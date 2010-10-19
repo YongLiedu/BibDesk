@@ -172,15 +172,6 @@ static NSUInteger currentUniqueID = 0;
     return status;
 }
 
-- (NSString *)statusDescription {
-    switch (status) {
-        case BDSKDownloadStatusDownloading: return NSLocalizedString(@"Downloading", @"download status");
-        case BDSKDownloadStatusFinished:    return NSLocalizedString(@"Finished", @"download status");
-        case BDSKDownloadStatusFailed:      return NSLocalizedString(@"Failed", @"download status");
-        default: return nil;
-    }
-}
-
 - (void)cancel {
     [download cancel];
 }
