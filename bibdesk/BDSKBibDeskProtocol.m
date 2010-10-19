@@ -60,6 +60,11 @@
 NSString *BDSKBibDeskScheme = @"bibdesk";
 NSURL *BDSKBibDeskWebGroupURL = nil;
 
+@interface BDSKBibDeskProtocol (Private)
+- (NSData *)welcomeHTMLData;
+- (NSData *)downloadsHTMLData;
+@end
+
 @implementation BDSKBibDeskProtocol
 
 + (void)initialize {
@@ -74,13 +79,9 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
 	return [[[theRequest URL] scheme] caseInsensitiveCompare:BDSKBibDeskScheme] == NSOrderedSame;
 }
 
-
-
 +(NSURLRequest *) canonicalRequestForRequest:(NSURLRequest *)request {
     return request;
 }
-
-
 
 /*
  Immediately provide the requested data.
@@ -148,25 +149,24 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
     }
 }
 
-
-
 - (void)stopLoading {}
 
+#pragma mark Create web pages from template
 
+- (NSData *)HTMLDataUsingTemplateFile:(NSString *)template usingObject:(id)object {
+    NSString *templateStringPath = [[NSBundle mainBundle] pathForResource:template ofType:@"html"];
+    NSString *templateString = [NSString stringWithContentsOfFile:templateStringPath encoding:NSUTF8StringEncoding error:NULL];
+    NSString *string = [BDSKTemplateParser stringByParsingTemplateString:templateString usingObject:object];
+    return [string dataUsingEncoding:NSUTF8StringEncoding];
+}
 
-#pragma mark Create Information Web page
-
-/*
- Loads web page template from resource file, inserts links to the web sites known by the available parser classes and returns the resulting HTML code as UTF-8 encoded data.
-*/
-- (NSData *) welcomeHTMLData {
+- (NSData *)welcomeHTMLData {
 	static NSData *data = nil;
     if (data == nil) {
-        NSString *templateStringPath = [[NSBundle mainBundle] pathForResource:@"WebGroupStartPage" ofType:@"html"];
-        NSString *templateString = [NSString stringWithContentsOfFile:templateStringPath encoding:NSUTF8StringEncoding error:NULL];
         NSMutableArray *publicParsers = [NSMutableArray array];
         NSMutableArray *subscriptionParsers = [NSMutableArray array];
         NSMutableArray *genericParsers = [NSMutableArray array];
+        NSDictionary *parsers = [NSDictionary dictionaryWithObjectsAndKeys:publicParsers, @"publicParsers", subscriptionParsers, @"subscriptionParsers", genericParsers, @"genericParsers", nil];
         
         for (NSDictionary *info in [BDSKWebParser parserInfos]) {
             switch ([[info objectForKey:@"feature"] unsignedIntegerValue]) {
@@ -183,20 +183,13 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
                     break;
             }
         }
-        
-        NSDictionary *parsers = [NSDictionary dictionaryWithObjectsAndKeys:publicParsers, @"publicParsers", subscriptionParsers, @"subscriptionParsers", genericParsers, @"genericParsers", nil];
-        NSString *string = [BDSKTemplateParser stringByParsingTemplateString:templateString usingObject:parsers];
-        
-        data = [[string dataUsingEncoding:NSUTF8StringEncoding] copy];
+        data = [[self HTMLDataUsingTemplateFile:@"WebGroupStartPage" usingObject:parsers] copy];
     }
     return data;
 }
 
-- (NSData *) downloadsHTMLData {
-    NSString *templateStringPath = [[NSBundle mainBundle] pathForResource:@"WebGroupDownloads" ofType:@"html"];
-    NSString *templateString = [NSString stringWithContentsOfFile:templateStringPath encoding:NSUTF8StringEncoding error:NULL];
-    NSString *string = [BDSKTemplateParser stringByParsingTemplateString:templateString usingObject:[BDSKDownloadManager sharedManager]];
-    return [[string dataUsingEncoding:NSUTF8StringEncoding] copy];
+- (NSData *)downloadsHTMLData {
+    return [self HTMLDataUsingTemplateFile:@"WebGroupDownloads" usingObject:[BDSKDownloadManager sharedManager]];
 }
 
 @end

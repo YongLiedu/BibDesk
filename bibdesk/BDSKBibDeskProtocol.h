@@ -43,6 +43,4 @@ extern NSString *BDSKBibDeskScheme;
 extern NSURL *BDSKBibDeskWebGroupURL;
 
 @interface BDSKBibDeskProtocol : NSURLProtocol
-- (NSData *) welcomeHTMLData;
-- (NSData *) downloadsHTMLData;
 @end
