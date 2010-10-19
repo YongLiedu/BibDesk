@@ -3,6 +3,7 @@
 	<head>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<meta http-equiv="refresh" content="5">
+<!-- Localize title -->
 	<title>Downloads</title>
 	<style type="text/css">
 		* { margin: 0px; padding: 0px; }
@@ -61,13 +62,16 @@ function setAlternatingRowColors() {
                         <?$fileURL?>
                         <$fileName/>
                         </$fileURL?>
+<!-- Localize text -->
                         <a class="source" href="<$URL/>">(Source)</a>
                         <br />
                         <span class="status">
+<!-- Localize text -->
                         <$status=0?>Downloading<?$status=1?>Finished<?$status=2?>Failed</$status?>
                         </span>
                     </td>
                     <td>
+<!-- Localize values -->
                         <$status=0?>
                         <input type="button" value="Cancel" onClick="cancelDownload(<$uniqueID/>)" />
                         <?$status?>
@@ -77,9 +81,11 @@ function setAlternatingRowColors() {
                 </tr>
                 </$downloads>
             </table>
+<!-- Localize value -->
             <input class="clear" type="button" value="Clear" onClick="clearDownloads()" />
 		</form>
 		<?$downloads?>
+<!-- Localize text -->
 		<h1>No Downloads</h1>
 		</$downloads?>
 		
