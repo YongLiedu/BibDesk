@@ -51,6 +51,8 @@
 #import "BDSKDownloadManager.h"
 
 #define WEBGROUP_SPECIFIER  @"webgroup"
+#define DOWNLOADS_SPECIFIER @"downloads"
+#define FILEICON_SPECIFIER  @"fileicon:"
 #define HELP_SPECIFIER      @"help"
 #define HELP_DIRECTORY      @"BibDeskHelp"
 #define HELP_START_FILE     @"BibDeskHelp.html"
@@ -96,15 +98,15 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
         [client URLProtocol:self didLoadData:data];
         [client URLProtocolDidFinishLoading:self];
         [response release];
-    } else if ([@"downloads" caseInsensitiveCompare:resourceSpecifier] == NSOrderedSame) {
+    } else if ([DOWNLOADS_SPECIFIER caseInsensitiveCompare:resourceSpecifier] == NSOrderedSame) {
         NSData *data = [self downloadsHTMLData];
         NSURLResponse *response = [[NSURLResponse alloc] initWithURL:[request URL] MIMEType:@"text/html" expectedContentLength:[data length] textEncodingName:@"utf-8"];
         [client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
         [client URLProtocol:self didLoadData:data];
         [client URLProtocolDidFinishLoading:self];
         [response release];
-    } else if ([resourceSpecifier hasCaseInsensitivePrefix:@"fileicon:"]) {
-        NSString *extension = [resourceSpecifier substringFromIndex:9];
+    } else if ([resourceSpecifier hasCaseInsensitivePrefix:FILEICON_SPECIFIER]) {
+        NSString *extension = [resourceSpecifier substringFromIndex:[FILEICON_SPECIFIER length]];
         NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFileType:extension];
         NSSize size = NSMakeSize(32.0, 32.0);
         if (NSEqualSizes([icon size], size) == NO) {
