@@ -79,13 +79,22 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
 	return [[[theRequest URL] scheme] caseInsensitiveCompare:BDSKBibDeskScheme] == NSOrderedSame;
 }
 
-+(NSURLRequest *) canonicalRequestForRequest:(NSURLRequest *)request {
++ (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request {
     return request;
 }
 
 /*
  Immediately provide the requested data.
 */ 
+- (void)loadData:(NSData *)data MIMEType:(NSString *)MIMEType {
+    id<NSURLProtocolClient> client = [self client];
+    NSURLResponse *response = [[NSURLResponse alloc] initWithURL:[[self request] URL] MIMEType:MIMEType expectedContentLength:[data length] textEncodingName:[MIMEType isEqualToString:@"text/html"] ? @"utf-8" : nil];
+    [client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
+    [client URLProtocol:self didLoadData:data];
+    [client URLProtocolDidFinishLoading:self];
+    [response release];
+}
+
 - (void)startLoading {
     id<NSURLProtocolClient> client = [self client];
     NSURLRequest *request = [self request];
@@ -93,28 +102,13 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
     NSString *resourceSpecifier = [theURL resourceSpecifier];
 	
     if ([WEBGROUP_SPECIFIER caseInsensitiveCompare:resourceSpecifier] == NSOrderedSame) {
-        NSData *data = [self welcomeHTMLData];
-        NSURLResponse *response = [[NSURLResponse alloc] initWithURL:[request URL] MIMEType:@"text/html" expectedContentLength:[data length] textEncodingName:@"utf-8"];
-        [client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
-        [client URLProtocol:self didLoadData:data];
-        [client URLProtocolDidFinishLoading:self];
-        [response release];
+        [self loadData:[self welcomeHTMLData] MIMEType:@"text/html"];
     } else if ([DOWNLOADS_SPECIFIER caseInsensitiveCompare:resourceSpecifier] == NSOrderedSame) {
-        NSData *data = [self downloadsHTMLData];
-        NSURLResponse *response = [[NSURLResponse alloc] initWithURL:[request URL] MIMEType:@"text/html" expectedContentLength:[data length] textEncodingName:@"utf-8"];
-        [client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
-        [client URLProtocol:self didLoadData:data];
-        [client URLProtocolDidFinishLoading:self];
-        [response release];
+        [self loadData:[self downloadsHTMLData] MIMEType:@"text/html"];
     } else if ([resourceSpecifier hasCaseInsensitivePrefix:FILEICON_SPECIFIER]) {
         NSString *extension = [resourceSpecifier substringFromIndex:[FILEICON_SPECIFIER length]];
         NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFileType:extension];
-        NSData *data = [icon TIFFRepresentation];
-        NSURLResponse *response = [[NSURLResponse alloc] initWithURL:[request URL] MIMEType:@"image/tiff" expectedContentLength:[data length] textEncodingName:@"utf-8"];
-        [client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
-        [client URLProtocol:self didLoadData:data];
-        [client URLProtocolDidFinishLoading:self];
-        [response release];
+        [self loadData:[icon TIFFRepresentation] MIMEType:@"image/tiff"];
     } else if ([HELP_SPECIFIER caseInsensitiveCompare:[[resourceSpecifier pathComponents] firstObject]] == NSOrderedSame) {
         // when there's no "//" the URL we get has percent escapes including in particular the # character, which would we don't want
         NSString *URLString = [NSString stringWithFormat:@"%@://%@", BDSKBibDeskScheme, [resourceSpecifier stringByReplacingPercentEscapes]];
@@ -135,11 +129,7 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
             NSData *data = [NSData dataWithContentsOfFile:path];
             NSString *theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:path error:NULL];
             NSString *MIMEType = (NSString *)UTTypeCopyPreferredTagWithClass((CFStringRef)theUTI, kUTTagClassMIMEType);
-            NSURLResponse *response = [[NSURLResponse alloc] initWithURL:theURL MIMEType:MIMEType expectedContentLength:[data length] textEncodingName:nil];
-            [client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
-            [client URLProtocol:self didLoadData:data];
-            [client URLProtocolDidFinishLoading:self];
-            [response release];
+            [self loadData:data MIMEType:MIMEType];
             [MIMEType release];
         } else {
             [client URLProtocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorFileDoesNotExist userInfo:nil]];
