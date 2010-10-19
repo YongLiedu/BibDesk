@@ -13,6 +13,7 @@
 		.icon { margin: 2px; width: 32px; height: 32px; }
 		.source { font-size: 12px; margin-left: 1em; }
 		.status { font-size: 11px; }
+		.button { margin-right: 10px; float: right; }
 		.clear { margin: 10px; }
 		a { text-decoration: none; }
 		a:hover { text-decoration: underline; }
@@ -61,8 +62,8 @@ function setAlternatingRowColors() {
                         <a href="<$fileURL/>"><$fileName/></a>
                         <?$fileURL?>
                         <$fileName/>
-<!-- Localize text -->
                         </$fileURL?>
+<!-- Localize text -->
                         <a class="source" href="<$URL/>">(Source)</a>
                         <br />
                         <span class="status">
@@ -73,9 +74,9 @@ function setAlternatingRowColors() {
                     <td>
 <!-- Localize values -->
                         <$status=0?>
-                        <input type="button" value="Cancel" onClick="cancelDownload(<$uniqueID/>)" />
+                        <input class="button" type="button" value="Cancel" onClick="cancelDownload(<$uniqueID/>)" />
                         <?$status?>
-                        <input type="button" value="Remove" onClick="removeDownload(<$uniqueID/>)" />
+                        <input class="button" type="button" value="Remove" onClick="removeDownload(<$uniqueID/>)" />
                         </$status?>
                     </td>
                 </tr>
