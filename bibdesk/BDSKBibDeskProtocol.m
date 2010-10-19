@@ -108,7 +108,7 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
         NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFileType:extension];
         NSSize size = NSMakeSize(32.0, 32.0);
         if (NSEqualSizes([icon size], size) == NO) {
-            NSImage *tmp = [[NSImage alloc] initWithSize:size];
+            NSImage *tmp = [[[NSImage alloc] initWithSize:size] autorelease];
             [tmp lockFocus];
             [icon drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0]; 
             [tmp unlockFocus];
