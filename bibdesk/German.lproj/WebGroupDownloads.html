@@ -9,9 +9,8 @@
 		body { font-family: "Lucida Grande"; font-size: 13px; padding: 0px; }
 		h1 { font-size: 16px; margin: 20px; color: #999; }
 		.downloads { width: 100%; border-width: 0px 0px 1px 0px; border-spacing: 0px; border-style: solid; border-color: #999; }
-		.icon { margin: 2px; }
-		.filename { font-size: 13px; }
-		.source { font-size: 13px; margin-left: 1em; }
+		.icon { margin: 2px; width: 32px; height: 32px; }
+		.source { font-size: 12px; margin-left: 1em; }
 		.status { font-size: 11px; }
 		.clear { margin: 10px; }
 		a { text-decoration: none; }
@@ -40,7 +39,7 @@ function setAlternatingRowColors() {
 	var table = document.getElementById('downloads');
 	var allTRs = table.getElementsByTagName("tr");
 	for (i = 1; i <= allTRs.length ; i++) {
-		if (i % 2 == 1) allTRs[i].style.backgroundColor = "#eaf0fd";
+		if (i % 2 == 1) allTRs[i].style.backgroundColor = "#edf3fe";
 	}
 }
 
@@ -50,39 +49,35 @@ function setAlternatingRowColors() {
 	
 		<$downloads?>
 		<form>
-		<table class="downloads" id="downloads">
-		<$downloads>
-		<tr>
-		<td width="36">
-		<img class="icon" src="bibdesk:fileicon:<$fileURL?><$fileURL.pathExtension/><?$fileURL?><$URL.pathExtension/></$fileURL?>" width="32" height="32" />
-		<span class="filename">
-		</td>
-		<td>
-		<$fileURL?>
-		<a href="<$fileURL/>"><$fileURL.lastPathComponent/></a>
-		<?$fileURL?>
-		<$URL.lastPathComponent/>
-		</$fileURL?>
-		</span>
-		<span class="source">
-		<a href="<$URL/>">(Source)</a>
-		</span>
-		<br />
-		<div class="status">
-		<$statusDescription/>
-		</span>
-		</td>
-		<td>
-		<$status=0?>
-		<input type="button" value="Cancel" onClick="cancelDownload(<$uniqueID/>)" />
-		<?$status?>
-		<input type="button" value="Remove" onClick="removeDownload(<$uniqueID/>)" />
-		</$status?>
-		</td>
-		</tr>
-		</$downloads>
-		</table>
-		<input class="clear" type="button" value="Clear" onClick="clearDownloads()" />
+            <table class="downloads" id="downloads">
+                <$downloads>
+                <tr>
+                    <td width="36">
+                        <img class="icon" src="bibdesk:fileicon:<$fileURL?><$fileURL.pathExtension/><?$fileURL?><$URL.pathExtension/></$fileURL?>" />
+                    </td>
+                    <td>
+                        <$fileURL?>
+                        <a href="<$fileURL/>"><$fileURL.lastPathComponent/></a>
+                        <?$fileURL?>
+                        <$URL.lastPathComponent/>
+                        </$fileURL?>
+                        <a class="source" href="<$URL/>">(Source)</a>
+                        <br />
+                        <span class="status">
+                        <$status=0?>Downloading<?$status=1?>Finished<?$status=2?>Failed</$status?>
+                        </span>
+                    </td>
+                    <td>
+                        <$status=0?>
+                        <input type="button" value="Cancel" onClick="cancelDownload(<$uniqueID/>)" />
+                        <?$status?>
+                        <input type="button" value="Remove" onClick="removeDownload(<$uniqueID/>)" />
+                        </$status?>
+                    </td>
+                </tr>
+                </$downloads>
+            </table>
+            <input class="clear" type="button" value="Clear" onClick="clearDownloads()" />
 		</form>
 		<?$downloads?>
 		<h1>No Downloads</h1>
