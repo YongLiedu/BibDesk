@@ -232,7 +232,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 - (NSString *)label {
     NSString *label = [self searchTerm];
-    return [label length] > 0 ? label : NSLocalizedString(@"(Empty)", @"Empty search term");
+    return [label length] > 0 ? label : NSLocalizedString(@"(Empty)", @"Empty group label");
 }
 
 - (BOOL)isSearch { return YES; }

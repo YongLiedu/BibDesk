@@ -126,7 +126,7 @@ static NSString *BDSKWebLocalizedString = nil;
 - (BOOL)isRetrieving { return isRetrieving; }
 
 - (NSString *)label {
-    return [label length] > 0 ? label : NSLocalizedString(@"(Empty)", @"Empty web group label");
+    return [label length] > 0 ? label : NSLocalizedString(@"(Empty)", @"Empty group label");
 }
 
 - (void)setLabel:(NSString *)newLabel {
