@@ -38,6 +38,7 @@
 
 #import "BDSKDownloadManager.h"
 #import <WebKit/WebKit.h>
+#import "NSURL_BDSKExtensions.h"
 
 
 @implementation BDSKDownloadManager
@@ -166,6 +167,20 @@ static NSUInteger currentUniqueID = 0;
 
 - (NSURL *)fileURL {
     return fileURL;
+}
+
+- (NSString *)fileName {
+    NSString *fileName = [fileURL lastPathComponent];
+    if (fileName == nil) {
+        if ([[URL path] length] > 1) {
+            fileName = [URL lastPathComponent];
+        } else {
+            fileName = [URL host];
+            if (fileName == nil)
+                fileName = [[[URL resourceSpecifier] lastPathComponent] stringByReplacingPercentEscapes];
+        }
+    }
+    return fileName;
 }
 
 - (BDSKDownloadStatus)status {

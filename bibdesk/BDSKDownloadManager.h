@@ -73,6 +73,7 @@ typedef NSUInteger BDSKDownloadStatus;
 - (NSUInteger)uniqueID;
 - (NSURL *)URL;
 - (NSURL *)fileURL;
+- (NSString *)fileName;
 - (BDSKDownloadStatus)status;
 
 - (void)cancel;
