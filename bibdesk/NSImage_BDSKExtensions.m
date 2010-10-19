@@ -260,12 +260,12 @@
         NSImage *questionMark = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kQuestionMarkIcon)];
         [image lockFocus];
         [genericDocImage drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:0.7];
-        [questionMark compositeToPoint:NSMakePoint(6, 4) operation:NSCompositeSourceOver fraction:0.7];
+        [questionMark drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:0.7];
         [image unlockFocus];
         NSImage *tinyImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
         [tinyImage lockFocus];
         [genericDocImage drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:0.7];
-        [questionMark compositeToPoint:NSMakePoint(3.0, 2.0) operation:NSCompositeSourceOver fraction:0.7];
+        [questionMark drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:0.7];
         [tinyImage unlockFocus];
         [image addRepresentation:[[tinyImage representations] lastObject]];
         [tinyImage release];
