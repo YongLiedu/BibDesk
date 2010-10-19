@@ -108,14 +108,6 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
     } else if ([resourceSpecifier hasCaseInsensitivePrefix:FILEICON_SPECIFIER]) {
         NSString *extension = [resourceSpecifier substringFromIndex:[FILEICON_SPECIFIER length]];
         NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFileType:extension];
-        NSSize size = NSMakeSize(32.0, 32.0);
-        if (NSEqualSizes([icon size], size) == NO) {
-            NSImage *tmp = [[[NSImage alloc] initWithSize:size] autorelease];
-            [tmp lockFocus];
-            [icon drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0]; 
-            [tmp unlockFocus];
-            icon = tmp;
-        }
         NSData *data = [icon TIFFRepresentation];
         NSURLResponse *response = [[NSURLResponse alloc] initWithURL:[request URL] MIMEType:@"image/tiff" expectedContentLength:[data length] textEncodingName:@"utf-8"];
         [client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
