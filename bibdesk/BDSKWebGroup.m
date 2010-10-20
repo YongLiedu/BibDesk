@@ -335,7 +335,7 @@ static NSString *BDSKWebLocalizedString = nil;
 }
 
 - (void)webView:(WebView *)sender didClearWindowObject:(WebScriptObject *)windowObject forFrame:(WebFrame *)frame {
-    [[webView windowScriptObject] setValue:[BDSKDownloadManager sharedManager] forKey:@"downloads"];
+    [windowObject setValue:[BDSKDownloadManager sharedManager] forKey:@"downloads"];
 }
 
 #pragma mark WebPolicyDelegate protocol

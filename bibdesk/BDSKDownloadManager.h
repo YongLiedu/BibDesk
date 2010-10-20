@@ -55,6 +55,11 @@ typedef NSUInteger BDSKDownloadStatus;
 
 - (NSArray *)downloads;
 
+- (BOOL)removeFinishedDownloads;
+- (void)setRemoveFinishedDownloads:(BOOL)flag;
+- (BOOL)removeFailedDownloads;
+- (void)setRemoveFailedDownloads:(BOOL)flag;
+
 - (void)clear;
 - (void)cancel:(NSUInteger)uniqueID;
 - (void)remove:(NSUInteger)uniqueID;

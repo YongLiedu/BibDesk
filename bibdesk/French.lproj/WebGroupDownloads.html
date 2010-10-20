@@ -15,6 +15,8 @@
 		.status { font-size: 11px; }
 		.button { margin-right: 10px; float: right; }
 		.clear { margin: 10px; }
+		.prefs { font-size: 12px; }
+		.prefs input { margin: 0.5em 0.5em 0.5em 10px;  }
 		a { text-decoration: none; }
 		a:hover { text-decoration: underline; }
 		a:active { color: #900; }
@@ -83,12 +85,17 @@ function setAlternatingRowColors() {
                 </$downloads>
             </table>
 <!-- Localize value and title -->
-            <input class="clear" type="button" value="Clear" title="Remove all finished downloads" onClick="clearDownloads()" />
+            <input class="clear" type="button" value="Clear" title="Remove all finished and failed downloads" onClick="clearDownloads()" />
 		</form>
 		<?$downloads?>
 <!-- Localize text -->
 		<h1>No Downloads</h1>
 		</$downloads?>
+		<form class="prefs">
+<!-- Localize text -->
+		<input type="checkbox" onClick="window.downloads.setRemoveFinishedDownloads(this.checked)" <$removeFinishedDownloads?>checked</$removeFinishedDownloads?> />Automatically remove finished downloads<br />
+		<input type="checkbox" onClick="window.downloads.setRemoveFailedDownloads(this.checked)" <$removeFailedDownloads?>checked</$removeFailedDownloads?> />Automatically remove failed downloads
+		</form>
 		
 	</body>
 </html>

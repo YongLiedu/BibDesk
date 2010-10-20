@@ -40,6 +40,8 @@
 #import <WebKit/WebKit.h>
 #import "NSURL_BDSKExtensions.h"
 
+#define BDSKRemoveFinishedDownloadsKey @"BDSKRemoveFinishedDownloads"
+#define BDSKRemoveFailedDownloadsKey   @"BDSKRemoveFailedDownloads"
 
 @implementation BDSKDownloadManager
 
@@ -49,11 +51,15 @@
         name = @"cancel";
     else if (aSelector == @selector(remove:))
         name = @"remove";
+    else if (aSelector == @selector(setRemoveFinishedDownloads:))
+        name = @"setRemoveFinishedDownloads";
+    else if (aSelector == @selector(setRemoveFailedDownloads:))
+        name = @"setRemoveFailedDownloads";
     return name;
 }
  
 + (BOOL)isSelectorExcludedFromWebScript:(SEL)aSelector {
-    return (aSelector != @selector(clear) && aSelector != @selector(cancel:) && aSelector != @selector(remove:));
+    return (aSelector != @selector(clear) && aSelector != @selector(cancel:) && aSelector != @selector(remove:) && aSelector != @selector(setRemoveFinishedDownloads:) && aSelector != @selector(setRemoveFailedDownloads:));
 }
 
 static id sharedManager = nil;
@@ -79,8 +85,31 @@ static id sharedManager = nil;
     }
 }
 
+- (void)removeDownload:(BDSKDownload *)download {
+    if (download) {
+        [download cancel:nil];
+        [downloads removeObject:download];
+    }
+}
+
 - (NSArray *)downloads {
     return downloads;
+}
+
+- (BOOL)removeFinishedDownloads {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:BDSKRemoveFinishedDownloadsKey];
+}
+
+- (void)setRemoveFinishedDownloads:(BOOL)flag {
+   [[NSUserDefaults standardUserDefaults] setBool:flag forKey:BDSKRemoveFinishedDownloadsKey];
+}
+
+- (BOOL)removeFailedDownloads {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:BDSKRemoveFailedDownloadsKey];
+}
+
+- (void)setRemoveFailedDownloads:(BOOL)flag {
+   [[NSUserDefaults standardUserDefaults] setBool:flag forKey:BDSKRemoveFailedDownloadsKey];
 }
 
 - (BDSKDownload *)downloadWithUniqueID:(NSUInteger)uniqueID {
@@ -104,11 +133,7 @@ static id sharedManager = nil;
 }
 
 - (void)remove:(NSUInteger)uniqueID {
-    BDSKDownload *download = [self downloadWithUniqueID:uniqueID];
-    if (download) {
-        [download cancel:nil];
-        [downloads removeObject:download];
-    }
+    [self removeDownload:[self downloadWithUniqueID:uniqueID]];
 }
 
 @end
@@ -210,6 +235,9 @@ static NSUInteger currentUniqueID = 0;
     BDSKDESTROY(download);
     status = BDSKDownloadStatusFinished;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKRemoveFinishedDownloadsKey])
+        [[BDSKDownloadManager sharedManager] removeDownload:self];
 }
 
 - (void)download:(NSURLDownload *)aDownload didFailWithError:(NSError *)error {
@@ -217,6 +245,9 @@ static NSUInteger currentUniqueID = 0;
     BDSKDESTROY(fileURL);
     status = BDSKDownloadStatusFailed;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKRemoveFailedDownloadsKey])
+        [[BDSKDownloadManager sharedManager] removeDownload:self];
     
     NSString *errorDescription = [error localizedDescription] ?: NSLocalizedString(@"An error occured during download.", @"Informative text in alert dialog");
     NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Download Failed", @"Message in alert dialog when download failed")
