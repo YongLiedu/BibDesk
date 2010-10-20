@@ -41,9 +41,11 @@ function removeDownload(id) {
 
 function setAlternatingRowColors() {
 	var table = document.getElementById('downloads');
-	var allTRs = table.getElementsByTagName("tr");
-	for (i = 1; i <= allTRs.length ; i++) {
-		if (i % 2 == 1) allTRs[i].style.backgroundColor = "#edf3fe";
+	if (table) {
+		var allTRs = table.getElementsByTagName("tr");
+		for (i = 1; i <= allTRs.length ; i++) {
+			if (i % 2 == 1 && allTRs[i]) allTRs[i].style.backgroundColor = "#edf3fe";
+		}
 	}
 }
 
