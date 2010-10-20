@@ -2,7 +2,6 @@
 <html>
 	<head>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-	<meta http-equiv="refresh" content="5">
 <!-- Localize title -->
 	<title>Downloads</title>
 	<style type="text/css">
@@ -25,69 +24,70 @@
 	<script language="javascript">
 
 function clearDownloads() {
-	window.downloads.clear();
-	window.location.reload();
+	downloads.clear();
+	location.reload();
 }
 
 function cancelDownload(id) {
-	window.downloads.cancel(id);
-	window.location.reload();
+	downloads.cancel(id);
+	location.reload();
 }
 
 function removeDownload(id) {
-	window.downloads.remove(id);
-	window.location.reload();
+	downloads.remove(id);
+	location.reload();
 }
 
-function setAlternatingRowColors() {
+function doLoad() {
 	var table = document.getElementById('downloads');
 	if (table) {
-		var allTRs = table.getElementsByTagName("tr");
-		for (i = 1; i <= allTRs.length ; i++) {
-			if (i % 2 == 1 && allTRs[i]) allTRs[i].style.backgroundColor = "#edf3fe";
+		var rows = table.getElementsByTagName("tr");
+		for (i = 0; i < rows.length ; i++) {
+			if (i % 2 == 1) rows[i].style.backgroundColor = "#edf3fe";
 		}
 	}
+	setTimeout("location.reload()",5000);
 }
 
 	</script>
 	</head>
-	<body onload="setAlternatingRowColors()">
+	<body onload="doLoad()">
 	
 		<$downloads?>
 		<form>
-            <table class="downloads" id="downloads">
-                <$downloads>
-                <tr>
-                    <td width="36">
-                        <img class="icon" src="bibdesk:fileicon:<$fileURL?><$fileURL.pathExtension/><?$fileURL?><$URL.pathExtension/></$fileURL?>" />
-                    </td>
-                    <td>
-                        <$fileURL?>
-                        <a href="<$fileURL/>"><$fileName/></a>
-                        <?$fileURL?>
-                        <$fileName/>
-                        </$fileURL?>
+			<table class="downloads" id="downloads">
+				<$downloads>
+				<tr>
+					<td width="36">
+						<img class="icon" src="bibdesk:fileicon:<$fileURL?><$fileURL.pathExtension/><?$fileURL?><$URL.pathExtension/></$fileURL?>" />
+					</td>
+					<td>
+						<$fileURL?>
+						<a href="<$fileURL/>"><$fileName/></a>
+						<?$fileURL?>
+						<$fileName/>
+						</$fileURL?>
 <!-- Localize text -->
-                        <a class="source" href="<$URL/>">(Source)</a>
-                        <br />
-                        <span class="status">
+						<a class="source" href="<$URL/>">(Source)</a>
+						<br />
+						<span class="status">
 <!-- Localize text -->
-                        <$status=0?>Downloading<?$status=1?>Finished<?$status=2?>Failed</$status?>
-                        </span>
-                    </td>
-                    <td>
+						<$status=0?>Downloading<?$status=1?>Finished<?$status=2?>Failed</$status?>
+						</span>
+					</td>
+					<td>
 <!-- Localize values and titles -->
-                        <$status=0?>
-                        <input class="button" type="button" value="Cancel" title="Cancel download" onClick="cancelDownload(<$uniqueID/>)" />
-                        <?$status?>
-                        <input class="button" type="button" value="Remove" title="Remove download" onClick="removeDownload(<$uniqueID/>)" />
-                        </$status?>
-                    </td>
-                </tr>
-                </$downloads>
-            </table>
+						<$status=0?>
+						<input class="button" type="button" value="Cancel" title="Cancel download" onClick="cancelDownload(<$uniqueID/>)" />
+						<?$status?>
+						<input class="button" type="button" value="Remove" title="Remove download" onClick="removeDownload(<$uniqueID/>)" />
+						</$status?>
+					</td>
+				</tr>
+				</$downloads>
+			</table>
 <!-- Localize value and title -->
-            <input class="clear" type="button" value="Clear" title="Remove all finished and failed downloads" onClick="clearDownloads()" />
+			<input class="clear" type="button" value="Clear" title="Remove all finished and failed downloads" onClick="clearDownloads()" />
 		</form>
 		<?$downloads?>
 <!-- Localize text -->
@@ -95,8 +95,8 @@ function setAlternatingRowColors() {
 		</$downloads?>
 		<form class="prefs">
 <!-- Localize text -->
-		<input type="checkbox" onClick="window.downloads.setRemoveFinishedDownloads(this.checked)" <$removeFinishedDownloads?>checked</$removeFinishedDownloads?> />Automatically remove finished downloads<br />
-		<input type="checkbox" onClick="window.downloads.setRemoveFailedDownloads(this.checked)" <$removeFailedDownloads?>checked</$removeFailedDownloads?> />Automatically remove failed downloads
+		<input type="checkbox" onClick="downloads.setRemoveFinishedDownloads(this.checked)" <$removeFinishedDownloads?>checked</$removeFinishedDownloads?> />Automatically remove finished downloads<br />
+		<input type="checkbox" onClick="downloads.setRemoveFailedDownloads(this.checked)" <$removeFailedDownloads?>checked</$removeFailedDownloads?> />Automatically remove failed downloads
 		</form>
 		
 	</body>
