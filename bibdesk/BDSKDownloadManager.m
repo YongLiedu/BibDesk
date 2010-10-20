@@ -45,9 +45,7 @@
 
 + (NSString *)webScriptNameForSelector:(SEL)aSelector {
     NSString *name = nil;
-    if (aSelector == @selector(clear))
-        name = @"clear";
-    else if (aSelector == @selector(cancel:))
+    if (aSelector == @selector(cancel:))
         name = @"cancel";
     else if (aSelector == @selector(remove:))
         name = @"remove";
@@ -55,9 +53,7 @@
 }
  
 + (BOOL)isSelectorExcludedFromWebScript:(SEL)aSelector {
-    if (aSelector == @selector(clear) || aSelector == @selector(cancel:) || aSelector == @selector(remove:))
-        return NO;
-    return YES;
+    return (aSelector != @selector(clear) && aSelector != @selector(cancel:) && aSelector != @selector(remove:));
 }
 
 static id sharedManager = nil;
@@ -71,19 +67,8 @@ static id sharedManager = nil;
 - (id)init {
     if (self = [super init]) {
         downloads = [[NSMutableArray alloc] init];
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleApplicationWillTerminateNotification:)
-                                                     name:NSApplicationWillTerminateNotification
-                                                   object:NSApp];
     }
     return self;
-}
-
-- (void)dealloc {
-    [downloads makeObjectsPerformSelector:@selector(cancel)];
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    BDSKDESTROY(downloads);
-    [super dealloc];
 }
 
 - (void)addDownloadForURL:(NSURL *)aURL {
@@ -114,25 +99,21 @@ static id sharedManager = nil;
     }
 }
 
-- (void)cancel:(NSUInteger)i {
-    [[self downloadWithUniqueID:i] cancel];
+- (void)cancel:(NSUInteger)uniqueID {
+    [[self downloadWithUniqueID:uniqueID] cancel:nil];
 }
 
-- (void)remove:(NSUInteger)i {
-    BDSKDownload *download = [self downloadWithUniqueID:i];
+- (void)remove:(NSUInteger)uniqueID {
+    BDSKDownload *download = [self downloadWithUniqueID:uniqueID];
     if (download) {
-        [download cancel];
+        [download cancel:nil];
         [downloads removeObject:download];
     }
 }
 
-- (void)handleApplicationWillTerminateNotification:(NSNotification *)note {
-    [downloads makeObjectsPerformSelector:@selector(cancel)];
-    [downloads removeAllObjects];
-}
-
 @end
 
+#pragma mark -
 
 @implementation BDSKDownload
 
@@ -145,11 +126,16 @@ static NSUInteger currentUniqueID = 0;
         fileURL = nil;
         status = BDSKDownloadStatusDownloading;
         download = [[WebDownload alloc] initWithRequest:[NSURLRequest requestWithURL:URL] delegate:self];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(cancel:)
+                                                     name:NSApplicationWillTerminateNotification
+                                                   object:NSApp];
     }
     return self;
 }
 
 - (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [download cancel];
     BDSKDESTROY(URL);
     BDSKDESTROY(fileURL);
@@ -187,7 +173,7 @@ static NSUInteger currentUniqueID = 0;
     return status;
 }
 
-- (void)cancel {
+- (void)cancel:(id)sender {
     [download cancel];
 }
 
@@ -223,12 +209,15 @@ static NSUInteger currentUniqueID = 0;
 - (void)downloadDidFinish:(NSURLDownload *)aDownload {
     BDSKDESTROY(download);
     status = BDSKDownloadStatusFinished;
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)download:(NSURLDownload *)aDownload didFailWithError:(NSError *)error {
     BDSKDESTROY(download);
     BDSKDESTROY(fileURL);
     status = BDSKDownloadStatusFailed;
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    
     NSString *errorDescription = [error localizedDescription] ?: NSLocalizedString(@"An error occured during download.", @"Informative text in alert dialog");
     NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Download Failed", @"Message in alert dialog when download failed")
                                      defaultButton:nil

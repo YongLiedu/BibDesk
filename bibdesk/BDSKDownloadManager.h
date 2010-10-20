@@ -55,10 +55,13 @@ typedef NSUInteger BDSKDownloadStatus;
 
 - (NSArray *)downloads;
 
-- (void)handleApplicationWillTerminateNotification:(NSNotification *)note;
+- (void)clear;
+- (void)cancel:(NSUInteger)uniqueID;
+- (void)remove:(NSUInteger)uniqueID;
 
 @end
 
+#pragma mark -
 
 @interface BDSKDownload : NSObject {
     NSUInteger uniqueID;
@@ -76,6 +79,6 @@ typedef NSUInteger BDSKDownloadStatus;
 - (NSString *)fileName;
 - (BDSKDownloadStatus)status;
 
-- (void)cancel;
+- (void)cancel:(id)sender;
 
 @end
