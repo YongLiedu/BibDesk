@@ -72,18 +72,18 @@ function setAlternatingRowColors() {
                         </span>
                     </td>
                     <td>
-<!-- Localize values -->
+<!-- Localize values and titles -->
                         <$status=0?>
-                        <input class="button" type="button" value="Cancel" onClick="cancelDownload(<$uniqueID/>)" />
+                        <input class="button" type="button" value="Cancel" title="Cancel download" onClick="cancelDownload(<$uniqueID/>)" />
                         <?$status?>
-                        <input class="button" type="button" value="Remove" onClick="removeDownload(<$uniqueID/>)" />
+                        <input class="button" type="button" value="Remove" title="Remove download" onClick="removeDownload(<$uniqueID/>)" />
                         </$status?>
                     </td>
                 </tr>
                 </$downloads>
             </table>
-<!-- Localize value -->
-            <input class="clear" type="button" value="Clear" onClick="clearDownloads()" />
+<!-- Localize value and title -->
+            <input class="clear" type="button" value="Clear" title="Remove all finished downloads" onClick="clearDownloads()" />
 		</form>
 		<?$downloads?>
 <!-- Localize text -->
