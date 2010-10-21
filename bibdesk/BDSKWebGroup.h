@@ -40,7 +40,7 @@
 #import "BDSKExternalGroup.h"
 
 @protocol BDSKWebGroupDelegate;
-@class WebView, WebFrame, BDSKNewWebWindowHandler;
+@class WebView, WebFrame;
 
 @interface BDSKWebGroup : BDSKExternalGroup {
     BOOL isRetrieving;
@@ -49,7 +49,6 @@
     WebView *webView;
     WebFrame *loadingWebFrame;
     NSUndoManager *undoManager;
-    BDSKNewWebWindowHandler *newWindowHandler;
 }
 
 - (NSString *)label;
