@@ -453,6 +453,24 @@ static NSString *BDSKWebLocalizedString = nil;
     [document removeGroups:[NSArray arrayWithObject:self]];
 }
 
+- (void)webView:(WebView *)sender runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WebFrame *)frame {
+    NSAlert *alert = [NSAlert alertWithMessageText:[[self URL] absoluteString] defaultButton:NSLocalizedString(@"OK", @"Button title") alternateButton:nil otherButton:nil informativeTextWithFormat:@"%@", message];
+    [alert runModal];
+}
+
+- (BOOL)webView:(WebView *)sender runJavaScriptConfirmPanelWithMessage:(NSString *)message initiatedByFrame:(WebFrame *)frame {
+    NSAlert *alert = [NSAlert alertWithMessageText:[[self URL] absoluteString] defaultButton:NSLocalizedString(@"OK", @"Button title") alternateButton:NSLocalizedString(@"Cancel", @"Button title") otherButton:nil informativeTextWithFormat:@"%@", message];
+    return NSAlertDefaultReturn == [alert runModal];
+}
+
+- (void)webView:(WebView *)sender runOpenPanelForFileButtonWithResultListener:(id < WebOpenPanelResultListener >)resultListener {
+    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+    if ([openPanel runModal] == NSFileHandlingPanelOKButton)
+        [resultListener chooseFilename:[openPanel filename]];
+    else
+        [resultListener cancel];
+}
+
 #pragma mark WebEditingDelegate protocol
 
 // this is needed because WebView uses the document's undo manager by default, rather than the one from the window.
