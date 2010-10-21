@@ -53,6 +53,7 @@
 #import "BDSKDownloadManager.h"
 #import "BibDocument.h"
 #import "BibDocument_UI.h"
+#import "BibDocument_Groups.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 
@@ -86,6 +87,7 @@ static NSString *BDSKWebLocalizedString = nil;
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [webView setHostWindow:nil];
     [webView setFrameLoadDelegate:nil];
     [webView setUIDelegate:nil];
     [webView setPolicyDelegate:nil];
@@ -113,6 +115,7 @@ static NSString *BDSKWebLocalizedString = nil;
     [webView setUIDelegate:self];
     [webView setPolicyDelegate:self];
     [webView setEditingDelegate:self];
+    [webView setHostWindow:[[[document windowControllers] objectAtIndex:0] window]];
 }
 
 #pragma mark BDSKGroup overrides
@@ -134,6 +137,11 @@ static NSString *BDSKWebLocalizedString = nil;
         [label release];
         label = [newLabel retain];
     }
+}
+
+- (void)setDocument:(BibDocument *)newDocument{
+    [super setDocument:newDocument];
+    [webView setHostWindow:[[[document windowControllers] objectAtIndex:0] window]];
 }
 
 #pragma mark BDSKExternalGroup overrides
@@ -440,7 +448,9 @@ static NSString *BDSKWebLocalizedString = nil;
     return [newWindowHandler webView];
 }
 
-- (void)webViewClose:(WebView *)sender {}
+- (void)webViewClose:(WebView *)sender {
+    [document removeGroups:[NSArray arrayWithObject:self]];
+}
 
 #pragma mark WebEditingDelegate protocol
 
