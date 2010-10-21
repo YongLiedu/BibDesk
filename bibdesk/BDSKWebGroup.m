@@ -246,7 +246,8 @@ static NSString *BDSKWebLocalizedString = nil;
     NSArray *newPubs = [BDSKWebParser itemsFromDocument:domDocument fromURL:url error:&error];
     if ([newPubs count] == 0) {
         WebDataSource *dataSource = [frame dataSource];
-        if ([[[dataSource mainResource] MIMEType] isEqualToString:@"text/plain"]) { 
+        NSString *MIMEType = [[dataSource mainResource] MIMEType];
+        if ([MIMEType isEqualToString:@"text/plain"]) { 
             NSString *string = [[dataSource representation] documentSource];
             if(string == nil) {
                 NSString *encodingName = [dataSource textEncodingName];
@@ -268,7 +269,7 @@ static NSString *BDSKWebLocalizedString = nil;
             else if (type != BDSKUnknownStringType)
                 newPubs = [BDSKStringParser itemsFromString:string ofType:type error:&error];
         }
-        else if (nil == newPubs) {
+        else if (nil == newPubs && [MIMEType isEqualToString:@"text/html"]) {
             // !!! logs are here to help diagnose problems that users are reporting
             // but unsupported web pages are far too common, we don't want to flood the console
             if ([[error domain] isEqualToString:[NSError localErrorDomain]] == NO || [error code] != kBDSKWebParserUnsupported)
