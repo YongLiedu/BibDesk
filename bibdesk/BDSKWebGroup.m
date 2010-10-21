@@ -141,7 +141,8 @@ static NSString *BDSKWebLocalizedString = nil;
 
 - (void)setDocument:(BibDocument *)newDocument{
     [super setDocument:newDocument];
-    [webView setHostWindow:[[[document windowControllers] objectAtIndex:0] window]];
+    if (webView)
+        [webView setHostWindow:[[[document windowControllers] objectAtIndex:0] window]];
 }
 
 #pragma mark BDSKExternalGroup overrides
