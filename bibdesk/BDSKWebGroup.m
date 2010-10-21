@@ -61,6 +61,7 @@
 @interface BDSKNewWebWindowHandler : NSObject {
     WebView *webView;
 }
++ (id)sharedHandler;
 - (WebView *)webView;
 @end
 
@@ -96,7 +97,6 @@ static NSString *BDSKWebLocalizedString = nil;
     BDSKDESTROY(label);
     BDSKDESTROY(webView);
     BDSKDESTROY(undoManager);
-    BDSKDESTROY(newWindowHandler);
     [super dealloc];
 }
 
@@ -444,9 +444,7 @@ static NSString *BDSKWebLocalizedString = nil;
 
 - (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request {
     // due to a known WebKit bug the request is always nil https://bugs.webkit.org/show_bug.cgi?id=23432
-    if (newWindowHandler == nil)
-        newWindowHandler = [[BDSKNewWebWindowHandler alloc] init];
-    return [newWindowHandler webView];
+    return [[BDSKNewWebWindowHandler sharedHandler] webView];
 }
 
 - (void)webViewClose:(WebView *)sender {
@@ -486,6 +484,14 @@ static NSString *BDSKWebLocalizedString = nil;
 #pragma mark -
 
 @implementation BDSKNewWebWindowHandler
+
+static id sharedHandler = nil;
+
++ (id)sharedHandler {
+    if (sharedHandler == nil)
+        sharedHandler = [[self alloc] init];
+    return sharedHandler;
+}
 
 - (id)init {
     if (self = [super init]) {
