@@ -255,7 +255,7 @@ static NSString *BDSKWebLocalizedString = nil;
     NSArray *newPubs = [BDSKWebParser itemsFromDocument:domDocument fromURL:url error:&error];
     if ([newPubs count] == 0) {
         WebDataSource *dataSource = [frame dataSource];
-        NSString *MIMEType = [[dataSource mainResource] MIMEType];NSLog(@"%@",MIMEType);
+        NSString *MIMEType = [[dataSource mainResource] MIMEType];
         if ([MIMEType isEqualToString:@"text/plain"]) { 
             NSString *string = [[dataSource representation] documentSource];
             if(string == nil) {
