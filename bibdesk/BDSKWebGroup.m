@@ -54,8 +54,11 @@
 #import "BibDocument.h"
 #import "BibDocument_UI.h"
 #import "BibDocument_Groups.h"
+#import "BDSKGroupsArray.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
+
+#define BDSKOpenNewWindowsForWebGroupInBrowserKey @"BDSKOpenNewWindowsForWebGroupInBrowser"
 
 // workaround for loading a URL from a javasecript window.open event http://stackoverflow.com/questions/270458/cocoa-webkit-having-window-open-javascipt-links-opening-in-an-instance-of-safa
 @interface BDSKNewWebWindowHandler : NSObject {
@@ -91,7 +94,6 @@ static NSString *BDSKWebLocalizedString = nil;
     [webView setHostWindow:nil];
     [webView setFrameLoadDelegate:nil];
     [webView setUIDelegate:nil];
-    [webView setPolicyDelegate:nil];
     [webView setEditingDelegate:nil];
     delegate = nil;
     BDSKDESTROY(label);
@@ -113,7 +115,6 @@ static NSString *BDSKWebLocalizedString = nil;
     webView = [[WebView alloc] init];
     [webView setFrameLoadDelegate:self];
     [webView setUIDelegate:self];
-    [webView setPolicyDelegate:self];
     [webView setEditingDelegate:self];
     [webView setHostWindow:[[[document windowControllers] objectAtIndex:0] window]];
 }
@@ -160,6 +161,12 @@ static NSString *BDSKWebLocalizedString = nil;
     return webView;
 }
 
+- (WebView *)webViewWithoutLoading {
+    if (webView == nil)
+        [self makeWebView];
+    return webView;
+}
+
 - (id<BDSKWebGroupDelegate>)delegate {
     return delegate;
 }
@@ -179,9 +186,7 @@ static NSString *BDSKWebLocalizedString = nil;
         [self setLabel:[NSLocalizedString(@"Loading", @"Placeholder web group label") stringByAppendingEllipsis]];
         [delegate webGroup:self setIcon:nil];
         [delegate webGroup:self setURL:newURL];
-        if (webView == nil)
-            [self makeWebView];
-        [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:newURL]];
+        [[[self webViewWithoutLoading] mainFrame] loadRequest:[NSURLRequest requestWithURL:newURL]];
     }
 }
 
@@ -348,13 +353,6 @@ static NSString *BDSKWebLocalizedString = nil;
     [windowObject setValue:[BDSKDownloadManager sharedManager] forKey:@"downloads"];
 }
 
-#pragma mark WebPolicyDelegate protocol
-
-- (void)webView:(WebView *)sender decidePolicyForNewWindowAction:(NSDictionary *)actionInformation request:(NSURLRequest *)request newFrameName:(NSString *)frameName decisionListener:(id < WebPolicyDecisionListener >)listener {
-    [listener ignore];
-    [[NSWorkspace sharedWorkspace] openURL:[request URL]];
-}
-
 #pragma mark WebUIDelegate protocol
 
 - (void)webView:(WebView *)sender setStatusText:(NSString *)text {
@@ -444,7 +442,17 @@ static NSString *BDSKWebLocalizedString = nil;
 
 - (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request {
     // due to a known WebKit bug the request is always nil https://bugs.webkit.org/show_bug.cgi?id=23432
-    return [[BDSKNewWebWindowHandler sharedHandler] webView];
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKOpenNewWindowsForWebGroupInBrowserKey]) {
+        return [[BDSKNewWebWindowHandler sharedHandler] webView];
+    } else {
+        BDSKWebGroup *group = [[[BDSKWebGroup alloc] init] autorelease];
+        [[document groups] addWebGroup:group];
+        return [group webViewWithoutLoading];
+    }
+}
+
+- (void)webViewShow:(WebView *)sender {
+    [document selectGroup:self];
 }
 
 - (void)webViewClose:(WebView *)sender {
