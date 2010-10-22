@@ -167,6 +167,10 @@ static NSString *BDSKWebLocalizedString = nil;
     return webView;
 }
 
+- (BOOL)isWebViewLoaded {
+    return webView != nil;
+}
+
 - (id<BDSKWebGroupDelegate>)delegate {
     return delegate;
 }
@@ -183,16 +187,11 @@ static NSString *BDSKWebLocalizedString = nil;
 
 - (void)setURL:(NSURL *)newURL {
     if (newURL && [[[[[webView mainFrame] dataSource] request] URL] isEqual:newURL] == NO) {
-        didLoad = YES;
         [self setLabel:[NSLocalizedString(@"Loading", @"Placeholder web group label") stringByAppendingEllipsis]];
         [delegate webGroup:self setIcon:nil];
         [delegate webGroup:self setURL:newURL];
         [[[self webViewWithoutLoading] mainFrame] loadRequest:[NSURLRequest requestWithURL:newURL]];
     }
-}
-
-- (BOOL)didLoad {
-    return didLoad;
 }
 
 #pragma mark Actions

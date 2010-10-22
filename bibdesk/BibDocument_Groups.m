@@ -1626,7 +1626,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         [group setURL:url];
     } else {
         for (group in [groups webGroups])
-            if ([group didLoad] == NO) break;
+            if ([group isWebViewLoaded] == NO) break;
         if (group == nil) {
             group = [[[BDSKWebGroup alloc] init] autorelease];
             [groups addWebGroup:group];
