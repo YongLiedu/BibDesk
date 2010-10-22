@@ -90,7 +90,6 @@
 #import "BDSKBookmarkSheetController.h"
 #import "BDSKBookmarkController.h"
 
-#define BDSKOpenURLsInNewWebGroupKey @"BDSKOpenURLsInNewWebGroup"
 
 @implementation BibDocument (Groups)
 
@@ -1626,11 +1625,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         group = [[self selectedGroups] lastObject];
         [group setURL:url];
     } else {
-        if ([[groups webGroups] count] == 0 || [[NSUserDefaults standardUserDefaults] boolForKey:BDSKOpenURLsInNewWebGroupKey]) {
+        for (group in [groups webGroups])
+            if ([group didLoad] == NO) break;
+        if (group == nil) {
             group = [[[BDSKWebGroup alloc] init] autorelease];
             [groups addWebGroup:group];
-        } else {
-            group = [[groups webGroups] firstObject];
         }
         [group setURL:url];
         [self selectGroup:group];

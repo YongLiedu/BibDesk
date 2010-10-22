@@ -46,6 +46,7 @@
     BOOL isRetrieving;
     NSString *label;
     id <BDSKWebGroupDelegate> delegate;
+    BOOL didLoad;
     WebView *webView;
     WebFrame *loadingWebFrame;
     NSUndoManager *undoManager;
@@ -59,6 +60,8 @@
 
 - (NSURL *)URL;
 - (void)setURL:(NSURL *)newURL;
+
+- (BOOL)didLoad;
 
 - (WebView *)webView;
 
