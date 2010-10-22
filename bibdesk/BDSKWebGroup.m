@@ -287,7 +287,7 @@ static NSString *BDSKWebLocalizedString = nil;
             else if (type != BDSKUnknownStringType)
                 newPubs = [BDSKStringParser itemsFromString:string ofType:type error:&error];
         }
-        else if (nil == newPubs && [MIMEType hasPrefix:@"text/"]) {
+        else if (nil == newPubs && [WebView canShowMIMETypeAsHTML:MIMEType]) {
             // !!! logs are here to help diagnose problems that users are reporting
             // but unsupported web pages are far too common, we don't want to flood the console
             if ([[error domain] isEqualToString:[NSError localErrorDomain]] == NO || [error code] != kBDSKWebParserUnsupported)
