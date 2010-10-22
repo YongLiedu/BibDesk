@@ -45,23 +45,6 @@
 
 @implementation BDSKDownloadManager
 
-+ (NSString *)webScriptNameForSelector:(SEL)aSelector {
-    NSString *name = nil;
-    if (aSelector == @selector(cancel:))
-        name = @"cancel";
-    else if (aSelector == @selector(remove:))
-        name = @"remove";
-    else if (aSelector == @selector(setRemoveFinishedDownloads:))
-        name = @"setRemoveFinishedDownloads";
-    else if (aSelector == @selector(setRemoveFailedDownloads:))
-        name = @"setRemoveFailedDownloads";
-    return name;
-}
- 
-+ (BOOL)isSelectorExcludedFromWebScript:(SEL)aSelector {
-    return (aSelector != @selector(clear) && aSelector != @selector(cancel:) && aSelector != @selector(remove:) && aSelector != @selector(setRemoveFinishedDownloads:) && aSelector != @selector(setRemoveFailedDownloads:));
-}
-
 static id sharedManager = nil;
 
 + (id)sharedManager {
@@ -134,6 +117,28 @@ static id sharedManager = nil;
 
 - (void)remove:(NSUInteger)uniqueID {
     [self removeDownload:[self downloadWithUniqueID:uniqueID]];
+}
+
++ (NSString *)webScriptNameForSelector:(SEL)aSelector {
+    NSString *name = nil;
+    if (aSelector == @selector(cancel:))
+        name = @"cancel";
+    else if (aSelector == @selector(remove:))
+        name = @"remove";
+    return name;
+}
+ 
++ (BOOL)isSelectorExcludedFromWebScript:(SEL)aSelector {
+    return (aSelector != @selector(clear) && aSelector != @selector(cancel:) && aSelector != @selector(remove:));
+}
+ 
++ (BOOL)isKeyExcludedFromWebScript:(const char *)aKey {
+    return 0 != strcmp(aKey, "removeFinishedDownloads") && 0 != strcmp(aKey, "removeFailedDownloads");
+}
+
+// This is necessary for web scripting to check the key for exposure, otherwise it will only check the ivar names instead
+- (NSArray *)attributeKeys {
+    return [NSArray arrayWithObjects:@"removeFinishedDownloads", @"removeFailedDownloads", nil];
 }
 
 @end

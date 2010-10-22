@@ -7,7 +7,7 @@
 	<style type="text/css">
 		* { margin: 0px; padding: 0px; }
 		body { font-family: "Lucida Grande"; font-size: 13px; padding: 0px; }
-		h1 { font-size: 16px; margin: 20px; color: #999; }
+		h1 { font-size: 16px; margin: 10px; color: #999; }
 		.downloads { width: 100%; border-width: 0px 0px 1px 0px; border-spacing: 0px; border-style: solid; border-color: #999; }
 		.icon { margin: 2px; width: 32px; height: 32px; }
 		.source { font-size: 12px; margin-left: 1em; }
@@ -95,8 +95,8 @@ function doLoad() {
 		</$downloads?>
 		<form class="prefs">
 <!-- Localize text -->
-		<input type="checkbox" onClick="downloads.setRemoveFinishedDownloads(this.checked)" <$removeFinishedDownloads?>checked</$removeFinishedDownloads?> />Automatically remove finished downloads<br />
-		<input type="checkbox" onClick="downloads.setRemoveFailedDownloads(this.checked)" <$removeFailedDownloads?>checked</$removeFailedDownloads?> />Automatically remove failed downloads
+		<input type="checkbox" onClick="downloads.removeFinishedDownloads = this.checked" <$removeFinishedDownloads?>checked</$removeFinishedDownloads?> />Automatically remove finished downloads<br />
+		<input type="checkbox" onClick="downloads.removeFailedDownloads = this.checked" <$removeFailedDownloads?>checked</$removeFailedDownloads?> />Automatically remove failed downloads
 		</form>
 		
 	</body>
