@@ -105,7 +105,7 @@ static id sharedManager = nil;
 }
 
 - (void)cancel:(NSUInteger)uniqueID {
-    [[self downloadWithUniqueID:uniqueID] cancel];
+    [[[self downloadWithUniqueID:uniqueID] URLDownload] cancel];
 }
 
 - (void)remove:(NSUInteger)uniqueID {
@@ -144,7 +144,7 @@ static id sharedManager = nil;
 
 - (void)downloadDidFinish:(NSURLDownload *)URLDownload {
     BDSKDownload *download = [self downloadForURLDownload:URLDownload];
-    [download finish];
+    [download setStatus:BDSKDownloadStatusFinished];
     
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKRemoveFinishedDownloadsKey] && download)
         [downloads removeObject:download];
@@ -152,7 +152,7 @@ static id sharedManager = nil;
 
 - (void)download:(NSURLDownload *)URLDownload didFailWithError:(NSError *)error {
     BDSKDownload *download = [self downloadForURLDownload:URLDownload];
-    [download fail];
+    [download setStatus:BDSKDownloadStatusFinished];
     
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKRemoveFailedDownloadsKey] && download)
         [downloads removeObject:download];
@@ -258,19 +258,14 @@ static NSUInteger currentUniqueID = 0;
     return status;
 }
 
-- (void)cancel {
-    [URLDownload cancel];
-}
-
-- (void)finish {
-    status = BDSKDownloadStatusFinished;
-    BDSKDESTROY(URLDownload);
-}
-
-- (void)fail {
-    status = BDSKDownloadStatusFailed;
-    [self setFileURL:nil];
-    BDSKDESTROY(URLDownload);
+- (void)setStatus:(BDSKDownloadStatus)newStatus {
+    if (status != newStatus) {
+        status = newStatus;
+        if (status != BDSKDownloadStatusDownloading)
+            BDSKDESTROY(URLDownload);
+        if (status == BDSKDownloadStatusFailed)
+            [self setFileURL:nil];
+    }
 }
 
 @end

@@ -70,23 +70,19 @@ typedef NSUInteger BDSKDownloadStatus;
     NSUInteger uniqueID;
     NSURL *URL;
     NSURL *fileURL;
-    NSInteger status;
+    BDSKDownloadStatus status;
     NSURLDownload *URLDownload;
 }
 
 - (id)initWithURLDownload:(NSURLDownload *)aDownload;
 
 - (NSURLDownload *)URLDownload;
-
 - (NSUInteger)uniqueID;
 - (NSURL *)URL;
 - (NSURL *)fileURL;
 - (void)setFileURL:(NSURL *)newFileURL;
 - (NSString *)fileName;
 - (BDSKDownloadStatus)status;
-
-- (void)cancel;
-- (void)finish;
-- (void)fail;
+- (void)setStatus:(BDSKDownloadStatus)newStatus;
 
 @end
