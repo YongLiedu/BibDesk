@@ -110,6 +110,7 @@ static NSString *BDSKWebLocalizedString = nil;
     [webView setFrameLoadDelegate:nil];
     [webView setUIDelegate:nil];
     [webView setEditingDelegate:nil];
+    [webView setDownloadDelegate:nil];
     delegate = nil;
     BDSKDESTROY(label);
     BDSKDESTROY(webView);
@@ -131,6 +132,7 @@ static NSString *BDSKWebLocalizedString = nil;
     [webView setFrameLoadDelegate:self];
     [webView setUIDelegate:self];
     [webView setEditingDelegate:self];
+    [webView setDownloadDelegate:[BDSKDownloadManager sharedManager]];
     [webView setHostWindow:[[[document windowControllers] objectAtIndex:0] window]];
 }
 
@@ -219,14 +221,6 @@ static NSString *BDSKWebLocalizedString = nil;
     [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString proposedName:title modalForWindow:[webView window]];
 }
 
-- (void)downloadLink:(id)sender {
-	NSURL *linkURL = (NSURL *)[[sender representedObject] objectForKey:WebElementLinkURLKey];
-    if (linkURL)
-        [[BDSKDownloadManager sharedManager] addDownloadForURL:linkURL];
-    else
-        NSBeep();
-}
-
 - (void)revealLink:(id)sender {
 	NSURL *linkURL = (NSURL *)[[sender representedObject] objectForKey:WebElementLinkURLKey];
     if ([linkURL isFileURL])
@@ -301,7 +295,7 @@ static NSString *BDSKWebLocalizedString = nil;
             else if (type != BDSKUnknownStringType)
                 newPubs = [BDSKStringParser itemsFromString:string ofType:type error:&error];
         }
-        else if (nil == newPubs && [WebView canShowMIMETypeAsHTML:MIMEType]) {
+        else if (nil == newPubs && [MIMEType hasPrefix:@"text/"]) {
             // !!! logs are here to help diagnose problems that users are reporting
             // but unsupported web pages are far too common, we don't want to flood the console
             if ([[error domain] isEqualToString:[NSError localErrorDomain]] == NO || [error code] != kBDSKWebParserUnsupported)
@@ -387,7 +381,7 @@ static NSString *BDSKWebLocalizedString = nil;
 	NSMenuItem *item;
     
     // @@ we may want to add support for some of these (downloading), but it's confusing to have them in the menu for now
-    NSArray *itemsToRemove = [NSArray arrayWithObjects:[NSNumber numberWithInteger:WebMenuItemTagOpenLinkInNewWindow], [NSNumber numberWithInteger:WebMenuItemTagDownloadLinkToDisk], [NSNumber numberWithInteger:WebMenuItemTagOpenImageInNewWindow], [NSNumber numberWithInteger:WebMenuItemTagDownloadImageToDisk], [NSNumber numberWithInteger:WebMenuItemTagOpenFrameInNewWindow], nil];
+    NSArray *itemsToRemove = [NSArray arrayWithObjects:[NSNumber numberWithInteger:WebMenuItemTagOpenLinkInNewWindow], [NSNumber numberWithInteger:WebMenuItemTagOpenImageInNewWindow], [NSNumber numberWithInteger:WebMenuItemTagDownloadImageToDisk], [NSNumber numberWithInteger:WebMenuItemTagOpenFrameInNewWindow], nil];
     for (NSNumber *n in itemsToRemove) {
         NSUInteger toRemove = [[menuItems valueForKey:@"tag"] indexOfObject:n];
         if (toRemove != NSNotFound)
@@ -407,13 +401,6 @@ static NSString *BDSKWebLocalizedString = nil;
         
         item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark Link", @"Menu item title") stringByAppendingEllipsis]
                                    action:@selector(bookmarkLink:)
-                            keyEquivalent:@""];
-        [item setTarget:self];
-        [item setRepresentedObject:element];
-        [menuItems insertObject:[item autorelease] atIndex:++i];
-        
-        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Save Link As", @"Menu item title") stringByAppendingEllipsis]
-                                   action:@selector(downloadLink:)
                             keyEquivalent:@""];
         [item setTarget:self];
         [item setRepresentedObject:element];
@@ -558,6 +545,7 @@ static id sharedHandler = nil;
         webView = [[WebView alloc] init];
         [webView setUIDelegate:self];
         [webView setFrameLoadDelegate:self];
+        [webView setDownloadDelegate:[BDSKDownloadManager sharedManager]];
         [window setContentView:webView];
     }
     return self;
@@ -566,6 +554,7 @@ static id sharedHandler = nil;
 - (void)dealloc {
     [webView setUIDelegate:nil];
     [webView setFrameLoadDelegate:nil];
+    [webView setDownloadDelegate:nil];
     BDSKDESTROY(webView);
     [super dealloc];
 }

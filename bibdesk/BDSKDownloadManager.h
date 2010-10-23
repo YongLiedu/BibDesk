@@ -51,8 +51,6 @@ typedef NSUInteger BDSKDownloadStatus;
 
 + (id)sharedManager;
 
-- (void)addDownloadForURL:(NSURL *)aURL;
-
 - (NSArray *)downloads;
 
 - (BOOL)removeFinishedDownloads;
@@ -70,20 +68,24 @@ typedef NSUInteger BDSKDownloadStatus;
 
 @interface BDSKDownload : NSObject {
     NSUInteger uniqueID;
-    NSURL *URL;
     NSURL *fileURL;
     NSInteger status;
-    NSURLDownload *download;
+    NSURLDownload *URLDownload;
 }
 
-- (id)initWithURL:(NSURL *)aURL;
+- (id)initWithURLDownload:(NSURLDownload *)aDownload;
+
+- (NSURLDownload *)URLDownload;
 
 - (NSUInteger)uniqueID;
 - (NSURL *)URL;
 - (NSURL *)fileURL;
+- (void)setFileURL:(NSURL *)newFileURL;
 - (NSString *)fileName;
 - (BDSKDownloadStatus)status;
 
-- (void)cancel:(id)sender;
+- (void)cancel;
+- (void)finish;
+- (void)fail;
 
 @end

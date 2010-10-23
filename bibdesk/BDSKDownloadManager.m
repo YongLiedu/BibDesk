@@ -60,21 +60,6 @@ static id sharedManager = nil;
     return self;
 }
 
-- (void)addDownloadForURL:(NSURL *)aURL {
-	NSURLDownload *download = [[BDSKDownload alloc] initWithURL:aURL];
-    if (download) {
-        [downloads addObject:download];
-        [download release];
-    }
-}
-
-- (void)removeDownload:(BDSKDownload *)download {
-    if (download) {
-        [download cancel:nil];
-        [downloads removeObject:download];
-    }
-}
-
 - (NSArray *)downloads {
     return downloads;
 }
@@ -95,6 +80,14 @@ static id sharedManager = nil;
    [[NSUserDefaults standardUserDefaults] setBool:flag forKey:BDSKRemoveFailedDownloadsKey];
 }
 
+- (BDSKDownload *)downloadForURLDownload:(NSURLDownload *)URLDownload {
+    for (BDSKDownload *download in downloads) {
+        if ([download URLDownload] == URLDownload)
+            return download;
+    }
+    return nil;
+}
+
 - (BDSKDownload *)downloadWithUniqueID:(NSUInteger)uniqueID {
     for (BDSKDownload *download in downloads) {
         if ([download uniqueID] == uniqueID)
@@ -112,11 +105,13 @@ static id sharedManager = nil;
 }
 
 - (void)cancel:(NSUInteger)uniqueID {
-    [[self downloadWithUniqueID:uniqueID] cancel:nil];
+    [[self downloadWithUniqueID:uniqueID] cancel];
 }
 
 - (void)remove:(NSUInteger)uniqueID {
-    [self removeDownload:[self downloadWithUniqueID:uniqueID]];
+    BDSKDownload *download = [self downloadWithUniqueID:uniqueID];
+    if (download)
+        [downloads removeObject:download];
 }
 
 + (NSString *)webScriptNameForSelector:(SEL)aSelector {
@@ -141,6 +136,61 @@ static id sharedManager = nil;
     return [NSArray arrayWithObjects:@"removeFinishedDownloads", @"removeFailedDownloads", nil];
 }
 
+#pragma mark NSURLDownload delegate protocol
+
+- (void)downloadDidBegin:(NSURLDownload *)URLDownload {
+    [downloads addObject:[[[BDSKDownload alloc] initWithURLDownload:URLDownload] autorelease]];
+}
+
+- (void)downloadDidFinish:(NSURLDownload *)URLDownload {
+    BDSKDownload *download = [self downloadForURLDownload:URLDownload];
+    [download finish];
+    
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKRemoveFinishedDownloadsKey] && download)
+        [downloads removeObject:download];
+}
+
+- (void)download:(NSURLDownload *)URLDownload didFailWithError:(NSError *)error {
+    BDSKDownload *download = [self downloadForURLDownload:URLDownload];
+    [download fail];
+    
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKRemoveFailedDownloadsKey] && download)
+        [downloads removeObject:download];
+    
+    NSString *errorDescription = [error localizedDescription] ?: NSLocalizedString(@"An error occured during download.", @"Informative text in alert dialog");
+    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Download Failed", @"Message in alert dialog when download failed")
+                                     defaultButton:nil
+                                   alternateButton:nil
+                                       otherButton:nil
+                         informativeTextWithFormat:errorDescription];
+    [alert runModal];
+}
+
+- (void)download:(NSURLDownload *)URLDownload decideDestinationWithSuggestedFilename:(NSString *)filename {
+	NSString *extension = [filename pathExtension];
+   
+	NSSavePanel *sPanel = [NSSavePanel savePanel];
+    if (NO == [extension isEqualToString:@""]) 
+		[sPanel setRequiredFileType:extension];
+    [sPanel setAllowsOtherFileTypes:YES];
+    [sPanel setCanSelectHiddenExtension:YES];
+	
+    // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
+    NSInteger returnCode = [sPanel runModalForDirectory:nil file:filename];
+    if (returnCode == NSOKButton)
+        [URLDownload setDestination:[sPanel filename] allowOverwrite:YES];
+    else
+        [URLDownload cancel];
+}
+
+- (void)download:(NSURLDownload *)URLDownload didCreateDestination:(NSString *)path {
+    [[self downloadForURLDownload:URLDownload] setFileURL:[NSURL fileURLWithPath:path]];
+}
+
+- (BOOL)download:(NSURLDownload *)URLDownload shouldDecodeSourceDataOfMIMEType:(NSString *)encodingType {
+    return YES;
+}
+
 @end
 
 #pragma mark -
@@ -149,28 +199,24 @@ static id sharedManager = nil;
 
 static NSUInteger currentUniqueID = 0;
 
-- (id)initWithURL:(NSURL *)aURL {
+- (id)initWithURLDownload:(NSURLDownload *)aURLDownload {
     if (self = [super init]) {
         uniqueID = ++currentUniqueID;
-        URL = [aURL retain];
         fileURL = nil;
         status = BDSKDownloadStatusDownloading;
-        download = [[WebDownload alloc] initWithRequest:[NSURLRequest requestWithURL:URL] delegate:self];
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(cancel:)
-                                                     name:NSApplicationWillTerminateNotification
-                                                   object:NSApp];
+        URLDownload = [aURLDownload retain];
     }
     return self;
 }
 
 - (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [download cancel];
-    BDSKDESTROY(URL);
     BDSKDESTROY(fileURL);
-    BDSKDESTROY(download);
+    BDSKDESTROY(URLDownload);
     [super dealloc];
+}
+
+- (NSURLDownload *)URLDownload {
+    return URLDownload;
 }
 
 - (NSUInteger)uniqueID {
@@ -178,16 +224,24 @@ static NSUInteger currentUniqueID = 0;
 }
 
 - (NSURL *)URL {
-    return URL;
+    return [[URLDownload request] URL];
 }
 
 - (NSURL *)fileURL {
     return fileURL;
 }
 
+- (void)setFileURL:(NSURL *)newFileURL {
+    if (fileURL != newFileURL) {
+        [fileURL release];
+        fileURL = [newFileURL retain];
+    }
+}
+
 - (NSString *)fileName {
     NSString *fileName = [fileURL lastPathComponent];
     if (fileName == nil) {
+        NSURL *URL = [self URL];
         if ([[URL path] length] > 1) {
             fileName = [URL lastPathComponent];
         } else {
@@ -203,64 +257,19 @@ static NSUInteger currentUniqueID = 0;
     return status;
 }
 
-- (void)cancel:(id)sender {
-    [download cancel];
+- (void)cancel {
+    [URLDownload cancel];
 }
 
-#pragma mark NSURLDownloadDelegate protocol
-
-- (void)download:(NSURLDownload *)aDownload decideDestinationWithSuggestedFilename:(NSString *)filename {
-	NSString *extension = [filename pathExtension];
-   
-	NSSavePanel *sPanel = [NSSavePanel savePanel];
-    if (NO == [extension isEqualToString:@""]) 
-		[sPanel setRequiredFileType:extension];
-    [sPanel setAllowsOtherFileTypes:YES];
-    [sPanel setCanSelectHiddenExtension:YES];
-	
-    // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
-    NSInteger returnCode = [sPanel runModalForDirectory:nil file:filename];
-    if (returnCode == NSOKButton) {
-        [download setDestination:[sPanel filename] allowOverwrite:YES];
-    } else {
-        [download cancel];
-    }
-}
-
-- (void)download:(NSURLDownload *)download didCreateDestination:(NSString *)path {
-    [fileURL release];
-    fileURL = path ? [[NSURL alloc] initFileURLWithPath:path] : nil;
-}
-
-- (BOOL)download:(NSURLDownload *)aDownload shouldDecodeSourceDataOfMIMEType:(NSString *)encodingType {
-    return YES;
-}
-
-- (void)downloadDidFinish:(NSURLDownload *)aDownload {
-    BDSKDESTROY(download);
+- (void)finish {
     status = BDSKDownloadStatusFinished;
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKRemoveFinishedDownloadsKey])
-        [[BDSKDownloadManager sharedManager] removeDownload:self];
+    BDSKDESTROY(URLDownload);
 }
 
-- (void)download:(NSURLDownload *)aDownload didFailWithError:(NSError *)error {
-    BDSKDESTROY(download);
-    BDSKDESTROY(fileURL);
+- (void)fail {
     status = BDSKDownloadStatusFailed;
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKRemoveFailedDownloadsKey])
-        [[BDSKDownloadManager sharedManager] removeDownload:self];
-    
-    NSString *errorDescription = [error localizedDescription] ?: NSLocalizedString(@"An error occured during download.", @"Informative text in alert dialog");
-    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Download Failed", @"Message in alert dialog when download failed")
-                                     defaultButton:nil
-                                   alternateButton:nil
-                                       otherButton:nil
-                         informativeTextWithFormat:errorDescription];
-    [alert runModal];
+    [self setFileURL:nil];
+    BDSKDESTROY(URLDownload);
 }
 
 @end
