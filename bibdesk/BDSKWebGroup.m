@@ -240,7 +240,6 @@ static NSString *BDSKWebLocalizedString = nil;
 - (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame{
     
     if (frame == [sender mainFrame]) {
-    [[webView windowScriptObject] setValue:[BDSKDownloadManager sharedManager] forKey:@"downloads"];
         
         BDSKASSERT(loadingWebFrame == nil);
         
