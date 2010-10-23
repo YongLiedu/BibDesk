@@ -616,6 +616,11 @@ static id sharedHandler = nil;
     }
 }
 
+- (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request {
+    // due to a known WebKit bug the request is always nil https://bugs.webkit.org/show_bug.cgi?id=23432
+    return [[BDSKNewWebWindowHandler sharedHandler] webView];
+}
+
 - (WebView *)webView:(WebView *)sender createWebViewModalDialogWithRequest:(NSURLRequest *)request {
     return [[[[BDSKWebViewModalDialogController alloc] init] autorelease] webView];
 }
