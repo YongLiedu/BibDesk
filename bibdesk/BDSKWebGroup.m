@@ -60,6 +60,13 @@
 
 #define BDSKOpenNewWindowsForWebGroupInBrowserKey @"BDSKOpenNewWindowsForWebGroupInBrowser"
 
+static NSString *defaultTitle(NSString *title, NSURL *url) {
+    if ([NSString isEmptyString:title]) {
+        title = [url isFileURL] ? [[url path] lastPathComponent] : [[url absoluteString] stringByReplacingPercentEscapes];
+    }
+    return title ?: @"";
+}
+
 // workaround for loading a URL from a javasecript window.open event http://stackoverflow.com/questions/270458/cocoa-webkit-having-window-open-javascipt-links-opening-in-an-instance-of-safa
 @interface BDSKNewWebWindowHandler : NSObject {
     WebView *webView;
@@ -306,14 +313,8 @@ static NSString *BDSKWebLocalizedString = nil;
     }
     
     if (frame == [sender mainFrame]) {
-        NSString *title = [sender mainFrameTitle];
-        if ([NSString isEmptyString:title]) {
-            if (url == nil)
-                url = [self URL];
-            title = [url isFileURL] ? [[url path] lastPathComponent] : [[url absoluteString] stringByReplacingPercentEscapes];
-        }
         [delegate webGroup:self setIcon:[sender mainFrameIcon]];
-        [self setLabel:title];
+        [self setLabel:defaultTitle([sender mainFrameTitle], url ?: [self URL])];
     }
     
     if (frame == loadingWebFrame) {
@@ -584,10 +585,39 @@ static id sharedHandler = nil;
     [self autorelease];
 }
 
+- (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame {
+    if (frame == [sender mainFrame]) { 
+        [[self window] setTitle:defaultTitle(nil, [self URL])];
+    }
+}
+
+- (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame{
+    if (frame == [sender mainFrame]) { 
+        [[self window] setTitle:defaultTitle([sender mainFrameTitle], [self URL])];
+    }
+}
+
+- (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
+    // !!! logs are here to help diagnose problems that users are reporting
+    NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
+    
+    NSURL *url = [[[frame provisionalDataSource] request] URL];
+    NSString *errorHTML = [NSString stringWithFormat:@"<html><title>%@</title><body><h1>%@</h1></body></html>", NSLocalizedString(@"Error", @"Placeholder web group label"), [error localizedDescription]];
+    [frame loadAlternateHTMLString:errorHTML baseURL:nil forUnreachableURL:url];
+}
+
+- (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
+    [self webView:sender didFailLoadWithError:error forFrame:frame];
+}
+
 - (void)webView:(WebView *)sender didReceiveTitle:(NSString *)title forFrame:(WebFrame *)frame {
     if (frame == [sender mainFrame]) { 
         [[self window] setTitle:title];
     }
+}
+
+- (WebView *)webView:(WebView *)sender createWebViewModalDialogWithRequest:(NSURLRequest *)request {
+    return [[[[BDSKWebViewModalDialogController alloc] init] autorelease] webView];
 }
 
 - (void)webViewRunModal:(WebView *)sender {
