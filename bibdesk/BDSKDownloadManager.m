@@ -202,6 +202,7 @@ static NSUInteger currentUniqueID = 0;
 - (id)initWithURLDownload:(NSURLDownload *)aURLDownload {
     if (self = [super init]) {
         uniqueID = ++currentUniqueID;
+        URL = [[[aURLDownload request] URL] retain];
         fileURL = nil;
         status = BDSKDownloadStatusDownloading;
         URLDownload = [aURLDownload retain];
@@ -210,6 +211,7 @@ static NSUInteger currentUniqueID = 0;
 }
 
 - (void)dealloc {
+    BDSKDESTROY(URL);
     BDSKDESTROY(fileURL);
     BDSKDESTROY(URLDownload);
     [super dealloc];
@@ -224,7 +226,7 @@ static NSUInteger currentUniqueID = 0;
 }
 
 - (NSURL *)URL {
-    return [[URLDownload request] URL];
+    return URL;
 }
 
 - (NSURL *)fileURL {
@@ -241,7 +243,6 @@ static NSUInteger currentUniqueID = 0;
 - (NSString *)fileName {
     NSString *fileName = [fileURL lastPathComponent];
     if (fileName == nil) {
-        NSURL *URL = [self URL];
         if ([[URL path] length] > 1) {
             fileName = [URL lastPathComponent];
         } else {
