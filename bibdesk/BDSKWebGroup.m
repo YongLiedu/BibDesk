@@ -70,6 +70,14 @@
 
 #pragma mark -
 
+@interface BDSKWebViewModalDialogController : NSWindowController {
+    WebView *webView;
+}
+- (WebView *)webView;
+@end
+
+#pragma mark -
+
 @implementation BDSKWebGroup
 
 static NSString *BDSKWebLocalizedString = nil;
@@ -455,6 +463,15 @@ static NSString *BDSKWebLocalizedString = nil;
     }
 }
 
+- (WebView *)webView:(WebView *)sender createWebViewModalDialogWithRequest:(NSURLRequest *)request {
+    return [[[[BDSKWebViewModalDialogController alloc] init] autorelease] webView];
+}
+
+// this seems to be necessary in order for webView:createWebViewModalDialogWithRequest: to work
+- (void)webViewRunModal:(WebView *)sender {
+    [document selectGroup:self];
+}
+
 - (void)webViewShow:(WebView *)sender {
     [document selectGroup:self];
 }
@@ -525,6 +542,81 @@ static id sharedHandler = nil;
 - (void)dealloc {
     BDSKDESTROY(webView);
     [super dealloc];
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKWebViewModalDialogController
+
+- (id)init {
+    NSUInteger mask = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
+    NSWindow *window = [[[NSWindow alloc] initWithContentRect:NSMakeRect(0.0, 0.0, 200.0, 200.0) styleMask:mask backing:NSBackingStoreBuffered defer:YES] autorelease];
+    if (self = [self initWithWindow:window]) {
+        [window setDelegate:self];
+        webView = [[WebView alloc] init];
+        [webView setUIDelegate:self];
+        [webView setFrameLoadDelegate:self];
+        [window setContentView:webView];
+    }
+    return self;
+}
+
+- (void)dealloc {
+    [webView setUIDelegate:nil];
+    [webView setFrameLoadDelegate:nil];
+    BDSKDESTROY(webView);
+    [super dealloc];
+}
+
+- (WebView *)webView {
+    return webView;
+}
+
+- (NSURL *)URL {
+    WebFrame *mainFrame = [webView mainFrame];
+    WebDataSource *dataSource = [mainFrame provisionalDataSource] ?: [mainFrame dataSource];
+    return [[dataSource request] URL];
+}
+
+- (void)windowWillClose:(NSNotification *)notification {
+    [NSApp stopModal];
+    [self autorelease];
+}
+
+- (void)webView:(WebView *)sender didReceiveTitle:(NSString *)title forFrame:(WebFrame *)frame {
+    if (frame == [sender mainFrame]) { 
+        [[self window] setTitle:title];
+    }
+}
+
+- (void)webViewRunModal:(WebView *)sender {
+    [self retain];
+    [[self window] makeKeyAndOrderFront:sender];
+    [NSApp runModalForWindow:[self window]];
+}
+
+- (void)webViewClose:(WebView *)sender {
+    [[self window] performClose:sender];
+}
+
+- (void)webView:(WebView *)sender runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WebFrame *)frame {
+    NSAlert *alert = [NSAlert alertWithMessageText:[[self URL] absoluteString] defaultButton:NSLocalizedString(@"OK", @"Button title") alternateButton:nil otherButton:nil informativeTextWithFormat:@"%@", message];
+    [alert runModal];
+}
+
+- (BOOL)webView:(WebView *)sender runJavaScriptConfirmPanelWithMessage:(NSString *)message initiatedByFrame:(WebFrame *)frame {
+    NSAlert *alert = [NSAlert alertWithMessageText:[[self URL] absoluteString] defaultButton:NSLocalizedString(@"OK", @"Button title") alternateButton:NSLocalizedString(@"Cancel", @"Button title") otherButton:nil informativeTextWithFormat:@"%@", message];
+    return NSAlertDefaultReturn == [alert runModal];
+}
+
+- (void)webView:(WebView *)sender runOpenPanelForFileButtonWithResultListener:(id < WebOpenPanelResultListener >)resultListener {
+    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+    if ([openPanel runModal] == NSFileHandlingPanelOKButton)
+        [resultListener chooseFilename:[openPanel filename]];
+    else
+        [resultListener cancel];
 }
 
 @end
