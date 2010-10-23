@@ -68,6 +68,7 @@ typedef NSUInteger BDSKDownloadStatus;
 
 @interface BDSKDownload : NSObject {
     NSUInteger uniqueID;
+    NSURL *URL;
     NSURL *fileURL;
     NSInteger status;
     NSURLDownload *URLDownload;
