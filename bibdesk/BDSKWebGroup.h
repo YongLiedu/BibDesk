@@ -38,17 +38,15 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKExternalGroup.h"
+#import "BDSKWebViewController.h"
 
 @protocol BDSKWebGroupDelegate;
-@class WebView, WebFrame;
+@class WebView;
 
-@interface BDSKWebGroup : BDSKExternalGroup {
-    BOOL isRetrieving;
+@interface BDSKWebGroup : BDSKExternalGroup <BDSKWebViewControllerDelegate> {
     NSString *label;
     id <BDSKWebGroupDelegate> delegate;
-    WebView *webView;
-    WebFrame *loadingWebFrame;
-    NSUndoManager *undoManager;
+    BDSKWebViewController *webViewController;
 }
 
 - (NSString *)label;

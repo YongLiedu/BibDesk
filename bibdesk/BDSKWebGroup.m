@@ -37,20 +37,12 @@
  */
 
 #import "BDSKWebGroup.h"
-#import "BDSKStringConstants.h"
-#import "BDSKPublicationsArray.h"
-#import "BDSKMacroResolver.h"
-#import "NSImage_BDSKExtensions.h"
-#import "BDSKItemSearchIndexes.h"
 #import "BibItem.h"
 #import <WebKit/WebKit.h>
 #import "BDSKWebParser.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKStringParser.h"
 #import "BDSKBibDeskProtocol.h"
-#import "NSWorkspace_BDSKExtensions.h"
-#import "BDSKBookmarkController.h"
-#import "BDSKDownloadManager.h"
 #import "BibDocument.h"
 #import "BibDocument_UI.h"
 #import "BibDocument_Groups.h"
@@ -59,31 +51,6 @@
 #import "NSError_BDSKExtensions.h"
 
 #define BDSKOpenNewWindowsForWebGroupInBrowserKey @"BDSKOpenNewWindowsForWebGroupInBrowser"
-
-static NSString *defaultTitle(NSString *title, NSURL *url) {
-    if ([NSString isEmptyString:title]) {
-        title = [url isFileURL] ? [[url path] lastPathComponent] : [[url absoluteString] stringByReplacingPercentEscapes];
-    }
-    return title ?: @"";
-}
-
-// workaround for loading a URL from a javasecript window.open event http://stackoverflow.com/questions/270458/cocoa-webkit-having-window-open-javascipt-links-opening-in-an-instance-of-safa
-@interface BDSKNewWebWindowHandler : NSObject {
-    WebView *webView;
-}
-+ (id)sharedHandler;
-- (WebView *)webView;
-@end
-
-#pragma mark -
-
-@interface BDSKWebViewModalDialogController : NSWindowController {
-    WebView *webView;
-}
-- (WebView *)webView;
-@end
-
-#pragma mark -
 
 @implementation BDSKWebGroup
 
@@ -106,15 +73,10 @@ static NSString *BDSKWebLocalizedString = nil;
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [webView setHostWindow:nil];
-    [webView setFrameLoadDelegate:nil];
-    [webView setUIDelegate:nil];
-    [webView setEditingDelegate:nil];
-    [webView setDownloadDelegate:nil];
+    [webViewController setDelegate:nil];
     delegate = nil;
     BDSKDESTROY(label);
-    BDSKDESTROY(webView);
-    BDSKDESTROY(undoManager);
+    BDSKDESTROY(webViewController);
     [super dealloc];
 }
 
@@ -127,13 +89,10 @@ static NSString *BDSKWebLocalizedString = nil;
 }
 
 - (void)makeWebView {
-    BDSKASSERT(webView == nil);
-    webView = [[WebView alloc] init];
-    [webView setFrameLoadDelegate:self];
-    [webView setUIDelegate:self];
-    [webView setEditingDelegate:self];
-    [webView setDownloadDelegate:[BDSKDownloadManager sharedManager]];
-    [webView setHostWindow:[[[document windowControllers] objectAtIndex:0] window]];
+    BDSKASSERT(webViewController == nil);
+    webViewController = [[BDSKWebViewController alloc] init];
+    [webViewController setDelegate:self];
+    [[webViewController webView] setHostWindow:[[[document windowControllers] objectAtIndex:0] window]];
 }
 
 #pragma mark BDSKGroup overrides
@@ -144,7 +103,7 @@ static NSString *BDSKWebLocalizedString = nil;
 
 - (BOOL)isWeb { return YES; }
 
-- (BOOL)isRetrieving { return isRetrieving; }
+- (BOOL)isRetrieving { return [webViewController isRetrieving]; }
 
 - (NSString *)label {
     return [label length] > 0 ? label : NSLocalizedString(@"(Empty)", @"Empty group label");
@@ -159,8 +118,8 @@ static NSString *BDSKWebLocalizedString = nil;
 
 - (void)setDocument:(BibDocument *)newDocument{
     [super setDocument:newDocument];
-    if (webView)
-        [webView setHostWindow:[[[document windowControllers] objectAtIndex:0] window]];
+    if (webViewController)
+        [[webViewController webView] setHostWindow:[[[document windowControllers] objectAtIndex:0] window]];
 }
 
 #pragma mark BDSKExternalGroup overrides
@@ -171,21 +130,13 @@ static NSString *BDSKWebLocalizedString = nil;
 #pragma mark Accessors
 
 - (WebView *)webView {
-    if (webView == nil) {
+    if (webViewController == nil)
         [self makeWebView];
-        [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:BDSKBibDeskWebGroupURL]];
-    }
-    return webView;
-}
-
-- (WebView *)webViewWithoutLoading {
-    if (webView == nil)
-        [self makeWebView];
-    return webView;
+    return [webViewController webView];
 }
 
 - (BOOL)isWebViewLoaded {
-    return webView != nil;
+    return webViewController != nil;
 }
 
 - (id<BDSKWebGroupDelegate>)delegate {
@@ -197,74 +148,64 @@ static NSString *BDSKWebLocalizedString = nil;
 }
 
 - (NSURL *)URL {
-    WebFrame *mainFrame = [webView mainFrame];
-    WebDataSource *dataSource = [mainFrame provisionalDataSource] ?: [mainFrame dataSource];
-    return [[dataSource request] URL];
+    return [webViewController URL];
 }
 
 - (void)setURL:(NSURL *)newURL {
-    if (newURL && [[[[[webView mainFrame] dataSource] request] URL] isEqual:newURL] == NO) {
-        [self setLabel:[NSLocalizedString(@"Loading", @"Placeholder web group label") stringByAppendingEllipsis]];
-        [delegate webGroup:self setIcon:nil];
-        [delegate webGroup:self setURL:newURL];
-        [[[self webViewWithoutLoading] mainFrame] loadRequest:[NSURLRequest requestWithURL:newURL]];
-    }
+    if (newURL && webViewController == nil)
+        [self makeWebView];
+    [webViewController setURL:newURL];
 }
 
-#pragma mark Actions
+#pragma mark BDSKWebViewControllerDelegate protocol
 
-- (void)bookmarkLink:(id)sender {
-	NSDictionary *element = (NSDictionary *)[sender representedObject];
-	NSString *URLString = [(NSURL *)[element objectForKey:WebElementLinkURLKey] absoluteString];
-	NSString *title = [element objectForKey:WebElementLinkLabelKey] ?: [URLString lastPathComponent];
-	
-    [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString proposedName:title modalForWindow:[webView window]];
+- (void)webViewController:(BDSKWebViewController *)controller setURL:(NSURL *)aURL {
+    [delegate webGroup:self setURL:aURL];
 }
 
-- (void)revealLink:(id)sender {
-	NSURL *linkURL = (NSURL *)[[sender representedObject] objectForKey:WebElementLinkURLKey];
-    if ([linkURL isFileURL])
-        [[NSWorkspace sharedWorkspace] selectFile:[linkURL path] inFileViewerRootedAtPath:nil];
+- (void)webViewController:(BDSKWebViewController *)controller setIcon:(NSImage *)icon {
+    [delegate webGroup:self setIcon:icon];
+}
+
+- (void)webViewController:(BDSKWebViewController *)controller setTitle:(NSString *)title {
+    [self setLabel:title];
+}
+
+- (void)webViewController:(BDSKWebViewController *)controller setStatusText:(NSString *)text {
+    if ([NSString isEmptyString:text])
+        [document updateStatus];
     else
-        NSBeep();
+        [document setStatus:text];
 }
 
-- (void)openInDefaultBrowser:(id)sender {
-    NSDictionary *element = (NSDictionary *)[sender representedObject];
-	NSURL *theURL = [element objectForKey:WebElementLinkURLKey];
-    if (theURL)
-        [[NSWorkspace sharedWorkspace] openLinkedURL:theURL];
+- (WebView *)webViewControllerCreateWebView:(BDSKWebViewController *)controller {
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKOpenNewWindowsForWebGroupInBrowserKey])
+        return nil;
+    BDSKWebGroup *group = [[[BDSKWebGroup alloc] init] autorelease];
+    [[document groups] addWebGroup:group];
+    return [group webView];
 }
 
-#pragma mark WebFrameLoadDelegate protocol
+- (void)webViewControllerShow:(BDSKWebViewController *)controller {
+    [document selectGroup:self];
+}
 
-- (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame{
-    
-    if (frame == [sender mainFrame]) {
-        
-        BDSKASSERT(loadingWebFrame == nil);
-        
-        [delegate webGroup:self setIcon:nil];
-        [self setLabel:[NSLocalizedString(@"Loading", @"Placeholder web group label") stringByAppendingEllipsis]];
-        
-        isRetrieving = YES;
+- (void)webViewControllerClose:(BDSKWebViewController *)controller {
+    [document removeGroups:[NSArray arrayWithObject:self]];
+}
+
+- (void)webViewControllerRunModal:(BDSKWebViewController *)controller {
+    [document selectGroup:self];
+}
+
+- (void)webViewController:(BDSKWebViewController *)controller didStartLoadForMainFrame:(BOOL)forMainFrame {
+    if (forMainFrame)
         [self setPublications:nil];
-        loadingWebFrame = frame;
-        
-        if ([[frame provisionalDataSource] unreachableURL] == nil && delegate)
-            [delegate webGroup:self setURL:[[[[webView mainFrame] provisionalDataSource] request] URL]];
-        
-    } else if (loadingWebFrame == nil) {
-        
-        isRetrieving = YES;
+    else
         [self addPublications:nil];
-        loadingWebFrame = frame;
-        
-    }
 }
 
-- (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame{
-
+- (void)webViewController:(BDSKWebViewController *)controller didFinishLoadForFrame:(WebFrame *)frame {
 	NSURL *url = [[[frame dataSource] request] URL];
     DOMDocument *domDocument = [frame DOMDocument];
     
@@ -306,340 +247,11 @@ static NSString *BDSKWebLocalizedString = nil;
         }
     }
     
-    if (frame == [sender mainFrame]) {
-        [delegate webGroup:self setIcon:[sender mainFrameIcon]];
-        [self setLabel:defaultTitle([sender mainFrameTitle], url ?: [self URL])];
-    }
-    
-    if (frame == loadingWebFrame) {
-        isRetrieving = NO;
-        loadingWebFrame = nil;
-    }
     [self addPublications:newPubs ?: [NSArray array]];
 }
 
-- (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
-    if (frame == loadingWebFrame) {
-        isRetrieving = NO;
-        [self addPublications:nil];
-        loadingWebFrame = nil;
-    }
-    
-    // !!! logs are here to help diagnose problems that users are reporting
-    NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
-    
-    NSURL *url = [[[frame provisionalDataSource] request] URL];
-    NSString *errorHTML = [NSString stringWithFormat:@"<html><title>%@</title><body><h1>%@</h1></body></html>", NSLocalizedString(@"Error", @"Placeholder web group label"), [error localizedDescription]];
-    [frame loadAlternateHTMLString:errorHTML baseURL:nil forUnreachableURL:url];
-}
-
-- (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
-    [self webView:sender didFailLoadWithError:error forFrame:frame];
-}
-
-- (void)webView:(WebView *)sender didReceiveServerRedirectForProvisionalLoadForFrame:(WebFrame *)frame{
-    if (frame == [sender mainFrame] && delegate) { 
-        [delegate webGroup:self setURL:[[[frame provisionalDataSource] request] URL]];
-    }
-}
-
-- (void)webView:(WebView *)sender didReceiveIcon:(NSImage *)image forFrame:(WebFrame *)frame{
-    if (frame == [sender mainFrame] && delegate) { 
-        [delegate webGroup:self setIcon:image];
-    }
-}
-
-- (void)webView:(WebView *)sender didReceiveTitle:(NSString *)title forFrame:(WebFrame *)frame {
-    if (frame == [sender mainFrame]) { 
-        [self setLabel:title];
-    }
-}
-
-- (void)webView:(WebView *)sender didClearWindowObject:(WebScriptObject *)windowObject forFrame:(WebFrame *)frame {
-    [windowObject setValue:[BDSKDownloadManager sharedManager] forKey:@"downloads"];
-}
-
-#pragma mark WebUIDelegate protocol
-
-- (void)webView:(WebView *)sender setStatusText:(NSString *)text {
-    if ([sender window]) {
-        if ([NSString isEmptyString:text])
-            [document updateStatus];
-        else
-            [document setStatus:text];
-    }
-}
-
-- (void)webView:(WebView *)sender mouseDidMoveOverElement:(NSDictionary *)elementInformation modifierFlags:(NSUInteger)modifierFlags {
-    NSURL *aLink = [elementInformation objectForKey:WebElementLinkURLKey];
-    [self webView:sender setStatusText:[[aLink absoluteString] stringByReplacingPercentEscapes]];
-}
-
-- (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems;
-{
-	NSMutableArray *menuItems = [NSMutableArray arrayWithArray:defaultMenuItems];
-	NSMenuItem *item;
-    
-    // @@ we may want to add support for some of these (downloading), but it's confusing to have them in the menu for now
-    NSArray *itemsToRemove = [NSArray arrayWithObjects:[NSNumber numberWithInteger:WebMenuItemTagOpenLinkInNewWindow], [NSNumber numberWithInteger:WebMenuItemTagOpenImageInNewWindow], [NSNumber numberWithInteger:WebMenuItemTagDownloadImageToDisk], [NSNumber numberWithInteger:WebMenuItemTagOpenFrameInNewWindow], nil];
-    for (NSNumber *n in itemsToRemove) {
-        NSUInteger toRemove = [[menuItems valueForKey:@"tag"] indexOfObject:n];
-        if (toRemove != NSNotFound)
-            [menuItems removeObjectAtIndex:toRemove];
-    }
-	
-    NSUInteger i = [[menuItems valueForKey:@"tag"] indexOfObject:[NSNumber numberWithInteger:WebMenuItemTagCopyLinkToClipboard]];
-    
-    if (i != NSNotFound) {
-        
-        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Open in Default Browser", @"Menu item title")
-                                                                    action:@selector(openInDefaultBrowser:)
-                                                             keyEquivalent:@""];
-        [item setTarget:self];
-        [item setRepresentedObject:element];
-        [menuItems insertObject:[item autorelease] atIndex:(i > 0 ? i - 1 : 0)];
-        
-        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark Link", @"Menu item title") stringByAppendingEllipsis]
-                                   action:@selector(bookmarkLink:)
-                            keyEquivalent:@""];
-        [item setTarget:self];
-        [item setRepresentedObject:element];
-        [menuItems insertObject:[item autorelease] atIndex:++i];
-        
-        if ([[element objectForKey:WebElementLinkURLKey] isFileURL]) {
-            item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Reveal Link", @"Menu item title") stringByAppendingEllipsis]
-                                       action:@selector(revealLink:)
-                                keyEquivalent:@""];
-            [item setTarget:self];
-            [item setRepresentedObject:element];
-            [menuItems insertObject:[item autorelease] atIndex:++i];
-        }
-    }
-    
-	if ([menuItems count] > 0) 
-		[menuItems addObject:[NSMenuItem separatorItem]];
-	
-    item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Increase Text Size", @"Menu item title")
-                                                                action:@selector(makeTextLarger:)
-                                                         keyEquivalent:@""];
-	[menuItems addObject:[item autorelease]];
-	
-	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Decrease Text Size", @"Menu item title")
-                                                                action:@selector(makeTextSmaller:)
-                                                         keyEquivalent:@""];
-	[menuItems addObject:[item autorelease]];
-	
-    [menuItems addObject:[NSMenuItem separatorItem]];
-        
-	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark This Page", @"Menu item title") stringByAppendingEllipsis]
-                                                                action:@selector(addBookmark:)
-                                                         keyEquivalent:@""];
-    [menuItems addObject:[item autorelease]];
-    
-	return menuItems;
-}
-
-- (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request {
-    // due to a known WebKit bug the request is always nil https://bugs.webkit.org/show_bug.cgi?id=23432
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKOpenNewWindowsForWebGroupInBrowserKey]) {
-        return [[BDSKNewWebWindowHandler sharedHandler] webView];
-    } else {
-        BDSKWebGroup *group = [[[BDSKWebGroup alloc] init] autorelease];
-        [[document groups] addWebGroup:group];
-        return [group webViewWithoutLoading];
-    }
-}
-
-- (WebView *)webView:(WebView *)sender createWebViewModalDialogWithRequest:(NSURLRequest *)request {
-    return [[[[BDSKWebViewModalDialogController alloc] init] autorelease] webView];
-}
-
-// this seems to be necessary in order for webView:createWebViewModalDialogWithRequest: to work
-- (void)webViewRunModal:(WebView *)sender {
-    [document selectGroup:self];
-}
-
-- (void)webViewShow:(WebView *)sender {
-    [document selectGroup:self];
-}
-
-- (void)webViewClose:(WebView *)sender {
-    [document removeGroups:[NSArray arrayWithObject:self]];
-}
-
-- (void)webView:(WebView *)sender runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WebFrame *)frame {
-    NSAlert *alert = [NSAlert alertWithMessageText:[[self URL] absoluteString] defaultButton:NSLocalizedString(@"OK", @"Button title") alternateButton:nil otherButton:nil informativeTextWithFormat:@"%@", message];
-    [alert runModal];
-}
-
-- (BOOL)webView:(WebView *)sender runJavaScriptConfirmPanelWithMessage:(NSString *)message initiatedByFrame:(WebFrame *)frame {
-    NSAlert *alert = [NSAlert alertWithMessageText:[[self URL] absoluteString] defaultButton:NSLocalizedString(@"OK", @"Button title") alternateButton:NSLocalizedString(@"Cancel", @"Button title") otherButton:nil informativeTextWithFormat:@"%@", message];
-    return NSAlertDefaultReturn == [alert runModal];
-}
-
-- (void)webView:(WebView *)sender runOpenPanelForFileButtonWithResultListener:(id < WebOpenPanelResultListener >)resultListener {
-    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-    if ([openPanel runModal] == NSFileHandlingPanelOKButton)
-        [resultListener chooseFilename:[openPanel filename]];
-    else
-        [resultListener cancel];
-}
-
-#pragma mark WebEditingDelegate protocol
-
-// this is needed because WebView uses the document's undo manager by default, rather than the one from the window.
-// I consider this a bug
-- (NSUndoManager *)undoManagerForWebView:(WebView *)sender {
-    if (undoManager == nil)
-        undoManager = [[NSUndoManager alloc] init];
-    return undoManager;
-}
-
-@end
-
-#pragma mark -
-
-@implementation BDSKNewWebWindowHandler
-
-static id sharedHandler = nil;
-
-+ (id)sharedHandler {
-    if (sharedHandler == nil)
-        sharedHandler = [[self alloc] init];
-    return sharedHandler;
-}
-
-- (id)init {
-    if (self = [super init]) {
-        webView = [[WebView alloc] init];
-        [webView setPolicyDelegate:self];  
-    }
-    return self;
-}
-
-- (void)webView:(WebView *)sender decidePolicyForNavigationAction:(NSDictionary *)actionInformation request:(NSURLRequest *)request frame:(WebFrame *)frame decisionListener:(id<WebPolicyDecisionListener>)listener {
-    [[NSWorkspace sharedWorkspace] openURL:[actionInformation objectForKey:WebActionOriginalURLKey]];
-    [listener ignore];
-}
-
--(WebView *)webView {
-    return webView;
-}
-
-- (void)dealloc {
-    BDSKDESTROY(webView);
-    [super dealloc];
-}
-
-@end
-
-#pragma mark -
-
-@implementation BDSKWebViewModalDialogController
-
-- (id)init {
-    NSUInteger mask = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
-    NSWindow *window = [[[NSWindow alloc] initWithContentRect:NSMakeRect(0.0, 0.0, 200.0, 200.0) styleMask:mask backing:NSBackingStoreBuffered defer:YES] autorelease];
-    if (self = [self initWithWindow:window]) {
-        [window setDelegate:self];
-        webView = [[WebView alloc] init];
-        [webView setUIDelegate:self];
-        [webView setFrameLoadDelegate:self];
-        [webView setDownloadDelegate:[BDSKDownloadManager sharedManager]];
-        [window setContentView:webView];
-    }
-    return self;
-}
-
-- (void)dealloc {
-    [webView setUIDelegate:nil];
-    [webView setFrameLoadDelegate:nil];
-    [webView setDownloadDelegate:nil];
-    BDSKDESTROY(webView);
-    [super dealloc];
-}
-
-- (WebView *)webView {
-    return webView;
-}
-
-- (NSURL *)URL {
-    WebFrame *mainFrame = [webView mainFrame];
-    WebDataSource *dataSource = [mainFrame provisionalDataSource] ?: [mainFrame dataSource];
-    return [[dataSource request] URL];
-}
-
-- (void)windowWillClose:(NSNotification *)notification {
-    [NSApp stopModal];
-    [self autorelease];
-}
-
-- (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame {
-    if (frame == [sender mainFrame]) { 
-        [[self window] setTitle:defaultTitle(nil, [self URL])];
-    }
-}
-
-- (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame{
-    if (frame == [sender mainFrame]) { 
-        [[self window] setTitle:defaultTitle([sender mainFrameTitle], [self URL])];
-    }
-}
-
-- (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
-    // !!! logs are here to help diagnose problems that users are reporting
-    NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
-    
-    NSURL *url = [[[frame provisionalDataSource] request] URL];
-    NSString *errorHTML = [NSString stringWithFormat:@"<html><title>%@</title><body><h1>%@</h1></body></html>", NSLocalizedString(@"Error", @"Placeholder web group label"), [error localizedDescription]];
-    [frame loadAlternateHTMLString:errorHTML baseURL:nil forUnreachableURL:url];
-}
-
-- (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
-    [self webView:sender didFailLoadWithError:error forFrame:frame];
-}
-
-- (void)webView:(WebView *)sender didReceiveTitle:(NSString *)title forFrame:(WebFrame *)frame {
-    if (frame == [sender mainFrame]) { 
-        [[self window] setTitle:title];
-    }
-}
-
-- (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request {
-    // due to a known WebKit bug the request is always nil https://bugs.webkit.org/show_bug.cgi?id=23432
-    return [[BDSKNewWebWindowHandler sharedHandler] webView];
-}
-
-- (WebView *)webView:(WebView *)sender createWebViewModalDialogWithRequest:(NSURLRequest *)request {
-    return [[[[BDSKWebViewModalDialogController alloc] init] autorelease] webView];
-}
-
-- (void)webViewRunModal:(WebView *)sender {
-    [self retain];
-    [[self window] makeKeyAndOrderFront:sender];
-    [NSApp runModalForWindow:[self window]];
-}
-
-- (void)webViewClose:(WebView *)sender {
-    [[self window] performClose:sender];
-}
-
-- (void)webView:(WebView *)sender runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WebFrame *)frame {
-    NSAlert *alert = [NSAlert alertWithMessageText:[[self URL] absoluteString] defaultButton:NSLocalizedString(@"OK", @"Button title") alternateButton:nil otherButton:nil informativeTextWithFormat:@"%@", message];
-    [alert runModal];
-}
-
-- (BOOL)webView:(WebView *)sender runJavaScriptConfirmPanelWithMessage:(NSString *)message initiatedByFrame:(WebFrame *)frame {
-    NSAlert *alert = [NSAlert alertWithMessageText:[[self URL] absoluteString] defaultButton:NSLocalizedString(@"OK", @"Button title") alternateButton:NSLocalizedString(@"Cancel", @"Button title") otherButton:nil informativeTextWithFormat:@"%@", message];
-    return NSAlertDefaultReturn == [alert runModal];
-}
-
-- (void)webView:(WebView *)sender runOpenPanelForFileButtonWithResultListener:(id < WebOpenPanelResultListener >)resultListener {
-    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-    if ([openPanel runModal] == NSFileHandlingPanelOKButton)
-        [resultListener chooseFilename:[openPanel filename]];
-    else
-        [resultListener cancel];
+- (void)webViewControllerDidFailLoad:(BDSKWebViewController *)controller {
+    [self addPublications:nil];
 }
 
 @end
