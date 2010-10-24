@@ -103,7 +103,7 @@ static NSString *BDSKWebLocalizedString = nil;
 
 - (BOOL)isWeb { return YES; }
 
-- (BOOL)isRetrieving { return [webViewController isRetrieving]; }
+- (BOOL)isRetrieving { return [[webViewController webView] isLoading]; }
 
 - (NSString *)label {
     return [label length] > 0 ? label : NSLocalizedString(@"(Empty)", @"Empty group label");

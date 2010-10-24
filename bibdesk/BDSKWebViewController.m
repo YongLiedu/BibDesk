@@ -96,8 +96,6 @@
 
 - (void)setDelegate:(id<BDSKWebViewControllerDelegate>)newDelegate { delegate = newDelegate; }
 
-- (BOOL)isRetrieving { return isRetrieving; }
-
 - (NSURL *)URL {
     WebFrame *mainFrame = [webView mainFrame];
     WebDataSource *dataSource = [mainFrame provisionalDataSource] ?: [mainFrame dataSource];
@@ -141,31 +139,18 @@
 #pragma mark WebFrameLoadDelegate protocol
 
 - (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame{
+    BOOL isMainFrame = (frame == [sender mainFrame]);
     
-    if (frame == [sender mainFrame]) {
-        
-        BDSKASSERT(loadingWebFrame == nil);
-        
+    if (isMainFrame) {
         [self notifyIcon:nil];
         [self notifyTitle:[NSLocalizedString(@"Loading", @"Placeholder web group label") stringByAppendingEllipsis]];
         
-        isRetrieving = YES;
-        loadingWebFrame = frame;
-        
         if ([[frame provisionalDataSource] unreachableURL] == nil)
             [self notifyURL:[[[[webView mainFrame] provisionalDataSource] request] URL]];
-        
-        if ([delegate respondsToSelector:@selector(webViewController:didStartLoadForMainFrame:)])
-            [delegate webViewController:self didStartLoadForMainFrame:YES];
-        
-    } else if (loadingWebFrame == nil) {
-        
-        isRetrieving = YES;
-        loadingWebFrame = frame;
-        
-        if ([delegate respondsToSelector:@selector(webViewController:didStartLoadForMainFrame:)])
-            [delegate webViewController:self didStartLoadForMainFrame:NO];
     }
+    
+    if ([delegate respondsToSelector:@selector(webViewController:didStartLoadForMainFrame:)])
+        [delegate webViewController:self didStartLoadForMainFrame:isMainFrame];
 }
 
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame{
@@ -174,24 +159,13 @@
         [self notifyIcon:[sender mainFrameIcon]];
         [self notifyTitle:[sender mainFrameTitle]];
     }
-    
-    if (frame == loadingWebFrame) {
-        isRetrieving = NO;
-        loadingWebFrame = nil;
-    }
-    
     if ([delegate respondsToSelector:@selector(webViewController:didFinishLoadForFrame:)])
         [delegate webViewController:self didFinishLoadForFrame:frame];
 }
 
 - (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
-    if (frame == loadingWebFrame) {
-        isRetrieving = NO;
-        loadingWebFrame = nil;
-        
-        if ([delegate respondsToSelector:@selector(webViewControllerDidFailLoad:)])
-            [delegate webViewControllerDidFailLoad:self];
-    }
+    if ([delegate respondsToSelector:@selector(webViewControllerDidFailLoad:)])
+        [delegate webViewControllerDidFailLoad:self];
     
     // !!! logs are here to help diagnose problems that users are reporting
     NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);

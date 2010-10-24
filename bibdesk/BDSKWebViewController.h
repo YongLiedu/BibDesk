@@ -42,10 +42,8 @@
 @protocol BDSKWebViewControllerDelegate;
 
 @interface BDSKWebViewController : NSObject {
-    BOOL isRetrieving;
     id <BDSKWebViewControllerDelegate> delegate;
     WebView *webView;
-    WebFrame *loadingWebFrame;
     NSUndoManager *undoManager;    
 }
 
@@ -56,8 +54,6 @@
 - (void)setURL:(NSURL *)newURL;
 
 - (WebView *)webView;
-
-- (BOOL)isRetrieving;
 
 @end
 
