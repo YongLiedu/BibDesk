@@ -215,14 +215,6 @@
 	NSMutableArray *menuItems = [NSMutableArray arrayWithArray:defaultMenuItems];
 	NSMenuItem *item;
     
-    // @@ we may want to add support for some of these (downloading), but it's confusing to have them in the menu for now
-    NSArray *itemsToRemove = [NSArray arrayWithObjects:[NSNumber numberWithInteger:WebMenuItemTagOpenLinkInNewWindow], [NSNumber numberWithInteger:WebMenuItemTagOpenImageInNewWindow], [NSNumber numberWithInteger:WebMenuItemTagDownloadImageToDisk], [NSNumber numberWithInteger:WebMenuItemTagOpenFrameInNewWindow], nil];
-    for (NSNumber *n in itemsToRemove) {
-        NSUInteger toRemove = [[menuItems valueForKey:@"tag"] indexOfObject:n];
-        if (toRemove != NSNotFound)
-            [menuItems removeObjectAtIndex:toRemove];
-    }
-	
     NSUInteger i = [[menuItems valueForKey:@"tag"] indexOfObject:[NSNumber numberWithInteger:WebMenuItemTagCopyLinkToClipboard]];
     
     if (i != NSNotFound) {
