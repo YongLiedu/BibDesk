@@ -224,7 +224,7 @@
                                                              keyEquivalent:@""];
         [item setTarget:self];
         [item setRepresentedObject:element];
-        [menuItems insertObject:[item autorelease] atIndex:(i > 0 ? i - 1 : 0)];
+        [menuItems insertObject:[item autorelease] atIndex:i];
         
         item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark Link", @"Menu item title") stringByAppendingEllipsis]
                                    action:@selector(bookmarkLink:)
@@ -273,11 +273,16 @@
         view = [delegate webViewControllerCreateWebView:self];
     if (view == nil)
         view = [[BDSKNewWebWindowHandler sharedHandler] webView];
+    if (request)
+        [[view mainFrame] loadRequest:request];
     return view;
 }
 
 - (WebView *)webView:(WebView *)sender createWebViewModalDialogWithRequest:(NSURLRequest *)request {
-    return [[[[BDSKWebViewModalDialogController alloc] init] autorelease] webView];
+    WebView *view = [[[[BDSKWebViewModalDialogController alloc] init] autorelease] webView];
+    if (request)
+        [[view mainFrame] loadRequest:request];
+    return view;
 }
 
 // this seems to be necessary in order for webView:createWebViewModalDialogWithRequest: to work
