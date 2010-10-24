@@ -248,10 +248,6 @@ The groupedPublications array is a subset of the publications array, developed b
     
     [webGroupViewController setGroup:group];
     
-    // load our start page when this was not used before, this must be done before calling [group webView]
-    if ([group isWebViewLoaded] == NO)
-        [group setURL:[NSURL URLWithString:@"bibdesk:webgroup"]];
-    
     NSView *webView = [group webView];
     if ([webView window] == nil) {
         if ([oldWebView window]) {
