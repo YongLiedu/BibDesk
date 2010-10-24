@@ -72,6 +72,9 @@
 - (void)webViewControllerClose:(BDSKWebViewController *)controller;
 - (void)webViewControllerRunModal:(BDSKWebViewController *)controller;
 
+- (void)webViewController:(BDSKWebViewController *)controller setResizable:(BOOL)resizable;
+- (void)webViewController:(BDSKWebViewController *)controller setFrame:(NSRect)frame;
+
 - (void)webViewController:(BDSKWebViewController *)controller didStartLoadForMainFrame:(BOOL)forMainFrame;
 - (void)webViewController:(BDSKWebViewController *)controller didFinishLoadForFrame:(WebFrame *)frame;
 - (void)webViewControllerDidFailLoad:(BDSKWebViewController *)controller;

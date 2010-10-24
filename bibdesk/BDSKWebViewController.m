@@ -301,6 +301,18 @@
         [delegate webViewControllerClose:self];
 }
 
+// we don't want the default implementation to change our document window resizability
+- (void)webView:(WebView *)sender setResizable:(BOOL)resizable {
+    if ([delegate respondsToSelector:@selector(webViewController:setResizable:)])
+        [delegate webViewController:self setResizable:resizable];
+}
+
+// we don't want the default implementation to change our document window frame
+- (void)webView:(WebView *)sender setFrame:(NSRect)frame {
+    if ([delegate respondsToSelector:@selector(webViewController:setFrame:)])
+        [delegate webViewController:self setFrame:frame];
+}
+
 - (void)webView:(WebView *)sender runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WebFrame *)frame {
     NSAlert *alert = [NSAlert alertWithMessageText:[[self URL] absoluteString] defaultButton:NSLocalizedString(@"OK", @"Button title") alternateButton:nil otherButton:nil informativeTextWithFormat:@"%@", message];
     [alert runModal];
@@ -409,6 +421,15 @@ static id sharedHandler = nil;
 - (void)webViewControllerRunModal:(BDSKWebViewController *)controller {
     [self retain];
     [NSApp runModalForWindow:[self window]];
+}
+
+- (void)webViewController:(BDSKWebViewController *)controller setResizable:(BOOL)resizable {
+    // This doesn't actually change the resizability of the window, only visibility of the indicator, but it is what WebKit does by default.
+    [[self window] setShowsResizeIndicator:resizable];
+}
+
+- (void)webViewController:(BDSKWebViewController *)controller setFrame:(NSRect)frame {
+    [[self window] setFrame:frame display:YES];
 }
 
 @end
