@@ -232,14 +232,6 @@ The groupedPublications array is a subset of the publications array, developed b
 
 #pragma mark Web Group 
 
-- (BDSKWebGroupViewController *)webGroupViewController {
-    if (webGroupViewController == nil) {
-        webGroupViewController = [[BDSKWebGroupViewController alloc] init];
-        [webGroupViewController setGroup:[[groups webGroups] firstObject]];
-    }
-    return webGroupViewController;
-}
-
 - (void)showWebGroupView {
     if (webGroupViewController == nil)
         webGroupViewController = [[BDSKWebGroupViewController alloc] init];
