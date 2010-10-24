@@ -49,6 +49,7 @@
 - (id)init {
     if (self = [super init]) {
         webView = [[WebView alloc] init];
+        [webView setGroupName:@"BibDeskWebGroup"];
         [webView setFrameLoadDelegate:self];
         [webView setUIDelegate:self];
         [webView setEditingDelegate:self];
