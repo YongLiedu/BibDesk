@@ -429,7 +429,15 @@ static id sharedHandler = nil;
 
 - (void)webViewControllerRunModal:(BDSKWebViewController *)controller {
     [self retain];
-    [NSApp runModalForWindow:[self window]];
+    // we can't use [NSApp runModalForWindow], because otherwise the webview does not download, and also it won't receive any close message from javascript
+    // http://www.dejal.com/blog/2007/01/cocoa-topics-case-modal-webview
+    NSModalSession session = [NSApp beginModalSessionForWindow:[self window]];
+    for (;;) {
+        if (NSRunContinuesResponse != [NSApp runModalSession:session]) break;
+        // tickle the default run loop to let the webview download or let a close message come through
+        [[NSRunLoop currentRunLoop] limitDateForMode:NSDefaultRunLoopMode];
+    }
+    [NSApp endModalSession:session];
 }
 
 - (void)webViewController:(BDSKWebViewController *)controller setResizable:(BOOL)resizable {
