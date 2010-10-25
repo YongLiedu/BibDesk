@@ -216,17 +216,16 @@
 	NSMutableArray *menuItems = [NSMutableArray arrayWithArray:defaultMenuItems];
 	NSMenuItem *item;
     
-    NSUInteger i = [[menuItems valueForKey:@"tag"] indexOfObject:[NSNumber numberWithInteger:WebMenuItemTagCopyLinkToClipboard]];
+    NSUInteger i = [[menuItems valueForKey:@"tag"] indexOfObject:[NSNumber numberWithInteger:WebMenuItemTagOpenLinkInNewWindow]];
     
     if (i != NSNotFound) {
-        
         item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Open Link in Browser", @"Menu item title")
                                                                     action:@selector(openInDefaultBrowser:)
                                                              keyEquivalent:@""];
         [item setTag:BDSKWebMenuItemTagOpenLinkInBrowser];
         [item setTarget:self];
         [item setRepresentedObject:element];
-        [menuItems insertObject:[item autorelease] atIndex:i];
+        [menuItems insertObject:[item autorelease] atIndex:++i];
         
         item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark Link", @"Menu item title") stringByAppendingEllipsis]
                                    action:@selector(bookmarkLink:)
