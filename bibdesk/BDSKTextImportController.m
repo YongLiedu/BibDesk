@@ -1010,16 +1010,16 @@
     
     i = [[menuItems valueForKey:@"tag"] indexOfObject:[NSNumber numberWithInteger:BDSKWebMenuItemTagAddBookmark]];
 	
-    if (i != NSNotFound) {
-        i = [menuItems count];
+    if (i == NSNotFound) {
         [menuItems addObject:[NSMenuItem separatorItem]];
+        i = [menuItems count];
 	}
     
 	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Copy Page Location To Url Field", @"Menu item title")
 									  action:@selector(copyLocationAsRemoteUrl:)
 							   keyEquivalent:@""];
 	[menuItem setTarget:self];
-    [menuItems insertObject:[menuItem autorelease] atIndex:i];
+    [menuItems insertObject:[menuItem autorelease] atIndex:++i];
 	
 	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Save Page As Local File", @"Menu item title") stringByAppendingEllipsis]
 									  action:@selector(saveFileAsLocalUrl:)
