@@ -1034,16 +1034,24 @@
     [statusLine setStringValue:text ?: @""];
 }
 
-- (void)webViewController:(BDSKWebViewController *)controller didStartLoadForMainFrame:(BOOL)forMainFrame{
+- (void)webViewController:(BDSKWebViewController *)controller didStartLoadForMainFrame:(BOOL)forMainFrame {
 	[self setLoading:YES];
 }
 
-- (void)webViewController:(BDSKWebViewController *)controller didFinishLoadForFrame:(WebFrame *)frame{
-	[self setLoading:[[webViewController webView] isLoading]];
-	[backButton setEnabled:[[webViewController webView] canGoBack]];
-	[forwardButton setEnabled:[[webViewController webView] canGoForward]];
+- (void)webViewController:(BDSKWebViewController *)controller didFinishLoadForFrame:(WebFrame *)frame {
+	WebView *webView = [webViewController webView];
+    [self setLoading:[webView isLoading]];
+	[backButton setEnabled:[webView canGoBack]];
+	[forwardButton setEnabled:[webView canGoForward]];
 
     [self autoDiscoverDataFromFrame:frame];
+}
+
+- (void)webViewControllerDidFailLoad:(BDSKWebViewController *)controller{
+	WebView *webView = [webViewController webView];
+    [self setLoading:[webView isLoading]];
+	[backButton setEnabled:[webView canGoBack]];
+	[forwardButton setEnabled:[webView canGoForward]];
 }
 
 #pragma mark NSURLDownloadDelegate methods
