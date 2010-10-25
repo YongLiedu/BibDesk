@@ -220,7 +220,7 @@
     
     if (i != NSNotFound) {
         
-        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Open in Default Browser", @"Menu item title")
+        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Open Link in Browser", @"Menu item title")
                                                                     action:@selector(openInDefaultBrowser:)
                                                              keyEquivalent:@""];
         [item setTarget:self];
@@ -235,7 +235,7 @@
         [menuItems insertObject:[item autorelease] atIndex:++i];
         
         if ([[element objectForKey:WebElementLinkURLKey] isFileURL]) {
-            item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Reveal Link", @"Menu item title") stringByAppendingEllipsis]
+            item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Reveal Linked File", @"Menu item title")
                                        action:@selector(revealLink:)
                                 keyEquivalent:@""];
             [item setTarget:self];
