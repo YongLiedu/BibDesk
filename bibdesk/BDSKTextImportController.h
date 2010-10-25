@@ -41,6 +41,7 @@
 #import "BDSKTableView.h"
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKCitationFormatter.h"
+#import "BDSKWebViewController.h"
 
 @protocol BDSKTextImportItemTableViewDelegate <BDSKTableViewDelegate>
 - (void)tableViewDidChangeTemporaryTypeSelectMode:(NSTableView *)tView;
@@ -49,10 +50,10 @@
 
 #pragma mark -
 
-@class BibDocument, BibItem, BDSKEdgeView, WebView, WebDownload, BDSKComplexStringEditor;
+@class BibDocument, BibItem, BDSKEdgeView, WebDownload, BDSKComplexStringEditor;
 @class BDSKCiteKeyFormatter, BDSKCrossrefFormatter;
 
-@interface BDSKTextImportController : NSWindowController <BDSKOwner, BDSKTextImportItemTableViewDelegate, NSTableViewDataSource, NSTextViewDelegate, NSSplitViewDelegate, BDSKComplexStringFormatterDelegate, BDSKCitationFormatterDelegate> {
+@interface BDSKTextImportController : NSWindowController <BDSKOwner, BDSKTextImportItemTableViewDelegate, NSTableViewDataSource, NSTextViewDelegate, NSSplitViewDelegate, BDSKComplexStringFormatterDelegate, BDSKCitationFormatterDelegate, BDSKWebViewControllerDelegate> {
     IBOutlet NSTextView* sourceTextView;
     IBOutlet NSTableView* itemTableView;
     IBOutlet NSTextField* citeKeyField;
@@ -65,7 +66,6 @@
     IBOutlet NSPopUpButton *actionMenuButton;
     IBOutlet NSSplitView* splitView;
     IBOutlet NSBox* sourceBox;
-    IBOutlet WebView* webView;
     IBOutlet BDSKEdgeView *webViewBox;
     IBOutlet NSView* webViewView;
     IBOutlet NSProgressIndicator *progressIndicator;
@@ -92,6 +92,8 @@
 	BOOL isLoading;
 	BOOL isDownloading;
 	
+    BDSKWebViewController *webViewController;
+    
 	WebDownload *download;
 	NSString *downloadFileName;
     NSInteger receivedContentLength;
@@ -131,7 +133,6 @@
 - (void)copyLinkedLocationAsRemoteUrl:(id)sender;
 - (void)saveFileAsLocalUrl:(id)sender;
 - (void)downloadLinkedFileAsLocalUrl:(id)sender;
-- (void)bookmarkLink:(id)sender;
 
 @end
 

@@ -70,6 +70,7 @@
 
 @interface BDSKTextImportController (Private)
 
+- (void)handleWebViewDidChangeSelection:(NSNotification *)notification;
 - (void)handleFlagsChangedNotification:(NSNotification *)notification;
 - (void)handleBibItemChangedNotification:(NSNotification *)notification;
 
@@ -115,6 +116,8 @@
         item = [[BibItem alloc] init];
         [item setOwner:self];
         fields = [[NSMutableArray alloc] init];
+        webViewController = [[BDSKWebViewController alloc] init];
+        [webViewController setDelegate:self];
         showingWebView = NO;
         itemsAdded = [[NSMutableArray alloc] init];
 		webSelection = nil;
@@ -130,13 +133,12 @@
     BDSKASSERT(download == nil);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     // next line is a workaround for a nasty webview crasher; looks like it messages a garbage pointer to its undo manager
-    [webView setEditingDelegate:nil];
-    [webView setFrameLoadDelegate:nil];
-    [webView setUIDelegate:nil];
+    [webViewController setDelegate:nil];
     [itemTableView setDelegate:nil];
     [itemTableView setDataSource:nil];
     [splitView setDelegate:nil];
     [citeKeyField setDelegate:nil];
+    BDSKDESTROY(webViewController);
     BDSKDESTROY(item);
     BDSKDESTROY(fields);
     BDSKDESTROY(itemsAdded);
@@ -162,15 +164,13 @@
     [statusLine setStringValue:@""];
 	
     [webViewBox setEdges:BDSKEveryEdgeMask];
-	[webViewBox setContentView:webView];
+	[webViewBox setContentView:[webViewController webView]];
     
     [self setupTypeUI];
     
     // these can be swapped in/out
     [sourceBox retain];
     [webViewView retain];
-	
-    [webView setEditingDelegate:self];
 	
     [itemTableView registerForDraggedTypes:[NSArray arrayWithObject:NSStringPboardType]];
     [itemTableView setDoubleAction:@selector(addTextToCurrentFieldAction:)];
@@ -185,6 +185,10 @@
                                              selector:@selector(handleBibItemChangedNotification:)
                                                  name:BDSKBibItemChangedNotification
                                                object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleWebViewDidChangeSelection:)
+                                                 name:WebViewDidChangeSelectionNotification
+                                               object:[webViewController webView]];
 }
 
 #pragma mark Calling the main sheet
@@ -356,16 +360,16 @@
 - (IBAction)openBookmark:(id)sender{
     NSURL *url = [sender representedObject];
     [self setShowingWebView:YES];
-    [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:url]];
+    [webViewController setURL:url];
 }
 
 - (IBAction)stopOrReloadAction:(id)sender{
 	if(isDownloading){
 		[self setDownloading:NO];
 	}else if (isLoading){
-		[webView stopLoading:sender];
+		[[webViewController webView] stopLoading:sender];
 	}else{
-		[webView reload:sender];
+		[[webViewController webView] reload:sender];
 	}
 }
 
@@ -488,7 +492,7 @@
 #pragma mark WebView contextual menu actions
 
 - (void)copyLocationAsRemoteUrl:(id)sender{
-	NSURL *aURL = [[[[webView mainFrame] dataSource] request] URL];
+	NSURL *aURL = [webViewController URL];
 	
 	if (aURL) {
         [item addFileForURL:aURL autoFile:YES runScriptHook:NO];
@@ -506,7 +510,7 @@
 }
 
 - (void)saveFileAsLocalUrl:(id)sender{
-	WebDataSource *dataSource = [[webView mainFrame] dataSource];
+	WebDataSource *dataSource = [[[webViewController webView] mainFrame] dataSource];
 	if (!dataSource || [dataSource isLoading]) 
 		return;
 	
@@ -541,14 +545,6 @@
                              informativeTextWithFormat:NSLocalizedString(@"The URL to download is either invalid or unsupported.", @"Informative text in alert dialog")];
         [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 	}
-}
-
-- (void)bookmarkLink:(id)sender{
-	NSDictionary *element = (NSDictionary *)[sender representedObject];
-	NSString *URLString = [(NSURL *)[element objectForKey:WebElementLinkURLKey] absoluteString];
-	NSString *title = [element objectForKey:WebElementLinkLabelKey] ?: [URLString lastPathComponent];
-	
-    [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString proposedName:title modalForWindow:[self window]];
 }
 
 #pragma mark UndoManager
@@ -586,6 +582,15 @@
 - (BDSKItemSearchIndexes *)searchIndexes { return nil; }
 
 #pragma mark Private
+
+// workaround for webview bug, which looses its selection when the focus changes to another view
+- (void)handleWebViewDidChangeSelection:(NSNotification *)notification{
+	NSString *selString = [[[notification object] selectedDOMRange] toString];
+	if ([NSString isEmptyString:selString] || selString == webSelection)
+		return;
+	[webSelection release];
+	webSelection = [[selString stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] copy];
+}
 
 - (void)handleFlagsChangedNotification:(NSNotification *)notification{
     NSUInteger modifierFlags = [NSEvent standardModifierFlags];
@@ -655,9 +660,8 @@
         
         NSArray *urls = (NSArray *)[pb propertyListForType:pbType];
         NSURL *url = [NSURL URLWithString:[urls objectAtIndex:0]];
-        NSURLRequest *urlreq = [NSURLRequest requestWithURL:url];
         
-        [[webView mainFrame] loadRequest:urlreq];
+        [webViewController setURL:url];
         
     }else{
 		
@@ -713,9 +717,7 @@
 - (void)showWebViewWithURLString:(NSString *)urlString{
     [self setShowingWebView:YES];
     NSURL *url = [NSURL URLWithString:[urlString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
-    NSURLRequest *urlreq = [NSURLRequest requestWithURL:url];
-    
-    [[webView mainFrame] loadRequest:urlreq];
+    [webViewController setURL:url];
         
 }
 
@@ -766,9 +768,7 @@
 - (void)didEndSheet:(NSPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     // cleanup
     [self cancelDownload];
-	[webView stopLoading:nil];
-    [webView setFrameLoadDelegate:nil];
-    [webView setUIDelegate:nil];
+    [webViewController setDelegate:nil];
 	// select the items we just added
 	[document selectPublications:itemsAdded];
 	[itemsAdded removeAllObjects];
@@ -864,8 +864,7 @@
                                  informativeTextWithFormat:NSLocalizedString(@"Mac OS X does not recognize this as a valid URL.  Please re-enter the address and try again.", @"Informative text in alert dialog")];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         } else {        
-            NSURLRequest *urlreq = [NSURLRequest requestWithURL:url];
-            [[webView mainFrame] loadRequest:urlreq];
+            [webViewController setURL:url];
         }
     }        
 }
@@ -873,7 +872,7 @@
 - (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     
 	if (returnCode == NSOKButton) {
-		if ([[[[webView mainFrame] dataSource] data] writeToFile:[sheet filename] atomically:YES]) {
+		if ([[[[[webViewController webView] mainFrame] dataSource] data] writeToFile:[sheet filename] atomically:YES]) {
 			NSURL *fileURL = [NSURL fileURLWithPath:[sheet filename]];
 			
             [item addFileForURL:fileURL autoFile:YES runScriptHook:NO];
@@ -959,7 +958,7 @@
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
 	if ([menuItem action] == @selector(saveFileAsLocalUrl:)) {
-		return ![[[webView mainFrame] dataSource] isLoading];
+		return NO == [[webViewController webView] isLoading];
 	} else if ([menuItem action] == @selector(importFromPasteboardAction:)) {
 		[menuItem setTitle:NSLocalizedString(@"Load Clipboard", @"Menu item title")];
 		return YES;
@@ -983,184 +982,68 @@
 	return YES;
 }
 
-#pragma mark WebUIDelegate methods
+#pragma mark BDSKWebViewControllerDelegate protocol
 
-- (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems{
-	NSMutableArray *menuItems = [NSMutableArray arrayWithCapacity:6];
+- (NSArray *)webViewController:(BDSKWebViewController *)controller contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems{
+	NSMutableArray *menuItems = [NSMutableArray arrayWithArray:defaultMenuItems];
 	NSMenuItem *menuItem;
+    
+    NSUInteger i = [[menuItems valueForKey:@"tag"] indexOfObject:[NSNumber numberWithInteger:WebMenuItemTagCopyLinkToClipboard]];
 	
-	for (menuItem in defaultMenuItems) { 
-		if ([menuItem tag] == WebMenuItemTagCopy) {
-			// copy text items
-			if ([menuItems count] > 0)
-				[menuItems addObject:[NSMenuItem separatorItem]];
-			
-			[menuItems addObject:menuItem];
-		}
-		if ([menuItem tag] == WebMenuItemTagCopyLinkToClipboard) {
-			NSURL *linkURL = [element objectForKey:WebElementLinkURLKey];
-			// copy link items
-			if ([menuItems count] > 0)
-				[menuItems addObject:[NSMenuItem separatorItem]];
-			
-			[menuItems addObject:menuItem];
-			
-			menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Copy Link To Url Field",@"Copy link to url field")
-											  action:@selector(copyLinkedLocationAsRemoteUrl:)
-									   keyEquivalent:@""];
-			[menuItem setTarget:self];
-			[menuItem setRepresentedObject:linkURL];
-			[menuItems addObject:[menuItem autorelease]];
-			
-			menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Save Link As Local File",@"Save link as local file") stringByAppendingEllipsis]
-											  action:@selector(downloadLinkedFileAsLocalUrl:)
-									   keyEquivalent:@""];
-			[menuItem setTarget:self];
-			[menuItem setRepresentedObject:linkURL];
-			[menuItems addObject:[menuItem autorelease]];
-			
-			menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark Link",@"Bookmark linked page") stringByAppendingEllipsis]
-											  action:@selector(bookmarkLink:)
-									   keyEquivalent:@""];
-			[menuItem setTarget:self];
-			[menuItem setRepresentedObject:element];
-			[menuItems addObject:[menuItem autorelease]];
-		}
+    if (i != NSNotFound) {
+        NSURL *linkURL = [element objectForKey:WebElementLinkURLKey];
+        
+        menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Copy Link To Url Field",@"Copy link to url field")
+                                          action:@selector(copyLinkedLocationAsRemoteUrl:)
+                                   keyEquivalent:@""];
+        [menuItem setTarget:self];
+        [menuItem setRepresentedObject:linkURL];
+        [menuItems insertObject:[menuItem autorelease] atIndex:++i];
+        
+        menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Save Link As Local File",@"Save link as local file") stringByAppendingEllipsis]
+                                          action:@selector(downloadLinkedFileAsLocalUrl:)
+                                   keyEquivalent:@""];
+        [menuItem setTarget:self];
+        [menuItem setRepresentedObject:linkURL];
+        [menuItems insertObject:[menuItem autorelease] atIndex:++i];
+    }
+    
+    i = [[menuItems valueForKey:@"tag"] indexOfObject:[NSNumber numberWithInteger:BDSKWebMenuItemTagAddBookmark]];
+	
+    if (i != NSNotFound) {
+        i = [menuItems count];
+        [menuItems addObject:[NSMenuItem separatorItem]];
 	}
-	
-	// current location items
-	if ([menuItems count] > 0) 
-		[menuItems addObject:[NSMenuItem separatorItem]];
-		
+    
 	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Copy Page Location To Url Field", @"Menu item title")
 									  action:@selector(copyLocationAsRemoteUrl:)
 							   keyEquivalent:@""];
 	[menuItem setTarget:self];
-	[menuItems addObject:[menuItem autorelease]];
+    [menuItems insertObject:[menuItem autorelease] atIndex:i];
 	
 	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Save Page As Local File", @"Menu item title") stringByAppendingEllipsis]
 									  action:@selector(saveFileAsLocalUrl:)
 							   keyEquivalent:@""];
 	[menuItem setTarget:self];
-	[menuItems addObject:[menuItem autorelease]];
-	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark This Page", @"Menu item title") stringByAppendingEllipsis]
-									  action:@selector(addBookmark:)
-							   keyEquivalent:@""];
-	[menuItem setTarget:webView];
-	[menuItems addObject:[menuItem autorelease]];
-	
-	// navigation items
-	[menuItems addObject:[NSMenuItem separatorItem]];
-	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Back", @"Menu item title")
-									  action:@selector(goBack:)
-							   keyEquivalent:@"["];
-	[menuItems addObject:[menuItem autorelease]];
-	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Forward", @"Menu item title")
-									  action:@selector(goForward:)
-							   keyEquivalent:@"]"];
-	[menuItems addObject:[menuItem autorelease]];
-	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Reload", @"Menu item title")
-									  action:@selector(reload:)
-							   keyEquivalent:@"r"];
-	[menuItems addObject:[menuItem autorelease]];
-	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Stop", @"Menu item title")
-									  action:@selector(stopLoading:)
-							   keyEquivalent:@""];
-	[menuItems addObject:[menuItem autorelease]];
-	
-	// text size items
-	[menuItems addObject:[NSMenuItem separatorItem]];
-	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Increase Text Size", @"Menu item title")
-									  action:@selector(makeTextLarger:)
-							   keyEquivalent:@""];
-	[menuItems addObject:[menuItem autorelease]];
-	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Decrease Text Size", @"Menu item title")
-									  action:@selector(makeTextSmaller:)
-							   keyEquivalent:@""];
-	[menuItems addObject:[menuItem autorelease]];
+    [menuItems insertObject:[menuItem autorelease] atIndex:++i];
 	
 	return menuItems;
 }
 
-- (void)webView:(WebView *)sender setStatusText:(NSString *)text {
-    [statusLine setStringValue:text];
+- (void)webViewController:(BDSKWebViewController *)controller setStatusText:(NSString *)text {
+    [statusLine setStringValue:text ?: @""];
 }
 
-- (void)webView:(WebView *)sender mouseDidMoveOverElement:(NSDictionary *)elementInformation modifierFlags:(NSUInteger)modifierFlags {
-    NSURL *aLink = [elementInformation objectForKey:WebElementLinkURLKey];
-    [statusLine setStringValue:aLink ? [aLink absoluteString] : @""];
-}
-
-#pragma mark WebEditingDelegate methods
-
-// workaround for webview bug, which looses its selection when the focus changes to another view
-- (void)webViewDidChangeSelection:(NSNotification *)notification{
-	NSString *selString = [[[notification object] selectedDOMRange] toString];
-	if ([NSString isEmptyString:selString] || selString == webSelection)
-		return;
-	[webSelection release];
-	webSelection = [[selString stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] copy];
-}
-
-#pragma mark WebFrameLoadDelegate methods
-
-- (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame{
+- (void)webViewController:(BDSKWebViewController *)controller didStartLoadForMainFrame:(BOOL)forMainFrame{
 	[self setLoading:YES];
 }
 
-- (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame{
-	[self setLoading:NO];
-	[backButton setEnabled:[sender canGoBack]];
-	[forwardButton setEnabled:[sender canGoForward]];
+- (void)webViewController:(BDSKWebViewController *)controller didFinishLoadForFrame:(WebFrame *)frame{
+	[self setLoading:[[webViewController webView] isLoading]];
+	[backButton setEnabled:[[webViewController webView] canGoBack]];
+	[forwardButton setEnabled:[[webViewController webView] canGoForward]];
 
     [self autoDiscoverDataFromFrame:frame];
-}
-
-- (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
-	[self setLoading:NO];
-	
-	if ([error code] == NSURLErrorCancelled) {// don't warn when the user cancels
-		return;
-	}
-	
-    NSString *errorDescription = [error localizedDescription];
-    if (!errorDescription) {
-        errorDescription = NSLocalizedString(@"An error occured during page load.", @"Informative text in alert dialog");
-    }
-    
-    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Page Load Failed", @"Message in alert dialog when web page did not load")
-                                     defaultButton:nil
-                                   alternateButton:nil
-                                       otherButton:nil
-                         informativeTextWithFormat:@"%@", errorDescription];
-    [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-}
-
-- (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
-	[self setLoading:NO];
-	
-	if ([error code] == NSURLErrorCancelled) {// don't warn when the user cancels
-		return;
-	}
-	
-    NSString *errorDescription = [error localizedDescription];
-    if (!errorDescription) {
-        errorDescription = NSLocalizedString(@"An error occured during page load.", @"Informative text in alert dialog");
-    }
-    
-    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Page Load Failed", @"Message in alert dialog when web page did not load")
-                                     defaultButton:nil
-                                   alternateButton:nil
-                                       otherButton:nil
-                         informativeTextWithFormat:@"%@", errorDescription];
-    [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 }
 
 #pragma mark NSURLDownloadDelegate methods

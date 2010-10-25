@@ -38,6 +38,15 @@
 
 #import <Cocoa/Cocoa.h>
 
+enum {
+    BDSKWebMenuItemTagOpenLinkInBrowser = 1001,
+    BDSKWebMenuItemTagBookmarkLink,
+    BDSKWebMenuItemTagRevealLink,
+    BDSKWebMenuItemTagMakeTextLarger,
+    BDSKWebMenuItemTagMakeTextSmaller,
+    BDSKWebMenuItemTagAddBookmark
+};
+
 @class WebView, WebFrame;
 @protocol BDSKWebViewControllerDelegate;
 
@@ -78,6 +87,8 @@
 - (void)webViewController:(BDSKWebViewController *)controller didStartLoadForMainFrame:(BOOL)forMainFrame;
 - (void)webViewController:(BDSKWebViewController *)controller didFinishLoadForFrame:(WebFrame *)frame;
 - (void)webViewControllerDidFailLoad:(BDSKWebViewController *)controller;
+
+- (NSArray *)webViewController:(BDSKWebViewController *)controller contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems;
 
 @end
 

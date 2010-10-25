@@ -223,6 +223,7 @@
         item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Open Link in Browser", @"Menu item title")
                                                                     action:@selector(openInDefaultBrowser:)
                                                              keyEquivalent:@""];
+        [item setTag:BDSKWebMenuItemTagOpenLinkInBrowser];
         [item setTarget:self];
         [item setRepresentedObject:element];
         [menuItems insertObject:[item autorelease] atIndex:i];
@@ -230,6 +231,7 @@
         item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark Link", @"Menu item title") stringByAppendingEllipsis]
                                    action:@selector(bookmarkLink:)
                             keyEquivalent:@""];
+        [item setTag:BDSKWebMenuItemTagBookmarkLink];
         [item setTarget:self];
         [item setRepresentedObject:element];
         [menuItems insertObject:[item autorelease] atIndex:++i];
@@ -238,6 +240,7 @@
             item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Reveal Linked File", @"Menu item title")
                                        action:@selector(revealLink:)
                                 keyEquivalent:@""];
+            [item setTag:BDSKWebMenuItemTagRevealLink];
             [item setTarget:self];
             [item setRepresentedObject:element];
             [menuItems insertObject:[item autorelease] atIndex:++i];
@@ -250,11 +253,13 @@
     item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Increase Text Size", @"Menu item title")
                                                                 action:@selector(makeTextLarger:)
                                                          keyEquivalent:@""];
+    [item setTag:BDSKWebMenuItemTagMakeTextLarger];
 	[menuItems addObject:[item autorelease]];
 	
 	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Decrease Text Size", @"Menu item title")
                                                                 action:@selector(makeTextSmaller:)
                                                          keyEquivalent:@""];
+    [item setTag:BDSKWebMenuItemTagMakeTextSmaller];
 	[menuItems addObject:[item autorelease]];
 	
     [menuItems addObject:[NSMenuItem separatorItem]];
@@ -262,7 +267,11 @@
 	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark This Page", @"Menu item title") stringByAppendingEllipsis]
                                                                 action:@selector(addBookmark:)
                                                          keyEquivalent:@""];
+    [item setTag:BDSKWebMenuItemTagAddBookmark];
     [menuItems addObject:[item autorelease]];
+    
+    if ([delegate respondsToSelector:@selector(webViewController:contextMenuItemsForElement:defaultMenuItems:)])
+        return [delegate webViewController:self contextMenuItemsForElement:element defaultMenuItems:menuItems];
     
 	return menuItems;
 }
