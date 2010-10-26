@@ -340,7 +340,11 @@ static id sharedServiceProvider = nil;
 	
 	// add to the frontmost bibliography
 	BibDocument * doc = [[NSDocumentController sharedDocumentController] mainDocument];
-    if (nil == doc) {
+    if ([doc isKindOfClass:[BibDocument class]] == NO) {
+        for (doc in [NSApp orderedDocuments])
+            if ([doc isKindOfClass:[BibDocument class]]) break;
+    }
+    if (doc == nil) {
         // create a new document if we don't have one, or else this method appears to fail mysteriosly (since the error isn't displayed)
         [self openDocumentFromSelection:pboard userData:userData error:error];
 	} else {
