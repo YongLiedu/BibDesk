@@ -140,6 +140,7 @@
 - (IBAction)refreshSelectedGroups:(id)sender;
 - (IBAction)openBookmark:(id)sender;
 - (IBAction)addBookmark:(id)sender;
+- (IBAction)goToHistoryItem:(id)sender;
 
 - (void)handleFilterChangedNotification:(NSNotification *)notification;
 - (void)sortGroupsByKey:(NSString *)key;

@@ -1857,6 +1857,31 @@
 									<reference key="NSOnImage" ref="570548833"/>
 									<reference key="NSMixedImage" ref="523458683"/>
 								</object>
+								<object class="NSMenuItem" id="910763239">
+									<reference key="NSMenu" ref="25499807"/>
+									<bool key="NSIsDisabled">YES</bool>
+									<bool key="NSIsSeparator">YES</bool>
+									<string key="NSTitle"/>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="570548833"/>
+									<reference key="NSMixedImage" ref="523458683"/>
+								</object>
+								<object class="NSMenuItem" id="1009501869">
+									<reference key="NSMenu" ref="25499807"/>
+									<string key="NSTitle">History</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="570548833"/>
+									<reference key="NSMixedImage" ref="523458683"/>
+									<string key="NSAction">submenuAction:</string>
+									<object class="NSMenu" key="NSSubmenu" id="712551163">
+										<string key="NSTitle">History</string>
+										<object class="NSMutableArray" key="NSMenuItems">
+											<bool key="EncodedWithXMLCoder">YES</bool>
+										</object>
+									</object>
+								</object>
 							</object>
 						</object>
 					</object>
@@ -3329,6 +3354,22 @@
 					</object>
 					<int key="connectionID">1318</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">historyMenu</string>
+						<reference key="source" ref="690411305"/>
+						<reference key="destination" ref="712551163"/>
+					</object>
+					<int key="connectionID">1323</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">delegate</string>
+						<reference key="source" ref="712551163"/>
+						<reference key="destination" ref="690411305"/>
+					</object>
+					<int key="connectionID">1324</int>
+				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<object class="NSArray" key="orderedObjects">
@@ -4764,6 +4805,8 @@
 							<reference ref="15695974"/>
 							<reference ref="995992164"/>
 							<reference ref="552095321"/>
+							<reference ref="910763239"/>
+							<reference ref="1009501869"/>
 						</object>
 						<reference key="parent" ref="373018632"/>
 					</object>
@@ -4831,6 +4874,28 @@
 						<int key="objectID">1316</int>
 						<reference key="object" ref="552095321"/>
 						<reference key="parent" ref="25499807"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">1319</int>
+						<reference key="object" ref="910763239"/>
+						<reference key="parent" ref="25499807"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">1320</int>
+						<reference key="object" ref="1009501869"/>
+						<object class="NSMutableArray" key="children">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<reference ref="712551163"/>
+						</object>
+						<reference key="parent" ref="25499807"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">1321</int>
+						<reference key="object" ref="712551163"/>
+						<object class="NSMutableArray" key="children">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+						</object>
+						<reference key="parent" ref="1009501869"/>
 					</object>
 				</object>
 			</object>
@@ -5015,6 +5080,10 @@
 					<string>1313.ImportedFromIB2</string>
 					<string>1316.IBPluginDependency</string>
 					<string>1316.ImportedFromIB2</string>
+					<string>1319.IBPluginDependency</string>
+					<string>1320.IBPluginDependency</string>
+					<string>1321.IBEditorWindowLastContentRect</string>
+					<string>1321.IBPluginDependency</string>
 					<string>134.IBPluginDependency</string>
 					<string>134.ImportedFromIB2</string>
 					<string>136.IBPluginDependency</string>
@@ -5400,7 +5469,7 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{523, 751}, {186, 63}}</string>
+					<string>{{523, 721}, {186, 93}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -5474,6 +5543,10 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>{{709, 738}, {64, 6}}</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -5771,7 +5844,7 @@
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">1318</int>
+			<int key="maxID">1324</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -5890,12 +5963,14 @@
 							<string>copyAsTemplateMenu</string>
 							<string>groupFieldMenu</string>
 							<string>groupSortMenu</string>
+							<string>historyMenu</string>
 							<string>previewDisplayMenu</string>
 							<string>searchBookmarksMenu</string>
 							<string>sidePreviewDisplayMenu</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>NSMenu</string>
 							<string>NSMenu</string>
 							<string>NSMenu</string>
 							<string>NSMenu</string>
@@ -5915,6 +5990,7 @@
 							<string>copyAsTemplateMenu</string>
 							<string>groupFieldMenu</string>
 							<string>groupSortMenu</string>
+							<string>historyMenu</string>
 							<string>previewDisplayMenu</string>
 							<string>searchBookmarksMenu</string>
 							<string>sidePreviewDisplayMenu</string>
@@ -5939,6 +6015,10 @@
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">groupSortMenu</string>
+								<string key="candidateClassName">NSMenu</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">historyMenu</string>
 								<string key="candidateClassName">NSMenu</string>
 							</object>
 							<object class="IBToOneOutletInfo">
@@ -8002,7 +8082,6 @@
 							<string>addItemAction:</string>
 							<string>addItemAndCloseAction:</string>
 							<string>addTextToCurrentFieldAction:</string>
-							<string>bookmarkLink:</string>
 							<string>changeTypeOfBibAction:</string>
 							<string>clearAction:</string>
 							<string>closeAction:</string>
@@ -8044,7 +8123,6 @@
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
-							<string>id</string>
 						</object>
 					</object>
 					<object class="NSMutableDictionary" key="actionInfosByName">
@@ -8055,7 +8133,6 @@
 							<string>addItemAction:</string>
 							<string>addItemAndCloseAction:</string>
 							<string>addTextToCurrentFieldAction:</string>
-							<string>bookmarkLink:</string>
 							<string>changeTypeOfBibAction:</string>
 							<string>clearAction:</string>
 							<string>closeAction:</string>
@@ -8090,10 +8167,6 @@
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">addTextToCurrentFieldAction:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">bookmarkLink:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
@@ -8187,7 +8260,6 @@
 							<string>splitView</string>
 							<string>statusLine</string>
 							<string>stopOrReloadButton</string>
-							<string>webView</string>
 							<string>webViewBox</string>
 							<string>webViewView</string>
 						</object>
@@ -8210,7 +8282,6 @@
 							<string>NSSplitView</string>
 							<string>NSTextField</string>
 							<string>NSButton</string>
-							<string>WebView</string>
 							<string>BDSKEdgeView</string>
 							<string>NSView</string>
 						</object>
@@ -8236,7 +8307,6 @@
 							<string>splitView</string>
 							<string>statusLine</string>
 							<string>stopOrReloadButton</string>
-							<string>webView</string>
 							<string>webViewBox</string>
 							<string>webViewView</string>
 						</object>
@@ -8309,10 +8379,6 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">stopOrReloadButton</string>
 								<string key="candidateClassName">NSButton</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">webView</string>
-								<string key="candidateClassName">WebView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">webViewBox</string>

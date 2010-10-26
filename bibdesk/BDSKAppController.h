@@ -46,6 +46,7 @@
 	IBOutlet NSMenu *sidePreviewDisplayMenu;
 	IBOutlet NSMenu *searchBookmarksMenu;
 	IBOutlet NSMenu *bookmarksMenu;
+	IBOutlet NSMenu *historyMenu;
 }
 
 - (IBAction)visitWebSite:(id)sender;

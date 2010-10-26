@@ -79,6 +79,7 @@
 #import "KFASHandlerAdditions-TypeTranslation.h"
 #import "BDSKTask.h"
 #import <Sparkle/Sparkle.h>
+#import <WebKit/WebKit.h>
 
 #define WEB_URL @"http://bibdesk.sourceforge.net/"
 #define WIKI_URL @"http://sourceforge.net/apps/mediawiki/bibdesk/"
@@ -326,6 +327,8 @@ static void fixLegacyTableColumnIdentifiers()
     [self doSpotlightImportIfNeeded];
     
     [[WebPreferences standardPreferences] setCacheModel:WebCacheModelDocumentBrowser];
+    
+    [WebHistory setOptionalSharedHistory:[[[WebHistory alloc] init] autorelease]];
     
     [[NSColorPanel sharedColorPanel] setShowsAlpha:YES];
 }
@@ -601,11 +604,24 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         
         NSArray *bookmarks = [[[BDSKBookmarkController sharedBookmarkController] bookmarkRoot] children];
         NSInteger i = [menu numberOfItems];
-        while (--i > 2)
+        while (--i > 4)
             [menu removeItemAtIndex:i];
         if ([bookmarks count] > 0)
             [menu addItem:[NSMenuItem separatorItem]];
         [self addMenuItemsForBookmarks:bookmarks toMenu:menu];
+        
+    } else if ([menu isEqual:historyMenu]) {
+        
+        NSArray *historyItems = [[WebHistory optionalSharedHistory] orderedItemsLastVisitedOnDay:[NSDate date]];
+        NSMenuItem *menuItem;
+        
+        [historyMenu removeAllItems];
+        for (WebHistoryItem *historyItem in historyItems) {
+            menuItem = [[NSMenuItem alloc] initWithTitle:[historyItem title] ?: [historyItem URLString] action:@selector(goToHistoryItem:) keyEquivalent:@""];
+            [menuItem setImageAndSize:[NSImage imageNamed:@"Bookmark"]];
+            [menuItem setRepresentedObject:historyItem];
+            [historyMenu addItem:menuItem];
+        }
         
     }
 }
