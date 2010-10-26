@@ -194,10 +194,6 @@ static NSString *BDSKWebLocalizedString = nil;
     [document removeGroups:[NSArray arrayWithObject:self]];
 }
 
-- (void)webViewControllerRunModal:(BDSKWebViewController *)controller {
-    [document selectGroup:self];
-}
-
 - (void)webViewController:(BDSKWebViewController *)controller didStartLoadForMainFrame:(BOOL)forMainFrame {
     if (forMainFrame)
         [self setPublications:nil];
