@@ -693,6 +693,19 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 
 #pragma mark URL handling code
 
+- (BibDocument *)frontDocumentOfClass:(Class)aClass error:(NSError **)error {
+    // try the main document first
+    id document = [[NSDocumentController sharedDocumentController] mainDocument];
+    if ([document isKindOfClass:aClass] == NO) {
+        for (document in [NSApp orderedDocuments])
+            if ([document isKindOfClass:aClass]) break;
+        if (document == nil)
+            document = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:error];
+    }
+    return document;
+}
+
+
 - (void)handleGetURLEvent:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)replyEvent{
     NSString *theURLString = [[event descriptorForKeyword:keyDirectObject] stringValue];
     NSURL *theURL = nil;
@@ -724,13 +737,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         BDSKSearchGroup *group = [[BDSKSearchGroup alloc] initWithURL:theURL];
         
         if (group) {
-            // try the main document first
-            document = [[NSDocumentController sharedDocumentController] mainDocument];
-            if (nil == document) {
-                document = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:&error];
-                [document showWindows];
-            }
-            
+            document = [self frontDocumentOfClass:[BibDocument class] error:&error];
             [[document groups] addSearchGroup:group];
             [group release];
         } else {
@@ -740,22 +747,17 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     } else if (([[theURL scheme] isEqualToString:@"http"] || [[theURL scheme] isEqualToString:@"https"]) &&
                [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldShowWebGroupPrefKey]) {
         
-        // try the main document first
-        document = [[NSDocumentController sharedDocumentController] mainDocument];
-        if (nil == document) {
-            document = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:&error];
-            [document showWindows];
-        }
+        document = [self frontDocumentOfClass:[BibDocument class] error:&error];
         [document openURLInWebGroup:theURL];
         
-        if (document == nil && error)
-            [NSApp presentError:error];
-        
-    } else {
+    } else if (theURL) {
         
         [[NSWorkspace sharedWorkspace] openURL:theURL];
         
     }
+    
+    if (document == nil && error)
+        [NSApp presentError:error];
 }
 
 #pragma mark Spotlight support
