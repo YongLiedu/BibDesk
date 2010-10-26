@@ -675,7 +675,7 @@
                                              documentAttributes:NULL] autorelease];
             pbString = [[(NSAttributedString *)pbString string] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 
-            if([pbString rangeOfString:@"http://"].location == 0){
+            if([pbString hasCaseInsensitivePrefix:@"http://"] || [pbString hasCaseInsensitivePrefix:@"https://"]){
                 [self showWebViewWithURLString:pbString];
             }else{
                 NSRange r = NSMakeRange(0,[[sourceTextView string] length]);
@@ -688,7 +688,7 @@
                                               documentAttributes:NULL] autorelease];
             pbString = [[(NSAttributedString *)pbString string] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             
-            if([pbString rangeOfString:@"http://"].location == 0){
+            if([pbString hasCaseInsensitivePrefix:@"http://"] || [pbString hasCaseInsensitivePrefix:@"https://"]){
                 [self showWebViewWithURLString:pbString];
             }else{
                 NSRange r = NSMakeRange(0,[[sourceTextView string] length]);
@@ -699,7 +699,7 @@
             pbData = [pb dataForType:pbType];
             pbString = [pb stringForType:pbType];
             pbString = [pbString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-			if([pbString rangeOfString:@"http://"].location == 0){
+			if([pbString hasCaseInsensitivePrefix:@"http://"] || [pbString hasCaseInsensitivePrefix:@"https://"]){
                 [self showWebViewWithURLString:pbString];
             }else{
                 [sourceTextView setString:pbString];

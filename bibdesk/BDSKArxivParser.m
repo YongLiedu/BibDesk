@@ -182,7 +182,7 @@
             // successfully found the result PDF url
             if (string = [[nodes objectAtIndex:0] stringValueOfAttribute:@"href"]) {
                 // fix relative urls
-                if (NO == [string hasPrefix:@"http"])
+                if (NO == [string hasCaseInsensitivePrefix:@"http"])
                     string = [[NSURL URLWithString:string relativeToURL:url] absoluteString];
                 [pubFields setValue:string forKey:BDSKUrlString];
             }

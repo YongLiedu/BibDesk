@@ -286,7 +286,7 @@ static inline void addMatchesFromBookmarks(NSMutableArray *bookmarks, BDSKBookma
     if (control == urlField) {
         NSMutableArray *matches = [NSMutableArray array];
         NSString *string = [textView string];
-        if ([@"http://" hasPrefix:string] == NO && [@"https://" hasPrefix:string] == NO)
+        if ([@"http://" hasCaseInsensitivePrefix:string] == NO && [@"https://" hasCaseInsensitivePrefix:string] == NO)
             addMatchesFromBookmarks(matches, [[BDSKBookmarkController sharedBookmarkController] bookmarkRoot], string);
         return matches;
     } else {

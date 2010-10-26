@@ -249,7 +249,7 @@
          [rd setObject:URIString
                 forKey:@"URI"];
          
-         if([URIString hasPrefix:@"http://"]){
+         if([URIString hasCaseInsensitivePrefix:@"http://"] || [URIString hasCaseInsensitivePrefix:@"https://"]){
              [rd setObject:URIString forKey:@"Url"];
          }
      }  

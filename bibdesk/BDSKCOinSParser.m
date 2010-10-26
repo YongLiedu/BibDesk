@@ -217,7 +217,7 @@
 			else if ([key isEqualToString:@"rft_id"] || [key isEqualToString:@"rft.identifier"]) { 
 				// these are most likely URLs or DOI type information
 				NSURL * URL = [NSURL URLWithString:value];
-				if (URL && [[URL scheme] rangeOfString:@"http" options:NSLiteralSearch|NSAnchoredSearch].location != NSNotFound ) {
+				if (URL && ([@"http" caseInsensitiveCompare:[URL scheme]] == NSOrderedSame || [@"https" caseInsensitiveCompare:[URL scheme]] == NSOrderedSame)) {
                     // add http/https URLs to the FileView items only, rather than the Url field. This lets us process more than one of them and avoid adding links to library catalogue entries to the BibTeX record. I haven't seen other usable URL typese yet.
                     [files addObject:[BDSKLinkedFile linkedFileWithURL:URL delegate:nil]];
 				}
