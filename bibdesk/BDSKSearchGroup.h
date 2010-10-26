@@ -44,6 +44,8 @@ extern NSString *BDSKSearchGroupZoom;
 extern NSString *BDSKSearchGroupISI;
 extern NSString *BDSKSearchGroupDBLP;
 
+extern NSString *BDSKSearchGroupURLScheme;
+
 @class BDSKServerInfo;
 
 @protocol BDSKSearchGroup <BDSKOwner>

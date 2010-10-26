@@ -46,6 +46,8 @@ extern NSString *BDSKBibItemKeyKey;
 extern NSString *BDSKBibItemOldValueKey;
 extern NSString *BDSKBibItemNewValueKey;
 
+extern NSString *BDSKBibItemURLScheme;
+
 enum {
     BDSKNoCrossrefError,
     BDSKSelfCrossrefError,

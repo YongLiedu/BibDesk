@@ -54,6 +54,8 @@ NSString *BDSKSearchGroupZoom = @"zoom";
 NSString *BDSKSearchGroupISI = @"isi";
 NSString *BDSKSearchGroupDBLP = @"dblp";
 
+NSString *BDSKSearchGroupURLScheme = @"x-bdsk-search";
+
 @implementation BDSKSearchGroup
 
 // old designated initializer
@@ -96,7 +98,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 }
 
 - (id)initWithURL:(NSURL *)bdsksearchURL {
-    BDSKPRECONDITION([[bdsksearchURL scheme] isEqualToString:@"x-bdsk-search"]);
+    BDSKPRECONDITION([[bdsksearchURL scheme] isEqualToString:BDSKSearchGroupURLScheme]);
     
     NSString *aHost = [[bdsksearchURL host] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     NSString *aPort = [[bdsksearchURL port] stringValue];
@@ -341,7 +343,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 }
 
 - (NSURL *)bdsksearchURL {
-    NSMutableString *string = [NSMutableString stringWithString:@"x-bdsk-search://"];
+    NSMutableString *string = [NSMutableString stringWithFormat:@"%@://", BDSKSearchGroupURLScheme];
     BDSKServerInfo *serverInfo = [self serverInfo];
     NSString *password = [serverInfo password];
     NSString *username = [serverInfo username];

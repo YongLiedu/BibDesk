@@ -1306,7 +1306,7 @@
                     [groups addSearchGroup:(BDSKSearchGroup *)group];
                     lastGroup = group;
                 }
-            } else if ([[url scheme] isEqualToString:@"x-bdsk-search"]) {
+            } else if ([[url scheme] isEqualToString:BDSKSearchGroupURLScheme]) {
                 if (group = [[[BDSKSearchGroup alloc] initWithURL:url] autorelease]) {
                     [groups addSearchGroup:(BDSKSearchGroup *)group];
                     lastGroup = group;

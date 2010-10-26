@@ -720,7 +720,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         theURL = [NSURL URLWithString:theURLString] ?: [NSURL URLWithStringByNormalizingPercentEscapes:theURLString];
     }
     
-    if ([[theURL scheme] isEqualToString:@"x-bdsk"]) {
+    if ([[theURL scheme] isEqualToString:BDSKBibItemURLScheme]) {
         
         NSString *citeKey = [[theURLString substringFromIndex:9] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         NSString *path = [[NSFileManager defaultManager] spotlightCacheFilePathWithCiteKey:citeKey];
@@ -732,7 +732,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             error = [NSError localErrorWithCode:kBDSKURLOperationFailed localizedDescription:NSLocalizedString(@"Unable to get item from bdsk:// URL.", @"error when opening bdskURL")];
         }
         
-    } else if ([[theURL scheme] isEqualToString:@"x-bdsk-search"]) {
+    } else if ([[theURL scheme] isEqualToString:BDSKSearchGroupURLScheme]) {
         
         BDSKSearchGroup *group = [[BDSKSearchGroup alloc] initWithURL:theURL];
         

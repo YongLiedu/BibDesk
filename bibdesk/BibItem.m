@@ -81,6 +81,8 @@ NSString *BDSKBibItemKeyKey = @"key";
 NSString *BDSKBibItemOldValueKey = @"oldValue";
 NSString *BDSKBibItemNewValueKey = @"newValue";
 
+NSString *BDSKBibItemURLScheme = @"x-bdsk";
+
 #define DEFAULT_CITEKEY @"cite-key"
 static NSSet *fieldsToWriteIfEmpty = nil;
 
@@ -3210,7 +3212,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 }
   
 - (NSURL *)bdskURL {
-    return [NSURL URLWithString:[@"x-bdsk://" stringByAppendingString:[[self citeKey] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
+    return [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@", BDSKBibItemURLScheme, [[self citeKey] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
 }
            
 @end
