@@ -330,7 +330,7 @@
 - (NSString *)alertTitleForURL:(NSURL *)aURL {
     NSString *scheme = [aURL scheme];
     NSString *host = [aURL host];
-    if (([@"http" caseInsensitiveCompare:scheme] == NSOrderedSame || [@"https" caseInsensitiveCompare:scheme] == NSOrderedSame) && host != nil)
+    if (scheme != nil && host != nil)
         return [NSString stringWithFormat:@"%@://%@", scheme, host];
     return NSLocalizedString(@"JavaScript", @"Default JavaScript alert title");
 }
