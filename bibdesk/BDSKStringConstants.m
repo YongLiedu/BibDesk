@@ -212,9 +212,6 @@ NSString *BDSKSharingNameKey = @"BDSKSharingNameKey";
 NSString *BDSKWarnOnCiteKeyChangeKey = @"BDSKWarnOnCiteKeyChangeKey";
 NSString *BDSKSpotlightVersionInfoKey = @"BDSKSpotlightVersionInfo";
 
-NSString *BDSKShouldShowWebGroupPrefKey = @"BDSKShouldShowWebGroup";
-
-
 #pragma mark Field name strings
 
 NSString *BDSKAnnoteString = @"Annote";

@@ -745,8 +745,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             error = [NSError localErrorWithCode:kBDSKURLOperationFailed localizedDescription:NSLocalizedString(@"Unable to get search group from bdsksearch:// URL.", @"error when opening bdsksearch URL")];
         }
         
-    } else if (([[theURL scheme] isEqualToString:@"http"] || [[theURL scheme] isEqualToString:@"https"]) &&
-               [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldShowWebGroupPrefKey]) {
+    } else if ([[theURL scheme] isEqualToString:@"http"] || [[theURL scheme] isEqualToString:@"https"]) {
         
         document = [self frontDocumentOfClass:[BibDocument class] error:&error];
         [document openURL:theURL];

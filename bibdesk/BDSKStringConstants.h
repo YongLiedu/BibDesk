@@ -187,7 +187,6 @@ extern NSString *BDSKHideGroupCountKey;
 
 extern NSString *BDSKSpotlightVersionInfoKey;
 
-extern NSString *BDSKShouldShowWebGroupPrefKey;
 extern NSString *BDSKDefaultArrayJoinStringKey;
 
 extern NSString *BDSKBottomFileViewIconScaleKey;
