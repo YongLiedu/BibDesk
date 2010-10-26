@@ -748,7 +748,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
                [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldShowWebGroupPrefKey]) {
         
         document = [self frontDocumentOfClass:[BibDocument class] error:&error];
-        [document openURLInWebGroup:theURL];
+        [document openURL:theURL];
         
     } else if (theURL) {
         

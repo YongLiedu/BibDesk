@@ -1260,7 +1260,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (IBAction)openBookmark:(id)sender{
-    if ([self openURLInWebGroup:[sender representedObject]] == NO)
+    if ([self openURL:[sender representedObject]] == NO)
         NSBeep();
 }
 
@@ -1273,7 +1273,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 - (IBAction)goToHistoryItem:(id)sender {
     NSString *urlString = [[sender representedObject] URLString];
-    if (urlString == nil || [self openURLInWebGroup:[NSURL URLWithString:urlString]] == NO)
+    if (urlString == nil || [self openURL:[NSURL URLWithString:urlString]] == NO)
         NSBeep();
 }
 
@@ -1622,7 +1622,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 #pragma mark Opening a URL
 
-- (BOOL)openURLInWebGroup:(NSURL *)url {
+- (BOOL)openURL:(NSURL *)url {
     BDSKWebGroup *group = nil;
     if ([self hasWebGroupsSelected]) {
         group = [[self selectedGroups] lastObject];
