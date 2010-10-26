@@ -90,8 +90,7 @@ static NSString *BDSKWebLocalizedString = nil;
 
 - (void)makeWebView {
     BDSKASSERT(webViewController == nil);
-    webViewController = [[BDSKWebViewController alloc] init];
-    [webViewController setDelegate:self];
+    webViewController = [[BDSKWebViewController alloc] initWithDelegate:self];
     [[webViewController webView] setHostWindow:[[[document windowControllers] objectAtIndex:0] window]];
 }
 

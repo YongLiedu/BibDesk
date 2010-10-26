@@ -56,6 +56,8 @@ enum {
     NSUndoManager *undoManager;    
 }
 
+- (id)initWithDelegate:(id<BDSKWebViewControllerDelegate>)aDelegate;
+
 - (id<BDSKWebViewControllerDelegate>)delegate;
 - (void)setDelegate:(id<BDSKWebViewControllerDelegate>)newDelegate;
 

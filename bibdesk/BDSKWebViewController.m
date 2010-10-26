@@ -46,7 +46,7 @@
 
 @implementation BDSKWebViewController
 
-- (id)init {
+- (id)initWithDelegate:(id<BDSKWebViewControllerDelegate>)aDelegate  {
     if (self = [super init]) {
         webView = [[WebView alloc] init];
         [webView setGroupName:@"BibDeskWebGroup"];
@@ -54,8 +54,13 @@
         [webView setUIDelegate:self];
         [webView setEditingDelegate:self];
         [webView setDownloadDelegate:[BDSKDownloadManager sharedManager]];
+        delegate = aDelegate;
     }
     return self;
+}
+
+- (id)init {
+    return [self initWithDelegate:nil];
 }
 
 - (void)dealloc {
@@ -397,8 +402,7 @@ static id sharedHandler = nil;
     NSWindow *window = [[[NSWindow alloc] initWithContentRect:NSMakeRect(0.0, 0.0, 200.0, 200.0) styleMask:mask backing:NSBackingStoreBuffered defer:YES] autorelease];
     if (self = [self initWithWindow:window]) {
         [window setDelegate:self];
-        webViewController = [[BDSKWebViewController alloc] init];
-        [webViewController setDelegate:self];
+        webViewController = [[BDSKWebViewController alloc] initWithDelegate:self];
         [window setContentView:[webViewController webView]];
     }
     return self;

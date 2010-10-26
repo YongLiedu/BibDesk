@@ -116,8 +116,7 @@
         item = [[BibItem alloc] init];
         [item setOwner:self];
         fields = [[NSMutableArray alloc] init];
-        webViewController = [[BDSKWebViewController alloc] init];
-        [webViewController setDelegate:self];
+        webViewController = [[BDSKWebViewController alloc] initWithDelegate:self];
         showingWebView = NO;
         itemsAdded = [[NSMutableArray alloc] init];
 		webSelection = nil;
