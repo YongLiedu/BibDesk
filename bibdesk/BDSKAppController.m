@@ -48,6 +48,7 @@
 #import "BibDocument_UI.h"
 #import "BibDocument_Groups.h"
 #import "BibDocument_Actions.h"
+#import "BibItem.h"
 #import "BDSKFormatParser.h"
 #import "BDAlias.h"
 #import "BDSKErrorObjectController.h"
