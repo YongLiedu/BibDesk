@@ -613,16 +613,17 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     } else if ([menu isEqual:historyMenu]) {
         
         NSArray *historyItems = [[WebHistory optionalSharedHistory] orderedItemsLastVisitedOnDay:[NSDate date]];
-        NSMenuItem *menuItem;
-        
         [historyMenu removeAllItems];
-        for (WebHistoryItem *historyItem in historyItems) {
-            menuItem = [[NSMenuItem alloc] initWithTitle:[historyItem title] ?: [historyItem URLString] action:@selector(goToHistoryItem:) keyEquivalent:@""];
-            [menuItem setImageAndSize:[NSImage imageNamed:@"Bookmark"]];
-            [menuItem setRepresentedObject:historyItem];
-            [historyMenu addItem:menuItem];
+        if ([historyItems count] > 0) {
+            for (WebHistoryItem *historyItem in historyItems) {
+                NSMenuItem *menuItem = [[NSMenuItem alloc] initWithTitle:[historyItem title] ?: [historyItem URLString] action:@selector(goToHistoryItem:) keyEquivalent:@""];
+                [menuItem setImageAndSize:[NSImage imageNamed:@"Bookmark"]];
+                [menuItem setRepresentedObject:historyItem];
+                [historyMenu addItem:menuItem];
+            }
+            [historyMenu addItem:[NSMenuItem separatorItem]];
         }
-        
+        [historyMenu addItemWithTitle:NSLocalizedString(@"Clear", @"Menu item title") action:@selector(clearHistory:) keyEquivalent:@""];
     }
 }
 
@@ -684,6 +685,10 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 
 - (IBAction)showBookmarks:(id)sender{
     [[BDSKBookmarkController sharedBookmarkController] showWindow:sender];
+}
+
+- (IBAction)clearHistory:(id)sender {
+    [[WebHistory optionalSharedHistory] removeAllItems];
 }
 
 #pragma mark URL handling code
