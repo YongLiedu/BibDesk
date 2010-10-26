@@ -96,6 +96,11 @@
     }
 }
 
+- (NSString *)fileContentSearchString {
+    // See bug #1344720; don't search if this is a known field (Title, Author, etc.).  This feature can be annoying because Preview.app zooms in on the search result in this case, in spite of your zoom settings (bug report filed with Apple).
+    return [self isDisplayingFileContentSearch] ? [searchField stringValue] : @"";
+}
+
 - (void)updateSearch:(id)sender {
     NSString *field = [searchButtonBar representedObjectOfSelectedButton];
     if (searchButtonBar && nil == field) {

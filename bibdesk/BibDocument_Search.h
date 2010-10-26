@@ -44,8 +44,9 @@ extern NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString);
 @interface BibDocument (Search) <BDSKFileContentSearchControllerDelegate, NSTextFieldDelegate>
 
 - (NSString *)searchString;
-
 - (void)setSearchString:(NSString *)filterterm;
+
+- (NSString *)fileContentSearchString;
 
 - (IBAction)makeSearchFieldKey:(id)sender;
 - (IBAction)changeSearchType:(id)sender;

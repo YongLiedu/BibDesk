@@ -1521,7 +1521,10 @@
 }
 
 - (BOOL)fileView:(FVFileView *)aFileView shouldOpenURL:(NSURL *)aURL {
-    return [self openURL:aURL] == NO;
+    if ([aURL isFileURL])
+        return NO == [[NSWorkspace sharedWorkspace] openURL:aURL withSearchString:[self fileContentSearchString]];
+    else
+        return [[NSWorkspace sharedWorkspace] openLinkedURL:aURL];
 }
 
 - (void)fileView:(FVFileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
