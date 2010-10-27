@@ -476,12 +476,24 @@ static id sharedHandler = nil;
 }
 
 - (void)webViewController:(BDSKWebViewController *)controller setResizable:(BOOL)resizable {
-    // This doesn't actually change the resizability of the window, only visibility of the indicator, but it is what WebKit does by default.
-    [[self window] setShowsResizeIndicator:resizable];
+    NSWindow *window = [self window];
+    [window setShowsResizeIndicator:resizable];
+    [[window standardWindowButton:NSWindowZoomButton] setEnabled:resizable];
+    if (resizable) {
+        [window setMinSize:NSMakeSize(100.0, 100.0)];
+        [window setMaxSize:[[NSScreen mainScreen] visibleFrame].size];
+    } else {
+        [window setMinSize:[window frame].size];
+        [window setMaxSize:[window frame].size];
+    }
 }
 
 - (void)webViewController:(BDSKWebViewController *)controller setFrame:(NSRect)frame {
     [[self window] setFrame:frame display:YES];
+    if ([[self window] showsResizeIndicator] == NO) {
+        [[self window] setMinSize:frame.size];
+        [[self window] setMaxSize:frame.size];
+    }
 }
 
 - (void)webViewController:(BDSKWebViewController *)controller setStatusBarVisible:(BOOL)visible {
