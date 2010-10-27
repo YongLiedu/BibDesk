@@ -617,7 +617,12 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         [historyMenu removeAllItems];
         if ([historyItems count] > 0) {
             for (WebHistoryItem *historyItem in historyItems) {
-                NSMenuItem *menuItem = [[NSMenuItem alloc] initWithTitle:[historyItem title] ?: [historyItem URLString] action:@selector(goToHistoryItem:) keyEquivalent:@""];
+                NSString *title = [historyItem title];
+                if ([NSString isEmptyString:title]) {
+                    NSURL *url = [NSURL URLWithString:[historyItem URLString]];
+                    title = [url isFileURL] ? [[url path] lastPathComponent] : [[url absoluteString] stringByReplacingPercentEscapes];
+                }
+                NSMenuItem *menuItem = [[NSMenuItem alloc] initWithTitle:title action:@selector(goToHistoryItem:) keyEquivalent:@""];
                 [menuItem setImageAndSize:[NSImage imageNamed:@"Bookmark"]];
                 [menuItem setRepresentedObject:historyItem];
                 [historyMenu addItem:menuItem];
