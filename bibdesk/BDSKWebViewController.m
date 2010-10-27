@@ -481,7 +481,7 @@ static id sharedHandler = nil;
     [[window standardWindowButton:NSWindowZoomButton] setEnabled:resizable];
     if (resizable) {
         [window setMinSize:NSMakeSize(100.0, 100.0)];
-        [window setMaxSize:[[NSScreen mainScreen] visibleFrame].size];
+        [window setMaxSize:[([window screen] ?: [NSScreen mainScreen]) visibleFrame].size];
     } else {
         [window setMinSize:[window frame].size];
         [window setMaxSize:[window frame].size];
