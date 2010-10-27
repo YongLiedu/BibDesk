@@ -47,7 +47,7 @@ enum {
     BDSKWebMenuItemTagAddBookmark
 };
 
-@class WebView, WebFrame;
+@class WebView, WebFrame, BDSKStatusBar;
 @protocol BDSKWebViewControllerDelegate;
 
 @interface BDSKWebViewController : NSObject {
@@ -85,6 +85,8 @@ enum {
 
 - (void)webViewController:(BDSKWebViewController *)controller setResizable:(BOOL)resizable;
 - (void)webViewController:(BDSKWebViewController *)controller setFrame:(NSRect)frame;
+- (void)webViewController:(BDSKWebViewController *)controller setStatusBarVisible:(BOOL)visible;
+- (BOOL)webViewControllerIsStatusBarVisible:(BDSKWebViewController *)controller;
 
 - (void)webViewController:(BDSKWebViewController *)controller didStartLoadForMainFrame:(BOOL)forMainFrame;
 - (void)webViewController:(BDSKWebViewController *)controller didFinishLoadForFrame:(WebFrame *)frame;
@@ -108,6 +110,7 @@ enum {
 
 @interface BDSKWebViewModalDialogController : NSWindowController <BDSKWebViewControllerDelegate> {
     BDSKWebViewController *webViewController;
+    BDSKStatusBar *statusBar;
 }
 - (WebView *)webView;
 @end

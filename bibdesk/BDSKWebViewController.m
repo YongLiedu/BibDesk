@@ -41,6 +41,7 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKBookmarkController.h"
 #import "BDSKDownloadManager.h"
+#import "BDSKStatusBar.h"
 #import "NSString_BDSKExtensions.h"
 
 
@@ -49,6 +50,7 @@
 - (id)initWithDelegate:(id<BDSKWebViewControllerDelegate>)aDelegate  {
     if (self = [super init]) {
         webView = [[WebView alloc] init];
+        [webView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
         [webView setGroupName:@"BibDeskWebGroup"];
         [webView setFrameLoadDelegate:self];
         [webView setUIDelegate:self];
@@ -327,6 +329,17 @@
         [delegate webViewController:self setFrame:frame];
 }
 
+- (void)webView:(WebView *)sender setStatusBarVisible:(BOOL)visible {
+    if ([delegate respondsToSelector:@selector(webViewController:setStatusBarVisible:)])
+        [delegate webViewController:self setStatusBarVisible:visible];
+}
+
+- (BOOL)webViewIsStatusBarVisible:(WebView *)sender {
+    if ([delegate respondsToSelector:@selector(webViewControllerIsStatusBarVisible:)])
+        return [delegate webViewControllerIsStatusBarVisible:self];
+    return NO;
+}
+
 - (NSString *)alertTitleForURL:(NSURL *)aURL {
     NSString *scheme = [aURL scheme];
     NSString *host = [aURL host];
@@ -413,7 +426,10 @@ static id sharedHandler = nil;
     if (self = [self initWithWindow:window]) {
         [window setDelegate:self];
         webViewController = [[BDSKWebViewController alloc] initWithDelegate:self];
-        [window setContentView:[webViewController webView]];
+        WebView *webView = [webViewController webView];
+        NSView *contentView = [window contentView];
+        [webView setFrame:[contentView bounds]];
+        [contentView addSubview:webView];
     }
     return self;
 }
@@ -421,6 +437,7 @@ static id sharedHandler = nil;
 - (void)dealloc {
     [webViewController setDelegate:nil];
     BDSKDESTROY(webViewController);
+    BDSKDESTROY(statusBar);
     [super dealloc];
 }
 
@@ -435,6 +452,10 @@ static id sharedHandler = nil;
 
 - (void)webViewController:(BDSKWebViewController *)controller setTitle:(NSString *)title {
     [[self window] setTitle:title];
+}
+
+- (void)webViewController:(BDSKWebViewController *)controller setStatusText:(NSString *)text {
+    [statusBar setStringValue:text ?: @""];
 }
 
 - (void)webViewControllerClose:(BDSKWebViewController *)controller {
@@ -461,6 +482,21 @@ static id sharedHandler = nil;
 
 - (void)webViewController:(BDSKWebViewController *)controller setFrame:(NSRect)frame {
     [[self window] setFrame:frame display:YES];
+}
+
+- (void)webViewController:(BDSKWebViewController *)controller setStatusBarVisible:(BOOL)visible {
+    if (visible != [statusBar isVisible]) {
+        WebView *webView = [webViewController webView];
+        if (visible && statusBar == nil) {
+            statusBar = [[BDSKStatusBar alloc] initWithFrame:NSMakeRect(0.0, 0.0, NSWidth([webView frame]), 22.0)];
+            [statusBar setAutoresizingMask:NSViewWidthSizable | NSViewMaxXMargin];
+        }
+        [statusBar toggleBelowView:webView animate:NO];
+    }
+}
+
+- (BOOL)webViewControllerIsStatusBarVisible:(BDSKWebViewController *)controller {
+    return [statusBar isVisible];
 }
 
 @end
