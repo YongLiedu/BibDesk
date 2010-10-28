@@ -86,6 +86,8 @@
 #define WIKI_URL @"http://sourceforge.net/apps/mediawiki/bibdesk/"
 #define TRACKER_URL @"http://sourceforge.net/tracker/?group_id=61487&atid=497423"
 
+#define BDSKHistoryByDateKey @"BDSKHistoryByDate"
+#define BDSKHistoryAgeLimitKey @"BDSKHistoryAgeLimit"
 #define BDSKIsRelaunchKey @"BDSKIsRelaunch"
 #define BDSKDidMigrateLocalUrlFormatDefaultsKey @"BDSKDidMigrateLocalUrlFormatDefaultsKey"
 
@@ -329,7 +331,14 @@ static void fixLegacyTableColumnIdentifiers()
     
     [[WebPreferences standardPreferences] setCacheModel:WebCacheModelDocumentBrowser];
     
-    [WebHistory setOptionalSharedHistory:[[[WebHistory alloc] init] autorelease]];
+    WebHistory *history = [[[WebHistory alloc] init] autorelease];
+    NSString *historyPath = [[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"History.plist"];
+    NSInteger ageLimit = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKHistoryAgeLimitKey];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:historyPath])
+        [history loadFromURL:[NSURL fileURLWithPath:historyPath] error:NULL];
+    if (ageLimit > 0)
+        [history setHistoryAgeInDaysLimit:ageLimit];
+    [WebHistory setOptionalSharedHistory:history];
     
     [[NSColorPanel sharedColorPanel] setShowsAlpha:YES];
 }
@@ -424,6 +433,11 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFlagsChangedNotification object:NSApp];
 }
 
+- (void)applicationWillTerminate:(NSNotification *)notification {
+    NSString *historyPath = [[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"History.plist"];
+    [[WebHistory optionalSharedHistory] saveToURL:[NSURL fileURLWithPath:historyPath] error:NULL];
+}
+
 #pragma mark Updater
 
 - (BOOL)updaterShouldPromptForPermissionToCheckForUpdates:(SUUpdater *)updater {
@@ -473,6 +487,13 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 		}else {
 			[menuItem setState:NSOffState];
 		}
+		return YES;
+    }
+    else if (act == @selector(toggleHistoryByDate:)){ 
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKHistoryByDateKey])
+            [menuItem setTitle:NSLocalizedString(@"Only Today", @"Menu item title")];
+        else
+            [menuItem setTitle:NSLocalizedString(@"Organize By Date", @"Menu item title")];
 		return YES;
 	}
 	return YES;
@@ -529,6 +550,20 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             [item setRepresentedObject:[bm URL]];
             [item setImageAndSize:[bm icon]];
         }
+    }
+}
+
+- (void)addMenuItemsForHistoryItems:(NSArray *)historyItems toMenu:(NSMenu *)menu {
+    for (WebHistoryItem *historyItem in historyItems) {
+        NSString *title = [historyItem title];
+        if ([NSString isEmptyString:title]) {
+            NSURL *url = [NSURL URLWithString:[historyItem URLString]];
+            title = [url isFileURL] ? [[url path] lastPathComponent] : [[url absoluteString] stringByReplacingPercentEscapes];
+        }
+        NSMenuItem *menuItem = [[NSMenuItem alloc] initWithTitle:title action:@selector(goToHistoryItem:) keyEquivalent:@""];
+        [menuItem setImageAndSize:[NSImage imageNamed:@"Bookmark"]];
+        [menuItem setRepresentedObject:historyItem];
+        [menu addItem:menuItem];
     }
 }
 
@@ -613,22 +648,28 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         
     } else if ([menu isEqual:historyMenu]) {
         
-        NSArray *historyItems = [[WebHistory optionalSharedHistory] orderedItemsLastVisitedOnDay:[NSDate date]];
+        WebHistory *history = [WebHistory optionalSharedHistory];
         [historyMenu removeAllItems];
-        if ([historyItems count] > 0) {
-            for (WebHistoryItem *historyItem in historyItems) {
-                NSString *title = [historyItem title];
-                if ([NSString isEmptyString:title]) {
-                    NSURL *url = [NSURL URLWithString:[historyItem URLString]];
-                    title = [url isFileURL] ? [[url path] lastPathComponent] : [[url absoluteString] stringByReplacingPercentEscapes];
-                }
-                NSMenuItem *menuItem = [[NSMenuItem alloc] initWithTitle:title action:@selector(goToHistoryItem:) keyEquivalent:@""];
-                [menuItem setImageAndSize:[NSImage imageNamed:@"Bookmark"]];
-                [menuItem setRepresentedObject:historyItem];
-                [historyMenu addItem:menuItem];
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKHistoryByDateKey]) {
+            NSArray *historyDays = [history orderedLastVisitedDays];
+            NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
+            [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+            [formatter setDateStyle:NSDateFormatterFullStyle];
+            [formatter setTimeStyle:NSDateFormatterNoStyle];
+            for (NSDate *date in historyDays) {
+                NSArray *historyItems = [history orderedItemsLastVisitedOnDay:(id)date];
+                NSMenu *submenu = [[NSMenu alloc] init];
+                [historyMenu addItemWithTitle:[formatter stringFromDate:date] submenu:submenu];
+                [self addMenuItemsForHistoryItems:historyItems toMenu:submenu];
+                [submenu release];
             }
-            [historyMenu addItem:[NSMenuItem separatorItem]];
+        } else {
+            NSArray *historyItems = [history orderedItemsLastVisitedOnDay:[NSDate date]];
+            [self addMenuItemsForHistoryItems:historyItems toMenu:menu];
         }
+        if ([historyMenu numberOfItems] > 0)
+            [historyMenu addItem:[NSMenuItem separatorItem]];
+        [historyMenu addItemWithTitle:NSLocalizedString(@"Organize By Date", @"Menu item title") action:@selector(toggleHistoryByDate:) keyEquivalent:@""];
         [historyMenu addItemWithTitle:NSLocalizedString(@"Clear", @"Menu item title") action:@selector(clearHistory:) keyEquivalent:@""];
     }
 }
@@ -695,6 +736,11 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 
 - (IBAction)clearHistory:(id)sender {
     [[WebHistory optionalSharedHistory] removeAllItems];
+}
+
+- (IBAction)toggleHistoryByDate:(id)sender {
+    NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
+    [sud setBool:NO == [sud boolForKey:BDSKHistoryByDateKey] forKey:BDSKHistoryByDateKey];
 }
 
 #pragma mark URL handling code

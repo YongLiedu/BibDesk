@@ -65,6 +65,7 @@
 - (IBAction)showBookmarks:(id)sender;
 
 - (IBAction)clearHistory:(id)sender;
+- (IBAction)toggleHistoryByDate:(id)sender;
 
 - (IBAction)toggleShowingOrphanedFilesPanel:(id)sender;
 
