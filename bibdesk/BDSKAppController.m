@@ -516,9 +516,8 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         if ([bm bookmarkType] == BDSKSearchBookmarkTypeFolder) {
             NSString *label = [bm label];
             NSMenu *submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:[bm label]] autorelease];
-            NSMenuItem *item = [menu addItemWithTitle:label ?: @"" action:NULL keyEquivalent:@""];
+            NSMenuItem *item = [menu addItemWithTitle:label ?: @"" submenu:submenu];
             [item setImageAndSize:[bm icon]];
-            [item setSubmenu:submenu];
             [self addMenuItemsForSearchBookmarks:[bm children] toMenu:submenu];
         } else if ([bm bookmarkType] == BDSKSearchBookmarkTypeSeparator) {
             [menu addItem:[NSMenuItem separatorItem]];
@@ -532,15 +531,12 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 }
 
 - (void)addMenuItemsForBookmarks:(NSArray *)bookmarks toMenu:(NSMenu *)menu {
-    NSInteger i, iMax = [bookmarks count];
-    for (i = 0; i < iMax; i++) {
-        BDSKBookmark *bm = [bookmarks objectAtIndex:i];
+    for (BDSKBookmark *bm in bookmarks) {
         if ([bm bookmarkType] == BDSKBookmarkTypeFolder) {
             NSString *name = [bm name];
             NSMenu *submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:[bm name]] autorelease];
-            NSMenuItem *item = [menu addItemWithTitle:name ?: @"" action:NULL keyEquivalent:@""];
+            NSMenuItem *item = [menu addItemWithTitle:name ?: @"" submenu:submenu];
             [item setImageAndSize:[bm icon]];
-            [item setSubmenu:submenu];
             [self addMenuItemsForBookmarks:[bm children] toMenu:submenu];
         } else if ([bm bookmarkType] == BDSKBookmarkTypeSeparator) {
             [menu addItem:[NSMenuItem separatorItem]];
@@ -560,10 +556,9 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             NSURL *url = [NSURL URLWithString:[historyItem URLString]];
             title = [url isFileURL] ? [[url path] lastPathComponent] : [[url absoluteString] stringByReplacingPercentEscapes];
         }
-        NSMenuItem *menuItem = [[NSMenuItem alloc] initWithTitle:title action:@selector(goToHistoryItem:) keyEquivalent:@""];
-        [menuItem setImageAndSize:[NSImage imageNamed:@"Bookmark"]];
-        [menuItem setRepresentedObject:historyItem];
-        [menu addItem:menuItem];
+        NSMenuItem *item = [menu addItemWithTitle:title action:@selector(openBookmark:) keyEquivalent:@""];
+        [item setRepresentedObject:[NSURL URLWithString:[historyItem URLString]]];
+        [item setImageAndSize:[NSImage imageNamed:@"Bookmark"]];
     }
 }
 
@@ -658,7 +653,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             [formatter setTimeStyle:NSDateFormatterNoStyle];
             for (NSDate *date in historyDays) {
                 NSArray *historyItems = [history orderedItemsLastVisitedOnDay:(id)date];
-                NSMenu *submenu = [[NSMenu alloc] init];
+                NSMenu *submenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
                 [historyMenu addItemWithTitle:[formatter stringFromDate:date] submenu:submenu];
                 [self addMenuItemsForHistoryItems:historyItems toMenu:submenu];
                 [submenu release];

@@ -1271,12 +1271,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         NSBeep();
 }
 
-- (IBAction)goToHistoryItem:(id)sender {
-    NSString *urlString = [[sender representedObject] URLString];
-    if (urlString == nil || [self openURL:[NSURL URLWithString:urlString]] == NO)
-        NSBeep();
-}
-
 #pragma mark Add or remove items
 
 - (NSArray *)mergeInPublications:(NSArray *)items{
