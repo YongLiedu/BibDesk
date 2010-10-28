@@ -87,7 +87,6 @@
 #define TRACKER_URL @"http://sourceforge.net/tracker/?group_id=61487&atid=497423"
 
 #define BDSKHistoryByDateKey @"BDSKHistoryByDate"
-#define BDSKHistoryAgeLimitKey @"BDSKHistoryAgeLimit"
 #define BDSKIsRelaunchKey @"BDSKIsRelaunch"
 #define BDSKDidMigrateLocalUrlFormatDefaultsKey @"BDSKDidMigrateLocalUrlFormatDefaultsKey"
 
@@ -333,11 +332,8 @@ static void fixLegacyTableColumnIdentifiers()
     
     WebHistory *history = [[[WebHistory alloc] init] autorelease];
     NSString *historyPath = [[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"History.plist"];
-    NSInteger ageLimit = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKHistoryAgeLimitKey];
     if ([[NSFileManager defaultManager] fileExistsAtPath:historyPath])
         [history loadFromURL:[NSURL fileURLWithPath:historyPath] error:NULL];
-    if (ageLimit > 0)
-        [history setHistoryAgeInDaysLimit:ageLimit];
     [WebHistory setOptionalSharedHistory:history];
     
     [[NSColorPanel sharedColorPanel] setShowsAlpha:YES];
