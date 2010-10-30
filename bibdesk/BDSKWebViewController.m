@@ -340,22 +340,23 @@
     return NO;
 }
 
-- (NSString *)alertTitleForURL:(NSURL *)aURL {
-    NSString *scheme = [aURL scheme];
-    NSString *host = [aURL host];
+- (NSString *)alertTitleForFrame:(WebFrame *)frame {
+    NSURL *url = [[[frame dataSource] request] URL];
+    NSString *scheme = [url scheme];
+    NSString *host = [url host];
     if (scheme != nil && host != nil)
         return [NSString stringWithFormat:@"%@://%@", scheme, host];
     return NSLocalizedString(@"JavaScript", @"Default JavaScript alert title");
 }
 
 - (void)webView:(WebView *)sender runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WebFrame *)frame {
-    NSString *title = [self alertTitleForURL:[[[frame dataSource] request] URL]];
+    NSString *title = [self alertTitleForFrame:frame];
     NSAlert *alert = [NSAlert alertWithMessageText:title defaultButton:NSLocalizedString(@"OK", @"Button title") alternateButton:nil otherButton:nil informativeTextWithFormat:@"%@", message];
     [alert runModal];
 }
 
 - (BOOL)webView:(WebView *)sender runJavaScriptConfirmPanelWithMessage:(NSString *)message initiatedByFrame:(WebFrame *)frame {
-    NSString *title = [self alertTitleForURL:[[[frame dataSource] request] URL]];
+    NSString *title = [self alertTitleForFrame:frame];
     NSAlert *alert = [NSAlert alertWithMessageText:title defaultButton:NSLocalizedString(@"OK", @"Button title") alternateButton:NSLocalizedString(@"Cancel", @"Button title") otherButton:nil informativeTextWithFormat:@"%@", message];
     return NSAlertDefaultReturn == [alert runModal];
 }
