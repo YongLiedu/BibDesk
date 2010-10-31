@@ -118,6 +118,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
         [prefs setJavaScriptCanOpenWindowsAutomatically:NO];
         [prefs setJavaScriptEnabled:NO];
         [prefs setAllowsAnimatedImages:NO];
+        [prefs setPrivateBrowsingEnabled:YES];
         
         /*
          WebCacheModelDocumentViewer is the most memory-efficient setting; remote resources are still cached to disk,
