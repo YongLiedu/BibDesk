@@ -1,5 +1,5 @@
 //
-//  BDSKWebViewController.h
+//  BDSKWebView.h
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 10/24/10.

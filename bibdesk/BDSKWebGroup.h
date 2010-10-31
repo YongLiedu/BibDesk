@@ -38,7 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKExternalGroup.h"
-#import "BDSKWebViewController.h"
+#import "BDSKWebView.h"
 
 
 @interface BDSKWebGroup : BDSKExternalGroup <BDSKWebViewDelegate> {

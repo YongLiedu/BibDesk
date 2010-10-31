@@ -1,5 +1,5 @@
 //
-//  BDSKWebViewController.m
+//  BDSKWebView.m
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 10/24/10.
@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKWebViewController.h"
+#import "BDSKWebView.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKBookmarkController.h"
 #import "BDSKDownloadManager.h"

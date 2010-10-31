@@ -41,7 +41,7 @@
 #import "BDSKTableView.h"
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKCitationFormatter.h"
-#import "BDSKWebViewController.h"
+#import "BDSKWebView.h"
 
 @protocol BDSKTextImportItemTableViewDelegate <BDSKTableViewDelegate>
 - (void)tableViewDidChangeTemporaryTypeSelectMode:(NSTableView *)tView;

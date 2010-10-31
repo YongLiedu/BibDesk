@@ -38,7 +38,7 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKWebViewController.h"
+#import "BDSKWebView.h"
 
 @class BDSKCollapsibleView, BDSKEdgeView, BDSKDragTextField, BDSKFieldEditor;
 
