@@ -1046,7 +1046,7 @@
     [self autoDiscoverDataFromFrame:frame];
 }
 
-- (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame {
+- (void)webView:(WebView *)sender didFailLoadForFrame:(WebFrame *)frame {
     [self setLoading:[webView isLoading]];
 	[backButton setEnabled:[webView canGoBack]];
 	[forwardButton setEnabled:[webView canGoForward]];

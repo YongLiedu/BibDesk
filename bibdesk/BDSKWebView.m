@@ -40,7 +40,7 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKBookmarkController.h"
 #import "BDSKDownloadManager.h"
-#import "BDSKStatusBar.h"
+#import "BDSKWebViewModalDialogController.h"
 #import "NSString_BDSKExtensions.h"
 
 
@@ -56,6 +56,16 @@
 - (id<BDSKWebViewNavigationDelegate>)navigationDelegate;
 - (void)setNavigationDelegate:(id<BDSKWebViewNavigationDelegate>)newDelegate;
 
+@end
+
+#pragma mark -
+
+// workaround for loading a URL from a javasecript window.open event http://stackoverflow.com/questions/270458/cocoa-webkit-having-window-open-javascipt-links-opening-in-an-instance-of-safa
+@interface BDSKNewWebWindowHandler : NSObject {
+    WebView *webView;
+}
++ (id)sharedHandler;
+- (WebView *)webView;
 @end
 
 #pragma mark -
@@ -205,8 +215,8 @@
 }
 
 - (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
-    if ([delegate respondsToSelector:@selector(webView:didFailLoadWithError:forFrame:)])
-        [delegate webView:sender didFailLoadWithError:error forFrame:frame];
+    if ([delegate respondsToSelector:@selector(webView:didFailLoadForFrame:)])
+        [delegate webView:sender didFailLoadForFrame:frame];
     [self webView:sender setLoading:[sender isLoading]];
     
     // !!! logs are here to help diagnose problems that users are reporting
@@ -441,98 +451,6 @@ static id sharedHandler = nil;
 - (void)dealloc {
     BDSKDESTROY(webView);
     [super dealloc];
-}
-
-@end
-
-#pragma mark -
-
-@implementation BDSKWebViewModalDialogController
-
-- (id)init {
-    NSUInteger mask = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
-    NSWindow *window = [[[NSWindow alloc] initWithContentRect:NSMakeRect(0.0, 0.0, 200.0, 200.0) styleMask:mask backing:NSBackingStoreBuffered defer:YES] autorelease];
-    if (self = [self initWithWindow:window]) {
-        [window setDelegate:self];
-        webView = [[BDSKWebView alloc] init];
-        [webView setDelegate:self];
-        NSView *contentView = [window contentView];
-        [webView setFrame:[contentView bounds]];
-        [contentView addSubview:webView];
-    }
-    return self;
-}
-
-- (void)dealloc {
-    [webView setDelegate:nil];
-    BDSKDESTROY(webView);
-    BDSKDESTROY(statusBar);
-    [super dealloc];
-}
-
-- (WebView *)webView {
-    return webView;
-}
-
-- (void)windowWillClose:(NSNotification *)notification {
-    [NSApp stopModal];
-    [self autorelease];
-}
-
-- (void)webView:(WebView *)sender setTitle:(NSString *)title {
-    [[self window] setTitle:title];
-}
-
-- (void)webView:(WebView *)sender setStatusText:(NSString *)text {
-    [statusBar setStringValue:text ?: @""];
-}
-
-- (void)webViewClose:(WebView *)sender {
-    [[self window] close];
-}
-
-- (void)webViewRunModal:(WebView *)sender {
-    [self retain];
-    // we can't use [NSApp runModalForWindow], because otherwise the webview does not download, and also it won't receive any close message from javascript
-    // http://www.dejal.com/blog/2007/01/cocoa-topics-case-modal-webview
-    NSModalSession session = [NSApp beginModalSessionForWindow:[self window]];
-    for (;;) {
-        if (NSRunContinuesResponse != [NSApp runModalSession:session]) break;
-        // tickle the default run loop to let the webview download or let a close message come through
-        [[NSRunLoop currentRunLoop] limitDateForMode:NSDefaultRunLoopMode];
-    }
-    [NSApp endModalSession:session];
-}
-
-- (void)webView:(WebView *)sender setResizable:(BOOL)resizable {
-    NSWindow *window = [self window];
-    [window setShowsResizeIndicator:resizable];
-    [[window standardWindowButton:NSWindowZoomButton] setEnabled:resizable];
-    if (resizable) {
-        [window setMinSize:NSMakeSize(100.0, 100.0)];
-        [window setMaxSize:[([window screen] ?: [NSScreen mainScreen]) visibleFrame].size];
-    } else {
-        [window setMinSize:[window frame].size];
-        [window setMaxSize:[window frame].size];
-    }
-}
-
-- (void)webView:(WebView *)sender setFrame:(NSRect)frame {
-    [[self window] setFrame:frame display:YES];
-    if ([[self window] showsResizeIndicator] == NO) {
-        [[self window] setMinSize:frame.size];
-        [[self window] setMaxSize:frame.size];
-    }
-}
-
-- (void)webView:(WebView *)sender setStatusBarVisible:(BOOL)visible {
-    if (visible != [statusBar isVisible]) {
-        if (visible && statusBar == nil) {
-            statusBar = [[BDSKStatusBar alloc] initWithFrame:NSMakeRect(0.0, 0.0, NSWidth([webView frame]), 22.0)];
-            [statusBar setAutoresizingMask:NSViewWidthSizable | NSViewMaxXMargin];
-        }
-        [statusBar toggleBelowView:webView animate:NO];
-    }
 }
 
 @end

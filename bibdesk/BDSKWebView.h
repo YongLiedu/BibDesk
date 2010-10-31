@@ -85,7 +85,7 @@ enum {
 
 - (void)webView:(WebView *)sender didStartLoadForFrame:(WebFrame *)frame;
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame;
-- (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame;
+- (void)webView:(WebView *)sender didFailLoadForFrame:(WebFrame *)frame;
 
 - (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems;
 
@@ -100,23 +100,4 @@ enum {
 - (void)webView:(WebView *)sender setIcon:(NSImage *)icon;
 - (void)webView:(WebView *)sender setLoading:(BOOL)loading;
 
-@end
-
-#pragma mark -
-
-// workaround for loading a URL from a javasecript window.open event http://stackoverflow.com/questions/270458/cocoa-webkit-having-window-open-javascipt-links-opening-in-an-instance-of-safa
-@interface BDSKNewWebWindowHandler : NSObject {
-    WebView *webView;
-}
-+ (id)sharedHandler;
-- (WebView *)webView;
-@end
-
-#pragma mark -
-
-@interface BDSKWebViewModalDialogController : NSWindowController <BDSKWebViewDelegate> {
-    BDSKWebView *webView;
-    BDSKStatusBar *statusBar;
-}
-- (WebView *)webView;
 @end

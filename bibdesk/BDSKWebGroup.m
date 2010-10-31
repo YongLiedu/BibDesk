@@ -230,7 +230,7 @@ static NSString *BDSKWebLocalizedString = nil;
     [self addPublications:newPubs ?: [NSArray array]];
 }
 
-- (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame {
+- (void)webView:(WebView *)sender didFailLoadForFrame:(WebFrame *)frame {
     [self addPublications:nil];
 }
 

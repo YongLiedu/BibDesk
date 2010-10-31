@@ -76,6 +76,8 @@
 		CE038E6A0F5F00E8001808EA /* Bookmark.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE038E690F5F00E8001808EA /* Bookmark.tiff */; };
 		CE0391910F612ED5001808EA /* sharing.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE0391900F612ED5001808EA /* sharing.tiff */; };
 		CE0391F90F6166FB001808EA /* importBadge.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE0391F80F6166FA001808EA /* importBadge.tiff */; };
+		CE03C0CA127D751D00F62F51 /* BDSKWebViewModalDialogController.h in Headers */ = {isa = PBXBuildFile; fileRef = CE03C0C8127D751D00F62F51 /* BDSKWebViewModalDialogController.h */; };
+		CE03C0CB127D751D00F62F51 /* BDSKWebViewModalDialogController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE03C0C9127D751D00F62F51 /* BDSKWebViewModalDialogController.m */; };
 		CE044A4412667EB500CE55C4 /* BDSKDownloadManager.h in Headers */ = {isa = PBXBuildFile; fileRef = CE044A4212667EB500CE55C4 /* BDSKDownloadManager.h */; };
 		CE044A4512667EB500CE55C4 /* BDSKDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE044A4312667EB500CE55C4 /* BDSKDownloadManager.m */; };
 		CE04583D0FB6FBBF003CAF5D /* Scroller_Divider.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE04583B0FB6FBBF003CAF5D /* Scroller_Divider.tiff */; };
@@ -859,6 +861,8 @@
 		CE038E690F5F00E8001808EA /* Bookmark.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Bookmark.tiff; sourceTree = "<group>"; };
 		CE0391900F612ED5001808EA /* sharing.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = sharing.tiff; sourceTree = "<group>"; };
 		CE0391F80F6166FA001808EA /* importBadge.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = importBadge.tiff; sourceTree = "<group>"; };
+		CE03C0C8127D751D00F62F51 /* BDSKWebViewModalDialogController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKWebViewModalDialogController.h; sourceTree = "<group>"; };
+		CE03C0C9127D751D00F62F51 /* BDSKWebViewModalDialogController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKWebViewModalDialogController.m; sourceTree = "<group>"; };
 		CE044A4212667EB500CE55C4 /* BDSKDownloadManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKDownloadManager.h; sourceTree = "<group>"; };
 		CE044A4312667EB500CE55C4 /* BDSKDownloadManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKDownloadManager.m; sourceTree = "<group>"; };
 		CE04583B0FB6FBBF003CAF5D /* Scroller_Divider.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Scroller_Divider.tiff; sourceTree = "<group>"; };
@@ -2181,6 +2185,7 @@
 				CEEFDDFF0B03ED0200668BB0 /* BDSKURLGroupSheetController.m */,
 				CE90BAFB103978D300992D50 /* BDSKURLSheetController.m */,
 				4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */,
+				CE03C0C9127D751D00F62F51 /* BDSKWebViewModalDialogController.m */,
 			);
 			name = Controllers;
 			sourceTree = "<group>";
@@ -2759,6 +2764,7 @@
 				F9E069B40981A03B00AEFBE7 /* BDSKWebOfScienceParser.h */,
 				CE3A254D0B75FF09006B64D3 /* BDSKWebParser.h */,
 				CEF7F42412743BCC00B20881 /* BDSKWebView.h */,
+				CE03C0C8127D751D00F62F51 /* BDSKWebViewModalDialogController.h */,
 				6C567DB70F8189F500DE285D /* BDSKZentralblattParser.h */,
 				F98F33C80892D4B700C1427D /* BDSKZoomablePDFView.h */,
 				CE27D9590AF92BFD00419879 /* BDSKZoomableTextView.h */,
@@ -2930,6 +2936,7 @@
 				CEFE21311259E6CB00DAD553 /* BDSKSearchGroupServerManager.h in Headers */,
 				CE044A4412667EB500CE55C4 /* BDSKDownloadManager.h in Headers */,
 				CEF7F42612743BCC00B20881 /* BDSKWebView.h in Headers */,
+				CE03C0CA127D751D00F62F51 /* BDSKWebViewModalDialogController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3765,6 +3772,7 @@
 				CEFE21321259E6CB00DAD553 /* BDSKSearchGroupServerManager.m in Sources */,
 				CE044A4512667EB500CE55C4 /* BDSKDownloadManager.m in Sources */,
 				CEF7F42712743BCC00B20881 /* BDSKWebView.m in Sources */,
+				CE03C0CB127D751D00F62F51 /* BDSKWebViewModalDialogController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
