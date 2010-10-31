@@ -126,31 +126,6 @@
     [super dealloc];
 }
 
-- (void)webView:(WebView *)sender setURL:(NSURL *)aURL {
-    if ([navigationDelegate respondsToSelector:@selector(webView:setURL:)])
-        [navigationDelegate webView:sender setURL:aURL];
-}
-
-- (void)webView:(WebView *)sender setIcon:(NSImage *)icon {
-    if ([navigationDelegate respondsToSelector:@selector(webView:setIcon:)])
-        [navigationDelegate webView:sender setIcon:icon];
-}
-
-- (void)webView:(WebView *)sender setLoading:(BOOL)loading {
-    if ([navigationDelegate respondsToSelector:@selector(webView:setLoading:)])
-        [navigationDelegate webView:sender setLoading:loading];
-}
-
-- (void)webView:(WebView *)sender setTitle:(NSString *)title {
-    if ([delegate respondsToSelector:@selector(webView:setTitle:)]) {
-        if ([NSString isEmptyString:title] && [sender respondsToSelector:@selector(URL)]) {
-            NSURL *url = [(BDSKWebView *)sender URL];
-            title = [url isFileURL] ? [[url path] lastPathComponent] : [[url absoluteString] stringByReplacingPercentEscapes];
-        }
-        [delegate webView:sender setTitle:title ?: @""];
-    }
-}
-
 #pragma mark Accessors
 
 - (id<BDSKWebViewDelegate>)delegate { return delegate; }
@@ -180,11 +155,33 @@
         NSBeep();
 }
 
-- (void)openInDefaultBrowser:(id)sender {
+- (void)openLinkInBrowser:(id)sender {
     NSDictionary *element = (NSDictionary *)[sender representedObject];
 	NSURL *theURL = [element objectForKey:WebElementLinkURLKey];
     if (theURL)
         [[NSWorkspace sharedWorkspace] openLinkedURL:theURL];
+}
+
+#pragma mark Delegate forward
+
+- (void)webView:(WebView *)sender setURL:(NSURL *)aURL {
+    if ([navigationDelegate respondsToSelector:@selector(webView:setURL:)])
+        [navigationDelegate webView:sender setURL:aURL];
+}
+
+- (void)webView:(WebView *)sender setIcon:(NSImage *)icon {
+    if ([navigationDelegate respondsToSelector:@selector(webView:setIcon:)])
+        [navigationDelegate webView:sender setIcon:icon];
+}
+
+- (void)webView:(WebView *)sender setLoading:(BOOL)loading {
+    if ([navigationDelegate respondsToSelector:@selector(webView:setLoading:)])
+        [navigationDelegate webView:sender setLoading:loading];
+}
+
+- (void)webView:(WebView *)sender setTitle:(NSString *)title {
+    if ([delegate respondsToSelector:@selector(webView:setTitle:)])
+        [delegate webView:sender setTitle:title ?: @""];
 }
 
 #pragma mark WebFrameLoadDelegate protocol
@@ -206,8 +203,13 @@
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame{
 
     if (frame == [sender mainFrame]) {
+        NSString *title = [sender mainFrameTitle];
+        if ([NSString isEmptyString:title]) {
+            NSURL *url = [[[frame dataSource] request] URL];
+            title = [url isFileURL] ? [[url path] lastPathComponent] : [[url absoluteString] stringByReplacingPercentEscapes];
+        }
         [self webView:sender setIcon:[sender mainFrameIcon]];
-        [self webView:sender setTitle:[sender mainFrameTitle]];
+        [self webView:sender setTitle:title];
     }
     [self webView:sender setLoading:[sender isLoading]];
     if ([delegate respondsToSelector:@selector(webView:didFinishLoadForFrame:)])
@@ -271,7 +273,7 @@
     
     if (i != NSNotFound) {
         item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Open Link in Browser", @"Menu item title")
-                                                                    action:@selector(openInDefaultBrowser:)
+                                                                    action:@selector(openLinkInBrowser:)
                                                              keyEquivalent:@""];
         [item setTag:BDSKWebMenuItemTagOpenLinkInBrowser];
         [item setTarget:self];
