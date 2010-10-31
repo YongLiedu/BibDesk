@@ -113,30 +113,16 @@
 - (id<BDSKWebViewNavigationDelegate>)navigationDelegate { return [webDelegate navigationDelegate]; }
 - (void)setNavigationDelegate:(id<BDSKWebViewNavigationDelegate>)newDelegate { [webDelegate setNavigationDelegate:newDelegate]; }
 
-@end
-
-#pragma mark -
-
-@implementation BDSKWebDelegate
-
-- (void)dealloc {
-    delegate = nil;
-    navigationDelegate = nil;
-    BDSKDESTROY(undoManager);
-    [super dealloc];
-}
-
-#pragma mark Accessors
-
-- (id<BDSKWebViewDelegate>)delegate { return delegate; }
-
-- (void)setDelegate:(id<BDSKWebViewDelegate>)newDelegate { delegate = newDelegate; }
-
-- (id<BDSKWebViewNavigationDelegate>)navigationDelegate { return navigationDelegate; }
-
-- (void)setNavigationDelegate:(id<BDSKWebViewNavigationDelegate>)newDelegate { navigationDelegate = newDelegate; }
-
 #pragma mark Actions
+
+- (IBAction)addBookmark:(id)sender {
+	WebDataSource *datasource = [[self mainFrame] dataSource];
+	NSString *URLString = [[[datasource request] URL] absoluteString];
+	NSString *name = [datasource pageTitle] ?: [URLString lastPathComponent];
+    
+    if (URLString)
+        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString proposedName:name modalForWindow:[self window]];
+}
 
 - (void)bookmarkLink:(id)sender {
 	NSDictionary *element = (NSDictionary *)[sender representedObject];
@@ -161,6 +147,29 @@
     if (theURL)
         [[NSWorkspace sharedWorkspace] openLinkedURL:theURL];
 }
+
+@end
+
+#pragma mark -
+
+@implementation BDSKWebDelegate
+
+- (void)dealloc {
+    delegate = nil;
+    navigationDelegate = nil;
+    BDSKDESTROY(undoManager);
+    [super dealloc];
+}
+
+#pragma mark Accessors
+
+- (id<BDSKWebViewDelegate>)delegate { return delegate; }
+
+- (void)setDelegate:(id<BDSKWebViewDelegate>)newDelegate { delegate = newDelegate; }
+
+- (id<BDSKWebViewNavigationDelegate>)navigationDelegate { return navigationDelegate; }
+
+- (void)setNavigationDelegate:(id<BDSKWebViewNavigationDelegate>)newDelegate { navigationDelegate = newDelegate; }
 
 #pragma mark Delegate forward
 
@@ -264,8 +273,7 @@
     [self webView:sender setStatusText:[[aLink absoluteString] stringByReplacingPercentEscapes]];
 }
 
-- (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems;
-{
+- (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems {
 	NSMutableArray *menuItems = [NSMutableArray arrayWithArray:defaultMenuItems];
 	NSMenuItem *item;
     
@@ -276,26 +284,29 @@
                                                                     action:@selector(openLinkInBrowser:)
                                                              keyEquivalent:@""];
         [item setTag:BDSKWebMenuItemTagOpenLinkInBrowser];
-        [item setTarget:self];
+        [item setTarget:sender];
         [item setRepresentedObject:element];
-        [menuItems insertObject:[item autorelease] atIndex:++i];
+        [menuItems insertObject:item atIndex:++i];
+        [item release];
         
         item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark Link", @"Menu item title") stringByAppendingEllipsis]
                                    action:@selector(bookmarkLink:)
                             keyEquivalent:@""];
         [item setTag:BDSKWebMenuItemTagBookmarkLink];
-        [item setTarget:self];
+        [item setTarget:sender];
         [item setRepresentedObject:element];
-        [menuItems insertObject:[item autorelease] atIndex:++i];
+        [menuItems insertObject:item atIndex:++i];
+        [item release];
         
         if ([[element objectForKey:WebElementLinkURLKey] isFileURL]) {
             item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Reveal Linked File", @"Menu item title")
                                        action:@selector(revealLink:)
                                 keyEquivalent:@""];
             [item setTag:BDSKWebMenuItemTagRevealLink];
-            [item setTarget:self];
+            [item setTarget:sender];
             [item setRepresentedObject:element];
-            [menuItems insertObject:[item autorelease] atIndex:++i];
+            [menuItems insertObject:item atIndex:++i];
+            [item release];
         }
     }
     
@@ -306,13 +317,17 @@
                                                                 action:@selector(makeTextLarger:)
                                                          keyEquivalent:@""];
     [item setTag:BDSKWebMenuItemTagMakeTextLarger];
-	[menuItems addObject:[item autorelease]];
+    [item setTarget:sender];
+	[menuItems addObject:item];
+    [item release];
 	
 	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Decrease Text Size", @"Menu item title")
                                                                 action:@selector(makeTextSmaller:)
                                                          keyEquivalent:@""];
     [item setTag:BDSKWebMenuItemTagMakeTextSmaller];
-	[menuItems addObject:[item autorelease]];
+    [item setTarget:sender];
+	[menuItems addObject:item];
+    [item release];
 	
     [menuItems addObject:[NSMenuItem separatorItem]];
         
@@ -320,7 +335,9 @@
                                                                 action:@selector(addBookmark:)
                                                          keyEquivalent:@""];
     [item setTag:BDSKWebMenuItemTagAddBookmark];
-    [menuItems addObject:[item autorelease]];
+    [item setTarget:sender];
+    [menuItems addObject:item];
+    [item release];
     
     if ([delegate respondsToSelector:@selector(webView:contextMenuItemsForElement:defaultMenuItems:)])
         return [delegate webView:sender contextMenuItemsForElement:element defaultMenuItems:menuItems];

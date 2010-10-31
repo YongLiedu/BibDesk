@@ -66,9 +66,3 @@
 - (NSUndoManager *)undoManager;
 
 @end
-
-#pragma mark -
-
-@interface WebView (BDSKExtensions)
-- (IBAction)addBookmark:(id)sender;
-@end

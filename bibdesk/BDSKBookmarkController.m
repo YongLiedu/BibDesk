@@ -685,18 +685,3 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 }
 
 @end
-
-#pragma mark -
-
-@implementation WebView (BDSKExtensions)
-
-- (IBAction)addBookmark:(id)sender {
-	WebDataSource *datasource = [[self mainFrame] dataSource];
-	NSString *URLString = [[[datasource request] URL] absoluteString];
-	NSString *name = [datasource pageTitle] ?: [URLString lastPathComponent];
-    
-    if (URLString)
-        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString proposedName:name modalForWindow:[self window]];
-}
-
-@end

@@ -1266,7 +1266,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 - (IBAction)addBookmark:(id)sender {
     if ([self hasWebGroupsSelected])
-        [[[[self selectedGroups] lastObject] webView] addBookmark:sender];
+        [[(BDSKWebGroup *)[[self selectedGroups] lastObject] webView] addBookmark:sender];
     else
         NSBeep();
 }

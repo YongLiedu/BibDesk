@@ -64,6 +64,8 @@ enum {
 - (NSURL *)URL;
 - (void)setURL:(NSURL *)newURL;
 
+- (IBAction)addBookmark:(id)sender;
+
 @end
 
 #pragma mark -
