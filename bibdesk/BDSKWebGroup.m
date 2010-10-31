@@ -73,10 +73,10 @@ static NSString *BDSKWebLocalizedString = nil;
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [webViewController setDelegate:nil];
-    delegate = nil;
+    [webView setHostWindow:nil];
+    [webView setDelegate:nil];
     BDSKDESTROY(label);
-    BDSKDESTROY(webViewController);
+    BDSKDESTROY(webView);
     [super dealloc];
 }
 
@@ -89,9 +89,10 @@ static NSString *BDSKWebLocalizedString = nil;
 }
 
 - (void)makeWebView {
-    BDSKASSERT(webViewController == nil);
-    webViewController = [[BDSKWebViewController alloc] initWithDelegate:self];
-    [[webViewController webView] setHostWindow:[[[document windowControllers] objectAtIndex:0] window]];
+    BDSKASSERT(webView == nil);
+    webView = [[BDSKWebView alloc] init];
+    [webView setDelegate:self];
+    [webView setHostWindow:[[[document windowControllers] objectAtIndex:0] window]];
 }
 
 #pragma mark BDSKGroup overrides
@@ -102,7 +103,7 @@ static NSString *BDSKWebLocalizedString = nil;
 
 - (BOOL)isWeb { return YES; }
 
-- (BOOL)isRetrieving { return [[webViewController webView] isLoading]; }
+- (BOOL)isRetrieving { return [webView isLoading]; }
 
 - (NSString *)label {
     return [label length] > 0 ? label : NSLocalizedString(@"(Empty)", @"Empty group label");
@@ -117,8 +118,8 @@ static NSString *BDSKWebLocalizedString = nil;
 
 - (void)setDocument:(BibDocument *)newDocument{
     [super setDocument:newDocument];
-    if (webViewController)
-        [[webViewController webView] setHostWindow:[[[document windowControllers] objectAtIndex:0] window]];
+    if (webView)
+        [webView setHostWindow:[[[document windowControllers] objectAtIndex:0] window]];
 }
 
 #pragma mark BDSKExternalGroup overrides
@@ -128,56 +129,40 @@ static NSString *BDSKWebLocalizedString = nil;
 
 #pragma mark Accessors
 
-- (WebView *)webView {
-    if (webViewController == nil)
+- (BDSKWebView *)webView {
+    if (webView == nil)
         [self makeWebView];
-    return [webViewController webView];
+    return webView;
 }
 
 - (BOOL)isWebViewLoaded {
-    return webViewController != nil;
-}
-
-- (id<BDSKWebGroupDelegate>)delegate {
-    return delegate;
-}
-
-- (void)setDelegate:(id<BDSKWebGroupDelegate>)newDelegate {
-    delegate = newDelegate;
+    return webView != nil;
 }
 
 - (NSURL *)URL {
-    return [webViewController URL];
+    return [webView URL];
 }
 
 - (void)setURL:(NSURL *)newURL {
-    if (newURL && webViewController == nil)
+    if (newURL && webView == nil)
         [self makeWebView];
-    [webViewController setURL:newURL];
+    [webView setURL:newURL];
 }
 
-#pragma mark BDSKWebViewControllerDelegate protocol
+#pragma mark BDSKWebViewDelegate protocol
 
-- (void)webViewController:(BDSKWebViewController *)controller setURL:(NSURL *)aURL {
-    [delegate webGroup:self setURL:aURL];
-}
-
-- (void)webViewController:(BDSKWebViewController *)controller setIcon:(NSImage *)icon {
-    [delegate webGroup:self setIcon:icon];
-}
-
-- (void)webViewController:(BDSKWebViewController *)controller setTitle:(NSString *)title {
+- (void)webView:(WebView *)sender setTitle:(NSString *)title {
     [self setLabel:title];
 }
 
-- (void)webViewController:(BDSKWebViewController *)controller setStatusText:(NSString *)text {
+- (void)webView:(WebView *)sender setStatusText:(NSString *)text {
     if ([NSString isEmptyString:text])
         [document updateStatus];
     else
         [document setStatus:text];
 }
 
-- (WebView *)webViewControllerCreateWebView:(BDSKWebViewController *)controller {
+- (WebView *)webViewCreateWebView:(WebView *)sender {
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKOpenNewWindowsForWebGroupInBrowserKey])
         return nil;
     BDSKWebGroup *group = [[[BDSKWebGroup alloc] init] autorelease];
@@ -185,22 +170,22 @@ static NSString *BDSKWebLocalizedString = nil;
     return [group webView];
 }
 
-- (void)webViewControllerShow:(BDSKWebViewController *)controller {
+- (void)webViewShow:(WebView *)sender {
     [document selectGroup:self];
 }
 
-- (void)webViewControllerClose:(BDSKWebViewController *)controller {
+- (void)webViewClose:(WebView *)sender {
     [document removeGroups:[NSArray arrayWithObject:self]];
 }
 
-- (void)webViewController:(BDSKWebViewController *)controller didStartLoadForMainFrame:(BOOL)forMainFrame {
-    if (forMainFrame)
+- (void)webView:(WebView *)sender didStartLoadForFrame:(WebFrame *)frame {
+    if (frame == [sender mainFrame])
         [self setPublications:nil];
     else
         [self addPublications:nil];
 }
 
-- (void)webViewController:(BDSKWebViewController *)controller didFinishLoadForFrame:(WebFrame *)frame {
+- (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame {
 	NSURL *url = [[[frame dataSource] request] URL];
     DOMDocument *domDocument = [frame DOMDocument];
     
@@ -245,7 +230,7 @@ static NSString *BDSKWebLocalizedString = nil;
     [self addPublications:newPubs ?: [NSArray array]];
 }
 
-- (void)webViewControllerDidFailLoad:(BDSKWebViewController *)controller {
+- (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame {
     [self addPublications:nil];
 }
 

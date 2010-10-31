@@ -40,32 +40,20 @@
 #import "BDSKExternalGroup.h"
 #import "BDSKWebViewController.h"
 
-@protocol BDSKWebGroupDelegate;
-@class WebView;
 
-@interface BDSKWebGroup : BDSKExternalGroup <BDSKWebViewControllerDelegate> {
+@interface BDSKWebGroup : BDSKExternalGroup <BDSKWebViewDelegate> {
     NSString *label;
-    id <BDSKWebGroupDelegate> delegate;
-    BDSKWebViewController *webViewController;
+    BDSKWebView *webView;
 }
 
 - (NSString *)label;
 - (void)setLabel:(NSString *)newLabel;
 
-- (id<BDSKWebGroupDelegate>)delegate;
-- (void)setDelegate:(id<BDSKWebGroupDelegate>)newDelegate;
-
 - (NSURL *)URL;
 - (void)setURL:(NSURL *)newURL;
 
-- (WebView *)webView;
+- (BDSKWebView *)webView;
 
 - (BOOL)isWebViewLoaded;
 
-@end
-
-
-@protocol BDSKWebGroupDelegate <NSObject>
-- (void)webGroup:(BDSKWebGroup *)group setURL:(NSURL *)aURL;
-- (void)webGroup:(BDSKWebGroup *)group setIcon:(NSImage *)icon;
 @end

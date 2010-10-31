@@ -116,7 +116,8 @@
         item = [[BibItem alloc] init];
         [item setOwner:self];
         fields = [[NSMutableArray alloc] init];
-        webViewController = [[BDSKWebViewController alloc] initWithDelegate:self];
+        webView = [[BDSKWebView alloc] init];
+        [webView setDelegate:self];
         showingWebView = NO;
         itemsAdded = [[NSMutableArray alloc] init];
 		webSelection = nil;
@@ -132,12 +133,12 @@
     BDSKASSERT(download == nil);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     // next line is a workaround for a nasty webview crasher; looks like it messages a garbage pointer to its undo manager
-    [webViewController setDelegate:nil];
+    [webView setDelegate:nil];
     [itemTableView setDelegate:nil];
     [itemTableView setDataSource:nil];
     [splitView setDelegate:nil];
     [citeKeyField setDelegate:nil];
-    BDSKDESTROY(webViewController);
+    BDSKDESTROY(webView);
     BDSKDESTROY(item);
     BDSKDESTROY(fields);
     BDSKDESTROY(itemsAdded);
@@ -163,7 +164,7 @@
     [statusLine setStringValue:@""];
 	
     [webViewBox setEdges:BDSKEveryEdgeMask];
-	[webViewBox setContentView:[webViewController webView]];
+	[webViewBox setContentView:webView];
     
     [self setupTypeUI];
     
@@ -187,7 +188,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleWebViewDidChangeSelection:)
                                                  name:WebViewDidChangeSelectionNotification
-                                               object:[webViewController webView]];
+                                               object:webView];
 }
 
 #pragma mark Calling the main sheet
@@ -359,16 +360,16 @@
 - (IBAction)openBookmark:(id)sender{
     NSURL *url = [sender representedObject];
     [self setShowingWebView:YES];
-    [webViewController setURL:url];
+    [webView setURL:url];
 }
 
 - (IBAction)stopOrReloadAction:(id)sender{
 	if(isDownloading){
 		[self setDownloading:NO];
 	}else if (isLoading){
-		[[webViewController webView] stopLoading:sender];
+		[webView stopLoading:sender];
 	}else{
-		[[webViewController webView] reload:sender];
+		[webView reload:sender];
 	}
 }
 
@@ -491,7 +492,7 @@
 #pragma mark WebView contextual menu actions
 
 - (void)copyLocationAsRemoteUrl:(id)sender{
-	NSURL *aURL = [webViewController URL];
+	NSURL *aURL = [webView URL];
 	
 	if (aURL) {
         [item addFileForURL:aURL autoFile:YES runScriptHook:NO];
@@ -509,7 +510,7 @@
 }
 
 - (void)saveFileAsLocalUrl:(id)sender{
-	WebDataSource *dataSource = [[[webViewController webView] mainFrame] dataSource];
+	WebDataSource *dataSource = [[webView mainFrame] dataSource];
 	if (!dataSource || [dataSource isLoading]) 
 		return;
 	
@@ -660,7 +661,7 @@
         NSArray *urls = (NSArray *)[pb propertyListForType:pbType];
         NSURL *url = [NSURL URLWithString:[urls objectAtIndex:0]];
         
-        [webViewController setURL:url];
+        [webView setURL:url];
         
     }else{
 		
@@ -716,7 +717,7 @@
 - (void)showWebViewWithURLString:(NSString *)urlString{
     [self setShowingWebView:YES];
     NSURL *url = [NSURL URLWithString:[urlString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
-    [webViewController setURL:url];
+    [webView setURL:url];
         
 }
 
@@ -767,7 +768,7 @@
 - (void)didEndSheet:(NSPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     // cleanup
     [self cancelDownload];
-    [webViewController setDelegate:nil];
+    [webView setDelegate:nil];
 	// select the items we just added
 	[document selectPublications:itemsAdded];
 	[itemsAdded removeAllObjects];
@@ -863,7 +864,7 @@
                                  informativeTextWithFormat:NSLocalizedString(@"Mac OS X does not recognize this as a valid URL.  Please re-enter the address and try again.", @"Informative text in alert dialog")];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         } else {        
-            [webViewController setURL:url];
+            [webView setURL:url];
         }
     }        
 }
@@ -871,7 +872,7 @@
 - (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     
 	if (returnCode == NSOKButton) {
-		if ([[[[[webViewController webView] mainFrame] dataSource] data] writeToFile:[sheet filename] atomically:YES]) {
+		if ([[[[webView mainFrame] dataSource] data] writeToFile:[sheet filename] atomically:YES]) {
 			NSURL *fileURL = [NSURL fileURLWithPath:[sheet filename]];
 			
             [item addFileForURL:fileURL autoFile:YES runScriptHook:NO];
@@ -957,7 +958,7 @@
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
 	if ([menuItem action] == @selector(saveFileAsLocalUrl:)) {
-		return NO == [[webViewController webView] isLoading];
+		return NO == [webView isLoading];
 	} else if ([menuItem action] == @selector(importFromPasteboardAction:)) {
 		[menuItem setTitle:NSLocalizedString(@"Load Clipboard", @"Menu item title")];
 		return YES;
@@ -981,9 +982,9 @@
 	return YES;
 }
 
-#pragma mark BDSKWebViewControllerDelegate protocol
+#pragma mark BDSKWebViewDelegate protocol
 
-- (NSArray *)webViewController:(BDSKWebViewController *)controller contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems{
+- (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems{
 	NSMutableArray *menuItems = [NSMutableArray arrayWithArray:defaultMenuItems];
 	NSMenuItem *menuItem;
     
@@ -1029,16 +1030,15 @@
 	return menuItems;
 }
 
-- (void)webViewController:(BDSKWebViewController *)controller setStatusText:(NSString *)text {
+- (void)webView:(WebView *)sender setStatusText:(NSString *)text {
     [statusLine setStringValue:text ?: @""];
 }
 
-- (void)webViewController:(BDSKWebViewController *)controller didStartLoadForMainFrame:(BOOL)forMainFrame {
+- (void)webView:(WebView *)sender didStartLoadForFrame:(WebFrame *)frame {
 	[self setLoading:YES];
 }
 
-- (void)webViewController:(BDSKWebViewController *)controller didFinishLoadForFrame:(WebFrame *)frame {
-	WebView *webView = [webViewController webView];
+- (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame {
     [self setLoading:[webView isLoading]];
 	[backButton setEnabled:[webView canGoBack]];
 	[forwardButton setEnabled:[webView canGoForward]];
@@ -1046,8 +1046,7 @@
     [self autoDiscoverDataFromFrame:frame];
 }
 
-- (void)webViewControllerDidFailLoad:(BDSKWebViewController *)controller{
-	WebView *webView = [webViewController webView];
+- (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame {
     [self setLoading:[webView isLoading]];
 	[backButton setEnabled:[webView canGoBack]];
 	[forwardButton setEnabled:[webView canGoForward]];

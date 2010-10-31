@@ -37,7 +37,6 @@
  */
 
 #import "BDSKWebViewController.h"
-#import <WebKit/WebKit.h>
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKBookmarkController.h"
 #import "BDSKDownloadManager.h"
@@ -45,79 +44,112 @@
 #import "NSString_BDSKExtensions.h"
 
 
-@implementation BDSKWebViewController
+@interface BDSKWebDelegate : NSObject {
+    id <BDSKWebViewDelegate> delegate;
+    id <BDSKWebViewNavigationDelegate> navigationDelegate;
+    NSUndoManager *undoManager;    
+}
 
-- (id)initWithDelegate:(id<BDSKWebViewControllerDelegate>)aDelegate  {
-    if (self = [super init]) {
-        webView = [[WebView alloc] init];
-        [webView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
-        [webView setGroupName:@"BibDeskWebGroup"];
-        [webView setFrameLoadDelegate:self];
-        [webView setUIDelegate:self];
-        [webView setEditingDelegate:self];
-        [webView setDownloadDelegate:[BDSKDownloadManager sharedManager]];
-        delegate = aDelegate;
+- (id<BDSKWebViewDelegate>)delegate;
+- (void)setDelegate:(id<BDSKWebViewDelegate>)newDelegate;
+
+- (id<BDSKWebViewNavigationDelegate>)navigationDelegate;
+- (void)setNavigationDelegate:(id<BDSKWebViewNavigationDelegate>)newDelegate;
+
+@end
+
+#pragma mark -
+
+@implementation BDSKWebView
+
+- (id)initWithFrame:(NSRect)frameRect frameName:(NSString *)frameName groupName:(NSString *)groupName {
+    if (self = [super initWithFrame:frameRect frameName:frameName groupName:@"BibDeskWebGroup"]) {
+        [self setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+        webDelegate = [[BDSKWebDelegate alloc] init];
+        [self setFrameLoadDelegate:webDelegate];
+        [self setUIDelegate:webDelegate];
+        [self setEditingDelegate:webDelegate];
+        [self setDownloadDelegate:[BDSKDownloadManager sharedManager]];
     }
     return self;
 }
 
-- (id)init {
-    return [self initWithDelegate:nil];
-}
-
 - (void)dealloc {
-    [webView setHostWindow:nil];
-    [webView setFrameLoadDelegate:nil];
-    [webView setUIDelegate:nil];
-    [webView setEditingDelegate:nil];
-    [webView setDownloadDelegate:nil];
-    delegate = nil;
-    BDSKDESTROY(webView);
-    BDSKDESTROY(undoManager);
+    [webDelegate setDelegate:nil];
+    [self setFrameLoadDelegate:nil];
+    [self setUIDelegate:nil];
+    [self setEditingDelegate:nil];
+    [self setDownloadDelegate:nil];
+    BDSKDESTROY(webDelegate);
     [super dealloc];
 }
 
-- (void)notifyURL:(NSURL *)aURL {
-    if ([delegate respondsToSelector:@selector(webViewController:setURL:)])
-        [delegate webViewController:self setURL:aURL];
-}
-
-- (void)notifyIcon:(NSImage *)icon {
-    if ([delegate respondsToSelector:@selector(webViewController:setIcon:)])
-        [delegate webViewController:self setIcon:icon];
-}
-
-- (void)notifyTitle:(NSString *)title {
-    if ([NSString isEmptyString:title]) {
-        NSURL *url = [self URL];
-        title = [url isFileURL] ? [[url path] lastPathComponent] : [[url absoluteString] stringByReplacingPercentEscapes];
-    }
-    if ([delegate respondsToSelector:@selector(webViewController:setTitle:)])
-        [delegate webViewController:self setTitle:title ?: @""];
-}
-
-#pragma mark Accessors
-
-- (WebView *)webView { return webView; }
-
-- (id<BDSKWebViewControllerDelegate>)delegate { return delegate; }
-
-- (void)setDelegate:(id<BDSKWebViewControllerDelegate>)newDelegate { delegate = newDelegate; }
-
 - (NSURL *)URL {
-    WebFrame *mainFrame = [webView mainFrame];
+    WebFrame *mainFrame = [self mainFrame];
     WebDataSource *dataSource = [mainFrame provisionalDataSource] ?: [mainFrame dataSource];
     return [[dataSource request] URL];
 }
 
 - (void)setURL:(NSURL *)newURL {
-    if (newURL && [[[[[webView mainFrame] dataSource] request] URL] isEqual:newURL] == NO) {
-        [self notifyTitle:[NSLocalizedString(@"Loading", @"Placeholder web group label") stringByAppendingEllipsis]];
-        [self notifyIcon:nil];
-        [self notifyURL:newURL];
-        [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:newURL]];
+    if (newURL && [[[[[self mainFrame] dataSource] request] URL] isEqual:newURL] == NO) {
+        [[self mainFrame] loadRequest:[NSURLRequest requestWithURL:newURL]];
     }
 }
+
+- (id<BDSKWebViewDelegate>)delegate { return [webDelegate delegate]; }
+
+- (void)setDelegate:(id<BDSKWebViewDelegate>)newDelegate { [webDelegate setDelegate:newDelegate]; }
+
+- (id<BDSKWebViewNavigationDelegate>)navigationDelegate { return [webDelegate navigationDelegate]; }
+- (void)setNavigationDelegate:(id<BDSKWebViewNavigationDelegate>)newDelegate { [webDelegate setNavigationDelegate:newDelegate]; }
+
+@end
+
+#pragma mark -
+
+@implementation BDSKWebDelegate
+
+- (void)dealloc {
+    delegate = nil;
+    navigationDelegate = nil;
+    BDSKDESTROY(undoManager);
+    [super dealloc];
+}
+
+- (void)webView:(WebView *)sender setURL:(NSURL *)aURL {
+    if ([navigationDelegate respondsToSelector:@selector(webView:setURL:)])
+        [navigationDelegate webView:sender setURL:aURL];
+}
+
+- (void)webView:(WebView *)sender setIcon:(NSImage *)icon {
+    if ([navigationDelegate respondsToSelector:@selector(webView:setIcon:)])
+        [navigationDelegate webView:sender setIcon:icon];
+}
+
+- (void)webView:(WebView *)sender setLoading:(BOOL)loading {
+    if ([navigationDelegate respondsToSelector:@selector(webView:setLoading:)])
+        [navigationDelegate webView:sender setLoading:loading];
+}
+
+- (void)webView:(WebView *)sender setTitle:(NSString *)title {
+    if ([delegate respondsToSelector:@selector(webView:setTitle:)]) {
+        if ([NSString isEmptyString:title] && [sender respondsToSelector:@selector(URL)]) {
+            NSURL *url = [(BDSKWebView *)sender URL];
+            title = [url isFileURL] ? [[url path] lastPathComponent] : [[url absoluteString] stringByReplacingPercentEscapes];
+        }
+        [delegate webView:sender setTitle:title ?: @""];
+    }
+}
+
+#pragma mark Accessors
+
+- (id<BDSKWebViewDelegate>)delegate { return delegate; }
+
+- (void)setDelegate:(id<BDSKWebViewDelegate>)newDelegate { delegate = newDelegate; }
+
+- (id<BDSKWebViewNavigationDelegate>)navigationDelegate { return navigationDelegate; }
+
+- (void)setNavigationDelegate:(id<BDSKWebViewNavigationDelegate>)newDelegate { navigationDelegate = newDelegate; }
 
 #pragma mark Actions
 
@@ -125,8 +157,9 @@
 	NSDictionary *element = (NSDictionary *)[sender representedObject];
 	NSString *URLString = [(NSURL *)[element objectForKey:WebElementLinkURLKey] absoluteString];
 	NSString *title = [element objectForKey:WebElementLinkLabelKey] ?: [URLString lastPathComponent];
+	WebFrame *frame = [element objectForKey:WebElementFrameKey];
 	
-    [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString proposedName:title modalForWindow:[webView window]];
+    [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString proposedName:title modalForWindow:[[frame webView] window]];
 }
 
 - (void)revealLink:(id)sender {
@@ -147,33 +180,34 @@
 #pragma mark WebFrameLoadDelegate protocol
 
 - (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame{
-    BOOL isMainFrame = (frame == [sender mainFrame]);
-    
-    if (isMainFrame) {
-        [self notifyIcon:nil];
-        [self notifyTitle:[NSLocalizedString(@"Loading", @"Placeholder web group label") stringByAppendingEllipsis]];
+    if (frame == [sender mainFrame]) {
+        [self webView:sender setIcon:nil];
+        [self webView:sender setTitle:[NSLocalizedString(@"Loading", @"Placeholder web group label") stringByAppendingEllipsis]];
         
         if ([[frame provisionalDataSource] unreachableURL] == nil)
-            [self notifyURL:[[[[webView mainFrame] provisionalDataSource] request] URL]];
+            [self webView:sender setURL:[[[[sender mainFrame] provisionalDataSource] request] URL]];
     }
+    [self webView:sender setLoading:[sender isLoading]];
     
-    if ([delegate respondsToSelector:@selector(webViewController:didStartLoadForMainFrame:)])
-        [delegate webViewController:self didStartLoadForMainFrame:isMainFrame];
+    if ([delegate respondsToSelector:@selector(webView:didStartLoadForFrame:)])
+        [delegate webView:sender didStartLoadForFrame:frame];
 }
 
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame{
 
     if (frame == [sender mainFrame]) {
-        [self notifyIcon:[sender mainFrameIcon]];
-        [self notifyTitle:[sender mainFrameTitle]];
+        [self webView:sender setIcon:[sender mainFrameIcon]];
+        [self webView:sender setTitle:[sender mainFrameTitle]];
     }
-    if ([delegate respondsToSelector:@selector(webViewController:didFinishLoadForFrame:)])
-        [delegate webViewController:self didFinishLoadForFrame:frame];
+    [self webView:sender setLoading:[sender isLoading]];
+    if ([delegate respondsToSelector:@selector(webView:didFinishLoadForFrame:)])
+        [delegate webView:sender didFinishLoadForFrame:frame];
 }
 
 - (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
-    if ([delegate respondsToSelector:@selector(webViewControllerDidFailLoad:)])
-        [delegate webViewControllerDidFailLoad:self];
+    if ([delegate respondsToSelector:@selector(webView:didFailLoadWithError:forFrame:)])
+        [delegate webView:sender didFailLoadWithError:error forFrame:frame];
+    [self webView:sender setLoading:[sender isLoading]];
     
     // !!! logs are here to help diagnose problems that users are reporting
     NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
@@ -189,17 +223,17 @@
 
 - (void)webView:(WebView *)sender didReceiveServerRedirectForProvisionalLoadForFrame:(WebFrame *)frame{
     if (frame == [sender mainFrame])
-        [self notifyURL:[[[frame provisionalDataSource] request] URL]];
+        [self webView:sender setURL:[[[frame provisionalDataSource] request] URL]];
 }
 
 - (void)webView:(WebView *)sender didReceiveIcon:(NSImage *)image forFrame:(WebFrame *)frame{
     if (frame == [sender mainFrame])
-        [self notifyIcon:image];
+        [self webView:sender setIcon:image];
 }
 
 - (void)webView:(WebView *)sender didReceiveTitle:(NSString *)title forFrame:(WebFrame *)frame {
     if (frame == [sender mainFrame])
-        [self notifyTitle:title];
+        [self webView:sender setTitle:title];
 }
 
 - (void)webView:(WebView *)sender didClearWindowObject:(WebScriptObject *)windowObject forFrame:(WebFrame *)frame {
@@ -209,8 +243,8 @@
 #pragma mark WebUIDelegate protocol
 
 - (void)webView:(WebView *)sender setStatusText:(NSString *)text {
-    if ([sender window] && [delegate respondsToSelector:@selector(webViewController:setStatusText:)])
-        [delegate webViewController:self setStatusText:text];
+    if ([sender window] && [delegate respondsToSelector:@selector(webView:setStatusText:)])
+        [delegate webView:sender setStatusText:text];
 }
 
 - (void)webView:(WebView *)sender mouseDidMoveOverElement:(NSDictionary *)elementInformation modifierFlags:(NSUInteger)modifierFlags {
@@ -276,8 +310,8 @@
     [item setTag:BDSKWebMenuItemTagAddBookmark];
     [menuItems addObject:[item autorelease]];
     
-    if ([delegate respondsToSelector:@selector(webViewController:contextMenuItemsForElement:defaultMenuItems:)])
-        return [delegate webViewController:self contextMenuItemsForElement:element defaultMenuItems:menuItems];
+    if ([delegate respondsToSelector:@selector(webView:contextMenuItemsForElement:defaultMenuItems:)])
+        return [delegate webView:sender contextMenuItemsForElement:element defaultMenuItems:menuItems];
     
 	return menuItems;
 }
@@ -285,8 +319,8 @@
 - (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request {
     // due to a known WebKit bug the request is always nil https://bugs.webkit.org/show_bug.cgi?id=23432
     WebView *view = nil;
-    if ([delegate respondsToSelector:@selector(webViewControllerCreateWebView:)])
-        view = [delegate webViewControllerCreateWebView:self];
+    if ([delegate respondsToSelector:@selector(webViewCreateWebView:)])
+        view = [delegate webViewCreateWebView:sender];
     if (view == nil)
         view = [[BDSKNewWebWindowHandler sharedHandler] webView];
     if (request)
@@ -303,41 +337,35 @@
 
 // this seems to be necessary in order for webView:createWebViewModalDialogWithRequest: to work
 - (void)webViewRunModal:(WebView *)sender {
-    if ([delegate respondsToSelector:@selector(webViewControllerRunModal:)])
-        [delegate webViewControllerRunModal:self];
+    if ([delegate respondsToSelector:@selector(webViewRunModal:)])
+        [delegate webViewRunModal:sender];
 }
 
 - (void)webViewShow:(WebView *)sender {
-    if ([delegate respondsToSelector:@selector(webViewControllerShow:)])
-        [delegate webViewControllerShow:self];
+    if ([delegate respondsToSelector:@selector(webViewShow:)])
+        [delegate webViewShow:sender];
 }
 
 - (void)webViewClose:(WebView *)sender {
-    if ([delegate respondsToSelector:@selector(webViewControllerClose:)])
-        [delegate webViewControllerClose:self];
+    if ([delegate respondsToSelector:@selector(webViewClose:)])
+        [delegate webViewClose:sender];
 }
 
 // we don't want the default implementation to change our document window resizability
 - (void)webView:(WebView *)sender setResizable:(BOOL)resizable {
-    if ([delegate respondsToSelector:@selector(webViewController:setResizable:)])
-        [delegate webViewController:self setResizable:resizable];
+    if ([delegate respondsToSelector:@selector(webView:setResizable:)])
+        [delegate webView:sender setResizable:resizable];
 }
 
 // we don't want the default implementation to change our document window frame
 - (void)webView:(WebView *)sender setFrame:(NSRect)frame {
-    if ([delegate respondsToSelector:@selector(webViewController:setFrame:)])
-        [delegate webViewController:self setFrame:frame];
+    if ([delegate respondsToSelector:@selector(webView:setFrame:)])
+        [delegate webView:sender setFrame:frame];
 }
 
 - (void)webView:(WebView *)sender setStatusBarVisible:(BOOL)visible {
-    if ([delegate respondsToSelector:@selector(webViewController:setStatusBarVisible:)])
-        [delegate webViewController:self setStatusBarVisible:visible];
-}
-
-- (BOOL)webViewIsStatusBarVisible:(WebView *)sender {
-    if ([delegate respondsToSelector:@selector(webViewControllerIsStatusBarVisible:)])
-        return [delegate webViewControllerIsStatusBarVisible:self];
-    return NO;
+    if ([delegate respondsToSelector:@selector(webView:setStatusBarVisible:)])
+        [delegate webView:sender setStatusBarVisible:visible];
 }
 
 - (NSString *)alertTitleForFrame:(WebFrame *)frame {
@@ -426,8 +454,8 @@ static id sharedHandler = nil;
     NSWindow *window = [[[NSWindow alloc] initWithContentRect:NSMakeRect(0.0, 0.0, 200.0, 200.0) styleMask:mask backing:NSBackingStoreBuffered defer:YES] autorelease];
     if (self = [self initWithWindow:window]) {
         [window setDelegate:self];
-        webViewController = [[BDSKWebViewController alloc] initWithDelegate:self];
-        WebView *webView = [webViewController webView];
+        webView = [[BDSKWebView alloc] init];
+        [webView setDelegate:self];
         NSView *contentView = [window contentView];
         [webView setFrame:[contentView bounds]];
         [contentView addSubview:webView];
@@ -436,14 +464,14 @@ static id sharedHandler = nil;
 }
 
 - (void)dealloc {
-    [webViewController setDelegate:nil];
-    BDSKDESTROY(webViewController);
+    [webView setDelegate:nil];
+    BDSKDESTROY(webView);
     BDSKDESTROY(statusBar);
     [super dealloc];
 }
 
 - (WebView *)webView {
-    return [webViewController webView];
+    return webView;
 }
 
 - (void)windowWillClose:(NSNotification *)notification {
@@ -451,19 +479,19 @@ static id sharedHandler = nil;
     [self autorelease];
 }
 
-- (void)webViewController:(BDSKWebViewController *)controller setTitle:(NSString *)title {
+- (void)webView:(WebView *)sender setTitle:(NSString *)title {
     [[self window] setTitle:title];
 }
 
-- (void)webViewController:(BDSKWebViewController *)controller setStatusText:(NSString *)text {
+- (void)webView:(WebView *)sender setStatusText:(NSString *)text {
     [statusBar setStringValue:text ?: @""];
 }
 
-- (void)webViewControllerClose:(BDSKWebViewController *)controller {
+- (void)webViewClose:(WebView *)sender {
     [[self window] close];
 }
 
-- (void)webViewControllerRunModal:(BDSKWebViewController *)controller {
+- (void)webViewRunModal:(WebView *)sender {
     [self retain];
     // we can't use [NSApp runModalForWindow], because otherwise the webview does not download, and also it won't receive any close message from javascript
     // http://www.dejal.com/blog/2007/01/cocoa-topics-case-modal-webview
@@ -476,7 +504,7 @@ static id sharedHandler = nil;
     [NSApp endModalSession:session];
 }
 
-- (void)webViewController:(BDSKWebViewController *)controller setResizable:(BOOL)resizable {
+- (void)webView:(WebView *)sender setResizable:(BOOL)resizable {
     NSWindow *window = [self window];
     [window setShowsResizeIndicator:resizable];
     [[window standardWindowButton:NSWindowZoomButton] setEnabled:resizable];
@@ -489,7 +517,7 @@ static id sharedHandler = nil;
     }
 }
 
-- (void)webViewController:(BDSKWebViewController *)controller setFrame:(NSRect)frame {
+- (void)webView:(WebView *)sender setFrame:(NSRect)frame {
     [[self window] setFrame:frame display:YES];
     if ([[self window] showsResizeIndicator] == NO) {
         [[self window] setMinSize:frame.size];
@@ -497,19 +525,14 @@ static id sharedHandler = nil;
     }
 }
 
-- (void)webViewController:(BDSKWebViewController *)controller setStatusBarVisible:(BOOL)visible {
+- (void)webView:(WebView *)sender setStatusBarVisible:(BOOL)visible {
     if (visible != [statusBar isVisible]) {
-        WebView *webView = [webViewController webView];
         if (visible && statusBar == nil) {
             statusBar = [[BDSKStatusBar alloc] initWithFrame:NSMakeRect(0.0, 0.0, NSWidth([webView frame]), 22.0)];
             [statusBar setAutoresizingMask:NSViewWidthSizable | NSViewMaxXMargin];
         }
         [statusBar toggleBelowView:webView animate:NO];
     }
-}
-
-- (BOOL)webViewControllerIsStatusBarVisible:(BDSKWebViewController *)controller {
-    return [statusBar isVisible];
 }
 
 @end

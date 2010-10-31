@@ -70,22 +70,6 @@
     [super dealloc];
 }
 
-- (void)handleGroupUpdatedNotification:(NSNotification *)note {
-    WebView *webView = [[self group] webView];
-    [backForwardButton setEnabled:[webView canGoBack] forSegment:BACK_SEGMENT_INDEX];
-    [backForwardButton setEnabled:[webView canGoForward] forSegment:FORWARD_SEGMENT_INDEX];
-    [stopOrReloadButton setEnabled:YES];
-    if ([[self group] isRetrieving]) {
-        [stopOrReloadButton setImage:[NSImage imageNamed:NSImageNameStopProgressTemplate]];
-        [stopOrReloadButton setToolTip:NSLocalizedString(@"Cancel download", @"Tool tip message")];
-        [stopOrReloadButton setKeyEquivalent:@"."];
-    } else {
-        [stopOrReloadButton setImage:[NSImage imageNamed:NSImageNameRefreshTemplate]];
-        [stopOrReloadButton setToolTip:NSLocalizedString(@"Reload page", @"Tool tip message")];
-        [stopOrReloadButton setKeyEquivalent:@"r"];
-    }
-}
-
 - (void)awakeFromNib {
     // navigation views
     [collapsibleView setMinSize:[collapsibleView frame].size];
@@ -103,36 +87,29 @@
     [backForwardButton setMenu:menu forSegment:FORWARD_SEGMENT_INDEX];
     
     // update the buttons, we should not be retrieving at this point
-    [self handleGroupUpdatedNotification:nil];
+    [self webView:nil setLoading:NO];
     
     [urlField registerForDraggedTypes:[NSArray arrayWithObjects:NSURLPboardType, BDSKWeblocFilePboardType, nil]];
 }
 
 #pragma mark Accessors
 
-- (BDSKWebGroup *)group {
+- (BDSKWebView *)webView {
     return [self representedObject];
 }
 
-- (void)setGroup:(BDSKWebGroup *)newGroup {
-    BDSKWebGroup *oldGroup = [self representedObject];
-    if (oldGroup != newGroup) {
-        if (oldGroup) {
-            [oldGroup setDelegate:nil];
-            [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                            name:BDSKExternalGroupUpdatedNotification
-                                                          object:oldGroup];
+- (void)setWebView:(BDSKWebView *)newWebView {
+    BDSKWebView *oldWebView = [self representedObject];
+    if (oldWebView != newWebView) {
+        if (oldWebView) {
+            [oldWebView setNavigationDelegate:nil];
         }
-        [self setRepresentedObject:newGroup];
-        if (newGroup) {
-            [self handleGroupUpdatedNotification:nil];
-            [self webGroup:newGroup setURL:[newGroup URL]];
-            [self webGroup:newGroup setIcon:[[newGroup webView] mainFrameIcon]];
-            [newGroup setDelegate:self];
-            [[NSNotificationCenter defaultCenter] addObserver:self
-                                                     selector:@selector(handleGroupUpdatedNotification:)
-                                                         name:BDSKExternalGroupUpdatedNotification
-                                                       object:newGroup];
+        [self setRepresentedObject:newWebView];
+        if (newWebView) {
+            [self webView:newWebView setURL:[newWebView URL]];
+            [self webView:newWebView setIcon:[newWebView mainFrameIcon]];
+            [self webView:newWebView setLoading:[newWebView isLoading]];
+            [newWebView setNavigationDelegate:self];
         }
     }
 }
@@ -150,12 +127,12 @@
             else
                 theURL = [NSURL URLWithStringByNormalizingPercentEscapes:[@"http://" stringByAppendingString:newURLString]];
         }
-        [[self group] setURL:theURL];
+        [[self webView] setURL:theURL];
     }
 }
 
 - (IBAction)goBackForward:(id)sender {
-    WebView *webView = [[self group] webView];
+    WebView *webView = [self webView];
     if([sender selectedSegment] == 0)
         [webView goBack:sender];
     else
@@ -163,8 +140,8 @@
 }
 
 - (IBAction)stopOrReloadAction:(id)sender {
-    WebView *webView = [[self group] webView];
-	if ([[self group] isRetrieving])
+    WebView *webView = [self webView];
+	if ([webView isLoading])
 		[webView stopLoading:sender];
 	else 
 		[webView reload:sender];
@@ -173,23 +150,39 @@
 - (void)goBackForwardInHistory:(id)sender {
     WebHistoryItem *item = [sender representedObject];
     if (item)
-        [[[self group] webView] goToBackForwardItem:item];
+        [[self webView] goToBackForwardItem:item];
 }
 
-#pragma mark BDSKWebGroupDelegate protocol
+#pragma mark BDSKWebViewNavigationDelegate protocol
 
-- (void)webGroup:(BDSKWebGroup *)aGroup setIcon:(NSImage *)icon {
+- (void)webView:(WebView *)sender setIcon:(NSImage *)icon {
     [(BDSKIconTextFieldCell *)[urlField cell] setIcon:icon ?: [NSImage imageNamed:@"Bookmark"]];
 }
 
-- (void)webGroup:(BDSKWebGroup *)aGroup setURL:(NSURL *)aURL {
+- (void)webView:(WebView *)sender setURL:(NSURL *)aURL {
     [urlField setStringValue:[aURL absoluteString] ?: @""];
+}
+
+- (void)webView:(WebView *)sender setLoading:(BOOL)loading {
+    WebView *webView = [self webView];
+    [backForwardButton setEnabled:[webView canGoBack] forSegment:BACK_SEGMENT_INDEX];
+    [backForwardButton setEnabled:[webView canGoForward] forSegment:FORWARD_SEGMENT_INDEX];
+    [stopOrReloadButton setEnabled:YES];
+    if (loading) {
+        [stopOrReloadButton setImage:[NSImage imageNamed:NSImageNameStopProgressTemplate]];
+        [stopOrReloadButton setToolTip:NSLocalizedString(@"Cancel download", @"Tool tip message")];
+        [stopOrReloadButton setKeyEquivalent:@"."];
+    } else {
+        [stopOrReloadButton setImage:[NSImage imageNamed:NSImageNameRefreshTemplate]];
+        [stopOrReloadButton setToolTip:NSLocalizedString(@"Reload page", @"Tool tip message")];
+        [stopOrReloadButton setKeyEquivalent:@"r"];
+    }
 }
 
 #pragma mark NSMenu delegate protocol
 
 - (void)menuNeedsUpdate:(NSMenu *)menu {
-    WebBackForwardList *backForwardList = [[[self group] webView] backForwardList];
+    WebBackForwardList *backForwardList = [[self webView] backForwardList];
     id items = nil;
     if (menu == [backForwardButton menuForSegment:BACK_SEGMENT_INDEX])
         items = [[backForwardList backListWithLimit:MAX_HISTORY] reverseObjectEnumerator];
@@ -243,7 +236,7 @@
 }
 
 - (BOOL)dragTextField:(BDSKDragTextField *)textField writeDataToPasteboard:(NSPasteboard *)pboard {
-    NSURL *url = [[self group] URL];
+    NSURL *url = [[self webView] URL];
     if (url) {
         [pboard declareTypes:[NSArray arrayWithObjects:NSURLPboardType, BDSKWeblocFilePboardType, nil] owner:nil];
         [url writeToPasteboard:pboard];

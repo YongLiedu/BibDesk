@@ -37,6 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import <WebKit/WebKit.h>
 
 enum {
     BDSKWebMenuItemTagOpenLinkInBrowser = 1001,
@@ -47,52 +48,57 @@ enum {
     BDSKWebMenuItemTagAddBookmark
 };
 
-@class WebView, WebFrame, BDSKStatusBar;
-@protocol BDSKWebViewControllerDelegate;
+@class BDSKWebDelegate, BDSKStatusBar;
+@protocol BDSKWebViewDelegate, BDSKWebViewNavigationDelegate;
 
-@interface BDSKWebViewController : NSObject {
-    id <BDSKWebViewControllerDelegate> delegate;
-    WebView *webView;
-    NSUndoManager *undoManager;    
+@interface BDSKWebView : WebView {
+    BDSKWebDelegate *webDelegate;
 }
 
-- (id)initWithDelegate:(id<BDSKWebViewControllerDelegate>)aDelegate;
+- (id<BDSKWebViewDelegate>)delegate;
+- (void)setDelegate:(id<BDSKWebViewDelegate>)newDelegate;
 
-- (id<BDSKWebViewControllerDelegate>)delegate;
-- (void)setDelegate:(id<BDSKWebViewControllerDelegate>)newDelegate;
+- (id<BDSKWebViewNavigationDelegate>)navigationDelegate;
+- (void)setNavigationDelegate:(id<BDSKWebViewNavigationDelegate>)newDelegate;
 
 - (NSURL *)URL;
 - (void)setURL:(NSURL *)newURL;
-
-- (WebView *)webView;
 
 @end
 
 #pragma mark -
 
-@protocol BDSKWebViewControllerDelegate <NSObject>
+@protocol BDSKWebViewDelegate <NSObject>
 @optional
 
-- (void)webViewController:(BDSKWebViewController *)controller setURL:(NSURL *)aURL;
-- (void)webViewController:(BDSKWebViewController *)controller setIcon:(NSImage *)icon;
-- (void)webViewController:(BDSKWebViewController *)controller setTitle:(NSString *)title;
-- (void)webViewController:(BDSKWebViewController *)controller setStatusText:(NSString *)text;
+- (void)webView:(WebView *)sender setTitle:(NSString *)title;
+- (void)webView:(WebView *)sender setStatusText:(NSString *)text;
 
-- (WebView *)webViewControllerCreateWebView:(BDSKWebViewController *)controller;
-- (void)webViewControllerShow:(BDSKWebViewController *)controller;
-- (void)webViewControllerClose:(BDSKWebViewController *)controller;
-- (void)webViewControllerRunModal:(BDSKWebViewController *)controller;
+- (WebView *)webViewCreateWebView:(WebView *)sender;
+- (void)webViewShow:(WebView *)sender;
+- (void)webViewClose:(WebView *)sender;
+- (void)webViewRunModal:(WebView *)sender;
 
-- (void)webViewController:(BDSKWebViewController *)controller setResizable:(BOOL)resizable;
-- (void)webViewController:(BDSKWebViewController *)controller setFrame:(NSRect)frame;
-- (void)webViewController:(BDSKWebViewController *)controller setStatusBarVisible:(BOOL)visible;
-- (BOOL)webViewControllerIsStatusBarVisible:(BDSKWebViewController *)controller;
+- (void)webView:(WebView *)sender setResizable:(BOOL)resizable;
+- (void)webView:(WebView *)sender setFrame:(NSRect)frame;
+- (void)webView:(WebView *)sender setStatusBarVisible:(BOOL)visible;
 
-- (void)webViewController:(BDSKWebViewController *)controller didStartLoadForMainFrame:(BOOL)forMainFrame;
-- (void)webViewController:(BDSKWebViewController *)controller didFinishLoadForFrame:(WebFrame *)frame;
-- (void)webViewControllerDidFailLoad:(BDSKWebViewController *)controller;
+- (void)webView:(WebView *)sender didStartLoadForFrame:(WebFrame *)frame;
+- (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame;
+- (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame;
 
-- (NSArray *)webViewController:(BDSKWebViewController *)controller contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems;
+- (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems;
+
+@end
+
+#pragma mark -
+
+@protocol BDSKWebViewNavigationDelegate <NSObject>
+@optional
+
+- (void)webView:(WebView *)sender setURL:(NSURL *)aURL;
+- (void)webView:(WebView *)sender setIcon:(NSImage *)icon;
+- (void)webView:(WebView *)sender setLoading:(BOOL)loading;
 
 @end
 
@@ -108,8 +114,8 @@ enum {
 
 #pragma mark -
 
-@interface BDSKWebViewModalDialogController : NSWindowController <BDSKWebViewControllerDelegate> {
-    BDSKWebViewController *webViewController;
+@interface BDSKWebViewModalDialogController : NSWindowController <BDSKWebViewDelegate> {
+    BDSKWebView *webView;
     BDSKStatusBar *statusBar;
 }
 - (WebView *)webView;

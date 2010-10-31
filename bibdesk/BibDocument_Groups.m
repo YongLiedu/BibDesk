@@ -237,7 +237,7 @@ The groupedPublications array is a subset of the publications array, developed b
         webGroupViewController = [[BDSKWebGroupViewController alloc] init];
     [self insertControlView:[webGroupViewController view] atTop:NO];
     
-    WebView *oldWebView = [[webGroupViewController group] webView];
+    WebView *oldWebView = [webGroupViewController webView];
     
     BDSKWebGroup *group = [[self selectedGroups] firstObject];
     BDSKASSERT([group isWeb]);
@@ -246,7 +246,7 @@ The groupedPublications array is a subset of the publications array, developed b
     if ([group isWebViewLoaded] == NO)
         [group setURL:[NSURL URLWithString:@"bibdesk:webgroup"]];
     
-    [webGroupViewController setGroup:group];
+    [webGroupViewController setWebView:[group webView]];
     
     NSView *webView = [group webView];
     if ([webView window] == nil) {
@@ -284,7 +284,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)hideWebGroupView{
-    NSView *webView = [[webGroupViewController group] webView];
+    NSView *webView = [webGroupViewController webView];
     if ([webView window]) {
         NSView *webGroupView = [webGroupViewController view];
         id firstResponder = [documentWindow firstResponder];
@@ -297,7 +297,7 @@ The groupedPublications array is a subset of the publications array, developed b
     }
     
     [self removeControlView:[webGroupViewController view]];
-    [webGroupViewController setGroup:nil];
+    [webGroupViewController setWebView:nil];
 }
 
 #pragma mark Notification handlers

@@ -38,11 +38,11 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKWebGroup.h"
+#import "BDSKWebViewController.h"
 
-@class BDSKCollapsibleView, BDSKEdgeView, WebView, BDSKDragTextField, BDSKFieldEditor;
+@class BDSKCollapsibleView, BDSKEdgeView, BDSKDragTextField, BDSKFieldEditor;
 
-@interface BDSKWebGroupViewController : NSViewController <NSMenuDelegate, BDSKWebGroupDelegate> {
+@interface BDSKWebGroupViewController : NSViewController <NSMenuDelegate, BDSKWebViewNavigationDelegate> {
     IBOutlet BDSKCollapsibleView *collapsibleView;
     IBOutlet BDSKDragTextField *urlField;
     IBOutlet NSSegmentedControl *backForwardButton;
@@ -50,8 +50,8 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
     BDSKFieldEditor *fieldEditor;
 }
 
-- (BDSKWebGroup *)group;
-- (void)setGroup:(BDSKWebGroup *)newGroup;
+- (BDSKWebView *)webView;
+- (void)setWebView:(BDSKWebView *)newWebView;
 
 - (IBAction)changeURL:(id)sender;
 - (IBAction)goBackForward:(id)sender;

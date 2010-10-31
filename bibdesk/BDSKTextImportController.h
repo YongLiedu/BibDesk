@@ -53,7 +53,7 @@
 @class BibDocument, BibItem, BDSKEdgeView, WebDownload, BDSKComplexStringEditor;
 @class BDSKCiteKeyFormatter, BDSKCrossrefFormatter;
 
-@interface BDSKTextImportController : NSWindowController <BDSKOwner, BDSKTextImportItemTableViewDelegate, NSTableViewDataSource, NSTextViewDelegate, NSSplitViewDelegate, BDSKComplexStringFormatterDelegate, BDSKCitationFormatterDelegate, BDSKWebViewControllerDelegate> {
+@interface BDSKTextImportController : NSWindowController <BDSKOwner, BDSKTextImportItemTableViewDelegate, NSTableViewDataSource, NSTextViewDelegate, NSSplitViewDelegate, BDSKComplexStringFormatterDelegate, BDSKCitationFormatterDelegate, BDSKWebViewDelegate> {
     IBOutlet NSTextView* sourceTextView;
     IBOutlet NSTableView* itemTableView;
     IBOutlet NSTextField* citeKeyField;
@@ -92,7 +92,7 @@
 	BOOL isLoading;
 	BOOL isDownloading;
 	
-    BDSKWebViewController *webViewController;
+    BDSKWebView *webView;
     
 	WebDownload *download;
 	NSString *downloadFileName;
