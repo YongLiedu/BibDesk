@@ -111,6 +111,7 @@
 - (void)setDelegate:(id<BDSKWebViewDelegate>)newDelegate { [webDelegate setDelegate:newDelegate]; }
 
 - (id<BDSKWebViewNavigationDelegate>)navigationDelegate { return [webDelegate navigationDelegate]; }
+
 - (void)setNavigationDelegate:(id<BDSKWebViewNavigationDelegate>)newDelegate { [webDelegate setNavigationDelegate:newDelegate]; }
 
 #pragma mark Actions
@@ -128,9 +129,9 @@
 	NSDictionary *element = (NSDictionary *)[sender representedObject];
 	NSString *URLString = [(NSURL *)[element objectForKey:WebElementLinkURLKey] absoluteString];
 	NSString *title = [element objectForKey:WebElementLinkLabelKey] ?: [URLString lastPathComponent];
-	WebFrame *frame = [element objectForKey:WebElementFrameKey];
 	
-    [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString proposedName:title modalForWindow:[[frame webView] window]];
+    if (URLString)
+        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString proposedName:title modalForWindow:[self window]];
 }
 
 - (void)revealLink:(id)sender {
