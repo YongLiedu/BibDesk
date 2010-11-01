@@ -43,7 +43,14 @@
 #import "BDSKWebViewModalDialogController.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
+#import "NSEvent_BDSKExtensions.h"
 
+
+@interface WebView (BDSKSnowLeopardDeclarations)
+- (void)reloadFromOrigin:(id)sender;
+@end
+
+#pragma mark -
 
 @interface BDSKWebDelegate : NSObject {
     id <BDSKWebViewDelegate> delegate;
@@ -116,6 +123,13 @@
 - (void)setNavigationDelegate:(id<BDSKWebViewNavigationDelegate>)newDelegate { [webDelegate setNavigationDelegate:newDelegate]; }
 
 #pragma mark Actions
+
+- (IBAction)reload:(id)sender {
+    if (([NSEvent standardModifierFlags] & NSShiftKeyMask) && [self respondsToSelector:@selector(reloadFromOrigin:)])
+		[super reloadFromOrigin:sender];
+    else
+        [super reload:self];
+}
 
 - (IBAction)addBookmark:(id)sender {
 	WebDataSource *datasource = [[self mainFrame] dataSource];
