@@ -48,7 +48,7 @@ enum {
     BDSKWebMenuItemTagAddBookmark
 };
 
-@class BDSKWebDelegate, BDSKStatusBar;
+@class BDSKWebDelegate;
 @protocol BDSKWebViewDelegate, BDSKWebViewNavigationDelegate;
 
 @interface BDSKWebView : WebView {
