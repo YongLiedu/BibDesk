@@ -49,6 +49,7 @@
 #import "BDSKGroupsArray.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
+#import "NSArray_BDSKExtensions.h"
 
 #define BDSKOpenNewWindowsForWebGroupInBrowserKey @"BDSKOpenNewWindowsForWebGroupInBrowser"
 
@@ -88,13 +89,6 @@ static NSString *BDSKWebLocalizedString = nil;
     return copy;
 }
 
-- (void)makeWebView {
-    BDSKASSERT(webView == nil);
-    webView = [[BDSKWebView alloc] init];
-    [webView setDelegate:self];
-    [webView setHostWindow:[[[document windowControllers] objectAtIndex:0] window]];
-}
-
 #pragma mark BDSKGroup overrides
 
 // note that pointer equality is used for these groups, so names can overlap
@@ -119,7 +113,7 @@ static NSString *BDSKWebLocalizedString = nil;
 - (void)setDocument:(BibDocument *)newDocument{
     [super setDocument:newDocument];
     if (webView)
-        [webView setHostWindow:[[[document windowControllers] objectAtIndex:0] window]];
+        [webView setHostWindow:[[[document windowControllers] firstObject] window]];
 }
 
 #pragma mark BDSKExternalGroup overrides
@@ -130,8 +124,11 @@ static NSString *BDSKWebLocalizedString = nil;
 #pragma mark Accessors
 
 - (BDSKWebView *)webView {
-    if (webView == nil)
-        [self makeWebView];
+    if (webView == nil) {
+        webView = [[BDSKWebView alloc] init];
+        [webView setDelegate:self];
+        [webView setHostWindow:[[[document windowControllers] firstObject] window]];
+    }
     return webView;
 }
 
@@ -144,9 +141,8 @@ static NSString *BDSKWebLocalizedString = nil;
 }
 
 - (void)setURL:(NSURL *)newURL {
-    if (newURL && webView == nil)
-        [self makeWebView];
-    [webView setURL:newURL];
+    if (newURL)
+        [[self webView] setURL:newURL];
 }
 
 #pragma mark BDSKWebViewDelegate protocol
