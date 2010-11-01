@@ -42,6 +42,7 @@
 #import "BDSKDownloadManager.h"
 #import "BDSKWebViewModalDialogController.h"
 #import "NSString_BDSKExtensions.h"
+#import "NSURL_BDSKExtensions.h"
 
 
 @interface BDSKWebDelegate : NSObject {
@@ -118,20 +119,18 @@
 
 - (IBAction)addBookmark:(id)sender {
 	WebDataSource *datasource = [[self mainFrame] dataSource];
-	NSString *URLString = [[[datasource request] URL] absoluteString];
-	NSString *name = [datasource pageTitle] ?: [URLString lastPathComponent];
-    
-    if (URLString)
-        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString proposedName:name modalForWindow:[self window]];
+	NSURL *theURL = [[datasource request] URL];
+	NSString *name = [datasource pageTitle] ?: [theURL lastPathComponent];
+    if (theURL)
+        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:[theURL absoluteString] proposedName:name modalForWindow:[self window]];
 }
 
 - (void)bookmarkLink:(id)sender {
 	NSDictionary *element = (NSDictionary *)[sender representedObject];
-	NSString *URLString = [(NSURL *)[element objectForKey:WebElementLinkURLKey] absoluteString];
-	NSString *title = [element objectForKey:WebElementLinkLabelKey] ?: [URLString lastPathComponent];
-	
-    if (URLString)
-        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString proposedName:title modalForWindow:[self window]];
+	NSURL *theURL = [element objectForKey:WebElementLinkURLKey];
+	NSString *name = [element objectForKey:WebElementLinkLabelKey] ?: [theURL lastPathComponent];
+    if (theURL)
+        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:[theURL absoluteString] proposedName:name modalForWindow:[self window]];
 }
 
 - (void)revealLink:(id)sender {
