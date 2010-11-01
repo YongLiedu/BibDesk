@@ -123,6 +123,131 @@ NSString *__BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroResolv
     return (NSString *)mutStr;
 }
 
+static inline
+NSArray *__BDStringCreateNodesFromBibTeXString(NSString *btstring, NSError **outError)
+{
+	NSMutableArray *returnNodes = [[NSMutableArray alloc] initWithCapacity:5];
+	BDSKStringNode *node = nil;
+    NSScanner *sc = [[NSScanner alloc] initWithString:btstring];
+    [sc setCharactersToBeSkipped:nil];
+    NSString *s = nil;
+    NSInteger nesting;
+    unichar ch;
+    NSError *error = nil;
+    
+    NSCharacterSet *bracesCharSet = [NSCharacterSet curlyBraceCharacterSet];
+	[BDSKComplexString class]; // make sure the class is initialized
+    
+    while (error == nil && NO == [sc isAtEnd]) {
+        ch = [btstring characterAtIndex:[sc scanLocation]];
+        if (ch == '{') {
+            // a brace-quoted string, we look for the corresponding closing brace
+            NSMutableString *nodeStr = [[NSMutableString alloc] initWithCapacity:10];
+            [sc setScanLocation:[sc scanLocation] + 1];
+            nesting = 1;
+            while (nesting > 0 && ![sc isAtEnd]) {
+                if ([sc scanUpToCharactersFromSet:bracesCharSet intoString:&s])
+                    [nodeStr appendString:s];
+                if ([sc isAtEnd]) break;
+                if ([btstring characterAtIndex:[sc scanLocation] - 1] != '\\') {
+                    // we found an unquoted brace
+                    ch = [btstring characterAtIndex:[sc scanLocation]];
+                    if (ch == '}') {
+                        --nesting;
+                    } else {
+                        ++nesting;
+                    }
+                    if (nesting > 0) // we don't include the outer braces
+                        [nodeStr appendFormat:@"%C",ch];
+                }
+                [sc setScanLocation:[sc scanLocation] + 1];
+            }
+            if (nesting > 0) {
+                error = [NSError localErrorWithCode:kBDSKComplexStringError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unbalanced string: [%@]", @"error description"), nodeStr]];
+            } else {
+                node = [[BDSKStringNode alloc] initWithQuotedString:nodeStr];
+                [returnNodes addObject:node];
+                [node release];
+            }
+            [nodeStr release];
+        }
+        else if (ch == '"') {
+            // a doublequote-quoted string
+            NSMutableString *nodeStr = [[NSMutableString alloc] initWithCapacity:10];
+            [sc setScanLocation:[sc scanLocation] + 1];
+            nesting = 1;
+            while (nesting > 0 && ![sc isAtEnd]) {
+                if ([sc scanUpToString:@"\"" intoString:&s])
+                    [nodeStr appendString:s];
+                if (![sc isAtEnd]) {
+                    if ([btstring characterAtIndex:[sc scanLocation] - 1] == '\\')
+                        [nodeStr appendString:@"\""];
+                    else
+                        nesting = 0;
+                    [sc setScanLocation:[sc scanLocation] + 1];
+                }
+            }
+            // we don't accept unbalanced braces, as we always quote with braces
+            // do we want to be more permissive and try to use "-quoted fields?
+            if (nesting > 0 || ![nodeStr isStringTeXQuotingBalancedWithBraces:YES connected:NO]) {
+                error = [NSError localErrorWithCode:kBDSKComplexStringError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unbalanced string: [%@]", @"error description"), nodeStr]];
+            } else {
+                node = [[BDSKStringNode alloc] initWithQuotedString:nodeStr];
+                [returnNodes addObject:node];
+                [node release];
+            }
+            [nodeStr release];
+        }
+        else if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:ch]) {
+            // this should be all numbers
+            [sc scanCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:&s];
+            node = [[BDSKStringNode alloc] initWithNumberString:s];
+			[returnNodes addObject:node];
+			[node release];
+        }
+        else if ([macroCharSet characterIsMember:ch]) {
+            // a macro
+            if ([sc scanCharactersFromSet:macroCharSet intoString:&s]) {
+				node = [[BDSKStringNode alloc] initWithMacroString:s];
+                [returnNodes addObject:node];
+				[node release];
+			}
+        }
+        else if (ch == '#') {
+            // we found 2 # or a # at the beginning
+            error = [NSError localErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Invalid first character in component", @"error description")];
+        }
+        else {
+            error = [NSError localErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Invalid first character in component", @"error description")];
+        }
+        
+        if (error == nil) {
+            // look for the next #-character, removing spaces around it
+            [sc scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
+            if (![sc isAtEnd]) {
+                if (![sc scanString:@"#" intoString:NULL]) {
+                    error = [NSError localErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Missing # character", @"error description")];
+                } else {
+                    [sc scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
+                    if ([sc isAtEnd]) {
+                        // we found a # at the end
+                        error = [NSError localErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Empty component", @"error description")];
+                    }
+                }
+            }
+        }
+    }
+    [sc release];
+    
+    if (error) {
+        [returnNodes release];
+        if (outError) *outError = error;
+        return nil;
+    } else {
+        return returnNodes;
+    }
+}
+
 @implementation BDSKComplexString
 
 + (void)initialize{
@@ -508,125 +633,13 @@ Rather than relying on the same call sequence to be used, I think we should igno
         return self = [self initWithString:@""];
     }
     
-	NSMutableArray *returnNodes = [[NSMutableArray alloc] initWithCapacity:5];
-	BDSKStringNode *node = nil;
-    NSScanner *sc = [[NSScanner alloc] initWithString:btstring];
-    [sc setCharactersToBeSkipped:nil];
-    NSString *s = nil;
-    NSInteger nesting;
-    unichar ch;
-    NSError *error = nil;
-    
-    NSCharacterSet *bracesCharSet = [NSCharacterSet curlyBraceCharacterSet];
-	[BDSKComplexString class]; // make sure the class is initialized
-    
-    while (error == nil && NO == [sc isAtEnd]) {
-        ch = [btstring characterAtIndex:[sc scanLocation]];
-        if (ch == '{') {
-            // a brace-quoted string, we look for the corresponding closing brace
-            NSMutableString *nodeStr = [[NSMutableString alloc] initWithCapacity:10];
-            [sc setScanLocation:[sc scanLocation] + 1];
-            nesting = 1;
-            while (nesting > 0 && ![sc isAtEnd]) {
-                if ([sc scanUpToCharactersFromSet:bracesCharSet intoString:&s])
-                    [nodeStr appendString:s];
-                if ([sc isAtEnd]) break;
-                if ([btstring characterAtIndex:[sc scanLocation] - 1] != '\\') {
-                    // we found an unquoted brace
-                    ch = [btstring characterAtIndex:[sc scanLocation]];
-                    if (ch == '}') {
-                        --nesting;
-                    } else {
-                        ++nesting;
-                    }
-                    if (nesting > 0) // we don't include the outer braces
-                        [nodeStr appendFormat:@"%C",ch];
-                }
-                [sc setScanLocation:[sc scanLocation] + 1];
-            }
-            if (nesting > 0) {
-                error = [NSError localErrorWithCode:kBDSKComplexStringError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unbalanced string: [%@]", @"error description"), nodeStr]];
-            } else {
-                node = [[BDSKStringNode alloc] initWithQuotedString:nodeStr];
-                [returnNodes addObject:node];
-                [node release];
-            }
-            [nodeStr release];
-        }
-        else if (ch == '"') {
-            // a doublequote-quoted string
-            NSMutableString *nodeStr = [[NSMutableString alloc] initWithCapacity:10];
-            [sc setScanLocation:[sc scanLocation] + 1];
-            nesting = 1;
-            while (nesting > 0 && ![sc isAtEnd]) {
-                if ([sc scanUpToString:@"\"" intoString:&s])
-                    [nodeStr appendString:s];
-                if (![sc isAtEnd]) {
-                    if ([btstring characterAtIndex:[sc scanLocation] - 1] == '\\')
-                        [nodeStr appendString:@"\""];
-                    else
-                        nesting = 0;
-                    [sc setScanLocation:[sc scanLocation] + 1];
-                }
-            }
-            // we don't accept unbalanced braces, as we always quote with braces
-            // do we want to be more permissive and try to use "-quoted fields?
-            if (nesting > 0 || ![nodeStr isStringTeXQuotingBalancedWithBraces:YES connected:NO]) {
-                error = [NSError localErrorWithCode:kBDSKComplexStringError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unbalanced string: [%@]", @"error description"), nodeStr]];
-            } else {
-                node = [[BDSKStringNode alloc] initWithQuotedString:nodeStr];
-                [returnNodes addObject:node];
-                [node release];
-            }
-            [nodeStr release];
-        }
-        else if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:ch]) {
-            // this should be all numbers
-            [sc scanCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:&s];
-            node = [[BDSKStringNode alloc] initWithNumberString:s];
-			[returnNodes addObject:node];
-			[node release];
-        }
-        else if ([macroCharSet characterIsMember:ch]) {
-            // a macro
-            if ([sc scanCharactersFromSet:macroCharSet intoString:&s]) {
-				node = [[BDSKStringNode alloc] initWithMacroString:s];
-                [returnNodes addObject:node];
-				[node release];
-			}
-        }
-        else if (ch == '#') {
-            // we found 2 # or a # at the beginning
-            error = [NSError localErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Invalid first character in component", @"error description")];
-        }
-        else {
-            error = [NSError localErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Invalid first character in component", @"error description")];
-        }
-        
-        if (error == nil) {
-            // look for the next #-character, removing spaces around it
-            [sc scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
-            if (![sc isAtEnd]) {
-                if (![sc scanString:@"#" intoString:NULL]) {
-                    error = [NSError localErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Missing # character", @"error description")];
-                } else {
-                    [sc scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
-                    if ([sc isAtEnd]) {
-                        // we found a # at the end
-                        error = [NSError localErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Empty component", @"error description")];
-                    }
-                }
-            }
-        }
-    }
-    if (error == nil) {
+    NSArray *returnNodes = __BDStringCreateNodesFromBibTeXString(btstring, outError);
+    if (returnNodes) {
         self = [self initWithNodes:returnNodes macroResolver:theMacroResolver];
     } else {
         [[self init] release];
         self = nil;
-        if (outError != NULL) *outError = error;
     }
-    [sc release];
     [returnNodes release];
     
     return self;
