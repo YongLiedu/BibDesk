@@ -152,4 +152,20 @@ static NSArray *webParserClasses() {
     return [webParserClasses() valueForKey:@"parserInfo"];
 }
 
++ (NSArray *)parserInfosForFeature:(BDSKParserFeature)feature {
+    return [[self parserInfos] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"feature = %lu", (unsigned long)feature]];
+}
+
++ (NSArray *)publicParserInfos {
+    return [self parserInfosForFeature:BDSKParserFeaturePublic];
+}
+
++ (NSArray *)subscriptionParserInfos {
+    return [self parserInfosForFeature:BDSKParserFeatureSubscription];
+}
+
++ (NSArray *)genericParserInfos {
+    return [self parserInfosForFeature:BDSKParserFeatureGeneric];
+}
+
 @end

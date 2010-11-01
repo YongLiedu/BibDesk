@@ -61,8 +61,7 @@ NSString *BDSKBibDeskScheme = @"bibdesk";
 NSURL *BDSKBibDeskWebGroupURL = nil;
 
 @interface BDSKBibDeskProtocol (Private)
-- (NSData *)welcomeHTMLData;
-- (NSData *)downloadsHTMLData;
+- (NSData *)HTMLDataUsingTemplateFile:(NSString *)template usingObject:(id)object;
 @end
 
 @implementation BDSKBibDeskProtocol
@@ -102,9 +101,13 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
     NSString *resourceSpecifier = [theURL resourceSpecifier];
 	
     if ([WEBGROUP_SPECIFIER caseInsensitiveCompare:resourceSpecifier] == NSOrderedSame) {
-        [self loadData:[self welcomeHTMLData] MIMEType:@"text/html"];
+        static NSData *welcomeHTMLData = nil;
+        if (welcomeHTMLData == nil)
+            welcomeHTMLData = [[self HTMLDataUsingTemplateFile:@"WebGroupStartPage" usingObject:[BDSKWebParser class]] copy];
+        [self loadData:welcomeHTMLData MIMEType:@"text/html"];
     } else if ([DOWNLOADS_SPECIFIER caseInsensitiveCompare:resourceSpecifier] == NSOrderedSame) {
-        [self loadData:[self downloadsHTMLData] MIMEType:@"text/html"];
+        NSData *data = [self HTMLDataUsingTemplateFile:@"WebGroupDownloads" usingObject:[BDSKDownloadManager sharedManager]];
+        [self loadData:data MIMEType:@"text/html"];
     } else if ([resourceSpecifier hasCaseInsensitivePrefix:FILEICON_SPECIFIER]) {
         NSString *extension = [resourceSpecifier substringFromIndex:[FILEICON_SPECIFIER length]];
         NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFileType:extension];
@@ -153,27 +156,7 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
 - (NSData *)welcomeHTMLData {
 	static NSData *data = nil;
     if (data == nil) {
-        NSMutableArray *publicParsers = [NSMutableArray array];
-        NSMutableArray *subscriptionParsers = [NSMutableArray array];
-        NSMutableArray *genericParsers = [NSMutableArray array];
-        NSDictionary *parsers = [NSDictionary dictionaryWithObjectsAndKeys:publicParsers, @"publicParsers", subscriptionParsers, @"subscriptionParsers", genericParsers, @"genericParsers", nil];
-        
-        for (NSDictionary *info in [BDSKWebParser parserInfos]) {
-            switch ([[info objectForKey:@"feature"] unsignedIntegerValue]) {
-                case BDSKParserFeaturePublic:
-                    [publicParsers addObject:info];
-                    break;
-                case BDSKParserFeatureSubscription:
-                    [subscriptionParsers addObject:info];
-                    break;
-                case BDSKParserFeatureGeneric:
-                    [genericParsers addObject:info];
-                    break;
-                default:
-                    break;
-            }
-        }
-        data = [[self HTMLDataUsingTemplateFile:@"WebGroupStartPage" usingObject:parsers] copy];
+        data = [[self HTMLDataUsingTemplateFile:@"WebGroupStartPage" usingObject:[BDSKWebParser class]] copy];
     }
     return data;
 }

@@ -56,6 +56,9 @@ typedef NSUInteger BDSKParserFeature;
 + (NSDictionary *) parserInfoWithName: (NSString *) name address: (NSString *) address description: (NSString *) description feature:(BDSKParserFeature) feature;
 // Returns the union of parserInfos of all available web parsers.
 + (NSArray *)parserInfos;
++ (NSArray *)publicParserInfos;
++ (NSArray *)subscriptionParserInfos;
++ (NSArray *)genericParserInfos;
 @end
 
 @protocol BDSKWebParser <NSObject>
