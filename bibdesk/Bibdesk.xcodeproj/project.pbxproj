@@ -2254,6 +2254,7 @@
 			isa = PBXGroup;
 			children = (
 				F946DCE709FDC4B600D471DF /* BDSKAsynchronousDOServer.m */,
+				6CD26A220F928EEE0089FDFD /* BDSKBibDeskProtocol.m */,
 				CE09CEA50DDEF65E00F3F2FE /* BDSKCompletionManager.m */,
 				F990C58A0D42D58D00B5425E /* BDSKDocumentSearch.m */,
 				CE044A4312667EB500CE55C4 /* BDSKDownloadManager.m */,
@@ -2284,7 +2285,6 @@
 			children = (
 				45DB3E480CAADFC3001EACDA /* BDSKACMDLParser.m */,
 				CE071ECF0F213EB300244F5C /* BDSKArxivParser.m */,
-				6CD26A220F928EEE0089FDFD /* BDSKBibDeskProtocol.m */,
 				F9022C960758038000C3F701 /* BDSKBibTeXParser.m */,
 				CD86BA391141C023005EEFDA /* BDSKBibTeXWebParser.m */,
 				45DB3E4A0CAADFC3001EACDA /* BDSKCiteULikeParser.m */,
