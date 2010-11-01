@@ -51,10 +51,15 @@
 #import "NSImage_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
+#import "NSEvent_BDSKExtensions.h"
 
 #define MAX_HISTORY 50
 #define BACK_SEGMENT_INDEX 0
 #define FORWARD_SEGMENT_INDEX 1
+
+@interface WebView (BDSKSnowLeopardDeclarations)
+- (void)reloadFromOrigin:(id)sender;
+@end
 
 @implementation BDSKWebGroupViewController
 
@@ -143,7 +148,9 @@
     WebView *webView = [self webView];
 	if ([webView isLoading])
 		[webView stopLoading:sender];
-	else 
+	else if (([NSEvent standardModifierFlags] & NSShiftKeyMask) && [webView respondsToSelector:@selector(reloadFromOrigin:)])
+		[webView reloadFromOrigin:sender];
+	else
 		[webView reload:sender];
 }
 
