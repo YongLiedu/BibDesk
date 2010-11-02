@@ -430,37 +430,51 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     }
     
     if (parsedTemplate && (templateDict = [self convertPubTemplate:parsedTemplate defaultFont:font])) {
-        NSArray *itemTemplate = [templateDict objectForKey:@""];
+        NSArray *defaultItemTemplate = [templateDict objectForKey:@""];
+        NSArray *itemTemplate;
         NSMutableSet *includedTypes = [[[NSMutableSet alloc] initWithArray:[templateDict allKeys]] autorelease];
         BDSKTypeTemplate *template;
         NSString *type;
         NSArray *currentTypes = [typeTemplates valueForKey:@"pubType"];
-        NSUInteger currentIndex;
+        NSString *defaultType = nil;
         
-        if (itemTemplate) {
-            [[typeTemplates objectAtIndex:defaultTypeIndex] setItemTemplate:itemTemplate];
+        if (defaultItemTemplate) {
             [includedTypes removeObject:@""];
-        }
-        
-        for (template in typeTemplates) {
-            if (itemTemplate = [templateDict objectForKey:[template pubType]]) {
-                [template setItemTemplate:itemTemplate];
-                [template setIncluded:YES];
-                [includedTypes removeObject:template];
+            NSArray *defaultTypes = [templateDict allKeysForObject:defaultItemTemplate];
+            if ([defaultTypes count] == 0) {
+                if ([includedTypes containsObject:BDSKArticleString] == NO)
+                    defaultType = BDSKArticleString;
+                else if ([includedTypes containsObject:BDSKMiscString] == NO)
+                    defaultType = BDSKMiscString;
+                else
+                    defaultType = @"default";
+                [includedTypes addObject:defaultType];
+            } else if ([defaultTypes containsObject:BDSKArticleString]) {
+                defaultType = BDSKArticleString;
+            } else if ([defaultTypes containsObject:BDSKMiscString]) {
+                defaultType = BDSKMiscString;
+            } else {
+                defaultType = [defaultTypes objectAtIndex:0];
             }
         }
         
         for (type in includedTypes) {
+            NSUInteger currentIndex = [currentTypes indexOfObject:type];
+            if (currentIndex == NSNotFound) {
+                template = [[[BDSKTypeTemplate alloc] initWithPubType:type forDocument:self] autorelease];
+                currentIndex = [typeTemplates count];
+                [self insertObject:template inTypeTemplatesAtIndex:currentIndex];
+            } else {
+                template = [typeTemplates objectAtIndex:currentIndex];
+            }
             itemTemplate = [templateDict objectForKey:type];
-            type = [type entryType];
-            template = [[[BDSKTypeTemplate alloc] initWithPubType:type forDocument:self] autorelease];
+            if ([type isEqualToString:defaultType]) {
+                if (itemTemplate == nil)
+                    itemTemplate = defaultItemTemplate;
+                [self setDefaultTypeIndex:currentIndex];
+            }
             [template setItemTemplate:itemTemplate];
             [template setIncluded:YES];
-            currentIndex = [currentTypes indexOfObject:type];
-            if (currentIndex == NSNotFound)
-                [[self mutableArrayValueForKey:@"typeTemplates"] addObject:template];
-            else
-                [[self mutableArrayValueForKey:@"typeTemplates"] replaceObjectAtIndex:currentIndex withObject:template];
         }
         
         [[self undoManager] removeAllActions];
@@ -1448,7 +1462,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         
         for (i = 0; i < count; i++) {
             if (itemTemplate = [self convertItemTemplate:[(BDSKConditionTemplateTag *)tag subtemplateAtIndex:i] defaultFont:defaultFont])
-                [result setObject:itemTemplate forKey:i < keyCount ? [matchStrings objectAtIndex:i] : @""];
+                [result setObject:itemTemplate forKey:i < keyCount ? [(NSString *)[matchStrings objectAtIndex:i] entryType] : @""];
             else return nil;
         }
     } else {
