@@ -1282,13 +1282,16 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
             } else {
                 token = [[[BDSKTextToken alloc] initWithTitle:[text string]] autorelease];
                 [self setFont:font ofToken:token defaultFont:defaultFont];
+                [token setDocument:self];
             }
             [tokens addObject:token];
         }
     } else if (allowText) {
         [tokens addObject:[(BDSKTextTemplateTag *)tag text]];
     } else {
-        [tokens addObject:[[[BDSKTextToken alloc] initWithTitle:[(BDSKTextTemplateTag *)tag text]] autorelease]];
+        id token = [[[BDSKTextToken alloc] initWithTitle:[(BDSKTextTemplateTag *)tag text]] autorelease];
+        [token setDocument:self];
+        [tokens addObject:token];
     }
     return tokens;
 }
@@ -1341,6 +1344,8 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         NSFont *font = [[(BDSKRichValueTemplateTag *)tag attributes] objectForKey:NSFontAttributeName];
         [self setFont:font ofToken:token defaultFont:defaultFont];
     }
+    
+    [token setDocument:self];
     
     return token;
 }
@@ -1395,6 +1400,8 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         if (suffix)
             [token setSuffix:suffix];
     } else return nil;
+    
+    [token setDocument:self];
     
     return token;
 }
