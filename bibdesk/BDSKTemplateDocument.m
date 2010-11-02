@@ -81,7 +81,6 @@ static char BDSKTokenPropertiesObservationContext;
 - (void)updateOptionView;
 - (void)setupOptionsMenus;
 - (void)handleDidChangeSelectionNotification:(NSNotification *)notification;
-- (void)handleDidEndEditingNotification:(NSNotification *)notification;
 - (void)handleTokenDidChangeNotification:(NSNotification *)notification;
 - (void)handleTemplateDidChangeNotification:(NSNotification *)notification;
 - (NSDictionary *)convertPubTemplate:(NSArray *)templateArray defaultFont:(NSFont *)defaultFont;
@@ -262,8 +261,6 @@ static char BDSKTokenPropertiesObservationContext;
                                                  name:BDSKTokenFieldDidChangeSelectionNotification object:optionalTokenField];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidChangeSelectionNotification:) 
                                                  name:BDSKTokenFieldDidChangeSelectionNotification object:defaultTokenField];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidEndEditingNotification:) 
-                                                 name:NSControlTextDidEndEditingNotification object:itemTemplateTokenField];
 }
 
 - (NSArray *)writableTypesForSaveOperation:(NSSaveOperationType)saveOperation {
@@ -436,17 +433,19 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     }
     
     if (parsedTemplate && (templateDict = [self convertPubTemplate:parsedTemplate defaultFont:font])) {
-        NSArray *defaultItemTemplate = [templateDict objectForKey:@""];
-        NSArray *itemTemplate;
+        NSArray *itemTemplate = [[[templateDict objectForKey:@""] retain] autorelease];
         NSMutableSet *includedTypes = [[[NSMutableSet alloc] initWithArray:[templateDict allKeys]] autorelease];
         BDSKTypeTemplate *template;
         NSString *type;
         NSArray *currentTypes = [typeTemplates valueForKey:@"pubType"];
         NSString *defaultType = nil;
         
-        if (defaultItemTemplate) {
+        if (itemTemplate) {
+            NSMutableDictionary *tmpDict = [[templateDict mutableCopy] autorelease];
+            [tmpDict removeObjectForKey:@""];
+            templateDict = tmpDict;
             [includedTypes removeObject:@""];
-            NSArray *defaultTypes = [templateDict allKeysForObject:defaultItemTemplate];
+            NSArray *defaultTypes = [templateDict allKeysForObject:itemTemplate];
             if ([defaultTypes count] == 0) {
                 if ([includedTypes containsObject:BDSKArticleString] == NO)
                     defaultType = BDSKArticleString;
@@ -455,6 +454,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
                 else
                     defaultType = @"default";
                 [includedTypes addObject:defaultType];
+                [tmpDict setObject:itemTemplate forKey:defaultType];
             } else if ([defaultTypes containsObject:BDSKArticleString]) {
                 defaultType = BDSKArticleString;
             } else if ([defaultTypes containsObject:BDSKMiscString]) {
@@ -475,13 +475,10 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
                 template = [typeTemplates objectAtIndex:currentIndex];
             }
             itemTemplate = [templateDict objectForKey:type];
-            if ([type isEqualToString:defaultType]) {
-                if (itemTemplate == nil)
-                    itemTemplate = defaultItemTemplate;
-                [self setDefaultTypeIndex:currentIndex];
-            }
             [template setItemTemplate:itemTemplate];
             [template setIncluded:YES];
+            if ([type isEqualToString:defaultType])
+                [self setDefaultTypeIndex:currentIndex];
         }
         
         [[self undoManager] removeAllActions];
