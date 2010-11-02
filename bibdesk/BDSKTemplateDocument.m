@@ -1282,16 +1282,13 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
             } else {
                 token = [[[BDSKTextToken alloc] initWithTitle:[text string]] autorelease];
                 [self setFont:font ofToken:token defaultFont:defaultFont];
-                [token setDocument:self];
             }
             [tokens addObject:token];
         }
     } else if (allowText) {
         [tokens addObject:[(BDSKTextTemplateTag *)tag text]];
     } else {
-        id token = [[[BDSKTextToken alloc] initWithTitle:[(BDSKTextTemplateTag *)tag text]] autorelease];
-        [token setDocument:self];
-        [tokens addObject:token];
+        [tokens addObject:[[[BDSKTextToken alloc] initWithTitle:[(BDSKTextTemplateTag *)tag text]] autorelease]];
     }
     return tokens;
 }
@@ -1344,8 +1341,6 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         NSFont *font = [[(BDSKRichValueTemplateTag *)tag attributes] objectForKey:NSFontAttributeName];
         [self setFont:font ofToken:token defaultFont:defaultFont];
     }
-    
-    [token setDocument:self];
     
     return token;
 }
@@ -1401,8 +1396,6 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
             [token setSuffix:suffix];
     } else return nil;
     
-    [token setDocument:self];
-    
     return token;
 }
 
@@ -1429,6 +1422,12 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
                 break;
             default:
                 return nil;
+        }
+    }
+    
+    for (token in result) {
+        if ([token isKindOfClass:[BDSKToken class]]) {
+            [token setDocument:self];
         }
     }
     
