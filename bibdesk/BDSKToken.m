@@ -135,16 +135,20 @@ NSString *BDSKRichTextString = @"Rich Text";
     BDSKDESTROY(fontName);
     [super dealloc];
 }
-/*
+
 - (BOOL)isEqual:(id)other {
     return [self isMemberOfClass:[other class]] &&
            EQUAL_OR_NIL_STRINGS(title, [other title]) &&
            EQUAL_OR_NIL_STRINGS(fontName, [other fontName]) &&
-           fontSize == [other fontSize] &&
-           bold == [other nbold] &&
+           fabs(fontSize - [other fontSize]) < 0.00001 &&
+           bold == [other bold] &&
            italic == [other italic];
 }
-*/
+
+- (NSUInteger)hash {
+    return [title hash] + [fontName hash] + ((NSUInteger)fontSize >> 4) + (bold >> 5) + (italic >> 6);
+}
+
 - (NSInteger)type {
     return -1;
 }
@@ -291,12 +295,16 @@ NSString *BDSKRichTextString = @"Rich Text";
     BDSKDESTROY(key);
     [super dealloc];
 }
-/*
+
 - (BOOL)isEqual:(id)other {
     return [super isEqual:other] &&
            EQUAL_OR_NIL_STRINGS(key, [other key]);
 }
-*/
+
+- (NSUInteger)hash {
+    return [super hash] + [key hash];
+}
+
 - (NSString *)key {
     return key;
 }
@@ -378,14 +386,17 @@ NSString *BDSKRichTextString = @"Rich Text";
     BDSKDESTROY(suffix);
     [super dealloc];
 }
-/*
+
 - (BOOL)isEqual:(id)other {
     return [super isEqual:other] &&
            EQUAL_OR_NIL_STRINGS(appendingKey, [other appendingKey]) &&
            EQUAL_OR_NIL_STRINGS(prefix, [other prefix]) &&
            EQUAL_OR_NIL_STRINGS(suffix, [other suffix]);
 }
-*/
+
+- (NSUInteger)hash {
+    return [super hash] + [appendingKey hash] + [prefix hash] + [suffix hash];
+}
 
 - (NSString *)appendingKey {
     return appendingKey;
@@ -518,13 +529,17 @@ NSString *BDSKRichTextString = @"Rich Text";
     BDSKDESTROY(cleaningKey);
     [super dealloc];
 }
-/*
+
 - (BOOL)isEqual:(id)other {
     return [super isEqual:other] &&
            EQUAL_OR_NIL_STRINGS(casingKey, [other casingKey]) &&
            EQUAL_OR_NIL_STRINGS(cleaningKey, [other cleaningKey]);
 }
-*/
+
+- (NSUInteger)hash {
+    return [super hash] + [casingKey hash] + [cleaningKey hash];
+}
+
 - (NSInteger)type {
     return BDSKFieldTokenType;
 }
@@ -638,12 +653,16 @@ NSString *BDSKRichTextString = @"Rich Text";
     BDSKDESTROY(urlFormatKey);
     [super dealloc];
 }
-/*
+
 - (BOOL)isEqual:(id)other {
     return [super isEqual:other] &&
            EQUAL_OR_NIL_STRINGS(urlFormatKey, [other urlFormatKey]);
 }
-*/
+
+- (NSUInteger)hash {
+    return [super hash] + [urlFormatKey hash];
+}
+
 - (NSInteger)type {
     return BDSKURLTokenType;
 }
@@ -731,13 +750,17 @@ NSString *BDSKRichTextString = @"Rich Text";
     BDSKDESTROY(joinStyleKey);
     [super dealloc];
 }
-/*
+
 - (BOOL)isEqual:(id)other {
     return [super isEqual:other] &&
            EQUAL_OR_NIL_STRINGS(nameStyleKey, [other nameStyleKey]) &&
            EQUAL_OR_NIL_STRINGS(joinStyleKey, [other joinStyleKey]);
 }
-*/
+
+- (NSUInteger)hash {
+    return [super hash] + [nameStyleKey hash] + [joinStyleKey hash];
+}
+
 - (NSInteger)type {
     return BDSKPersonTokenType;
 }
@@ -839,13 +862,17 @@ NSString *BDSKRichTextString = @"Rich Text";
     BDSKDESTROY(linkedFileJoinStyleKey);
     [super dealloc];
 }
-/*
+
 - (BOOL)isEqual:(id)other {
     return [super isEqual:other] &&
            EQUAL_OR_NIL_STRINGS(linkedFileFormatKey, [other linkedFileFormatKey]) &&
            EQUAL_OR_NIL_STRINGS(linkedFileJoinStyleKey, [other linkedFileJoinStyleKey]);
 }
-*/
+
+- (NSUInteger)hash {
+    return [super hash] + [linkedFileFormatKey hash] + [linkedFileJoinStyleKey hash];
+}
+
 - (NSInteger)type {
     return BDSKLinkedFileTokenType;
 }
@@ -938,12 +965,16 @@ NSString *BDSKRichTextString = @"Rich Text";
     BDSKDESTROY(dateFormatKey);
     [super dealloc];
 }
-/*
+
 - (BOOL)isEqual:(id)other {
     return [super isEqual:other] &&
            EQUAL_OR_NIL_STRINGS(dateFormatKey, [other dateFormatKey]);
 }
-*/
+
+- (NSUInteger)hash {
+    return [super hash] + [dateFormatKey hash];
+}
+
 - (NSInteger)type {
     return BDSKDateTokenType;
 }
@@ -1031,13 +1062,17 @@ NSString *BDSKRichTextString = @"Rich Text";
     BDSKDESTROY(counterCasingKey);
     [super dealloc];
 }
-/*
+
 - (BOOL)isEqual:(id)other {
     return [super isEqual:other] &&
            EQUAL_OR_NIL_STRINGS(counterStyleKey, [other counterStyleKey]) &&
            EQUAL_OR_NIL_STRINGS(counterCasingKey, [other counterCasingKey]);
 }
-*/
+
+- (NSUInteger)hash {
+    return [super hash] + [counterStyleKey hash] + [counterCasingKey hash];
+}
+
 - (NSInteger)type {
     return BDSKNumberTokenType;
 }
@@ -1138,13 +1173,17 @@ NSString *BDSKRichTextString = @"Rich Text";
     BDSKDESTROY(altText);
     [super dealloc];
 }
-/*
+
 - (BOOL)isEqual:(id)other {
     return [super isEqual:other] &&
            EQUAL_OR_NIL_STRINGS(field, [other field]) &&
            EQUAL_OR_NIL_STRINGS(altText, [other altText]);
 }
-*/
+
+- (NSUInteger)hash {
+    return [super hash] + [field hash] + [altText hash];
+}
+
 - (NSInteger)type {
     return BDSKTextTokenType;
 }
