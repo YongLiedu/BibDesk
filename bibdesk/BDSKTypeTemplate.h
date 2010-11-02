@@ -74,8 +74,6 @@ extern NSString *BDSKTemplateDidChangeNotification;
 
 - (BDSKTemplateDocument *)document;
 
-- (NSUndoManager *)undoManager;
-
 - (NSString *)string;
 - (NSAttributedString *)attributedStringWithDefaultAttributes:(NSDictionary *)attributes;
 

@@ -190,6 +190,11 @@ extern NSString *BDSKRichTextTemplateDocumentType;
 
 - (IBAction)addField:(id)sender;
 
+- (void)startObservingTypeTemplate:(BDSKTypeTemplate *)typeTemplate;
+- (void)stopObservingTypeTemplate:(BDSKTypeTemplate *)typeTemplate;
+- (void)startObservingTokens:(NSArray *)tokens;
+- (void)stopObservingTokens:(NSArray *)tokens;
+
 @end
 
 #pragma mark -

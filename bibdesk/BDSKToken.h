@@ -48,11 +48,7 @@ enum {
     BDSKTextTokenType
 };
 
-extern NSString *BDSKTokenDidChangeNotification;
-
 extern NSString *BDSKRichTextString;
-
-@class BDSKTemplateDocument;
 
 @interface BDSKToken : NSObject <NSCopying, NSCoding> {
     NSString *title;
@@ -60,7 +56,6 @@ extern NSString *BDSKRichTextString;
     CGFloat fontSize;
     NSInteger bold;
     NSInteger italic;
-    BDSKTemplateDocument *document;
 }
 
 + (id)tokenWithField:(NSString *)field;
@@ -83,13 +78,12 @@ extern NSString *BDSKRichTextString;
 - (NSInteger)italic;
 - (void)setItalic:(NSInteger)newItalic;
 
-- (BDSKTemplateDocument *)document;
-- (void)setDocument:(BDSKTemplateDocument *)newDocument;
-
 - (NSString *)string;
 - (NSAttributedString *)attributedStringWithDefaultAttributes:(NSDictionary *)attributes;
 
-- (NSUndoManager *)undoManager;
+- (NSSet *)keysForValuesToObserveForUndo;
+
+- (void)setKey:(NSString *)aKey toValue:(id)aValue;
 
 @end
 

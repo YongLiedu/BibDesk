@@ -43,8 +43,6 @@
 
 #define EQUAL_OR_NIL_STRINGS(string1, string2) ( (string1 == nil && string2 == nil) || [string1 isEqualToString:string2] )
 
-NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
-
 NSString *BDSKRichTextString = @"Rich Text";
 
 @implementation BDSKToken
@@ -97,7 +95,6 @@ NSString *BDSKRichTextString = @"Rich Text";
         fontSize = 0.0;
         bold = NSMixedState;
         italic = NSMixedState;
-        document = nil;
     }
     return self;
 }
@@ -163,10 +160,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (void)setFontName:(NSString *)newFontName {
     if (fontName != newFontName) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setFontName:fontName];
         [fontName release];
         fontName = [newFontName retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
@@ -176,9 +171,7 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (void)setFontSize:(CGFloat)newFontSize {
     if (fabs(fontSize - newFontSize) > 0.0) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setFontSize:fontSize];
         fontSize = newFontSize;
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
@@ -188,9 +181,7 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (void)setBold:(NSInteger)newBold {
     if (bold != newBold) {
-        [(BDSKToken *)[[self undoManager] prepareWithInvocationTarget:self] setBold:bold];
         bold = newBold;
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
@@ -200,22 +191,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (void)setItalic:(NSInteger)newItalic {
     if (italic != newItalic) {
-        [(BDSKToken *)[[self undoManager] prepareWithInvocationTarget:self] setItalic:italic];
         italic = newItalic;
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
-}
-
-- (BDSKTemplateDocument *)document {
-    return document;
-}
-
-- (void)setDocument:(BDSKTemplateDocument *)newDocument {
-    document = newDocument;
-}
-
-- (NSUndoManager *)undoManager {
-    return [document undoManager];
 }
 
 - (NSString *)string {
@@ -247,6 +224,18 @@ NSString *BDSKRichTextString = @"Rich Text";
     [attrs release];
     
     return attrString;
+}
+
+- (NSSet *)keysForValuesToObserveForUndo {
+    static NSSet *keys = nil;
+    if (keys == nil)
+        keys = [[NSSet alloc] initWithObjects:@"fontName", @"fontSize", @"bold", @"italic", nil];
+    return keys;
+}
+
+// used for undo, because you cannot register setValue:forKey:
+- (void)setKey:(NSString *)aKey toValue:(id)aValue {
+    [self setValue:aValue forKey:aKey];
 }
 
 // Needed as any option control binds to any type of token
@@ -311,10 +300,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (void)setKey:(NSString *)newKey {
     if (key != newKey) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setKey:key];
         [key release];
         key = [newKey retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
@@ -327,6 +314,17 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (NSString *)string {
     return [NSString stringWithFormat:@"<$%@/>", [[self keys] componentsJoinedByString:@"."]];
+}
+
+- (NSSet *)keysForValuesToObserveForUndo {
+    static NSSet *keys = nil;
+    if (keys == nil) {
+        NSMutableSet *mutableKeys = [[super keysForValuesToObserveForUndo] mutableCopy];
+        [mutableKeys addObject:@"key"];
+        keys = [mutableKeys copy];
+        [mutableKeys release];
+    }
+    return keys;
 }
 
 @end
@@ -404,10 +402,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (void)setAppendingKey:(NSString *)newAppendingKey {
     if (appendingKey != newAppendingKey) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setAppendingKey:appendingKey];
         [appendingKey release];
         appendingKey = [newAppendingKey retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
@@ -417,10 +413,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (void)setPrefix:(NSString *)newPrefix {
     if (prefix != newPrefix) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setPrefix:prefix];
         [prefix release];
         prefix = [newPrefix retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
@@ -430,10 +424,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (void)setSuffix:(NSString *)newSuffix {
     if (suffix != newSuffix) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setSuffix:suffix];
         [suffix release];
         suffix = [newSuffix retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
@@ -471,6 +463,19 @@ NSString *BDSKRichTextString = @"Rich Text";
     NSFont *font = [NSFont fontWithName:fontName size:fontSize];
     NSDictionary *attrs = [NSDictionary dictionaryWithObjectsAndKeys:font, NSFontAttributeName, nil];
     return [[[NSAttributedString alloc] initWithString:[self string] attributes:attrs] autorelease];
+}
+
+- (NSSet *)keysForValuesToObserveForUndo {
+    static NSSet *keys = nil;
+    if (keys == nil) {
+        NSMutableSet *mutableKeys = [[super keysForValuesToObserveForUndo] mutableCopy];
+        [mutableKeys addObject:@"appendingKey"];
+        [mutableKeys addObject:@"prefix"];
+        [mutableKeys addObject:@"suffix"];
+        keys = [mutableKeys copy];
+        [mutableKeys release];
+    }
+    return keys;
 }
 
 @end
@@ -550,10 +555,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (void)setCasingKey:(NSString *)newCasingKey {
     if (casingKey != newCasingKey) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setCasingKey:casingKey];
         [casingKey release];
         casingKey = [newCasingKey retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
@@ -563,10 +566,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (void)setCleaningKey:(NSString *)newCleaningKey {
     if (cleaningKey != newCleaningKey) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setCleaningKey:cleaningKey];
         [cleaningKey release];
         cleaningKey = [newCleaningKey retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
@@ -608,6 +609,18 @@ NSString *BDSKRichTextString = @"Rich Text";
     NSFont *font = [NSFont fontWithName:fontName size:fontSize];
     NSDictionary *attrs = [NSDictionary dictionaryWithObjectsAndKeys:font, NSFontAttributeName, nil];
     return [[[NSAttributedString alloc] initWithString:[self string] attributes:attrs] autorelease];
+}
+
+- (NSSet *)keysForValuesToObserveForUndo {
+    static NSSet *keys = nil;
+    if (keys == nil) {
+        NSMutableSet *mutableKeys = [[super keysForValuesToObserveForUndo] mutableCopy];
+        [mutableKeys addObject:@"casingKey"];
+        [mutableKeys addObject:@"cleaningKey"];
+        keys = [mutableKeys copy];
+        [mutableKeys release];
+    }
+    return keys;
 }
 
 @end
@@ -673,10 +686,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (void)setUrlFormatKey:(NSString *)newUrlFormatKey {
     if (urlFormatKey != newUrlFormatKey) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setKey:urlFormatKey];
         [urlFormatKey release];
         urlFormatKey = [newUrlFormatKey retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
@@ -697,6 +708,17 @@ NSString *BDSKRichTextString = @"Rich Text";
         [keys addObject:cleaningKey];
     if ([appendingKey length])
         [keys addObject:appendingKey];
+    return keys;
+}
+
+- (NSSet *)keysForValuesToObserveForUndo {
+    static NSSet *keys = nil;
+    if (keys == nil) {
+        NSMutableSet *mutableKeys = [[super keysForValuesToObserveForUndo] mutableCopy];
+        [mutableKeys addObject:@"urlFormatKey"];
+        keys = [mutableKeys copy];
+        [mutableKeys release];
+    }
     return keys;
 }
 
@@ -771,10 +793,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (void)setNameStyleKey:(NSString *)newNameStyleKey {
     if (nameStyleKey != newNameStyleKey) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setNameStyleKey:nameStyleKey];
         [nameStyleKey release];
         nameStyleKey = [newNameStyleKey retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
@@ -784,10 +804,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (void)setJoinStyleKey:(NSString *)newJoinStyleKey {
     if (joinStyleKey != newJoinStyleKey) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setJoinStyleKey:joinStyleKey];
         [joinStyleKey release];
         joinStyleKey = [newJoinStyleKey retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
@@ -809,6 +827,18 @@ NSString *BDSKRichTextString = @"Rich Text";
     if ([appendingKey length])
         [keys addObject:appendingKey];
     [keys addObject:joinStyleKey];
+    return keys;
+}
+
+- (NSSet *)keysForValuesToObserveForUndo {
+    static NSSet *keys = nil;
+    if (keys == nil) {
+        NSMutableSet *mutableKeys = [[super keysForValuesToObserveForUndo] mutableCopy];
+        [mutableKeys addObject:@"nameStyleKey"];
+        [mutableKeys addObject:@"joinStyleKey"];
+        keys = [mutableKeys copy];
+        [mutableKeys release];
+    }
     return keys;
 }
 
@@ -884,10 +914,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (void)setLinkedFileFormatKey:(NSString *)newLinkedFileFormatKey {
     if (linkedFileFormatKey != newLinkedFileFormatKey) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setLinkedFileFormatKey:linkedFileFormatKey];
         [linkedFileFormatKey release];
         linkedFileFormatKey = [newLinkedFileFormatKey retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
@@ -897,10 +925,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (void)setLinkedFileJoinStyleKey:(NSString *)newLinkedFileJoinStyleKey {
     if (linkedFileJoinStyleKey != newLinkedFileJoinStyleKey) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setLinkedFileJoinStyleKey:linkedFileJoinStyleKey];
         [linkedFileJoinStyleKey release];
         linkedFileJoinStyleKey = [newLinkedFileJoinStyleKey retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
@@ -919,6 +945,18 @@ NSString *BDSKRichTextString = @"Rich Text";
     if ([appendingKey length])
         [keys addObject:appendingKey];
     [keys addObject:linkedFileJoinStyleKey];
+    return keys;
+}
+
+- (NSSet *)keysForValuesToObserveForUndo {
+    static NSSet *keys = nil;
+    if (keys == nil) {
+        NSMutableSet *mutableKeys = [[super keysForValuesToObserveForUndo] mutableCopy];
+        [mutableKeys addObject:@"linkedFileFormatKey"];
+        [mutableKeys addObject:@"linkedFileJoinStyleKey"];
+        keys = [mutableKeys copy];
+        [mutableKeys release];
+    }
     return keys;
 }
 
@@ -985,10 +1023,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (void)setDateFormatKey:(NSString *)newDateFormatKey {
     if (dateFormatKey != newDateFormatKey) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setKey:dateFormatKey];
         [dateFormatKey release];
         dateFormatKey = [newDateFormatKey retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
@@ -1009,6 +1045,17 @@ NSString *BDSKRichTextString = @"Rich Text";
         [keys addObject:cleaningKey];
     if ([appendingKey length])
         [keys addObject:appendingKey];
+    return keys;
+}
+
+- (NSSet *)keysForValuesToObserveForUndo {
+    static NSSet *keys = nil;
+    if (keys == nil) {
+        NSMutableSet *mutableKeys = [[super keysForValuesToObserveForUndo] mutableCopy];
+        [mutableKeys addObject:@"dateFormatKey"];
+        keys = [mutableKeys copy];
+        [mutableKeys release];
+    }
     return keys;
 }
 
@@ -1083,10 +1130,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (void)setCounterStyleKey:(NSString *)newCounterStyleKey {
     if (counterStyleKey != newCounterStyleKey) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setCasingKey:counterStyleKey];
         [counterStyleKey release];
         counterStyleKey = [newCounterStyleKey retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
@@ -1096,10 +1141,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (void)setCounterCasingKey:(NSString *)newCounterCasingKey {
     if (counterCasingKey != newCounterCasingKey) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setCasingKey:counterCasingKey];
         [counterCasingKey release];
         counterCasingKey = [newCounterCasingKey retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
@@ -1121,6 +1164,18 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (NSString *)string {
     return [NSString stringWithFormat:@"<$%@/>", [[self keys] componentsJoinedByString:@"."]];
+}
+
+- (NSSet *)keysForValuesToObserveForUndo {
+    static NSSet *keys = nil;
+    if (keys == nil) {
+        NSMutableSet *mutableKeys = [[super keysForValuesToObserveForUndo] mutableCopy];
+        [mutableKeys addObject:@"counterStyleKey"];
+        [mutableKeys addObject:@"counterCasingKey"];
+        keys = [mutableKeys copy];
+        [mutableKeys release];
+    }
+    return keys;
 }
 
 @end
@@ -1192,10 +1247,8 @@ NSString *BDSKRichTextString = @"Rich Text";
     if (newTitle == nil)
         newTitle = @"";
     if (title != newTitle) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setTitle:title];
         [title release];
         title = [newTitle retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
@@ -1205,10 +1258,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (void)setField:(NSString *)newField {
     if (field != newField) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setField:field];
         [field release];
         field = [newField retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
@@ -1218,10 +1269,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (void)setAltText:(NSString *)newAltText {
     if (altText != newAltText) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setAltText:altText];
         [altText release];
         altText = [newAltText retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
 
@@ -1235,6 +1284,19 @@ NSString *BDSKRichTextString = @"Rich Text";
     } else {
         return title;
     }
+}
+
+- (NSSet *)keysForValuesToObserveForUndo {
+    static NSSet *keys = nil;
+    if (keys == nil) {
+        NSMutableSet *mutableKeys = [[super keysForValuesToObserveForUndo] mutableCopy];
+        [mutableKeys addObject:@"title"];
+        [mutableKeys addObject:@"field"];
+        [mutableKeys addObject:@"altText"];
+        keys = [mutableKeys copy];
+        [mutableKeys release];
+    }
+    return keys;
 }
 
 @end

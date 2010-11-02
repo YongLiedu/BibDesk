@@ -97,11 +97,7 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
 }
 
 - (void)setIncluded:(BOOL)newIncluded {
-    if (included != newIncluded) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setIncluded:included];
-        included = newIncluded;
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTemplateDidChangeNotification object:self];
-    }
+    included = newIncluded;
 }
 
 - (BOOL)isDefault {
@@ -136,23 +132,15 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
 }
 
 - (NSArray *)itemTemplate {
-    return itemTemplate;
+    return [[itemTemplate copy] autorelease];
 }
 
 - (void)setItemTemplate:(NSArray *)newItemTemplate {
-    if ([itemTemplate isEqual:newItemTemplate] == NO) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setItemTemplate:[[itemTemplate copy] autorelease]];
-        [itemTemplate setArray:newItemTemplate];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTemplateDidChangeNotification object:self];
-    }
+    [itemTemplate setArray:newItemTemplate];
 }
 
 - (BDSKTemplateDocument *)document {
     return document;
-}
-
-- (NSUndoManager *)undoManager {
-    return [document undoManager];
 }
 
 - (NSString *)string {

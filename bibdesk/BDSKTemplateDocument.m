@@ -67,6 +67,9 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 #define BDSKTypeTemplateRowsPboardType @"BDSKTypeTemplateRowsPboardType"
 #define BDSKValueOrNoneTransformerName @"BDSKValueOrNone"
 
+static char BDSKTypeTemplateObservationContext;
+static char BDSKTokenPropertiesObservationContext;
+
 @interface BDSKValueOrNoneTransformer : NSValueTransformer @end
 
 @interface BDSKFlippedClipView : NSClipView @end
@@ -140,8 +143,11 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
         templateOptions = [tmpDict copy];
         [tmpDict release];
         
-        for (NSString *type in [[BDSKTypeManager sharedManager] types])
-            [typeTemplates addObject:[[[BDSKTypeTemplate alloc] initWithPubType:type forDocument:self] autorelease]];
+        for (NSString *type in [[BDSKTypeManager sharedManager] types]) {
+            BDSKTypeTemplate *template = [[[BDSKTypeTemplate alloc] initWithPubType:type forDocument:self] autorelease];
+            [typeTemplates addObject:template];
+            [self startObservingTypeTemplate:template];
+        }
         
         defaultTypeIndex = [[typeTemplates valueForKey:@"pubType"] indexOfObject:BDSKArticleString];
         if (defaultTypeIndex == NSNotFound)
@@ -171,6 +177,10 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 }
 
 - (void)dealloc {
+    for (BDSKTypeTemplate *template in typeTemplates) {
+        [self stopObservingTokens:[template itemTemplate]];
+        [self stopObservingTypeTemplate:template];
+    }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     BDSKDESTROY(specialTokens);
     BDSKDESTROY(defaultTokens);
@@ -254,10 +264,6 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
                                                  name:BDSKTokenFieldDidChangeSelectionNotification object:defaultTokenField];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidEndEditingNotification:) 
                                                  name:NSControlTextDidEndEditingNotification object:itemTemplateTokenField];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTokenDidChangeNotification:) 
-                                                 name:BDSKTokenDidChangeNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTemplateDidChangeNotification:) 
-                                                 name:BDSKTemplateDidChangeNotification object:nil];
 }
 
 - (NSArray *)writableTypesForSaveOperation:(NSSaveOperationType)saveOperation {
@@ -464,6 +470,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
                 template = [[[BDSKTypeTemplate alloc] initWithPubType:type forDocument:self] autorelease];
                 currentIndex = [typeTemplates count];
                 [self insertObject:template inTypeTemplatesAtIndex:currentIndex];
+                [self startObservingTypeTemplate:template];
             } else {
                 template = [typeTemplates objectAtIndex:currentIndex];
             }
@@ -1008,6 +1015,91 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     }
 }
 
+#pragma mark KVO and Undo
+
+- (void)startObservingTypeTemplate:(BDSKTypeTemplate *)template {
+    [template addObserver:self forKeyPath:@"itemTemplate" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKTypeTemplateObservationContext];
+    [template addObserver:self forKeyPath:@"included" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKTypeTemplateObservationContext];
+}
+
+- (void)stopObservingTypeTemplate:(BDSKTypeTemplate *)template {
+    [template removeObserver:self forKeyPath:@"itemTemplate"];
+    [template removeObserver:self forKeyPath:@"included"];
+}
+
+- (void)startObservingTokens:(NSArray *)tokens {
+    for (id token in tokens) {
+        if ([token isKindOfClass:[BDSKToken class]]) {
+            for (NSString *key in [token keysForValuesToObserveForUndo])
+                [token addObserver:self forKeyPath:key options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKTokenPropertiesObservationContext];
+        }
+    }
+}
+
+- (void)stopObservingTokens:(NSArray *)tokens {
+    for (id token in tokens) {
+        if ([token isKindOfClass:[BDSKToken class]]) {
+            for (NSString *key in [token keysForValuesToObserveForUndo])
+                [token removeObserver:self forKeyPath:key];
+        }
+    }
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if (context == &BDSKTypeTemplateObservationContext) {
+        
+        BDSKTypeTemplate *template = (BDSKTypeTemplate *)object;
+        id newValue = [change objectForKey:NSKeyValueChangeNewKey];
+        id oldValue = [change objectForKey:NSKeyValueChangeOldKey];
+        
+        if ([newValue isEqual:[NSNull null]]) newValue = nil;
+        if ([oldValue isEqual:[NSNull null]]) oldValue = nil;
+        
+        if ([keyPath isEqualToString:@"itemTemplate"]) {
+            NSMutableArray *old = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, 0, NULL);
+            NSMutableArray *new = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, 0, NULL);
+            [old addObjectsFromArray:oldValue];
+            [old removeObjectsInArray:newValue];
+            [new addObjectsFromArray:newValue];
+            [new removeObjectsInArray:oldValue];
+            [self stopObservingTokens:old];
+            [self startObservingTokens:new];
+            [old release];
+            [new release];
+            
+            // KVO in NSTokenField binding does not work
+            if (template == [typeTemplates objectAtIndex:[tableView selectedRow]])
+                [itemTemplateTokenField setObjectValue:[template itemTemplate]];
+                [[[self undoManager] prepareWithInvocationTarget:template] setItemTemplate:oldValue];
+        } else if ([keyPath isEqualToString:@"included"]) {
+            [[[self undoManager] prepareWithInvocationTarget:template] setIncluded:[oldValue boolValue]];
+        }
+
+        [self updateStrings];
+        
+    } else if (context == &BDSKTokenPropertiesObservationContext) {
+        
+        BDSKToken *token = (BDSKToken *)object;
+        id newValue = [change objectForKey:NSKeyValueChangeNewKey];
+        id oldValue = [change objectForKey:NSKeyValueChangeOldKey];
+        
+        if ([newValue isEqual:[NSNull null]]) newValue = nil;
+        if ([oldValue isEqual:[NSNull null]]) oldValue = nil;
+        
+        [[[self undoManager] prepareWithInvocationTarget:token] setKey:keyPath toValue:oldValue];
+        
+        [self updateStrings];
+        if ([token type] == BDSKTextTokenType) {
+            NSArray *currentItemTemplate = [itemTemplateTokenField objectValue];
+            if ([currentItemTemplate indexOfObjectIdenticalTo:token] != NSNotFound)
+                [itemTemplateTokenField setObjectValue:[[currentItemTemplate copy] autorelease]];
+        }
+        
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
+}
+
 #pragma mark Notification handlers
 
 - (void)handleDidChangeSelectionNotification:(NSNotification *)notification {
@@ -1037,31 +1129,6 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
                 return;
         }
         [self setSelectedToken:token];
-    }
-}
-
-- (void)handleDidEndEditingNotification:(NSNotification *)notification {
-}
-
-- (void)handleTokenDidChangeNotification:(NSNotification *)notification {
-    BDSKToken *token = [notification object];
-    if ([[typeTemplates valueForKeyPath:@"@unionOfArrays.itemTemplate"] indexOfObjectIdenticalTo:token] != NSNotFound) {
-        [self updateStrings];
-        if ([token type] == BDSKTextTokenType) {
-            NSArray *currentItemTemplate = [itemTemplateTokenField objectValue];
-            if ([currentItemTemplate indexOfObjectIdenticalTo:token] != NSNotFound)
-                [itemTemplateTokenField setObjectValue:[[currentItemTemplate copy] autorelease]];
-        }
-    }
-}
-
-- (void)handleTemplateDidChangeNotification:(NSNotification *)notification {
-    BDSKTypeTemplate *template = [notification object];
-    if ([typeTemplates indexOfObjectIdenticalTo:template] != NSNotFound) {
-        [self updateStrings];
-        // KVO in NSTokenField binding does not work
-        if (template == [typeTemplates objectAtIndex:[tableView selectedRow]])
-            [itemTemplateTokenField setObjectValue:[template itemTemplate]];
     }
 }
 
@@ -1165,18 +1232,6 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         }
     }
     return menu;
-}
-
-- (NSArray *)tokenField:(NSTokenField *)tokenField shouldAddObjects:(NSArray *)tokens atIndex:(NSUInteger)idx {
-    if (tokenField == itemTemplateTokenField) {
-        for (id token in tokens) {
-            if ([token isKindOfClass:[BDSKToken class]]) {
-                [token setDocument:self];
-            }
-        }
-    }
-    
-    return tokens;
 }
 
 - (void)tokenField:(NSTokenField *)tokenField textViewDidChangeSelection:(NSTextView *)textView {
@@ -1436,12 +1491,6 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
                 break;
             default:
                 return nil;
-        }
-    }
-    
-    for (token in result) {
-        if ([token isKindOfClass:[BDSKToken class]]) {
-            [token setDocument:self];
         }
     }
     
