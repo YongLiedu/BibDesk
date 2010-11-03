@@ -407,6 +407,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         
         if (endRange.location != NSNotFound) {
             if ([self isRichText]) {
+                font = [attrString attribute:NSFontAttributeName atIndex:startLoc effectiveRange:NULL] ?: [NSFont userFontOfSize:0.0];
                 if (startRange.location > 0)
                    prefix = [attrString attributedSubstringFromRange:makeRange(0, startRange.location)];
                 if (NSMaxRange(endRange) < length)
@@ -476,7 +477,6 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
                 [self setSuffixTemplate:suffix];
                 [self setSeparatorTemplate:separator];
                 if ([self isRichText]) {
-                    font = [attrString attribute:NSFontAttributeName atIndex:startLoc effectiveRange:NULL] ?: [NSFont userFontOfSize:0.0];
                     NSInteger traits = [[NSFontManager sharedFontManager] traitsOfFont:font];
                     [self setFontName:[font familyName]];
                     [self setFontSize:[font pointSize]];
