@@ -862,7 +862,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 
 #pragma mark Setup and Update
 
-- (NSArray *)propertiesForTokenType:(NSInteger)type {
+- (NSArray *)propertiesForTokenType:(BDSKTokenType)type {
     switch (type) {
         case BDSKFieldTokenType:        return [NSArray arrayWithObjects:@"casing", @"cleaning", @"appending", nil];
         case BDSKURLTokenType:          return [NSArray arrayWithObjects:@"urlFormat", @"casing", @"cleaning", @"appending", nil];
@@ -874,7 +874,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     }
 }
 
-- (void)setupOptionsMenu:(NSMenu *)parentMenu forTokenType:(NSInteger)type {
+- (void)setupOptionsMenu:(NSMenu *)parentMenu forTokenType:(BDSKTokenType)type {
     NSUInteger i = 0;
     for (NSString *key in [self propertiesForTokenType:type]) {
         NSMenu *menu = [[parentMenu itemAtIndex:i++] submenu];
@@ -1296,7 +1296,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 
 #pragma mark Reading
 
-- (NSString *)propertyForKey:(NSString *)key tokenType:(NSInteger)type {
+- (NSString *)propertyForKey:(NSString *)key tokenType:(BDSKTokenType)type {
     for (NSString *prop in [self propertiesForTokenType:type]) {
         if ([[templateOptions valueForKeyPath:[prop stringByAppendingString:@".key"]] containsObject:key])
             return [prop stringByAppendingString:@"Key"];
@@ -1354,7 +1354,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     NSArray *keys = [[tag keyPath] componentsSeparatedByString:@"."];
     NSString *key = [keys count] ? [keys objectAtIndex:0] : nil;
     BDSKToken *token = nil;
-    NSInteger type;
+    BDSKTokenType type;
     NSString *field = nil;
     NSInteger i = 0, j;
     

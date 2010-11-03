@@ -146,7 +146,7 @@ NSString *BDSKRichTextString = @"Rich Text";
     return [title hash] + [fontName hash] + ((NSUInteger)fontSize >> 4) + (bold >> 5) + (italic >> 6);
 }
 
-- (NSInteger)type {
+- (BDSKTokenType)type {
     return -1;
 }
 
@@ -545,7 +545,7 @@ NSString *BDSKRichTextString = @"Rich Text";
     return [super hash] + [casingKey hash] + [cleaningKey hash];
 }
 
-- (NSInteger)type {
+- (BDSKTokenType)type {
     return BDSKFieldTokenType;
 }
 
@@ -676,7 +676,7 @@ NSString *BDSKRichTextString = @"Rich Text";
     return [super hash] + [urlFormatKey hash];
 }
 
-- (NSInteger)type {
+- (BDSKTokenType)type {
     return BDSKURLTokenType;
 }
 
@@ -783,7 +783,7 @@ NSString *BDSKRichTextString = @"Rich Text";
     return [super hash] + [nameStyleKey hash] + [joinStyleKey hash];
 }
 
-- (NSInteger)type {
+- (BDSKTokenType)type {
     return BDSKPersonTokenType;
 }
 
@@ -903,7 +903,7 @@ NSString *BDSKRichTextString = @"Rich Text";
     return [super hash] + [linkedFileFormatKey hash] + [linkedFileJoinStyleKey hash];
 }
 
-- (NSInteger)type {
+- (BDSKTokenType)type {
     return BDSKLinkedFileTokenType;
 }
 
@@ -1013,7 +1013,7 @@ NSString *BDSKRichTextString = @"Rich Text";
     return [super hash] + [dateFormatKey hash];
 }
 
-- (NSInteger)type {
+- (BDSKTokenType)type {
     return BDSKDateTokenType;
 }
 
@@ -1120,7 +1120,7 @@ NSString *BDSKRichTextString = @"Rich Text";
     return [super hash] + [counterStyleKey hash] + [counterCasingKey hash];
 }
 
-- (NSInteger)type {
+- (BDSKTokenType)type {
     return BDSKNumberTokenType;
 }
 
@@ -1239,7 +1239,7 @@ NSString *BDSKRichTextString = @"Rich Text";
     return [super hash] + [field hash] + [altText hash];
 }
 
-- (NSInteger)type {
+- (BDSKTokenType)type {
     return BDSKTextTokenType;
 }
 

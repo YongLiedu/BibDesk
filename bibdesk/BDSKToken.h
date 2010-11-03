@@ -47,6 +47,7 @@ enum {
     BDSKNumberTokenType,
     BDSKTextTokenType
 };
+typedef NSInteger BDSKTokenType;
 
 extern NSString *BDSKRichTextString;
 
@@ -62,7 +63,7 @@ extern NSString *BDSKRichTextString;
 
 - (id)initWithTitle:(NSString *)aTitle;
 
-- (NSInteger)type;
+- (BDSKTokenType)type;
 
 - (NSString *)title;
 
