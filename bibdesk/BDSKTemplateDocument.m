@@ -53,6 +53,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSPrintOperation_BDSKExtensions.h"
 #import "BDSKTableView.h"
+#import "BDSKUndoManager.h"
 
 static CGFloat BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0, 32.0, 48.0, 64.0};
 
@@ -126,6 +127,10 @@ static char BDSKTokenPropertiesObservationContext;
         defaultTypeIndex = 0;
         
         [self setFileType:BDSKTextTemplateDocumentType];
+        
+        BDSKUndoManager *undoManager = [[[BDSKUndoManager alloc] init] autorelease];
+        [undoManager setDelegate:self];
+        [self setUndoManager:undoManager];
         
         NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"TemplateOptions" ofType:@"plist"]];
         
@@ -502,6 +507,21 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 
 - (NSPrintOperation *)printOperationWithSettings:(NSDictionary *)printSettings error:(NSError **)outError {
     return [NSPrintOperation printOperationWithAttributedString:[self attributedString] printInfo:[self printInfo] settings:printSettings];
+}
+
+- (BOOL)undoManagerShouldUndoChange:(id)sender{
+	if (![self isDocumentEdited]) {
+		NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog") 
+                                         defaultButton:NSLocalizedString(@"Yes", @"Button title") 
+                                       alternateButton:NSLocalizedString(@"No", @"Button title") 
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"You are about to undo past the last point this file was saved. Do you want to do this?", @"Informative text in alert dialog") ];
+
+		NSInteger rv = [alert runModal];
+		if (rv == NSAlertAlternateReturn)
+			return NO;
+	}
+	return YES;
 }
 
 - (BDSKToken *)tokenForField:(NSString *)field {
