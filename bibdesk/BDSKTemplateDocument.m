@@ -121,7 +121,7 @@ static char BDSKTokenPropertiesObservationContext;
         suffixTemplate = [[NSMutableAttributedString alloc] init];
         separatorTemplate = [[NSMutableAttributedString alloc] init];
         richText = NO;
-        fontName = [font familyName];
+        fontName = [[font familyName] retain];
         fontSize = [font pointSize];
         bold = NO;
         italic = NO;
