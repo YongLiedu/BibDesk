@@ -459,10 +459,6 @@
     return [self hasSearchGroupsSelected];
 }
 
-- (BOOL)validateRevertDocumentToSavedMenuItem:(NSMenuItem *)menuItem {
-    return [self isDocumentEdited];
-}
-
 - (BOOL)validateChangePreviewDisplayMenuItem:(NSMenuItem *)menuItem {
     NSInteger tag = [menuItem tag], state = NSOffState;
     NSString *style = [menuItem representedObject];
