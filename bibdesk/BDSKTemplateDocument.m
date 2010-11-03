@@ -249,7 +249,7 @@ static char BDSKTokenPropertiesObservationContext;
     
 	[fieldField setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
     
-    [ownerController setContent:self];
+    [ownerController bind:@"contentValue" toObject:self withKeyPath:@"self" options:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidChangeSelectionNotification:) 
                                                  name:BDSKTokenFieldDidChangeSelectionNotification object:itemTemplateTokenField];
@@ -800,26 +800,6 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 
 #pragma mark Actions
 
-- (IBAction)saveDocument:(id)sender {
-    if ([ownerController commitEditing])
-        [super saveDocument:sender];
-}
-
-- (IBAction)saveDocumentAs:(id)sender {
-    if ([ownerController commitEditing])
-        [super saveDocumentAs:sender];
-}
-
-- (IBAction)saveDocumentTo:(id)sender {
-    if ([ownerController commitEditing])
-        [super saveDocumentTo:sender];
-}
-
-- (IBAction)printDocument:(id)sender {
-    if ([ownerController commitEditing])
-        [super printDocument:sender];
-}
-
 - (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSOKButton) {
         BDSKToken *token = [self tokenForField:[addFieldController field]];
@@ -1140,7 +1120,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 }
 
 - (void)windowWillClose:(NSNotification *)notification {
-    [ownerController setContent:nil];
+    [ownerController unbind:@"contentObject"];
 }
 
 - (void)canCloseDocumentWithDelegate:(id)delegate shouldCloseSelector:(SEL)shouldCloseSelector contextInfo:(void *)contextInfo {
