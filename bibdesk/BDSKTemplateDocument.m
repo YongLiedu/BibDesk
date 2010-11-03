@@ -249,7 +249,7 @@ static char BDSKTokenPropertiesObservationContext;
     
 	[fieldField setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
     
-    [ownerController bind:@"contentValue" toObject:self withKeyPath:@"self" options:nil];
+    [ownerController bind:@"contentObject" toObject:self withKeyPath:@"self" options:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidChangeSelectionNotification:) 
                                                  name:BDSKTokenFieldDidChangeSelectionNotification object:itemTemplateTokenField];
