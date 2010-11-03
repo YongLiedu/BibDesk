@@ -40,18 +40,16 @@
 
 extern NSString *BDSKTemplateDidChangeNotification;
 
-@class BDSKTemplateDocument;
-
 @interface BDSKTypeTemplate : NSObject {
     NSString *pubType;
     BOOL included;
+    BOOL isDefault;
     NSArray *requiredTokens;
     NSArray *optionalTokens;
     NSArray *itemTemplate;
-    BDSKTemplateDocument *document;
 }
 
-- (id)initWithPubType:(NSString *)aPubType forDocument:(BDSKTemplateDocument *)aDocument;
+- (id)initWithPubType:(NSString *)aPubType requiredTokens:(NSArray *)required optionalTokens:(NSArray *)optional;
 
 - (NSString *)pubType;
 - (void)setPubType:(NSString *)newPubType;
@@ -60,6 +58,7 @@ extern NSString *BDSKTemplateDidChangeNotification;
 - (void)setIncluded:(BOOL)newIncluded;
 
 - (BOOL)isDefault;
+- (void)setDefault:(BOOL)newDefault;
 
 - (NSColor *)textColor;
 
@@ -68,8 +67,6 @@ extern NSString *BDSKTemplateDidChangeNotification;
 
 - (NSArray *)itemTemplate;
 - (void)setItemTemplate:(NSArray *)newItemTemplate;
-
-- (BDSKTemplateDocument *)document;
 
 - (NSString *)string;
 - (NSAttributedString *)attributedStringWithDefaultAttributes:(NSDictionary *)attributes;

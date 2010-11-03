@@ -138,14 +138,7 @@ extern NSString *BDSKRichTextTemplateDocumentType;
     NSAttributedString *attributedString;
 }
 
-- (BDSKToken *)tokenForField:(NSString *)field;
-
 - (NSArray *)typeTemplates;
-- (void)setTypeTemplates:(NSArray *)newTypeTemplates;
-- (NSUInteger)countOfTypeTemplates;
-- (id)objectInTypeTemplatesAtIndex:(NSUInteger)index;
-- (void)insertObject:(id)obj inTypeTemplatesAtIndex:(NSUInteger)index;
-- (void)removeObjectFromTypeTemplatesAtIndex:(NSUInteger)index;
 
 - (NSArray *)specialTokens;
 - (void)setSpecialTokens:(NSArray *)newSpecialTokens;

@@ -76,6 +76,8 @@ static char BDSKTokenPropertiesObservationContext;
 @interface BDSKFlippedClipView : NSClipView @end
 
 @interface BDSKTemplateDocument (BDSKPrivate)
+- (NSArray *)tokensForFields:(NSArray *)array;
+- (BDSKTypeTemplate *)addTypeTemplateForType:(NSString *)type;
 - (void)updateTextViews;
 - (void)updateTokenFields;
 - (void)updateStrings;
@@ -132,15 +134,16 @@ static char BDSKTokenPropertiesObservationContext;
         [undoManager setDelegate:self];
         [self setUndoManager:undoManager];
         
-        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"TemplateOptions" ofType:@"plist"]];
+        NSBundle *bundle = [NSBundle mainBundle];
+        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithContentsOfFile:[bundle pathForResource:@"TemplateOptions" ofType:@"plist"]];
         
         for (NSString *key in [tmpDict allKeys]) {
             NSMutableArray *array = [NSMutableArray array];
             for (NSDictionary *dict in [tmpDict objectForKey:key]) {
-                dict = [dict mutableCopy];
-                [(NSMutableDictionary *)dict setObject:[[NSBundle mainBundle] localizedStringForKey:[dict objectForKey:@"displayName"] value:@"" table:@"TemplateOptions"] forKey:@"displayName"];
-                [array addObject:dict];
-                [dict release];
+                NSMutableDictionary *mutableDict = [dict mutableCopy];
+                [mutableDict setObject:[bundle localizedStringForKey:[dict objectForKey:@"displayName"] value:@"" table:@"TemplateOptions"] forKey:@"displayName"];
+                [array addObject:mutableDict];
+                [mutableDict release];
             }
             [tmpDict setObject:array forKey:key];
         }
@@ -148,14 +151,11 @@ static char BDSKTokenPropertiesObservationContext;
         [tmpDict release];
         
         for (NSString *type in [[BDSKTypeManager sharedManager] types]) {
-            BDSKTypeTemplate *template = [[[BDSKTypeTemplate alloc] initWithPubType:type forDocument:self] autorelease];
-            [typeTemplates addObject:template];
-            [self startObservingTypeTemplate:template];
+            if ([type isEqualToString:BDSKArticleString])
+                defaultTypeIndex = [typeTemplates count];
+            [self addTypeTemplateForType:type];
         }
-        
-        defaultTypeIndex = [[typeTemplates valueForKey:@"pubType"] indexOfObject:BDSKArticleString];
-        if (defaultTypeIndex == NSNotFound)
-            defaultTypeIndex = 0;
+        [[typeTemplates objectAtIndex:defaultTypeIndex] setDefault:YES];
         
         NSMutableArray *tmpFonts = [NSMutableArray array];
         NSMutableArray *fontNames = [[[[NSFontManager sharedFontManager] availableFontFamilies] mutableCopy] autorelease];
@@ -169,13 +169,8 @@ static char BDSKTokenPropertiesObservationContext;
         [tmpFonts insertObject:[NSDictionary dictionaryWithObjectsAndKeys:@"<None>", @"fontName", NSLocalizedString(@"Same as body", @"Inerited font message in popup"), @"displayName", nil] atIndex:0];
         tokenFonts = [tmpFonts copy];
         
-        NSString *field;
-        
-        for (field in [[BDSKTypeManager sharedManager] userDefaultFieldsForType:nil])
-            [defaultTokens addObject:[self tokenForField:field]];
-        
-        for (field in [NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKLocalFileString, BDSKRemoteURLString, BDSKItemNumberString, BDSKRichTextString, BDSKDateAddedString, BDSKDateModifiedString, BDSKPubDateString, nil])
-            [specialTokens addObject:[self tokenForField:field]];
+        [defaultTokens setArray:[self tokensForFields:[[BDSKTypeManager sharedManager] userDefaultFieldsForType:nil]]];
+        [specialTokens setArray:[self tokensForFields:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKLocalFileString, BDSKRemoteURLString, BDSKItemNumberString, BDSKRichTextString, BDSKDateAddedString, BDSKDateModifiedString, BDSKPubDateString, nil]]];
     }
     return self;
 }
@@ -465,10 +460,8 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
                 for (type in templateDict) {
                     NSUInteger currentIndex = [currentTypes indexOfObject:type];
                     if (currentIndex == NSNotFound) {
-                        template = [[[BDSKTypeTemplate alloc] initWithPubType:type forDocument:self] autorelease];
                         currentIndex = [typeTemplates count];
-                        [self insertObject:template inTypeTemplatesAtIndex:currentIndex];
-                        [self startObservingTypeTemplate:template];
+                        template = [self addTypeTemplateForType:type];
                     } else {
                         template = [typeTemplates objectAtIndex:currentIndex];
                     }
@@ -524,42 +517,35 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 	return YES;
 }
 
-- (BDSKToken *)tokenForField:(NSString *)field {
-    id token = [fieldTokens objectForKey:field];
-    if (token == nil) {
-        token = [BDSKToken tokenWithField:field];
-        [fieldTokens setObject:token forKey:field];
+- (NSArray *)tokensForFields:(NSArray *)array {
+    NSMutableArray *tokens = [NSMutableArray array];
+    for (NSString *field in array) {
+        id token = [fieldTokens objectForKey:field];
+        if (token == nil) {
+            token = [BDSKToken tokenWithField:field];
+            [fieldTokens setObject:token forKey:field];
+        }
+        [tokens addObject:token];
     }
-    return token;
+    return tokens;
+}
+
+- (BDSKTypeTemplate *)addTypeTemplateForType:(NSString *)type {
+    BDSKTypeManager *tm = [BDSKTypeManager sharedManager];
+    NSArray *requiredTokens = [self tokensForFields:[tm requiredFieldsForType:type]];
+    NSArray *optionalTokens = [self tokensForFields:[tm optionalFieldsForType:type]];
+    BDSKTypeTemplate *template = [[[BDSKTypeTemplate alloc] initWithPubType:type requiredTokens:requiredTokens optionalTokens:optionalTokens] autorelease];
+    [self willChangeValueForKey:@"typeTemplates"];
+    [typeTemplates addObject:template];
+    [self didChangeValueForKey:@"typeTemplates"];
+    [self startObservingTypeTemplate:template];
+    return template;
 }
 
 #pragma mark Accessors
 
 - (NSArray *)typeTemplates {
     return typeTemplates;
-}
-
-- (void)setTypeTemplates:(NSArray *)newTypeTemplates {
-    if (typeTemplates != newTypeTemplates) {
-        [typeTemplates release];
-        typeTemplates = [newTypeTemplates mutableCopy];
-    }
-}
-
-- (NSUInteger)countOfTypeTemplates {
-    return [typeTemplates count];
-}
-
-- (id)objectInTypeTemplatesAtIndex:(NSUInteger)idx {
-    return [typeTemplates objectAtIndex:idx];
-}
-
-- (void)insertObject:(id)obj inTypeTemplatesAtIndex:(NSUInteger)idx {
-    [typeTemplates insertObject:obj atIndex:idx];
-}
-
-- (void)removeObjectFromTypeTemplatesAtIndex:(NSUInteger)idx {
-    [typeTemplates removeObjectAtIndex:idx];
 }
 
 - (NSUInteger)countOfSizes {
@@ -710,12 +696,9 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 - (void)setDefaultTypeIndex:(NSUInteger)newDefaultTypeIndex {
     if (defaultTypeIndex != newDefaultTypeIndex) {
         [[[self undoManager] prepareWithInvocationTarget:self] setDefaultTypeIndex:defaultTypeIndex];
-        NSUInteger oldDefaultTypeIndex = defaultTypeIndex;
-        [[typeTemplates objectAtIndex:oldDefaultTypeIndex] willChangeValueForKey:@"default"];
-        [[typeTemplates objectAtIndex:newDefaultTypeIndex] willChangeValueForKey:@"default"];
+        [[typeTemplates objectAtIndex:defaultTypeIndex] setDefault:NO];
         defaultTypeIndex = newDefaultTypeIndex;
-        [[typeTemplates objectAtIndex:oldDefaultTypeIndex] didChangeValueForKey:@"default"];
-        [[typeTemplates objectAtIndex:newDefaultTypeIndex] didChangeValueForKey:@"default"];
+        [[typeTemplates objectAtIndex:defaultTypeIndex] setDefault:YES];
         [self updateStrings];
     }
 }
@@ -830,8 +813,8 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 
 - (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSOKButton) {
-        BDSKToken *token = [self tokenForField:[addFieldController field]];
-        [self setDefaultTokens:[[self defaultTokens] arrayByAddingObject:token]];
+        NSArray *tokens = [self tokensForFields:[NSArray arrayWithObjects:[addFieldController field], nil]];
+        [self setDefaultTokens:[[self defaultTokens] arrayByAddingObjectsFromArray:tokens]];
         [defaultTokenField setObjectValue:[self defaultTokens]];
         [self updateTokenFields];
     }
@@ -1297,7 +1280,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 }
 
 - (void)tableViewInsertNewline:(NSTableView *)tv {
-    BDSKTypeTemplate *selTemplate = [self objectInTypeTemplatesAtIndex:[tableView selectedRow]];
+    BDSKTypeTemplate *selTemplate = [typeTemplates objectAtIndex:[tableView selectedRow]];
     [selTemplate setIncluded:[selTemplate isIncluded] == NO];
 }
 

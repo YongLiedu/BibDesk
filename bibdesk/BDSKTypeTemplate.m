@@ -37,7 +37,6 @@
  */
 
 #import "BDSKTypeTemplate.h"
-#import "BDSKTemplateDocument.h"
 #import "BDSKToken.h"
 #import "BDSKTypeManager.h"
 #import "BDSKStringConstants.h"
@@ -50,25 +49,12 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
     return [NSSet setWithObjects:@"itemTemplate", @"included", @"default", nil];
 }
 
-- (id)initWithPubType:(NSString *)aPubType forDocument:(BDSKTemplateDocument *)aDocument {
+- (id)initWithPubType:(NSString *)aPubType requiredTokens:(NSArray *)required optionalTokens:(NSArray *)optional {
     if (self = [super init]) {
         pubType = [aPubType retain];
         itemTemplate = [[NSArray alloc] init];
-        document = aDocument;
-        
-        NSMutableArray *tmpArray = [NSMutableArray array];
-        BDSKTypeManager *tm = [BDSKTypeManager sharedManager];
-        NSString *field;
-        
-        for (field in [tm requiredFieldsForType:pubType])
-            [tmpArray addObject:[document tokenForField:field]];
-        requiredTokens = [tmpArray copy];
-        
-        [tmpArray removeAllObjects];
-        for (field in [tm optionalFieldsForType:pubType])
-            [tmpArray addObject:[document tokenForField:field]];
-        optionalTokens = [tmpArray copy];
-        
+        requiredTokens = [[NSArray alloc] initWithArray:required];
+        optionalTokens = [[NSArray alloc] initWithArray:optional];
     }
     return self;
 }
@@ -103,7 +89,11 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
 }
 
 - (BOOL)isDefault {
-    return [[[document typeTemplates] objectAtIndex:[document defaultTypeIndex]] isEqual:self];
+    return isDefault;
+}
+
+- (void)setDefault:(BOOL)newDefault {
+    isDefault = newDefault;
 }
 
 - (NSColor *)textColor {
@@ -132,12 +122,8 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
 - (void)setItemTemplate:(NSArray *)newItemTemplate {
     if (itemTemplate != newItemTemplate) {
         [itemTemplate release];
-        itemTemplate = [newItemTemplate copy] ?: [[NSArray alloc] init];
+        itemTemplate = [[NSArray alloc] initWithArray:newItemTemplate];
     }
-}
-
-- (BDSKTemplateDocument *)document {
-    return document;
 }
 
 - (NSString *)string {
