@@ -45,9 +45,9 @@ extern NSString *BDSKTemplateDidChangeNotification;
 @interface BDSKTypeTemplate : NSObject {
     NSString *pubType;
     BOOL included;
-    NSMutableArray *requiredTokens;
-    NSMutableArray *optionalTokens;
-    NSMutableArray *itemTemplate;
+    NSArray *requiredTokens;
+    NSArray *optionalTokens;
+    NSArray *itemTemplate;
     BDSKTemplateDocument *document;
 }
 
@@ -64,10 +64,7 @@ extern NSString *BDSKTemplateDidChangeNotification;
 - (NSColor *)textColor;
 
 - (NSArray *)requiredTokens;
-- (void)setRequiredTokens:(NSArray *)newRequiredTokens;
-
 - (NSArray *)optionalTokens;
-- (void)setOptionalTokens:(NSArray *)newOptionalTokens;
 
 - (NSArray *)itemTemplate;
 - (void)setItemTemplate:(NSArray *)newItemTemplate;

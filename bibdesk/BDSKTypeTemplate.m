@@ -53,19 +53,21 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
 - (id)initWithPubType:(NSString *)aPubType forDocument:(BDSKTemplateDocument *)aDocument {
     if (self = [super init]) {
         pubType = [aPubType retain];
-        requiredTokens = [[NSMutableArray alloc] init];
-        optionalTokens = [[NSMutableArray alloc] init];
-        itemTemplate = [[NSMutableArray alloc] init];
+        itemTemplate = [[NSArray alloc] init];
         document = aDocument;
         
+        NSMutableArray *tmpArray = [NSMutableArray array];
         BDSKTypeManager *tm = [BDSKTypeManager sharedManager];
         NSString *field;
         
         for (field in [tm requiredFieldsForType:pubType])
-            [requiredTokens addObject:[document tokenForField:field]];
+            [tmpArray addObject:[document tokenForField:field]];
+        requiredTokens = [tmpArray copy];
         
+        [tmpArray removeAllObjects];
         for (field in [tm optionalFieldsForType:pubType])
-            [optionalTokens addObject:[document tokenForField:field]];
+            [tmpArray addObject:[document tokenForField:field]];
+        optionalTokens = [tmpArray copy];
         
     }
     return self;
@@ -119,24 +121,19 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
     return requiredTokens;
 }
 
-- (void)setRequiredTokens:(NSArray *)newRequiredTokens {
-    [requiredTokens setArray:newRequiredTokens];
-}
-
 - (NSArray *)optionalTokens {
     return optionalTokens;
 }
 
-- (void)setOptionalTokens:(NSArray *)newOptionalTokens {
-    [optionalTokens setArray:newOptionalTokens];
-}
-
 - (NSArray *)itemTemplate {
-    return [[itemTemplate copy] autorelease];
+    return itemTemplate;
 }
 
 - (void)setItemTemplate:(NSArray *)newItemTemplate {
-    [itemTemplate setArray:newItemTemplate];
+    if (itemTemplate != newItemTemplate) {
+        [itemTemplate release];
+        itemTemplate = [newItemTemplate copy] ?: [[NSArray alloc] init];
+    }
 }
 
 - (BDSKTemplateDocument *)document {
