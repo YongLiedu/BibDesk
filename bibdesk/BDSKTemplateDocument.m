@@ -620,7 +620,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         [self updateOptionView];
         [self updateTextViews];
         [self setFileURL:nil];
-        [self setFileType:richText ? @"RTFTemplate" : @"TextTemplate"];
+        [self setFileType:richText ? BDSKRichTextTemplateDocumentType : BDSKTextTemplateDocumentType];
     }
 }
 
