@@ -880,7 +880,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         NSMenu *menu = [[parentMenu itemAtIndex:i++] submenu];
         [menu setTitle:[key stringByAppendingString:@"Key"]];
         for (NSDictionary *dict in [templateOptions valueForKey:key]) {
-            NSMenuItem *item = [menu addItemWithTitle:[[NSBundle mainBundle] localizedStringForKey:[dict objectForKey:@"displayName"] value:@"" table:@"TemplateOptions"]
+            NSMenuItem *item = [menu addItemWithTitle:[dict objectForKey:@"displayName"]
                                                action:@selector(changeValueFromMenu:) keyEquivalent:@""];
             [item setTarget:self];
             [item setRepresentedObject:[dict objectForKey:@"key"]];
