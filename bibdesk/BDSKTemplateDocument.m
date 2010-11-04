@@ -54,6 +54,7 @@
 #import "NSPrintOperation_BDSKExtensions.h"
 #import "BDSKTableView.h"
 #import "BDSKUndoManager.h"
+#import "NSMenu_BDSKExtensions.h"
 
 static CGFloat BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0, 32.0, 48.0, 64.0};
 
@@ -181,6 +182,12 @@ static char BDSKTokenPropertiesObservationContext;
         [self stopObservingTypeTemplate:template];
     }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    BDSKDESTROY(fieldOptionsMenu);
+    BDSKDESTROY(urlOptionsMenu);
+    BDSKDESTROY(personOptionsMenu);
+    BDSKDESTROY(linkedFileOptionsMenu);
+    BDSKDESTROY(dateOptionsMenu);
+    BDSKDESTROY(numberOptionsMenu);
     BDSKDESTROY(specialTokens);
     BDSKDESTROY(defaultTokens);
     BDSKDESTROY(fieldTokens);
@@ -863,38 +870,56 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 #pragma mark Setup and Update
 
 - (NSArray *)propertiesForTokenType:(BDSKTokenType)type {
+    static NSArray *fieldProperties = nil;
+    static NSArray *urlProperties = nil;
+    static NSArray *personProperties = nil;
+    static NSArray *linkedFileProperties = nil;
+    static NSArray *dateProperties = nil;
+    static NSArray *numberProperties = nil;
+    if (fieldProperties == nil) {
+        fieldProperties = [[NSArray alloc] initWithObjects:@"casing", @"cleaning", @"appending", nil];
+        urlProperties = [[NSArray alloc] initWithObjects:@"urlFormat", @"casing", @"cleaning", @"appending", nil];
+        personProperties = [[NSArray alloc] initWithObjects:@"nameStyle", @"joinStyle", @"casing", @"cleaning", @"appending", nil];
+        linkedFileProperties = [[NSArray alloc] initWithObjects:@"linkedFileFormat", @"linkedFileJoinStyle", @"appending", nil];
+        dateProperties = [[NSArray alloc] initWithObjects:@"dateFormat", @"casing", @"cleaning", @"appending", nil];
+        numberProperties = [[NSArray alloc] initWithObjects:@"counterStyle", @"counterCasing", nil];
+    }
     switch (type) {
-        case BDSKFieldTokenType:        return [NSArray arrayWithObjects:@"casing", @"cleaning", @"appending", nil];
-        case BDSKURLTokenType:          return [NSArray arrayWithObjects:@"urlFormat", @"casing", @"cleaning", @"appending", nil];
-        case BDSKPersonTokenType:       return [NSArray arrayWithObjects:@"nameStyle", @"joinStyle", @"casing", @"cleaning", @"appending", nil];
-        case BDSKLinkedFileTokenType:   return [NSArray arrayWithObjects:@"linkedFileFormat", @"linkedFileJoinStyle", @"appending", nil];
-        case BDSKDateTokenType:         return [NSArray arrayWithObjects:@"dateFormat", @"casing", @"cleaning", @"appending", nil];
-        case BDSKNumberTokenType:       return [NSArray arrayWithObjects:@"counterStyle", @"counterCasing", nil];
+        case BDSKFieldTokenType:        return fieldProperties;
+        case BDSKURLTokenType:          return urlProperties;
+        case BDSKPersonTokenType:       return personProperties;
+        case BDSKLinkedFileTokenType:   return linkedFileProperties;
+        case BDSKDateTokenType:         return dateProperties;
+        case BDSKNumberTokenType:       return numberProperties;
         default:                        return nil;
     }
 }
 
-- (void)setupOptionsMenu:(NSMenu *)parentMenu forTokenType:(BDSKTokenType)type {
-    NSUInteger i = 0;
+- (NSMenu *)newOptionsMenuForTokenType:(BDSKTokenType)type {
+    NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
+    NSBundle *bundle = [NSBundle mainBundle];
     for (NSString *key in [self propertiesForTokenType:type]) {
-        NSMenu *menu = [[parentMenu itemAtIndex:i++] submenu];
-        [menu setTitle:[key stringByAppendingString:@"Key"]];
+        NSMenu *submenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:[key stringByAppendingString:@"Key"]];
+        [submenu setTitle:[key stringByAppendingString:@"Key"]];
         for (NSDictionary *dict in [templateOptions valueForKey:key]) {
-            NSMenuItem *item = [menu addItemWithTitle:[dict objectForKey:@"displayName"]
-                                               action:@selector(changeValueFromMenu:) keyEquivalent:@""];
+            NSMenuItem *item = [submenu addItemWithTitle:[dict objectForKey:@"displayName"]
+                                                  action:@selector(changeValueFromMenu:) keyEquivalent:@""];
             [item setTarget:self];
             [item setRepresentedObject:[dict objectForKey:@"key"]];
         }
+        [menu addItemWithTitle:[bundle localizedStringForKey:key value:@"" table:@"TemplateOptions"] submenu:submenu];
+        [submenu release];
     }
+    return menu;
 }
 
 - (void)setupOptionsMenus {
-    [self setupOptionsMenu:fieldOptionsMenu forTokenType:BDSKFieldTokenType];
-    [self setupOptionsMenu:urlOptionsMenu forTokenType:BDSKURLTokenType];
-    [self setupOptionsMenu:personOptionsMenu forTokenType:BDSKPersonTokenType];
-    [self setupOptionsMenu:linkedFileOptionsMenu forTokenType:BDSKLinkedFileTokenType];
-    [self setupOptionsMenu:dateOptionsMenu forTokenType:BDSKDateTokenType];
-    [self setupOptionsMenu:numberOptionsMenu forTokenType:BDSKNumberTokenType];
+    fieldOptionsMenu = [self newOptionsMenuForTokenType:BDSKFieldTokenType];
+    urlOptionsMenu = [self newOptionsMenuForTokenType:BDSKURLTokenType];
+    personOptionsMenu = [self newOptionsMenuForTokenType:BDSKPersonTokenType];
+    linkedFileOptionsMenu = [self newOptionsMenuForTokenType:BDSKLinkedFileTokenType];
+    dateOptionsMenu = [self newOptionsMenuForTokenType:BDSKDateTokenType];
+    numberOptionsMenu = [self newOptionsMenuForTokenType:BDSKNumberTokenType];
 }
 
 - (void)updateTextViews {

@@ -88,12 +88,6 @@ extern NSString *BDSKRichTextTemplateDocumentType;
     IBOutlet NSView *dateOptionsView;
     IBOutlet NSView *numberOptionsView;
     IBOutlet NSView *textOptionsView;
-    IBOutlet NSMenu *fieldOptionsMenu;
-    IBOutlet NSMenu *urlOptionsMenu;
-    IBOutlet NSMenu *personOptionsMenu;
-    IBOutlet NSMenu *linkedFileOptionsMenu;
-    IBOutlet NSMenu *dateOptionsMenu;
-    IBOutlet NSMenu *numberOptionsMenu;
     IBOutlet NSPopUpButton *fieldFontNamePopUp;
     IBOutlet NSComboBox *fieldFontSizeComboBox;
     IBOutlet NSButton *fieldBoldCheckButton;
@@ -114,6 +108,13 @@ extern NSString *BDSKRichTextTemplateDocumentType;
     IBOutlet NSTextField *textField;
     IBOutlet NSTextField *fieldField;
     IBOutlet NSTextField *altTextField;
+    
+    NSMenu *fieldOptionsMenu;
+    NSMenu *urlOptionsMenu;
+    NSMenu *personOptionsMenu;
+    NSMenu *linkedFileOptionsMenu;
+    NSMenu *dateOptionsMenu;
+    NSMenu *numberOptionsMenu;
     
     NSArray *fonts;
     NSArray *tokenFonts;
