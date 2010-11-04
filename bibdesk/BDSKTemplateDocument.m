@@ -83,7 +83,6 @@ static char BDSKTokenPropertiesObservationContext;
 - (void)updateTokenFields;
 - (void)updateStrings;
 - (void)updateOptionView;
-- (void)setupOptionsMenus;
 - (void)handleDidChangeSelectionNotification:(NSNotification *)notification;
 - (void)handleTokenDidChangeNotification:(NSNotification *)notification;
 - (void)handleTemplateDidChangeNotification:(NSNotification *)notification;
@@ -233,8 +232,6 @@ static char BDSKTokenPropertiesObservationContext;
     
     [self updateTokenFields];
     [self updateTextViews];
-    
-    [self setupOptionsMenus];
     
     [tableView setTypeSelectHelper:[[[BDSKTypeSelectHelper alloc] init] autorelease]];
     
@@ -900,15 +897,6 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     return menu;
 }
 
-- (void)setupOptionsMenus {
-    fieldOptionsMenu = [self newOptionsMenuForTokenType:BDSKFieldTokenType];
-    urlOptionsMenu = [self newOptionsMenuForTokenType:BDSKURLTokenType];
-    personOptionsMenu = [self newOptionsMenuForTokenType:BDSKPersonTokenType];
-    linkedFileOptionsMenu = [self newOptionsMenuForTokenType:BDSKLinkedFileTokenType];
-    dateOptionsMenu = [self newOptionsMenuForTokenType:BDSKDateTokenType];
-    numberOptionsMenu = [self newOptionsMenuForTokenType:BDSKNumberTokenType];
-}
-
 - (void)updateTextViews {
     [prefixTemplateTextView setRichText:[self isRichText]];
     [separatorTemplateTextView setRichText:[self isRichText]];
@@ -1218,20 +1206,38 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 }
 
 - (NSMenu *)tokenField:(NSTokenField *)tokenField menuForRepresentedObject:(id)representedObject {
-    NSMenu *menu = nil;
     if ([representedObject isKindOfClass:[BDSKToken class]]) {
         menuToken = representedObject;
         switch ([(BDSKToken *)representedObject type]) {
-            case BDSKFieldTokenType: menu = fieldOptionsMenu; break;
-            case BDSKURLTokenType: menu = urlOptionsMenu; break;
-            case BDSKPersonTokenType: menu = personOptionsMenu; break;
-            case BDSKLinkedFileTokenType: menu = linkedFileOptionsMenu; break;
-            case BDSKDateTokenType: menu = dateOptionsMenu; break;
-            case BDSKNumberTokenType: menu = numberOptionsMenu; break;
-            default: menu = nil; break;
+            case BDSKFieldTokenType:
+                if (fieldOptionsMenu == nil)
+                    fieldOptionsMenu = [self newOptionsMenuForTokenType:BDSKFieldTokenType];
+                return fieldOptionsMenu;
+            case BDSKURLTokenType:
+                if (urlOptionsMenu == nil)
+                    urlOptionsMenu = [self newOptionsMenuForTokenType:BDSKURLTokenType];
+                return urlOptionsMenu;
+            case BDSKPersonTokenType:
+                if (personOptionsMenu == nil)
+                    personOptionsMenu = [self newOptionsMenuForTokenType:BDSKPersonTokenType];
+                return personOptionsMenu;
+            case BDSKLinkedFileTokenType:
+                if (linkedFileOptionsMenu == nil)
+                    linkedFileOptionsMenu = [self newOptionsMenuForTokenType:BDSKLinkedFileTokenType];
+                return linkedFileOptionsMenu;
+            case BDSKDateTokenType:
+                if (dateOptionsMenu == nil)
+                    dateOptionsMenu = [self newOptionsMenuForTokenType:BDSKDateTokenType];
+                return dateOptionsMenu;
+            case BDSKNumberTokenType:
+                if (numberOptionsMenu == nil)
+                    numberOptionsMenu = [self newOptionsMenuForTokenType:BDSKNumberTokenType];
+                return numberOptionsMenu;
+            default: 
+                return nil;
         }
     }
-    return menu;
+    return nil;
 }
 
 - (void)tokenField:(NSTokenField *)tokenField textViewDidChangeSelection:(NSTextView *)textView {
