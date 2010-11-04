@@ -1050,7 +1050,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
             // KVO in NSTokenField binding does not work
             if (template == [typeTemplates objectAtIndex:[tableView selectedRow]])
                 [itemTemplateTokenField setObjectValue:[template itemTemplate]];
-                [[[self undoManager] prepareWithInvocationTarget:template] setItemTemplate:oldValue];
+            [[[self undoManager] prepareWithInvocationTarget:template] setItemTemplate:oldValue];
         } else if ([keyPath isEqualToString:@"included"]) {
             [[[self undoManager] prepareWithInvocationTarget:template] setIncluded:[oldValue boolValue]];
         }
