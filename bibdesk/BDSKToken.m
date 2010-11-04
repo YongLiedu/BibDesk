@@ -120,10 +120,10 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)copyWithZone:(NSZone *)aZone {
     BDSKToken *copy = [[[self class] allocWithZone:aZone] initWithTitle:title];
-    copy->fontName = [fontName retain];
-    copy->fontSize = fontSize;
-    copy->bold = bold;
-    copy->italic = italic;
+    [copy setFontName:fontName];
+    [copy setFontSize:fontSize];
+    [copy setBold:bold];
+    [copy setItalic:italic];
     return copy;
 }
 
@@ -276,7 +276,7 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)copyWithZone:(NSZone *)aZone {
     BDSKTagToken *copy = [super copyWithZone:aZone];
-    copy->key = [key retain];
+    [copy setKey:key];
     return copy;
 }
 
@@ -372,9 +372,9 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)copyWithZone:(NSZone *)aZone {
     BDSKValueTagToken *copy = [super copyWithZone:aZone];
-    copy->appendingKey = [appendingKey retain];
-    copy->prefix = [prefix retain];
-    copy->suffix = [suffix retain];
+    [copy setAppendingKey:appendingKey];
+    [copy setPrefix:prefix];
+    [copy setSuffix:suffix];
     return copy;
 }
 
@@ -524,8 +524,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)copyWithZone:(NSZone *)aZone {
     BDSKFieldTagToken *copy = [super copyWithZone:aZone];
-    copy->casingKey = [casingKey retain];
-    copy->cleaningKey = [cleaningKey retain];
+    [copy setCasingKey:casingKey];
+    [copy setCleaningKey:cleaningKey];
     return copy;
 }
 
@@ -658,7 +658,7 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)copyWithZone:(NSZone *)aZone {
     BDSKURLTagToken *copy = [super copyWithZone:aZone];
-    copy->urlFormatKey = [urlFormatKey retain];
+    [copy setUrlFormatKey:urlFormatKey];
     return copy;
 }
 
@@ -762,8 +762,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)copyWithZone:(NSZone *)aZone {
     BDSKPersonTagToken *copy = [super copyWithZone:aZone];
-    copy->nameStyleKey = [nameStyleKey retain];
-    copy->joinStyleKey = [joinStyleKey retain];
+    [copy setNameStyleKey:nameStyleKey];
+    [copy setJoinStyleKey:joinStyleKey];
     return copy;
 }
 
@@ -882,8 +882,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)copyWithZone:(NSZone *)aZone {
     BDSKLinkedFileTagToken *copy = [super copyWithZone:aZone];
-    copy->linkedFileFormatKey = [linkedFileFormatKey retain];
-    copy->linkedFileJoinStyleKey = [linkedFileJoinStyleKey retain];
+    [copy setLinkedFileFormatKey:linkedFileFormatKey];
+    [copy setLinkedFileJoinStyleKey:linkedFileJoinStyleKey];
     return copy;
 }
 
@@ -995,7 +995,7 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)copyWithZone:(NSZone *)aZone {
     BDSKDateTagToken *copy = [super copyWithZone:aZone];
-    copy->dateFormatKey = [dateFormatKey retain];
+    [copy setDateFormatKey:dateFormatKey];
     return copy;
 }
 
@@ -1099,8 +1099,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)copyWithZone:(NSZone *)aZone {
     BDSKNumberTagToken *copy = [super copyWithZone:aZone];
-    copy->counterStyleKey = [counterStyleKey retain];
-    copy->counterCasingKey = [counterCasingKey retain];
+    [copy setCounterStyleKey:counterStyleKey];
+    [copy setCounterCasingKey:counterCasingKey];
     return copy;
 }
 
@@ -1218,8 +1218,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)copyWithZone:(NSZone *)aZone {
     BDSKTextToken *copy = [super copyWithZone:aZone];
-    copy->field = [field retain];
-    copy->altText = [altText retain];
+    [copy setField:field];
+    [copy setAltText:altText];
     return copy;
 }
 
