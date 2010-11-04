@@ -163,6 +163,10 @@
             key = "path.stringByDeletingPathExtension";
         },
         {
+            displayName = "File name without extension";
+            key = "path.lastPathComponent.stringByDeletingPathExtension";
+        },
+        {
             displayName = "Resolved path";
             key = "path.stringByResolvingSymlinksInPath";
         },
@@ -303,6 +307,10 @@
         {
             displayName = "Path without extension";
             key = "path.stringByDeletingPathExtension";
+        },
+        {
+            displayName = "File name without extension";
+            key = "path.lastPathComponent.stringByDeletingPathExtension";
         },
         {
             displayName = "Resolved path";
