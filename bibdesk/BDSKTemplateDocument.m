@@ -437,7 +437,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
                         else if ([templateDict objectForKey:BDSKMiscString] == nil)
                             defaultType = BDSKMiscString;
                         else
-                            defaultType = @"default";
+                            defaultType = @"(default)";
                         [tmpDict setObject:itemTemplate forKey:defaultType];
                     } else if ([defaultTypes containsObject:BDSKArticleString]) {
                         defaultType = BDSKArticleString;
@@ -461,7 +461,8 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
                     }
                     itemTemplate = [templateDict objectForKey:type];
                     [template setItemTemplate:itemTemplate];
-                    [template setIncluded:YES];
+                    if ([type isEqualToString:@"(default)"] == NO)
+                        [template setIncluded:YES];
                     if ([type isEqualToString:defaultType])
                         [self setDefaultTypeIndex:currentIndex];
                 }
