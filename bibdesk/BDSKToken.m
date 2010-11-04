@@ -71,7 +71,7 @@ NSString *BDSKRichTextString = @"Rich Text";
             [tag setKey:@"dateAdded"];
         else if ([field isEqualToString:BDSKDateModifiedString])
             [tag setKey:@"dateModified"];
-        if ([field isEqualToString:BDSKPubDateString])
+        else if ([field isEqualToString:BDSKPubDateString])
             [tag setKey:@"date"];
     } else if ([field isEqualToString:BDSKItemNumberString]) {
         tag = [[BDSKNumberTagToken alloc] initWithTitle:field];
