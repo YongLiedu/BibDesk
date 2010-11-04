@@ -1358,7 +1358,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     NSString *field = nil;
     NSInteger i = 0, j;
     
-    if ([key isEqualToString:@"fields"] || [key isEqualToString:@"urls"] || [key isEqualToString:@"persons"])
+    if (([key isEqualToString:@"fields"] || [key isEqualToString:@"urls"] || [key isEqualToString:@"persons"]) && [keys count] > 1)
         field = [keys objectAtIndex:++i];
     else if ([key isEqualToString:@"citeKey"])
         field = BDSKCiteKeyString;
