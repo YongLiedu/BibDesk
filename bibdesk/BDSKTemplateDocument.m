@@ -819,16 +819,15 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 }
 
 - (void)changeValueFromMenu:(id)sender {
-    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
-    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
-    [menuToken setValue:newValue forKey:[[sender menu] title]];
+    [menuToken setValue:[sender representedObject] forKey:[[sender menu] title]];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
     SEL action = [menuItem action];
     if (action == @selector(changeValueFromMenu:)) {
-        NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
-        [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:[[menuItem menu] title]]] isEqualToString:[menuItem representedObject]]];
+        NSString *value = [menuItem representedObject];
+        NSString *currentValue = [menuToken valueForKey:[[menuItem menu] title]];
+        [menuItem setState:currentValue == value || [currentValue isEqualToString:value]];
         return YES;
     } else if ([[BDSKTemplateDocument superclass] instancesRespondToSelector:_cmd]) {
         return [super validateMenuItem:menuItem];
@@ -878,6 +877,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 - (NSMenu *)newOptionsMenuForTokenType:(BDSKTokenType)type {
     NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
     NSBundle *bundle = [NSBundle mainBundle];
+    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
     for (NSString *key in [self propertiesForTokenType:type]) {
         NSMenu *submenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:[key stringByAppendingString:@"Key"]];
         [submenu setTitle:[key stringByAppendingString:@"Key"]];
@@ -885,7 +885,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
             NSMenuItem *item = [submenu addItemWithTitle:[bundle localizedStringForKey:[dict objectForKey:@"displayName"] value:@"" table:@"TemplateOptions"]
                                                   action:@selector(changeValueFromMenu:) keyEquivalent:@""];
             [item setTarget:self];
-            [item setRepresentedObject:[dict objectForKey:@"key"]];
+            [item setRepresentedObject:[transformer reverseTransformedValue:[dict objectForKey:@"key"]]];
         }
         [menu addItemWithTitle:[bundle localizedStringForKey:key value:@"" table:@"TemplateOptions"] submenu:submenu];
         [submenu release];
