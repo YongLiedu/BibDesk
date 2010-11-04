@@ -135,21 +135,7 @@ static char BDSKTokenPropertiesObservationContext;
         [undoManager setDelegate:self];
         [self setUndoManager:undoManager];
         
-        NSBundle *bundle = [NSBundle mainBundle];
-        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithContentsOfFile:[bundle pathForResource:@"TemplateOptions" ofType:@"plist"]];
-        
-        for (NSString *key in [tmpDict allKeys]) {
-            NSMutableArray *array = [NSMutableArray array];
-            for (NSDictionary *dict in [tmpDict objectForKey:key]) {
-                NSMutableDictionary *mutableDict = [dict mutableCopy];
-                [mutableDict setObject:[bundle localizedStringForKey:[dict objectForKey:@"displayName"] value:@"" table:@"TemplateOptions"] forKey:@"displayName"];
-                [array addObject:mutableDict];
-                [mutableDict release];
-            }
-            [tmpDict setObject:array forKey:key];
-        }
-        templateOptions = [tmpDict copy];
-        [tmpDict release];
+        templateOptions = [[NSMutableDictionary alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"TemplateOptions" ofType:@"plist"]];
         
         for (NSString *type in [[BDSKTypeManager sharedManager] types]) {
             if ([type isEqualToString:BDSKArticleString])
@@ -902,7 +888,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         NSMenu *submenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:[key stringByAppendingString:@"Key"]];
         [submenu setTitle:[key stringByAppendingString:@"Key"]];
         for (NSDictionary *dict in [templateOptions valueForKey:key]) {
-            NSMenuItem *item = [submenu addItemWithTitle:[dict objectForKey:@"displayName"]
+            NSMenuItem *item = [submenu addItemWithTitle:[bundle localizedStringForKey:[dict objectForKey:@"displayName"] value:@"" table:@"TemplateOptions"]
                                                   action:@selector(changeValueFromMenu:) keyEquivalent:@""];
             [item setTarget:self];
             [item setRepresentedObject:[dict objectForKey:@"key"]];
