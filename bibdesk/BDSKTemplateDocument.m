@@ -1044,16 +1044,8 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         if ([oldValue isEqual:[NSNull null]]) oldValue = nil;
         
         if ([keyPath isEqualToString:@"itemTemplate"]) {
-            NSMutableArray *old = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, 0, NULL);
-            NSMutableArray *new = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, 0, NULL);
-            [old addObjectsFromArray:oldValue];
-            [old removeObjectsInArray:newValue];
-            [new addObjectsFromArray:newValue];
-            [new removeObjectsInArray:oldValue];
-            [self stopObservingTokens:old];
-            [self startObservingTokens:new];
-            [old release];
-            [new release];
+            [self stopObservingTokens:oldValue];
+            [self startObservingTokens:newValue];
             
             // KVO in NSTokenField binding does not work
             if (template == [typeTemplates objectAtIndex:[tableView selectedRow]])
