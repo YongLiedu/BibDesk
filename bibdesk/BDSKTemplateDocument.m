@@ -712,11 +712,9 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
             [mutString appendString:[[typeTemplates objectAtIndex:defaultTypeIndex] string]];
         } else {
             for (template in includedTemplates) {
-                if ([template isIncluded]) {
-                    [mutString appendFormat:@"<%@$pubType=%@?>\n", altPrefix, [template pubType]];
-                    [mutString appendString:[template string]];
-                    altPrefix = @"?";
-                }
+                [mutString appendFormat:@"<%@$pubType=%@?>\n", altPrefix, [template pubType]];
+                [mutString appendString:[template string]];
+                altPrefix = @"?";
             }
             [mutString appendString:@"<?$pubType?>\n"];
             [mutString appendString:[[typeTemplates objectAtIndex:defaultTypeIndex] string]];
@@ -765,12 +763,10 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
                 [attrString appendAttributedString:[[typeTemplates objectAtIndex:defaultTypeIndex] attributedStringWithDefaultAttributes:attrs]];
             } else {
                 for (template in includedTemplates) {
-                    if ([template isIncluded]) {
-                        NSString *s = [NSString stringWithFormat:@"<%@$pubType=%@?>\n", altPrefix, [template pubType]];
-                        [attrString appendAttributedString:[[[NSAttributedString alloc] initWithString:s attributes:attrs] autorelease]];
-                        [attrString appendAttributedString:[template attributedStringWithDefaultAttributes:attrs]];
-                        altPrefix = @"?";
-                    }
+                    NSString *s = [NSString stringWithFormat:@"<%@$pubType=%@?>\n", altPrefix, [template pubType]];
+                    [attrString appendAttributedString:[[[NSAttributedString alloc] initWithString:s attributes:attrs] autorelease]];
+                    [attrString appendAttributedString:[template attributedStringWithDefaultAttributes:attrs]];
+                    altPrefix = @"?";
                 }
                 [attrString appendAttributedString:[[[NSAttributedString alloc] initWithString:@"<?$pubType?>\n" attributes:attrs] autorelease]];
                 [attrString appendAttributedString:[[typeTemplates objectAtIndex:defaultTypeIndex] attributedStringWithDefaultAttributes:attrs]];
