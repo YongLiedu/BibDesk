@@ -256,22 +256,14 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
-        if ([decoder allowsKeyedCoding]) {
-            key = [[decoder decodeObjectForKey:@"key"] retain];
-        } else {
-            key = [[decoder decodeObject] retain];
-        }
+        key = [[decoder decodeObjectForKey:@"key"] retain];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [super encodeWithCoder:encoder];
-    if ([encoder allowsKeyedCoding]) {
-        [encoder encodeObject:key forKey:@"key"];
-    } else {
-        [encoder encodeObject:key];
-    }
+    [encoder encodeObject:key forKey:@"key"];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -344,30 +336,18 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
-        if ([decoder allowsKeyedCoding]) {
-            appendingKey = [[decoder decodeObjectForKey:@"appendingKey"] retain];
-            prefix = [[decoder decodeObjectForKey:@"prefix"] retain];
-            suffix = [[decoder decodeObjectForKey:@"suffix"] retain];
-        } else {
-            appendingKey = [[decoder decodeObject] retain];
-            prefix = [[decoder decodeObject] retain];
-            suffix = [[decoder decodeObject] retain];
-        }
+        appendingKey = [[decoder decodeObjectForKey:@"appendingKey"] retain];
+        prefix = [[decoder decodeObjectForKey:@"prefix"] retain];
+        suffix = [[decoder decodeObjectForKey:@"suffix"] retain];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [super encodeWithCoder:encoder];
-    if ([encoder allowsKeyedCoding]) {
-        [encoder encodeObject:appendingKey forKey:@"appendingKey"];
-        [encoder encodeObject:prefix forKey:@"prefix"];
-        [encoder encodeObject:suffix forKey:@"suffix"];
-    } else {
-        [encoder encodeObject:appendingKey];
-        [encoder encodeObject:prefix];
-        [encoder encodeObject:suffix];
-    }
+    [encoder encodeObject:appendingKey forKey:@"appendingKey"];
+    [encoder encodeObject:prefix forKey:@"prefix"];
+    [encoder encodeObject:suffix forKey:@"suffix"];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -488,38 +468,22 @@ NSString *BDSKRichTextString = @"Rich Text";
     if (self = [super initWithTitle:aTitle]) {
         casingKey = nil;
         cleaningKey = nil;
-        appendingKey = nil;
-        prefix = nil;
-        suffix = nil;
     }
     return self;
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
-        if ([decoder allowsKeyedCoding]) {
-            casingKey = [[decoder decodeObjectForKey:@"casingKey"] retain];
-            cleaningKey = [[decoder decodeObjectForKey:@"cleaningKey"] retain];
-        } else {
-            casingKey = [[decoder decodeObject] retain];
-            cleaningKey = [[decoder decodeObject] retain];
-        }
+        casingKey = [[decoder decodeObjectForKey:@"casingKey"] retain];
+        cleaningKey = [[decoder decodeObjectForKey:@"cleaningKey"] retain];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [super encodeWithCoder:encoder];
-    if ([encoder allowsKeyedCoding]) {
-        [encoder encodeObject:casingKey forKey:@"casingKey"];
-        [encoder encodeObject:cleaningKey forKey:@"cleaningKey"];
-    } else {
-        [encoder encodeObject:casingKey];
-        [encoder encodeObject:cleaningKey];
-        [encoder encodeObject:appendingKey];
-        [encoder encodeObject:prefix];
-        [encoder encodeObject:suffix];
-    }
+    [encoder encodeObject:casingKey forKey:@"casingKey"];
+    [encoder encodeObject:cleaningKey forKey:@"cleaningKey"];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -638,22 +602,14 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
-        if ([decoder allowsKeyedCoding]) {
-            urlFormatKey = [[decoder decodeObjectForKey:@"urlFormatKey"] retain];
-        } else {
-            urlFormatKey = [[decoder decodeObject] retain];
-        }
+        urlFormatKey = [[decoder decodeObjectForKey:@"urlFormatKey"] retain];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [super encodeWithCoder:encoder];
-    if ([encoder allowsKeyedCoding]) {
-        [encoder encodeObject:urlFormatKey forKey:@"urlFormatKey"];
-    } else {
-        [encoder encodeObject:urlFormatKey];
-    }
+    [encoder encodeObject:urlFormatKey forKey:@"urlFormatKey"];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -738,26 +694,16 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
-        if ([decoder allowsKeyedCoding]) {
-            nameStyleKey = [[decoder decodeObjectForKey:@"nameStyleKey"] retain];
-            joinStyleKey = [[decoder decodeObjectForKey:@"joinStyleKey"] retain];
-        } else {
-            nameStyleKey = [[decoder decodeObject] retain];
-            joinStyleKey = [[decoder decodeObject] retain];
-        }
+        nameStyleKey = [[decoder decodeObjectForKey:@"nameStyleKey"] retain];
+        joinStyleKey = [[decoder decodeObjectForKey:@"joinStyleKey"] retain];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [super encodeWithCoder:encoder];
-    if ([encoder allowsKeyedCoding]) {
-        [encoder encodeObject:nameStyleKey forKey:@"nameStyleKey"];
-        [encoder encodeObject:joinStyleKey forKey:@"joinStyleKey"];
-    } else {
-        [encoder encodeObject:nameStyleKey];
-        [encoder encodeObject:joinStyleKey];
-    }
+    [encoder encodeObject:nameStyleKey forKey:@"nameStyleKey"];
+    [encoder encodeObject:joinStyleKey forKey:@"joinStyleKey"];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -858,26 +804,16 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
-        if ([decoder allowsKeyedCoding]) {
-            linkedFileFormatKey = [[decoder decodeObjectForKey:@"linkedFileFormatKey"] retain];
-            linkedFileJoinStyleKey = [[decoder decodeObjectForKey:@"linkedFileJoinStyleKey"] retain];
-        } else {
-            linkedFileFormatKey = [[decoder decodeObject] retain];
-            linkedFileJoinStyleKey = [[decoder decodeObject] retain];
-        }
+        linkedFileFormatKey = [[decoder decodeObjectForKey:@"linkedFileFormatKey"] retain];
+        linkedFileJoinStyleKey = [[decoder decodeObjectForKey:@"linkedFileJoinStyleKey"] retain];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [super encodeWithCoder:encoder];
-    if ([encoder allowsKeyedCoding]) {
-        [encoder encodeObject:linkedFileFormatKey forKey:@"linkedFileFormatKey"];
-        [encoder encodeObject:linkedFileJoinStyleKey forKey:@"linkedFileJoinStyleKey"];
-    } else {
-        [encoder encodeObject:linkedFileFormatKey];
-        [encoder encodeObject:linkedFileJoinStyleKey];
-    }
+    [encoder encodeObject:linkedFileFormatKey forKey:@"linkedFileFormatKey"];
+    [encoder encodeObject:linkedFileJoinStyleKey forKey:@"linkedFileJoinStyleKey"];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -975,22 +911,14 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
-        if ([decoder allowsKeyedCoding]) {
-            dateFormatKey = [[decoder decodeObjectForKey:@"dateFormatKey"] retain];
-        } else {
-            dateFormatKey = [[decoder decodeObject] retain];
-        }
+        dateFormatKey = [[decoder decodeObjectForKey:@"dateFormatKey"] retain];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [super encodeWithCoder:encoder];
-    if ([encoder allowsKeyedCoding]) {
-        [encoder encodeObject:dateFormatKey forKey:@"dateFormatKey"];
-    } else {
-        [encoder encodeObject:dateFormatKey];
-    }
+    [encoder encodeObject:dateFormatKey forKey:@"dateFormatKey"];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -1075,26 +1003,16 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
-        if ([decoder allowsKeyedCoding]) {
-            counterStyleKey = [[decoder decodeObjectForKey:@"counterStyleKey"] retain];
-            counterCasingKey = [[decoder decodeObjectForKey:@"counterCasingKey"] retain];
-        } else {
-            counterStyleKey = [[decoder decodeObject] retain];
-            counterCasingKey = [[decoder decodeObject] retain];
-        }
+        counterStyleKey = [[decoder decodeObjectForKey:@"counterStyleKey"] retain];
+        counterCasingKey = [[decoder decodeObjectForKey:@"counterCasingKey"] retain];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [super encodeWithCoder:encoder];
-    if ([encoder allowsKeyedCoding]) {
-        [encoder encodeObject:counterStyleKey forKey:@"counterStyleKey"];
-        [encoder encodeObject:counterCasingKey forKey:@"counterCasingKey"];
-    } else {
-        [encoder encodeObject:counterStyleKey];
-        [encoder encodeObject:counterCasingKey];
-    }
+    [encoder encodeObject:counterStyleKey forKey:@"counterStyleKey"];
+    [encoder encodeObject:counterCasingKey forKey:@"counterCasingKey"];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -1194,26 +1112,16 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
-        if ([decoder allowsKeyedCoding]) {
-            field = [[decoder decodeObjectForKey:@"field"] retain];
-            altText = [[decoder decodeObjectForKey:@"altText"] retain];
-        } else {
-            field = [[decoder decodeObject] retain];
-            altText = [[decoder decodeObject] retain];
-        }
+        field = [[decoder decodeObjectForKey:@"field"] retain];
+        altText = [[decoder decodeObjectForKey:@"altText"] retain];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [super encodeWithCoder:encoder];
-    if ([encoder allowsKeyedCoding]) {
-        [encoder encodeObject:field forKey:@"field"];
-        [encoder encodeObject:altText forKey:@"altText"];
-    } else {
-        [encoder encodeObject:field];
-        [encoder encodeObject:altText];
-    }
+    [encoder encodeObject:field forKey:@"field"];
+    [encoder encodeObject:altText forKey:@"altText"];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
