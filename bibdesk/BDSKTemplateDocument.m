@@ -1007,7 +1007,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
 
 - (void)startObservingTypeTemplate:(BDSKTypeTemplate *)template {
     [template addObserver:self forKeyPath:@"itemTemplate" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKTypeTemplateObservationContext];
-    [template addObserver:self forKeyPath:@"included" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKTypeTemplateObservationContext];
+    [template addObserver:self forKeyPath:@"included" options:NSKeyValueObservingOptionOld context:&BDSKTypeTemplateObservationContext];
 }
 
 - (void)stopObservingTypeTemplate:(BDSKTypeTemplate *)template {
@@ -1019,7 +1019,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     for (id token in tokens) {
         if ([token isKindOfClass:[BDSKToken class]]) {
             for (NSString *key in [token keysForValuesToObserveForUndo])
-                [token addObserver:self forKeyPath:key options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKTokenPropertiesObservationContext];
+                [token addObserver:self forKeyPath:key options:NSKeyValueObservingOptionOld context:&BDSKTokenPropertiesObservationContext];
         }
     }
 }
@@ -1037,13 +1037,13 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     if (context == &BDSKTypeTemplateObservationContext) {
         
         BDSKTypeTemplate *template = (BDSKTypeTemplate *)object;
-        id newValue = [change objectForKey:NSKeyValueChangeNewKey];
         id oldValue = [change objectForKey:NSKeyValueChangeOldKey];
-        
-        if ([newValue isEqual:[NSNull null]]) newValue = nil;
         if ([oldValue isEqual:[NSNull null]]) oldValue = nil;
         
         if ([keyPath isEqualToString:@"itemTemplate"]) {
+            id newValue = [change objectForKey:NSKeyValueChangeNewKey];
+            if ([newValue isEqual:[NSNull null]]) newValue = nil;
+            
             [self stopObservingTokens:oldValue];
             [self startObservingTokens:newValue];
             
@@ -1060,10 +1060,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     } else if (context == &BDSKTokenPropertiesObservationContext) {
         
         BDSKToken *token = (BDSKToken *)object;
-        id newValue = [change objectForKey:NSKeyValueChangeNewKey];
         id oldValue = [change objectForKey:NSKeyValueChangeOldKey];
-        
-        if ([newValue isEqual:[NSNull null]]) newValue = nil;
         if ([oldValue isEqual:[NSNull null]]) oldValue = nil;
         
         [[[self undoManager] prepareWithInvocationTarget:token] setKey:keyPath toValue:oldValue];
