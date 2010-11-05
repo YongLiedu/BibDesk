@@ -336,6 +336,62 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     return end;
 }
 
+static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSRange *suffixRangePtr, NSRange *separatorRangePtr, NSRange *itemRangePtr) {
+    if ([str length] == 0)
+        return NO;
+    
+    NSUInteger length = [str length], startLoc = NSNotFound, tmpLoc;
+    NSRange startRange = [str rangeOfString:@"<$publications>"];
+    NSRange endRange = { NSNotFound, 0 };
+    NSRange sepRange = { NSNotFound, 0 };
+    
+    if (startRange.location != NSNotFound) {
+        startLoc = startRange.location;
+        
+        tmpLoc = startOfTrailingEmptyLine(str, makeRange(0, startRange.location), NO);
+        if (tmpLoc != NSNotFound)
+            startRange = makeRange(tmpLoc, NSMaxRange(startRange));
+        tmpLoc = endOfLeadingEmptyLine(str, makeRange(NSMaxRange(startRange), length), YES);
+        if (tmpLoc != NSNotFound)
+            startRange = makeRange(startRange.location, tmpLoc);
+        
+        endRange = [str rangeOfString:@"</$publications>" options:NSBackwardsSearch range:makeRange(NSMaxRange(startRange), length)];
+        
+        if (endRange.location != NSNotFound) {
+            tmpLoc = startOfTrailingEmptyLine(str, makeRange(NSMaxRange(startRange), endRange.location), YES);
+            if (tmpLoc != NSNotFound)
+                endRange = makeRange(tmpLoc, NSMaxRange(endRange));
+            tmpLoc = endOfLeadingEmptyLine(str, makeRange(NSMaxRange(endRange), length), NO);
+            if (tmpLoc != NSNotFound)
+                endRange = makeRange(endRange.location, tmpLoc);
+            
+            sepRange = [str rangeOfString:@"<?$publications>" options:NSBackwardsSearch range:makeRange(NSMaxRange(startRange), endRange.location)];
+            if (sepRange.location != NSNotFound) {
+                tmpLoc = startOfTrailingEmptyLine(str, makeRange(NSMaxRange(startRange), sepRange.location), YES);
+                if (tmpLoc != NSNotFound)
+                    sepRange = makeRange(tmpLoc, NSMaxRange(sepRange));
+                tmpLoc = endOfLeadingEmptyLine(str, makeRange(NSMaxRange(sepRange), endRange.location), YES);
+                if (tmpLoc != NSNotFound)
+                    sepRange = makeRange(sepRange.location, tmpLoc);
+            }
+        }
+    }
+    
+    if (endRange.location == NSNotFound)
+        return NO;
+    
+    *prefixRangePtr = NSMakeRange(0, startRange.location);
+    *suffixRangePtr = makeRange(NSMaxRange(endRange), length);
+    if (sepRange.location == NSNotFound) {
+        *separatorRangePtr = NSMakeRange(NSNotFound, 0);
+        *itemRangePtr = makeRange(NSMaxRange(startRange), endRange.location);
+    } else {
+        *separatorRangePtr = makeRange(NSMaxRange(sepRange), endRange.location);
+        *itemRangePtr = makeRange(NSMaxRange(startRange), sepRange.location);
+    }
+    return YES;
+}
+
 - (BOOL)readFromData:(NSData *)data ofType:(NSString *)typeName error:(NSError **)outError {
     NSArray *parsedTemplate = nil;
     NSDictionary *templateDict = nil;
@@ -345,7 +401,7 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
     NSAttributedString *suffix = nil;
     NSAttributedString *separator = nil;
     NSString *str = nil;
-    NSRange startRange, endRange = { NSNotFound, 0 }, sepRange = { NSNotFound, 0 };
+    NSRange prefixRange, suffixRange, separatorRange, itemRange;
     NSUInteger length, startLoc = NSNotFound, tmpLoc;
     BOOL success = NO;
     
@@ -358,128 +414,91 @@ static inline NSUInteger endOfLeadingEmptyLine(NSString *string, NSRange range, 
         str = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
     }
     
-    if (str) {
-        length = [str length];
+    if (getTemplateRanges(str, &prefixRange, &suffixRange, &separatorRange, &itemRange)) {
         
-        startRange = [str rangeOfString:@"<$publications>"];
-        
-        if (startRange.location != NSNotFound) {
-            startLoc = startRange.location;
-            
-            tmpLoc = startOfTrailingEmptyLine(str, makeRange(0, startRange.location), NO);
-            if (tmpLoc != NSNotFound)
-                startRange = makeRange(tmpLoc, NSMaxRange(startRange));
-            tmpLoc = endOfLeadingEmptyLine(str, makeRange(NSMaxRange(startRange), length), YES);
-            if (tmpLoc != NSNotFound)
-                startRange = makeRange(startRange.location, tmpLoc);
-            
-            endRange = [str rangeOfString:@"</$publications>" options:NSBackwardsSearch range:makeRange(NSMaxRange(startRange), length)];
-            
-            if (endRange.location != NSNotFound) {
-                tmpLoc = startOfTrailingEmptyLine(str, makeRange(NSMaxRange(startRange), endRange.location), YES);
-                if (tmpLoc != NSNotFound)
-                    endRange = makeRange(tmpLoc, NSMaxRange(endRange));
-                tmpLoc = endOfLeadingEmptyLine(str, makeRange(NSMaxRange(endRange), length), NO);
-                if (tmpLoc != NSNotFound)
-                    endRange = makeRange(endRange.location, tmpLoc);
-                
-                sepRange = [str rangeOfString:@"<?$publications>" options:NSBackwardsSearch range:makeRange(NSMaxRange(startRange), endRange.location)];
-                if (sepRange.location != NSNotFound) {
-                    tmpLoc = startOfTrailingEmptyLine(str, makeRange(NSMaxRange(startRange), sepRange.location), YES);
-                    if (tmpLoc != NSNotFound)
-                        sepRange = makeRange(tmpLoc, NSMaxRange(sepRange));
-                    tmpLoc = endOfLeadingEmptyLine(str, makeRange(NSMaxRange(sepRange), endRange.location), YES);
-                    if (tmpLoc != NSNotFound)
-                        sepRange = makeRange(sepRange.location, tmpLoc);
-                }
-            }
+        if ([self isRichText]) {
+            font = [attrString attribute:NSFontAttributeName atIndex:startLoc effectiveRange:NULL] ?: [NSFont userFontOfSize:0.0];
+            if (prefixRange.length > 0)
+               prefix = [attrString attributedSubstringFromRange:prefixRange];
+            if (suffixRange.length > 0)
+                suffix = [attrString attributedSubstringFromRange:suffixRange];
+            if (separatorRange.length > 0)
+                separator = [attrString attributedSubstringFromRange:separatorRange];
+            parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateAttributedString:[attrString attributedSubstringFromRange:itemRange]];
+        } else {
+            NSDictionary *attrs = [NSDictionary dictionaryWithObjectsAndKeys:[NSFont userFontOfSize:0.0], NSFontAttributeName, nil];
+            if (prefixRange.length > 0)
+                prefix = [[[NSAttributedString alloc] initWithString:[str substringWithRange:prefixRange] attributes:attrs] autorelease];
+            if (suffixRange.length > 0)
+                suffix = [[[NSAttributedString alloc] initWithString:[str substringWithRange:suffixRange] attributes:attrs] autorelease];
+            if (separatorRange.length > 0)
+                separator = [[[NSAttributedString alloc] initWithString:[str substringWithRange:separatorRange] attributes:attrs] autorelease];
+            parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateString:[str substringWithRange:itemRange]];
         }
         
-        if (endRange.location != NSNotFound) {
-            if ([self isRichText]) {
-                font = [attrString attribute:NSFontAttributeName atIndex:startLoc effectiveRange:NULL] ?: [NSFont userFontOfSize:0.0];
-                if (startRange.location > 0)
-                   prefix = [attrString attributedSubstringFromRange:makeRange(0, startRange.location)];
-                if (NSMaxRange(endRange) < length)
-                    suffix = [attrString attributedSubstringFromRange:makeRange(NSMaxRange(endRange), length)];
-                if (NSMaxRange(sepRange) < endRange.location)
-                    separator = [attrString attributedSubstringFromRange:makeRange(NSMaxRange(sepRange), endRange.location)];
-                parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateAttributedString:[attrString attributedSubstringFromRange:makeRange(NSMaxRange(startRange), (sepRange.location == NSNotFound ? endRange.location : sepRange.location))]];
-            } else {
-                NSDictionary *attrs = [NSDictionary dictionaryWithObjectsAndKeys:[NSFont userFontOfSize:0.0], NSFontAttributeName, nil];
-                if (startRange.location > 0)
-                    prefix = [[[NSAttributedString alloc] initWithString:[str substringWithRange:makeRange(0, startRange.location)] attributes:attrs] autorelease];
-                if (NSMaxRange(endRange) < length)
-                    suffix = [[[NSAttributedString alloc] initWithString:[str substringWithRange:makeRange(NSMaxRange(endRange), length)] attributes:attrs] autorelease];
-                if (NSMaxRange(sepRange) < endRange.location)
-                    separator = [[[NSAttributedString alloc] initWithString:[str substringWithRange:makeRange(NSMaxRange(sepRange), endRange.location)] attributes:attrs] autorelease];
-                parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateString:[str substringWithRange:makeRange(NSMaxRange(startRange), (sepRange.location == NSNotFound ? endRange.location : sepRange.location))]];
+        if (templateDict = [self convertPubTemplate:parsedTemplate defaultFont:font]) {
+            NSArray *itemTemplate = [[[templateDict objectForKey:@""] retain] autorelease];
+            BDSKTypeTemplate *template;
+            NSString *type;
+            NSArray *currentTypes = [typeTemplates valueForKey:@"pubType"];
+            NSString *defaultType = nil;
+            
+            if (itemTemplate) {
+                NSMutableDictionary *tmpDict = [[templateDict mutableCopy] autorelease];
+                [tmpDict removeObjectForKey:@""];
+                templateDict = tmpDict;
+                NSArray *defaultTypes = [templateDict allKeysForObject:itemTemplate];
+                if ([defaultTypes count] == 0) {
+                    if ([templateDict objectForKey:BDSKArticleString] == nil)
+                        defaultType = BDSKArticleString;
+                    else if ([templateDict objectForKey:BDSKMiscString] == nil)
+                        defaultType = BDSKMiscString;
+                    else
+                        defaultType = @"(default)";
+                    [tmpDict setObject:itemTemplate forKey:defaultType];
+                } else if ([defaultTypes containsObject:BDSKArticleString]) {
+                    defaultType = BDSKArticleString;
+                } else if ([defaultTypes containsObject:BDSKMiscString]) {
+                    defaultType = BDSKMiscString;
+                } else {
+                    defaultType = [defaultTypes objectAtIndex:0];
+                }
             }
             
-            if (templateDict = [self convertPubTemplate:parsedTemplate defaultFont:font]) {
-                NSArray *itemTemplate = [[[templateDict objectForKey:@""] retain] autorelease];
-                BDSKTypeTemplate *template;
-                NSString *type;
-                NSArray *currentTypes = [typeTemplates valueForKey:@"pubType"];
-                NSString *defaultType = nil;
-                
-                if (itemTemplate) {
-                    NSMutableDictionary *tmpDict = [[templateDict mutableCopy] autorelease];
-                    [tmpDict removeObjectForKey:@""];
-                    templateDict = tmpDict;
-                    NSArray *defaultTypes = [templateDict allKeysForObject:itemTemplate];
-                    if ([defaultTypes count] == 0) {
-                        if ([templateDict objectForKey:BDSKArticleString] == nil)
-                            defaultType = BDSKArticleString;
-                        else if ([templateDict objectForKey:BDSKMiscString] == nil)
-                            defaultType = BDSKMiscString;
-                        else
-                            defaultType = @"(default)";
-                        [tmpDict setObject:itemTemplate forKey:defaultType];
-                    } else if ([defaultTypes containsObject:BDSKArticleString]) {
-                        defaultType = BDSKArticleString;
-                    } else if ([defaultTypes containsObject:BDSKMiscString]) {
-                        defaultType = BDSKMiscString;
-                    } else {
-                        defaultType = [defaultTypes objectAtIndex:0];
-                    }
+            [typeTemplates setValue:nil forKey:@"itemTemplate"];
+            [typeTemplates setValue:[NSNumber numberWithBool:NO] forKey:@"included"];
+            
+            for (type in templateDict) {
+                NSUInteger currentIndex = [currentTypes indexOfObject:type];
+                if (currentIndex == NSNotFound) {
+                    currentIndex = [typeTemplates count];
+                    template = [self addTypeTemplateForType:type];
+                } else {
+                    template = [typeTemplates objectAtIndex:currentIndex];
                 }
-                
-                [typeTemplates setValue:nil forKey:@"itemTemplate"];
-                [typeTemplates setValue:[NSNumber numberWithBool:NO] forKey:@"included"];
-                
-                for (type in templateDict) {
-                    NSUInteger currentIndex = [currentTypes indexOfObject:type];
-                    if (currentIndex == NSNotFound) {
-                        currentIndex = [typeTemplates count];
-                        template = [self addTypeTemplateForType:type];
-                    } else {
-                        template = [typeTemplates objectAtIndex:currentIndex];
-                    }
-                    itemTemplate = [templateDict objectForKey:type];
-                    [template setItemTemplate:itemTemplate];
-                    if ([type isEqualToString:@"(default)"] == NO)
-                        [template setIncluded:YES];
-                    if ([type isEqualToString:defaultType])
-                        [self setDefaultTypeIndex:currentIndex];
-                }
-                
-                [self setPrefixTemplate:prefix];
-                [self setSuffixTemplate:suffix];
-                [self setSeparatorTemplate:separator];
-                if ([self isRichText]) {
-                    NSInteger traits = [[NSFontManager sharedFontManager] traitsOfFont:font];
-                    [self setFontName:[font familyName]];
-                    [self setFontSize:[font pointSize]];
-                    [self setBold:(traits & NSBoldFontMask) != 0];
-                    [self setItalic:(traits & NSItalicFontMask) != 0];
-                }
-                
-                [[self undoManager] removeAllActions];
-                [self updateChangeCount:NSChangeCleared];
-                
-                success = YES;
+                itemTemplate = [templateDict objectForKey:type];
+                [template setItemTemplate:itemTemplate];
+                if ([type isEqualToString:@"(default)"] == NO)
+                    [template setIncluded:YES];
+                if ([type isEqualToString:defaultType])
+                    [self setDefaultTypeIndex:currentIndex];
             }
+            
+            [self setPrefixTemplate:prefix];
+            [self setSuffixTemplate:suffix];
+            [self setSeparatorTemplate:separator];
+            if ([self isRichText]) {
+                NSInteger traits = [[NSFontManager sharedFontManager] traitsOfFont:font];
+                [self setFontName:[font familyName]];
+                [self setFontSize:[font pointSize]];
+                [self setBold:(traits & NSBoldFontMask) != 0];
+                [self setItalic:(traits & NSItalicFontMask) != 0];
+            }
+            
+            [[self undoManager] removeAllActions];
+            [self updateChangeCount:NSChangeCleared];
+            
+            success = YES;
         }
     }
     
