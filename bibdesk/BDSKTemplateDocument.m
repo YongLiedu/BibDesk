@@ -137,7 +137,7 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
         [undoManager setDelegate:self];
         [self setUndoManager:undoManager];
         
-        templateOptions = [[NSMutableDictionary alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"TemplateOptions" ofType:@"plist"]];
+        templateOptions = [[NSDictionary alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"TemplateOptions" ofType:@"plist"]];
         
         for (NSString *type in [[BDSKTypeManager sharedManager] types]) {
             if ([type isEqualToString:BDSKArticleString])
