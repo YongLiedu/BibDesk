@@ -55,6 +55,7 @@
 #import "BDSKTableView.h"
 #import "BDSKUndoManager.h"
 #import "NSMenu_BDSKExtensions.h"
+#import "NSArray_BDSKExtensions.h"
 
 static CGFloat BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0, 32.0, 48.0, 64.0};
 
@@ -343,17 +344,18 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
         }
         
         if (templateDict = [self convertPubTemplate:parsedTemplate defaultFont:font]) {
-            NSArray *itemTemplate = [[[templateDict objectForKey:@""] retain] autorelease];
+            NSArray *defaultItemTemplate = [templateDict objectForKey:@""];
+            NSArray *itemTemplate;
             BDSKTypeTemplate *template;
             NSString *type;
             NSArray *currentTypes = [typeTemplates valueForKey:@"pubType"];
+            NSArray *types = [templateDict allKeys];
             NSString *defaultType = nil;
             
-            if (itemTemplate) {
-                NSMutableDictionary *tmpDict = [[templateDict mutableCopy] autorelease];
-                [tmpDict removeObjectForKey:@""];
-                templateDict = tmpDict;
-                NSArray *defaultTypes = [templateDict allKeysForObject:itemTemplate];
+            if (defaultItemTemplate) {
+                NSArray *defaultTypes = [[templateDict allKeysForObject:defaultItemTemplate] arrayByRemovingObject:@""];
+                types = [[types mutableCopy] autorelease];
+                [(NSMutableArray *)types removeObject:@""];
                 if ([defaultTypes count] == 0) {
                     if ([templateDict objectForKey:BDSKArticleString] == nil)
                         defaultType = BDSKArticleString;
@@ -361,20 +363,19 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
                         defaultType = BDSKMiscString;
                     else
                         defaultType = @"(default)";
-                    [tmpDict setObject:itemTemplate forKey:defaultType];
-                } else if ([defaultTypes containsObject:BDSKArticleString]) {
+                    [(NSMutableArray *)types addObject:defaultType];
+                } else if ([defaultTypes containsObject:BDSKArticleString])
                     defaultType = BDSKArticleString;
-                } else if ([defaultTypes containsObject:BDSKMiscString]) {
+                else if ([defaultTypes containsObject:BDSKMiscString])
                     defaultType = BDSKMiscString;
-                } else {
+                else
                     defaultType = [defaultTypes objectAtIndex:0];
-                }
             }
             
             [typeTemplates setValue:nil forKey:@"itemTemplate"];
             [typeTemplates setValue:[NSNumber numberWithBool:NO] forKey:@"included"];
             
-            for (type in templateDict) {
+            for (type in types) {
                 NSUInteger currentIndex = [currentTypes indexOfObject:type];
                 if (currentIndex == NSNotFound) {
                     currentIndex = [typeTemplates count];
@@ -382,10 +383,13 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
                 } else {
                     template = [typeTemplates objectAtIndex:currentIndex];
                 }
-                itemTemplate = [templateDict objectForKey:type];
-                [template setItemTemplate:itemTemplate];
-                if ([type isEqualToString:@"(default)"] == NO)
+                if (itemTemplate = [templateDict objectForKey:type]) {
                     [template setIncluded:YES];
+                    [template setItemTemplate:itemTemplate];
+                } else {
+                    BDSKASSERT([type isEqualToString:defaultType]);
+                    [template setItemTemplate:defaultItemTemplate];
+                }
                 if ([type isEqualToString:defaultType])
                     [self setDefaultTypeIndex:currentIndex];
             }
