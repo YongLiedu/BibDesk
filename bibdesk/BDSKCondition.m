@@ -201,7 +201,7 @@ static char BDSKConditionObservationContext;
             date = [item dateAdded];
         else if ([key isEqualToString:BDSKDateModifiedString])
             date = [item dateModified];
-        return ((cachedStartDate == nil || [date compare:cachedStartDate] == NSOrderedDescending) &&
+        return ((cachedStartDate == nil || [date compare:cachedStartDate] != NSOrderedAscending) &&
                 (cachedEndDate == nil || [date compare:cachedEndDate] == NSOrderedAscending));
         
     } else if ([self isAttachmentCondition]) {
@@ -744,7 +744,7 @@ static BOOL differentDates(NSDate *date1, NSDate *date2) {
             *endDate = [*startDate dateByAddingNumber:1 ofPeriod:BDSKPeriodDay];
             break;
         case BDSKAfterDate: 
-            *startDate = [dateValue endOfDay];
+            *startDate = [[dateValue startOfDay] dateByAddingNumber:1 ofPeriod:BDSKPeriodDay];
             *endDate = nil;
             break;
         case BDSKBeforeDate: 
@@ -753,7 +753,7 @@ static BOOL differentDates(NSDate *date1, NSDate *date2) {
             break;
         case BDSKInDateRange:
             *startDate = [dateValue startOfDay];
-            *endDate = [toDateValue endOfDay];
+            *endDate = [[toDateValue startOfDay] dateByAddingNumber:1 ofPeriod:BDSKPeriodDay];
             break;
     }
 }

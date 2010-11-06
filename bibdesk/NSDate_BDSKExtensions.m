@@ -210,17 +210,6 @@
     return [calendar dateFromComponents:components];
 }
 
-- (NSDate *)endOfDay;
-{
-    NSCalendar *calendar = [NSCalendar currentCalendar];
-    NSUInteger unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit | NSWeekdayOrdinalCalendarUnit | NSWeekdayCalendarUnit | NSDayCalendarUnit;
-    NSDateComponents *components = [calendar components:unitFlags fromDate:self];
-    [components setHour:23];
-    [components setMinute:59];
-    [components setSecond:59];
-    return [calendar dateFromComponents:components];
-}
-
 - (NSDate *)startOfWeek;
 {
     NSCalendar *calendar = [NSCalendar currentCalendar];
