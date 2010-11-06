@@ -261,7 +261,7 @@
 }
 
 - (NSDate *)nextDate {
-    [self dateByAddingNumber:1 ofPeriod:BDSKPeriodDay];
+    return [self dateByAddingNumber:1 ofPeriod:BDSKPeriodDay];
 }
 
 @end
