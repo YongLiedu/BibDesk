@@ -724,27 +724,27 @@ static BOOL differentDates(NSDate *date1, NSDate *date2) {
             *startDate = [*endDate dateByAddingNumber:-1 ofPeriod:BDSKPeriodWeek];
             break;
         case BDSKExactly: 
-            *startDate = [today dateByAddingNumber:-numberValue ofPeriod:periodValue];
+            *startDate = [[today dateByAddingNumber:-numberValue ofPeriod:periodValue] nextDate];
             *endDate = [*startDate dateByAddingNumber:1 ofPeriod:periodValue];
             break;
         case BDSKInLast: 
-            *startDate = [today dateByAddingNumber:1-numberValue ofPeriod:periodValue];
+            *startDate = [[today dateByAddingNumber:-numberValue ofPeriod:periodValue] nextDate];
             *endDate = nil;
             break;
         case BDSKNotInLast: 
             *startDate = nil;
-            *endDate = [today dateByAddingNumber:1-numberValue ofPeriod:periodValue];
+            *endDate = [[today dateByAddingNumber:1-numberValue ofPeriod:periodValue] nextDate];
             break;
         case BDSKBetween: 
-            *startDate = [today dateByAddingNumber:-MAX(numberValue,andNumberValue) ofPeriod:periodValue];
-            *endDate = [today dateByAddingNumber:1-MIN(numberValue,andNumberValue) ofPeriod:periodValue];
+            *startDate = [[today dateByAddingNumber:-MAX(numberValue,andNumberValue) ofPeriod:periodValue] nextDate];
+            *endDate = [[today dateByAddingNumber:1-MIN(numberValue,andNumberValue) ofPeriod:periodValue] nextDate];
             break;
         case BDSKDate: 
             *startDate = [dateValue startOfDay];
-            *endDate = [*startDate dateByAddingNumber:1 ofPeriod:BDSKPeriodDay];
+            *endDate = [*startDate nextDate];
             break;
         case BDSKAfterDate: 
-            *startDate = [[dateValue startOfDay] dateByAddingNumber:1 ofPeriod:BDSKPeriodDay];
+            *startDate = [[dateValue startOfDay] nextDate];
             *endDate = nil;
             break;
         case BDSKBeforeDate: 
@@ -753,7 +753,7 @@ static BOOL differentDates(NSDate *date1, NSDate *date2) {
             break;
         case BDSKInDateRange:
             *startDate = [dateValue startOfDay];
-            *endDate = [[toDateValue startOfDay] dateByAddingNumber:1 ofPeriod:BDSKPeriodDay];
+            *endDate = [[toDateValue startOfDay] nextDate];
             break;
     }
 }

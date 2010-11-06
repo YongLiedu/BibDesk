@@ -202,7 +202,7 @@
 - (NSDate *)startOfDay;
 {
     NSCalendar *calendar = [NSCalendar currentCalendar];
-    NSUInteger unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit | NSWeekdayOrdinalCalendarUnit | NSWeekdayCalendarUnit | NSDayCalendarUnit;
+    NSUInteger unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit;
     NSDateComponents *components = [calendar components:unitFlags fromDate:self];
     [components setHour:0];
     [components setMinute:0];
@@ -258,6 +258,10 @@
     NSDate *date = [calendar dateByAddingComponents:components toDate:self options:0];
     [components release];
     return date;
+}
+
+- (NSDate *)nextDate {
+    [self dateByAddingNumber:1 ofPeriod:BDSKPeriodDay];
 }
 
 @end
