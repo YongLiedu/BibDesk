@@ -71,7 +71,6 @@ enum {
 - (NSDate *)startOfDay;
 - (NSDate *)endOfDay;
 - (NSDate *)startOfWeek;
-- (NSDate *)endOfWeek;
 - (NSDate *)dateByAddingNumber:(NSInteger)number ofPeriod:(NSInteger)period;
 
 @end

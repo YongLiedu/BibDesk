@@ -225,21 +225,6 @@
     return date;
 }
 
-- (NSDate *)startOfWeek;
-{
-    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
-    NSUInteger unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit;
-    NSDateComponents *components = [calendar components:unitFlags fromDate:self];
-    // the week jumps at firstWeekday, not at weekday=1
-    [components setWeekday:[calendar firstWeekday]];
-    [components setHour:0];
-    [components setMinute:0];
-    [components setSecond:0];
-    NSDate *date = [calendar dateFromComponents:components];
-    [calendar release];
-    return date;
-}
-
 - (NSDate *)endOfWeek;
 {
     NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
