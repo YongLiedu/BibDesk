@@ -4495,6 +4495,10 @@ Below are lists of collection keys that could be used in BibDesk export template
 @tab 
 @item dateDescription
 @tab 
+@item longDateDescription
+@tab 
+@item mediumDateDescription
+@tab 
 @item shortDateDescription
 @tab 
 @item standardDateDescription

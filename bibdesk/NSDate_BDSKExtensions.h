@@ -62,6 +62,8 @@ enum {
 - (id)initWithMonthString:(NSString *)monthString yearString:(NSString *)yearString;
 
 - (NSString *)dateDescription;
+- (NSString *)longDateDescription;
+- (NSString *)mediumDateDescription;
 - (NSString *)shortDateDescription;
 - (NSString *)rssDescription;
 - (NSString *)standardDescription;

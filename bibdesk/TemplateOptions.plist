@@ -343,6 +343,14 @@
         {
             displayName = "Default";
             key = "dateDescription";
+        {
+            displayName = "Long Default";
+            key = "longDateDescription";
+        },
+        {
+            displayName = "Medium Default";
+            key = "mediumDateDescription";
+        },
         },
         {
             displayName = "Short Default";

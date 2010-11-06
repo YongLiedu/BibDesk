@@ -156,6 +156,24 @@
     return [formatter stringFromDate:self];
 }
 
+- (NSString *)longDateDescription{
+    // March 24, 2001 (NSLongDateFormatString)
+    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
+    [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+    [formatter setDateStyle:NSDateFormatterLongStyle];
+    [formatter setTimeStyle:NSDateFormatterNoStyle];
+    return [formatter stringFromDate:self];
+}
+
+- (NSString *)mediumDateDescription{
+    // Mar 24, 2001 (NSMediumDateFormatString)
+    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
+    [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+    [formatter setDateStyle:NSDateFormatterMediumStyle];
+    [formatter setTimeStyle:NSDateFormatterNoStyle];
+    return [formatter stringFromDate:self];
+}
+
 - (NSString *)shortDateDescription{
     // 31/10/01 (NSShortDateFormatString)
     NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
