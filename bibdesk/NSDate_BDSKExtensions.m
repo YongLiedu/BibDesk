@@ -199,69 +199,44 @@
     return [formatter stringFromDate:self];
 }
 
-- (NSDate *)startOfDay;
-{
+- (NSDate *)startOfPeriod:(NSInteger)period byAdding:(NSInteger)offset {
     NSCalendar *calendar = [NSCalendar currentCalendar];
-    NSUInteger unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit;
+    NSUInteger unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit;
+    unitFlags |= period == BDSKPeriodWeek ? NSWeekCalendarUnit : NSDayCalendarUnit;
     NSDateComponents *components = [calendar components:unitFlags fromDate:self];
+    
+    // workaround for a known bug, week is 1 for last week of the year
+    if (period == BDSKPeriodWeek && [components week] == 1 && [components month] > 1) {
+        components = [calendar components:unitFlags fromDate:[self addTimeInterval:-7 * 24 * 3600]];
+        offset++;
+    }
     [components setHour:0];
     [components setMinute:0];
     [components setSecond:0];
-    return [calendar dateFromComponents:components];
-}
-
-- (NSDate *)startOfWeek;
-{
-    NSCalendar *calendar = [NSCalendar currentCalendar];
-    NSUInteger unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit;
-    NSDateComponents *components = [calendar components:unitFlags fromDate:self];
-    // the week jumps at firstWeekday, not at weekday=1
-    [components setWeekday:[calendar firstWeekday]];
-    [components setHour:0];
-    [components setMinute:0];
-    [components setSecond:0];
-    return [calendar dateFromComponents:components];
-}
-
-- (NSDate *)dateByAddingNumber:(NSInteger)number ofPeriod:(NSInteger)period {
-    NSCalendar *calendar = [NSCalendar currentCalendar];
-    NSDateComponents *components = [[NSDateComponents alloc] init];
-    [components setYear:0];
-    [components setMonth:0];
-    [components setDay:0];
-    [components setHour:0];
-    [components setMinute:0];
-    [components setSecond:0];
+    
     switch (period) {
-        case BDSKPeriodHour:
-            [components setHour:number];
-            break;
         case BDSKPeriodDay:
-            [components setDay:number];
+            [components setDay:[components day] + offset];
             break;
         case BDSKPeriodWeek:
-            [components setWeek:number];
-            [components setWeekday:0];
-            [components setDay:NSUndefinedDateComponent];
+            [components setWeekday:[calendar firstWeekday]];
+            [components setWeek:[components week] + offset];
             [components setMonth:NSUndefinedDateComponent];
             break;
         case BDSKPeriodMonth:
-            [components setMonth:number];
+            [components setDay:1];
+            [components setMonth:[components month] + offset];
             break;
         case BDSKPeriodYear:
-            [components setYear:number];
+            [components setDay:1];
+            [components setMonth:1];
+            [components setYear:[components year] + offset];
             break;
         default:
             NSLog(@"Unknown period %ld", (long)period);
             break;
     }
-    NSDate *date = [calendar dateByAddingComponents:components toDate:self options:0];
-    [components release];
-    return date;
-}
-
-- (NSDate *)nextDate {
-    return [self dateByAddingNumber:1 ofPeriod:BDSKPeriodDay];
+    return [calendar dateFromComponents:components];
 }
 
 @end

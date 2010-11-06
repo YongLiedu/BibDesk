@@ -663,7 +663,7 @@ static char BDSKConditionObservationContext;
         if (dateComparison < BDSKDate && group) {
             // we fire every day at 1 second past midnight, because the condition changes at midnight
             NSTimeInterval refreshInterval = 24 * 3600;
-            NSDate *fireDate = [[[NSDate date] startOfDay] addTimeInterval:refreshInterval + 1];
+            NSDate *fireDate = [[[NSDate date] startOfPeriod:BDSKPeriodDay byAdding:0] addTimeInterval:refreshInterval + 1];
             cacheTimer = [[NSTimer alloc] initWithFireDate:fireDate interval:refreshInterval target:self selector:@selector(refreshCachedDate:) userInfo:NULL repeats:YES];
             [[NSRunLoop currentRunLoop] addTimer:cacheTimer forMode:NSDefaultRunLoopMode];
             [cacheTimer release];
@@ -704,56 +704,56 @@ static BOOL differentDates(NSDate *date1, NSDate *date2) {
 }
 
 - (void)getStartDate:(NSDate **)startDate endDate:(NSDate **)endDate {
-    NSDate *today = [[NSDate date] startOfDay];
+    NSDate *today = [NSDate date];
     
     switch (dateComparison) {
         case BDSKToday:
-            *startDate = today;
+            *startDate = [today startOfPeriod:BDSKPeriodDay byAdding:0];
             *endDate = nil;
             break;
         case BDSKYesterday: 
-            *startDate = [today dateByAddingNumber:-1 ofPeriod:BDSKPeriodDay];
+            *startDate = [today startOfPeriod:BDSKPeriodDay byAdding:-1];
             *endDate = today;
             break;
         case BDSKThisWeek: 
-            *startDate = [today startOfWeek];
+            *startDate = [today startOfPeriod:BDSKPeriodWeek byAdding:0];
             *endDate = nil;
             break;
         case BDSKLastWeek: 
-            *endDate = [today startOfWeek];
-            *startDate = [*endDate dateByAddingNumber:-1 ofPeriod:BDSKPeriodWeek];
+            *startDate = [today startOfPeriod:BDSKPeriodWeek byAdding:-1];
+            *endDate = [today startOfPeriod:BDSKPeriodWeek byAdding:0];
             break;
         case BDSKExactly: 
-            *startDate = [[today dateByAddingNumber:-numberValue ofPeriod:periodValue] nextDate];
-            *endDate = [*startDate dateByAddingNumber:1 ofPeriod:periodValue];
+            *startDate = [today startOfPeriod:periodValue byAdding:-numberValue];
+            *endDate = [today startOfPeriod:periodValue byAdding:1-numberValue];
             break;
         case BDSKInLast: 
-            *startDate = [[today dateByAddingNumber:-numberValue ofPeriod:periodValue] nextDate];
+            *startDate = [today startOfPeriod:periodValue byAdding:1-numberValue];
             *endDate = nil;
             break;
         case BDSKNotInLast: 
             *startDate = nil;
-            *endDate = [[today dateByAddingNumber:1-numberValue ofPeriod:periodValue] nextDate];
+            *endDate = [today startOfPeriod:periodValue byAdding:1-numberValue];
             break;
         case BDSKBetween: 
-            *startDate = [[today dateByAddingNumber:-MAX(numberValue,andNumberValue) ofPeriod:periodValue] nextDate];
-            *endDate = [[today dateByAddingNumber:1-MIN(numberValue,andNumberValue) ofPeriod:periodValue] nextDate];
+            *startDate = [today startOfPeriod:periodValue byAdding:1-MAX(numberValue,andNumberValue)];
+            *endDate = [today startOfPeriod:periodValue byAdding:2-MIN(numberValue,andNumberValue)];
             break;
         case BDSKDate: 
-            *startDate = [dateValue startOfDay];
-            *endDate = [*startDate nextDate];
+            *startDate = [dateValue startOfPeriod:BDSKPeriodDay byAdding:0];
+            *endDate = [dateValue startOfPeriod:BDSKPeriodDay byAdding:1];
             break;
         case BDSKAfterDate: 
-            *startDate = [[dateValue startOfDay] nextDate];
+            *startDate = [dateValue startOfPeriod:BDSKPeriodDay byAdding:1];
             *endDate = nil;
             break;
         case BDSKBeforeDate: 
             *startDate = nil;
-            *endDate = [dateValue startOfDay];
+            *endDate = [dateValue startOfPeriod:BDSKPeriodDay byAdding:0];
             break;
         case BDSKInDateRange:
-            *startDate = [dateValue startOfDay];
-            *endDate = [[toDateValue startOfDay] nextDate];
+            *startDate = [dateValue startOfPeriod:BDSKPeriodDay byAdding:0];
+            *endDate = [toDateValue startOfPeriod:BDSKPeriodDay byAdding:1];
             break;
     }
 }

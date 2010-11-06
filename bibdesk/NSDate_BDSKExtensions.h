@@ -40,8 +40,7 @@
 
 
 enum {
-    BDSKPeriodHour,
-    BDSKPeriodDay,
+    BDSKPeriodDay = 1,
     BDSKPeriodWeek,
     BDSKPeriodMonth,
     BDSKPeriodYear
@@ -68,10 +67,7 @@ enum {
 - (NSString *)rssDescription;
 - (NSString *)standardDescription;
 
-- (NSDate *)startOfDay;
-- (NSDate *)startOfWeek;
-- (NSDate *)dateByAddingNumber:(NSInteger)number ofPeriod:(NSInteger)period;
-- (NSDate *)nextDate;
+- (NSDate *)startOfPeriod:(NSInteger)period byAdding:(NSInteger)offset;
 
 @end
 
