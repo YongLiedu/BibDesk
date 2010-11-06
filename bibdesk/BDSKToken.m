@@ -43,6 +43,29 @@
 
 #define EQUAL_OR_NIL_STRINGS(string1, string2) ( (string1 == nil && string2 == nil) || [string1 isEqualToString:string2] )
 
+#define TITLE_KEY @"title"
+#define FONTNAME_KEY @"fontName"
+#define FONTSIZE_KEY @"fontSize"
+#define BOLD_KEY @"bold"
+#define ITALIC_KEY @"italic"
+#define KEY_KEY @"key"
+#define APPENDINGKEY_KEY @"appendingKey"
+#define PREFIX_KEY @"prefix"
+#define SUFFIX_KEY @"suffix"
+#define CASINGKEY_KEY @"casingKey"
+#define CLEANINGKEY_KEY @"cleaningKey"
+#define URLFORMATKEY_KEY @"urlFormatKey"
+#define NAMESTYLEKEY_KEY @"nameStyleKey"
+#define JOINSTYLEKEY_KEY @"joinStyleKey"
+#define LINKEDFILEFORMATKEY_KEY @"linkedFileFormatKey"
+#define LINKEDFILEJOINSTYLEKEY_KEY @"linkedFileJoinStyleKey"
+#define DATEFORMATKEY_KEY @"dateFormatKey"
+#define COUNTERSTYLEKEY_KEY @"counterStyleKey"
+#define COUNTERCASINGKEY_KEY @"counterCasingKey"
+#define FIELD_KEY @"field"
+#define ALTTEXT_KEY @"altText"
+
+
 NSString *BDSKRichTextString = @"Rich Text";
 
 @implementation BDSKToken
@@ -101,21 +124,21 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super init]) {
-        title = [[decoder decodeObjectForKey:@"title"] retain];
-        fontName = [[decoder decodeObjectForKey:@"fontName"] retain];
-        fontSize = [decoder decodeDoubleForKey:@"fontSize"];
-        bold = [decoder decodeIntegerForKey:@"bold"];
-        italic = [decoder decodeIntegerForKey:@"italic"];
+        title = [[decoder decodeObjectForKey:TITLE_KEY] retain];
+        fontName = [[decoder decodeObjectForKey:FONTNAME_KEY] retain];
+        fontSize = [decoder decodeDoubleForKey:FONTSIZE_KEY];
+        bold = [decoder decodeIntegerForKey:BOLD_KEY];
+        italic = [decoder decodeIntegerForKey:ITALIC_KEY];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
-    [encoder encodeObject:title forKey:@"title"];
-    [encoder encodeObject:fontName forKey:@"fontName"];
-    [encoder encodeDouble:fontSize forKey:@"fontSize"];
-    [encoder encodeInteger:bold forKey:@"bold"];
-    [encoder encodeInteger:italic forKey:@"italic"];
+    [encoder encodeObject:title forKey:TITLE_KEY];
+    [encoder encodeObject:fontName forKey:FONTNAME_KEY];
+    [encoder encodeDouble:fontSize forKey:FONTSIZE_KEY];
+    [encoder encodeInteger:bold forKey:BOLD_KEY];
+    [encoder encodeInteger:italic forKey:ITALIC_KEY];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -229,7 +252,7 @@ NSString *BDSKRichTextString = @"Rich Text";
 - (NSSet *)keysForValuesToObserveForUndo {
     static NSSet *keys = nil;
     if (keys == nil)
-        keys = [[NSSet alloc] initWithObjects:@"fontName", @"fontSize", @"bold", @"italic", nil];
+        keys = [[NSSet alloc] initWithObjects:FONTNAME_KEY, FONTSIZE_KEY, BOLD_KEY, ITALIC_KEY, nil];
     return keys;
 }
 
@@ -256,14 +279,14 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
-        key = [[decoder decodeObjectForKey:@"key"] retain];
+        key = [[decoder decodeObjectForKey:KEY_KEY] retain];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [super encodeWithCoder:encoder];
-    [encoder encodeObject:key forKey:@"key"];
+    [encoder encodeObject:key forKey:KEY_KEY];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -312,7 +335,7 @@ NSString *BDSKRichTextString = @"Rich Text";
     static NSSet *keys = nil;
     if (keys == nil) {
         NSMutableSet *mutableKeys = [[super keysForValuesToObserveForUndo] mutableCopy];
-        [mutableKeys addObject:@"key"];
+        [mutableKeys addObject:KEY_KEY];
         keys = [mutableKeys copy];
         [mutableKeys release];
     }
@@ -336,18 +359,18 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
-        appendingKey = [[decoder decodeObjectForKey:@"appendingKey"] retain];
-        prefix = [[decoder decodeObjectForKey:@"prefix"] retain];
-        suffix = [[decoder decodeObjectForKey:@"suffix"] retain];
+        appendingKey = [[decoder decodeObjectForKey:APPENDINGKEY_KEY] retain];
+        prefix = [[decoder decodeObjectForKey:PREFIX_KEY] retain];
+        suffix = [[decoder decodeObjectForKey:SUFFIX_KEY] retain];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [super encodeWithCoder:encoder];
-    [encoder encodeObject:appendingKey forKey:@"appendingKey"];
-    [encoder encodeObject:prefix forKey:@"prefix"];
-    [encoder encodeObject:suffix forKey:@"suffix"];
+    [encoder encodeObject:appendingKey forKey:APPENDINGKEY_KEY];
+    [encoder encodeObject:prefix forKey:PREFIX_KEY];
+    [encoder encodeObject:suffix forKey:SUFFIX_KEY];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -449,9 +472,9 @@ NSString *BDSKRichTextString = @"Rich Text";
     static NSSet *keys = nil;
     if (keys == nil) {
         NSMutableSet *mutableKeys = [[super keysForValuesToObserveForUndo] mutableCopy];
-        [mutableKeys addObject:@"appendingKey"];
-        [mutableKeys addObject:@"prefix"];
-        [mutableKeys addObject:@"suffix"];
+        [mutableKeys addObject:APPENDINGKEY_KEY];
+        [mutableKeys addObject:PREFIX_KEY];
+        [mutableKeys addObject:SUFFIX_KEY];
         keys = [mutableKeys copy];
         [mutableKeys release];
     }
@@ -474,16 +497,16 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
-        casingKey = [[decoder decodeObjectForKey:@"casingKey"] retain];
-        cleaningKey = [[decoder decodeObjectForKey:@"cleaningKey"] retain];
+        casingKey = [[decoder decodeObjectForKey:CASINGKEY_KEY] retain];
+        cleaningKey = [[decoder decodeObjectForKey:CLEANINGKEY_KEY] retain];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [super encodeWithCoder:encoder];
-    [encoder encodeObject:casingKey forKey:@"casingKey"];
-    [encoder encodeObject:cleaningKey forKey:@"cleaningKey"];
+    [encoder encodeObject:casingKey forKey:CASINGKEY_KEY];
+    [encoder encodeObject:cleaningKey forKey:CLEANINGKEY_KEY];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -579,8 +602,8 @@ NSString *BDSKRichTextString = @"Rich Text";
     static NSSet *keys = nil;
     if (keys == nil) {
         NSMutableSet *mutableKeys = [[super keysForValuesToObserveForUndo] mutableCopy];
-        [mutableKeys addObject:@"casingKey"];
-        [mutableKeys addObject:@"cleaningKey"];
+        [mutableKeys addObject:CASINGKEY_KEY];
+        [mutableKeys addObject:CLEANINGKEY_KEY];
         keys = [mutableKeys copy];
         [mutableKeys release];
     }
@@ -602,14 +625,14 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
-        urlFormatKey = [[decoder decodeObjectForKey:@"urlFormatKey"] retain];
+        urlFormatKey = [[decoder decodeObjectForKey:URLFORMATKEY_KEY] retain];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [super encodeWithCoder:encoder];
-    [encoder encodeObject:urlFormatKey forKey:@"urlFormatKey"];
+    [encoder encodeObject:urlFormatKey forKey:URLFORMATKEY_KEY];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -671,7 +694,7 @@ NSString *BDSKRichTextString = @"Rich Text";
     static NSSet *keys = nil;
     if (keys == nil) {
         NSMutableSet *mutableKeys = [[super keysForValuesToObserveForUndo] mutableCopy];
-        [mutableKeys addObject:@"urlFormatKey"];
+        [mutableKeys addObject:URLFORMATKEY_KEY];
         keys = [mutableKeys copy];
         [mutableKeys release];
     }
@@ -694,16 +717,16 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
-        nameStyleKey = [[decoder decodeObjectForKey:@"nameStyleKey"] retain];
-        joinStyleKey = [[decoder decodeObjectForKey:@"joinStyleKey"] retain];
+        nameStyleKey = [[decoder decodeObjectForKey:NAMESTYLEKEY_KEY] retain];
+        joinStyleKey = [[decoder decodeObjectForKey:JOINSTYLEKEY_KEY] retain];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [super encodeWithCoder:encoder];
-    [encoder encodeObject:nameStyleKey forKey:@"nameStyleKey"];
-    [encoder encodeObject:joinStyleKey forKey:@"joinStyleKey"];
+    [encoder encodeObject:nameStyleKey forKey:NAMESTYLEKEY_KEY];
+    [encoder encodeObject:joinStyleKey forKey:JOINSTYLEKEY_KEY];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -780,8 +803,8 @@ NSString *BDSKRichTextString = @"Rich Text";
     static NSSet *keys = nil;
     if (keys == nil) {
         NSMutableSet *mutableKeys = [[super keysForValuesToObserveForUndo] mutableCopy];
-        [mutableKeys addObject:@"nameStyleKey"];
-        [mutableKeys addObject:@"joinStyleKey"];
+        [mutableKeys addObject:NAMESTYLEKEY_KEY];
+        [mutableKeys addObject:JOINSTYLEKEY_KEY];
         keys = [mutableKeys copy];
         [mutableKeys release];
     }
@@ -804,16 +827,16 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
-        linkedFileFormatKey = [[decoder decodeObjectForKey:@"linkedFileFormatKey"] retain];
-        linkedFileJoinStyleKey = [[decoder decodeObjectForKey:@"linkedFileJoinStyleKey"] retain];
+        linkedFileFormatKey = [[decoder decodeObjectForKey:LINKEDFILEFORMATKEY_KEY] retain];
+        linkedFileJoinStyleKey = [[decoder decodeObjectForKey:LINKEDFILEJOINSTYLEKEY_KEY] retain];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [super encodeWithCoder:encoder];
-    [encoder encodeObject:linkedFileFormatKey forKey:@"linkedFileFormatKey"];
-    [encoder encodeObject:linkedFileJoinStyleKey forKey:@"linkedFileJoinStyleKey"];
+    [encoder encodeObject:linkedFileFormatKey forKey:LINKEDFILEFORMATKEY_KEY];
+    [encoder encodeObject:linkedFileJoinStyleKey forKey:LINKEDFILEJOINSTYLEKEY_KEY];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -888,8 +911,8 @@ NSString *BDSKRichTextString = @"Rich Text";
     static NSSet *keys = nil;
     if (keys == nil) {
         NSMutableSet *mutableKeys = [[super keysForValuesToObserveForUndo] mutableCopy];
-        [mutableKeys addObject:@"linkedFileFormatKey"];
-        [mutableKeys addObject:@"linkedFileJoinStyleKey"];
+        [mutableKeys addObject:LINKEDFILEFORMATKEY_KEY];
+        [mutableKeys addObject:LINKEDFILEJOINSTYLEKEY_KEY];
         keys = [mutableKeys copy];
         [mutableKeys release];
     }
@@ -911,14 +934,14 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
-        dateFormatKey = [[decoder decodeObjectForKey:@"dateFormatKey"] retain];
+        dateFormatKey = [[decoder decodeObjectForKey:DATEFORMATKEY_KEY] retain];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [super encodeWithCoder:encoder];
-    [encoder encodeObject:dateFormatKey forKey:@"dateFormatKey"];
+    [encoder encodeObject:dateFormatKey forKey:DATEFORMATKEY_KEY];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -980,7 +1003,7 @@ NSString *BDSKRichTextString = @"Rich Text";
     static NSSet *keys = nil;
     if (keys == nil) {
         NSMutableSet *mutableKeys = [[super keysForValuesToObserveForUndo] mutableCopy];
-        [mutableKeys addObject:@"dateFormatKey"];
+        [mutableKeys addObject:DATEFORMATKEY_KEY];
         keys = [mutableKeys copy];
         [mutableKeys release];
     }
@@ -1003,16 +1026,16 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
-        counterStyleKey = [[decoder decodeObjectForKey:@"counterStyleKey"] retain];
-        counterCasingKey = [[decoder decodeObjectForKey:@"counterCasingKey"] retain];
+        counterStyleKey = [[decoder decodeObjectForKey:COUNTERSTYLEKEY_KEY] retain];
+        counterCasingKey = [[decoder decodeObjectForKey:COUNTERCASINGKEY_KEY] retain];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [super encodeWithCoder:encoder];
-    [encoder encodeObject:counterStyleKey forKey:@"counterStyleKey"];
-    [encoder encodeObject:counterCasingKey forKey:@"counterCasingKey"];
+    [encoder encodeObject:counterStyleKey forKey:COUNTERSTYLEKEY_KEY];
+    [encoder encodeObject:counterCasingKey forKey:COUNTERCASINGKEY_KEY];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -1088,8 +1111,8 @@ NSString *BDSKRichTextString = @"Rich Text";
     static NSSet *keys = nil;
     if (keys == nil) {
         NSMutableSet *mutableKeys = [[super keysForValuesToObserveForUndo] mutableCopy];
-        [mutableKeys addObject:@"counterStyleKey"];
-        [mutableKeys addObject:@"counterCasingKey"];
+        [mutableKeys addObject:COUNTERSTYLEKEY_KEY];
+        [mutableKeys addObject:COUNTERCASINGKEY_KEY];
         keys = [mutableKeys copy];
         [mutableKeys release];
     }
@@ -1112,16 +1135,16 @@ NSString *BDSKRichTextString = @"Rich Text";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
-        field = [[decoder decodeObjectForKey:@"field"] retain];
-        altText = [[decoder decodeObjectForKey:@"altText"] retain];
+        field = [[decoder decodeObjectForKey:FIELD_KEY] retain];
+        altText = [[decoder decodeObjectForKey:ALTTEXT_KEY] retain];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [super encodeWithCoder:encoder];
-    [encoder encodeObject:field forKey:@"field"];
-    [encoder encodeObject:altText forKey:@"altText"];
+    [encoder encodeObject:field forKey:FIELD_KEY];
+    [encoder encodeObject:altText forKey:ALTTEXT_KEY];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
@@ -1198,9 +1221,8 @@ NSString *BDSKRichTextString = @"Rich Text";
     static NSSet *keys = nil;
     if (keys == nil) {
         NSMutableSet *mutableKeys = [[super keysForValuesToObserveForUndo] mutableCopy];
-        [mutableKeys addObject:@"title"];
-        [mutableKeys addObject:@"field"];
-        [mutableKeys addObject:@"altText"];
+        [mutableKeys addObject:FIELD_KEY];
+        [mutableKeys addObject:ALTTEXT_KEY];
         keys = [mutableKeys copy];
         [mutableKeys release];
     }
