@@ -201,33 +201,29 @@
 
 - (NSDate *)startOfDay;
 {
-    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    NSCalendar *calendar = [NSCalendar currentCalendar];
     NSUInteger unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit | NSWeekdayOrdinalCalendarUnit | NSWeekdayCalendarUnit | NSDayCalendarUnit;
     NSDateComponents *components = [calendar components:unitFlags fromDate:self];
     [components setHour:0];
     [components setMinute:0];
     [components setSecond:0];
-    NSDate *date = [calendar dateFromComponents:components];
-    [calendar release];
-    return date;
+    return [calendar dateFromComponents:components];
 }
 
 - (NSDate *)endOfDay;
 {
-    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    NSCalendar *calendar = [NSCalendar currentCalendar];
     NSUInteger unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit | NSWeekdayOrdinalCalendarUnit | NSWeekdayCalendarUnit | NSDayCalendarUnit;
     NSDateComponents *components = [calendar components:unitFlags fromDate:self];
     [components setHour:23];
     [components setMinute:59];
     [components setSecond:59];
-    NSDate *date = [calendar dateFromComponents:components];
-    [calendar release];
-    return date;
+    return [calendar dateFromComponents:components];
 }
 
 - (NSDate *)startOfWeek;
 {
-    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    NSCalendar *calendar = [NSCalendar currentCalendar];
     NSUInteger unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit;
     NSDateComponents *components = [calendar components:unitFlags fromDate:self];
     // the week jumps at firstWeekday, not at weekday=1
@@ -235,13 +231,11 @@
     [components setHour:0];
     [components setMinute:0];
     [components setSecond:0];
-    NSDate *date = [calendar dateFromComponents:components];
-    [calendar release];
-    return date;
+    return [calendar dateFromComponents:components];
 }
 
 - (NSDate *)dateByAddingNumber:(NSInteger)number ofPeriod:(NSInteger)period {
-    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    NSCalendar *calendar = [NSCalendar currentCalendar];
     NSDateComponents *components = [[NSDateComponents alloc] init];
     [components setYear:0];
     [components setMonth:0];
@@ -273,7 +267,6 @@
             break;
     }
     NSDate *date = [calendar dateByAddingComponents:components toDate:self options:0];
-    [calendar release];
     [components release];
     return date;
 }
