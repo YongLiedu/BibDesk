@@ -244,8 +244,10 @@
 {
     NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
     NSDateComponents *components = [NSDateComponents dateComponentsWithYear:0 month:NSUndefinedDateComponent day:0 hour:0 minute:0 second:-1];
+    NSRange range = [calendar maximumRangeOfUnit:NSWeekdayCalendarUnit];
+    NSUInteger firstWeekday = [calendar firstWeekday];
     // the week jumps at firstWeekday, not at weekday=1
-    [components setWeekday:[calendar firstWeekday] - 1 ?: 7];
+    [components setWeekday:(firstWeekday == range.location ? NSMaxRange(range) : firstWeekday) - 1];
     NSDate *date = [calendar dateByAddingComponents:components toDate:[self startOfWeek] options:0];
     [calendar release];
     return date;

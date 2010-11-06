@@ -662,11 +662,8 @@ static char BDSKConditionObservationContext;
         [self getStartDate:&startDate endDate:&endDate];
         if (dateComparison < BDSKDate && group) {
             // we fire every day at 1 second past midnight, because the condition changes at midnight
-            NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
-            NSDateComponents *components = [NSDateComponents dateComponentsWithYear:0 month:0 day:1 hour:0 minute:0 second:1];
-            NSDate *fireDate = [calendar dateByAddingComponents:components toDate:[[NSDate date] startOfDay] options:0];
-            [calendar release];
             NSTimeInterval refreshInterval = 24 * 3600;
+            NSDate *fireDate = [[[NSDate date] startOfDay] addTimeInterval:refreshInterval + 1];
             cacheTimer = [[NSTimer alloc] initWithFireDate:fireDate interval:refreshInterval target:self selector:@selector(refreshCachedDate:) userInfo:NULL repeats:YES];
             [[NSRunLoop currentRunLoop] addTimer:cacheTimer forMode:NSDefaultRunLoopMode];
             [cacheTimer release];
