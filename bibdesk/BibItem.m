@@ -1369,13 +1369,6 @@ static inline NSDate *convertCalendarDate(NSDate *date) {
 }
 
 - (id)displayValueOfField:(NSString *)field{
-    static NSDateFormatter *shortDateFormatter = nil;
-    if(shortDateFormatter == nil) {
-        shortDateFormatter = [[NSDateFormatter alloc] init];
-        [shortDateFormatter setDateStyle:NSDateFormatterShortStyle];
-        [shortDateFormatter setTimeStyle:NSDateFormatterNoStyle];
-    }
-    
     if([field isEqualToString:BDSKCiteKeyString]){
         return [self citeKey];
     }else if([field isEqualToString:BDSKItemNumberString]){
@@ -1385,9 +1378,9 @@ static inline NSDate *convertCalendarDate(NSDate *date) {
     }else if([field isEqualToString: BDSKContainerString] ){
         return [self container];
     }else if([field isEqualToString: BDSKDateAddedString]){
-        return [shortDateFormatter stringFromDate:[self dateAdded]];
+        return [[self dateAdded] shortDateDescription];
     }else if([field isEqualToString: BDSKDateModifiedString]){
-        return [shortDateFormatter stringFromDate:[self dateModified]];
+        return [[self dateModified]shortDateDescription];
     }else if([field isEqualToString: BDSKPubDateString] ){
         NSDate *date = [self date];
         if(nil == date) 

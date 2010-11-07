@@ -81,6 +81,7 @@
 #import "BDSKTask.h"
 #import <Sparkle/Sparkle.h>
 #import <WebKit/WebKit.h>
+#import "NSDate_BDSKExtensions.h"
 
 #define WEB_URL @"http://bibdesk.sourceforge.net/"
 #define WIKI_URL @"http://sourceforge.net/apps/mediawiki/bibdesk/"
@@ -643,14 +644,10 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         [historyMenu removeAllItems];
         if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKHistoryByDateKey]) {
             NSArray *historyDays = [history orderedLastVisitedDays];
-            NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
-            [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
-            [formatter setDateStyle:NSDateFormatterFullStyle];
-            [formatter setTimeStyle:NSDateFormatterNoStyle];
             for (NSDate *date in historyDays) {
                 NSArray *historyItems = [history orderedItemsLastVisitedOnDay:(id)date];
                 NSMenu *submenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
-                [historyMenu addItemWithTitle:[formatter stringFromDate:date] submenu:submenu];
+                [historyMenu addItemWithTitle:[date dateDescription] submenu:submenu];
                 [self addMenuItemsForHistoryItems:historyItems toMenu:submenu];
                 [submenu release];
             }

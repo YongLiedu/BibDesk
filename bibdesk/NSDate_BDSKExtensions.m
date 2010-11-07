@@ -149,53 +149,71 @@
 
 - (NSString *)dateDescription{
     // Saturday, March 24, 2001 (NSDateFormatString)
-    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
-    [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
-    [formatter setDateStyle:NSDateFormatterFullStyle];
-    [formatter setTimeStyle:NSDateFormatterNoStyle];
+    static NSDateFormatter *formatter = nil;
+    if (formatter == nil) {
+        formatter = [[NSDateFormatter alloc] init];
+        [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+        [formatter setDateStyle:NSDateFormatterFullStyle];
+        [formatter setTimeStyle:NSDateFormatterNoStyle];
+    }
     return [formatter stringFromDate:self];
 }
 
 - (NSString *)longDateDescription{
     // March 24, 2001 (NSLongDateFormatString)
-    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
-    [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
-    [formatter setDateStyle:NSDateFormatterLongStyle];
-    [formatter setTimeStyle:NSDateFormatterNoStyle];
+    NSDateFormatter *formatter = nil;
+    if (formatter == nil) {
+        formatter = [[NSDateFormatter alloc] init];
+        [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+        [formatter setDateStyle:NSDateFormatterLongStyle];
+        [formatter setTimeStyle:NSDateFormatterNoStyle];
+    }
     return [formatter stringFromDate:self];
 }
 
 - (NSString *)mediumDateDescription{
     // Mar 24, 2001 (NSMediumDateFormatString)
-    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
-    [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
-    [formatter setDateStyle:NSDateFormatterMediumStyle];
-    [formatter setTimeStyle:NSDateFormatterNoStyle];
+    static NSDateFormatter *formatter = nil;
+    if (formatter == nil) {
+        formatter = [[NSDateFormatter alloc] init];
+        [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+        [formatter setDateStyle:NSDateFormatterMediumStyle];
+        [formatter setTimeStyle:NSDateFormatterNoStyle];
+    }
     return [formatter stringFromDate:self];
 }
 
 - (NSString *)shortDateDescription{
     // 31/10/01 (NSShortDateFormatString)
-    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
-    [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
-    [formatter setDateStyle:NSDateFormatterShortStyle];
-    [formatter setTimeStyle:NSDateFormatterNoStyle];
+    static NSDateFormatter *formatter = nil;
+    if (formatter == nil) {
+        formatter = [[NSDateFormatter alloc] init];
+        [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+        [formatter setDateStyle:NSDateFormatterShortStyle];
+        [formatter setTimeStyle:NSDateFormatterNoStyle];
+    }
     return [formatter stringFromDate:self];
 }
 
 - (NSString *)rssDescription{
     // see RFC 822, %a, %d %b %Y %H:%M:%S %z
-    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
-    [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
-    [formatter setDateFormat:@"EEE, dd MMM yyyy HH:mm:ss ZZZ"];
+    static NSDateFormatter *formatter = nil;
+    if (formatter == nil) {
+        formatter = [[NSDateFormatter alloc] init];
+        [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+        [formatter setDateFormat:@"EEE, dd MMM yyyy HH:mm:ss ZZZ"];
+    }
     return [formatter stringFromDate:self];
 }
 
 - (NSString *)standardDescription{
     // %Y-%m-%d %H:%M:%S %z
-    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
-    [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
-    [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss ZZZ"];
+    static NSDateFormatter *formatter = nil;
+    if (formatter == nil) {
+        formatter = [[NSDateFormatter alloc] init];
+        [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+        [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss ZZZ"];
+    }
     return [formatter stringFromDate:self];
 }
 
