@@ -123,9 +123,9 @@ enum {
 
 @interface BibItem (Private)
 
-- (void)setDateAdded:(NSCalendarDate *)newDateAdded;
-- (void)setDateModified:(NSCalendarDate *)newDateModified;
-- (void)setDate:(NSCalendarDate *)newDate;
+- (void)setDateAdded:(NSDate *)newDateAdded;
+- (void)setDateModified:(NSDate *)newDateModified;
+- (void)setDate:(NSDate *)newDate;
 - (void)setPubTypeWithoutUndo:(NSString *)newType;
 
 // updates derived info from the dictionary
@@ -283,7 +283,7 @@ static NSMapTable *selectorTable = NULL;
             files = [[NSMutableArray alloc] initWithCapacity:2];
         }
 		if (isNew){
-			NSString *nowStr = [[NSCalendarDate date] description];
+			NSString *nowStr = [[NSDate date] description];
 			[pubFields setObject:nowStr forKey:BDSKDateAddedString];
 			[pubFields setObject:nowStr forKey:BDSKDateModifiedString];
         }
@@ -332,6 +332,8 @@ static NSMapTable *selectorTable = NULL;
     return theCopy;
 }
 
+// Legacy: we need to encode deprecated NSCalendarDate objects, because we might be sharing with someone who uses an older version of BibDesk
+
 static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     if (date == nil || [date isKindOfClass:[NSCalendarDate class]])
         return (NSCalendarDate *)date;
@@ -339,14 +341,21 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         return [[[NSCalendarDate alloc] initWithTimeInterval:0.0 sinceDate:date] autorelease];
 }
 
+static inline NSDate *convertCalendarDate(NSDate *date) {
+    if ([date isKindOfClass:[NSCalendarDate class]])
+        return [[[NSDate alloc] initWithTimeInterval:0.0 sinceDate:date] autorelease];
+    else
+        return date;
+}
+
 - (id)initWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
         if(self = [super init]){
             pubFields = [[NSMutableDictionary alloc] initWithDictionary:[coder decodeObjectForKey:@"pubFields"]];
             [self setCiteKeyString:[coder decodeObjectForKey:@"citeKey"]];
-            [self setDate:ensureCalendarDate([coder decodeObjectForKey:@"pubDate"])];
-            [self setDateAdded:ensureCalendarDate([coder decodeObjectForKey:@"dateAdded"])];
-            [self setDateModified:ensureCalendarDate([coder decodeObjectForKey:@"dateModified"])];
+            [self setDate:convertCalendarDate([coder decodeObjectForKey:@"pubDate"])];
+            [self setDateAdded:convertCalendarDate([coder decodeObjectForKey:@"dateAdded"])];
+            [self setDateModified:convertCalendarDate([coder decodeObjectForKey:@"dateModified"])];
             [self setPubTypeWithoutUndo:[coder decodeObjectForKey:@"pubType"]];
             groups = [[NSMutableDictionary alloc] initWithCapacity:5];
             files = [[NSMutableArray alloc] initWithArray:[coder decodeObjectForKey:@"files"]];
@@ -371,9 +380,9 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     if([coder allowsKeyedCoding]){
         [coder encodeObject:BDSKBibtexString forKey:@"fileType"]; // legacy
         [coder encodeObject:citeKey forKey:@"citeKey"];
-        [coder encodeObject:pubDate forKey:@"pubDate"];
-        [coder encodeObject:dateAdded forKey:@"dateAdded"];
-        [coder encodeObject:dateModified forKey:@"dateModified"];
+        [coder encodeObject:ensureCalendarDate(pubDate) forKey:@"pubDate"];
+        [coder encodeObject:ensureCalendarDate(dateAdded) forKey:@"dateAdded"];
+        [coder encodeObject:ensureCalendarDate(dateModified) forKey:@"dateModified"];
         [coder encodeObject:pubType forKey:@"pubType"];
         [coder encodeObject:pubFields forKey:@"pubFields"];
         [coder encodeBool:hasBeenEdited forKey:@"hasBeenEdited"];
@@ -921,11 +930,11 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	[self setField:BDSKBooktitleString toValue:title];
 }
 
-- (NSCalendarDate *)date{
+- (NSDate *)date{
     return [self dateInheriting:YES];
 }
 
-- (NSCalendarDate *)dateInheriting:(BOOL)inherit{
+- (NSDate *)dateInheriting:(BOOL)inherit{
     BibItem *parent;
 	
 	if(inherit && pubDate == nil && (parent = [self crossrefParent])) {
@@ -934,19 +943,19 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	return pubDate;
 }
 
-- (NSCalendarDate *)dateAdded {
+- (NSDate *)dateAdded {
     return dateAdded;
 }
 
-- (NSCalendarDate *)dateModified {
+- (NSDate *)dateModified {
     return dateModified;
 }
 
 - (void)setPubType:(NSString *)newType{
-    [self setPubType:newType withModDate:[NSCalendarDate date]];
+    [self setPubType:newType withModDate:[NSDate date]];
 }
 
-- (void)setPubType:(NSString *)newType withModDate:(NSCalendarDate *)date{
+- (void)setPubType:(NSString *)newType withModDate:(NSDate *)date{
     NSString *oldType = [self pubType];
     
     if ([oldType isEqualToString:newType]) {
@@ -1013,10 +1022,10 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 }
 
 - (void)setCiteKey:(NSString *)newCiteKey{
-    [self setCiteKey:newCiteKey withModDate:[NSCalendarDate date]];
+    [self setCiteKey:newCiteKey withModDate:[NSDate date]];
 }
 
-- (void)setCiteKey:(NSString *)newCiteKey withModDate:(NSCalendarDate *)date{
+- (void)setCiteKey:(NSString *)newCiteKey withModDate:(NSDate *)date{
     NSString *oldCiteKey = [[self citeKey] retain];
 
     if ([self undoManager]) {
@@ -1161,10 +1170,10 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 }
 
 - (void)setField: (NSString *)key toValue: (NSString *)value{
-	[self setField:key toValue:value withModDate:[NSCalendarDate date]];
+	[self setField:key toValue:value withModDate:[NSDate date]];
 }
 
-- (void)setField:(NSString *)key toValue:(NSString *)value withModDate:(NSCalendarDate *)date{
+- (void)setField:(NSString *)key toValue:(NSString *)value withModDate:(NSDate *)date{
     BDSKPRECONDITION(key != nil);
     // use a copy of the old value, since this may be a mutable value
     NSString *oldValue = [[pubFields objectForKey:key] copy];
@@ -1175,7 +1184,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     if ([value isEqualAsComplexString:@""] && [key isNoteField] == NO)
         value = nil;
     if ([self undoManager]) {
-		NSCalendarDate *oldModDate = [self dateModified];
+		NSDate *oldModDate = [self dateModified];
 		
 		[[[self undoManager] prepareWithInvocationTarget:self] setField:key 
 														 toValue:oldValue
@@ -1380,7 +1389,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     }else if([field isEqualToString: BDSKDateModifiedString]){
         return [shortDateFormatter stringFromDate:[self dateModified]];
     }else if([field isEqualToString: BDSKPubDateString] ){
-        NSCalendarDate *date = [self date];
+        NSDate *date = [self date];
         if(nil == date) 
             return nil;
         NSString *format = [NSString isEmptyString:[self valueOfField:BDSKMonthString]] ? @"yyyy" : @"MMM yyyy";
@@ -3277,21 +3286,21 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 @implementation BibItem (Private)
 
 // The date setters should only be used at initialization or from updateMetadata:forKey:.  If you want to change the date, change the value in pubFields, and let updateMetadata handle the ivar.
-- (void)setDate: (NSCalendarDate *)newDate{
+- (void)setDate: (NSDate *)newDate{
     if(newDate != pubDate){
         [pubDate release];
         pubDate = [newDate retain];
     }
 }
 
-- (void)setDateAdded:(NSCalendarDate *)newDateAdded {
+- (void)setDateAdded:(NSDate *)newDateAdded {
     if(newDateAdded != dateAdded){
         [dateAdded release];
         dateAdded = [newDateAdded retain];
     }
 }
 
-- (void)setDateModified:(NSCalendarDate *)newDateModified {
+- (void)setDateModified:(NSDate *)newDateModified {
     if(newDateModified != dateModified){
         [dateModified release];
         dateModified = [newDateModified retain];
@@ -3334,12 +3343,12 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 		[groups removeObjectForKey:key];
 	}
 	
-    NSCalendarDate *theDate = nil;
+    NSDate *theDate = nil;
     
     // pubDate is a derived field based on Month and Year fields; we take the 15th day of the month to avoid edge cases
     if (key == nil || allFieldsChanged || [BDSKYearString isEqualToString:key] || [BDSKMonthString isEqualToString:key]) {
         // allows month as number, name or abbreviated name
-        theDate = [[NSCalendarDate alloc] initWithMonthString:[pubFields objectForKey:BDSKMonthString] yearString:[pubFields objectForKey:BDSKYearString]];
+        theDate = [[NSDate alloc] initWithMonthString:[pubFields objectForKey:BDSKMonthString] yearString:[pubFields objectForKey:BDSKYearString]];
         [self setDate:theDate];
         [theDate release];
 	}
@@ -3348,7 +3357,9 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     if (key == nil || allFieldsChanged || [BDSKDateAddedString isEqualToString:key]) {
 		NSString *dateAddedValue = [pubFields objectForKey:BDSKDateAddedString];
 		if (![NSString isEmptyString:dateAddedValue]) {
-            theDate = [[NSCalendarDate alloc] initWithNaturalLanguageString:dateAddedValue];
+            theDate = [[NSDate alloc] initWithString:dateAddedValue];
+            if (theDate == nil)
+                theDate = [[NSDate dateWithNaturalLanguageString:dateAddedValue] retain];
 			[self setDateAdded:theDate];
             [theDate release];
 		}else{
@@ -3360,7 +3371,9 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     // setDateModified: is only called here; it is derived based on pubFields value of BDSKDateAddedString
     NSString *dateModValue = [pubFields objectForKey:BDSKDateModifiedString];
     if (![NSString isEmptyString:dateModValue]) {
-        theDate = [[NSCalendarDate alloc] initWithNaturalLanguageString:dateModValue];
+        theDate = [[NSDate alloc] initWithString:dateModValue];
+        if (theDate == nil)
+            theDate = [[NSDate dateWithNaturalLanguageString:dateModValue] retain];
         [self setDateModified:theDate];
         [theDate release];
     }else{

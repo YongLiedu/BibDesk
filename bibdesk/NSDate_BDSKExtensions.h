@@ -70,9 +70,3 @@ enum {
 - (NSDate *)startOfPeriod:(NSInteger)period byAdding:(NSInteger)offset;
 
 @end
-
-@interface NSCalendarDate (BDSKExtensions)
-
-- (NSCalendarDate *)initWithNaturalLanguageString:(NSString *)dateString;
-
-@end

@@ -82,9 +82,9 @@ enum {
 	NSString *pubType;
     NSMutableDictionary *pubFields;
     NSMutableDictionary *people;
-    NSCalendarDate *pubDate;
-	NSCalendarDate *dateAdded;
-	NSCalendarDate *dateModified;
+    NSDate *pubDate;
+	NSDate *dateAdded;
+	NSDate *dateModified;
 	NSMutableDictionary *groups;
     NSNumber * fileOrder;
     BOOL hasBeenEdited;
@@ -426,7 +426,7 @@ enum {
     @discussion (discussion)
     
 */
-- (NSCalendarDate *)date;
+- (NSDate *)date;
 
 /*!
     @method dateInheriting:
@@ -435,10 +435,10 @@ enum {
     @discussion (discussion)
     
 */
-- (NSCalendarDate *)dateInheriting:(BOOL)inherit;
+- (NSDate *)dateInheriting:(BOOL)inherit;
 
-- (NSCalendarDate *)dateAdded;
-- (NSCalendarDate *)dateModified;
+- (NSDate *)dateAdded;
+- (NSDate *)dateModified;
 
 /*!
 	@method     setPubType:
@@ -451,7 +451,7 @@ enum {
 	@abstract   Basic setter for the publication type, with undo. Sets up the fields if necessary.
 	@discussion -
 */
-- (void)setPubType:(NSString *)newType withModDate:(NSCalendarDate *)date;
+- (void)setPubType:(NSString *)newType withModDate:(NSDate *)date;
 /*!
 	@method     pubType
 	@abstract   Returns the publication type.
@@ -634,7 +634,7 @@ enum {
 	@abstract   basic setter for the cite key, with notification and undo.
 	@discussion -
 */
-- (void)setCiteKey:(NSString *)newCiteKey withModDate:(NSCalendarDate *)date;
+- (void)setCiteKey:(NSString *)newCiteKey withModDate:(NSDate *)date;
 
 /*!
 	@method     citeKey
@@ -658,7 +658,7 @@ enum {
 - (void)setFields: (NSDictionary *)newFields;
 
 - (void)setField: (NSString *)key toValue: (NSString *)value;
-- (void)setField: (NSString *)key toValue: (NSString *)value withModDate:(NSCalendarDate *)date;
+- (void)setField: (NSString *)key toValue: (NSString *)value withModDate:(NSDate *)date;
 
 - (void)replaceValueOfFieldByCopy:(NSString *)key;
 

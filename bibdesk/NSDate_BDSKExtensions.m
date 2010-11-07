@@ -44,7 +44,7 @@
 
 
 @implementation NSDate (BDSKExtensions)
-    
+
 - (id)initWithMonthDayYearString:(NSString *)dateString;
 {    
     [[self init] release];
@@ -237,30 +237,6 @@
             break;
     }
     return [calendar dateFromComponents:components];
-}
-
-@end
-
-@implementation NSCalendarDate (BDSKExtensions)
-
-- (NSCalendarDate *)initWithNaturalLanguageString:(NSString *)dateString;
-{
-    // initWithString should release self when it returns nil
-    self = [self initWithString:dateString];
-    if (self == nil)
-        self = [[NSCalendarDate dateWithNaturalLanguageString:dateString] retain];
-    return self;
-}
-
-// override this NSDate method so we can return an NSCalendarDate efficiently
-- (NSCalendarDate *)initWithMonthDayYearString:(NSString *)dateString;
-{        
-    NSDate *date = [[NSDate alloc] initWithMonthDayYearString:dateString];
-    NSTimeInterval t = [date timeIntervalSinceReferenceDate];
-    self = [self initWithTimeIntervalSinceReferenceDate:t];
-    [date release];
-    
-    return self;
 }
 
 @end
