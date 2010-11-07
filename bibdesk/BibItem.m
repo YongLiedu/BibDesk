@@ -376,6 +376,8 @@ static inline NSDate *convertCalendarDate(NSDate *date) {
 	return self;
 }
 
+// If we ever want to drop legacy, i.e. no fileType and no NSCalendarDate, we must increase [BDSKSharingClientServer supportedProtocolVersion] and [BDSKSharingDOServer requiredProtocolVersion]
+
 - (void)encodeWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
         [coder encodeObject:BDSKBibtexString forKey:@"fileType"]; // legacy
