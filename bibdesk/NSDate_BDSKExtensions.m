@@ -264,19 +264,3 @@
 }
 
 @end
-
-@implementation NSDateComponents (BDSKExtensions)
-
-+ (NSDateComponents *)dateComponentsWithYear:(NSInteger)year month:(NSInteger)month day:(NSInteger)day hour:(NSInteger)hour minute:(NSInteger)minute second:(NSInteger)second
-{
-    NSDateComponents *components = [[[NSDateComponents alloc] init] autorelease];
-    [components setYear:year];
-    [components setMonth:month];
-    [components setDay:day];
-    [components setHour:hour];
-    [components setMinute:minute];
-    [components setSecond:second];
-    return components;
-}
-
-@end

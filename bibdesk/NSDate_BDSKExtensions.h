@@ -76,7 +76,3 @@ enum {
 - (NSCalendarDate *)initWithNaturalLanguageString:(NSString *)dateString;
 
 @end
-
-@interface NSDateComponents (BDSKExtensions)
-+ (NSDateComponents *)dateComponentsWithYear:(NSInteger)year month:(NSInteger)month day:(NSInteger)day hour:(NSInteger)hour minute:(NSInteger)minute second:(NSInteger)second;
-@end
