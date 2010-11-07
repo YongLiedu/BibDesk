@@ -1383,13 +1383,13 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         NSCalendarDate *date = [self date];
         if(nil == date) 
             return nil;
-        NSString *monthStr = [self valueOfField:BDSKMonthString];
-        NSDictionary *locale = [[NSUserDefaults standardUserDefaults] dictionaryRepresentation];
-        if([NSString isEmptyString:monthStr])
-            return [date descriptionWithCalendarFormat:@"%Y" locale:locale];
-        else
-            return [date descriptionWithCalendarFormat:@"%b %Y" locale:locale];
-    }else if([field isEqualToString: BDSKFirstAuthorString] ){
+        NSString *format = [NSString isEmptyString:[self valueOfField:BDSKMonthString]] ? @"yyyy" : @"MMM yyyy";
+        NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
+        [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+        [formatter setDateFormat:format];
+        [formatter setLocale:[NSLocale currentLocale]]; // is this necessary?
+        return [formatter stringFromDate:date];
+     }else if([field isEqualToString: BDSKFirstAuthorString] ){
         return [[self authorAtIndex:0] displayName];
     }else if([field isEqualToString: BDSKSecondAuthorString] ){
         return [[self authorAtIndex:1] displayName]; 
