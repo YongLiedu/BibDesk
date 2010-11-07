@@ -1619,16 +1619,18 @@
         // Special-case DC.date to get month and year, but still insert "DC.date"
         //  to capture the day, which may be useful.
         if([fieldName isEqualToString:@"Date"]){
-            NSCalendarDate *date = [NSCalendarDate dateWithString:fieldValue
-                                                   calendarFormat:@"%Y-%m-%d"];
-            [item setField:BDSKYearString
-                   toValue:[date descriptionWithCalendarFormat:@"%Y"]];
-            [item setField:BDSKMonthString
-                   toValue:[date descriptionWithCalendarFormat:@"%m"]];
+            NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+            [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+            [formatter setDateFormat:@"yyyy-MM-dd"];
+            NSDate *date = [formatter dateFromString:fieldValue];
+            [formatter setDateFormat:@"yyyy"];
+            [item setField:BDSKYearString toValue:[formatter stringFromDate:date]];
+            [formatter setDateFormat:@"MM"];
+            [item setField:BDSKMonthString toValue:[formatter stringFromDate:date]];
+            [formatter release];
             // fieldName is "Date" here, don't just insert that.
             // we use "Date" to generate a nice table column, and we shouldn't override that.
-            [item setField:@"DC.date"
-                   toValue:fieldValue];
+            [item setField:@"DC.date" toValue:fieldValue];
         }else if([fieldName isEqualToString:BDSKAuthorString]){
             // DC.creator and DC.contributor both map to Author, so append them in the appropriate order
             NSString *currentVal = [item valueOfField:BDSKAuthorString];
