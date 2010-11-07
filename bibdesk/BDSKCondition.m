@@ -736,8 +736,8 @@ static BOOL differentDates(NSDate *date1, NSDate *date2) {
             *endDate = [today startOfPeriod:periodValue byAdding:1-numberValue];
             break;
         case BDSKBetween: 
-            *startDate = [today startOfPeriod:periodValue byAdding:1-MAX(numberValue,andNumberValue)];
-            *endDate = [today startOfPeriod:periodValue byAdding:2-MIN(numberValue,andNumberValue)];
+            *startDate = [today startOfPeriod:periodValue byAdding:-MAX(numberValue,andNumberValue)];
+            *endDate = [today startOfPeriod:periodValue byAdding:1-MIN(numberValue,andNumberValue)];
             break;
         case BDSKDate: 
             *startDate = [dateValue startOfPeriod:BDSKPeriodDay byAdding:0];
