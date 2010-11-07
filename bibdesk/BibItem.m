@@ -341,21 +341,11 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         return [[[NSCalendarDate alloc] initWithTimeInterval:0.0 sinceDate:date] autorelease];
 }
 
-static inline NSDate *convertCalendarDate(NSDate *date) {
-    if ([date isKindOfClass:[NSCalendarDate class]])
-        return [[[NSDate alloc] initWithTimeInterval:0.0 sinceDate:date] autorelease];
-    else
-        return date;
-}
-
 - (id)initWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
         if(self = [super init]){
             pubFields = [[NSMutableDictionary alloc] initWithDictionary:[coder decodeObjectForKey:@"pubFields"]];
             [self setCiteKeyString:[coder decodeObjectForKey:@"citeKey"]];
-            [self setDate:convertCalendarDate([coder decodeObjectForKey:@"pubDate"])];
-            [self setDateAdded:convertCalendarDate([coder decodeObjectForKey:@"dateAdded"])];
-            [self setDateModified:convertCalendarDate([coder decodeObjectForKey:@"dateModified"])];
             [self setPubTypeWithoutUndo:[coder decodeObjectForKey:@"pubType"]];
             groups = [[NSMutableDictionary alloc] initWithCapacity:5];
             files = [[NSMutableArray alloc] initWithArray:[coder decodeObjectForKey:@"files"]];
@@ -364,10 +354,18 @@ static inline NSDate *convertCalendarDate(NSDate *date) {
             owner = nil;
             macroResolver = nil;
             fileOrder = nil;
-            hasBeenEdited = [coder decodeBoolForKey:@"hasBeenEdited"];
+            hasBeenEdited = YES;
             // we don't bother encoding this
             spotlightMetadataChanged = YES;
             identifierURL = createUniqueURL();
+            
+            // these are set by updateMetadataForKey:
+            pubDate = nil;
+            dateAdded = nil;
+            dateModified = nil;
+            
+            // set the dates based on the fields
+            [self updateMetadataForKey:nil];
         }
     } else {
         [[super init] release];
@@ -380,15 +378,16 @@ static inline NSDate *convertCalendarDate(NSDate *date) {
 
 - (void)encodeWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
-        [coder encodeObject:BDSKBibtexString forKey:@"fileType"]; // legacy
         [coder encodeObject:citeKey forKey:@"citeKey"];
+        [coder encodeObject:pubType forKey:@"pubType"];
+        [coder encodeObject:pubFields forKey:@"pubFields"];
+        [coder encodeObject:files forKey:@"files"];
+        // Legacy, these are necessary for sharing with older versions of BibDesk
+        [coder encodeObject:BDSKBibtexString forKey:@"fileType"];
         [coder encodeObject:ensureCalendarDate(pubDate) forKey:@"pubDate"];
         [coder encodeObject:ensureCalendarDate(dateAdded) forKey:@"dateAdded"];
         [coder encodeObject:ensureCalendarDate(dateModified) forKey:@"dateModified"];
-        [coder encodeObject:pubType forKey:@"pubType"];
-        [coder encodeObject:pubFields forKey:@"pubFields"];
         [coder encodeBool:hasBeenEdited forKey:@"hasBeenEdited"];
-        [coder encodeObject:files forKey:@"files"];
     } else {
         [coder encodeDataObject:[NSKeyedArchiver archivedDataWithRootObject:self]];
     }        
