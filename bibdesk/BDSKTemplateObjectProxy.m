@@ -216,7 +216,7 @@
 // legacy method, as it may appear as a key in older templates
 - (id)publicationsAsHTML{ return [self publicationsUsingTemplate]; }
 
-- (NSCalendarDate *)currentDate{ return [NSCalendarDate date]; }
+- (NSDate *)currentDate{ return [NSDate date]; }
 
 // BDSKTemplateParserDelegate protocol
 - (void)templateParserWillParseTemplate:(id)template usingObject:(id)anObject {

@@ -60,6 +60,6 @@
 - (NSArray *)publications;
 - (id)publicationsUsingTemplate;
 
-- (NSCalendarDate *)currentDate;
+- (NSDate *)currentDate;
 
 @end

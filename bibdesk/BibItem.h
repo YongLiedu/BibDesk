@@ -741,7 +741,7 @@ enum {
 - (id)authorsOrEditors;
 - (NSInteger)itemIndex;
 - (void)setItemIndex:(NSInteger)index;
-- (NSCalendarDate *)currentDate;
+- (NSDate *)currentDate;
 - (NSString *)textSkimNotes;
 - (NSAttributedString *)richTextSkimNotes;
 - (NSAttributedString *)linkedText;

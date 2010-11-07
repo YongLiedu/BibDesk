@@ -242,7 +242,7 @@ static void fixEEURL(BibItem *pub)
 {
     // no UI for providing years, so use 1900--present
     NSNumber *startYear = [NSNumber numberWithInteger:1900];
-    NSNumber *endYear = [NSNumber numberWithInteger:[[NSCalendarDate date] yearOfCommonEra]];
+    NSNumber *endYear = [NSNumber numberWithInteger:[[[[[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar] autorelease] components:NSYearCalendarUnit fromDate:[NSDate date]] year]];
     
     NSArray *searchResults = nil;
     if ([database caseInsensitiveCompare:@"authors"] == NSOrderedSame) {

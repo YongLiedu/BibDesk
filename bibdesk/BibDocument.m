@@ -1970,7 +1970,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 - (void)markAsImported {
     [self setFileURL:nil];
     // set date-added for imports
-    NSString *importDate = [[NSCalendarDate date] description];
+    NSString *importDate = [[NSDate date] description];
     for (BibItem *pub in publications)
         [pub setField:BDSKDateAddedString toValue:importDate];
     [[self undoManager] removeAllActions];
@@ -2149,7 +2149,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     [self generateCiteKeysForPublications:autogeneratePubs];
     
     // set Date-Added to the current date, since unarchived items will have their own (incorrect) date
-    NSString *importDate = [[NSCalendarDate date] description];
+    NSString *importDate = [[NSDate date] description];
     for (pub in newPubs)
         [pub setField:BDSKDateAddedString toValue:importDate];
 	
@@ -2479,7 +2479,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         pubs = [NSMutableArray array];
         [newBI addFileForURL:theURL autoFile:NO runScriptHook:YES];
         [newBI setPubType:@"webpage"];
-        [newBI setField:@"Lastchecked" toValue:[[NSCalendarDate date] dateDescription]];
+        [newBI setField:@"Lastchecked" toValue:[[NSDate date] dateDescription]];
         NSString *title = [WebView URLTitleFromPasteboard:pboard];
         if (title)
             [newBI setField:BDSKTitleString toValue:title];

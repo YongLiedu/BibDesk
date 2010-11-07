@@ -42,7 +42,7 @@
 
 
 @interface BDSKHCiteParser (Private)
-+ (NSCalendarDate *)dateFromNode:(NSXMLNode *)node;
++ (NSDate *)dateFromNode:(NSXMLNode *)node;
 + (NSString *)BTAuthorStringFromVCardNode:(NSXMLNode *)node;
 + (NSMutableDictionary *)dictionaryFromCitationNode:(NSXMLNode *)citationNode;
 
@@ -203,11 +203,14 @@
      
      if([datePublishedNodes count] > 0) {
          NSXMLNode *datePublishedNode = [datePublishedNodes objectAtIndex:0]; // Only use the first such node.
-         NSCalendarDate *datePublished = [self dateFromNode:datePublishedNode];
-         [rd setObject:[datePublished descriptionWithCalendarFormat:@"%Y"]
-                forKey:@"Year"];
-         [rd setObject:[datePublished descriptionWithCalendarFormat:@"%B"]
-                forKey:@"Month"];
+         NSDate *datePublished = [self dateFromNode:datePublishedNode];
+         NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+         [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+         [formatter setDateFormat:@"yyyy"];
+         [rd setObject:[formatter stringFromDate:datePublished] forKey:@"Year"];
+         [formatter setDateFormat:@"MMMM"];
+         [rd setObject:[formatter stringFromDate:datePublished] forKey:@"Month"];
+         [formatter release];
      }
      
      // find issue
@@ -326,27 +329,30 @@
     return [[fnNodes objectAtIndex:0] fullStringValueIfABBR];
 }
 
-+ (NSCalendarDate *)dateFromNode:(NSXMLNode *)node{
++ (NSDate *)dateFromNode:(NSXMLNode *)node{
     
     NSString *fullString = [node fullStringValueIfABBR];
-    
-    // todo - support other formats
-    NSCalendarDate *d = [NSCalendarDate dateWithString:fullString
-                                        calendarFormat:@"%Y%m%d"];
-    
-    if (d) return d;
-    
-    d = [NSCalendarDate dateWithString:fullString
-                                        calendarFormat:@"%Y%m%dT%H%M"];
+    NSDate *d;
+    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
+    [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
 
+    // todo - support other formats
+    [formatter setDateFormat:@"yyyyMMMdd"];
+    d = [formatter dateFromString:fullString];
+    
     if (d) return d;
     
-    d = [NSCalendarDate dateWithString:fullString
-                                        calendarFormat:@"%Y%m%dT%H%M%z"];
+    [formatter setDateFormat:@"yyyyMMMdd'T'HHmm"];
+    d = [formatter dateFromString:fullString];
     
+    if (d) return d;
     
-    d = [NSCalendarDate dateWithString:fullString
-                        calendarFormat:@"%Y"]; // degenerate year-only case
+    [formatter setDateFormat:@"yyyyMMMdd'T'HHmmZZZ"];
+    d = [formatter dateFromString:fullString];
+
+    
+    [formatter setDateFormat:@"yyyy"]; // degenerate year-only case
+    d = [formatter dateFromString:fullString];
     
     if (d) return d;
     
@@ -356,8 +362,8 @@
 
 
 + (NSDictionary *)parserInfo {
-	NSString *parserDescription = NSLocalizedString(@"HCite is meant to become a microformat for adding bibliographic information to web pages. It is unlikely to be relevant or useful at the moment.", @"Description for the HCite microformat");
-	return [BDSKWebParser parserInfoWithName:@"HCite" address:@"http://microformats.org/wiki/citation" description:parserDescription feature:BDSKParserFeatureGeneric];
+        NSString *parserDescription = NSLocalizedString(@"HCite is meant to become a microformat for adding bibliographic information to web pages. It is unlikely to be relevant or useful at the moment.", @"Description for the HCite microformat");
+        return [BDSKWebParser parserInfoWithName:@"HCite" address:@"http://microformats.org/wiki/citation" description:parserDescription feature:BDSKParserFeatureGeneric];
 }
 
 @end

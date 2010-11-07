@@ -176,12 +176,12 @@ enum {
                     if (value = [newValue objectForKey:@"andNumberValue"])
                         [self setAndNumberValue:[value integerValue]];
                 } else if (value = [newValue objectForKey:@"dateValue"]) {
-                    [self setDateValue:[[[NSCalendarDate alloc] initWithTimeInterval:0.0 sinceDate:value] autorelease]];
+                    [self setDateValue:value];
                     if (value = [newValue objectForKey:@"toDateValue"])
-                        [self setToDateValue:[[[NSCalendarDate alloc] initWithTimeInterval:0.0 sinceDate:value] autorelease]];
+                        [self setToDateValue:value];
                 }
             } else if ([newValue isKindOfClass:[NSDate class]]) {
-                [self setDateValue:[[[NSCalendarDate alloc] initWithTimeInterval:0.0 sinceDate:newValue] autorelease]];
+                [self setDateValue:newValue];
             } else if (newValue && [newValue isEqual:[NSNull null]] == NO) {
                 NSScriptCommand *cmd = [NSScriptCommand currentCommand];
                 [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];

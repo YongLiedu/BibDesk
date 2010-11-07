@@ -2332,7 +2332,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 - (NSInteger)itemIndex{ return currentIndex; }
 
-- (NSCalendarDate *)currentDate{ return [NSCalendarDate date]; }
+- (NSDate *)currentDate{ return [NSDate date]; }
 
 - (NSString *)textSkimNotes {
     NSMutableString *string = [NSMutableString string];
