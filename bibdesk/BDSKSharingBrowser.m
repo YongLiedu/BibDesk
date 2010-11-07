@@ -82,6 +82,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     NSData *TXTData = [aNetService TXTRecordData];
     NSString *version = nil;
     // check the version for compatibility; this is our own versioning system
+    // version is [BDSKSharingServer supportedProtocolVersion] of the server
     if(TXTData)
         version = [[[NSString alloc] initWithData:[[NSNetService dictionaryFromTXTRecordData:TXTData] objectForKey:BDSKTXTVersionKey] encoding:NSUTF8StringEncoding] autorelease];
     return [version numericCompare:[BDSKSharingBrowser requiredProtocolVersion]] != NSOrderedAscending;

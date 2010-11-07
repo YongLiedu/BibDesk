@@ -689,6 +689,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     NSParameterAssert(clientObject != nil && identifier != nil && version != nil);
     
     // we don't register clients that have a version we don't support
+    // version is [BDSKSharingClientServer supportedProtocolVersion] from the client
     if([version numericCompare:[BDSKSharingDOServer requiredProtocolVersion]] == NSOrderedAscending)
         return;
     
