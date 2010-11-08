@@ -92,7 +92,8 @@ static NSSet *fieldsToWriteIfEmpty = nil;
 - (void)setDateAdded:(NSDate *)newDateAdded;
 - (void)setDateModified:(NSDate *)newDateModified;
 - (void)setDate:(NSDate *)newDate;
-- (void)setPubTypeWithoutUndo:(NSString *)newType;
+- (void)setPubTypeString:(NSString *)newType;
+- (void)setCiteKeyString:(NSString *)newCiteKey;
 
 // updates derived info from the dictionary
 - (void)updateMetadataForKey:(NSString *)key;
@@ -262,7 +263,7 @@ static NSMapTable *selectorTable = NULL;
         fileOrder = nil;
         identifierURL = createUniqueURL();
         
-        [self setPubTypeWithoutUndo:type];
+        [self setPubTypeString:type];
         [self setDate: nil];
         [self setDateAdded: nil];
         [self setDateModified: nil];
@@ -312,7 +313,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         if(self = [super init]){
             pubFields = [[NSMutableDictionary alloc] initWithDictionary:[coder decodeObjectForKey:@"pubFields"]];
             [self setCiteKeyString:[coder decodeObjectForKey:@"citeKey"]];
-            [self setPubTypeWithoutUndo:[coder decodeObjectForKey:@"pubType"]];
+            [self setPubTypeString:[coder decodeObjectForKey:@"pubType"]];
             groups = [[NSMutableDictionary alloc] initWithCapacity:5];
             files = [[NSMutableArray alloc] initWithArray:[coder decodeObjectForKey:@"files"]];
             [files makeObjectsPerformSelector:@selector(setDelegate:) withObject:self];
@@ -935,7 +936,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     }
 	
     [oldType retain];
-	[self setPubTypeWithoutUndo:newType];
+	[self setPubTypeString:newType];
 	
 	if (date != nil) {
 		[pubFields setObject:[date description] forKey:BDSKDateModifiedString];
@@ -1016,16 +1017,6 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];
-}
-
-- (void)setCiteKeyString:(NSString *)newCiteKey{
-    // parser doesn't allow empty cite keys
-    BDSKPRECONDITION([NSString isEmptyString:newCiteKey] == NO);
-    if(newCiteKey != citeKey){
-        [citeKey autorelease];
-        citeKey = [newCiteKey copy];
-        [[BDSKCompletionManager sharedManager] addString:newCiteKey forCompletionEntry:BDSKCrossrefString];
-    }
 }
 
 - (NSString *)citeKey{
@@ -3267,13 +3258,23 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     }
 }
 
-- (void)setPubTypeWithoutUndo:(NSString *)newType{
+- (void)setPubTypeString:(NSString *)newType{
     newType = [newType entryType];
     BDSKASSERT(![NSString isEmptyString:newType]);
-	if(![[self pubType] isEqualToString:newType]){
+	if(newType != pubType){
 		[pubType release];
-		pubType = [newType copy];
+		pubType = [newType retain];
 	}
+}
+
+- (void)setCiteKeyString:(NSString *)newCiteKey{
+    // parser doesn't allow empty cite keys
+    BDSKPRECONDITION([NSString isEmptyString:newCiteKey] == NO);
+    if(newCiteKey != citeKey){
+        [citeKey autorelease];
+        citeKey = [newCiteKey copy];
+        [[BDSKCompletionManager sharedManager] addString:newCiteKey forCompletionEntry:BDSKCrossrefString];
+    }
 }
 
 - (void)updateMetadataForKey:(NSString *)key{

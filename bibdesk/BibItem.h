@@ -616,13 +616,6 @@ enum {
 - (NSInteger)canSetCrossref:(NSString *)aCrossref andCiteKey:(NSString *)aCiteKey;
 
 /*!
-	@method     setCiteKeyString
-	@abstract   basic setter for the cite key, for initialization only.
-	@discussion -
-*/
-- (void)setCiteKeyString:(NSString *)newCiteKey;
-
-/*!
 	@method     setCiteKey:
 	@abstract   basic setter for the cite key, with notification and undo and current modified date. 
 	@discussion -
