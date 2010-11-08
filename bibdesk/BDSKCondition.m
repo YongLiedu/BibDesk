@@ -663,7 +663,7 @@ static char BDSKConditionObservationContext;
         if (dateComparison < BDSKDate && group) {
             // we fire every day at 1 second past midnight, because the condition changes at midnight
             NSTimeInterval refreshInterval = 24 * 3600;
-            NSDate *fireDate = [[[NSDate date] startOfPeriod:BDSKPeriodDay byAdding:1] addTimeInterval:1];
+            NSDate *fireDate = [[[NSDate date] startOfPeriod:BDSKPeriodDay] addTimeInterval:refreshInterval + 1];
             cacheTimer = [[NSTimer alloc] initWithFireDate:fireDate interval:refreshInterval target:self selector:@selector(refreshCachedDate:) userInfo:NULL repeats:YES];
             [[NSRunLoop currentRunLoop] addTimer:cacheTimer forMode:NSDefaultRunLoopMode];
             [cacheTimer release];
