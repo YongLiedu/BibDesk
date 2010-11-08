@@ -278,6 +278,12 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     }
 }
 
+- (NSDate*)scriptingDate {
+	NSDate * d = [self date];
+	
+	if (!d) return [NSDate dateWithTimeIntervalSince1970:0];
+	else return d;
+}
 
 - (NSDate*)scriptingDateAdded {
 	NSDate * d = [self dateAdded];

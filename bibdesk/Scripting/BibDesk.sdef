@@ -945,9 +945,9 @@
                 description="The publication's rating.">
                 <cocoa key="scriptingRating"/>
             </property>  
-            <property name="publication date" code="pdat" type="date" hidden="yes"
+            <property name="publication date" code="pdat" type="date" access="r" hidden="yes"
                 description="Deprecated. Use publication year and publication month instead.">
-                <cocoa key="date"/>
+                <cocoa key="scriptingDate"/>
             </property>  
             <property name="publication month" code="pmon" type="text"
 			description="Month of publication.">

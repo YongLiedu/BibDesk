@@ -73,6 +73,7 @@
 - (void)setScriptingTitle:(NSString *)newTitle;
 
 // wrapping original methods 
+- (NSDate*)scriptingDate;
 - (NSDate*)scriptingDateAdded;
 - (NSDate*)scriptingDateModified;
 
