@@ -713,7 +713,7 @@ static BOOL differentDates(NSDate *date1, NSDate *date2) {
             break;
         case BDSKYesterday: 
             *startDate = [today startOfPeriod:BDSKPeriodDay byAdding:-1];
-            *endDate = today;
+            *endDate = [today startOfPeriod:BDSKPeriodDay];
             break;
         case BDSKThisWeek: 
             *startDate = [today startOfPeriod:BDSKPeriodWeek];
