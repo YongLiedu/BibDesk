@@ -3273,7 +3273,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     if(newCiteKey != citeKey){
         [citeKey autorelease];
         citeKey = [newCiteKey copy];
-        [[BDSKCompletionManager sharedManager] addString:newCiteKey forCompletionEntry:BDSKCrossrefString];
+        if ([newCiteKey isEqualToString:DEFAULT_CITEKEY] == NO)
+            [[BDSKCompletionManager sharedManager] addString:newCiteKey forCompletionEntry:BDSKCrossrefString];
     }
 }
 
