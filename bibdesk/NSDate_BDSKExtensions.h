@@ -67,6 +67,8 @@ enum {
 - (NSString *)rssDescription;
 - (NSString *)standardDescription;
 
+- (NSDate *)startOfPeriod:(NSInteger)period;
+- (NSDate *)dateByAddingAmount:(NSInteger)offset ofPeriod:(NSInteger)period;
 - (NSDate *)startOfPeriod:(NSInteger)period byAdding:(NSInteger)offset;
 
 @end

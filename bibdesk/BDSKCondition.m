@@ -708,7 +708,7 @@ static BOOL differentDates(NSDate *date1, NSDate *date2) {
     
     switch (dateComparison) {
         case BDSKToday:
-            *startDate = [today startOfPeriod:BDSKPeriodDay byAdding:0];
+            *startDate = [today startOfPeriod:BDSKPeriodDay];
             *endDate = nil;
             break;
         case BDSKYesterday: 
@@ -716,12 +716,12 @@ static BOOL differentDates(NSDate *date1, NSDate *date2) {
             *endDate = today;
             break;
         case BDSKThisWeek: 
-            *startDate = [today startOfPeriod:BDSKPeriodWeek byAdding:0];
+            *startDate = [today startOfPeriod:BDSKPeriodWeek];
             *endDate = nil;
             break;
         case BDSKLastWeek: 
             *startDate = [today startOfPeriod:BDSKPeriodWeek byAdding:-1];
-            *endDate = [today startOfPeriod:BDSKPeriodWeek byAdding:0];
+            *endDate = [today startOfPeriod:BDSKPeriodWeek];
             break;
         case BDSKExactly: 
             *startDate = [today startOfPeriod:periodValue byAdding:-numberValue];
@@ -740,7 +740,7 @@ static BOOL differentDates(NSDate *date1, NSDate *date2) {
             *endDate = [today startOfPeriod:periodValue byAdding:1-MIN(numberValue,andNumberValue)];
             break;
         case BDSKDate: 
-            *startDate = [dateValue startOfPeriod:BDSKPeriodDay byAdding:0];
+            *startDate = [dateValue startOfPeriod:BDSKPeriodDay];
             *endDate = [dateValue startOfPeriod:BDSKPeriodDay byAdding:1];
             break;
         case BDSKAfterDate: 
@@ -749,10 +749,10 @@ static BOOL differentDates(NSDate *date1, NSDate *date2) {
             break;
         case BDSKBeforeDate: 
             *startDate = nil;
-            *endDate = [dateValue startOfPeriod:BDSKPeriodDay byAdding:0];
+            *endDate = [dateValue startOfPeriod:BDSKPeriodDay];
             break;
         case BDSKInDateRange:
-            *startDate = [dateValue startOfPeriod:BDSKPeriodDay byAdding:0];
+            *startDate = [dateValue startOfPeriod:BDSKPeriodDay];
             *endDate = [toDateValue startOfPeriod:BDSKPeriodDay byAdding:1];
             break;
     }
