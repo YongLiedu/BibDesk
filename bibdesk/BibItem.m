@@ -63,6 +63,7 @@
 #import "BDSKField.h"
 #import "BDSKTemplate.h"
 #import "BDSKTemplateParser.h"
+#import "BDSKFieldCollection.h"
 #import "BDSKPublicationsArray.h"
 #import "NSData_BDSKExtensions.h"
 #import "BDSKScriptHook.h"
@@ -85,41 +86,6 @@ NSString *BDSKBibItemURLScheme = @"x-bdsk";
 
 #define DEFAULT_CITEKEY @"cite-key"
 static NSSet *fieldsToWriteIfEmpty = nil;
-
-
-enum {
-    BDSKStringFieldCollection, 
-    BDSKPersonFieldCollection,
-    BDSKURLFieldCollection
-};
-
-@interface BDSKFieldCollection : NSObject {
-    BibItem *item;
-    NSMutableSet *usedFields;
-    NSInteger type;
-}
-
-- (id)initWithItem:(BibItem *)anItem;
-- (void)setType:(NSInteger)type;
-- (id)fieldForName:(NSString *)name;
-- (BOOL)isUsedField:(NSString *)name;
-- (BOOL)isEmptyField:(NSString *)name;
-- (id)fieldsWithNames:(NSArray *)names;
-
-@end
-
-@interface BDSKFieldArray : NSArray {
-    NSMutableArray *fieldNames;
-    BDSKFieldCollection *fieldCollection;
-    unsigned long mutations;
-}
-
-- (id)initWithFieldCollection:(BDSKFieldCollection *)collection fieldNames:(NSArray *)array;
-- (id)nonEmpty;
-- (NSUInteger)count;
-- (id)objectAtIndex:(NSUInteger)index;
-
-@end
 
 @interface BibItem (Private)
 
@@ -3466,118 +3432,6 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     [keysToRemove release];
     [unresolvedFiles release];
     [unresolvedURLs release];
-}
-
-@end
-
-@implementation BDSKFieldCollection 
-
-- (id)initWithItem:(BibItem *)anItem{
-    if (self = [super init]) {
-        item = anItem;
-        usedFields = [[NSMutableSet alloc] init];
-        type = BDSKStringFieldCollection;
-    }
-    return self;
-}
-
-- (void)dealloc{
-    BDSKDESTROY(usedFields);
-    [super dealloc];
-}
-
-- (id)valueForUndefinedKey:(NSString *)key{
-    id value = nil;
-    key = [key fieldName];
-    if (key) {
-        [usedFields addObject:key];
-        if (type == BDSKPersonFieldCollection) {
-            value = (id)[item peopleArrayForField:key];
-        } else if (type == BDSKURLFieldCollection) {
-            if ([key isEqualToString:BDSKLocalUrlString])
-                value = [[[item localFiles] firstObject] URL];
-            else if ([key isEqualToString:BDSKUrlString])
-                value = [[[item remoteURLs] firstObject] URL];
-            else
-                value = (id)[item URLForField:key];
-        } else {
-            value = (id)[item stringValueOfField:key];
-            if ([key isURLField] == NO && [key isBooleanField] == NO && [key isTriStateField] == NO && [key isRatingField] == NO && [key isCitationField] == NO)
-                value = (id)[value stringByDeTeXifyingString];
-        }
-    }
-    return value;
-}
-
-- (void)setType:(NSInteger)aType{
-    type = aType;
-}
-
-- (BOOL)isUsedField:(NSString *)name{
-    return [usedFields containsObject:[name fieldName]];
-}
-
-- (BOOL)isEmptyField:(NSString *)name{
-    return [NSString isEmptyString:[item stringValueOfField:name]];
-}
-
-- (id)fieldForName:(NSString *)name{
-    name = [name fieldName];
-    [usedFields addObject:name];
-    return [[[BDSKField alloc] initWithName:name bibItem:item] autorelease];
-}
-
-- (id)fieldsWithNames:(NSArray *)names{
-    return [[[BDSKFieldArray alloc] initWithFieldCollection:self fieldNames:names] autorelease];
-}
-
-@end
-
-@implementation BDSKFieldArray
-
-- (id)initWithFieldCollection:(BDSKFieldCollection *)collection fieldNames:(NSArray *)array{
-    if (self = [super init]) {
-        fieldCollection = [collection retain];
-        fieldNames = [[NSMutableArray alloc] initWithCapacity:[array count]];
-        for (NSString *name in array) 
-            if ([fieldCollection isUsedField:name] == NO)
-                [fieldNames addObject:name];
-        mutations = 0;
-    }
-    return self;
-}
-
-- (void)dealloc{
-    BDSKDESTROY(fieldNames);
-    BDSKDESTROY(fieldCollection);
-    [super dealloc];
-}
-
-- (NSUInteger)count{
-    return [fieldNames count];
-}
-
-- (id)objectAtIndex:(NSUInteger)idx{
-    return [fieldCollection fieldForName:[fieldNames objectAtIndex:idx]];
-}
-
-- (id)nonEmpty{
-    NSUInteger i = [fieldNames count];
-    while (i--) 
-        if ([fieldCollection isEmptyField:[fieldNames objectAtIndex:i]])
-            [fieldNames removeObjectAtIndex:i];
-    mutations++;
-    return self;
-}
-
-- (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state objects:(id *)stackbuf count:(NSUInteger)len {
-    NSUInteger i = 0, current = state->state, count = [fieldNames count];
-    for (i = 0, current = state->state; current < count && i < len; i++, current++)
-        stackbuf[i] = [fieldCollection fieldForName:[fieldNames objectAtIndex:current]];
-    state->state = current;
-    state->itemsPtr = stackbuf;
-	state->mutationsPtr = &mutations;
-    return i;
 }
 
 @end
