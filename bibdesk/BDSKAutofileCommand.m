@@ -56,7 +56,7 @@
     NSString *location = [params objectForKey:@"to"];
     NSNumber *checkNumber = [params objectForKey:@"check"];
 	BOOL check = checkNumber ? [checkNumber boolValue] : YES;
-    NSInteger mask = 0;
+    BDSKFilerOptions mask = 0;
     NSUInteger i = indexNumber ? [indexNumber unsignedIntegerValue] - 1 : 0;
     
 	if (pub == nil) {

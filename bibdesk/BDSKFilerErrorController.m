@@ -118,7 +118,7 @@
     
     BibDocument *doc = [[document retain] autorelease];
     NSString *field = [[fieldName retain] autorelease];
-    NSInteger mask = (options & BDSKInitialAutoFileOptionMask);
+    BDSKFilerOptions mask = (options & BDSKInitialAutoFileOptionMask);
     mask |= ([forceCheckButton state]) ? BDSKForceAutoFileOptionMask : (options & BDSKCheckCompleteAutoFileOptionMask);
     
     [[self window] performClose:sender];

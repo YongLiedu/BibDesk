@@ -50,20 +50,21 @@ extern NSString *BDSKFilerFixKey;
 
 enum {
 	BDSKNoError = 0,
-	BDSKSourceFileDoesNotExistErrorMask = 1,
-	BDSKTargetFileExistsErrorMask = 2,
-	BDSKCannotMoveFileErrorMask = 4,
-	BDSKCannotRemoveFileErrorMask = 8,
-    BDSKCannotResolveAliasErrorMask = 16,
-    BDSKCannotCreateParentErrorMask = 32,
-	BDSKIncompleteFieldsErrorMask = 64
+	BDSKSourceFileDoesNotExistErrorMask = 1 << 0,
+	BDSKTargetFileExistsErrorMask = 1 << 1,
+	BDSKCannotMoveFileErrorMask = 1 << 2,
+	BDSKCannotRemoveFileErrorMask = 1 << 3,
+    BDSKCannotResolveAliasErrorMask = 1 << 4,
+    BDSKCannotCreateParentErrorMask = 1 << 5,
+	BDSKIncompleteFieldsErrorMask = 1 << 6
 };
 
 enum {
-    BDSKInitialAutoFileOptionMask = 1,
-    BDSKCheckCompleteAutoFileOptionMask = 2,
-    BDSKForceAutoFileOptionMask = 4
+    BDSKInitialAutoFileOptionMask = 1 << 0,
+    BDSKCheckCompleteAutoFileOptionMask = 1 << 1,
+    BDSKForceAutoFileOptionMask = 1 << 2
 };
+typedef NSUInteger BDSKFilerOptions;
 
 @interface BDSKFiler : NSWindowController {
 	IBOutlet NSProgressIndicator *progressIndicator;
@@ -97,7 +98,7 @@ BDSKInitialAutoFileOptionMask should be used for initial autofile moves, the new
 BDSKCheckCompleteAutoFileOptionMask indicates that for initial moves a check will be done whether all required fields are set. 
 BDSKForceAutoFileOptionMask forces AutoFiling, even if there may be problems moving the file. 
 */
-- (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(NSInteger)masks;
+- (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(BDSKFilerOptions)masks;
 
 @end
 

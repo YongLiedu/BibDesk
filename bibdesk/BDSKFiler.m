@@ -99,7 +99,7 @@ static BDSKFiler *sharedFiler = nil;
         }
 	}
 	
-    NSInteger mask = BDSKInitialAutoFileOptionMask;
+    BDSKFilerOptions mask = BDSKInitialAutoFileOptionMask;
     if (check) mask |= BDSKCheckCompleteAutoFileOptionMask;
     
     NSMutableArray *paperInfos = [NSMutableArray arrayWithCapacity:[papers count]];
@@ -109,7 +109,7 @@ static BDSKFiler *sharedFiler = nil;
 	[self movePapers:paperInfos forField:BDSKLocalFileString fromDocument:doc options:mask];
 }
 
-- (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(NSInteger)mask{
+- (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(BDSKFilerOptions)mask{
 	NSFileManager *fm = [NSFileManager defaultManager];
     NSInteger numberOfPapers = [paperInfos count];
 	BibItem *pub = nil;
