@@ -155,6 +155,11 @@ NSString *BDSKDocumentPublicationsKey = @"publications";
 #define BDSKSelectedGroupsKey @"BDSKSelectedGroupsKey"
 #define BDSKDocumentGroupsToExpandKey @"BDSKDocumentGroupsToExpandKey"
 
+#define BDSKDisableMigrationWarningKey @"BDSKDisableMigrationWarning"
+#define BDSKRemoveExtendedAttributesFromDocumentsKey @"BDSKRemoveExtendedAttributesFromDocuments"
+#define BDSKDisableDocumentExtendedAttributesKey @"BDSKDisableDocumentExtendedAttributes"
+#define BDSKDisableExportAttributesKey @"BDSKDisableExportAttributes"
+
 #pragma mark -
 
 @interface NSDocument (BDSKPrivateExtensions)
@@ -329,7 +334,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
 - (void)migrationAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)unused {
     
     if ([[alert suppressionButton] state] == NSOnState)
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"BDSKDisableMigrationWarning"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:BDSKDisableMigrationWarningKey];
     
     if (NSAlertDefaultReturn == returnCode)
         [self migrateFiles:self];
@@ -401,14 +406,14 @@ static NSOperationQueue *metadataCacheQueue = nil;
     // this is the controller for the main window
     [aController setShouldCloseDocument:YES];
     
+    NSUserDefaults* sud = [NSUserDefaults standardUserDefaults];
+    
     // hidden default to remove xattrs; this presently occurs before we use them, but it may need to be earlier at some point
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKRemoveExtendedAttributesFromDocuments"] && [self fileURL]) {
+    if ([sud boolForKey:BDSKRemoveExtendedAttributesFromDocumentsKey] && [self fileURL])
         [[SKNExtendedAttributeManager sharedNoSplitManager] removeAllExtendedAttributesAtPath:[[self fileURL] path] traverseLink:YES error:NULL];
-    }
     
     // get document-specific attributes (returns empty dictionary if there are none, so defaultValue works correctly)
     NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
-    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
     
     [self setupToolbar];
     
@@ -456,8 +461,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
     }
     
     // set previous splitview frames
-    CGFloat fract;
-    fract = [xattrDefaults doubleForKey:BDSKGroupSplitViewFractionKey defaultValue:-1.0];
+    CGFloat fract = [xattrDefaults doubleForKey:BDSKGroupSplitViewFractionKey defaultValue:-1.0];
     if (fract >= 0)
         [groupSplitView setFraction:fract];
     fract = [xattrDefaults doubleForKey:BDSKMainTableSplitViewFractionKey defaultValue:-1.0];
@@ -684,7 +688,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
 - (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL forEncoding:(NSStringEncoding)encoding {
     
     NSString *path = [anURL path];
-    if (path && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableDocumentExtendedAttributes"] == NO) {
+    if (path && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKDisableDocumentExtendedAttributesKey] == NO) {
         
         // We could set each of these as a separate attribute name on the file, but then we'd need to muck around with prepending net.sourceforge.bibdesk. to each key, and that seems messy.
         NSMutableDictionary *dictionary = [[self mainWindowSetupDictionaryFromExtendedAttributes] mutableCopy];
@@ -1699,7 +1703,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionaryWithDictionary:docAttributes];
     
     // create some useful metadata, with an option to disable for the paranoid
-    if([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableExportAttributes"]){
+    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKDisableExportAttributesKey]){
         [mutableAttributes addEntriesFromDictionary:[NSDictionary dictionaryWithObjectsAndKeys:NSFullUserName(), NSAuthorDocumentAttribute, [NSDate date], NSCreationTimeDocumentAttribute, [NSLocalizedString(@"BibDesk export of ", @"Error description") stringByAppendingString:[[[self fileURL] path] lastPathComponent]], NSTitleDocumentAttribute, nil]];
     }
     
