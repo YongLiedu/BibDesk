@@ -40,17 +40,8 @@
 
 
 @interface BDSKPreferenceRecord : NSObject {
-    NSString *identifier;
-    Class paneClass;
-    NSString *nibName;
-    NSString *title;
-    NSString *label;
-    NSString *toolTip;
     NSImage *icon;
-    NSString *helpAnchor;
     NSURL *helpURL;
-    NSDictionary *initialValues;
-    NSArray *searchTerms;
     NSDictionary *dictionary;
 }
 

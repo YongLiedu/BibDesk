@@ -55,34 +55,18 @@
 - (id)initWithDictionary:(NSDictionary *)aDictionary {
     if (self = [super init]) {
         BDSKPRECONDITION(aDictionary != nil);
-        identifier = [[aDictionary valueForKey:IDENTIFIER_KEY] retain];
-        paneClass = NSClassFromString([aDictionary valueForKey:CLASS_KEY]);
-        nibName = [[aDictionary valueForKey:NIB_NAME_KEY] retain];
         icon = [aDictionary valueForKey:ICON_KEY] ? [[NSImage imageNamed:[aDictionary valueForKey:ICON_KEY]] retain] : nil;
-        title = [[aDictionary valueForKey:TITLE_KEY] retain];
-        label = [[aDictionary valueForKey:LABEL_KEY] retain];
-        toolTip = [[aDictionary valueForKey:TOOL_TIP_KEY] retain];
-        helpAnchor = [[aDictionary valueForKey:HELP_ANCHOR_KEY] retain];
         helpURL = [aDictionary valueForKey:HELP_URL_KEY] ? [[NSURL alloc] initWithString:[aDictionary valueForKey:HELP_URL_KEY]] : nil;
-        initialValues = [[aDictionary valueForKey:INITIAL_VALUES_KEY] retain];
-        searchTerms = [[aDictionary valueForKey:SEARCH_TERMS_KEY] copy];
         dictionary = [aDictionary copy];
-        BDSKPOSTCONDITION(identifier != nil);
-        BDSKPOSTCONDITION(paneClass != Nil);
+        BDSKPOSTCONDITION([self identifier] != nil);
+        BDSKPOSTCONDITION([self paneClass] != Nil);
     }
     return self;
 }
 
 - (void)dealloc {
-    BDSKDESTROY(identifier);
-    BDSKDESTROY(nibName);
-    BDSKDESTROY(title);
-    BDSKDESTROY(label);
     BDSKDESTROY(icon);
-    BDSKDESTROY(helpAnchor);
     BDSKDESTROY(helpURL);
-    BDSKDESTROY(initialValues);
-    BDSKDESTROY(searchTerms);
     BDSKDESTROY(dictionary);
     [super dealloc];
 }
@@ -91,27 +75,27 @@
     return [NSString stringWithFormat:@"<%@: %@>", [self class], dictionary];
 }
 
-- (NSString *)identifier { return identifier; }
+- (NSString *)identifier { return [dictionary objectForKey:IDENTIFIER_KEY]; }
 
-- (Class)paneClass { return paneClass; }
+- (Class)paneClass { return NSClassFromString([dictionary valueForKey:CLASS_KEY]); }
 
-- (NSString *)nibName { return nibName; }
+- (NSString *)nibName { return [dictionary objectForKey:NIB_NAME_KEY]; }
 
-- (NSString *)title { return title; }
+- (NSString *)title { return [dictionary objectForKey:TITLE_KEY]; }
 
-- (NSString *)label { return label; }
+- (NSString *)label { return [dictionary objectForKey:LABEL_KEY]; }
 
-- (NSString *)toolTip { return toolTip; }
+- (NSString *)toolTip { return [dictionary objectForKey:TOOL_TIP_KEY]; }
 
 - (NSImage *)icon { return icon; }
 
-- (NSString *)helpAnchor { return helpAnchor; }
+- (NSString *)helpAnchor { return [dictionary objectForKey:HELP_ANCHOR_KEY]; }
 
 - (NSURL *)helpURL { return helpURL; }
 
-- (NSDictionary *)initialValues { return initialValues; }
+- (NSDictionary *)initialValues { return [dictionary objectForKey:INITIAL_VALUES_KEY]; }
 
-- (NSArray *)searchTerms { return searchTerms; }
+- (NSArray *)searchTerms { return [dictionary objectForKey:SEARCH_TERMS_KEY]; }
 
 - (NSDictionary *)dictionary { return dictionary; }
 
