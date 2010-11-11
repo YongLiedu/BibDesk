@@ -108,8 +108,12 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
     return [NSArray arrayWithObjects:BDSKTextTemplateDocumentType, BDSKRichTextTemplateDocumentType, nil];
 }
 
-+ (NSArray *)nativeTypes {
++ (NSArray *)readableTypes {
     return [NSArray arrayWithObjects:BDSKTextTemplateDocumentType, BDSKRichTextTemplateDocumentType, nil];
+}
+
++ (BOOL)isNativeType:(NSString *)aType {
+    return [aType isEqualToString:BDSKTextTemplateDocumentType] || [aType isEqualToString:BDSKRichTextTemplateDocumentType];
 }
 
 - (id)init {
