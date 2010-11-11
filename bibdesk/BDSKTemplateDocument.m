@@ -165,10 +165,8 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
 }
 
 - (void)dealloc {
-    for (BDSKTypeTemplate *template in typeTemplates) {
-        [self stopObservingTokens:[template itemTemplate]];
+    for (BDSKTypeTemplate *template in typeTemplates)
         [self stopObservingTypeTemplate:template];
-    }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     BDSKDESTROY(fieldOptionsMenu);
     BDSKDESTROY(urlOptionsMenu);
@@ -933,11 +931,13 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
 - (void)startObservingTypeTemplate:(BDSKTypeTemplate *)template {
     [template addObserver:self forKeyPath:@"itemTemplate" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKTypeTemplateObservationContext];
     [template addObserver:self forKeyPath:@"included" options:NSKeyValueObservingOptionOld context:&BDSKTypeTemplateObservationContext];
+    [self startObservingTokens:[template itemTemplate]];
 }
 
 - (void)stopObservingTypeTemplate:(BDSKTypeTemplate *)template {
     [template removeObserver:self forKeyPath:@"itemTemplate"];
     [template removeObserver:self forKeyPath:@"included"];
+    [self stopObservingTokens:[template itemTemplate]];
 }
 
 - (void)startObservingTokens:(NSArray *)tokens {
