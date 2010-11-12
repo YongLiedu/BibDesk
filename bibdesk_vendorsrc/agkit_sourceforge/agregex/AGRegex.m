@@ -41,7 +41,7 @@ typedef struct {
 // count the number of UTF-8 characters in a string
 // there is probably a better way to do this but this works for now
 static inline
-NSInteger utf8charcount(UInt8 *str, NSInteger len) {
+int utf8charcount(UInt8 *str, int len) {
 	NSInteger chars, pos;
 	unsigned char c;
 	for (pos = chars = 0; pos < len; pos++) {
@@ -431,7 +431,7 @@ static AGRegex *backrefPattern;
 }
 
 - (NSRange)rangeAtIndex:(NSInteger)idx {
-	NSInteger start, end;
+	int start, end;
 	if (idx >= count)
 		[NSException raise:NSRangeException format:@"index %d out of bounds", idx];
 	start = matchv[2 * idx];
