@@ -72,6 +72,7 @@
 #import "BDSKGroupsArray.h"
 #import "NSTableView_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import "BDSKMacroResolver.h"
 
 static char BDSKDocumentFileViewObservationContext;
 static char BDSKDocumentDefaultsObservationContext;
@@ -1037,7 +1038,9 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 	id changedOwner = [[aNotification object] owner];
 	if(changedOwner && changedOwner != self)
 		return; // only macro changes for ourselves or the global macros
-	
+	if ([[[aNotification userInfo] objectForKey:BDSKMacroResolverTypeKey] isEqualToString:BDSKMacroResolverSetType])
+        return; // this will be handled after loading finished
+    
     [tableView reloadData];
     [self updatePreviews];
 }

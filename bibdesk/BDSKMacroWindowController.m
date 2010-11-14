@@ -251,6 +251,8 @@
             BDSKASSERT(idx != NSNotFound);
             [self replaceObjectInMacrosAtIndex:idx withObject:macro];
             [macro release];
+        } else if ([type isEqualToString:BDSKMacroResolverSetType]) {
+            [self reloadMacros];
         }
         [arrayController rearrangeObjects];
         [tableView reloadData];

@@ -47,6 +47,7 @@ extern NSString *BDSKMacroResolverAddType;
 extern NSString *BDSKMacroResolverRemoveType;
 extern NSString *BDSKMacroResolverChangeType;
 extern NSString *BDSKMacroResolverRenameType;
+extern NSString *BDSKMacroResolverSetType;
 
 @class BibDocument;
 @protocol BDSKOwner;

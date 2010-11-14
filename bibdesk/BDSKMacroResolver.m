@@ -56,6 +56,7 @@ NSString *BDSKMacroResolverAddType = @"add";
 NSString *BDSKMacroResolverRemoveType = @"remove";
 NSString *BDSKMacroResolverChangeType = @"change";
 NSString *BDSKMacroResolverRenameType = @"rename";
+NSString *BDSKMacroResolverSetType = @"set";
 
 static char BDSKMacroResolverDefaultsObservationContext;
 
@@ -241,6 +242,11 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     if (macroDefinitions == nil)
         [self loadMacroDefinitions];
     [macroDefinitions setDictionary:dictionary];
+
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKMacroResolverSetType, BDSKMacroResolverTypeKey, nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
+                                                        object:self
+                                                      userInfo:userInfo];    
 }
 
 - (void)removeAllMacros{
