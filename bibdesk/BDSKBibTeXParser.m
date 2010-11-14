@@ -150,8 +150,7 @@ static NSString *stringWithoutComments(NSString *string) {
 }
 
 /// libbtparse methods
-+ (NSArray *)itemsFromString:(NSString *)aString owner:(id<BDSKOwner>)anOwner isPartialData:(BOOL *)isPartialData
-error:(NSError **)outError{
++ (NSArray *)itemsFromString:(NSString *)aString owner:(id<BDSKOwner>)anOwner isPartialData:(BOOL *)isPartialData error:(NSError **)outError{
     NSData *inData = [aString dataUsingEncoding:NSUTF8StringEncoding];
     return [self itemsFromData:inData frontMatter:nil filePath:BDSKParserPasteDragString owner:anOwner encoding:NSUTF8StringEncoding isPartialData:isPartialData error:outError];
 }
