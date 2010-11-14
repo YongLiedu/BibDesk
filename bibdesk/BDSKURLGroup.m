@@ -211,8 +211,8 @@
             [self setErrorMessage:[error localizedDescription]];
         }
     }
-    [self setPublications:pubs];
     [[self macroResolver] setMacroDefinitions:macros];
+    [self setPublications:pubs];
 }
 
 - (void)download:(NSURLDownload *)download didFailWithError:(NSError *)error

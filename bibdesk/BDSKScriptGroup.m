@@ -294,8 +294,8 @@
         failedDownload = YES;
         [self setErrorMessage:[error localizedDescription]];
     }
-    [self setPublications:pubs];
     [[self macroResolver] setMacroDefinitions:macros];
+    [self setPublications:pubs];
 }
 
 - (void)scriptDidFailWithError:(NSError *)error;

@@ -223,11 +223,8 @@ static NSImage *unlockedIcon = nil;
     // we set the macroResolver so we know the fields of this item may refer to it, so we can prevent scripting from adding this to the wrong document
     [pubs makeObjectsPerformSelector:@selector(setMacroResolver:) withObject:macroResolver];
     
+    [[self macroResolver] setMacroDefinitions:macros];
     [self setPublications:pubs];
-    
-    [[self macroResolver] removeAllMacros];
-    for (NSString *macro in macros)
-        [[self macroResolver] setMacro:macro toValue:[macros objectForKey:macro]];
 }
 
 @end
