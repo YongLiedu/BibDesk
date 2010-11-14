@@ -148,13 +148,13 @@
 	return [publications containsObject:item];
 }
 
-- (void)update {
-    if (tmpKeys) {
+- (void)setDocument:(BibDocument *)newDocument {
+    [super setDocument:newDocument];
+    if (document && tmpKeys) {
         for (NSString *key in tmpKeys)
             [publications addObjectsFromArray:[[document publications] allItemsForCiteKey:key]];
         [self setCount:[publications count]];
-        [tmpKeys release];
-        tmpKeys = nil;
+        BDSKDESTROY(tmpKeys);
     }
 }
 

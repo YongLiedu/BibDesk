@@ -1876,13 +1876,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     [self setPublications:newPubs];
     [documentInfo setDictionary:newDocumentInfo];
     [[self macroResolver] setMacroDefinitions:newMacros];
+    // important that groups are loaded after publications, otherwise the static groups won't find their publications
     for (NSNumber *groupType in newGroups)
         [[self groups] setGroupsOfType:[groupType integerValue] fromSerializedData:[newGroups objectForKey:groupType]];
     [frontMatter release];
     frontMatter = [newFrontMatter retain];
-    
-    // update the publications of all static groups from the archived keys
-    [[groups staticGroups] makeObjectsPerformSelector:@selector(update)];
     
     if (wasLoaded) {
         [self setSearchString:@""];

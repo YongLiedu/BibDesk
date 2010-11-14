@@ -354,7 +354,6 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
         for (NSDictionary *groupDict in plist) {
             @try {
                 group = [[groupClass alloc] initWithDictionary:groupDict];
-                [(BDSKGroup *)group setDocument:[self document]];
                 if (groupType == BDSKSmartGroupType)
                     [[self smartParent] addSmartGroup:group];
                 else if (groupType == BDSKURLGroupType)

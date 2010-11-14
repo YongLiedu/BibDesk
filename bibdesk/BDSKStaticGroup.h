@@ -102,6 +102,4 @@
 */
 - (void)removePublicationsInArray:(NSArray *)items;
 
-- (void)update;
-
 @end
