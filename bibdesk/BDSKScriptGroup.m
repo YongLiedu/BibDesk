@@ -282,8 +282,9 @@
     NSDictionary *macros = nil;
     
     if (type == BDSKBibTeXStringType) {
-        NSMutableString *frontMatter = [NSMutableString string];
         pubs = [BDSKBibTeXParser itemsFromData:[outputString dataUsingEncoding:NSUTF8StringEncoding] macros:&macros filePath:@"" owner:self encoding:NSUTF8StringEncoding isPartialData:&isPartialData error:&error];
+        if (isPartialData && [error isLocalError] && [error code] == kBDSKParserIgnoredFrontMatter)
+            isPartialData = NO;
     } else if (type != BDSKUnknownStringType){
         pubs = [BDSKStringParser itemsFromString:outputString ofType:type error:&error];
     } else {

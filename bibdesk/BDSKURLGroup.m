@@ -200,8 +200,9 @@
         BDSKStringType type = [contentString contentStringType];
         BOOL isPartialData = NO;
         if (type == BDSKBibTeXStringType) {
-            NSMutableString *frontMatter = [NSMutableString string];
             pubs = [BDSKBibTeXParser itemsFromData:[contentString dataUsingEncoding:NSUTF8StringEncoding] macros:&macros filePath:filePath owner:self encoding:NSUTF8StringEncoding isPartialData:&isPartialData error:&error];
+            if (isPartialData && [error isLocalError] && [error code] == kBDSKParserIgnoredFrontMatter)
+                isPartialData = NO;
         } else if (type != BDSKUnknownStringType && type != BDSKNoKeyBibTeXStringType){
             pubs = [BDSKStringParser itemsFromString:contentString ofType:type error:&error];
         }
