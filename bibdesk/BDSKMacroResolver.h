@@ -73,11 +73,14 @@ extern NSString *BDSKMacroResolverRenameType;
 
 - (NSString *)valueOfMacro:(NSString *)macro;
 - (void)setMacro:(NSString *)macro toValue:(NSString *)value;
-- (void)setMacroWithoutUndo:(NSString *)macroKey toValue:(NSString *)value;
 - (void)changeMacro:(NSString *)oldMacro to:(NSString *)newMacro;
+
+// these don't use undo
+- (void)setMacroDefinitions:(NSDictionary *)dictionary;
 - (void)removeAllMacros;
 
 - (BOOL)string:(NSString *)string dependsOnMacro:(NSString *)macro;
+- (BOOL)string:(NSString *)string dependsOnMacro:(NSString *)macro inMacroDefinitions:(NSDictionary *)dictionary;
 
 - (unsigned long long)modification;
 

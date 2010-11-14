@@ -60,6 +60,7 @@
 #import "BDSKCompletionManager.h"
 #import "NSData_BDSKExtensions.h"
 #import "CFString_BDSKExtensions.h"
+#import "NSDictionary_BDSKExtensions.h"
 
 static NSLock *parserLock = nil;
 
@@ -79,8 +80,8 @@ static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacro
 
 // private functions for handling different entry types; these functions do not do any locking around the parser
 static BOOL appendPreambleToFrontmatter(AST *entry, NSMutableString *frontMatter, NSString *filePath, NSStringEncoding encoding);
-static BOOL addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding encoding, NSError **error);
-static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *frontMatter, NSString *filePath, BibDocument *document, NSStringEncoding encoding);
+static BOOL addMacroToDictionary(AST *entry, NSMutableDictionary *dictionary, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding encoding, NSError **error);
+static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *frontMatter, NSMutableDictionary *groups, NSString *filePath, NSStringEncoding encoding);
 
 // private function for preserving newlines in annote/abstract fields; does not lock the parser
 static NSString *copyStringFromNoteField(AST *field, const char *data, NSUInteger inputDataLength, NSString *filePath, NSStringEncoding encoding, NSString **error);
@@ -152,16 +153,33 @@ static NSString *stringWithoutComments(NSString *string) {
 /// libbtparse methods
 + (NSArray *)itemsFromString:(NSString *)aString owner:(id<BDSKOwner>)anOwner isPartialData:(BOOL *)isPartialData error:(NSError **)outError{
     NSData *inData = [aString dataUsingEncoding:NSUTF8StringEncoding];
-    return [self itemsFromData:inData frontMatter:nil filePath:BDSKParserPasteDragString owner:anOwner encoding:NSUTF8StringEncoding isPartialData:isPartialData error:outError];
+    return [self itemsFromData:inData macros:NULL documentInfo:NULL groups:NULL frontMatter:NULL filePath:BDSKParserPasteDragString owner:anOwner encoding:NSUTF8StringEncoding isPartialData:isPartialData error:outError];
 }
 
-+ (NSArray *)itemsFromData:(NSData *)inData frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath owner:(id<BDSKOwner>)anOwner encoding:(NSStringEncoding)parserEncoding isPartialData:(BOOL *)isPartialData error:(NSError **)outError{
-    // btparse will crash if we pass it a zero-length data, so we'll return here for empty files
-    if (isPartialData)
-        *isPartialData = NO;
++ (NSArray *)itemsFromData:(NSData *)inData macros:(NSDictionary **)outMacros filePath:(NSString *)filePath owner:(id<BDSKOwner>)anOwner encoding:(NSStringEncoding)parserEncoding isPartialData:(BOOL *)isPartialData error:(NSError **)outError{
+    return [self itemsFromData:inData macros:outMacros documentInfo:NULL groups:NULL frontMatter:NULL filePath:filePath owner:anOwner encoding:parserEncoding isPartialData:isPartialData error:outError];
+}
+
++ (NSArray *)itemsFromData:(NSData *)inData macros:(NSDictionary **)outMacros documentInfo:(NSDictionary **)outDocumentInfo groups:(NSDictionary **)outGroups frontMatter:(NSString **)outFrontMatter filePath:(NSString *)filePath owner:(id<BDSKOwner>)anOwner encoding:(NSStringEncoding)parserEncoding isPartialData:(BOOL *)isPartialData error:(NSError **)outError{
+    NSMutableDictionary *groups = nil;
+    NSMutableDictionary *macros = nil;
+    NSMutableString *frontMatter = nil;
     
-    if ([inData length] == 0)
+    if (outGroups)
+        *outGroups = groups = [NSMutableDictionary dictionary];
+    if (outMacros)
+        *outMacros = macros = [[[NSMutableDictionary alloc] initForCaseInsensitiveKeys] autorelease];
+    if (outFrontMatter)
+        *outFrontMatter = frontMatter = [NSMutableString string];
+    if (outDocumentInfo)
+        *outDocumentInfo = nil;
+    
+    // btparse will crash if we pass it a zero-length data, so we'll return here for empty files
+    if ([inData length] == 0) {
+        if (isPartialData)
+            *isPartialData = NO;
         return [NSArray array];
+    }
     
     [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
     
@@ -170,7 +188,6 @@ static NSString *stringWithoutComments(NSString *string) {
     inData = normalizeLineEndingsInData(inData, &didReplaceNewlines);
 	
     BibItem *newBI = nil;
-    BibDocument *document = [anOwner isDocument] ? (BibDocument *)anOwner : nil;
     BDSKMacroResolver *macroResolver = [anOwner macroResolver];	
     
     AST *entry = NULL;
@@ -219,30 +236,22 @@ static NSString *stringWithoutComments(NSString *string) {
         if (parsed_ok) {
             
             bt_metatype metatype = bt_entry_metatype (entry);
-            if (metatype != BTE_REGULAR) {
-                
-                if (nil != frontMatter) {
-                
-                    // put @preamble etc. into the frontmatter string so we carry them along.
-                    // without frontMatter, e.g. with paste or drag, we eventually ignore these entries (except macros)
-                    if (BTE_PREAMBLE == metatype){
-                        if(NO == appendPreambleToFrontmatter(entry, frontMatter, filePath, parserEncoding))
-                            hadProblems = YES;
-                    }else if(BTE_MACRODEF == metatype){
-                        if(NO == addMacroToResolver(entry, macroResolver, filePath, parserEncoding, &error))
-                            hadProblems = YES;
-                    }else if(BTE_COMMENT == metatype && document){
-                        if(NO == appendCommentToFrontmatterOrAddGroups(entry, frontMatter, filePath, document, parserEncoding))
-                            hadProblems = YES;
-                    }
-                } else if (BTE_MACRODEF == metatype) {
-                    ignoredMacros = YES;
-                } else {
+            if (BTE_PREAMBLE == metatype){
+                if (frontMatter == nil)
                     ignoredFrontmatter = YES;
-                }
-                    
-                
-            } else {
+                else if (NO == appendPreambleToFrontmatter(entry, frontMatter, filePath, parserEncoding))
+                    hadProblems = YES;
+            } else if (BTE_MACRODEF == metatype) {
+                if (macros == nil)
+                    ignoredMacros = YES;
+                else if (NO == addMacroToDictionary(entry, macros, macroResolver, filePath, parserEncoding, &error))
+                    hadProblems = YES;
+            } else if (BTE_COMMENT == metatype) {
+                if (frontMatter == nil && groups == nil)
+                    ignoredFrontmatter = YES;
+                else if (NO == appendCommentToFrontmatterOrAddGroups(entry, frontMatter, groups, filePath, parserEncoding))
+                    hadProblems = YES;
+            } else if (metatype == BTE_REGULAR) {
                 
                 // regular type (@article, @proceedings, etc.)
                 // don't skip the loop if this fails, since it'll have partial data in the dictionary
@@ -255,8 +264,8 @@ static NSString *stringWithoutComments(NSString *string) {
                 [tmpStr release];
                 
                 if ([entryType isEqualToString:@"bibdesk_info"]) {
-                    if(nil != frontMatter)
-                        [document setDocumentInfo:dictionary];
+                    if(outDocumentInfo)
+                        *outDocumentInfo = [[dictionary copy] autorelease];
                 } else if (entryType) {
                     
                     NSString *citeKey = copyCheckedString(bt_entry_key(entry), entry->line, filePath, parserEncoding);
@@ -326,7 +335,7 @@ static NSString *stringWithoutComments(NSString *string) {
     if (isPartialData)
         *isPartialData = hadProblems;
 	
-    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:document pasteDragData:isPasteOrDrag ? inData : nil];
+    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:[anOwner isDocument] ? (BibDocument *)anOwner : nil pasteDragData:isPasteOrDrag ? inData : nil];
     
     return returnArray;
 }
@@ -806,7 +815,7 @@ static BOOL appendPreambleToFrontmatter(AST *entry, NSMutableString *frontMatter
     return success;
 }
 
-static BOOL addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding encoding, NSError **error)
+static BOOL addMacroToDictionary(AST *entry, NSMutableDictionary *dictionary, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding encoding, NSError **error)
 {
     // get the field name, there can be several macros in a single entry
     AST *field = NULL;
@@ -817,13 +826,13 @@ static BOOL addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSS
         NSString *macroKey = copyCheckedString(field->text, field->line, filePath, encoding);
         NSCAssert(macroKey != nil, @"Macro keys must be ASCII");
         NSString *macroString = copyStringFromBTField(field, filePath, macroResolver, encoding); // handles TeXification
-        if([macroResolver string:macroString dependsOnMacro:macroKey]){
+        if([macroResolver string:macroString dependsOnMacro:macroKey inMacroDefinitions:dictionary]){
             NSString *message = NSLocalizedString(@"Macro leads to circular definition, ignored.", @"Error description");            
             [BDSKErrorObject reportError:message forFile:filePath line:field->line];
             if (error)
                 *error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Circular macro ignored.", @"Error description")];
         }else if(nil != macroString){
-            [macroResolver setMacroWithoutUndo:macroKey toValue:macroString];
+            [dictionary setObject:macroString forKey:macroKey];
         }else {
             // set this to NO, but don't subsequently set it to YES; signals partial data
             success = NO;
@@ -834,7 +843,7 @@ static BOOL addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSS
     return success;
 }
 
-static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *frontMatter, NSString *filePath, BibDocument *document, NSStringEncoding encoding)
+static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *frontMatter, NSMutableDictionary *groups, NSString *filePath, NSStringEncoding encoding)
 {
     NSMutableString *commentStr = [[NSMutableString alloc] init];
     AST *field = NULL;
@@ -844,16 +853,13 @@ static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
     // this is our identifier string for a smart group
     const char *smartGroupStr = "BibDesk Smart Groups";
     size_t smartGroupStrLength = strlen(smartGroupStr);
-    Boolean isSmartGroup = FALSE;
     const char *staticGroupStr = "BibDesk Static Groups";
     size_t staticGroupStrLength = strlen(staticGroupStr);
-    Boolean isStaticGroup = FALSE;
     const char *urlGroupStr = "BibDesk URL Groups";
     size_t urlGroupStrLength = strlen(urlGroupStr);
-    Boolean isURLGroup = FALSE;
     const char *scriptGroupStr = "BibDesk Script Groups";
     size_t scriptGroupStrLength = strlen(scriptGroupStr);
-    Boolean isScriptGroup = FALSE;
+    NSInteger groupType = -1;
     Boolean firstValue = TRUE;
     
     NSStringEncoding groupsEncoding = [[BDSKStringEncodingManager sharedEncodingManager] isUnparseableEncoding:encoding] ? encoding : NSUTF8StringEncoding;
@@ -864,17 +870,17 @@ static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
             if(firstValue){
                 firstValue = FALSE;
                 if(strlen(text) >= smartGroupStrLength && strncmp(text, smartGroupStr, smartGroupStrLength) == 0)
-                    isSmartGroup = TRUE;
+                    groupType = BDSKSmartGroupType;
                 else if(strlen(text) >= staticGroupStrLength && strncmp(text, staticGroupStr, staticGroupStrLength) == 0)
-                    isStaticGroup = TRUE;
+                    groupType = BDSKStaticGroupType;
                 else if(strlen(text) >= urlGroupStrLength && strncmp(text, urlGroupStr, urlGroupStrLength) == 0)
-                    isURLGroup = TRUE;
+                    groupType = BDSKURLGroupType;
                 else if(strlen(text) >= scriptGroupStrLength && strncmp(text, scriptGroupStr, scriptGroupStrLength) == 0)
-                    isScriptGroup = TRUE;
+                    groupType = BDSKScriptGroupType;
             }
             
             // encoding will be UTF-8 for the plist, so make sure we use it for each line
-            tmpStr = copyCheckedString(text, field->line, filePath, ((isSmartGroup || isStaticGroup || isURLGroup || isScriptGroup)? groupsEncoding : encoding));
+            tmpStr = copyCheckedString(text, field->line, filePath, (groupType != -1 ? groupsEncoding : encoding));
             
             if(tmpStr) 
                 [commentStr appendString:tmpStr];
@@ -884,22 +890,15 @@ static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
             [tmpStr release];
         }
     }
-    if(isSmartGroup || isStaticGroup || isURLGroup || isScriptGroup){
-        if(document){
+    if(groupType != -1){
+        if(groups){
             NSRange range = [commentStr rangeOfString:@"{"];
             if(range.location != NSNotFound){
                 [commentStr deleteCharactersInRange:NSMakeRange(0,NSMaxRange(range))];
                 range = [commentStr rangeOfString:@"}" options:NSBackwardsSearch];
                 if(range.location != NSNotFound){
                     [commentStr deleteCharactersInRange:NSMakeRange(range.location,[commentStr length] - range.location)];
-                    if (isSmartGroup)
-                        [[document groups] setGroupsOfType:BDSKSmartGroupType fromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
-                    else if (isStaticGroup)
-                        [[document groups] setGroupsOfType:BDSKStaticGroupType fromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
-                    else if (isURLGroup)
-                        [[document groups] setGroupsOfType:BDSKURLGroupType fromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
-                    else if (isScriptGroup)
-                        [[document groups] setGroupsOfType:BDSKScriptGroupType fromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
+                    [groups setObject:[commentStr dataUsingEncoding:NSUTF8StringEncoding] forKey:[NSNumber numberWithInteger:groupType]];
                 }
             }
         }

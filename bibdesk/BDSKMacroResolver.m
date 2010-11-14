@@ -143,7 +143,11 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 	return macroString;
 }
 
-- (BOOL)string:(NSString *)string dependsOnMacro:(NSString *)macro{
+- (BOOL)string:(NSString *)string dependsOnMacro:(NSString *)macro {
+    return [self string:string dependsOnMacro:macro inMacroDefinitions:nil];
+}
+
+- (BOOL)string:(NSString *)string dependsOnMacro:(NSString *)macro inMacroDefinitions:(NSDictionary *)dictionary {
     if ([string isComplex] == NO) 
         return NO;
     
@@ -158,7 +162,9 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
         if ([aMacro caseInsensitiveCompare:macro] == NSOrderedSame)
             return YES;
         
-        if ([self string:[self valueOfMacro:aMacro] dependsOnMacro:macro])
+        NSString *aString = dictionary ? [dictionary objectForKey:aMacro] : [self valueOfMacro:aMacro];
+        
+        if ([self string:aString dependsOnMacro:macro])
             return YES;
     }
     return NO;
@@ -177,12 +183,6 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     if (macroDefinitions == nil)
         [self loadMacroDefinitions];
     return macroDefinitions;
-}
-
-- (void)setMacroWithoutUndo:(NSString *)macro toValue:(NSString *)value {
-    if (macroDefinitions == nil)
-        [self loadMacroDefinitions];
-    [macroDefinitions setObject:value forKey:macro];
 }
 
 - (void)changeMacro:(NSString *)oldMacro to:(NSString *)newMacro{
@@ -235,6 +235,12 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
                                                         object:self
                                                       userInfo:userInfo];    
+}
+
+- (void)setMacroDefinitions:(NSDictionary *)dictionary {
+    if (macroDefinitions == nil)
+        [self loadMacroDefinitions];
+    [macroDefinitions setDictionary:dictionary];
 }
 
 - (void)removeAllMacros{

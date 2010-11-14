@@ -51,6 +51,7 @@
 #import "BDSKPublicationsArray.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKTask.h"
+#import "BDSKMacroResolver.h"
 
 #define APPLESCRIPT_HANDLER_NAME @"main"
 
@@ -270,7 +271,7 @@
     NSParameterAssert(NO == failedDownload);
     isRetrieving = NO;
     NSError *error = nil;
-
+    
     NSArray *pubs = nil;
     BDSKStringType type = [outputString contentStringType];
     if (type == BDSKNoKeyBibTeXStringType) {
@@ -278,10 +279,11 @@
         type = BDSKBibTeXStringType;
     }
     BOOL isPartialData = NO;
-
+    NSDictionary *macros = nil;
+    
     if (type == BDSKBibTeXStringType) {
         NSMutableString *frontMatter = [NSMutableString string];
-        pubs = [BDSKBibTeXParser itemsFromData:[outputString dataUsingEncoding:NSUTF8StringEncoding] frontMatter:frontMatter filePath:@"" owner:self encoding:NSUTF8StringEncoding isPartialData:&isPartialData error:&error];
+        pubs = [BDSKBibTeXParser itemsFromData:[outputString dataUsingEncoding:NSUTF8StringEncoding] macros:&macros filePath:@"" owner:self encoding:NSUTF8StringEncoding isPartialData:&isPartialData error:&error];
     } else if (type != BDSKUnknownStringType){
         pubs = [BDSKStringParser itemsFromString:outputString ofType:type error:&error];
     } else {
@@ -292,6 +294,7 @@
         [self setErrorMessage:[error localizedDescription]];
     }
     [self setPublications:pubs];
+    [[self macroResolver] setMacroDefinitions:macros];
 }
 
 - (void)scriptDidFailWithError:(NSError *)error;

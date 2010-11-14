@@ -49,6 +49,7 @@
 #import "BDSKPublicationsArray.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BibItem.h"
+#import "BDSKMacroResolver.h"
 
 @implementation BDSKURLGroup
 
@@ -191,6 +192,7 @@
     // tried using -[NSString stringWithContentsOfFile:usedEncoding:error:] but it fails too often
     NSString *contentString = [NSString stringWithContentsOfFile:filePath encoding:0 guessEncoding:YES];
     NSArray *pubs = nil;
+    NSDictionary *macros = nil;
     if (nil == contentString) {
         failedDownload = YES;
         [self setErrorMessage:NSLocalizedString(@"Unable to find content", @"Error description")];
@@ -199,7 +201,7 @@
         BOOL isPartialData = NO;
         if (type == BDSKBibTeXStringType) {
             NSMutableString *frontMatter = [NSMutableString string];
-            pubs = [BDSKBibTeXParser itemsFromData:[contentString dataUsingEncoding:NSUTF8StringEncoding] frontMatter:frontMatter filePath:filePath owner:self encoding:NSUTF8StringEncoding isPartialData:&isPartialData error:&error];
+            pubs = [BDSKBibTeXParser itemsFromData:[contentString dataUsingEncoding:NSUTF8StringEncoding] macros:&macros filePath:filePath owner:self encoding:NSUTF8StringEncoding isPartialData:&isPartialData error:&error];
         } else if (type != BDSKUnknownStringType && type != BDSKNoKeyBibTeXStringType){
             pubs = [BDSKStringParser itemsFromString:contentString ofType:type error:&error];
         }
@@ -209,6 +211,7 @@
         }
     }
     [self setPublications:pubs];
+    [[self macroResolver] setMacroDefinitions:macros];
 }
 
 - (void)download:(NSURLDownload *)download didFailWithError:(NSError *)error

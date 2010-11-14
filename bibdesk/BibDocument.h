@@ -208,7 +208,7 @@ extern NSString *BDSKDocumentPublicationsKey;
     NSMutableDictionary *documentInfo;
     BDSKDocumentInfoWindowController *infoWC;
     
-	NSMutableString *frontMatter;    // for preambles, and stuff
+	NSString *frontMatter;    // for preambles, and stuff
 	
 #pragma mark Search variables
     

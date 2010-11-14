@@ -198,7 +198,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
         groupedPublications = [[NSMutableArray alloc] init];
         groups = [(BDSKGroupsArray *)[BDSKGroupsArray alloc] initWithDocument:self];
         
-        frontMatter = [[NSMutableString alloc] initWithString:@""];
+        frontMatter = nil;
         documentInfo = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
         macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         
@@ -1758,19 +1758,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 - (BOOL)revertToContentsOfURL:(NSURL *)absoluteURL ofType:(NSString *)aType error:(NSError **)outError
 {
-	// first remove all editor windows, as they will be invalid afterwards
-    NSUInteger idx = [[self windowControllers] count];
-    while(--idx)
-        [[[self windowControllers] objectAtIndex:idx] close];
-    
-    if ([self isDisplayingFileContentSearch])
-        [self setSearchString:@""];
-    [fileSearchController terminateForDocumentURL:[self fileURL]];
-    BDSKDESTROY(fileSearchController);
-    
-    BOOL success = [super revertToContentsOfURL:absoluteURL ofType:aType error:outError];
-    
-    if(success){
+    if ([super revertToContentsOfURL:absoluteURL ofType:aType error:outError]) {
         [self setSearchString:@""];
         [self updateSmartGroupsCount];
         [self updateCategoryGroupsPreservingSelection:YES];
@@ -1778,13 +1766,14 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 		[tableView deselectAll:self]; // clear before resorting
 		[self redoSearch]; // redo the search
         [self sortPubsByKey:nil]; // resort
-	}
-	return success;
+        return YES;
+	} else
+        return NO;
 }
 
 - (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)aType error:(NSError **)outError
 {
-    BOOL success;
+    BOOL success = NO;
     NSError *error = nil;
     NSData *data = [NSData dataWithContentsOfURL:absoluteURL options:NSUncachedRead error:&error];
     if (nil == data) {
@@ -1794,16 +1783,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     // when using the Open panel this should be initialized to the selected encoding, otherwise the default encoding from the prefs, or for revert whatever it was
     NSStringEncoding encoding = [self documentStringEncoding];
-    
-    // make sure we clear all macros and groups that are saved in the file, should only have those for revert
-    // better do this here, so we don't remove them when reading the data fails
-    [macroResolver removeAllMacros];
-    for (BDSKGroup *group in [groups URLGroups])
-        [self removeSpinnerForGroup:group];
-    for (BDSKGroup *group in [groups scriptGroups])
-        [self removeSpinnerForGroup:group];
-    [groups removeAllUndoableGroups]; // this also removes editor windows for external groups
-    [frontMatter setString:@""];
     
     // This is only a sanity check; an encoding of 0 is not valid, so is a signal we should ignore xattrs; could only check for public.text UTIs, but it will be zero if it was never written (and we don't warn in that case).  The user can do many things to make the attribute incorrect, so this isn't very robust.
     NSStringEncoding encodingFromFile = [[self mainWindowSetupDictionaryFromExtendedAttributes] unsignedIntegerForKey:BDSKDocumentStringEncodingKey defaultValue:BDSKNoStringEncoding];
@@ -1841,69 +1820,64 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }else{
 		// sniff the string to see what format we got
 		NSString *string = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
-		if(string == nil){
+        BDSKStringType type = [string contentStringType];
+        if(string == nil){
             error = [NSError mutableLocalErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unable To Open Document", @"Error description")];
             [error setValue:NSLocalizedString(@"This document does not appear to be a text file.", @"Error informative text") forKey:NSLocalizedRecoverySuggestionErrorKey];
-            if(outError) *outError = error;
-            
-            // bypass the partial data warning, since we have no data
-			return NO;
-        }
-        BDSKStringType type = [string contentStringType];
-        if(type == BDSKBibTeXStringType){
+        }else if(type == BDSKBibTeXStringType){
             success = [self readFromBibTeXData:data fromURL:absoluteURL encoding:encoding error:&error];
 		}else if (type == BDSKNoKeyBibTeXStringType){
             error = [NSError mutableLocalErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unable To Open Document", @"Error description")];
             [error setValue:NSLocalizedString(@"This file appears to contain invalid BibTeX because of missing cite keys. Try to open using temporary cite keys to fix this.", @"Error informative text") forKey:NSLocalizedRecoverySuggestionErrorKey];
-            if (outError) *outError = error;
-            
-            // bypass the partial data warning; we have no data in this case
-            return NO;
 		}else if (type == BDSKUnknownStringType){
             error = [NSError mutableLocalErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unable To Open Document", @"Error description")];
             [error setValue:NSLocalizedString(@"This text file does not contain a recognized data type.", @"Error informative text") forKey:NSLocalizedRecoverySuggestionErrorKey];
-            if (outError) *outError = error;
-            
-            // bypass the partial data warning; we have no data in this case
-            return NO;
         }else{
             success = [self readFromData:data ofStringType:type fromURL:absoluteURL encoding:encoding error:&error];
         }
-
 	}
     
-    // @@ move this to NSDocumentController; need to figure out where to add it, though
-    if(success == NO){
-        NSInteger rv;
-        // run a modal dialog asking if we want to use partial data or give up
-        NSAlert *alert = [NSAlert alertWithMessageText:[error localizedDescription] ?: NSLocalizedString(@"Error reading file!", @"Message in alert dialog when unable to read file")
-                                         defaultButton:NSLocalizedString(@"Give Up", @"Button title")
-                                       alternateButton:NSLocalizedString(@"Edit File", @"Button title")
-                                           otherButton:NSLocalizedString(@"Keep Going", @"Button title")
-                             informativeTextWithFormat:NSLocalizedString(@"There was a problem reading the file.  Do you want to give up, edit the file to correct the errors, or keep going with everything that could be analyzed?\n\nIf you choose \"Keep Going\" and then save the file, you will probably lose data.", @"Informative text in alert dialog")];
-        [alert setAlertStyle:NSCriticalAlertStyle];
-        rv = [alert runModal];
-        if (rv == NSAlertDefaultReturn) {
-            // the user said to give up
-            [[BDSKErrorObjectController sharedErrorObjectController] documentFailedLoad:self shouldEdit:NO]; // this hands the errors to a new error editor and sets that as the documentForErrors
-        }else if (rv == NSAlertAlternateReturn){
-            // the user said to edit the file.
-            [[BDSKErrorObjectController sharedErrorObjectController] documentFailedLoad:self shouldEdit:YES]; // this hands the errors to a new error editor and sets that as the documentForErrors
-        }else if(rv == NSAlertOtherReturn){
-            // the user said to keep going, so if they save, they might clobber data...
-            // if we don't return YES, NSDocumentController puts up its lame alert saying the document could not be opened, and we get no partial data
-            success = YES;
-        }
-    }
-    if(outError) *outError = error;
-    return success;        
+    if(success == NO && outError) *outError = error;
+    
+    return success;
+}
+
+- (void)setPublications:(NSArray *)newPubs macros:(NSDictionary *)newMacros documentInfo:(NSDictionary *)newDocumentInfo groups:(NSDictionary *)newGroups frontMatter:(NSString *)newFrontMatter {
+    // we need to stop the file search controller on revert, as this will be invalid after we update our publications
+    if ([self isDisplayingFileContentSearch])
+        [self setSearchString:@""];
+    [fileSearchController terminateForDocumentURL:[self fileURL]];
+    BDSKDESTROY(fileSearchController);
+    
+	// first remove all editor windows, as they will be invalid afterwards
+    NSInteger idx = [[self windowControllers] count];
+    while(--idx > 0)
+        [[[self windowControllers] objectAtIndex:idx] close];
+    
+    // make sure we clear all groups that are saved in the file, should only have those for revert
+    // better do this here, so we don't remove them when reading the data fails
+    for (BDSKGroup *group in [groups URLGroups])
+        [self removeSpinnerForGroup:group];
+    for (BDSKGroup *group in [groups scriptGroups])
+        [self removeSpinnerForGroup:group];
+    [groups removeAllUndoableGroups]; // this also removes editor windows for external groups
+    
+    [[self undoManager] disableUndoRegistration];
+    [self setPublications:newPubs];
+    [self setDocumentInfo:newDocumentInfo];
+    [[self macroResolver] setMacroDefinitions:newMacros];
+    for (NSNumber *groupType in newGroups)
+        [[self groups] setGroupsOfType:[groupType integerValue] fromSerializedData:[newGroups objectForKey:groupType]];
+    [frontMatter release];
+    frontMatter = [newFrontMatter retain];
+    [[self undoManager] enableUndoRegistration];
+    // update the publications of all static groups from the archived keys
+    [[groups staticGroups] makeObjectsPerformSelector:@selector(update)];
 }
 
 - (BOOL)readFromBibTeXData:(NSData *)data fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
     NSString *filePath = [absoluteURL path];
     NSStringEncoding parserEncoding = [[BDSKStringEncodingManager sharedEncodingManager] isUnparseableEncoding:encoding] ? NSUTF8StringEncoding : encoding;
-    
-    [self setDocumentStringEncoding:encoding];
     
     if(parserEncoding != encoding){
         NSString *string = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
@@ -1920,17 +1894,45 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSError *error = nil;
     BOOL isPartialData;
 	NSArray *newPubs;
+	NSDictionary *newMacros = nil;
+	NSDictionary *newGroups = nil;
+	NSDictionary *newDocumentInfo = nil;
+	NSString *newFrontMatter = nil;
     
-    [[self undoManager] disableUndoRegistration];
-    newPubs = [BDSKBibTeXParser itemsFromData:data frontMatter:frontMatter filePath:filePath owner:self encoding:parserEncoding isPartialData:&isPartialData error:&error];
-	if(isPartialData && outError) *outError = error;	
-    [self setPublications:newPubs];
-    [[self undoManager] enableUndoRegistration];
+    newPubs = [BDSKBibTeXParser itemsFromData:data macros:&newMacros documentInfo:&newDocumentInfo groups:&newGroups frontMatter:&newFrontMatter filePath:filePath owner:self encoding:parserEncoding isPartialData:&isPartialData error:&error];
     
-    // update the publications of all static groups from the archived keys
-    [[groups staticGroups] makeObjectsPerformSelector:@selector(update)];
+    // @@ move this to NSDocumentController; need to figure out where to add it, though
+    if (isPartialData) {
+        if (outError) *outError = error;
+        
+        // run a modal dialog asking if we want to use partial data or give up
+        NSAlert *alert = [NSAlert alertWithMessageText:[error localizedDescription] ?: NSLocalizedString(@"Error reading file!", @"Message in alert dialog when unable to read file")
+                                         defaultButton:NSLocalizedString(@"Give Up", @"Button title")
+                                       alternateButton:NSLocalizedString(@"Edit File", @"Button title")
+                                           otherButton:NSLocalizedString(@"Keep Going", @"Button title")
+                             informativeTextWithFormat:NSLocalizedString(@"There was a problem reading the file.  Do you want to give up, edit the file to correct the errors, or keep going with everything that could be analyzed?\n\nIf you choose \"Keep Going\" and then save the file, you will probably lose data.", @"Informative text in alert dialog")];
+        [alert setAlertStyle:NSCriticalAlertStyle];
+        NSInteger rv = [alert runModal];
+        if (rv == NSAlertDefaultReturn) {
+            // the user said to give up
+            [[BDSKErrorObjectController sharedErrorObjectController] documentFailedLoad:self shouldEdit:NO]; // this hands the errors to a new error editor and sets that as the documentForErrors
+        }else if (rv == NSAlertAlternateReturn){
+            // the user said to edit the file.
+            [[BDSKErrorObjectController sharedErrorObjectController] documentFailedLoad:self shouldEdit:YES]; // this hands the errors to a new error editor and sets that as the documentForErrors
+        }else if(rv == NSAlertOtherReturn){
+            // the user said to keep going, so if they save, they might clobber data...
+            // if we don't return YES, NSDocumentController puts up its lame alert saying the document could not be opened, and we get no partial data
+            isPartialData = NO;
+        }
+    }
     
-    return isPartialData == NO;
+    if (isPartialData == NO) {
+        [self setDocumentStringEncoding:encoding];
+        [self setPublications:newPubs macros:newMacros documentInfo:newDocumentInfo groups:newGroups frontMatter:newFrontMatter];
+        return YES;
+    } else {
+        return NO;
+    }
 }
 
 - (BOOL)readFromData:(NSData *)data ofStringType:(BDSKStringType)type fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
@@ -1943,20 +1945,19 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         error = [NSError mutableLocalErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unable to Interpret", @"Error description")];
         [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Unable to interpret data as %@.  Try a different encoding.", @"Error informative text"), [NSString localizedNameOfStringEncoding:encoding]] forKey:NSLocalizedRecoverySuggestionErrorKey];
         [error setValue:[NSNumber numberWithUnsignedInteger:encoding] forKey:NSStringEncodingErrorKey];
-        if(outError) *outError = error;
-        return NO;
+    } else {
+        newPubs = [BDSKStringParser itemsFromString:dataString ofType:type error:&error];
     }
     
-	newPubs = [BDSKStringParser itemsFromString:dataString ofType:type error:&error];
-        
-    if(outError) *outError = error;
-    [self setPublications:newPubs];
-    
-    // since we can't save other files in their native format (BibTeX is handled separately)
-    if (type != BDSKRISStringType)
+    if (newPubs) {
+        [self setPublications:newPubs macros:nil documentInfo:nil groups:nil frontMatter:nil];
+        // since we can't save other files in their native format (BibTeX is handled separately)
         [self setFileURL:nil];
-    
-    return newPubs != nil;
+        return YES;
+    } else {
+        if (outError) *outError = error;
+        return NO;
+    }
 }
 
 #pragma mark -
@@ -2055,9 +2056,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         options |= BDSKBibTeXOptionTeXifyMask;
     
 	// in case there are @preambles in it
-	[bibString appendString:frontMatter];
-	[bibString appendString:@"\n"];
-	
+	if (frontMatter) {
+        [bibString appendString:frontMatter];
+        [bibString appendString:@"\n"];
+	}
+    
     [bibString appendString:[[BDSKMacroResolver defaultMacroResolver] bibTeXString]];
     [bibString appendString:[[self macroResolver] bibTeXString]];
 	

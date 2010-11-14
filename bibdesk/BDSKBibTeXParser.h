@@ -59,12 +59,23 @@
 */
 + (NSArray *)itemsFromString:(NSString *)aString owner:(id<BDSKOwner>)anOwner isPartialData:(BOOL *)isPartialData error:(NSError **)outError;
 
++ (NSArray *)itemsFromData:(NSData *)inData
+                    macros:(NSDictionary **)outMacros
+                  filePath:(NSString *)filePath
+                     owner:(id<BDSKOwner>)anOwner
+                  encoding:(NSStringEncoding)parserEncoding
+             isPartialData:(BOOL *)isPartialData
+                     error:(NSError **)outError;
+
 /*!
-    @method     itemsFromData:error:frontMatter:filePath:owner:encoding:error:
+    @method     itemsFromData:macros:documentInfo:groups:frontMatter:filePath:owner:encoding:error:
     @abstract   Parsing method that returns an array of BibItems from data, using libbtparse; needs a document to act as macro resolver.
     @discussion (comprehensive description)
     @param      inData (description)
-    @param      frontMatter (description)
+    @param      outMacros (description)
+    @param      outDocumentInfo (description)
+    @param      outGroups (description)
+    @param      outFrontMatter (description)
     @param      filePath (description)
     @param      anOwner (description)
     @param      parserEncoding (description)
@@ -73,7 +84,10 @@
     @result     (description)
 */
 + (NSArray *)itemsFromData:(NSData *)inData
-               frontMatter:(NSMutableString *)frontMatter
+                    macros:(NSDictionary **)outMacros
+              documentInfo:(NSDictionary **)outDocumentInfo
+                    groups:(NSDictionary **)outGroups
+               frontMatter:(NSString **)outFrontMatter
                   filePath:(NSString *)filePath
                      owner:(id<BDSKOwner>)anOwner
                   encoding:(NSStringEncoding)parserEncoding
