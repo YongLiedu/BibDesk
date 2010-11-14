@@ -73,6 +73,19 @@
 
 @implementation NSDictionary (BDSKExtensions)
 
+static void addEntryFunction(const void *key, const void *value, void *context) {
+    CFDictionarySetValue((CFMutableDictionaryRef)context, key, value);
+}
+
+- (id)initForCaseInsensitiveKeysWithDictionary:(NSDictionary *)aDictionary{
+    [[self init] release];
+    CFMutableDictionaryRef tmpDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), [aDictionary count], &kBDSKCaseInsensitiveStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    CFDictionaryApplyFunction((CFDictionaryRef)aDictionary, addEntryFunction, (void *)tmpDict);
+    id dict = (id)CFDictionaryCreateCopy(CFAllocatorGetDefault(), tmpDict);
+    CFRelease(tmpDict);
+    return dict;
+}
+
 // The rest of these methods are copied from NSData-OFExtensions.m
 
 // This seems more convenient than having to write your own if statement a zillion times

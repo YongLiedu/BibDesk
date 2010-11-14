@@ -67,6 +67,7 @@
 
 
 @interface NSDictionary (BDSKExtensions)
+- (id)initForCaseInsensitiveKeysWithDictionary:(NSDictionary *)aDictionary;
 - (BOOL)boolForKey:(NSString *)key defaultValue:(BOOL)defaultValue;
 - (NSInteger)integerForKey:(NSString *)key defaultValue:(NSInteger)defaultValue;
 - (NSUInteger)unsignedIntegerForKey:(NSString *)key defaultValue:(NSUInteger)defaultValue;

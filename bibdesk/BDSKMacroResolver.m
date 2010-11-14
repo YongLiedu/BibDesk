@@ -61,7 +61,7 @@ NSString *BDSKMacroResolverSetType = @"set";
 static char BDSKMacroResolverDefaultsObservationContext;
 
 @interface BDSKGlobalMacroResolver : BDSKMacroResolver {
-    NSMutableDictionary *standardMacroDefinitions;
+    NSDictionary *standardMacroDefinitions;
     NSMutableDictionary *fileMacroDefinitions;
 }
 
@@ -306,8 +306,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
         NSArray *monthNames = [[[[NSDateFormatter alloc] init] autorelease] standaloneMonthSymbols];
         NSDictionary *standardDefs = [NSDictionary dictionaryWithObjects:monthNames
                                                                  forKeys:[NSArray arrayWithObjects:@"jan", @"feb", @"mar", @"apr", @"may", @"jun", @"jul", @"aug", @"sep", @"oct", @"nov", @"dec", nil]];
-        standardMacroDefinitions = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
-        [standardMacroDefinitions addEntriesFromDictionary:standardDefs];
+        standardMacroDefinitions = [[NSDictionary alloc] initForCaseInsensitiveKeysWithDictionary:standardDefs];
         // these need to be loaded lazily, because loading them can use ourselves, but we aren't yet initialized
         fileMacroDefinitions = nil; 
 		
