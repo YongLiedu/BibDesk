@@ -2,9 +2,9 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1040</int>
-		<string key="IBDocument.SystemVersion">10F569</string>
+		<string key="IBDocument.SystemVersion">10H574</string>
 		<string key="IBDocument.InterfaceBuilderVersion">804</string>
-		<string key="IBDocument.AppKitVersion">1038.29</string>
+		<string key="IBDocument.AppKitVersion">1038.35</string>
 		<string key="IBDocument.HIToolboxVersion">461.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -3096,38 +3096,6 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
-						<string key="label">capitalizationPopUp</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="133589152"/>
-					</object>
-					<int key="connectionID">312</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">cleaningPopUp</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="918818634"/>
-					</object>
-					<int key="connectionID">314</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">joinStylePopUp</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="900973414"/>
-					</object>
-					<int key="connectionID">317</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">nameStylePopUp</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="865304301"/>
-					</object>
-					<int key="connectionID">318</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
 						<string key="label">fieldOptionsView</string>
 						<reference key="source" ref="527323802"/>
 						<reference key="destination" ref="533192603"/>
@@ -3144,27 +3112,11 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
-						<string key="label">fieldFontNamePopUp</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="302636486"/>
-					</object>
-					<int key="connectionID">604</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
 						<string key="label">fontOptionsView</string>
 						<reference key="source" ref="527323802"/>
 						<reference key="destination" ref="570822323"/>
 					</object>
 					<int key="connectionID">605</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">fieldFontSizeComboBox</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="80320377"/>
-					</object>
-					<int key="connectionID">606</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -3205,14 +3157,6 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 						<reference key="destination" ref="201741703"/>
 					</object>
 					<int key="connectionID">807</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">textField</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="250150443"/>
-					</object>
-					<int key="connectionID">808</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -3312,22 +3256,6 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
-						<string key="label">fieldBoldCheckButton</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="682655381"/>
-					</object>
-					<int key="connectionID">991</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">fieldItalicCheckButton</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="422745688"/>
-					</object>
-					<int key="connectionID">992</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
 						<string key="label">urlOptionsView</string>
 						<reference key="source" ref="527323802"/>
 						<reference key="destination" ref="980625357"/>
@@ -3341,14 +3269,6 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 						<reference key="destination" ref="917770388"/>
 					</object>
 					<int key="connectionID">994</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">urlPopUp</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="691556711"/>
-					</object>
-					<int key="connectionID">1026</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -3489,14 +3409,6 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 						<reference key="destination" ref="780598651"/>
 					</object>
 					<int key="connectionID">1141</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">altTextField</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="780598651"/>
-					</object>
-					<int key="connectionID">1142</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -3951,14 +3863,6 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 					<int key="connectionID">1426</int>
 				</object>
 				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">datePopUp</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="149539903"/>
-					</object>
-					<int key="connectionID">1431</int>
-				</object>
-				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
 						<string key="label">content: selection.templateOptions.dateFormat</string>
 						<reference key="source" ref="149539903"/>
@@ -4326,14 +4230,6 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
-						<string key="label">defaultTypePopUp</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="57494521"/>
-					</object>
-					<int key="connectionID">1622</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
 						<string key="label">requiredTokenField</string>
 						<reference key="source" ref="527323802"/>
 						<reference key="destination" ref="341027017"/>
@@ -4371,54 +4267,6 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 						<reference key="destination" ref="271109800"/>
 					</object>
 					<int key="connectionID">1627</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">richTextCheckButton</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="38181194"/>
-					</object>
-					<int key="connectionID">1628</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">fontNamePopUp</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="387603817"/>
-					</object>
-					<int key="connectionID">1629</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">addFieldButton</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="635537331"/>
-					</object>
-					<int key="connectionID">1630</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">fontSizeComboBox</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="251855545"/>
-					</object>
-					<int key="connectionID">1631</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">boldCheckButton</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="565092434"/>
-					</object>
-					<int key="connectionID">1632</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">italicCheckButton</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="595388310"/>
-					</object>
-					<int key="connectionID">1633</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
@@ -5048,22 +4896,6 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 					<int key="connectionID">1754</int>
 				</object>
 				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">counterStylePopUp</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="888397030"/>
-					</object>
-					<int key="connectionID">1755</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">counterCapitalizationPopUp</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="200185042"/>
-					</object>
-					<int key="connectionID">1756</int>
-				</object>
-				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
 						<string key="label">selectedObject: selection.counterStyleKey</string>
 						<reference key="source" ref="888397030"/>
@@ -5162,22 +4994,6 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 						<reference key="destination" ref="890453047"/>
 					</object>
 					<int key="connectionID">1792</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">linkedFileFormatStylePopUp</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="56863981"/>
-					</object>
-					<int key="connectionID">1793</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">linkedFileJoinStylePopUp</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="702750394"/>
-					</object>
-					<int key="connectionID">1794</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -5284,30 +5100,6 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 						<reference key="destination" ref="625656576"/>
 					</object>
 					<int key="connectionID">1839</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">appendingPopUp</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="391005021"/>
-					</object>
-					<int key="connectionID">1840</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">prefixField</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="348290161"/>
-					</object>
-					<int key="connectionID">1841</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">suffixField</string>
-						<reference key="source" ref="527323802"/>
-						<reference key="destination" ref="896521852"/>
-					</object>
-					<int key="connectionID">1842</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -8045,289 +7837,127 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>addFieldButton</string>
-							<string>altTextField</string>
 							<string>appendingOptionsView</string>
-							<string>appendingPopUp</string>
-							<string>boldCheckButton</string>
-							<string>capitalizationPopUp</string>
-							<string>cleaningPopUp</string>
-							<string>counterCapitalizationPopUp</string>
-							<string>counterStylePopUp</string>
 							<string>dateOptionsView</string>
-							<string>datePopUp</string>
 							<string>defaultTokenField</string>
-							<string>defaultTypePopUp</string>
-							<string>fieldBoldCheckButton</string>
 							<string>fieldField</string>
-							<string>fieldFontNamePopUp</string>
-							<string>fieldFontSizeComboBox</string>
-							<string>fieldItalicCheckButton</string>
 							<string>fieldOptionsView</string>
-							<string>fontNamePopUp</string>
 							<string>fontOptionsView</string>
-							<string>fontSizeComboBox</string>
-							<string>italicCheckButton</string>
 							<string>itemTemplateTokenField</string>
-							<string>joinStylePopUp</string>
-							<string>linkedFileFormatStylePopUp</string>
-							<string>linkedFileJoinStylePopUp</string>
 							<string>linkedFileOptionsView</string>
-							<string>nameStylePopUp</string>
 							<string>numberOptionsView</string>
 							<string>optionalTokenField</string>
 							<string>ownerController</string>
 							<string>personOptionsView</string>
-							<string>prefixField</string>
 							<string>prefixTemplateTextView</string>
 							<string>previewTextView</string>
 							<string>requiredTokenField</string>
-							<string>richTextCheckButton</string>
 							<string>separatorTemplateTextView</string>
 							<string>specialTokenField</string>
-							<string>suffixField</string>
 							<string>suffixTemplateTextView</string>
 							<string>tableView</string>
 							<string>tableViewSplitView</string>
 							<string>templateArrayController</string>
-							<string>textField</string>
 							<string>textOptionsView</string>
 							<string>textViewSplitView</string>
 							<string>tokenObjectController</string>
 							<string>tokenOptionsBox</string>
 							<string>urlOptionsView</string>
-							<string>urlPopUp</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>NSButton</string>
+							<string>NSView</string>
+							<string>NSView</string>
+							<string>NSTokenField</string>
 							<string>NSTextField</string>
 							<string>NSView</string>
-							<string>NSPopUpButton</string>
-							<string>NSButton</string>
-							<string>NSPopUpButton</string>
-							<string>NSPopUpButton</string>
-							<string>NSPopUpButton</string>
-							<string>NSPopUpButton</string>
 							<string>NSView</string>
-							<string>NSPopUpButton</string>
 							<string>NSTokenField</string>
-							<string>NSPopUpButton</string>
-							<string>NSButton</string>
-							<string>NSTextField</string>
-							<string>NSPopUpButton</string>
-							<string>NSComboBox</string>
-							<string>NSButton</string>
 							<string>NSView</string>
-							<string>NSPopUpButton</string>
-							<string>NSView</string>
-							<string>NSComboBox</string>
-							<string>NSButton</string>
-							<string>NSTokenField</string>
-							<string>NSPopUpButton</string>
-							<string>NSPopUpButton</string>
-							<string>NSPopUpButton</string>
-							<string>NSView</string>
-							<string>NSPopUpButton</string>
 							<string>NSView</string>
 							<string>NSTokenField</string>
 							<string>NSObjectController</string>
 							<string>NSView</string>
-							<string>NSTextField</string>
 							<string>NSTextView</string>
 							<string>NSTextView</string>
 							<string>NSTokenField</string>
-							<string>NSButton</string>
 							<string>NSTextView</string>
 							<string>NSTokenField</string>
-							<string>NSTextField</string>
 							<string>NSTextView</string>
 							<string>BDSKTableView</string>
 							<string>NSSplitView</string>
 							<string>NSArrayController</string>
-							<string>NSTextField</string>
 							<string>NSView</string>
 							<string>NSSplitView</string>
 							<string>NSObjectController</string>
 							<string>NSBox</string>
 							<string>NSView</string>
-							<string>NSPopUpButton</string>
 						</object>
 					</object>
 					<object class="NSMutableDictionary" key="toOneOutletInfosByName">
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>addFieldButton</string>
-							<string>altTextField</string>
 							<string>appendingOptionsView</string>
-							<string>appendingPopUp</string>
-							<string>boldCheckButton</string>
-							<string>capitalizationPopUp</string>
-							<string>cleaningPopUp</string>
-							<string>counterCapitalizationPopUp</string>
-							<string>counterStylePopUp</string>
 							<string>dateOptionsView</string>
-							<string>datePopUp</string>
 							<string>defaultTokenField</string>
-							<string>defaultTypePopUp</string>
-							<string>fieldBoldCheckButton</string>
 							<string>fieldField</string>
-							<string>fieldFontNamePopUp</string>
-							<string>fieldFontSizeComboBox</string>
-							<string>fieldItalicCheckButton</string>
 							<string>fieldOptionsView</string>
-							<string>fontNamePopUp</string>
 							<string>fontOptionsView</string>
-							<string>fontSizeComboBox</string>
-							<string>italicCheckButton</string>
 							<string>itemTemplateTokenField</string>
-							<string>joinStylePopUp</string>
-							<string>linkedFileFormatStylePopUp</string>
-							<string>linkedFileJoinStylePopUp</string>
 							<string>linkedFileOptionsView</string>
-							<string>nameStylePopUp</string>
 							<string>numberOptionsView</string>
 							<string>optionalTokenField</string>
 							<string>ownerController</string>
 							<string>personOptionsView</string>
-							<string>prefixField</string>
 							<string>prefixTemplateTextView</string>
 							<string>previewTextView</string>
 							<string>requiredTokenField</string>
-							<string>richTextCheckButton</string>
 							<string>separatorTemplateTextView</string>
 							<string>specialTokenField</string>
-							<string>suffixField</string>
 							<string>suffixTemplateTextView</string>
 							<string>tableView</string>
 							<string>tableViewSplitView</string>
 							<string>templateArrayController</string>
-							<string>textField</string>
 							<string>textOptionsView</string>
 							<string>textViewSplitView</string>
 							<string>tokenObjectController</string>
 							<string>tokenOptionsBox</string>
 							<string>urlOptionsView</string>
-							<string>urlPopUp</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<object class="IBToOneOutletInfo">
-								<string key="name">addFieldButton</string>
-								<string key="candidateClassName">NSButton</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">altTextField</string>
-								<string key="candidateClassName">NSTextField</string>
-							</object>
-							<object class="IBToOneOutletInfo">
 								<string key="name">appendingOptionsView</string>
 								<string key="candidateClassName">NSView</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">appendingPopUp</string>
-								<string key="candidateClassName">NSPopUpButton</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">boldCheckButton</string>
-								<string key="candidateClassName">NSButton</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">capitalizationPopUp</string>
-								<string key="candidateClassName">NSPopUpButton</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">cleaningPopUp</string>
-								<string key="candidateClassName">NSPopUpButton</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">counterCapitalizationPopUp</string>
-								<string key="candidateClassName">NSPopUpButton</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">counterStylePopUp</string>
-								<string key="candidateClassName">NSPopUpButton</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">dateOptionsView</string>
 								<string key="candidateClassName">NSView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
-								<string key="name">datePopUp</string>
-								<string key="candidateClassName">NSPopUpButton</string>
-							</object>
-							<object class="IBToOneOutletInfo">
 								<string key="name">defaultTokenField</string>
 								<string key="candidateClassName">NSTokenField</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">defaultTypePopUp</string>
-								<string key="candidateClassName">NSPopUpButton</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">fieldBoldCheckButton</string>
-								<string key="candidateClassName">NSButton</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">fieldField</string>
 								<string key="candidateClassName">NSTextField</string>
 							</object>
 							<object class="IBToOneOutletInfo">
-								<string key="name">fieldFontNamePopUp</string>
-								<string key="candidateClassName">NSPopUpButton</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">fieldFontSizeComboBox</string>
-								<string key="candidateClassName">NSComboBox</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">fieldItalicCheckButton</string>
-								<string key="candidateClassName">NSButton</string>
-							</object>
-							<object class="IBToOneOutletInfo">
 								<string key="name">fieldOptionsView</string>
 								<string key="candidateClassName">NSView</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">fontNamePopUp</string>
-								<string key="candidateClassName">NSPopUpButton</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">fontOptionsView</string>
 								<string key="candidateClassName">NSView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
-								<string key="name">fontSizeComboBox</string>
-								<string key="candidateClassName">NSComboBox</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">italicCheckButton</string>
-								<string key="candidateClassName">NSButton</string>
-							</object>
-							<object class="IBToOneOutletInfo">
 								<string key="name">itemTemplateTokenField</string>
 								<string key="candidateClassName">NSTokenField</string>
 							</object>
 							<object class="IBToOneOutletInfo">
-								<string key="name">joinStylePopUp</string>
-								<string key="candidateClassName">NSPopUpButton</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">linkedFileFormatStylePopUp</string>
-								<string key="candidateClassName">NSPopUpButton</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">linkedFileJoinStylePopUp</string>
-								<string key="candidateClassName">NSPopUpButton</string>
-							</object>
-							<object class="IBToOneOutletInfo">
 								<string key="name">linkedFileOptionsView</string>
 								<string key="candidateClassName">NSView</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">nameStylePopUp</string>
-								<string key="candidateClassName">NSPopUpButton</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">numberOptionsView</string>
@@ -8346,10 +7976,6 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 								<string key="candidateClassName">NSView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
-								<string key="name">prefixField</string>
-								<string key="candidateClassName">NSTextField</string>
-							</object>
-							<object class="IBToOneOutletInfo">
 								<string key="name">prefixTemplateTextView</string>
 								<string key="candidateClassName">NSTextView</string>
 							</object>
@@ -8362,20 +7988,12 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 								<string key="candidateClassName">NSTokenField</string>
 							</object>
 							<object class="IBToOneOutletInfo">
-								<string key="name">richTextCheckButton</string>
-								<string key="candidateClassName">NSButton</string>
-							</object>
-							<object class="IBToOneOutletInfo">
 								<string key="name">separatorTemplateTextView</string>
 								<string key="candidateClassName">NSTextView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">specialTokenField</string>
 								<string key="candidateClassName">NSTokenField</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">suffixField</string>
-								<string key="candidateClassName">NSTextField</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">suffixTemplateTextView</string>
@@ -8392,10 +8010,6 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 							<object class="IBToOneOutletInfo">
 								<string key="name">templateArrayController</string>
 								<string key="candidateClassName">NSArrayController</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">textField</string>
-								<string key="candidateClassName">NSTextField</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">textOptionsView</string>
@@ -8416,10 +8030,6 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 							<object class="IBToOneOutletInfo">
 								<string key="name">urlOptionsView</string>
 								<string key="candidateClassName">NSView</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">urlPopUp</string>
-								<string key="candidateClassName">NSPopUpButton</string>
 							</object>
 						</object>
 					</object>
