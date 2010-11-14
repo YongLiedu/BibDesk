@@ -205,7 +205,7 @@ extern NSString *BDSKDocumentPublicationsKey;
     BDSKMacroResolver *macroResolver;
     BDSKMacroWindowController *macroWC;
 	
-    NSDictionary *documentInfo;
+    NSMutableDictionary *documentInfo;
     BDSKDocumentInfoWindowController *infoWC;
     
 	NSString *frontMatter;    // for preambles, and stuff

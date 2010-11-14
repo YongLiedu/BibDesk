@@ -199,7 +199,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
         groups = [(BDSKGroupsArray *)[BDSKGroupsArray alloc] initWithDocument:self];
         
         frontMatter = nil;
-        documentInfo = nil;
+        documentInfo = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
         macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         
         BDSKUndoManager *newUndoManager = [[[BDSKUndoManager alloc] init] autorelease];
@@ -887,11 +887,8 @@ static NSOperationQueue *metadataCacheQueue = nil;
 }
 
 - (void)setDocumentInfo:(NSDictionary *)dict{
-    if (dict != documentInfo) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setDocumentInfo:documentInfo];
-        documentInfo = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
-        [(NSMutableDictionary *)documentInfo setDictionary:dict];
-    }
+    [[[self undoManager] prepareWithInvocationTarget:self] setDocumentInfo:[[documentInfo copy] autorelease]];
+    [documentInfo setDictionary:dict];
 }
 
 - (NSString *)documentInfoForKey:(NSString *)key{
@@ -1837,6 +1834,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if (wasLoaded) {
         NSArray *oldPubs = [[publications copy] autorelease];
         NSDictionary *oldMacros = [[[[self macroResolver] macroDefinitions] copy] autorelease];
+        NSDictionary *oldDocInfo = [[[self documentInfo] copy] autorelease];
         NSMutableDictionary *oldGroups = [NSMutableDictionary dictionary];
         NSData *groupData;
         
@@ -1849,7 +1847,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         if (groupData = [[self groups] serializedGroupsDataOfType:BDSKScriptGroupType])
             [oldGroups setObject:groupData forKey:[NSNumber numberWithInteger:BDSKScriptGroupType]];
          
-        [[[self undoManager] prepareWithInvocationTarget:self] setPublications:oldPubs macros:oldMacros documentInfo:documentInfo groups:oldGroups frontMatter:frontMatter encoding:[self documentStringEncoding]];
+        [[[self undoManager] prepareWithInvocationTarget:self] setPublications:oldPubs macros:oldMacros documentInfo:oldDocInfo groups:oldGroups frontMatter:frontMatter encoding:[self documentStringEncoding]];
         
         // we need to stop the file search controller on revert, as this will be invalid after we update our publications
         if ([self isDisplayingFileContentSearch])
