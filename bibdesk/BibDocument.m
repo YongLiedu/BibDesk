@@ -1756,21 +1756,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 #pragma mark -
 #pragma mark Opening and Loading Files
 
-- (BOOL)revertToContentsOfURL:(NSURL *)absoluteURL ofType:(NSString *)aType error:(NSError **)outError
-{
-    if ([super revertToContentsOfURL:absoluteURL ofType:aType error:outError]) {
-        [self setSearchString:@""];
-        [self updateSmartGroupsCount];
-        [self updateCategoryGroupsPreservingSelection:YES];
-        [self sortGroupsByKey:nil]; // resort
-		[tableView deselectAll:self]; // clear before resorting
-		[self redoSearch]; // redo the search
-        [self sortPubsByKey:nil]; // resort
-        return YES;
-	} else
-        return NO;
-}
-
 - (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)aType error:(NSError **)outError
 {
     BOOL success = NO;
@@ -1842,26 +1827,52 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     return success;
 }
 
-- (void)setPublications:(NSArray *)newPubs macros:(NSDictionary *)newMacros documentInfo:(NSDictionary *)newDocumentInfo groups:(NSDictionary *)newGroups frontMatter:(NSString *)newFrontMatter {
-    // we need to stop the file search controller on revert, as this will be invalid after we update our publications
-    if ([self isDisplayingFileContentSearch])
-        [self setSearchString:@""];
-    [fileSearchController terminateForDocumentURL:[self fileURL]];
-    BDSKDESTROY(fileSearchController);
+- (void)setPublications:(NSArray *)newPubs macros:(NSDictionary *)newMacros documentInfo:(NSDictionary *)newDocumentInfo groups:(NSDictionary *)newGroups frontMatter:(NSString *)newFrontMatter encoding:(NSStringEncoding)newEncoding {
+    NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
+    BOOL wasLoaded = nil != [wcEnum nextObject]; // initial read is before makeWindowControllers
     
-	// first remove all editor windows, as they will be invalid afterwards
-    NSInteger idx = [[self windowControllers] count];
-    while(--idx > 0)
-        [[[self windowControllers] objectAtIndex:idx] close];
+    if (wasLoaded) {
+        NSArray *oldPubs = [[publications copy] autorelease];
+        NSDictionary *oldMacros = [[[[self macroResolver] macroDefinitions] copy] autorelease];
+        NSDictionary *oldDocInfo = [[[self documentInfo] copy] autorelease];
+        NSMutableDictionary *oldGroups = [NSMutableDictionary dictionary];
+        NSData *groupData;
+        
+        if (groupData = [[self groups] serializedGroupsDataOfType:BDSKSmartGroupType])
+            [oldGroups setObject:groupData forKey:[NSNumber numberWithInteger:BDSKSmartGroupType]];
+        if (groupData = [[self groups] serializedGroupsDataOfType:BDSKStaticGroupType])
+            [oldGroups setObject:groupData forKey:[NSNumber numberWithInteger:BDSKStaticGroupType]];
+        if (groupData = [[self groups] serializedGroupsDataOfType:BDSKURLGroupType])
+            [oldGroups setObject:groupData forKey:[NSNumber numberWithInteger:BDSKURLGroupType]];
+        if (groupData = [[self groups] serializedGroupsDataOfType:BDSKScriptGroupType])
+            [oldGroups setObject:groupData forKey:[NSNumber numberWithInteger:BDSKScriptGroupType]];
+         
+        [[[self undoManager] prepareWithInvocationTarget:self] setPublications:oldPubs macros:oldMacros documentInfo:oldDocInfo groups:oldGroups frontMatter:frontMatter encoding:[self documentStringEncoding]];
+        
+        // we need to stop the file search controller on revert, as this will be invalid after we update our publications
+        if ([self isDisplayingFileContentSearch])
+            [self setSearchString:@""];
+        [fileSearchController terminateForDocumentURL:[self fileURL]];
+        BDSKDESTROY(fileSearchController);
+        
+        // first remove all editor windows, as they will be invalid afterwards
+        NSWindowController *wc;
+        while (wc = [wcEnum nextObject]) {
+            if ([wc respondsToSelector:@selector(discardEditing)])
+                [wc discardEditing];
+            [wc close];
+        }
+        
+        // make sure we clear all groups that are saved in the file, should only have those for revert
+        // better do this here, so we don't remove them when reading the data fails
+        for (BDSKGroup *group in [groups URLGroups])
+            [self removeSpinnerForGroup:group];
+        for (BDSKGroup *group in [groups scriptGroups])
+            [self removeSpinnerForGroup:group];
+        [groups removeAllUndoableGroups]; // this also removes editor windows for external groups
+    }
     
-    // make sure we clear all groups that are saved in the file, should only have those for revert
-    // better do this here, so we don't remove them when reading the data fails
-    for (BDSKGroup *group in [groups URLGroups])
-        [self removeSpinnerForGroup:group];
-    for (BDSKGroup *group in [groups scriptGroups])
-        [self removeSpinnerForGroup:group];
-    [groups removeAllUndoableGroups]; // this also removes editor windows for external groups
-    
+    [self setDocumentStringEncoding:newEncoding];
     [self setPublications:newPubs];
     [documentInfo setDictionary:newDocumentInfo];
     [[self macroResolver] setMacroDefinitions:newMacros];
@@ -1870,11 +1881,18 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     [frontMatter release];
     frontMatter = [newFrontMatter retain];
     
-    // don't allow undo beyond this point, because all changes above are not registered
-    [[self undoManager] removeAllActions];
-    
     // update the publications of all static groups from the archived keys
     [[groups staticGroups] makeObjectsPerformSelector:@selector(update)];
+    
+    if (wasLoaded) {
+        [self setSearchString:@""];
+        [self updateSmartGroupsCount];
+        [self updateCategoryGroupsPreservingSelection:YES];
+        [self sortGroupsByKey:nil]; // resort
+		[tableView deselectAll:self]; // clear before resorting
+		[self redoSearch]; // redo the search
+        [self sortPubsByKey:nil]; // resort
+    }
 }
 
 - (BOOL)readFromBibTeXData:(NSData *)data fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
@@ -1929,8 +1947,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
     
     if (isPartialData == NO) {
-        [self setDocumentStringEncoding:encoding];
-        [self setPublications:newPubs macros:newMacros documentInfo:newDocumentInfo groups:newGroups frontMatter:newFrontMatter];
+        [self setPublications:newPubs macros:newMacros documentInfo:newDocumentInfo groups:newGroups frontMatter:newFrontMatter encoding:encoding];
         return YES;
     } else {
         return NO;
@@ -1952,7 +1969,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
     
     if (newPubs) {
-        [self setPublications:newPubs macros:nil documentInfo:nil groups:nil frontMatter:nil];
+        [self setPublications:newPubs macros:nil documentInfo:nil groups:nil frontMatter:nil encoding:[self documentStringEncoding]];
         // since we can't save other files in their native format (BibTeX is handled separately)
         [self setFileURL:nil];
         return YES;
