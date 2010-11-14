@@ -1862,15 +1862,17 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [self removeSpinnerForGroup:group];
     [groups removeAllUndoableGroups]; // this also removes editor windows for external groups
     
-    [[self undoManager] disableUndoRegistration];
     [self setPublications:newPubs];
-    [self setDocumentInfo:newDocumentInfo];
+    [documentInfo setDictionary:newDocumentInfo];
     [[self macroResolver] setMacroDefinitions:newMacros];
     for (NSNumber *groupType in newGroups)
         [[self groups] setGroupsOfType:[groupType integerValue] fromSerializedData:[newGroups objectForKey:groupType]];
     [frontMatter release];
     frontMatter = [newFrontMatter retain];
-    [[self undoManager] enableUndoRegistration];
+    
+    // don't allow undo beyond this point, because all changes above are not registered
+    [[self undoManager] removeAllActions];
+    
     // update the publications of all static groups from the archived keys
     [[groups staticGroups] makeObjectsPerformSelector:@selector(update)];
 }
