@@ -240,7 +240,7 @@ static NSString *stringWithoutComments(NSString *string) {
                         hadProblems = YES;
                     break;
                 case BTE_COMMENT:
-                    if (frontMatter == nil && groups == nil)
+                    if (frontMatter == nil)
                         ignoredFrontmatter = YES;
                     else if (NO == appendCommentToFrontmatterOrAddGroups(entry, frontMatter, groups, filePath, parserEncoding))
                         hadProblems = YES;
@@ -820,7 +820,7 @@ static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
     const char *scriptGroupStr = "BibDesk Script Groups";
     size_t scriptGroupStrLength = strlen(scriptGroupStr);
     NSInteger groupType = -1;
-    Boolean firstValue = TRUE;
+    Boolean firstValue = (groups != nil);
     
     NSStringEncoding groupsEncoding = [[BDSKStringEncodingManager sharedEncodingManager] isUnparseableEncoding:encoding] ? encoding : NSUTF8StringEncoding;
     BOOL success = YES;
