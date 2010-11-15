@@ -79,6 +79,7 @@ static inline NSString *copyCheckedString(const char *cstring, NSInteger line, N
 static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacroResolver *macroResolver, NSStringEncoding parserEncoding);
 
 // private functions for handling different entry types; these functions do not do any locking around the parser
+static BOOL addItemToDictionaryOrSetDocumentInfo(AST *entry, NSMutableArray *returnArray, NSDictionary **outDocumentInfo, const char *buf, NSUInteger inputDataLength, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding);
 static BOOL appendPreambleToFrontmatter(AST *entry, NSMutableString *frontMatter, NSString *filePath, NSStringEncoding encoding);
 static BOOL addMacroToDictionary(AST *entry, NSMutableDictionary *dictionary, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding encoding, NSError **error);
 static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *frontMatter, NSMutableDictionary *groups, NSString *filePath, NSStringEncoding encoding);
@@ -196,13 +197,9 @@ static NSString *stringWithoutComments(NSString *string) {
     NSUInteger inputDataLength = [inData length];
     const char *buf = NULL;
 
-    //dictionary is the bibtex entry
-    NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:6];
-    
     const char * fs_path = NULL;
     FILE *infile = NULL;
     BOOL isPasteOrDrag = [filePath isEqualToString:BDSKParserPasteDragString];
-    
     
     NSError *error = nil;
     
@@ -233,74 +230,37 @@ static NSString *stringWithoutComments(NSString *string) {
 
     while(entry =  bt_parse_entry(infile, (char *)fs_path, 0, &parsed_ok)){
 
-        if (parsed_ok) {
-            
-            bt_metatype metatype = bt_entry_metatype (entry);
-            if (BTE_PREAMBLE == metatype){
-                if (frontMatter == nil)
-                    ignoredFrontmatter = YES;
-                else if (NO == appendPreambleToFrontmatter(entry, frontMatter, filePath, parserEncoding))
-                    hadProblems = YES;
-            } else if (BTE_MACRODEF == metatype) {
-                if (macros == nil)
-                    ignoredMacros = YES;
-                else if (NO == addMacroToDictionary(entry, macros, macroResolver, filePath, parserEncoding, &error))
-                    hadProblems = YES;
-            } else if (BTE_COMMENT == metatype) {
-                if (frontMatter == nil && groups == nil)
-                    ignoredFrontmatter = YES;
-                else if (NO == appendCommentToFrontmatterOrAddGroups(entry, frontMatter, groups, filePath, parserEncoding))
-                    hadProblems = YES;
-            } else if (metatype == BTE_REGULAR) {
-                
-                // regular type (@article, @proceedings, etc.)
-                // don't skip the loop if this fails, since it'll have partial data in the dictionary
-                if (NO == addValuesFromEntryToDictionary(entry, dictionary, buf, inputDataLength, macroResolver, filePath, parserEncoding))
-                    hadProblems = YES;
-                
-                // get the entry type as a string
-                tmpStr = copyCheckedString(bt_entry_type(entry), entry->line, filePath, parserEncoding);
-                entryType = [tmpStr entryType];
-                [tmpStr release];
-                
-                if ([entryType isEqualToString:@"bibdesk_info"]) {
-                    if(outDocumentInfo)
-                        *outDocumentInfo = [[dictionary copy] autorelease];
-                } else if (entryType) {
-                    
-                    NSString *citeKey = copyCheckedString(bt_entry_key(entry), entry->line, filePath, parserEncoding);
-                    
-                    if(citeKey) {
-                        [[BDSKCompletionManager sharedManager] addString:citeKey forCompletionEntry:BDSKCrossrefString];
-                        
-                        newBI = [[BibItem alloc] initWithType:entryType
-                                                      citeKey:citeKey
-                                                    pubFields:dictionary
-                                                        isNew:isPasteOrDrag];
-                        // we set the macroResolver so we know the fields were parsed with this macroResolver, mostly to prevent scripting to add the item to the wrong document
-                        [newBI setMacroResolver:macroResolver];
-                        
-                        [citeKey release];
-                        
-                        [returnArray addObject:newBI];
-                        [newBI release];
-                    } else {
-                        // no citekey
-                        hadProblems = YES;
-                        [BDSKErrorObject reportError:NSLocalizedString(@"Missing citekey for entry (skipped entry)", @"Error description") forFile:filePath line:entry->line];
-                    }
-                    
-                } else {
-                    // no entry type
-                    hadProblems = YES;
-                    [BDSKErrorObject reportError:NSLocalizedString(@"Missing entry type (skipped entry)", @"Error description") forFile:filePath line:entry->line];
-                }
-                
-                [dictionary removeAllObjects];
-            } // end generate BibItem from ENTRY metatype.
-        } else {
+        if (parsed_ok == 0) {
             // wasn't ok, record it and deal with it later.
             hadProblems = YES;
+        } else {
+            switch (bt_entry_metatype(entry)) {
+                case BTE_REGULAR:
+                    if (NO == addItemToDictionaryOrSetDocumentInfo(entry, returnArray, outDocumentInfo, buf, inputDataLength, macroResolver, filePath, parserEncoding))
+                        hadProblems = YES;
+                    break;
+                case BTE_COMMENT:
+                    if (frontMatter == nil && groups == nil)
+                        ignoredFrontmatter = YES;
+                    else if (NO == appendCommentToFrontmatterOrAddGroups(entry, frontMatter, groups, filePath, parserEncoding))
+                        hadProblems = YES;
+                    break;
+                case BTE_PREAMBLE:
+                    if (frontMatter == nil)
+                        ignoredFrontmatter = YES;
+                    else if (NO == appendPreambleToFrontmatter(entry, frontMatter, filePath, parserEncoding))
+                        hadProblems = YES;
+                    break;
+                case BTE_MACRODEF:
+                    if (macros == nil)
+                        ignoredMacros = YES;
+                    else if (NO == addMacroToDictionary(entry, macros, macroResolver, filePath, parserEncoding, &error))
+                        hadProblems = YES;
+                    break;
+                default:
+                    // BTE_UNKNOWN
+                    break;
+            } // end switch metatype
         }
         bt_free_ast(entry);
 
@@ -1023,5 +983,58 @@ static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dict
         [fieldValue release];
         
     }// end while field - process next bt field      
+    return hadProblems == NO;
+}
+
+static BOOL addItemToDictionaryOrSetDocumentInfo(AST *entry, NSMutableArray *returnArray, NSDictionary **outDocumentInfo, const char *buf, NSUInteger inputDataLength, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding)
+{
+    NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
+    BOOL hadProblems = NO;
+    
+    // regular type (@article, @proceedings, etc.)
+    // don't skip the loop if this fails, since it'll have partial data in the dictionary
+    if (NO == addValuesFromEntryToDictionary(entry, dictionary, buf, inputDataLength, macroResolver, filePath, parserEncoding))
+        hadProblems = YES;
+    
+    // get the entry type as a string
+    NSString *tmpStr = copyCheckedString(bt_entry_type(entry), entry->line, filePath, parserEncoding);
+    NSString *entryType = [tmpStr entryType];
+    [tmpStr release];
+    
+    if ([entryType isEqualToString:@"bibdesk_info"]) {
+        if(outDocumentInfo)
+            *outDocumentInfo = [[dictionary copy] autorelease];
+    } else if (entryType) {
+        
+        NSString *citeKey = copyCheckedString(bt_entry_key(entry), entry->line, filePath, parserEncoding);
+        
+        if(citeKey) {
+            [[BDSKCompletionManager sharedManager] addString:citeKey forCompletionEntry:BDSKCrossrefString];
+            
+            BibItem *newBI = [[BibItem alloc] initWithType:entryType
+                                                   citeKey:citeKey
+                                                 pubFields:dictionary
+                                                     isNew:[filePath isEqualToString:BDSKParserPasteDragString]];
+            // we set the macroResolver so we know the fields were parsed with this macroResolver, mostly to prevent scripting to add the item to the wrong document
+            [newBI setMacroResolver:macroResolver];
+            
+            [citeKey release];
+            
+            [returnArray addObject:newBI];
+            [newBI release];
+        } else {
+            // no citekey
+            hadProblems = YES;
+            [BDSKErrorObject reportError:NSLocalizedString(@"Missing citekey for entry (skipped entry)", @"Error description") forFile:filePath line:entry->line];
+        }
+        
+    } else {
+        // no entry type
+        hadProblems = YES;
+        [BDSKErrorObject reportError:NSLocalizedString(@"Missing entry type (skipped entry)", @"Error description") forFile:filePath line:entry->line];
+    }
+    
+    [dictionary release];
+    
     return hadProblems == NO;
 }
