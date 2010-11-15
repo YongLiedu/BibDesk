@@ -303,7 +303,10 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 - (id)initWithOwner:(id<BDSKOwner>)anOwner{
     if (self = [super initWithOwner:nil]) {
         // store system-defined macros for the months.
-        NSArray *monthNames = [[[[NSDateFormatter alloc] init] autorelease] standaloneMonthSymbols];
+        NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
+        if ([[[formatter calendar] calendarIdentifier] isEqualToString:NSGregorianCalendar] == NO)
+            [formatter setCalendar:[[[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar] autorelease]];
+        NSArray *monthNames = [formatter standaloneMonthSymbols];
         NSDictionary *standardDefs = [NSDictionary dictionaryWithObjects:monthNames
                                                                  forKeys:[NSArray arrayWithObjects:@"jan", @"feb", @"mar", @"apr", @"may", @"jun", @"jul", @"aug", @"sep", @"oct", @"nov", @"dec", nil]];
         standardMacroDefinitions = [[NSDictionary alloc] initForCaseInsensitiveKeysWithDictionary:standardDefs];
