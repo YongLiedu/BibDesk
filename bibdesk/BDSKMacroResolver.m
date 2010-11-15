@@ -242,6 +242,8 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     if (macroDefinitions == nil)
         [self loadMacroDefinitions];
     [macroDefinitions setDictionary:dictionary];
+    
+    modification++;
 
     NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKMacroResolverSetType, BDSKMacroResolverTypeKey, nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
@@ -252,6 +254,8 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 - (void)removeAllMacros{
     [macroDefinitions release];
     macroDefinitions = nil;
+    
+    modification++;
     
     NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKMacroResolverRemoveType, BDSKMacroResolverTypeKey, nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
