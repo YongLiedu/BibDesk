@@ -306,10 +306,10 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
         NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
         if ([[[formatter calendar] calendarIdentifier] isEqualToString:NSGregorianCalendar] == NO)
             [formatter setCalendar:[[[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar] autorelease]];
-        NSArray *monthNames = [formatter standaloneMonthSymbols];
-        NSDictionary *standardDefs = [NSDictionary dictionaryWithObjects:monthNames
-                                                                 forKeys:[NSArray arrayWithObjects:@"jan", @"feb", @"mar", @"apr", @"may", @"jun", @"jul", @"aug", @"sep", @"oct", @"nov", @"dec", nil]];
-        standardMacroDefinitions = [[NSDictionary alloc] initForCaseInsensitiveKeysWithDictionary:standardDefs];
+        NSString *shortMonthNames[12] = {@"jan", @"feb", @"mar", @"apr", @"may", @"jun", @"jul", @"aug", @"sep", @"oct", @"nov", @"dec"};
+        NSString *monthNames[12];
+        [[formatter standaloneMonthSymbols] getObjects:monthNames range:NSMakeRange(0, 12)];
+        standardMacroDefinitions = [[NSDictionary alloc] initWithObjects:monthNames forCaseInsensitiveKeys:shortMonthNames count:12];
         // these need to be loaded lazily, because loading them can use ourselves, but we aren't yet initialized
         fileMacroDefinitions = nil; 
 		

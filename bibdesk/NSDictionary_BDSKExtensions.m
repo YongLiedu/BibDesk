@@ -73,15 +73,19 @@
 
 @implementation NSDictionary (BDSKExtensions)
 
-- (id)initForCaseInsensitiveKeysWithDictionary:(NSDictionary *)aDictionary{
+- (id)initWithObjects:(id *)objects forCaseInsensitiveKeys:(NSString **)keys count:(NSUInteger)count {
     [[self init] release];
+    return (id)CFDictionaryCreate(CFAllocatorGetDefault(), (const void **)keys, (const void **)objects, count, &kBDSKCaseInsensitiveStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+}
+
+- (id)initForCaseInsensitiveKeysWithDictionary:(NSDictionary *)aDictionary{
     CFIndex count = [aDictionary count];
     BDSKASSERT(count < 256);
     NSString *keys[count];
     id values[count];
     if (count)
         CFDictionaryGetKeysAndValues((CFDictionaryRef)aDictionary, (const void **)keys, (const void **)values);
-    return (id)CFDictionaryCreate(CFAllocatorGetDefault(), (const void **)keys, (const void **)values, count, &kBDSKCaseInsensitiveStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    return [self initWithObjects:values forCaseInsensitiveKeys:keys count:count];
 }
 
 // The rest of these methods are copied from NSData-OFExtensions.m

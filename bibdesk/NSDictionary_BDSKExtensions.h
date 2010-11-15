@@ -67,7 +67,10 @@
 
 
 @interface NSDictionary (BDSKExtensions)
+
+- (id)initWithObjects:(id *)objects forCaseInsensitiveKeys:(NSString **)keys count:(NSUInteger)count;
 - (id)initForCaseInsensitiveKeysWithDictionary:(NSDictionary *)aDictionary;
+
 - (BOOL)boolForKey:(NSString *)key defaultValue:(BOOL)defaultValue;
 - (NSInteger)integerForKey:(NSString *)key defaultValue:(NSInteger)defaultValue;
 - (NSUInteger)unsignedIntegerForKey:(NSString *)key defaultValue:(NSUInteger)defaultValue;
@@ -76,12 +79,15 @@
 - (NSPoint)pointForKey:(NSString *)key defaultValue:(NSPoint)defaultValue;
 - (NSSize)sizeForKey:(NSString *)key defaultValue:(NSSize)defaultValue;
 - (NSRect)rectForKey:(NSString *)key defaultValue:(NSRect)defaultValue;
+
 @end
 
 #pragma mark -
 
 @interface NSMutableDictionary (BDSKExtensions)
+
 - (id)initForCaseInsensitiveKeys;
+
 - (void)setBoolValue:(BOOL)value forKey:(NSString *)key;
 - (void)setIntegerValue:(NSInteger)value forKey:(NSString *)key;
 - (void)setUnsignedIntegerValue:(NSUInteger)value forKey:(NSString *)key;
@@ -90,4 +96,5 @@
 - (void)setPointValue:(NSPoint)value forKey:(NSString *)key;
 - (void)setSizeValue:(NSSize)value forKey:(NSString *)key;
 - (void)setRectValue:(NSRect)value forKey:(NSString *)key;
+
 @end
