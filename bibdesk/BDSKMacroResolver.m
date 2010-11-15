@@ -186,6 +186,19 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     return macroDefinitions;
 }
 
+- (void)setMacroDefinitions:(NSDictionary *)dictionary {
+    if (macroDefinitions == nil)
+        [self loadMacroDefinitions];
+    [macroDefinitions setDictionary:dictionary];
+    
+    modification++;
+
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKMacroResolverSetType, BDSKMacroResolverTypeKey, nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
+                                                        object:self
+                                                      userInfo:userInfo];    
+}
+
 - (void)changeMacro:(NSString *)oldMacro to:(NSString *)newMacro{
     if (macroDefinitions == nil)
         [self loadMacroDefinitions];
@@ -233,31 +246,6 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     [self synchronize];
 
     NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:type, BDSKMacroResolverTypeKey, macro, BDSKMacroResolverMacroKey, nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
-                                                        object:self
-                                                      userInfo:userInfo];    
-}
-
-- (void)setMacroDefinitions:(NSDictionary *)dictionary {
-    if (macroDefinitions == nil)
-        [self loadMacroDefinitions];
-    [macroDefinitions setDictionary:dictionary];
-    
-    modification++;
-
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKMacroResolverSetType, BDSKMacroResolverTypeKey, nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
-                                                        object:self
-                                                      userInfo:userInfo];    
-}
-
-- (void)removeAllMacros{
-    [macroDefinitions release];
-    macroDefinitions = nil;
-    
-    modification++;
-    
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKMacroResolverRemoveType, BDSKMacroResolverTypeKey, nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
                                                         object:self
                                                       userInfo:userInfo];    

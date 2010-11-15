@@ -235,14 +235,9 @@
             [macro release];
         } else if ([type isEqualToString:BDSKMacroResolverRemoveType]) {
             NSString *key = [info objectForKey:BDSKMacroResolverMacroKey];
-            if (key) {
-                NSUInteger idx = [[macros valueForKeyPath:@"name.lowercaseString"] indexOfObject:[key lowercaseString]];
-                BDSKASSERT(idx != NSNotFound);
-                [self removeObjectFromMacrosAtIndex:idx];
-            } else {
-                [self setMacros:[NSArray array]];
-                return;
-            }
+            NSUInteger idx = [[macros valueForKeyPath:@"name.lowercaseString"] indexOfObject:[key lowercaseString]];
+            BDSKASSERT(idx != NSNotFound);
+            [self removeObjectFromMacrosAtIndex:idx];
         } else if ([type isEqualToString:BDSKMacroResolverRenameType]) {
             NSString *newKey = [info objectForKey:BDSKMacroResolverNewMacroKey];
             NSString *oldKey = [info objectForKey:BDSKMacroResolverOldMacroKey];

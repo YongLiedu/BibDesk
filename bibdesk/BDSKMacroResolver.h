@@ -69,16 +69,14 @@ extern NSString *BDSKMacroResolverSetType;
 - (NSString *)bibTeXString;
 
 - (NSDictionary *)macroDefinitions;
+- (void)setMacroDefinitions:(NSDictionary *)dictionary;
 // returns global definitions + local overrides
 - (NSDictionary *)allMacroDefinitions;
 
 - (NSString *)valueOfMacro:(NSString *)macro;
+// these use undo
 - (void)setMacro:(NSString *)macro toValue:(NSString *)value;
 - (void)changeMacro:(NSString *)oldMacro to:(NSString *)newMacro;
-
-// these don't use undo
-- (void)setMacroDefinitions:(NSDictionary *)dictionary;
-- (void)removeAllMacros;
 
 - (BOOL)string:(NSString *)string dependsOnMacro:(NSString *)macro;
 - (BOOL)string:(NSString *)string dependsOnMacro:(NSString *)macro inMacroDefinitions:(NSDictionary *)dictionary;

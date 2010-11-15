@@ -118,7 +118,7 @@ NSString *BDSKExternalGroupSucceededKey = @"succeeded";
         [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
         [searchIndexes resetWithPublications:publications];
         if (publications == nil)
-            [macroResolver removeAllMacros];
+            [macroResolver setMacroDefinitions:nil];
     }
     
     [self setCount:[publications count]];
