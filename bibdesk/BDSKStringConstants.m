@@ -289,8 +289,6 @@ NSString *BDSKUnpublishedString = @"unpublished";
 NSString *BDSKMastersThesisString = @"mastersthesis";
 NSString *BDSKPhDThesisString = @"phdthesis";
 
-NSString *BDSKParserPasteDragString = @"Paste/Drag";
-
 #pragma mark ||  Notification name strings
 NSString *BDSKFinalizeChangesNotification = @"Finalize Changes Notification";
 NSString *BDSKDocumentFileURLDidChangeNotification = @"BDSKDocumentFileURLDidChangeNotification";

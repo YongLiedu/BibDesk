@@ -64,7 +64,7 @@
 
 static NSLock *parserLock = nil;
 
-@interface BDSKBibTeXParser (Private)
+static NSString *BDSKParserPasteDragString = @"Paste/Drag";
 
 // private function to normalize line endings in data
 static inline NSData *normalizeLineEndingsInData(NSData *data, BOOL *didReplaceNewlines);
@@ -90,7 +90,6 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSUIntege
 // parses an individual entry and adds it's field/value pairs to the dictionary
 static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dictionary, const char *buf, NSUInteger inputDataLength, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding);
 
-@end
 
 @implementation BDSKBibTeXParser
 
@@ -199,11 +198,10 @@ static NSString *stringWithoutComments(NSString *string) {
 
     const char * fs_path = NULL;
     FILE *infile = NULL;
-    BOOL isPasteOrDrag = [filePath isEqualToString:BDSKParserPasteDragString];
     
     NSError *error = nil;
     
-    if (isPasteOrDrag || [[NSFileManager defaultManager] fileExistsAtPath:filePath] == NO) {
+    if (filePath == BDSKParserPasteDragString || [[NSFileManager defaultManager] fileExistsAtPath:filePath] == NO) {
         fs_path = NULL; // used for error context in libbtparse
         infile = [inData openReadStream];
     } else {
@@ -295,7 +293,7 @@ static NSString *stringWithoutComments(NSString *string) {
     if (isPartialData)
         *isPartialData = hadProblems;
 	
-    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:[anOwner isDocument] ? (BibDocument *)anOwner : nil pasteDragData:isPasteOrDrag ? inData : nil];
+    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:[anOwner isDocument] ? (BibDocument *)anOwner : nil pasteDragData:filePath == BDSKParserPasteDragString ? inData : nil];
     
     return returnArray;
 }
@@ -1014,7 +1012,7 @@ static BOOL addItemToDictionaryOrSetDocumentInfo(AST *entry, NSMutableArray *ret
             BibItem *newBI = [[BibItem alloc] initWithType:entryType
                                                    citeKey:citeKey
                                                  pubFields:dictionary
-                                                     isNew:[filePath isEqualToString:BDSKParserPasteDragString]];
+                                                     isNew:filePath == BDSKParserPasteDragString];
             // we set the macroResolver so we know the fields were parsed with this macroResolver, mostly to prevent scripting to add the item to the wrong document
             [newBI setMacroResolver:macroResolver];
             

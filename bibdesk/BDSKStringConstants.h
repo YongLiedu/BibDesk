@@ -279,8 +279,6 @@ extern NSString *BDSKRelevanceString;
 extern NSString *BDSKPersonString;
 extern NSString *BDSKSkimNotesString;
 
-extern NSString *BDSKParserPasteDragString;
-
 #pragma mark Notification name strings
 
 extern NSString *BDSKFinalizeChangesNotification;
