@@ -79,7 +79,8 @@
     BDSKASSERT(count < 256);
     NSString *keys[count];
     id values[count];
-    CFDictionaryGetKeysAndValues((CFDictionaryRef)aDictionary, (const void **)keys, (const void **)values);
+    if (count)
+        CFDictionaryGetKeysAndValues((CFDictionaryRef)aDictionary, (const void **)keys, (const void **)values);
     return (id)CFDictionaryCreate(CFAllocatorGetDefault(), (const void **)keys, (const void **)values, count, &kBDSKCaseInsensitiveStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 }
 
