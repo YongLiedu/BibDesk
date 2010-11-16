@@ -563,6 +563,108 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
 	return authors;
 }
 
+// creates an NSString from the given bt_name and bt_namepart, which were parsed with the given encoding; returns nil if no such name component exists
+static NSString *createNameStringForComponent(CFAllocatorRef alloc, bt_name *theName, bt_namepart thePart, CFStringEncoding encoding)
+{
+    NSInteger i, numberOfTokens = theName->part_len[thePart];
+    CFStringRef theString = NULL;
+ 
+    // typical for some parts; let's not bother with a mutable string in this case
+    if (numberOfTokens == 1){
+        theString = CFStringCreateWithCString(alloc, theName->parts[thePart][0], encoding);
+    } else if (numberOfTokens > 1){
+        CFMutableStringRef mutableString = CFStringCreateMutable(alloc, 0);
+        NSInteger stopTokenIndex = numberOfTokens - 1;
+        
+        for (i = 0; i < numberOfTokens; i++){
+            theString = CFStringCreateWithCString(alloc, theName->parts[thePart][i], encoding);
+            CFStringAppend(mutableString, theString);
+            CFRelease(theString);
+    
+            if (i < stopTokenIndex)
+                CFStringAppend(mutableString, CFSTR(" "));
+        }
+        theString = mutableString;
+    }
+    return (NSString *)theString;
+}
+
++ (NSDictionary *)nameComponents:(NSString *)aName forPublication:(BibItem *)pub{
+    NSMutableDictionary *parts = [NSMutableDictionary dictionary];
+    
+    CFAllocatorRef alloc = CFAllocatorGetDefault();
+    
+    // we need to remove newlines and collapse whitespace before using bt_split_name 
+    aName = (NSString *)BDStringCreateByCollapsingAndTrimmingCharactersInSet(alloc, (CFStringRef)aName, (CFCharacterSetRef)[NSCharacterSet whitespaceAndNewlineCharacterSet]);
+    
+    // get the fastest encoding, since it usually allows us to get a pointer to the contents
+    // the main reason for using CFString here is that it offers cString create/get for any encoding
+    CFStringEncoding encoding = CFStringGetFastestEncoding((CFStringRef)aName);   
+    
+    // if it's Unicode, switch to UTF-8 to avoid data loss (btparse doesn't like unichars)
+    if(encoding >= kCFStringEncodingUnicode)
+        encoding = kCFStringEncodingUTF8;
+    
+    const char *name_cstring = NULL;
+    name_cstring = CFStringGetCStringPtr((CFStringRef)aName, encoding);
+    BOOL shouldFree = NO;
+    CFIndex fullLength = CFStringGetLength((CFStringRef)aName);
+    
+    // CFStringGetCStringPtr will probably always fail for UTF-8, but it may fail regardless
+    if(NULL == name_cstring){
+        shouldFree = YES;
+        
+        // this length is probably excessive, but it's returned quickly
+        CFIndex requiredLength = CFStringGetMaximumSizeForEncoding(fullLength, encoding);
+        
+        // malloc a buffer, then set our const pointer to it if the conversion succeeds; this may be slightly more efficient than -[NSString UTF8String] because it's not adding an NSData to the autorelease pool
+        char *buffer = (char *)CFAllocatorAllocate(alloc, (requiredLength + 1) * sizeof(char), 0);
+        if(FALSE == CFStringGetCString((CFStringRef)aName, buffer, requiredLength, encoding)){
+            CFAllocatorDeallocate(alloc, buffer);
+            shouldFree = NO;
+        } else {
+            name_cstring = buffer;
+        }
+    }
+    
+    bt_name *theName;
+    
+    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
+    // pass the name as a C string; note that btparse will not work with unichars
+    theName = bt_split_name((char *)name_cstring, NULL, 0, 0);
+    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForPublication:pub];
+
+    [aName release];
+    if(shouldFree)
+        CFAllocatorDeallocate(alloc, (void *)name_cstring);
+    
+    NSString *nameString = nil;
+    
+    if (nameString = createNameStringForComponent(alloc, theName, BTN_FIRST, encoding)) {
+        [parts setObject:nameString forKey:@"first"];
+        [nameString release];
+    }
+    
+    if (nameString = createNameStringForComponent(alloc, theName, BTN_VON, encoding)) {
+        [parts setObject:nameString forKey:@"von"];
+        [nameString release];
+    }
+    
+    if (nameString = createNameStringForComponent(alloc, theName, BTN_LAST, encoding)) {
+        [parts setObject:nameString forKey:@"last"];
+        [nameString release];
+    }
+    
+    if (nameString = createNameStringForComponent(alloc, theName, BTN_JR, encoding)) {
+        [parts setObject:nameString forKey:@"jr"];
+        [nameString release];
+    }
+    
+    bt_free_name(theName);
+    
+    return parts;
+}
+
 @end
 
 /// private functions used with libbtparse code

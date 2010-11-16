@@ -125,4 +125,6 @@
 */
 + (NSArray *)authorsFromBibtexString:(NSString *)aString withPublication:(BibItem *)pub forField:(NSString *)field;
 
++ (NSDictionary *)nameComponents:(NSString *)aName forPublication:(BibItem *)pub;
+
 @end
