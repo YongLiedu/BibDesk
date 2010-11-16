@@ -181,25 +181,12 @@ static NSString *stringWithoutComments(NSString *string) {
         return [NSArray array];
     }
     
-    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
-    
     // btparse chokes on classic Macintosh line endings, so we'll replace all returns with a newline; this takes < 0.01 seconds on a 1000+ item file with Unix line endings, so performance is not affected.  Windows line endings will be replaced by a single newline.
     BOOL didReplaceNewlines = NO;
     inData = normalizeLineEndingsInData(inData, &didReplaceNewlines);
-	
-    BibItem *newBI = nil;
-    BDSKMacroResolver *macroResolver = [anOwner macroResolver];	
-    
-    AST *entry = NULL;
-    NSString *entryType = nil;
-    NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:100];
-    NSUInteger inputDataLength = [inData length];
-    const char *buf = NULL;
 
     const char * fs_path = NULL;
     FILE *infile = NULL;
-    
-    NSError *error = nil;
     
     if (filePath == BDSKParserPasteDragString || [[NSFileManager defaultManager] fileExistsAtPath:filePath] == NO) {
         fs_path = NULL; // used for error context in libbtparse
@@ -209,8 +196,6 @@ static NSString *stringWithoutComments(NSString *string) {
         infile = didReplaceNewlines ? [inData openReadStream] : fopen(fs_path, "r");
     }
 
-    buf = (const char *) [inData bytes];
-
     if([parserLock tryLock] == NO)
         [NSException raise:NSInternalInconsistencyException format:@"Attempt to reenter the parser.  Please report this error."];
     
@@ -219,13 +204,18 @@ static NSString *stringWithoutComments(NSString *string) {
     bt_set_stringopts(BTE_MACRODEF, BTO_MINIMAL);
     // Passing BTO_COLLAPSE causes problems.  The comments on bt_postprocess_value indicate that BibTeX-style collapsing must take place /after/ pasting, but we do this with BDSKComplexString instead of BTO_PASTE.  See bug #1803091 for an example, although that case could be avoided by having bt_postprocess_string consider a single space " " as collapsed instead of deleting it.
     bt_set_stringopts(BTE_REGULAR, BTO_MINIMAL);
-    
-    NSString *tmpStr = nil;
-    BOOL hadProblems = NO;
-    BOOL ignoredMacros = NO;
-    BOOL ignoredFrontmatter = NO;
+	
+    NSMutableArray *returnArray = [NSMutableArray array];
+    NSUInteger inputDataLength = [inData length];
+    const char *buf = (const char *)[inData bytes];
+    BDSKMacroResolver *macroResolver = [anOwner macroResolver];	
+    AST *entry = NULL;
+    NSError *error = nil;
+    BOOL hadProblems = NO, ignoredMacros = NO, ignoredFrontmatter = NO;
     int parsed_ok = 1;
 
+    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
+    
     while(entry =  bt_parse_entry(infile, (char *)fs_path, 0, &parsed_ok)){
 
         if (parsed_ok == 0) {
@@ -263,6 +253,14 @@ static NSString *stringWithoutComments(NSString *string) {
         bt_free_ast(entry);
 
     } // while (scanning through file) 
+	
+    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:([anOwner isDocument] ? (BibDocument *)anOwner : nil) pasteDragData:(filePath == BDSKParserPasteDragString ? inData : nil)];
+
+    // execute this regardless, so the parser isn't left in an inconsistent state
+    bt_cleanup();
+    fclose(infile);
+    
+    [parserLock unlock];
         
     // generic error message; the error tableview will have specific errors and context
     if(parsed_ok == 0 || hadProblems){
@@ -282,18 +280,12 @@ static NSString *stringWithoutComments(NSString *string) {
         [error setValue:NSLocalizedString(@"Front matter (preamble and comments) from pasted data should be added via a text editor", @"") forKey:NSLocalizedRecoverySuggestionErrorKey];
         hadProblems = YES;
     }
-
-    // execute this regardless, so the parser isn't left in an inconsistent state
-    bt_cleanup();
-    fclose(infile);
     
-    if(outError) *outError = error;
-    [parserLock unlock];
+    if (outError)
+        *outError = error;
     
     if (isPartialData)
         *isPartialData = hadProblems;
-	
-    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:[anOwner isDocument] ? (BibDocument *)anOwner : nil pasteDragData:filePath == BDSKParserPasteDragString ? inData : nil];
     
     return returnArray;
 }
