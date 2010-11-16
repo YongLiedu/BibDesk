@@ -72,19 +72,7 @@
     [error setFileName:filePath];
     [error setLineNumber:line];
     [error setErrorMessage:msg];
-    [error report];
-    [error release];
-}
-
-+ (void)reportWarning:(NSString *)msg forFile:(NSString *)filePath line:(NSInteger)line;
-{
-    id error = [[self alloc] init];
-    // @@ localizing this is probably dangerous
-    [error setErrorClassName:NSLocalizedString(@"warning", @"error name")];
-    [error setFileName:filePath];
-    [error setLineNumber:line];
-    [error setErrorMessage:msg];
-    [error report];
+    [[BDSKErrorObjectController sharedErrorObjectController] reportError:self];
     [error release];
 }
 
@@ -180,10 +168,6 @@
 
 - (BOOL)isIgnorableWarning {
     return isIgnorableWarning;
-}
-
-- (void)report {
-    [[BDSKErrorObjectController sharedErrorObjectController] reportError:self];
 }
 
 @end

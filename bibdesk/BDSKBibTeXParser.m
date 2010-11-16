@@ -1131,21 +1131,8 @@ static BOOL addItemToDictionaryOrSetDocumentInfo(AST *entry, NSMutableArray *ret
     return hadProblems == NO;
 }
 
-static NSString *errclass_names[NUM_ERRCLASSES] = 
-{
-   NULL,                         /* BTERR_NOTIFY */
-   @"warning",                   /* BTERR_CONTENT */ 
-   @"warning",                   /* BTERR_LEXWARN */
-   @"warning",                   /* BTERR_USAGEWARN */
-   @"error",                     /* BTERR_LEXERR */
-   @"syntax error",              /* BTERR_SYNTAX */
-   @"fatal error",               /* BTERR_USAGEERR */
-   @"internal error"             /* BTERR_INTERNAL */
-};
-
 void handleError (bt_error *err)
 {
-    NSString *  name;
     BDSKErrorObject *errObj = [[BDSKErrorObject alloc] init];
     
     if (err->filename)
@@ -1154,7 +1141,7 @@ void handleError (bt_error *err)
         [errObj setFileName:fileName];
     }
     
-    if (err->line > 0)                   /* going to print a line number? */
+    if (err->line > 0) 
     {
         [errObj setLineNumber:err->line];
     }
@@ -1163,16 +1150,33 @@ void handleError (bt_error *err)
         [errObj setLineNumber:-1];
     }
     
-    if (err->item_desc && err->item > 0) /* going to print an item number? */
+    if (err->item_desc && err->item > 0)
     {
         [errObj setItemDescription:[NSString stringWithUTF8String:err->item_desc]];
         [errObj setItemNumber:err->item];
     }
     
-    name = errclass_names[(int) err->class];
-    if (name)
+    switch (err->class)
     {
-        [errObj setErrorClassName:name];
+        case BTERR_CONTENT:
+        case BTERR_LEXWARN:
+        case BTERR_USAGEWARN:
+            [errObj setErrorClassName:NSLocalizedString(@"warning", @"error name")];
+            break;
+        case BTERR_LEXERR:
+            [errObj setErrorClassName:NSLocalizedString(@"error", @"error name")];
+            break;
+        case BTERR_SYNTAX:
+            [errObj setErrorClassName:NSLocalizedString(@"syntax error", @"error name")];
+            break;
+        case BTERR_USAGEERR:
+            [errObj setErrorClassName:NSLocalizedString(@"fatal error", @"error name")];
+            break;
+        case BTERR_INTERNAL:
+            [errObj setErrorClassName:NSLocalizedString(@"internal error", @"error name")];
+            break;
+        default:
+            break;
     }
     
     if (err->class > BTERR_USAGEWARN)
@@ -1182,7 +1186,8 @@ void handleError (bt_error *err)
     
     [errObj setErrorMessage:[NSString stringWithUTF8String:err->message]];
     
-    [errObj report];
+    [[BDSKErrorObjectController sharedErrorObjectController] reportError:errObj];
+    
     [errObj release];
    
 }

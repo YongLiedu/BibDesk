@@ -56,7 +56,6 @@
 }
 
 + (void)reportError:(NSString *)msg forFile:(NSString *)filePath line:(NSInteger)line;
-+ (void)reportWarning:(NSString *)msg forFile:(NSString *)filePath line:(NSInteger)line;
 
 - (NSString *)fileName;
 - (void)setFileName:(NSString *)newFileName;
@@ -84,7 +83,5 @@
 
 - (void)setIsIgnorableWarning:(BOOL)flag;
 - (BOOL)isIgnorableWarning;
-
-- (void)report;
 
 @end
