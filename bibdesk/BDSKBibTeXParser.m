@@ -255,30 +255,26 @@ static NSString *stringWithoutComments(NSString *string) {
     
     [parserLock unlock];
         
-    // generic error message; the error tableview will have specific errors and context
-    if(parsed_ok == 0 || hadProblems){
-        error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unable to parse string as BibTeX", @"Error description") underlyingError:error];
-        
-    // If no critical errors, warn about ignoring macros or frontmatter; callers can ignore this by passing a valid NSMutableString for frontmatter (or ignoring the partial data flag).  Mainly relevant for paste/drag on the document.
-    } else if (ignoredMacros && ignoredFrontmatter) {
-        error = [NSError mutableLocalErrorWithCode:kBDSKParserIgnoredFrontMatter localizedDescription:NSLocalizedString(@"Macros and front matter ignored while parsing BibTeX", @"")];
-        [error setValue:NSLocalizedString(@"Front matter (preamble and comments) from pasted data should be added via a text editor, and macros should be added via the macro editor (cmd-shift-M)", @"") forKey:NSLocalizedRecoverySuggestionErrorKey];
-        hadProblems = YES;
-    } else if (ignoredMacros) {
-        error = [NSError mutableLocalErrorWithCode:kBDSKParserIgnoredFrontMatter localizedDescription:NSLocalizedString(@"Macros ignored while parsing BibTeX", @"")];
-        [error setValue:NSLocalizedString(@"Macros must be added via the macro editor (cmd-shift-M)", @"") forKey:NSLocalizedRecoverySuggestionErrorKey];
-        hadProblems = YES;
-    } else if (ignoredFrontmatter) {
-        error = [NSError mutableLocalErrorWithCode:kBDSKParserIgnoredFrontMatter localizedDescription:NSLocalizedString(@"Front matter ignored while parsing BibTeX", @"")];
-        [error setValue:NSLocalizedString(@"Front matter (preamble and comments) from pasted data should be added via a text editor", @"") forKey:NSLocalizedRecoverySuggestionErrorKey];
-        hadProblems = YES;
+    if (outError) {
+        // generic error message; the error tableview will have specific errors and context
+        if (parsed_ok == 0 || hadProblems) {
+            error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unable to parse string as BibTeX", @"Error description") underlyingError:error];
+        // If no critical errors, warn about ignoring macros or frontmatter; callers can ignore this by passing a valid NSMutableString for frontmatter (or ignoring the partial data flag).  Mainly relevant for paste/drag on the document.
+        } else if (ignoredMacros && ignoredFrontmatter) {
+            error = [NSError mutableLocalErrorWithCode:kBDSKParserIgnoredFrontMatter localizedDescription:NSLocalizedString(@"Macros and front matter ignored while parsing BibTeX", @"")];
+            [error setValue:NSLocalizedString(@"Front matter (preamble and comments) from pasted data should be added via a text editor, and macros should be added via the macro editor (cmd-shift-M)", @"") forKey:NSLocalizedRecoverySuggestionErrorKey];
+        } else if (ignoredMacros) {
+            error = [NSError mutableLocalErrorWithCode:kBDSKParserIgnoredFrontMatter localizedDescription:NSLocalizedString(@"Macros ignored while parsing BibTeX", @"")];
+            [error setValue:NSLocalizedString(@"Macros must be added via the macro editor (cmd-shift-M)", @"") forKey:NSLocalizedRecoverySuggestionErrorKey];
+        } else if (ignoredFrontmatter) {
+            error = [NSError mutableLocalErrorWithCode:kBDSKParserIgnoredFrontMatter localizedDescription:NSLocalizedString(@"Front matter ignored while parsing BibTeX", @"")];
+            [error setValue:NSLocalizedString(@"Front matter (preamble and comments) from pasted data should be added via a text editor", @"") forKey:NSLocalizedRecoverySuggestionErrorKey];
+        }
+        *outError = error;
     }
     
-    if (outError)
-        *outError = error;
-    
     if (isPartialData)
-        *isPartialData = hadProblems;
+        *isPartialData = (hadProblems || parsed_ok == 0 || ignoredMacros || ignoredFrontmatter);
     
     return returnArray;
 }
