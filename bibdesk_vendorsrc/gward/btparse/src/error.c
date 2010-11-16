@@ -4,7 +4,7 @@
               warnings.
 @GLOBALS    : errclass_names
               err_actions
-              err_handlers
+              bt_err_handlers
               errclass_counts
               error_buf
 @CALLS      : 
@@ -56,7 +56,7 @@ static bt_erraction err_actions[NUM_ERRCLASSES] =
 
 void print_error (bt_error *err);
 
-bt_err_handler err_handlers[NUM_ERRCLASSES] =
+bt_err_handler bt_err_handlers[NUM_ERRCLASSES] =
 {
    print_error,
    print_error,
@@ -176,8 +176,8 @@ report_error (bt_errclass class,
 #endif
 
    err.message = error_buf;
-   if (err_handlers[class])
-      (*err_handlers[class]) (&err);
+   if (bt_err_handlers[class])
+      (*bt_err_handlers[class]) (&err);
 
    switch (err_actions[class])
    {

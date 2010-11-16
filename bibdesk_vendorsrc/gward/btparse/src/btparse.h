@@ -243,7 +243,7 @@ typedef struct
 
 typedef void (*bt_err_handler) (bt_error *);
 
-extern bt_err_handler err_handlers[NUM_ERRCLASSES];
+extern bt_err_handler bt_err_handlers[NUM_ERRCLASSES];
 
 #if defined(__cplusplus__) || defined(__cplusplus) || defined(c_plusplus)
 extern "C" {
