@@ -37,7 +37,6 @@
  */
 
 #import "BDSKErrorObjectController.h"
-#import <BTParse/btparse.h>
 #import <BTParse/BDSKErrorObject.h>
 #import "BDSKErrorManager.h"
 #import "BDSKErrorEditor.h"
