@@ -41,6 +41,7 @@
 #import "BDSKCFCallBacks.h"
 #import "NSCharacterSet_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
+#import "CFString_BDSKExtensions.h"
 
 @interface BibAuthor (Private)
 
