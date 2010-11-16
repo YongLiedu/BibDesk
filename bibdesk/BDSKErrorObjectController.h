@@ -92,7 +92,7 @@
 - (void)endObservingErrorsForPublication:(BibItem *)pub;
 - (void)endObservingErrorsForDocument:(BibDocument *)document pasteDragData:(NSData *)data;
 
-- (void)handleErrorNotification:(NSNotification *)notification;
+- (void)reportError:(BDSKErrorObject *)error;
 
 @end
 

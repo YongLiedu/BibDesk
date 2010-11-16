@@ -38,7 +38,7 @@
 
 #import "BDSKBibTeXParser.h"
 #import <BTParse/btparse.h>
-#import <BTParse/BDSKErrorObject.h>
+#import "BDSKErrorObject.h"
 #import <AGRegex/AGRegex.h>
 #import "BDSKAppController.h"
 #include <stdio.h>
@@ -90,12 +90,23 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSUIntege
 // parses an individual entry and adds it's field/value pairs to the dictionary
 static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dictionary, const char *buf, NSUInteger inputDataLength, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding);
 
+static void handleError(bt_error *err);
+
 
 @implementation BDSKBibTeXParser
 
 + (void)initialize{
     BDSKINITIALIZE;
     parserLock = [[NSLock alloc] init];
+    // do nothing in the case of a harmless lexical buffer warning, use BDSKErrorObject for other errors
+    err_handlers[BTERR_NOTIFY] = NULL;
+    err_handlers[BTERR_CONTENT] = handleError;
+    err_handlers[BTERR_LEXWARN] = handleError;
+    err_handlers[BTERR_USAGEWARN] = handleError;
+    err_handlers[BTERR_LEXERR] = handleError;
+    err_handlers[BTERR_SYNTAX] = handleError;
+    err_handlers[BTERR_USAGEERR] = handleError;
+    err_handlers[BTERR_INTERNAL] = handleError;
 }
 
 static NSString *stringWithoutComments(NSString *string) {
@@ -1118,4 +1129,60 @@ static BOOL addItemToDictionaryOrSetDocumentInfo(AST *entry, NSMutableArray *ret
     [dictionary release];
     
     return hadProblems == NO;
+}
+
+static NSString *errclass_names[NUM_ERRCLASSES] = 
+{
+   NULL,                         /* BTERR_NOTIFY */
+   @"warning",                   /* BTERR_CONTENT */ 
+   @"warning",                   /* BTERR_LEXWARN */
+   @"warning",                   /* BTERR_USAGEWARN */
+   @"error",                     /* BTERR_LEXERR */
+   @"syntax error",              /* BTERR_SYNTAX */
+   @"fatal error",               /* BTERR_USAGEERR */
+   @"internal error"             /* BTERR_INTERNAL */
+};
+
+void handleError (bt_error *err)
+{
+    NSString *  name;
+    BDSKErrorObject *errObj = [[BDSKErrorObject alloc] init];
+    
+    if (err->filename)
+    {
+        NSString *fileName = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:err->filename  length:strlen(err->filename)];
+        [errObj setFileName:fileName];
+    }
+    
+    if (err->line > 0)                   /* going to print a line number? */
+    {
+        [errObj setLineNumber:err->line];
+    }
+    else
+    {
+        [errObj setLineNumber:-1];
+    }
+    
+    if (err->item_desc && err->item > 0) /* going to print an item number? */
+    {
+        [errObj setItemDescription:[NSString stringWithUTF8String:err->item_desc]];
+        [errObj setItemNumber:err->item];
+    }
+    
+    name = errclass_names[(int) err->class];
+    if (name)
+    {
+        [errObj setErrorClassName:name];
+    }
+    
+    if (err->class > BTERR_USAGEWARN)
+        [errObj setIsIgnorableWarning:NO];
+    else
+        [errObj setIsIgnorableWarning:YES];
+    
+    [errObj setErrorMessage:[NSString stringWithUTF8String:err->message]];
+    
+    [errObj report];
+    [errObj release];
+   
 }

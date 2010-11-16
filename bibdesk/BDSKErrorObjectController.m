@@ -37,7 +37,7 @@
  */
 
 #import "BDSKErrorObjectController.h"
-#import <BTParse/BDSKErrorObject.h>
+#import "BDSKErrorObject.h"
 #import "BDSKErrorManager.h"
 #import "BDSKErrorEditor.h"
 #import "BDSKStringConstants.h"
@@ -84,10 +84,6 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
         
         [managers addObject:[BDSKErrorManager allItemsErrorManager]];
         
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleErrorNotification:)
-                                                     name:BDSKParserErrorNotification
-                                                   object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleRemoveDocumentNotification:)
                                                      name:BDSKDocumentControllerRemoveDocumentNotification
@@ -392,8 +388,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     [self endObservingErrorsForDocument:document pasteDragData:nil publication:pub];
 }
 
-- (void)handleErrorNotification:(NSNotification *)notification{
-    BDSKErrorObject *obj = [notification object];
+- (void)reportError:(BDSKErrorObject *)obj{
     [currentErrors addObject:obj];
     
     // set a flag so we know that the window should be displayed after endObserving:...

@@ -38,7 +38,7 @@
 
 #import "BDSKErrorManager.h"
 #import "BDSKErrorObjectController.h"
-#import <BTParse/BDSKErrorObject.h>
+#import "BDSKErrorObject.h"
 #import "BDSKErrorEditor.h"
 #import "BibDocument.h"
 #import "NSWindowController_BDSKExtensions.h"
