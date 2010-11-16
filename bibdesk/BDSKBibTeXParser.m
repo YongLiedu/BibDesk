@@ -184,20 +184,15 @@ static NSString *stringWithoutComments(NSString *string) {
     // btparse chokes on classic Macintosh line endings, so we'll replace all returns with a newline; this takes < 0.01 seconds on a 1000+ item file with Unix line endings, so performance is not affected.  Windows line endings will be replaced by a single newline.
     BOOL didReplaceNewlines = NO;
     inData = normalizeLineEndingsInData(inData, &didReplaceNewlines);
-
-    const char * fs_path = NULL;
-    FILE *infile = NULL;
     
-    if (filePath == BDSKParserPasteDragString || [[NSFileManager defaultManager] fileExistsAtPath:filePath] == NO) {
-        fs_path = NULL; // used for error context in libbtparse
-        infile = [inData openReadStream];
-    } else {
-        fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
-        infile = didReplaceNewlines ? [inData openReadStream] : fopen(fs_path, "r");
-    }
-
+    BOOL fileExists = filePath != BDSKParserPasteDragString && [[NSFileManager defaultManager] fileExistsAtPath:filePath];
+    const char *fs_path = fileExists ? [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath] : NULL;
+    FILE *infile = fileExists && NO == didReplaceNewlines ? fopen(fs_path, "r") : [inData openReadStream];
+    
     if([parserLock tryLock] == NO)
         [NSException raise:NSInternalInconsistencyException format:@"Attempt to reenter the parser.  Please report this error."];
+
+    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
     
     bt_initialize();
     bt_set_stringopts(BTE_PREAMBLE, BTO_EXPAND);
@@ -213,8 +208,6 @@ static NSString *stringWithoutComments(NSString *string) {
     NSError *error = nil;
     BOOL hadProblems = NO, ignoredMacros = NO, ignoredFrontmatter = NO;
     int parsed_ok = 1;
-
-    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
     
     while(entry =  bt_parse_entry(infile, (char *)fs_path, 0, &parsed_ok)){
 
@@ -253,12 +246,12 @@ static NSString *stringWithoutComments(NSString *string) {
         bt_free_ast(entry);
 
     } // while (scanning through file) 
-	
-    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:([anOwner isDocument] ? (BibDocument *)anOwner : nil) pasteDragData:(filePath == BDSKParserPasteDragString ? inData : nil)];
 
     // execute this regardless, so the parser isn't left in an inconsistent state
     bt_cleanup();
     fclose(infile);
+	
+    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:([anOwner isDocument] ? (BibDocument *)anOwner : nil) pasteDragData:(filePath == BDSKParserPasteDragString ? inData : nil)];
     
     [parserLock unlock];
         
