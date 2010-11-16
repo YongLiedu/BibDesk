@@ -28,9 +28,6 @@
 #include "btparse.h"
 #include "error.h"
 #include "my_dmalloc.h"
-#include "BDSKErrorObject.h"
-
-#define NUM_ERRCLASSES ((int) BTERR_INTERNAL + 1)
 
 
 static char *errclass_names[NUM_ERRCLASSES] = 
@@ -59,7 +56,7 @@ static bt_erraction err_actions[NUM_ERRCLASSES] =
 
 void print_error (bt_error *err);
 
-static bt_err_handler err_handlers[NUM_ERRCLASSES] =
+bt_err_handler err_handlers[NUM_ERRCLASSES] =
 {
    print_error,
    print_error,
@@ -81,48 +78,44 @@ static char error_buf[MAX_ERROR+1];
 
 void print_error (bt_error *err)
 {
-    if (err->class != BTERR_NOTIFY) /* do nothing in the case of a harmless lexical buffer warning */
-    {
-        char *  name;
-        BDSKErrorObject *errObj = [[BDSKErrorObject alloc] init];
-        
-        if (err->filename)
-        {
-            NSString *fileName = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:err->filename  length:strlen(err->filename)];
-            [errObj setFileName:fileName];
-        }
-        
-        if (err->line > 0)                   /* going to print a line number? */
-        {
-            [errObj setLineNumber:err->line];
-        }
-        else
-        {
-            [errObj setLineNumber:-1];
-        }
-        
-        if (err->item_desc && err->item > 0) /* going to print an item number? */
-        {
-            [errObj setItemDescription:[NSString stringWithUTF8String:err->item_desc]];
-            [errObj setItemNumber:err->item];
-        }
-        
-        name = errclass_names[(int) err->class];
-        if (name)
-        {
-            [errObj setErrorClassName:[NSString stringWithUTF8String:name]];
-        }
-        
-        if (err->class > BTERR_USAGEWARN)
-            [errObj setIsIgnorableWarning:NO];
-        else
-            [errObj setIsIgnorableWarning:YES];
-        
-        [errObj setErrorMessage:[NSString stringWithUTF8String:err->message]];
-        
-        [errObj report];
-        [errObj release];
-    }
+   char *  name;
+   boolean something_printed;
+
+   something_printed = FALSE;
+
+   if (err->filename)
+   {
+      fprintf (stderr, "%s", err->filename);
+      something_printed = TRUE;
+   }
+   if (err->line > 0)                   /* going to print a line number? */
+   {
+      if (something_printed)
+         fprintf (stderr, ", ");
+      fprintf (stderr, "line %d", err->line);
+      something_printed = TRUE;
+   }
+   if (err->item_desc && err->item > 0) /* going to print an item number? */
+   {
+      if (something_printed)
+         fprintf (stderr, ", ");
+      fprintf (stderr, "%s %d", err->item_desc, err->item);
+      something_printed = TRUE;
+   }
+
+   name = errclass_names[(int) err->class];
+   if (name)
+   {
+      if (something_printed)
+         fprintf (stderr, ", ");
+      fprintf (stderr, "%s", name);
+      something_printed = TRUE;
+   }
+
+   if (something_printed)
+      fprintf (stderr, ": ");
+
+   fprintf (stderr, "%s\n", err->message);
    
 } /* print_error() */
 

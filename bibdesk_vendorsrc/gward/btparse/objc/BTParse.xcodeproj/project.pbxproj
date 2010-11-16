@@ -8,10 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
-		CE5895360AA046CE000733B6 /* BDSKErrorObject.h in Headers */ = {isa = PBXBuildFile; fileRef = CE5895340AA046CE000733B6 /* BDSKErrorObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		CE5895370AA046CE000733B6 /* BDSKErrorObject.m in Sources */ = {isa = PBXBuildFile; fileRef = CE5895350AA046CE000733B6 /* BDSKErrorObject.m */; };
-		CEC1516A0CDD3AF70014896A /* BTParse.strings in Resources */ = {isa = PBXBuildFile; fileRef = CEC151690CDD3AF70014896A /* BTParse.strings */; };
-		CED8F0AC0D7617DC00754CB4 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0867D69BFE84028FC02AAC07 /* Foundation.framework */; };
 		F9281247086E0EDC00E8900E /* ast.c in Headers */ = {isa = PBXBuildFile; fileRef = F99630DA086E0D9600872609 /* ast.c */; };
 		F9963119086E0D9600872609 /* antlr.h in Headers */ = {isa = PBXBuildFile; fileRef = F99630D9086E0D9600872609 /* antlr.h */; };
 		F996311B086E0D9600872609 /* ast.h in Headers */ = {isa = PBXBuildFile; fileRef = F99630DB086E0D9600872609 /* ast.h */; };
@@ -27,7 +23,7 @@
 		F996312A086E0D9600872609 /* btparse.h in Headers */ = {isa = PBXBuildFile; fileRef = F99630EB086E0D9600872609 /* btparse.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F996312C086E0D9600872609 /* err.c in Sources */ = {isa = PBXBuildFile; fileRef = F99630ED086E0D9600872609 /* err.c */; };
 		F996312E086E0D9600872609 /* error.c in Sources */ = {isa = PBXBuildFile; fileRef = F99630EF086E0D9600872609 /* error.c */; settings = {COMPILER_FLAGS = "-x objective-c"; }; };
-		F996312F086E0D9600872609 /* error.h in Headers */ = {isa = PBXBuildFile; fileRef = F99630F0086E0D9600872609 /* error.h */; settings = {ATTRIBUTES = (Public, ); COMPILER_FLAGS = "-x objective-c"; }; };
+		F996312F086E0D9600872609 /* error.h in Headers */ = {isa = PBXBuildFile; fileRef = F99630F0086E0D9600872609 /* error.h */; settings = {ATTRIBUTES = (Private, ); COMPILER_FLAGS = "-x objective-c"; }; };
 		F9963131086E0D9600872609 /* format_name.c in Sources */ = {isa = PBXBuildFile; fileRef = F99630F2086E0D9600872609 /* format_name.c */; };
 		F9963133086E0D9600872609 /* init.c in Sources */ = {isa = PBXBuildFile; fileRef = F99630F4086E0D9600872609 /* init.c */; };
 		F9963135086E0D9600872609 /* input.c in Sources */ = {isa = PBXBuildFile; fileRef = F99630F6086E0D9600872609 /* input.c */; };
@@ -55,17 +51,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		0867D69BFE84028FC02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		089C1667FE841158C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		32DBCF5E0370ADEE00C91783 /* BTParse_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BTParse_Prefix.pch; sourceTree = "<group>"; };
 		8DC2EF5A0486A6940098B216 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8DC2EF5B0486A6940098B216 /* BTParse.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BTParse.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE3D8F21125E8AE400AE0232 /* German */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		CE3D8F23125E8AF200AE0232 /* German */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/BTParse.strings; sourceTree = "<group>"; };
-		CE5895340AA046CE000733B6 /* BDSKErrorObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKErrorObject.h; sourceTree = "<group>"; };
-		CE5895350AA046CE000733B6 /* BDSKErrorObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKErrorObject.m; sourceTree = "<group>"; };
-		CEC151590CDD3AC30014896A /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/BTParse.strings; sourceTree = "<group>"; };
-		CEC1516B0CDD3AFE0014896A /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/BTParse.strings; sourceTree = "<group>"; };
 		F99630D9086E0D9600872609 /* antlr.h */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.h; path = antlr.h; sourceTree = "<group>"; };
 		F99630DA086E0D9600872609 /* ast.c */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.c; path = ast.c; sourceTree = "<group>"; };
 		F99630DB086E0D9600872609 /* ast.h */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.h; path = ast.h; sourceTree = "<group>"; };
@@ -114,7 +103,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CED8F0AC0D7617DC00754CB4 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -143,7 +131,6 @@
 		0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				0867D69BFE84028FC02AAC07 /* Foundation.framework */,
 			);
 			name = "External Frameworks and Libraries";
 			sourceTree = "<group>";
@@ -153,7 +140,6 @@
 			children = (
 				8DC2EF5A0486A6940098B216 /* Info.plist */,
 				089C1666FE841158C02AAC07 /* InfoPlist.strings */,
-				CEC151690CDD3AF70014896A /* BTParse.strings */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -163,7 +149,6 @@
 			children = (
 				F99630D8086E0D9600872609 /* pccts */,
 				F99630E0086E0D9600872609 /* src */,
-				32DBCF5E0370ADEE00C91783 /* BTParse_Prefix.pch */,
 			);
 			name = "Other Sources";
 			sourceTree = "<group>";
@@ -219,8 +204,6 @@
 				F9963114086E0D9600872609 /* tokens.h */,
 				F9963115086E0D9600872609 /* traversal.c */,
 				F9963117086E0D9600872609 /* util.c */,
-				CE5895340AA046CE000733B6 /* BDSKErrorObject.h */,
-				CE5895350AA046CE000733B6 /* BDSKErrorObject.m */,
 			);
 			name = src;
 			path = ../src;
@@ -254,7 +237,6 @@
 				F996314B086E0D9600872609 /* stdpccts.h in Headers */,
 				F996314F086E0D9600872609 /* sym.h in Headers */,
 				F9963153086E0D9600872609 /* tokens.h in Headers */,
-				CE5895360AA046CE000733B6 /* BDSKErrorObject.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -311,7 +293,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */,
-				CEC1516A0CDD3AF70014896A /* BTParse.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -341,7 +322,6 @@
 				F9963154086E0D9600872609 /* traversal.c in Sources */,
 				F9963156086E0D9600872609 /* util.c in Sources */,
 				F9E43AE608AD8C1A00A0354B /* parse_auxiliary.c in Sources */,
-				CE5895370AA046CE000733B6 /* BDSKErrorObject.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -358,16 +338,6 @@
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
-		CEC151690CDD3AF70014896A /* BTParse.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				CEC151590CDD3AC30014896A /* English */,
-				CEC1516B0CDD3AFE0014896A /* French */,
-				CE3D8F23125E8AF200AE0232 /* German */,
-			);
-			name = BTParse.strings;
-			sourceTree = "<group>";
-		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
@@ -381,10 +351,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_INPUT_FILETYPE = sourcecode.c.objc;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				GCC_PREFIX_HEADER = BTParse_Prefix.pch;
 				GCC_WARN_ABOUT_POINTER_SIGNEDNESS = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "@executable_path/../Frameworks";
@@ -406,9 +373,6 @@
 				FRAMEWORK_VERSION = A;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_INPUT_FILETYPE = sourcecode.c.objc;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				GCC_PREFIX_HEADER = BTParse_Prefix.pch;
 				GCC_WARN_ABOUT_POINTER_SIGNEDNESS = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "@executable_path/../Frameworks";

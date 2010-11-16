@@ -239,8 +239,11 @@ typedef struct
    char *      message;
 } bt_error;
 
+#define NUM_ERRCLASSES ((int) BTERR_INTERNAL + 1)
+
 typedef void (*bt_err_handler) (bt_error *);
 
+extern bt_err_handler err_handlers[NUM_ERRCLASSES];
 
 #if defined(__cplusplus__) || defined(__cplusplus) || defined(c_plusplus)
 extern "C" {
