@@ -70,7 +70,7 @@
     [error setLineNumber:line];
     [error setErrorMessage:msg];
     [error setIgnorableWarning:flag];
-    [[BDSKErrorObjectController sharedErrorObjectController] reportError:self];
+    [[BDSKErrorObjectController sharedErrorObjectController] reportError:error];
     [error release];
 }
 
