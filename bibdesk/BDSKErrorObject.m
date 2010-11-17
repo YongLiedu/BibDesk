@@ -79,7 +79,7 @@
 }
 
 - (NSString *)description{
-    return [NSString stringWithFormat:@"File name: %@, Editor: %@, line number: %d \n\t error class: %@, error message: %@", fileName, editor, lineNumber, errorClassName, errorMessage];
+    return [NSString stringWithFormat:@"<%@ file: %@, line: %ld\n\terror class: %@, error message: %@\n\teditor: %@>", [self class], fileName, lineNumber, errorClassName, errorMessage, editor];
 }
 
 - (NSString *)fileName {
