@@ -49,7 +49,6 @@
     self = [super init];
     if (self) {
         isIgnorableWarning = NO;
-        itemNumber = -1;
         lineNumber = -1;
     }
     return self;
@@ -64,20 +63,23 @@
     [super dealloc];
 }
 
-+ (void)reportError:(NSString *)msg forFile:(NSString *)filePath line:(NSInteger)line;
-{
++ (void)reportError:(NSString *)className message:(NSString *)msg forFile:(NSString *)filePath line:(NSInteger)line isWarning:(BOOL)flag{
     id error = [[self alloc] init];
-    // @@ localizing this is probably dangerous
-    [error setErrorClassName:NSLocalizedString(@"error", @"error name")];
+    [error setErrorClassName:className];
     [error setFileName:filePath];
     [error setLineNumber:line];
     [error setErrorMessage:msg];
+    [error setIgnorableWarning:flag];
     [[BDSKErrorObjectController sharedErrorObjectController] reportError:self];
     [error release];
 }
 
++ (void)reportErrorMessage:(NSString *)msg forFile:(NSString *)filePath line:(NSInteger)line{
+    [self reportError:NSLocalizedString(@"error", @"error name") message:msg forFile:filePath line:line isWarning:NO];
+}
+
 - (NSString *)description{
-    return [NSString stringWithFormat:@"File name: %@, Editor: %@, line number: %d \n\t item: %@, error class: %@, error message: %@", fileName, editor, lineNumber, itemDescription, errorClassName, errorMessage];
+    return [NSString stringWithFormat:@"File name: %@, Editor: %@, line number: %d \n\t error class: %@, error message: %@", fileName, editor, lineNumber, errorClassName, errorMessage];
 }
 
 - (NSString *)fileName {
@@ -121,25 +123,6 @@
     lineNumber = newLineNumber;
 }
 
-- (NSString *)itemDescription {
-    return itemDescription;
-}
-
-- (void)setItemDescription:(NSString *)newItemDescription {
-    if (itemDescription != newItemDescription) {
-        [itemDescription release];
-        itemDescription = [newItemDescription copy];
-    }
-}
-
-- (NSInteger)itemNumber {
-    return itemNumber;
-}
-
-- (void)setItemNumber:(NSInteger)newItemNumber {
-    itemNumber = newItemNumber;
-}
-
 - (NSString *)errorClassName {
     return errorClassName;
 }
@@ -162,7 +145,7 @@
     }
 }
 
-- (void)setIsIgnorableWarning:(BOOL)flag {
+- (void)setIgnorableWarning:(BOOL)flag {
     isIgnorableWarning = flag;
 }
 

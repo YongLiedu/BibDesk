@@ -552,7 +552,7 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
     // shouldn't ever see this case as far as I know, as long as we're using btparse
     if(names == NULL){
         [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
-        [BDSKErrorObject reportError:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unbalanced braces in author names:", @"Error description"), [(id)array description]] forFile:nil line:-1];
+        [BDSKErrorObject reportErrorMessage:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unbalanced braces in author names:", @"Error description"), [(id)array description]] forFile:nil line:-1];
         [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForPublication:pub];
         CFRelease(array);
 
@@ -730,7 +730,7 @@ static inline NSInteger numberOfValuesInField(AST *field)
 static inline BOOL checkStringForEncoding(NSString *s, NSInteger line, NSString *filePath, NSStringEncoding parserEncoding){
     if(![s canBeConvertedToEncoding:parserEncoding]){
         NSString *message = [NSString stringWithFormat:NSLocalizedString(@"Unable to convert characters to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:parserEncoding]];
-        [BDSKErrorObject reportError:message forFile:filePath line:line];      
+        [BDSKErrorObject reportErrorMessage:message forFile:filePath line:line];      
         return NO;
     } 
     
@@ -880,7 +880,7 @@ static BOOL addMacroToDictionary(AST *entry, NSMutableDictionary *dictionary, BD
         NSString *macroString = copyStringFromBTField(field, filePath, macroResolver, encoding); // handles TeXification
         if([macroResolver string:macroString dependsOnMacro:macroKey inMacroDefinitions:dictionary]){
             NSString *message = NSLocalizedString(@"Macro leads to circular definition, ignored.", @"Error description");            
-            [BDSKErrorObject reportError:message forFile:filePath line:field->line];
+            [BDSKErrorObject reportErrorMessage:message forFile:filePath line:field->line];
             if (error)
                 *error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Circular macro ignored.", @"Error description")];
         }else if(nil != macroString){
@@ -1044,7 +1044,7 @@ static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dict
             // this can happen with badly formed annote/abstract fields, and leads to data loss
             if(nil == tmpStr){
                 hadProblems = YES;
-                [BDSKErrorObject reportError:errorString forFile:filePath line:field->line];
+                [BDSKErrorObject reportErrorMessage:errorString forFile:filePath line:field->line];
             } else {
                 
                 // this returns nil in case of a syntax error; it isn't an encoding failure
@@ -1053,7 +1053,7 @@ static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dict
                 if (nil == fieldValue) {
                     hadProblems = YES;
                     NSString *message = [NSString stringWithFormat:NSLocalizedString(@"Unable to convert TeX string \"%@\"", @"Error description"), tmpStr];
-                    [BDSKErrorObject reportError:message forFile:filePath line:field->line];  
+                    [BDSKErrorObject reportErrorMessage:message forFile:filePath line:field->line];  
                 }
             }
             [tmpStr release];
@@ -1117,13 +1117,13 @@ static BOOL addItemToDictionaryOrSetDocumentInfo(AST *entry, NSMutableArray *ret
         } else {
             // no citekey
             hadProblems = YES;
-            [BDSKErrorObject reportError:NSLocalizedString(@"Missing citekey for entry (skipped entry)", @"Error description") forFile:filePath line:entry->line];
+            [BDSKErrorObject reportErrorMessage:NSLocalizedString(@"Missing citekey for entry (skipped entry)", @"Error description") forFile:filePath line:entry->line];
         }
         
     } else {
         // no entry type
         hadProblems = YES;
-        [BDSKErrorObject reportError:NSLocalizedString(@"Missing entry type (skipped entry)", @"Error description") forFile:filePath line:entry->line];
+        [BDSKErrorObject reportErrorMessage:NSLocalizedString(@"Missing entry type (skipped entry)", @"Error description") forFile:filePath line:entry->line];
     }
     
     [dictionary release];
@@ -1133,61 +1133,37 @@ static BOOL addItemToDictionaryOrSetDocumentInfo(AST *entry, NSMutableArray *ret
 
 void handleError (bt_error *err)
 {
-    BDSKErrorObject *errObj = [[BDSKErrorObject alloc] init];
+    NSString *name = nil;
+    NSString *fileName = nil;
     
     if (err->filename)
-    {
-        NSString *fileName = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:err->filename  length:strlen(err->filename)];
-        [errObj setFileName:fileName];
-    }
+        fileName = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:err->filename  length:strlen(err->filename)];
     
-    if (err->line > 0) 
-    {
-        [errObj setLineNumber:err->line];
-    }
-    else
-    {
-        [errObj setLineNumber:-1];
-    }
-    
-    if (err->item_desc && err->item > 0)
-    {
-        [errObj setItemDescription:[NSString stringWithUTF8String:err->item_desc]];
-        [errObj setItemNumber:err->item];
-    }
-    
-    switch (err->class)
-    {
+    switch (err->class) {
         case BTERR_CONTENT:
         case BTERR_LEXWARN:
         case BTERR_USAGEWARN:
-            [errObj setErrorClassName:NSLocalizedString(@"warning", @"error name")];
+            name = NSLocalizedString(@"warning", @"error name");
             break;
         case BTERR_LEXERR:
-            [errObj setErrorClassName:NSLocalizedString(@"error", @"error name")];
+            name = NSLocalizedString(@"error", @"error name");
             break;
         case BTERR_SYNTAX:
-            [errObj setErrorClassName:NSLocalizedString(@"syntax error", @"error name")];
+            name = NSLocalizedString(@"syntax error", @"error name");
             break;
         case BTERR_USAGEERR:
-            [errObj setErrorClassName:NSLocalizedString(@"fatal error", @"error name")];
+            name = NSLocalizedString(@"fatal error", @"error name");
             break;
         case BTERR_INTERNAL:
-            [errObj setErrorClassName:NSLocalizedString(@"internal error", @"error name")];
+            name = NSLocalizedString(@"internal error", @"error name");
             break;
         default:
             break;
     }
     
-    if (err->class > BTERR_USAGEWARN)
-        [errObj setIsIgnorableWarning:NO];
-    else
-        [errObj setIsIgnorableWarning:YES];
-    
-    [errObj setErrorMessage:[NSString stringWithUTF8String:err->message]];
-    
-    [[BDSKErrorObjectController sharedErrorObjectController] reportError:errObj];
-    
-    [errObj release];
-   
+    [BDSKErrorObject reportError:name
+                         message:[NSString stringWithUTF8String:err->message]
+                         forFile:fileName
+                            line:err->line ?: -1
+                       isWarning:err->class <= BTERR_USAGEWARN];
 }

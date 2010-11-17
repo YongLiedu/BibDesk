@@ -41,21 +41,19 @@
 @class BDSKErrorEditor, BibItem;
 
 @interface BDSKErrorObject : NSObject {
-    NSString *fileName;
 	BDSKErrorEditor *editor;
 	BibItem *publication;
     
+    NSString *fileName;
     NSInteger lineNumber;
-    
-    NSString *itemDescription;
-    NSInteger itemNumber;
     
     NSString *errorClassName;
     NSString *errorMessage;
     BOOL isIgnorableWarning;
 }
 
-+ (void)reportError:(NSString *)msg forFile:(NSString *)filePath line:(NSInteger)line;
++ (void)reportError:(NSString *)className message:(NSString *)msg forFile:(NSString *)filePath line:(NSInteger)line isWarning:(BOOL)flag;
++ (void)reportErrorMessage:(NSString *)msg forFile:(NSString *)filePath line:(NSInteger)line;
 
 - (NSString *)fileName;
 - (void)setFileName:(NSString *)newFileName;
@@ -69,19 +67,13 @@
 - (NSInteger)lineNumber;
 - (void)setLineNumber:(NSInteger)newLineNumber;
 
-- (NSString *)itemDescription;
-- (void)setItemDescription:(NSString *)newItemDescription;
-
-- (NSInteger)itemNumber;
-- (void)setItemNumber:(NSInteger)newItemNumber;
-
 - (NSString *)errorClassName;
 - (void)setErrorClassName:(NSString *)newErrorClassName;
 
 - (NSString *)errorMessage;
 - (void)setErrorMessage:(NSString *)newErrorMessage;
 
-- (void)setIsIgnorableWarning:(BOOL)flag;
+- (void)setIgnorableWarning:(BOOL)flag;
 - (BOOL)isIgnorableWarning;
 
 @end
