@@ -829,7 +829,7 @@ static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacro
             [sNode release];
         }
         
-            simple_value = simple_value->right;
+        simple_value = simple_value->right;
 	} // while simple_value
 	
     // This will return a single string-type node as a non-complex string.
@@ -942,22 +942,20 @@ static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
             [tmpStr release];
         }
     }
-    if(groupType != -1){
-        if(groups){
-            NSRange range = [commentStr rangeOfString:@"{"];
-            if(range.location != NSNotFound){
-                [commentStr deleteCharactersInRange:NSMakeRange(0,NSMaxRange(range))];
-                range = [commentStr rangeOfString:@"}" options:NSBackwardsSearch];
-                if(range.location != NSNotFound){
-                    [commentStr deleteCharactersInRange:NSMakeRange(range.location,[commentStr length] - range.location)];
-                    [groups setObject:[commentStr dataUsingEncoding:NSUTF8StringEncoding] forKey:[NSNumber numberWithInteger:groupType]];
-                }
-            }
-        }
-    }else{
+    if(groupType == -1){
         [frontMatter appendString:@"\n@comment{"];
         [frontMatter appendString:commentStr];
         [frontMatter appendString:@"}"];
+    }else if(groups){
+        NSRange range = [commentStr rangeOfString:@"{"];
+        if(range.location != NSNotFound){
+            [commentStr deleteCharactersInRange:NSMakeRange(0,NSMaxRange(range))];
+            range = [commentStr rangeOfString:@"}" options:NSBackwardsSearch];
+            if(range.location != NSNotFound){
+                [commentStr deleteCharactersInRange:NSMakeRange(range.location,[commentStr length] - range.location)];
+                [groups setObject:[commentStr dataUsingEncoding:NSUTF8StringEncoding] forKey:[NSNumber numberWithInteger:groupType]];
+            }
+        }
     }
     [commentStr release];    
     return success;
