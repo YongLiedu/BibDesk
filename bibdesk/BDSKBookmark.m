@@ -108,37 +108,37 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (id)initWithUrlString:(NSString *)aUrlString name:(NSString *)aName {
-    [self doesNotRecognizeSelector:_cmd];
+    BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
 - (id)initFolderWithChildren:(NSArray *)aChildren name:(NSString *)aName {
-    [self doesNotRecognizeSelector:_cmd];
+    BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
 - (id)initFolderWithName:(NSString *)aName {
-    [self doesNotRecognizeSelector:_cmd];
+    BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
 - (id)initRootWithChildren:(NSArray *)aChildren {
-    [self doesNotRecognizeSelector:_cmd];
+    BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
 - (id)initSeparator {
-    [self doesNotRecognizeSelector:_cmd];
+    BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
-    [self doesNotRecognizeSelector:_cmd];
+    BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
-    [self doesNotRecognizeSelector:_cmd];
+    BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
