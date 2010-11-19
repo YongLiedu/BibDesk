@@ -77,7 +77,6 @@
 #import "BDSKTemplateObjectProxy.h"
 #import "BDSKMainTableView.h"
 #import "BDSKGroupOutlineView.h"
-#import "NSTask_BDSKExtensions.h"
 #import "BDSKColoredView.h"
 #import "BDSKStringParser.h"
 #import "BDSKZoomablePDFView.h"
