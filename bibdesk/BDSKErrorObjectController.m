@@ -360,13 +360,11 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     lastIndex = [self countOfErrors];
 }
 
-- (void)endObservingErrorsForDocument:(BibDocument *)document pasteDragData:(NSData *)data publication:(BibItem *)pub{
+- (void)endObservingErrorsForDocument:(BibDocument *)document pasteDragData:(NSData *)data {
     if([currentErrors count]){
         if(document != nil){ // this should happen only for temporary author objects, which we ignore as they don't belong to any document
             id editor = data ? [self editorForPasteDragData:data document:document] : [self editorForDocument:document create:YES];
-            [currentErrors makeObjectsPerformSelector:@selector(setEditor:) withObject:editor];
-            if(pub)
-                [currentErrors makeObjectsPerformSelector:@selector(setPublication:) withObject:pub];
+            [currentErrors setValue:editor forKey:@"editor"];
             [[self mutableArrayValueForKey:@"errors"] addObjectsFromArray:currentErrors];
             if([self isWindowVisible] == NO && (handledNonIgnorableError || [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShowWarningsKey]))
                 [self showWindow:self];
@@ -376,16 +374,13 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     }
 }
 
-- (void)endObservingErrorsForDocument:(BibDocument *)document pasteDragData:(NSData *)data{
-    [self endObservingErrorsForDocument:document pasteDragData:data publication:nil];
-}
-
 - (void)endObservingErrorsForPublication:(BibItem *)pub{
     id document = [pub owner];
     // we can't and shouldn't manage errors from external groups
     if ([document isDocument] == NO)
         document = nil;
-    [self endObservingErrorsForDocument:document pasteDragData:nil publication:pub];
+    [currentErrors setValue:pub forKey:@"publications"];
+    [self endObservingErrorsForDocument:document pasteDragData:nil];
 }
 
 - (void)reportError:(BDSKErrorObject *)obj{
