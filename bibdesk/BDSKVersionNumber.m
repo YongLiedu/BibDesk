@@ -41,7 +41,7 @@
 
 @implementation BDSKVersionNumber
 
-// This allows version numbers like "1.3", "v1.3", "1.0b2", "1.0rc1", "198v3", "1.0-alpha-5", and ignores spaces
+// This allows version numbers like "1.3", "v1.3", "1.0b2", "1.0rc1", "198f3", "1.0-alpha-5", and ignores spaces
 
 + (NSComparisonResult)compareVersionString:(NSString *)versionString toVersionString:(NSString *)otherVersionString;
 {
