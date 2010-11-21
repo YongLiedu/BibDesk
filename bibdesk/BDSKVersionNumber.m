@@ -47,7 +47,7 @@
 {
     BDSKVersionNumber *versionNumber = [[self alloc] initWithVersionString:versionString];
     BDSKVersionNumber *otherVersionNumber = [[self alloc] initWithVersionString:otherVersionString];
-    NSComparisonResult result = [versionNumber compareToVersionNumber:otherVersionNumber];
+    NSComparisonResult result = [versionNumber compare:otherVersionNumber];
     [versionNumber release];
     [otherVersionNumber release];
     return result;
@@ -210,10 +210,10 @@
 {
     if ([otherObject isMemberOfClass:[self class]] == NO)
         return NO;
-    return [self compareToVersionNumber:(BDSKVersionNumber *)otherObject] == NSOrderedSame;
+    return [self compare:(BDSKVersionNumber *)otherObject] == NSOrderedSame;
 }
 
-- (NSComparisonResult)compareToVersionNumber:(BDSKVersionNumber *)otherVersion;
+- (NSComparisonResult)compare:(BDSKVersionNumber *)otherVersion;
 {
     if (otherVersion == nil)
         return NSOrderedAscending;

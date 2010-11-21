@@ -251,7 +251,7 @@ static void destroyTemporaryDirectory()
                         fileVersion = [[[BDSKVersionNumber alloc] initWithVersionString:[file substringFromIndex:4]] autorelease];
                     else
                         fileVersion = [[[BDSKVersionNumber alloc] initWithVersionString:@""] autorelease];
-                    if ([fileVersion compareToVersionNumber:version] == NSOrderedDescending) {
+                    if ([fileVersion compare:version] == NSOrderedDescending) {
                         lyxPipePath = pipePath;
                         version = fileVersion;
                     }

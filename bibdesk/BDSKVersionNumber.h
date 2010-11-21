@@ -70,6 +70,6 @@ enum {
 
 - (NSInteger)releaseType;
 
-- (NSComparisonResult)compareToVersionNumber:(BDSKVersionNumber *)otherVersion;
+- (NSComparisonResult)compare:(BDSKVersionNumber *)otherVersion;
 
 @end

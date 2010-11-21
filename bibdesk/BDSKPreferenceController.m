@@ -535,8 +535,8 @@ static id sharedController = nil;
             [record release];
             BDSKVersionNumber *minimumSystemVersion = [BDSKVersionNumber versionNumberWithVersionString:[paneDict valueForKey:MINIMUM_SYSTEM_VERSION_KEY]];
             BDSKVersionNumber *maximumSystemVersion = [BDSKVersionNumber versionNumberWithVersionString:[paneDict valueForKey:MAXIMUM_SYSTEM_VERSION_KEY]];
-            if ((minimumSystemVersion == nil || [systemVersion compareToVersionNumber:minimumSystemVersion] != NSOrderedAscending) &&
-                (maximumSystemVersion == nil || [systemVersion compareToVersionNumber:maximumSystemVersion] != NSOrderedDescending))
+            if ((minimumSystemVersion == nil || [systemVersion compare:minimumSystemVersion] != NSOrderedAscending) &&
+                (maximumSystemVersion == nil || [systemVersion compare:maximumSystemVersion] != NSOrderedDescending))
                 [paneArray addObject:identifier];
         }
         

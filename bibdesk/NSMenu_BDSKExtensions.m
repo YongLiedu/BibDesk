@@ -255,7 +255,7 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
         
         [versionStrings release];
         
-        NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"versionNumber" ascending:NO selector:@selector(compareToVersionNumber:)];
+        NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"versionNumber" ascending:NO selector:@selector(compare:)];
         [uniqueNamesAndURLs sortUsingDescriptors:[NSArray arrayWithObject:sort]];
         [sort release];
     } else if (count == 1) {
