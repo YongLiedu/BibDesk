@@ -45,7 +45,7 @@ enum {
 };
 typedef NSInteger BDSKBookmarkType;
 
-@interface BDSKBookmark : NSObject <NSCopying> {
+@interface BDSKBookmark : NSObject {
     BDSKBookmark *parent;
 }
 

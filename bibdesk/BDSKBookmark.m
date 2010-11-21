@@ -137,11 +137,6 @@ static Class BDSKBookmarkClass = Nil;
     return nil;
 }
 
-- (id)copyWithZone:(NSZone *)aZone {
-    BDSKRequestConcreteImplementation(self, _cmd);
-    return nil;
-}
-
 - (void)dealloc {
     parent = nil;
     [super dealloc];
@@ -256,10 +251,6 @@ static Class BDSKBookmarkClass = Nil;
     return self;
 }
 
-- (id)copyWithZone:(NSZone *)aZone {
-    return [[[self class] allocWithZone:aZone] initWithUrlString:urlString name:name];
-}
-
 - (void)dealloc {
     BDSKDESTROY(name);
     BDSKDESTROY(urlString);
@@ -362,10 +353,6 @@ static Class BDSKBookmarkClass = Nil;
     return self;
 }
 
-- (id)copyWithZone:(NSZone *)aZone {
-    return [[[self class] allocWithZone:aZone] initFolderWithChildren:[[[NSArray alloc] initWithArray:children copyItems:YES] autorelease] name:name];
-}
-
 - (void)dealloc {
     BDSKDESTROY(name);
     BDSKDESTROY(children);
@@ -450,10 +437,6 @@ static Class BDSKBookmarkClass = Nil;
 #pragma mark -
 
 @implementation BDSKSeparatorBookmark
-
-- (id)copyWithZone:(NSZone *)aZone {
-    return [[[self class] allocWithZone:aZone] init];
-}
 
 - (NSString *)description {
     return [NSString stringWithFormat:@"<%@: separator>", [self class]];
