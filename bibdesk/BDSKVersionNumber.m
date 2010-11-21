@@ -107,7 +107,7 @@
                             [mutableVersionString appendString:@"b"];
                         } else if ([scanner scanString:@"development" intoString:NULL] || [scanner scanString:@"d" intoString:NULL]) {
                             releaseType = BDSKDevelopmentVersionType;
-                            [mutableVersionString appendString:@"b"];
+                            [mutableVersionString appendString:@"d"];
                         } else if ([scanner scanString:@"final" intoString:NULL] || [scanner scanString:@"f" intoString:NULL]) {
                             releaseType = BDSKReleaseCandidateVersionType;
                             [mutableVersionString appendString:@"f"];
