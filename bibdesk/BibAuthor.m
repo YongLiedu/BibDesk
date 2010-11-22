@@ -45,7 +45,7 @@
 
 @interface BibAuthor (Private)
 
-- (void)splitName:(NSString *)newName;
+- (void)splitName;
 - (void)setupNames;
 - (void)setupAbbreviatedNames;
 
@@ -109,7 +109,7 @@ static CFCharacterSetRef dashSet = NULL;
         
         originalName = [aName copy];
         // this does all the name parsing
-		[self splitName:aName];
+		[self splitName];
 	}
     
     return self;
@@ -146,8 +146,9 @@ static CFCharacterSetRef dashSet = NULL;
     if([coder allowsKeyedCoding]){
         self = [super init];
         publication = [coder decodeObjectForKey:@"publication"];
+        originalName = [[coder decodeObjectForKey:@"name"] retain];
         // this should take care of the rest of the ivars
-        [self splitName:[coder decodeObjectForKey:@"name"]];
+        [self splitName];
     } else {
         [[super init] release];
         self = [[NSKeyedUnarchiver unarchiveObjectWithData:[coder decodeDataObject]] retain];
@@ -157,7 +158,7 @@ static CFCharacterSetRef dashSet = NULL;
 
 - (void)encodeWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
-        [coder encodeObject:name forKey:@"name"];
+        [coder encodeObject:originalName forKey:@"name"];
         [coder encodeConditionalObject:publication forKey:@"publication"];
     } else {
         [coder encodeDataObject:[NSKeyedArchiver archivedDataWithRootObject:self]];
@@ -395,9 +396,9 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 
 @implementation BibAuthor (Private)
 
-- (void)splitName:(NSString *)newName{
+- (void)splitName{
     
-    NSParameterAssert(newName != nil);
+    NSParameterAssert(originalName != nil);
     // @@ this is necessary because the hash method depends on the internal state of the object (which is itself necessary since we can have multiple author instances of the same author)
     if(name != nil)
         @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Attempt to modify non-nil attribute of immutable object %@", self] userInfo:nil];
@@ -407,7 +408,7 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
     BDSKASSERT(lastName == nil);
     BDSKASSERT(jrPart == nil);
     
-    NSDictionary *parts = [BDSKBibTeXParser nameComponents:newName forPublication:publication];
+    NSDictionary *parts = [BDSKBibTeXParser nameComponents:originalName forPublication:publication];
     
     firstName = [[parts objectForKey:@"first"] copy];
     vonPart = [[parts objectForKey:@"von"] copy];
