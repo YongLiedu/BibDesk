@@ -379,7 +379,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     // we can't and shouldn't manage errors from external groups
     if ([document isDocument] == NO)
         document = nil;
-    [currentErrors setValue:pub forKey:@"publications"];
+    [currentErrors setValue:pub forKey:@"publication"];
     [self endObservingErrorsForDocument:document pasteDragData:nil];
 }
 
