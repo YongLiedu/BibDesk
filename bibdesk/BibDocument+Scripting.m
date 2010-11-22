@@ -537,7 +537,7 @@
 
 - (BDSKCategoryGroup *)valueInFieldGroupsWithName:(NSString *)name {
     if ([[self currentGroupField] isPersonField]) {
-        BibAuthor *fuzzyName = [NSString isEmptyString:name] ? [BibAuthor emptyAuthor] : [BibAuthor authorWithName:name publication:nil];
+        BibAuthor *fuzzyName = [NSString isEmptyString:name] ? [BibAuthor emptyAuthor] : [BibAuthor authorWithName:name];
         for (BDSKCategoryGroup *group in [groups categoryGroups])
             if ([[group name] fuzzyEqual:fuzzyName])
                 return group;

@@ -62,7 +62,7 @@ static CFCharacterSetRef dashSet = NULL;
     BDSKINITIALIZE;
     separatorSet = CFCharacterSetCreateWithCharactersInString(CFAllocatorGetDefault(), CFSTR(" ."));
     dashSet = CFCharacterSetCreateWithCharactersInString(CFAllocatorGetDefault(), CFSTR("-"));
-    emptyAuthorInstance = [[BibAuthor alloc] initWithName:@"" publication:nil forField:BDSKAuthorString];
+    emptyAuthorInstance = [[BibAuthor alloc] initWithName:@"" publication:nil forField:nil];
 }
     
 
@@ -70,8 +70,8 @@ static CFCharacterSetRef dashSet = NULL;
     return NO; 
 }
 
-+ (BibAuthor *)authorWithName:(NSString *)newName publication:(BibItem *)aPub{	
-    return [[[BibAuthor alloc] initWithName:newName publication:aPub forField:BDSKAuthorString] autorelease];
++ (BibAuthor *)authorWithName:(NSString *)newName {	
+    return [[[BibAuthor alloc] initWithName:newName publication:nil forField:nil] autorelease];
 }
 
 + (BibAuthor *)authorWithVCardRepresentation:(NSData *)vCard{
@@ -87,7 +87,7 @@ static CFCharacterSetRef dashSet = NULL;
     
     [person release];
     
-    BibAuthor *author = [NSString isEmptyString:name] ? [BibAuthor emptyAuthor] : [BibAuthor authorWithName:name publication:nil];
+    BibAuthor *author = [NSString isEmptyString:name] ? [BibAuthor emptyAuthor] : [BibAuthor authorWithName:name];
     [name release];
     
     return author;
@@ -105,7 +105,7 @@ static CFCharacterSetRef dashSet = NULL;
 		// set this first so we have the document for parser errors
         publication = aPub; // don't retain this, since it retains us
         
-        field = aField ? [aField retain] : [BDSKAuthorString retain];
+        field = [(aField ?: BDSKAuthorString) retain];
         
         originalName = [aName copy];
         // this does all the name parsing

@@ -56,7 +56,7 @@
 + (BibAuthor *)authorWithName:(NSString *)aName inPublications:(NSArray *)publications {
     // create a new author so we can use BibAuthor's isEqual: method for comparison
     // instead of trying to do string comparisons
-    BibAuthor *newAuth = [BibAuthor authorWithName:aName publication:nil];
+    BibAuthor *newAuth = [BibAuthor authorWithName:aName];
 	for (BibItem *pub in publications) {
 		for (BibAuthor *auth in [pub pubAuthors]) {
 			if ([auth isEqual:newAuth])
@@ -76,7 +76,7 @@
 + (BibAuthor *)editorWithName:(NSString *)aName inPublications:(NSArray *)publications {
     // create a new author so we can use BibAuthor's isEqual: method for comparison
     // instead of trying to do string comparisons
-    BibAuthor *newAuth = [BibAuthor authorWithName:aName publication:nil];
+    BibAuthor *newAuth = [BibAuthor authorWithName:aName];
 	for (BibItem *pub in publications) {
 		for (BibAuthor *auth in [pub pubEditors]) {
 			if ([auth isEqual:newAuth])

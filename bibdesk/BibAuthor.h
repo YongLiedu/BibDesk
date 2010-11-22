@@ -76,7 +76,7 @@ enum {
     NSString *fuzzyName;  // always non-nil
 }
 
-+ (BibAuthor *)authorWithName:(NSString *)name publication:(BibItem *)aPub;
++ (BibAuthor *)authorWithName:(NSString *)name;
 + (id)emptyAuthor;
 + (BibAuthor *)authorWithVCardRepresentation:(NSData *)vCard;
 

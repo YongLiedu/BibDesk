@@ -379,7 +379,7 @@
     BOOL found;
     
     // this is only used as a placeholder for the name, so we don't care about its pub or field
-    BibAuthor *newPerson = [BibAuthor authorWithName:newNameString publication:nil];
+    BibAuthor *newPerson = [BibAuthor authorWithName:newNameString];
     
     for (NSDictionary *item in pubs) {
         

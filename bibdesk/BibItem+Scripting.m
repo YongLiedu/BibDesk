@@ -101,7 +101,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 - (BibAuthor *)valueInScriptingAuthorsWithName:(NSString *)name {
     // create a new author so we can use BibAuthor's isEqual: method for comparison
     // instead of trying to do string comparisons
-    BibAuthor *newAuth = [BibAuthor authorWithName:name publication:nil];
+    BibAuthor *newAuth = [BibAuthor authorWithName:name];
 	
     for (BibAuthor *auth in [self pubAuthors]) {
 		if ([auth isEqual:newAuth])
@@ -117,7 +117,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 - (BibAuthor *)valueInScriptingEditorsWithName:(NSString *)name {
     // create a new author so we can use BibAuthor's isEqual: method for comparison
     // instead of trying to do string comparisons
-    BibAuthor *newAuth = [BibAuthor authorWithName:name publication:nil];
+    BibAuthor *newAuth = [BibAuthor authorWithName:name];
 	
     for (BibAuthor *auth in [self pubEditors]) {
 		if ([auth isEqual:newAuth])
