@@ -177,8 +177,8 @@ static CFCharacterSetRef dashSet = NULL;
 }
 
 - (NSUInteger)hash{
-    // @@ assumes that these objects will not be modified while contained in a hashing collection
-    return hash;
+    // isEqual: is based on normalizedName, so also hash must be based on that
+    return [normalizedName hash];
 }
 
 #pragma mark Comparison
@@ -484,9 +484,6 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
     }
     
     normalizedName = [theName copy];
-    
-    // our hash is based upon the normalized name, so isEqual: must also be based upon the normalized name
-    hash = [normalizedName hash];
 
     // create the sortable name
     // "Lastname Firstname" (no comma, von, or jr), with braces removed
