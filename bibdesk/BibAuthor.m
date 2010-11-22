@@ -355,17 +355,31 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
     NSMutableString *s = [NSMutableString stringWithString:@"<name type=\"personal\">"];
     
     if(firstName){
-        [s appendFormat:@"<namePart type=\"given\">%@</namePart>", firstName];
+        [s appendString:@"<namePart type=\"given\">"];
+        [s appendString:firstName];
+        [s appendString:@"</namePart>"];
     }
     
     if(lastName){
-        [s appendFormat:@"<namePart type=\"family\">%@%@</namePart>", (vonPart ?: @""),
-            lastName];
+        [s appendString:@"<namePart type=\"family\">"];
+        if(vonPart){
+            [s appendString:vonPart];
+            [s appendString:@" "];
+        }
+        [s appendString:lastName];
+        [s appendString:@"</namePart>"];
+    }
+    
+    if(jrPart){
+        [s appendString:@"<namePart type=\"termsOfAddress\">"];
+        [s appendString:jrPart];
+        [s appendString:@"</namePart>"];
     }
     
     if(role){
-        [s appendFormat:@"<role> <roleTerm authority=\"marcrelator\" type=\"text\">%@</roleTerm></role>",
-        role];
+        [s appendString:@"<role><roleTerm authority=\"marcrelator\" type=\"text\">"];
+        [s appendString:role];
+        [s appendString:@"</roleTerm></role>"];
     }
     
     [s appendString:@"</name>"];
