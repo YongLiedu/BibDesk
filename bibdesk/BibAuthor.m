@@ -102,9 +102,6 @@ static CFCharacterSetRef dashSet = NULL;
 
 - (id)initWithName:(NSString *)aName andPub:(BibItem *)aPub forField:(NSString *)aField{
 	if (self = [super init]) {
-        // zero the flags
-        memset(&flags, (BOOL)0, sizeof(BibAuthorFlags));
-
 		// set this first so we have the document for parser errors
         publication = aPub; // don't retain this, since it retains us
         
@@ -148,7 +145,6 @@ static CFCharacterSetRef dashSet = NULL;
 - (id)initWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
         self = [super init];
-        memset(&flags, (BOOL)0, sizeof(BibAuthorFlags));
         publication = [coder decodeObjectForKey:@"publication"];
         // this should take care of the rest of the ivars
         [self splitName:[coder decodeObjectForKey:@"name"]];
@@ -244,7 +240,7 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
         return NO;
     
     // if one of the first names is empty, no point in doing anything more sophisticated (unless we want to force the order here)
-    if(flags.hasFirst == NO && otherAuth->flags.hasFirst == NO)
+    if(firstName == nil && [otherAuth firstName] == nil)
         return YES;
     else 
         return __BibAuthorsHaveEqualFirstNames((CFArrayRef)firstNames, (CFArrayRef)otherAuth->firstNames);
@@ -418,27 +414,11 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
     BDSKASSERT(jrPart == nil);
     
     NSDictionary *parts = [BDSKBibTeXParser nameComponents:newName forPublication:publication];
-    NSString *nameString;
     
-    if (nameString = [parts objectForKey:@"first"]) {
-        firstName = [nameString copy];
-        flags.hasFirst = YES;
-    }
-    
-    if (nameString = [parts objectForKey:@"von"]) {
-        vonPart = [nameString copy];
-        flags.hasVon = YES;
-    }
-    
-    if (nameString = [parts objectForKey:@"last"]) {
-        lastName = [nameString copy];
-        flags.hasLast = YES;
-    }
-    
-    if (nameString = [parts objectForKey:@"jr"]) {
-        jrPart = [nameString copy];
-        flags.hasJr = YES;
-    }
+    firstName = [[parts objectForKey:@"first"] copy];
+    vonPart = [[parts objectForKey:@"von"] copy];
+    lastName = [[parts objectForKey:@"last"] copy];
+    jrPart = [[parts objectForKey:@"jr"] copy];
     
     [self setupNames];    
 }
@@ -466,19 +446,19 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
     // @@ This will potentially alter data if BibItem ever saves based on -[BibAuthor name] instead of the original string it keeps in pubFields    
 
     // first and middle are associated
-    if(flags.hasFirst){
+    if(firstName){
         [theName appendString:firstName];
         [theName appendString:@" "];
     }
     
-    if(flags.hasVon){
+    if(vonPart){
         [theName appendString:vonPart];
         [theName appendString:@" "];
     }
     
-    if(flags.hasLast) [theName appendString:lastName];
+    if(lastName) [theName appendString:lastName];
     
-    if(flags.hasJr){
+    if(jrPart){
         [theName appendString:@", "];
         [theName appendString:jrPart];
     }
@@ -489,21 +469,21 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
 
     [theName replaceCharactersInRange:NSMakeRange(0, [theName length]) withString:@""];
 
-    if(flags.hasVon){
+    if(vonPart){
         [theName appendString:vonPart];
         [theName appendString:@" "];
     }
     
-    if(flags.hasLast) [theName appendString:lastName];
+    if(lastName) [theName appendString:lastName];
     
-    if(flags.hasJr){
+    if(jrPart){
         [theName appendString:@", "];
         [theName appendString:jrPart];
     }
     
     fullLastName = [theName copy];
     
-    if(flags.hasFirst){
+    if(firstName){
         [theName appendString:@", "];
         [theName appendString:firstName];
     }
@@ -517,25 +497,28 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
     // "Lastname Firstname" (no comma, von, or jr), with braces removed
         
     [theName replaceCharactersInRange:NSMakeRange(0, [theName length]) withString:@""];
-
-    [theName appendString:(flags.hasLast ? lastName : @"")];
-    [theName appendString:(flags.hasFirst ? @" " : @"")];
-    [theName appendString:(flags.hasFirst ? firstName : @"")];
+    
+    if(lastName)
+        [theName appendString:lastName];
+    if(firstName) {
+        [theName appendString:@" "];
+        [theName appendString:firstName];
+    }
     [theName deleteCharactersInCharacterSet:[NSCharacterSet curlyBraceCharacterSet]];
     sortableName = [theName copy];
     
     // components of the first name used in fuzzy comparisons
     
     // @@ see note on firstLetterCharacterString() function for possible issues with this
-    firstNames = flags.hasFirst ? (id)BDStringCreateComponentsSeparatedByCharacterSetTrimWhitespace(CFAllocatorGetDefault(), (CFStringRef)firstName, separatorSet, FALSE) : [[NSArray alloc] init];
+    firstNames = firstName ? (id)BDStringCreateComponentsSeparatedByCharacterSetTrimWhitespace(CFAllocatorGetDefault(), (CFStringRef)firstName, separatorSet, FALSE) : [[NSArray alloc] init];
 
     // fuzzy comparison  name
     // don't bother with spaces for this comparison (and whitespace is already collapsed)
     
     [theName replaceCharactersInRange:NSMakeRange(0, [theName length]) withString:@""];
 
-    if(flags.hasVon) [theName appendString:vonPart];
-	if(flags.hasLast) [theName appendString:lastName];
+    if(vonPart) [theName appendString:vonPart];
+	if(lastName) [theName appendString:lastName];
     fuzzyName = [theName copy];
     
     // dispose of the temporary mutable string
@@ -590,7 +573,7 @@ static inline void appendFirstLetterCharacters(CFAllocatorRef alloc, CFMutableSt
     CFMutableStringRef abbrevFirstName = NULL;
     CFMutableStringRef shortAbbrevFirstName = NULL;
     
-    if(flags.hasFirst){
+    if(firstName){
         
         // allow for ". " around each character
         abbrevFirstName = CFStringCreateMutable(alloc, firstNameMaxLength);
@@ -604,7 +587,7 @@ static inline void appendFirstLetterCharacters(CFAllocatorRef alloc, CFMutableSt
     }
     
     // abbrevName is now empty; set it to the first name
-    if(flags.hasFirst){
+    if(firstName){
         CFStringAppend(abbrevName, abbrevFirstName);
         CFStringAppend(abbrevName, CFSTR(" "));
     }
@@ -616,7 +599,7 @@ static inline void appendFirstLetterCharacters(CFAllocatorRef alloc, CFMutableSt
     // now for the normalized abbreviated form; start with only the last name
     CFStringReplaceAll(abbrevName, (CFStringRef)fullLastName);
     
-    if(flags.hasFirst){
+    if(firstName){
         CFStringAppend(abbrevName, CFSTR(", "));
         CFStringAppend(abbrevName, abbrevFirstName);
         
@@ -629,16 +612,16 @@ static inline void appendFirstLetterCharacters(CFAllocatorRef alloc, CFMutableSt
     // now for the unpunctuated normalized abbreviated form
     CFStringReplaceAll(abbrevName, CFSTR(""));
     
-    if(flags.hasVon){
+    if(vonPart){
         CFStringAppend(abbrevName, (CFStringRef)vonPart);
         CFStringAppend(abbrevName, CFSTR(" "));
     }
     
-    if (flags.hasLast){
+    if (lastName){
         CFStringAppend(abbrevName, (CFStringRef)lastName);
     }
     
-    if(flags.hasFirst){
+    if(firstName){
         CFStringAppend(abbrevName, CFSTR(" "));
         CFStringAppend(abbrevName, shortAbbrevFirstName);
         
@@ -646,7 +629,7 @@ static inline void appendFirstLetterCharacters(CFAllocatorRef alloc, CFMutableSt
         CFRelease(shortAbbrevFirstName);
     }
     
-    if(flags.hasJr){
+    if(jrPart){
         CFStringAppend(abbrevName, CFSTR(" "));
         CFStringAppend(abbrevName, (CFStringRef)jrPart);
     }

@@ -44,13 +44,6 @@
 @class BibItem;
 @class ABPerson;
 
-typedef struct _BibAuthorFlags {
-    BOOL hasFirst;
-    BOOL hasVon;
-    BOOL hasLast;
-    BOOL hasJr;
-} BibAuthorFlags;
-
 enum {
     BDSKAuthorDisplayFirstNameMask = 1,
     BDSKAuthorAbbreviateFirstNameMask = 2,
@@ -82,7 +75,6 @@ enum {
 @private
     NSArray *firstNames;  // always non-nil
     NSString *fuzzyName;  // always non-nil
-    BibAuthorFlags flags; // do not archive
 }
 
 + (BibAuthor *)authorWithName:(NSString *)name andPub:(BibItem *)aPub;
