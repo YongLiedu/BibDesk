@@ -246,7 +246,7 @@ static void fixEEURL(BibItem *pub)
     
     NSArray *searchResults = nil;
     if ([database caseInsensitiveCompare:@"authors"] == NSOrderedSame) {
-        BibAuthor *author = [BibAuthor authorWithName:searchTerm andPub:nil];
+        BibAuthor *author = [BibAuthor authorWithName:searchTerm publication:nil];
         BDSKDBLPAllPublicationsAuthorYear *invocation = [[BDSKDBLPAllPublicationsAuthorYear alloc] init];    
         [invocation setParameters:([author firstName] ?: @"")
                                                             in_familyName:([author lastName] ?: @"")

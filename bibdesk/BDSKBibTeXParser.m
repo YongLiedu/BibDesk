@@ -565,7 +565,7 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
     BibAuthor *anAuthor;
     
     for(i = 0; i < iMax; i++){
-        anAuthor = [[BibAuthor alloc] initWithName:(id)CFArrayGetValueAtIndex(names, i) andPub:pub forField:(NSString *)field];
+        anAuthor = [[BibAuthor alloc] initWithName:(id)CFArrayGetValueAtIndex(names, i) publication:pub forField:(NSString *)field];
         [authors addObject:anAuthor];
         [anAuthor release];
     }

@@ -62,7 +62,7 @@ static CFCharacterSetRef dashSet = NULL;
     BDSKINITIALIZE;
     separatorSet = CFCharacterSetCreateWithCharactersInString(CFAllocatorGetDefault(), CFSTR(" ."));
     dashSet = CFCharacterSetCreateWithCharactersInString(CFAllocatorGetDefault(), CFSTR("-"));
-    emptyAuthorInstance = [[BibAuthor alloc] initWithName:@"" andPub:nil forField:BDSKAuthorString];
+    emptyAuthorInstance = [[BibAuthor alloc] initWithName:@"" publication:nil forField:BDSKAuthorString];
 }
     
 
@@ -70,11 +70,11 @@ static CFCharacterSetRef dashSet = NULL;
     return NO; 
 }
 
-+ (BibAuthor *)authorWithName:(NSString *)newName andPub:(BibItem *)aPub{	
-    return [[[BibAuthor alloc] initWithName:newName andPub:aPub forField:BDSKAuthorString] autorelease];
++ (BibAuthor *)authorWithName:(NSString *)newName publication:(BibItem *)aPub{	
+    return [[[BibAuthor alloc] initWithName:newName publication:aPub forField:BDSKAuthorString] autorelease];
 }
 
-+ (BibAuthor *)authorWithVCardRepresentation:(NSData *)vCard andPub:aPub{
++ (BibAuthor *)authorWithVCardRepresentation:(NSData *)vCard{
     ABPerson *person = [[ABPerson alloc] initWithVCardRepresentation:vCard];
     NSMutableString *name = [[NSMutableString alloc] initWithCapacity:10];
     
@@ -87,7 +87,7 @@ static CFCharacterSetRef dashSet = NULL;
     
     [person release];
     
-    BibAuthor *author = [NSString isEmptyString:name] ? [BibAuthor emptyAuthor] : [BibAuthor authorWithName:name andPub:aPub];
+    BibAuthor *author = [NSString isEmptyString:name] ? [BibAuthor emptyAuthor] : [BibAuthor authorWithName:name publication:nil];
     [name release];
     
     return author;
@@ -100,7 +100,7 @@ static CFCharacterSetRef dashSet = NULL;
     return emptyAuthorInstance;
 }
 
-- (id)initWithName:(NSString *)aName andPub:(BibItem *)aPub forField:(NSString *)aField{
+- (id)initWithName:(NSString *)aName publication:(BibItem *)aPub forField:(NSString *)aField{
 	if (self = [super init]) {
 		// set this first so we have the document for parser errors
         publication = aPub; // don't retain this, since it retains us
@@ -139,7 +139,7 @@ static CFCharacterSetRef dashSet = NULL;
     if (NSShouldRetainWithZone(self, zone))
         return [self retain];
     else
-        return [[[self class] allocWithZone:zone] initWithName:originalName andPub:publication forField:field];
+        return [[[self class] allocWithZone:zone] initWithName:originalName publication:publication forField:field];
 }
 
 - (id)initWithCoder:(NSCoder *)coder{

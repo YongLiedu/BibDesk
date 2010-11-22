@@ -379,7 +379,7 @@
     BOOL found;
     
     // this is only used as a placeholder for the name, so we don't care about its pub or field
-    BibAuthor *newPerson = [BibAuthor authorWithName:newNameString andPub:nil];
+    BibAuthor *newPerson = [BibAuthor authorWithName:newNameString publication:nil];
     
     for (NSDictionary *item in pubs) {
         
@@ -453,7 +453,7 @@
     if([[pboard types] containsObject:NSVCardPboardType] == NO)
         return NO;
 	
-	BibAuthor *newAuthor = [BibAuthor authorWithVCardRepresentation:[pboard dataForType:NSVCardPboardType] andPub:nil];
+	BibAuthor *newAuthor = [BibAuthor authorWithVCardRepresentation:[pboard dataForType:NSVCardPboardType]];
 	
 	if([newAuthor isEqual:[BibAuthor emptyAuthor]])
 		return NO;

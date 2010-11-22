@@ -76,13 +76,11 @@ enum {
     NSString *fuzzyName;  // always non-nil
 }
 
-+ (BibAuthor *)authorWithName:(NSString *)name andPub:(BibItem *)aPub;
++ (BibAuthor *)authorWithName:(NSString *)name publication:(BibItem *)aPub;
 + (id)emptyAuthor;
-+ (BibAuthor *)authorWithVCardRepresentation:(NSData *)vCard andPub:aPub;
++ (BibAuthor *)authorWithVCardRepresentation:(NSData *)vCard;
 
-// maybe this should be 'and pubs'
-- (id)initWithName:(NSString *)aName andPub:(BibItem *)aPub forField:(NSString *)aField;
-- (void)dealloc;
+- (id)initWithName:(NSString *)aName publication:(BibItem *)aPub forField:(NSString *)aField;
 
 - (NSComparisonResult)compare:(BibAuthor *)otherAuth;
 - (BOOL)fuzzyEqual:(BibAuthor *)otherAuth;

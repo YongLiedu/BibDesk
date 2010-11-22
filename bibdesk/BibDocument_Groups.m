@@ -1201,7 +1201,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     while ([names containsObject:name])
         name = [NSString stringWithFormat:@"%@%lu", baseName, (unsigned long)i++];
     if (isAuthor)
-        name = [BibAuthor authorWithName:name andPub:nil];
+        name = [BibAuthor authorWithName:name publication:nil];
     group = [[[BDSKCategoryGroup alloc] initWithName:name key:currentGroupField] autorelease];
     
     // first merge in shared groups

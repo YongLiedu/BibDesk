@@ -75,13 +75,13 @@
 			NSLocalizedString(@"Keyword1,Keyword2", @"Keywords for preview item in preferences"), BDSKKeywordsString, 
 			NSLocalizedString(@"Local File Name.pdf", @"Local-Url for preview item in preferences"), BDSKLocalUrlString, nil];
         pubAuthors = [[NSArray alloc] initWithObjects:
-            [BibAuthor authorWithName:@"McCracken, M." andPub:nil], 
-            [BibAuthor authorWithName:@"Maxwell, A." andPub:nil], 
-            [BibAuthor authorWithName:@"Hofman, C. M." andPub:nil], 
-            [BibAuthor authorWithName:@"Porst, S. S." andPub:nil], 
-            [BibAuthor authorWithName:@"Howison, J." andPub:nil], 
-            [BibAuthor authorWithName:@"Routley, M." andPub:nil], 
-            [BibAuthor authorWithName:@"Spiegel, S." andPub:nil], nil];
+            [BibAuthor authorWithName:@"McCracken, M." publication:nil], 
+            [BibAuthor authorWithName:@"Maxwell, A." publication:nil], 
+            [BibAuthor authorWithName:@"Hofman, C. M." publication:nil], 
+            [BibAuthor authorWithName:@"Porst, S. S." publication:nil], 
+            [BibAuthor authorWithName:@"Howison, J." publication:nil], 
+            [BibAuthor authorWithName:@"Routley, M." publication:nil], 
+            [BibAuthor authorWithName:@"Spiegel, S." publication:nil], nil];
         owner = [[BDSKPreviewOwner alloc] init];
         linkedFile = [[BDSKPreviewLinkedFile alloc] init];
     }
