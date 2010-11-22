@@ -451,39 +451,14 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
 	// temporary string storage
     NSMutableString *theName = [[NSMutableString alloc] initWithCapacity:14];
     
-    // create the name ivar as "First Middle von Last, Jr", which is more readable and less sortable
-    // @@ This will potentially alter data if BibItem ever saves based on -[BibAuthor name] instead of the original string it keeps in pubFields    
-
-    // first and middle are associated
-    if(firstName){
-        [theName appendString:firstName];
-        [theName appendString:@" "];
-    }
-    
     if(vonPart){
         [theName appendString:vonPart];
         [theName appendString:@" "];
     }
     
-    if(lastName) [theName appendString:lastName];
-    
-    if(jrPart){
-        [theName appendString:@", "];
-        [theName appendString:jrPart];
+    if(lastName){
+        [theName appendString:lastName];
     }
-    
-    name = [theName copy];
-    
-    // create the normalized name (see comment above method)
-
-    [theName replaceCharactersInRange:NSMakeRange(0, [theName length]) withString:@""];
-
-    if(vonPart){
-        [theName appendString:vonPart];
-        [theName appendString:@" "];
-    }
-    
-    if(lastName) [theName appendString:lastName];
     
     if(jrPart){
         [theName appendString:@", "];
@@ -492,25 +467,45 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
     
     fullLastName = [theName copy];
     
+    // create the normalized name (see comment above method)
+    // start with what we already have
+    
     if(firstName){
         [theName appendString:@", "];
         [theName appendString:firstName];
     }
     
     normalizedName = [theName copy];
+    
+    // create normal name
+    
+    [theName replaceCharactersInRange:NSMakeRange(0, [theName length]) withString:@""];
+    
+    if(firstName){
+        [theName appendString:firstName];
+        [theName appendString:@" "];
+    }
+    
+    [theName appendString:fullLastName];
+    
+    name = [theName copy];
 
     // create the sortable name
     // "Lastname Firstname" (no comma, von, or jr), with braces removed
         
     [theName replaceCharactersInRange:NSMakeRange(0, [theName length]) withString:@""];
     
-    if(lastName)
+    if(lastName){
         [theName appendString:lastName];
+    }
+    
     if(firstName) {
         [theName appendString:@" "];
         [theName appendString:firstName];
     }
+    
     [theName deleteCharactersInCharacterSet:[NSCharacterSet curlyBraceCharacterSet]];
+    
     sortableName = [theName copy];
     
     // components of the first name used in fuzzy comparisons
@@ -524,7 +519,9 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
     [theName replaceCharactersInRange:NSMakeRange(0, [theName length]) withString:@""];
 
     if(vonPart) [theName appendString:vonPart];
-	if(lastName) [theName appendString:lastName];
+	
+    if(lastName) [theName appendString:lastName];
+    
     fuzzyName = [theName copy];
     
     // dispose of the temporary mutable string
