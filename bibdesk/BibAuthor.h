@@ -97,25 +97,32 @@ enum {
 */
 - (NSComparisonResult)sortCompare:(BibAuthor *)otherAuth;
 
-/*!
-    @method     displayName
-    @abstract   Displays a name according to user's preferences.
-    @discussion (comprehensive description)
-    @result     (description)
-*/
-- (NSString *)displayName;
-- (NSString *)normalizedName;
-- (NSString *)fullLastName;
-- (NSString *)sortableName;
-- (NSString *)originalName;
-- (NSString *)name;
+// The basic parts as interpreted by btparse
 - (NSString *)firstName;
 - (NSString *)vonPart;
 - (NSString *)lastName;
 - (NSString *)jrPart;
+
+// name used to create the BibAuthor instance
+- (NSString *)originalName;
+
+// First von Last, Jr
+- (NSString *)name;
+// von Last, Jr, First
+- (NSString *)normalizedName;
+// According to user preferences
+- (NSString *)displayName;
+// von Last, Jr
+- (NSString *)fullLastName;
+// Last First
+- (NSString *)sortableName;
+// F. von Last, Jr
 - (NSString *)abbreviatedName;
+// von Last, Jr, F.
 - (NSString *)abbreviatedNormalizedName;
+// von Last, Jr, F
 - (NSString *)unpunctuatedAbbreviatedNormalizedName;
+
 - (NSArray *)firstNames;
 
 - (NSString *)MODSStringWithRole:(NSString *)rel;
