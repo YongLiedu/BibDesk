@@ -122,7 +122,6 @@ enum {
 - (NSString *)MODSStringWithRole:(NSString *)rel;
 
 - (BibItem *)publication;
-- (void)setPublication:(BibItem *)newPub;
 
 - (NSString *)field;
 

@@ -376,12 +376,6 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
     return publication;
 }
 
-- (void)setPublication:(BibItem *)newPub{
-    if(publication != nil)
-        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Attempt to modify non-nil attribute of immutable object %@", self] userInfo:nil];
-    publication = newPub;
-}
-
 - (NSString *)field{
     return field;
 }
