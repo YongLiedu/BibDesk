@@ -270,11 +270,6 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
     return [self displayName];
 }
 
-// Automatically called by collection classes; override OBObject's implementation for templating, although the output still won't generally be appropriate for users.
-- (NSString *)descriptionWithLocale:(NSDictionary *)locale indent:(NSUInteger)level{
-    return [self description];
-}
-
 - (NSString *)displayName{
     NSInteger mask = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKAuthorNameDisplayKey];
 
