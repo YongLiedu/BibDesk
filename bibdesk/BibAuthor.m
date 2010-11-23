@@ -387,6 +387,18 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
     return [matches count] ? [matches objectAtIndex:0] : nil;
 }
 
+- (NSData *)vCardRepresentation{
+    ABPerson *person = [self personFromAddressBook];
+    if(person == nil){    
+        person = [[[ABPerson alloc] init] autorelease];
+        [person setValue:(vonPart ? [NSString stringWithFormat:@"%@ %@", vonPart, lastName] : lastName) forProperty:kABLastNameProperty];
+        [person setValue:firstName forProperty:kABFirstNameProperty];
+        if (jrPart)
+            [person setValue:firstName forProperty:kABSuffixProperty];
+    }
+    return [person vCardRepresentation];
+}
+
 @end
 
 @implementation BibAuthor (Private)
@@ -668,21 +680,4 @@ const CFBagCallBacks kBDSKAuthorFuzzyBagCallBacks = {
     [[self init] release];
     return (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKAuthorFuzzySetCallBacks);
 }
-@end
-
-
-@implementation ABPerson (BibAuthor)
-
-+ (ABPerson *)personWithAuthor:(BibAuthor *)author;
-{
-    
-    ABPerson *person = [author personFromAddressBook];
-    if(person == nil){    
-        person = [[[ABPerson alloc] init] autorelease];
-        [person setValue:[author lastName] forProperty:kABLastNameProperty];
-        [person setValue:[author firstName] forProperty:kABFirstNameProperty];
-    }
-    return person;
-}
-
 @end

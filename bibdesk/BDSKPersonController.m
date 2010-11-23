@@ -479,7 +479,7 @@
 	[pboard declareTypes:[NSArray arrayWithObjects:NSVCardPboardType, NSFilesPromisePboardType, nil] owner:nil];
 
 	// if we don't have a match in the address book, this will create a new person record
-	NSData *data = [[ABPerson personWithAuthor:person] vCardRepresentation];
+	NSData *data = [person vCardRepresentation];
 	BDSKPOSTCONDITION(data);
 
 	if(data == nil)
@@ -491,7 +491,7 @@
 }
 
 - (NSArray *)dragImageView:(BDSKDragImageView *)view namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination {
-    NSData *data = [[ABPerson personWithAuthor:person] vCardRepresentation];
+    NSData *data = [person vCardRepresentation];
     NSString *fileName = [[person name] stringByAppendingPathExtension:@"vcf"];
     [data writeToFile:[[dropDestination path] stringByAppendingPathComponent:fileName] atomically:YES];
     

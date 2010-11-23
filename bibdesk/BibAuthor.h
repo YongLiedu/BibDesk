@@ -130,6 +130,7 @@ enum {
 - (NSString *)field;
 
 - (ABPerson *)personFromAddressBook;
+- (NSData *)vCardRepresentation;
 
 @end
 
@@ -141,8 +142,4 @@ extern const CFBagCallBacks kBDSKAuthorFuzzyBagCallBacks;
 
 @interface NSMutableSet (BibAuthor)
 - (id)initForFuzzyAuthors;
-@end
-
-@interface ABPerson (BibAuthor)
-+ (ABPerson *)personWithAuthor:(BibAuthor *)author;
 @end
