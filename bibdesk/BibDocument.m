@@ -499,7 +499,8 @@ static NSOperationQueue *metadataCacheQueue = nil;
     [sortGroupsKey autorelease];
     sortGroupsKey = [[xattrDefaults objectForKey:BDSKSortGroupsKey] ?: [sud objectForKey:BDSKSortGroupsKey] retain];
     docFlags.sortGroupsDescending = [xattrDefaults boolForKey:BDSKSortGroupsDescendingKey defaultValue:[sud boolForKey:BDSKSortGroupsDescendingKey]];
-    [self setCurrentGroupField:[xattrDefaults objectForKey:BDSKCurrentGroupFieldKey] ?: [sud objectForKey:BDSKCurrentGroupFieldKey]];
+    // don't use setter, because we don't want to change the prefs here, and the value should be nil at this point
+    currentGroupField = [([xattrDefaults objectForKey:BDSKCurrentGroupFieldKey] ?: [sud objectForKey:BDSKCurrentGroupFieldKey]) copy];
     
     [tableView setDoubleAction:@selector(editPubOrOpenURLAction:)];
     NSArray *dragTypes = [NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSColorPboardType, nil];

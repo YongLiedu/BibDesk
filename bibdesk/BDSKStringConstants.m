@@ -295,7 +295,6 @@ NSString *BDSKDocumentFileURLDidChangeNotification = @"BDSKDocumentFileURLDidCha
 NSString *BDSKPreviewDisplayChangedNotification = @"Preview Pane Preference Change Notification";
 NSString *BDSKTableSelectionChangedNotification = @"TableSelectionChangedNotification";
 NSString *BDSKGroupTableSelectionChangedNotification = @"GroupTableSelectionChangedNotification";
-NSString *BDSKGroupFieldChangedNotification = @"GroupFieldChangedNotification";
 NSString *BDSKBibItemChangedNotification = @"BibItem Changed notification";
 NSString *BDSKNeedsToBeFiledChangedNotification = @"BibItem NeedsToBeFiled Flag Changed notification";
 NSString *BDSKDocAddItemNotification = @"Added a bibitem to a document";

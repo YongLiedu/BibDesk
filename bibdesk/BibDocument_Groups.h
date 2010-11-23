@@ -92,7 +92,6 @@
 - (void)showSearchGroupView;
 - (void)hideSearchGroupView;
 
-- (void)handleGroupFieldChangedNotification:(NSNotification *)notification;
 - (void)handleGroupNameChangedNotification:(NSNotification *)notification;
 - (void)handleStaticGroupChangedNotification:(NSNotification *)notification;
 - (void)handleSharedGroupsChangedNotification:(NSNotification *)notification;

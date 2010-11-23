@@ -192,6 +192,9 @@ The groupedPublications array is a subset of the publications array, developed b
 		[currentGroupField release];
 		currentGroupField = [field copy];
 		[[groups categoryParent] setName:[NSString isEmptyString:field] ? NSLocalizedString(@"FIELD", @"source list group row title") : [field uppercaseString]];
+        // use the most recently changed group as default for newly opened documents; could also store on a per-document basis
+        [[NSUserDefaults standardUserDefaults] setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
+        [self updateCategoryGroupsPreservingSelection:NO];
 	}
 }	
 
@@ -301,12 +304,6 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 #pragma mark Notification handlers
-
-- (void)handleGroupFieldChangedNotification:(NSNotification *)notification{
-    // use the most recently changed group as default for newly opened documents; could also store on a per-document basis
-    [[NSUserDefaults standardUserDefaults] setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
-	[self updateCategoryGroupsPreservingSelection:NO];
-}
 
 - (void)handleFilterChangedNotification:(NSNotification *)notification{
     if (NSNotFound != [[groups smartGroups] indexOfObjectIdenticalTo:[notification object]])
@@ -755,11 +752,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 - (IBAction)changeGroupFieldAction:(id)sender{
     NSString *field = [sender representedObject] ?: @"";
     
-	if(![field isEqualToString:currentGroupField]){
+	if(NO == [field isEqualToString:currentGroupField])
 		[self setCurrentGroupField:field];
-        
-		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification object:self];
-	}
 }
 
 // for adding/removing groups, we use the searchfield sheets
@@ -784,10 +778,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	if ([array indexOfObject:newGroupField] == NSNotFound)
         [array addObject:newGroupField];
 	[[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKGroupFieldsKey];	
-    
     [self setCurrentGroupField:newGroupField];
-	
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification object:self];
     [array release];
 }    
 
@@ -816,12 +807,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKGroupFieldsKey];
     [array release];
     
-    if([oldGroupField isEqualToString:currentGroupField]){
+    if([oldGroupField isEqualToString:currentGroupField])
         [self setCurrentGroupField:@""];
-		[[groups categoryParent] setName:NSLocalizedString(@"FIELD", @"")];
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification object:self];
-    }
 }
 
 - (IBAction)removeGroupFieldAction:(id)sender{

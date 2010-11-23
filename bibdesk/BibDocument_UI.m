@@ -1124,10 +1124,6 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     
     [nc addObserver:self
-           selector:@selector(handleGroupFieldChangedNotification:)
-               name:BDSKGroupFieldChangedNotification
-             object:self];
-    [nc addObserver:self
            selector:@selector(handleTableSelectionChangedNotification:)
                name:BDSKTableSelectionChangedNotification
              object:self];
