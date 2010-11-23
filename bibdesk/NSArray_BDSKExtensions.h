@@ -90,9 +90,6 @@
 
 - (NSArray *)arrayByRemovingObject:(id)anObject;
 
-- (NSArray *)arrayByPerformingSelector:(SEL)aSelector;
-- (NSArray *)arrayByPerformingSelector:(SEL)aSelector withObject:(id)anObject;
-
 - (NSIndexSet *)indexesOfObjects:(NSArray *)objects;
 - (NSIndexSet *)indexesOfObjectsIdenticalTo:(NSArray *)objects;
 - (NSArray *)objectsAtIndexSpecifiers:(NSArray *)indexes;

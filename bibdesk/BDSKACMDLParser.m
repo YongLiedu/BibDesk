@@ -118,7 +118,7 @@
     if ([preNodes count] == 0)
         preString = [[preNodes objectAtIndex:0] stringValue];
     else
-        preString = [[preNodes arrayByPerformingSelector:@selector(stringValue)] componentsJoinedByString:@" "];
+        preString = [[preNodes valueForKey:@"stringValue"] componentsJoinedByString:@" "];
     
     
     BOOL isPartialData = NO;

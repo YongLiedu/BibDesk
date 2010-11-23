@@ -466,7 +466,7 @@ static NSString *nodeStringsForXPathJoinedByString(NSXMLNode *child, NSString *X
     NSArray *nodes = [child nodesForXPath:XPath error:NULL];
     NSString *toReturn = nil;
     if ([nodes count]) {
-        nodes = [nodes arrayByPerformingSelector:@selector(stringValue)];
+        nodes = [nodes valueForKey:@"stringValuevalueForKey:@"];
         toReturn = [nodes componentsJoinedByString:join];
     }
     return toReturn;
@@ -481,7 +481,7 @@ static void addAuthorsFromXMLNode(NSXMLNode *child, NSMutableDictionary *pubFiel
         [pubFields setObject:authorString forKey:BDSKAuthorString];
     else { 
         // join the subnodes by their stringValue, since that's all that's available at this point
-        authorString = [[[child children] arrayByPerformingSelector:@selector(stringValue)] componentsJoinedByString:@" and "];
+        authorString = [[[child children] valueForKey:@"stringValue"] componentsJoinedByString:@" and "];
         if (authorString) [pubFields setObject:authorString forKey:BDSKAuthorString];
     }
 }

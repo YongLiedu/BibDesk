@@ -106,7 +106,7 @@
 		} else if ([obj isKindOfClass:[NSArray class]]) {
             id lastObject = [obj lastObject];
             if ([lastObject isKindOfClass:[BibItem class]] == NO && [lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
-                items = [obj arrayByPerformingSelector:@selector(objectsByEvaluatingSpecifier)];
+                items = [obj valueForKey:@"objectsByEvaluatingSpecifier"];
         } else {
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
@@ -128,7 +128,7 @@
 		} else if ([obj isKindOfClass:[NSArray class]]) {
             id lastObject = [obj lastObject];
             if ([lastObject isKindOfClass:[BibItem class]] == NO && [lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
-                items = [obj arrayByPerformingSelector:@selector(objectsByEvaluatingSpecifier)];
+                items = [obj valueForKey:@"objectsByEvaluatingSpecifier"];
         } else {
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
@@ -213,7 +213,7 @@
 		} else if ([obj isKindOfClass:[NSArray class]]) {
             id lastObject = [obj lastObject];
             if ([lastObject isKindOfClass:[BibItem class]] == NO && [lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
-                items = [obj arrayByPerformingSelector:@selector(objectsByEvaluatingSpecifier)];
+                items = [obj valueForKey:@"objectsByEvaluatingSpecifier"];
         } else {
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
@@ -235,7 +235,7 @@
 		} else if ([obj isKindOfClass:[NSArray class]]) {
             id lastObject = [obj lastObject];
             if ([lastObject isKindOfClass:[BibItem class]] == NO && [lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
-                items = [obj arrayByPerformingSelector:@selector(objectsByEvaluatingSpecifier)];
+                items = [obj valueForKey:@"objectsByEvaluatingSpecifier"];
         } else {
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];

@@ -87,7 +87,7 @@
         
         // new document won't have a URL, so we'll have to wait for the controller to set it
         NSURL *documentURL = [owner fileURL];
-        NSArray *items = [[owner publications] arrayByPerformingSelector:@selector(searchIndexInfo)];
+        NSArray *items = [[owner publications] valueForKey:@"searchIndexInfo"];
         NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:items, @"items", documentURL, @"documentURL", nil];
         
         // setting up the cache folder is not thread safe, so make sure it's done on the main thread

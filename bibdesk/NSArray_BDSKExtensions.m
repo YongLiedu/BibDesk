@@ -362,19 +362,6 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
     return tmpArray;
 }
 
-- (NSArray *)arrayByPerformingSelector:(SEL)aSelector {
-    return [self arrayByPerformingSelector:aSelector withObject:nil];
-}
-
-- (NSArray *)arrayByPerformingSelector:(SEL)aSelector withObject:(id)anObject {
-    NSMutableArray *array = [NSMutableArray array];
-    for (id object in self) {
-        if (object = [object performSelector:aSelector withObject:anObject])
-            [array addObject:object];
-    }
-    return array;
-}
-
 @end
 
 #pragma mark -

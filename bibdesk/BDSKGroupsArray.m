@@ -395,7 +395,7 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
     NSData *data = nil;
     
     if (groupClass && groupArray) {
-        NSArray *array = [groupArray arrayByPerformingSelector:@selector(dictionaryValue)];
+        NSArray *array = [groupArray valueForKey:@"dictionaryValue"];
         
         NSString *error = nil;
         NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;

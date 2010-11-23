@@ -699,7 +699,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 }
 
 - (NSArray *)pubAuthorsAsStrings{
-    return [[self pubAuthors] arrayByPerformingSelector:@selector(normalizedName)];
+    return [[self pubAuthors] valueForKey:@"normalizedName"];
 }
 
 - (NSString *)pubAuthorsForDisplay{

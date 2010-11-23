@@ -734,7 +734,7 @@
 	NSArray *pubsToSelect = newSelection;
     id lastObject = [newSelection lastObject];
     if ([lastObject isKindOfClass:[BibItem class]] == NO && [lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
-        pubsToSelect = [newSelection arrayByPerformingSelector:@selector(objectsByEvaluatingSpecifier)];
+        pubsToSelect = [newSelection valueForKey:@"objectsByEvaluatingSpecifier"];
 	[self selectPublications:pubsToSelect];
 }
 
@@ -748,7 +748,7 @@
     NSArray *groupsToSelect = newSelection;
     id lastObject = [newSelection lastObject];
     if ([lastObject isKindOfClass:[BDSKGroup class]] == NO && [lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
-        groupsToSelect = [newSelection arrayByPerformingSelector:@selector(objectsByEvaluatingSpecifier)];
+        groupsToSelect = [newSelection valueForKey:@"objectsByEvaluatingSpecifier"];
     [self selectGroups:groupsToSelect];
 }
 

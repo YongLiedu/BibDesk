@@ -669,7 +669,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 - (BOOL)selectGroups:(NSArray *)theGroups{
     // expand the parents, or rowForItem: will return -1
-    for (id parent in [NSSet setWithArray:[theGroups arrayByPerformingSelector:@selector(parent)]])
+    for (id parent in [NSSet setWithArray:[theGroups valueForKey:@"parent"]])
         [groupOutlineView expandItem:parent];
 
     NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];

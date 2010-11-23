@@ -724,7 +724,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
         // encode groups so we can select them later with isEqual: (saving row indexes would not be as reliable)
         [dictionary setObject:([self hasExternalGroupsSelected] ? [NSData data] : [NSKeyedArchiver archivedDataWithRootObject:[self selectedGroups]]) forKey:BDSKSelectedGroupsKey];
         
-        NSArray *selectedKeys = [[self selectedPublications] arrayByPerformingSelector:@selector(citeKey)];
+        NSArray *selectedKeys = [[self selectedPublications] valueForKey:@"citeKey"];
         if ([selectedKeys count] == 0 || [self hasExternalGroupsSelected])
             selectedKeys = [NSArray array];
         [dictionary setObject:selectedKeys forKey:BDSKSelectedPublicationsKey];
@@ -853,7 +853,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
 	[publications removeObjectsAtIndexes:indexes];
 	
 	[pubs makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
-    [[NSFileManager defaultManager] removeSpotlightCacheFilesForCiteKeys:[pubs arrayByPerformingSelector:@selector(citeKey)]];
+    [[NSFileManager defaultManager] removeSpotlightCacheFilesForCiteKeys:[pubs valueForKey:@"citeKey"]];
 	
 	notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, BDSKDocumentPublicationsKey, nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocDelItemNotification

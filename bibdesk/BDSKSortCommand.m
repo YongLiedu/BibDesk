@@ -74,7 +74,7 @@ static NSString *normalizedKey(NSString *key) {
     
     id lastObject = [dP lastObject];
     if ([lastObject isKindOfClass:[BibItem class]] == NO && [lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
-        dP = [dP arrayByPerformingSelector:@selector(objectsByEvaluatingSpecifier)];
+        dP = [dP valueForKey:@"objectsByEvaluatingSpecifier"];
     
     NSDictionary *args = [self evaluatedArguments];
     NSString *key = [args objectForKey:@"by"];

@@ -100,7 +100,7 @@ static id sharedManager = nil;
             [completionSet addObjectsFromArray:[string componentsSeparatedByCharactersInSet:acSet trimWhitespace:YES]];
         else if ([entry isEqualToString:BDSKKeywordsString])
             // if it wasn't punctuated, try this; Elsevier uses "and" as a separator, and it's annoying to have the whole string autocomplete on you
-            [completionSet addObjectsFromArray:[[string componentsSeparatedByString:@" and "] arrayByPerformingSelector:@selector(stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace)]];
+            [completionSet addObjectsFromArray:[[string componentsSeparatedByString:@" and "] valueForKey:@"stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace"]];
         else
             [completionSet addObject:[string stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
     }
