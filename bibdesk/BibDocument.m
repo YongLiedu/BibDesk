@@ -501,6 +501,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
     docFlags.sortGroupsDescending = [xattrDefaults boolForKey:BDSKSortGroupsDescendingKey defaultValue:[sud boolForKey:BDSKSortGroupsDescendingKey]];
     // don't use setter, because we don't want to change the prefs here, and the value should be nil at this point
     currentGroupField = [([xattrDefaults objectForKey:BDSKCurrentGroupFieldKey] ?: [sud objectForKey:BDSKCurrentGroupFieldKey]) copy];
+    [[groups categoryParent] setName:[NSString isEmptyString:currentGroupField] ? NSLocalizedString(@"FIELD", @"source list group row title") : [currentGroupField uppercaseString]];
     
     [tableView setDoubleAction:@selector(editPubOrOpenURLAction:)];
     NSArray *dragTypes = [NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSColorPboardType, nil];
