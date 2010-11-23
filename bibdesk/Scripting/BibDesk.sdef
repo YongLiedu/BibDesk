@@ -1062,6 +1062,10 @@
 			description="The author's last name.">
                 <cocoa key="lastName"/>
             </property>  
+            <property name="full last name" code="aufl" type="text" access="r"
+			description="The author's full last name, as 'von Last, Jr'.">
+                <cocoa key="fullLastName"/>
+            </property>  
             <property name="jr part" code="aujr" type="text" access="r"
                 description="The 'Jr' part of the author's name.">
                 <cocoa key="jrPart"/>
