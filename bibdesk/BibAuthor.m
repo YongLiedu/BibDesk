@@ -78,10 +78,8 @@ static CFCharacterSetRef dashSet = NULL;
     ABPerson *person = [[ABPerson alloc] initWithVCardRepresentation:vCard];
     NSMutableString *name = [[NSMutableString alloc] initWithCapacity:10];
     
-    if([person valueForKey:kABFirstNameProperty]){
-        [name appendString:[person valueForKey:kABFirstNameProperty]];
-        [name appendString:@" "];
-    }
+    if([person valueForKey:kABFirstNameProperty])
+        [name appendStrings:[person valueForKey:kABFirstNameProperty], @" ",  nil];
     if([person valueForKey:kABLastNameProperty])
         [name appendString:[person valueForKey:kABLastNameProperty]];
     
@@ -354,33 +352,21 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 - (NSString *)MODSStringWithRole:(NSString *)role{
     NSMutableString *s = [NSMutableString stringWithString:@"<name type=\"personal\">"];
     
-    if(firstName){
-        [s appendString:@"<namePart type=\"given\">"];
-        [s appendString:firstName];
-        [s appendString:@"</namePart>"];
-    }
+    if(firstName)
+        [s appendStrings:@"<namePart type=\"given\">", firstName, @"</namePart>",  nil];
     
     if(lastName){
         [s appendString:@"<namePart type=\"family\">"];
-        if(vonPart){
-            [s appendString:vonPart];
-            [s appendString:@" "];
-        }
-        [s appendString:lastName];
-        [s appendString:@"</namePart>"];
+        if(vonPart)
+            [s appendStrings:vonPart, @" ",  nil];
+        [s appendStrings:lastName, @"</namePart>",  nil];
     }
     
-    if(jrPart){
-        [s appendString:@"<namePart type=\"termsOfAddress\">"];
-        [s appendString:jrPart];
-        [s appendString:@"</namePart>"];
-    }
+    if(jrPart)
+        [s appendStrings:@"<namePart type=\"termsOfAddress\">", jrPart, @"</namePart>",  nil];
     
-    if(role){
-        [s appendString:@"<role><roleTerm authority=\"marcrelator\" type=\"text\">"];
-        [s appendString:role];
-        [s appendString:@"</roleTerm></role>"];
-    }
+    if(role)
+        [s appendStrings:@"<role><roleTerm authority=\"marcrelator\" type=\"text\">", role, @"</roleTerm></role>",  nil];
     
     [s appendString:@"</name>"];
     
@@ -451,29 +437,22 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
 	// temporary string storage
     NSMutableString *theName = [[NSMutableString alloc] initWithCapacity:14];
     
-    if(vonPart){
-        [theName appendString:vonPart];
-        [theName appendString:@" "];
-    }
+    if(vonPart)
+        [theName appendStrings:vonPart, @" ", nil];
     
-    if(lastName){
+    if(lastName)
         [theName appendString:lastName];
-    }
     
-    if(jrPart){
-        [theName appendString:@", "];
-        [theName appendString:jrPart];
-    }
+    if(jrPart)
+        [theName appendStrings:@", ", jrPart, nil];
     
     fullLastName = [theName copy];
     
     // create the normalized name (see comment above method)
     // start with what we already have
     
-    if(firstName){
-        [theName appendString:@", "];
-        [theName appendString:firstName];
-    }
+    if(firstName)
+        [theName appendStrings:@", ", firstName, nil];
     
     normalizedName = [theName copy];
     
@@ -481,10 +460,8 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
     
     [theName replaceCharactersInRange:NSMakeRange(0, [theName length]) withString:@""];
     
-    if(firstName){
-        [theName appendString:firstName];
-        [theName appendString:@" "];
-    }
+    if(firstName)
+        [theName appendStrings:firstName, @" ",  nil];
     
     [theName appendString:fullLastName];
     
@@ -495,14 +472,11 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
         
     [theName replaceCharactersInRange:NSMakeRange(0, [theName length]) withString:@""];
     
-    if(lastName){
+    if(lastName)
         [theName appendString:lastName];
-    }
     
-    if(firstName) {
-        [theName appendString:@" "];
-        [theName appendString:firstName];
-    }
+    if(firstName)
+        [theName appendStrings:@" ", firstName,  nil];
     
     [theName deleteCharactersInCharacterSet:[NSCharacterSet curlyBraceCharacterSet]];
     
