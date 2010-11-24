@@ -274,7 +274,7 @@
         [NSString setMacroResolverForUnarchiving:[self macroResolver]];
         id copiedValue = [[NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:value]] retain];
         [NSString setMacroResolverForUnarchiving:nil];
-        [copiedValue makeObjectsPerformSelector:@selector(setMacroResolver:) withObject:[self macroResolver]];
+        [copiedValue setValue:[self macroResolver] forKey:@"macroResolver"];
         if ([properties count]) {
             for (id item in copiedValue) {
                 NSMutableDictionary *validProps = [NSMutableDictionary dictionary];

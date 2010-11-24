@@ -245,7 +245,7 @@ static NSMapTable *selectorTable = NULL;
 		}
         if (filesArray) {
             files = [filesArray mutableCopy];
-            [files makeObjectsPerformSelector:@selector(setDelegate:) withObject:self];
+            [files setValue:self forKey:@"delegate"];
         } else {
             files = [[NSMutableArray alloc] initWithCapacity:2];
         }
@@ -316,7 +316,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
             [self setPubTypeString:[coder decodeObjectForKey:@"pubType"]];
             groups = [[NSMutableDictionary alloc] initWithCapacity:5];
             files = [[NSMutableArray alloc] initWithArray:[coder decodeObjectForKey:@"files"]];
-            [files makeObjectsPerformSelector:@selector(setDelegate:) withObject:self];
+            [files setValue:self forKey:@"delegate"];
             // set by the document, which we don't archive
             owner = nil;
             macroResolver = nil;

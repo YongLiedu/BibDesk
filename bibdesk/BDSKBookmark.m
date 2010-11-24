@@ -348,7 +348,7 @@ static Class BDSKBookmarkClass = Nil;
     if (self = [super init]) {
         name = [aName copy];
         children = [aChildren mutableCopy];
-        [children makeObjectsPerformSelector:@selector(setParent:) withObject:self];
+        [children setValue:self forKey:@"parent"];
     }
     return self;
 }

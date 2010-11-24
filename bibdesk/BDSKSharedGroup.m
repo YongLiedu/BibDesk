@@ -221,7 +221,7 @@ static NSImage *unlockedIcon = nil;
     [NSString setMacroResolverForUnarchiving:nil];
     
     // we set the macroResolver so we know the fields of this item may refer to it, so we can prevent scripting from adding this to the wrong document
-    [pubs makeObjectsPerformSelector:@selector(setMacroResolver:) withObject:macroResolver];
+    [pubs setValue:macroResolver forKey:@"macroResolver"];
     
     [[self macroResolver] setMacroDefinitions:macros];
     [self setPublications:pubs];

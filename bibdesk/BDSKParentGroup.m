@@ -84,8 +84,8 @@
 - (BOOL)isEqual:(id)other { return self == other; }
 
 - (void)dealloc {
-    [children makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
-    [children makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
+    [children setValue:nil forKey:@"parent"];
+    [children setValue:nil forKey:@"document"];
     BDSKDESTROY(children);
     BDSKDESTROY(sortDescriptors);
     [super dealloc];
@@ -134,23 +134,23 @@
 
 - (void)replaceChildrenInRange:(NSRange)range withChildren:(NSArray *)newChildren {
     if (NSEqualRanges(range, NSMakeRange(0, [self numberOfChildren]))) {
-        [children makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
-        [children makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
+        [children setValue:nil forKey:@"parent"];
+        [children setValue:nil forKey:@"document"];
         [children setArray:newChildren];
     } else {
-        [[children subarrayWithRange:range] makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
-        [[children subarrayWithRange:range] makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
+        [[children subarrayWithRange:range] setValue:nil forKey:@"parent"];
+        [[children subarrayWithRange:range] setValue:nil forKey:@"document"];
         [children replaceObjectsInRange:range withObjectsFromArray:newChildren];
     }
-    [children makeObjectsPerformSelector:@selector(setParent:) withObject:self];
-    [children makeObjectsPerformSelector:@selector(setDocument:) withObject:[self document]];
+    [children setValue:self forKey:@"parent"];
+    [children setValue:[self document] forKey:@"document"];
     if ([newChildren count])
         [self resort];
 }
 
 - (void)removeAllChildren {
-    [children makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
-    [children makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
+    [children setValue:nil forKey:@"parent"];
+    [children setValue:nil forKey:@"document"];
     [children removeAllObjects];
 }
 
@@ -168,7 +168,7 @@
 
 - (void)setDocument:(BibDocument *)newDocument {
     [super setDocument:newDocument];
-    [children makeObjectsPerformSelector:@selector(setDocument:) withObject:newDocument];
+    [children setValue:newDocument forKey:@"document"];
 }
 
 - (void)removeAllUndoableChildren {

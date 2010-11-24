@@ -206,7 +206,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
         
         BDSKDESTROY(browser);
         
-        [unresolvedNetServices makeObjectsPerformSelector:@selector(setDelegate:) withObject:nil];
+        [unresolvedNetServices setValue:nil forKey:@"delegate"];
         BDSKDESTROY(unresolvedNetServices);
         
         if ([undecidedNetServices count])

@@ -76,7 +76,7 @@ NSString *BDSKExternalGroupSucceededKey = @"succeeded";
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
+    [publications setValue:nil forKey:@"owner"];
     BDSKDESTROY(publications);
     BDSKDESTROY(macroResolver);
     BDSKDESTROY(searchIndexes);
@@ -112,10 +112,10 @@ NSString *BDSKExternalGroupSucceededKey = @"succeeded";
         [self stopRetrieving];
     
     if (newPublications != publications) {
-        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
+        [publications setValue:nil forKey:@"owner"];
         [publications release];
         publications = newPublications == nil ? nil : [[BDSKPublicationsArray alloc] initWithArray:newPublications];
-        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
+        [publications setValue:self forKey:@"owner"];
         [searchIndexes resetWithPublications:publications];
         if (publications == nil)
             [macroResolver setMacroDefinitions:nil];
@@ -132,7 +132,7 @@ NSString *BDSKExternalGroupSucceededKey = @"succeeded";
             publications = [[BDSKPublicationsArray alloc] initWithArray:newPublications];
         else 
             [publications addObjectsFromArray:newPublications];
-        [newPublications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
+        [newPublications setValue:self forKey:@"owner"];
         [searchIndexes addPublications:newPublications];
     }
     

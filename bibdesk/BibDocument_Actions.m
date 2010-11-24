@@ -647,7 +647,7 @@ static BOOL changingColors = NO;
 - (void)changeColor:(id)sender {
     if ([self hasExternalGroupsSelected] == NO && [self isDisplayingFileContentSearch] == NO && [[self selectedPublications] count] && changingColors == NO) {
         changingColors = YES;
-        [[self selectedPublications] makeObjectsPerformSelector:@selector(setColor:) withObject:[sender color]];
+        [[self selectedPublications] setValue:[sender color] forKey:@"color"];
         changingColors = NO;
         [[self undoManager] setActionName:NSLocalizedString(@"Change Color", @"Undo action name")];
     }

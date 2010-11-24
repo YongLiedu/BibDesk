@@ -1221,15 +1221,15 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (IBAction)refreshURLGroups:(id)sender{
-    [[groups URLGroups] makeObjectsPerformSelector:@selector(setPublications:) withObject:nil];
+    [[groups URLGroups] setValue:nil forKey:@"publications"];
 }
 
 - (IBAction)refreshScriptGroups:(id)sender{
-    [[groups scriptGroups] makeObjectsPerformSelector:@selector(setPublications:) withObject:nil];
+    [[groups scriptGroups] setValue:nil forKey:@"publications"];
 }
 
 - (IBAction)refreshSearchGroups:(id)sender{
-    [[groups searchGroups] makeObjectsPerformSelector:@selector(setPublications:) withObject:nil];
+    [[groups searchGroups] setValue:nil forKey:@"publications"];
 }
 
 - (IBAction)refreshAllExternalGroups:(id)sender{

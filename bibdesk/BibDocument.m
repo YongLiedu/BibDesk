@@ -284,8 +284,8 @@ static NSOperationQueue *metadataCacheQueue = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [[NSDistributedNotificationCenter defaultCenter] removeObserver:self];
     // workaround for crash: to reproduce, create empty doc, hit cmd-n for new editor window, then cmd-q to quit, choose "don't save"; this results in an -undoManager message to the dealloced document
-    [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
-    [groups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
+    [publications setValue:nil forKey:@"owner"];
+    [groups setValue:nil forKey:@"document"];
     [(BDSKUndoManager *)[self undoManager] setDelegate:nil];
     [pboardHelper setDelegate:nil];
     [fileSearchController setDelegate:nil];
@@ -790,9 +790,9 @@ static NSOperationQueue *metadataCacheQueue = nil;
 
 // This is not undoable!
 - (void)setPublications:(NSArray *)newPubs{
-    [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
+    [publications setValue:nil forKey:@"owner"];
     [publications setArray:newPubs];
-    [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
+    [publications setValue:self forKey:@"owner"];
     
     [searchIndexes resetWithPublications:newPubs];
     [notesSearchIndex resetWithPublications:newPubs];
@@ -813,7 +813,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
 		
 	[publications insertObjects:pubs atIndexes:indexes];        
     
-	[pubs makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
+	[pubs setValue:self forKey:@"owner"];
 	
     [searchIndexes addPublications:pubs];
     [notesSearchIndex addPublications:pubs];
@@ -852,7 +852,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
     
 	[publications removeObjectsAtIndexes:indexes];
 	
-	[pubs makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
+	[pubs setValue:nil forKey:@"owner"];
     [[NSFileManager defaultManager] removeSpotlightCacheFilesForCiteKeys:[pubs valueForKey:@"citeKey"]];
 	
 	notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, BDSKDocumentPublicationsKey, nil];
@@ -2303,7 +2303,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     [NSString setMacroResolverForUnarchiving:nil];
     
     // we set the macroResolver so we know the fields of this item may refer to it, so we can prevent scripting from adding this to the wrong document
-    [newPubs makeObjectsPerformSelector:@selector(setMacroResolver:) withObject:macroResolver];
+    [newPubs setValue:macroResolver forKey:@"macroResolver"];
     
     return newPubs;
 }

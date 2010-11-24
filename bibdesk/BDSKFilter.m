@@ -100,7 +100,7 @@
 
 - (void)dealloc {
 	[[self undoManager] removeAllActionsWithTarget:self];
-    [conditions makeObjectsPerformSelector:@selector(setGroup:) withObject:nil]; // this stops the date cache timer
+    [conditions setValue:nil forKey:@"group"]; // this stops the date cache timer
 	BDSKDESTROY(conditions);
 	[super dealloc];
 }
@@ -161,10 +161,10 @@
     if (NO == [conditions isEqualToArray:newConditions]) {
 		[[[self undoManager] prepareWithInvocationTarget:self] setConditions:conditions];
         
-        [conditions makeObjectsPerformSelector:@selector(setGroup:) withObject:nil];
+        [conditions setValue:nil forKey:@"group"];
 		[conditions release];
         conditions = [newConditions mutableCopy];
-        [conditions makeObjectsPerformSelector:@selector(setGroup:) withObject:group];
+        [conditions setValue:group forKey:@"group"];
 		
 		if ([self group]) // only notify when we are attached to a group
 			[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFilterChangedNotification object:group];
@@ -192,7 +192,7 @@
 
 - (void)setGroup:(id<BDSKSmartGroup>)newGroup {
     group = newGroup;
-    [conditions makeObjectsPerformSelector:@selector(setGroup:) withObject:group];
+    [conditions setValue:group forKey:@"group"];
 }
 
 - (NSUndoManager *)undoManager {

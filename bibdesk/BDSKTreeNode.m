@@ -121,13 +121,13 @@
 - (void)setChildren:(NSArray *)newChildren {
     if (children != newChildren) {
         // make sure to orphan these children
-        [children makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
+        [children setValue:nil forKey:@"parent"];
         
         [children release];
         children = [newChildren mutableCopy];
         
         // make sure these children know their parent
-        [children makeObjectsPerformSelector:@selector(setParent:) withObject:self];
+        [children setValue:self forKey:@"parent"];
     }
 }
 

@@ -311,7 +311,7 @@ static Class BDSKSearchBookmarkClass = Nil;
     if (self = [super init]) {
         label = [aLabel copy];
         children = [aChildren mutableCopy];
-        [children makeObjectsPerformSelector:@selector(setParent:) withObject:self];
+        [children setValue:self forKey:@"parent"];
     }
     return self;
 }
