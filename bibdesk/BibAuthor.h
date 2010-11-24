@@ -146,4 +146,5 @@ extern const CFBagCallBacks kBDSKAuthorFuzzyBagCallBacks;
 
 
 @interface NSArray (BibAuthorMultipleCompare)
+- (NSComparisonResult)sortCompareToAuthorArray:(NSArray *)other;
 @end
