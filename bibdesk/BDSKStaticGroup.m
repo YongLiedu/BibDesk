@@ -77,6 +77,14 @@
     return [NSDictionary dictionaryWithObjectsAndKeys:aName, @"group name", keys, @"keys", nil];
 }
 
+// we don't really care about the publications for unarchoving, as we only use NSCoding to remember group selection
+- (id)initWithCoder:(NSCoder *)decoder {
+    if (self = [super initWithCoder:decoder]) {
+        publications = [[NSMutableArray alloc] init];
+    }
+    return self;
+}
+
 - (id)copyWithZone:(NSZone *)aZone {
 	return [[[self class] allocWithZone:aZone] initWithName:name publications:publications];
 }
