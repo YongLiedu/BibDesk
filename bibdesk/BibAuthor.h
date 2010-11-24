@@ -134,12 +134,16 @@ enum {
 
 @end
 
+
 extern const CFDictionaryKeyCallBacks kBDSKAuthorFuzzyDictionaryKeyCallBacks;
 extern const CFArrayCallBacks kBDSKAuthorFuzzyArrayCallBacks;
 extern const CFSetCallBacks kBDSKAuthorFuzzySetCallBacks;
 extern const CFBagCallBacks kBDSKAuthorFuzzyBagCallBacks;
 
-
 @interface NSMutableSet (BibAuthor)
 - (id)initForFuzzyAuthors;
+@end
+
+
+@interface NSArray (BibAuthorMultipleCompare)
 @end
