@@ -1112,19 +1112,15 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 - (BOOL)writeToURL:(NSURL *)fileURL ofType:(NSString *)docType error:(NSError **)outError{
     BOOL success = YES;
     NSError *nsError = nil;
-    NSArray *items = publications;
     
     // callers are responsible for making sure all edits are committed
     NSParameterAssert([self commitPendingEdits]);
     
-    if(docState.currentSaveOperationType == NSSaveToOperation && [exportSelectionCheckButton state] == NSOnState)
-        items = [self numberOfSelectedPubs] > 0 ? [self selectedPublications] : groupedPublications;
-    
     if ([docType isEqualToString:BDSKArchiveDocumentType]) {
-        success = [self writeArchiveToURL:fileURL forPublications:items error:outError];
+        success = [self writeArchiveToURL:fileURL error:outError];
     } else {
-        NSFileWrapper *fileWrapper = [self fileWrapperOfType:docType forPublications:items error:&nsError];
-        success = nil == fileWrapper ? NO : [fileWrapper writeToFile:[fileURL path] atomically:NO updateFilenames:NO];
+        NSFileWrapper *fileWrapper = [self fileWrapperOfType:docType error:&nsError];
+        success = [fileWrapper writeToFile:[fileURL path] atomically:NO updateFilenames:NO];
     }
     
     // see if this is our error or Apple's
@@ -1285,9 +1281,17 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 	[self updateChangeCount:NSChangeCleared];
 }
 
-- (BOOL)writeArchiveToURL:(NSURL *)fileURL forPublications:(NSArray *)items error:(NSError **)outError{
-    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-    
+- (NSArray *)publicationsForSaving {
+    if (docState.currentSaveOperationType != NSSaveToOperation || [exportSelectionCheckButton state] != NSOnState)
+        return publications;
+    else if ([self numberOfSelectedPubs] == 0)
+        return groupedPublications;
+    else
+        return [self selectedPublications];
+}
+
+- (BOOL)writeArchiveToURL:(NSURL *)fileURL error:(NSError **)outError{
+    NSArray *items = [self publicationsForSaving];
     NSString *path = [[fileURL path] stringByDeletingPathExtension];
     NSFileManager *fm = [NSFileManager defaultManager];
     NSString *filePath;
@@ -1348,17 +1352,12 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 - (NSFileWrapper *)fileWrapperOfType:(NSString *)aType error:(NSError **)outError
 {
-    return [self fileWrapperOfType:aType forPublications:publications error:outError];
-}
-
-- (NSFileWrapper *)fileWrapperOfType:(NSString *)aType forPublications:(NSArray *)items error:(NSError **)outError
-{
     NSFileWrapper *fileWrapper = nil;
     
     // check if we need a fileWrapper; only needed for RTFD templates
     BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:aType];
     if([selectedTemplate templateFormat] & BDSKRTFDTemplateFormat){
-        fileWrapper = [self fileWrapperForPublications:items usingTemplate:selectedTemplate];
+        fileWrapper = [self fileWrapperForPublications:[self publicationsForSaving] usingTemplate:selectedTemplate];
         if(fileWrapper == nil){
             if (outError) 
                 *outError = [NSError localErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to create file wrapper for the selected template", @"Error description")];
@@ -1367,7 +1366,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         BDSKASSERT_NOT_REACHED("Should not save a fileWrapper for archive");
     }else{
         NSError *error = nil;
-        NSData *data = [self dataOfType:aType forPublications:items error:&error];
+        NSData *data = [self dataOfType:aType error:&error];
         if(data != nil && error == nil){
             fileWrapper = [[[NSFileWrapper alloc] initRegularFileWithContents:data] autorelease];
         } else {
@@ -1380,17 +1379,14 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 - (NSData *)dataOfType:(NSString *)aType error:(NSError **)outError
 {
-    return [self dataOfType:aType forPublications:publications error:outError];
-}
-
-- (NSData *)dataOfType:(NSString *)aType forPublications:(NSArray *)items error:(NSError **)outError
-{
     NSData *data = nil;
     NSError *error = nil;
     NSStringEncoding encoding = [self documentStringEncoding];
     NSParameterAssert(encoding != 0);
     
     BOOL isBibTeX = [aType isEqualToString:BDSKBibTeXDocumentType];
+    
+    NSArray *items = [self publicationsForSaving];
     
     // export operations need their own encoding
     if (NSSaveToOperation == docState.currentSaveOperationType)

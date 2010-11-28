@@ -280,10 +280,7 @@ extern NSString *BDSKDocumentPublicationsKey;
 */
 - (void)clearChangeCount;
 
-- (BOOL)writeArchiveToURL:(NSURL *)fileURL forPublications:(NSArray *)items error:(NSError **)outError;
-
-- (NSFileWrapper *)fileWrapperOfType:(NSString *)aType forPublications:(NSArray *)items error:(NSError **)outError;
-- (NSData *)dataOfType:(NSString *)aType forPublications:(NSArray *)items error:(NSError **)outError;
+- (BOOL)writeArchiveToURL:(NSURL *)fileURL error:(NSError **)outError;
 
 - (NSData *)stringDataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template;
 - (NSData *)stringDataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template;
