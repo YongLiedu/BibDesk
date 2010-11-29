@@ -73,7 +73,7 @@
         attrString = [BDSKTemplateParser attributedStringByParsingTemplateAttributedString:attrString usingObject:objectProxy delegate:objectProxy];
         [objectProxy release];
     }else{
-        NSData *data = [self dataByParsingTemplate:template withObject:anObject publications:items];
+        NSData *data = [self dataByParsingTemplate:template withObject:anObject publications:items publicationsContext:itemsContext];
         NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:[template documentType], NSDocumentTypeDocumentOption, nil];
         attrString = [[[NSAttributedString alloc] initWithData:data options:options documentAttributes:NULL error:NULL] autorelease];
     }
