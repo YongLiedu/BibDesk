@@ -1674,23 +1674,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
     BDSKPRECONDITION(nil != template);
-    BDSKTemplateFormat format = [template templateFormat];
-    BDSKPRECONDITION(format & (BDSKRTFTemplateFormat | BDSKDocTemplateFormat | BDSKDocxTemplateFormat | BDSKOdtTemplateFormat | BDSKWebArchiveTemplateFormat | BDSKRichHTMLTemplateFormat));
+    BDSKPRECONDITION([template templateFormat] & (BDSKRTFTemplateFormat | BDSKDocTemplateFormat | BDSKDocxTemplateFormat | BDSKOdtTemplateFormat | BDSKWebArchiveTemplateFormat | BDSKRichHTMLTemplateFormat));
     
-    NSString *docType = nil;
-    if (format & BDSKRTFTemplateFormat)
-        docType = NSRTFTextDocumentType;
-    else if (format & BDSKRichHTMLTemplateFormat)
-        docType = NSHTMLTextDocumentType;
-    else if (format & BDSKDocTemplateFormat)
-        docType = NSDocFormatTextDocumentType;
-    else if (format & BDSKDocxTemplateFormat)
-        docType = NSOfficeOpenXMLTextDocumentType;
-    else if (format & BDSKOdtTemplateFormat)
-        docType = NSOpenDocumentTextDocumentType;
-    else if (format & BDSKWebArchiveTemplateFormat)
-        docType = NSWebArchiveTextDocumentType;
-    else return nil;
+    NSString *docType = [template documentType];
+    if (docType == nil || [docType isEqualToString:NSRTFDTextDocumentType] || [docType isEqualToString:NSPlainTextDocumentType])
+        return nil;
     
     NSDictionary *docAttributes = nil;
     NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items publicationsContext:itemsContext documentAttributes:&docAttributes];
