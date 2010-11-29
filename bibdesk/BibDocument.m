@@ -1675,7 +1675,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     BDSKPRECONDITION(nil != template);
     BDSKTemplateFormat format = [template templateFormat];
-    BDSKPRECONDITION(format & (BDSKRTFTemplateFormat | BDSKDocTemplateFormat | BDSKDocxTemplateFormat | BDSKOdtTemplateFormat | BDSKRichHTMLTemplateFormat));
+    BDSKPRECONDITION(format & (BDSKRTFTemplateFormat | BDSKDocTemplateFormat | BDSKDocxTemplateFormat | BDSKOdtTemplateFormat | BDSKWebArchiveTemplateFormat | BDSKRichHTMLTemplateFormat));
     NSDictionary *docAttributes = nil;
     NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items publicationsContext:itemsContext documentAttributes:&docAttributes];
     NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionaryWithDictionary:docAttributes];
@@ -1694,11 +1694,15 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     } else if (format & BDSKDocTemplateFormat) {
         return [fileTemplate docFormatFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes];
     } else if (format & BDSKDocxTemplateFormat) {
-        [mutableAttributes setObject:@"NSOfficeOpenXML" forKey:NSDocumentTypeDocumentAttribute];
+        [mutableAttributes setObject:NSOfficeOpenXMLTextDocumentType forKey:NSDocumentTypeDocumentAttribute];
         NSError *error = nil;
         return [fileTemplate dataFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes error:&error];
     } else if (format & BDSKOdtTemplateFormat) {
-        [mutableAttributes setObject:@"NSOpenDocument" forKey:NSDocumentTypeDocumentAttribute];
+        [mutableAttributes setObject:NSOpenDocumentTextDocumentType forKey:NSDocumentTypeDocumentAttribute];
+        NSError *error = nil;
+        return [fileTemplate dataFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes error:&error];
+    } else if (format & BDSKWebArchiveTemplateFormat) {
+        [mutableAttributes setObject:NSWebArchiveTextDocumentType forKey:NSDocumentTypeDocumentAttribute];
         NSError *error = nil;
         return [fileTemplate dataFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes error:&error];
     } else return nil;
