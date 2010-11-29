@@ -112,18 +112,6 @@ static NSMutableArray *_finishedDownloads = nil;
 	return [match groupAtIndex:1];
 }
 
-+ (NSString *)ISNumberFromURLSubstring:(NSString *)urlPath error:(NSError **)outError{
-	
-	AGRegex * ISNumberRegex = [AGRegex regexWithPattern:@"isnumber=([0-9]+)" options:AGRegexMultiline];
-	AGRegexMatch *match = [ISNumberRegex findInString:urlPath];
-	if([match count] == 0 && outError){
-		*outError = [NSError localErrorWithCode:kBDSKWebParserFailed localizedDescription:NSLocalizedString(@"missingISNumberKey", @"Can't get an ISNumber from the URL")];
-		
-		return NULL;
-	}
-	return [match groupAtIndex:1];
-}
-
 + (void)downloadFinishedOrFailed:(_BDSKIEEEDownload *)download;
 {
     if ([download failed] == NO)
@@ -136,27 +124,25 @@ static NSMutableArray *_finishedDownloads = nil;
     NSError *error;
 
     NSString *arnumberString = [self ARNumberFromURLSubstring:[url query] error:&error];
-    NSString *isnumberString = [self ISNumberFromURLSubstring:[url query] error:&error];
-    
     
     // Query IEEEXplore with a POST request	
     
     NSString * serverName = [[url host] lowercaseString];
     
-    NSString * URLString = [NSString stringWithFormat:@"http://%@/xpls/citationAct", serverName];
+    NSString * URLString = [NSString stringWithFormat:@"http://%@/xpl/downloadCitations", serverName];
     
     NSMutableURLRequest * request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:URLString]];
     [request setHTTPMethod:@"POST"];
     [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-type"];
     
     // note, do not actually url-encode this. they are expecting their angle brackets raw.
-    NSString * queryString = [NSString stringWithFormat:@"dlSelect=cite_abs&fileFormate=BibTex&arnumber=<arnumber>%@</arnumber>", arnumberString];
+    NSString * queryString = [NSString stringWithFormat:@"recordIds=%@&fromPageName=searchabstract&citations-format=citation-abstract&download-format=download-bibtex", arnumberString];
     
     [request setHTTPBody:[queryString dataUsingEncoding:NSUTF8StringEncoding]];
     
     _BDSKIEEEDownload *download = [[_BDSKIEEEDownload alloc] initWithRequest:request delegate:self];
     
-    NSString * arnumberURLString = [NSString stringWithFormat:@"http://ieeexplore.ieee.org/xpls/abs_all.jsp?tp=&arnumber=%@&isnumber=%@", arnumberString, isnumberString];
+    NSString * arnumberURLString = [NSString stringWithFormat:@"http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=%@", arnumberString];
     
     // stash this away since we have arnumber and isnumber here, and the download won't have the correct URL
     [download setPdfLinkURL:[NSURL URLWithString:arnumberURLString]];
@@ -213,15 +199,7 @@ static NSMutableArray *_finishedDownloads = nil;
     while ([_activeDownloads count])
         CFRunLoopRunInMode((CFStringRef)[_BDSKIEEEDownload runloopMode], 0.3, FALSE);
     
-    // copy and clear _finishedDownloads, since we'll be enqueuing more right away
-    NSArray *finishedDownloads = [[_finishedDownloads copy] autorelease];
-    [_finishedDownloads removeAllObjects];
-    
-    // need to associate subsequent PDF link downloads with their BibItem
-    NSMutableDictionary *downloadItemTable = [NSMutableDictionary dictionary];
-	_BDSKIEEEDownload *download;
-    
-    for (download in finishedDownloads) {
+    for (_BDSKIEEEDownload *download in _finishedDownloads) {
         
         // download failure
         if ([download failed]) {
@@ -247,7 +225,7 @@ static NSMutableArray *_finishedDownloads = nil;
          */
         
         NSAttributedString * attrString = [[[NSAttributedString alloc] initWithHTML:[download result] options:nil documentAttributes:NULL] autorelease];
-        NSString * bibTeXString = [[attrString string] stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        NSString * bibTeXString = [[attrString string] stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
         
         /*
          You'd think the IEEE would be able to produce valid BibTeX, but lots of entries have
@@ -326,30 +304,9 @@ static NSMutableArray *_finishedDownloads = nil;
         } else {
             [items addObject:newPub];
         }
+        
 	}
     
-    // download all the PDF link documents
-    while ([_activeDownloads count])
-        CFRunLoopRunInMode((CFStringRef)[_BDSKIEEEDownload runloopMode], 0.3, FALSE);
-    
-    for (download in _finishedDownloads) {
-                            
-        if ([download failed])
-            continue;
-        
-        NSXMLDocument *linkDocument = nil;
-        linkDocument = [[NSXMLDocument alloc] initWithData:[download result] options:NSXMLDocumentTidyHTML error:NULL];
-        NSArray *pdfLinkNodes = [[linkDocument rootElement] nodesForXPath:@"//a[contains(text(), 'PDF')]" error:NULL];
-        if ([pdfLinkNodes count] > 0) {
-            NSXMLNode *pdfLinkNode = [pdfLinkNodes objectAtIndex:0];
-            NSString *hrefValue = [pdfLinkNode stringValueOfAttribute:@"href"];
-            
-            NSString *pdfURLString = [NSString stringWithFormat:@"http://%@%@", [[download URL] host], hrefValue];
-        
-            [[downloadItemTable objectForKey:download] setField:BDSKUrlString toValue:pdfURLString];
-        }
-        [linkDocument release];
-    }
     [_finishedDownloads removeAllObjects];
 	
 	return items;
