@@ -107,6 +107,7 @@ extern NSString *BDSKTemplateScriptString;
 
 - (BDSKTemplateFormat)templateFormat;
 - (NSString *)fileExtension;
+- (NSString *)documentType;
 
 - (NSString *)mainPageString;
 - (NSAttributedString *)mainPageAttributedStringWithDocumentAttributes:(NSDictionary **)docAttributes;

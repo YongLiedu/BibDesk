@@ -73,24 +73,9 @@
         attrString = [BDSKTemplateParser attributedStringByParsingTemplateAttributedString:attrString usingObject:objectProxy delegate:objectProxy];
         [objectProxy release];
     }else{
-        NSString *docType = nil;
-        BDSKTemplateFormat templateFormat = [template templateFormat];
-        if(templateFormat == BDSKRichHTMLTemplateFormat)
-            docType = NSHTMLTextDocumentType;
-        if(templateFormat == BDSKRTFTemplateFormat)
-            docType = NSRTFTextDocumentType;
-        else if(templateFormat == BDSKRTFDTemplateFormat)
-            docType = NSRTFDTextDocumentType;
-        else if(templateFormat == BDSKDocTemplateFormat)
-            docType = NSDocFormatTextDocumentType;
-        else if(templateFormat == BDSKDocxTemplateFormat)
-            docType = NSOfficeOpenXMLTextDocumentType;
-        else if(templateFormat == BDSKOdtTemplateFormat)
-            docType = NSOpenDocumentTextDocumentType;
-        else if(templateFormat == BDSKWebArchiveTemplateFormat)
-            docType = NSWebArchiveTextDocumentType;
         NSData *data = [self dataByParsingTemplate:template withObject:anObject publications:items];
-        attrString = [[[NSAttributedString alloc] initWithData:data options:[NSDictionary dictionaryWithObjectsAndKeys:docType, NSDocumentTypeDocumentOption, nil] documentAttributes:NULL error:NULL] autorelease];
+        NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:[template documentType], NSDocumentTypeDocumentOption, nil];
+        attrString = [[[NSAttributedString alloc] initWithData:data options:options documentAttributes:NULL error:NULL] autorelease];
     }
     return attrString;
 }

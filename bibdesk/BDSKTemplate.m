@@ -372,6 +372,28 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     return format;
 }
 
+- (NSString *)documentType {
+    NSString *docType = nil;
+    BDSKTemplateFormat templateFormat = [self templateFormat];
+    if(templateFormat == BDSKRichHTMLTemplateFormat)
+        docType = NSHTMLTextDocumentType;
+    if(templateFormat == BDSKRTFTemplateFormat)
+        docType = NSRTFTextDocumentType;
+    else if(templateFormat == BDSKRTFDTemplateFormat)
+        docType = NSRTFDTextDocumentType;
+    else if(templateFormat == BDSKDocTemplateFormat)
+        docType = NSDocFormatTextDocumentType;
+    else if(templateFormat == BDSKDocxTemplateFormat)
+        docType = NSOfficeOpenXMLTextDocumentType;
+    else if(templateFormat == BDSKOdtTemplateFormat)
+        docType = NSOpenDocumentTextDocumentType;
+    else if(templateFormat == BDSKWebArchiveTemplateFormat)
+        docType = NSWebArchiveTextDocumentType;
+    else if(templateFormat & BDSKPlainTextTemplateFormat)
+        docType = NSPlainTextDocumentType;
+    return docType;
+}
+
 - (NSString *)fileExtension;
 {
     BDSKASSERT([self parent] == nil);
