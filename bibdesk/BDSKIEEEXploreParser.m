@@ -90,18 +90,13 @@ static NSMutableArray *_finishedDownloads = nil;
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
-    if (nil == [url host] || NSOrderedSame != [[url host] isEqualToString:@"ieeexplore.ieee.org"]){
+    if (nil == [url host] || NSOrderedSame != [[url host] isEqualToString:@"ieeexplore.ieee.org"])
         return NO;
-    }
         
-	bool isOnAbstractPage     = [[url path] isEqualToString:abstractPageURLPath];
-	bool isOnSearchResultPage = [[url path] isEqualToString:searchResultPageURLPath];
+	if ([[url path] isEqualToString:abstractPageURLPath] || [[url path] isEqualToString:searchResultPageURLPath])
+        return NO;
     
-    NSError *error = nil;    
-
-    bool nodecountisok =  [[[xmlDocument rootElement] nodesForXPath:containsAbstractPlusLinkNode error:&error] count] > 0;
-
-    return nodecountisok || isOnAbstractPage || isOnSearchResultPage;
+    return [[[xmlDocument rootElement] nodesForXPath:containsAbstractPlusLinkNode error:NULL] count] > 0;
 }
 
 
@@ -192,15 +187,15 @@ static NSMutableArray *_finishedDownloads = nil;
         
         // parse all links on a TOC page
         
-        NSArray *AbstractPlusLinkNodes = [[xmlDocument rootElement] nodesForXPath:containsAbstractPlusLinkNode
-																			error:&error];  
+        NSArray *abstractPlusLinkNodes = [[xmlDocument rootElement] nodesForXPath:containsAbstractPlusLinkNode error:&error];  
 		
-		if ([AbstractPlusLinkNodes count] < 1) {
-			if (outError) *outError = error;
+		if ([abstractPlusLinkNodes count] < 1) {
+			if (nil == abstractPlusLinkNodes && outError) *outError = error;
+            else if (outError) *outError = [NSError localErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Unable to find links", @"")];
 			return nil;
 		}
 		
-        for (NSXMLNode *aplinknode in AbstractPlusLinkNodes) {
+        for (NSXMLNode *aplinknode in abstractPlusLinkNodes) {
             NSString *hrefValue = [aplinknode stringValueOfAttribute:@"href"];
 			NSURL *abstractPageURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@%@", [url host], hrefValue]];
 			
@@ -254,31 +249,83 @@ static NSMutableArray *_finishedDownloads = nil;
         NSAttributedString * attrString = [[[NSAttributedString alloc] initWithHTML:[download result] options:nil documentAttributes:NULL] autorelease];
         NSString * bibTeXString = [[attrString string] stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         
+        /*
+         You'd think the IEEE would be able to produce valid BibTeX, but lots of entries have
+         crap like "month=jun 1--aug 1" (unquoted).  They can also end a line with a double 
+         comma (visible in the downloaded BibTeX, so not my fault).  Either of these causes
+         btparse to choke.
+         
+         Unfortunately, BibTeX itself processes these without warnings, so there's not much
+         point in complaining to IEEE.  BibTeX just uses the first simple value and ignores
+         the rest.
+         */
+        NSScanner *scanner = [[NSScanner alloc] initWithString:bibTeXString];
+        [scanner setCaseSensitive:NO];
+        NSString *scanResult;
+        if ([scanner scanUpToString:@"month=" intoString:&scanResult]) {
+            [scanner scanString:@"month=" intoString:NULL];
+            NSMutableString *fixed = [[scanResult mutableCopy] autorelease];
+            if ([scanner scanUpToString:@"," intoString:&scanResult]) {
+                [fixed appendFormat:@"month={%@},", scanResult];
+                [scanner scanString:@"," intoString:NULL];
+                
+                // basically want to look for spaces and dashes between fragments; this is a heuristic, not a strict macro charset
+                static NSCharacterSet *badSet = nil;
+                if (nil == badSet) {
+                    NSMutableCharacterSet *cset = [NSMutableCharacterSet characterSetWithRange:NSMakeRange('a', 26)];
+                    [cset addCharactersInRange:NSMakeRange('A', 26)];
+                    [cset addCharactersInString:@"0123456789"];
+                    badSet = [[cset invertedSet] copy];
+                }
+                // unbraced non-letter
+                if ([scanResult rangeOfCharacterFromSet:badSet].length) {
+                    [fixed appendString:[[scanner string] substringFromIndex:[scanner scanLocation]]];
+                    bibTeXString = fixed;
+                }
+            }
+            else if ([scanner scanString:@"," intoString:NULL]) {
+                // empty month, unbraced, which also causes btparse to complain
+                [fixed appendString:[[scanner string] substringFromIndex:[scanner scanLocation]]];
+                bibTeXString = fixed;
+            }
+            
+            // find and remove ",,\n"
+            NSRange doubleCommaRange = [fixed rangeOfString:@",," options:NSLiteralSearch];
+            while (doubleCommaRange.length) {
+                NSUInteger newlineIndex = NSMaxRange(doubleCommaRange) + 1;
+                if (doubleCommaRange.length && newlineIndex < [fixed length] && [[NSCharacterSet newlineCharacterSet] characterIsMember:[fixed characterAtIndex:newlineIndex]]) {
+                    [fixed replaceCharactersInRange:doubleCommaRange withString:@","];
+                    newlineIndex -= 1;
+                }
+                doubleCommaRange = [fixed rangeOfString:@",," options:NSLiteralSearch range:NSMakeRange(newlineIndex, [fixed length] - newlineIndex)];
+            }
+        }
+        [scanner release];
+        
         BOOL isPartialData;
-        NSArray * newPubs = [BDSKBibTeXParser itemsFromString:bibTeXString owner:nil isPartialData:&isPartialData error: &error];
+        NSArray *newPubs = nil;
+        if ([NSString isEmptyString:bibTeXString] == NO)
+            newPubs = [BDSKBibTeXParser itemsFromString:bibTeXString owner:nil isPartialData:&isPartialData error: &error];
+        else
+            error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"No data returned from server", @"")];
         
         BibItem *newPub = [newPubs firstObject];
         
+        [newPub addFileForURL:[download pdfLinkURL] autoFile:NO runScriptHook:NO];
+        
         // parse failure
         if (nil == newPub) {
-            NSDictionary *pubFields = [NSDictionary dictionaryWithObject:[error localizedDescription] forKey:BDSKTitleString];
+            NSMutableDictionary *pubFields = [NSMutableDictionary dictionaryWithObject:[error localizedDescription] forKey:BDSKTitleString];
+            if ([[download URL] absoluteString])
+                [pubFields setObject:[[download URL] absoluteString] forKey:BDSKUrlString];
+            if (bibTeXString)
+                [pubFields setObject:bibTeXString forKey:BDSKAnnoteString];
             BibItem *errorItem = [[BibItem alloc] initWithType:BDSKMiscString citeKey:nil pubFields:pubFields isNew:YES];
             [items addObject:errorItem];
             [errorItem release];
-            
-            continue;
+        } else {
+            [items addObject:newPub];
         }
-        
-        // enqueue a download to get the PDF URL, if possible:
-        NSURLRequest *request = [NSURLRequest requestWithURL:[download pdfLinkURL]];
-        download = [[_BDSKIEEEDownload alloc] initWithRequest:request delegate:self];
-        [_activeDownloads addObject:download];
-        [download release];
-        [download start];
-        [downloadItemTable setObject:newPub forKey:download];
-
-        [items addObject:newPub];
-
 	}
     
     // download all the PDF link documents
@@ -362,6 +409,7 @@ static NSMutableArray *_finishedDownloads = nil;
     _result = [NSMutableData new];
     _connection = [[NSURLConnection alloc] initWithRequest:_request delegate:self startImmediately:NO];
     [_connection scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:[[self class] runloopMode]];
+    [_connection scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
     [_connection start];
 }
 
