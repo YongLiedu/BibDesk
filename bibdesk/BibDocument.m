@@ -1676,36 +1676,32 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     BDSKPRECONDITION(nil != template);
     BDSKTemplateFormat format = [template templateFormat];
     BDSKPRECONDITION(format & (BDSKRTFTemplateFormat | BDSKDocTemplateFormat | BDSKDocxTemplateFormat | BDSKOdtTemplateFormat | BDSKWebArchiveTemplateFormat | BDSKRichHTMLTemplateFormat));
+    
+    NSString *docType = nil;
+    if (format & BDSKRTFTemplateFormat)
+        docType = NSRTFTextDocumentType;
+    else if (format & BDSKRichHTMLTemplateFormat)
+        docType = NSHTMLTextDocumentType;
+    else if (format & BDSKDocTemplateFormat)
+        docType = NSDocFormatTextDocumentType;
+    else if (format & BDSKDocxTemplateFormat)
+        docType = NSOfficeOpenXMLTextDocumentType;
+    else if (format & BDSKOdtTemplateFormat)
+        docType = NSOpenDocumentTextDocumentType;
+    else if (format & BDSKWebArchiveTemplateFormat)
+        docType = NSWebArchiveTextDocumentType;
+    else return nil;
+    
     NSDictionary *docAttributes = nil;
     NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items publicationsContext:itemsContext documentAttributes:&docAttributes];
     NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionaryWithDictionary:docAttributes];
     
     // create some useful metadata, with an option to disable for the paranoid
-    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKDisableExportAttributesKey]){
+    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKDisableExportAttributesKey])
         [mutableAttributes addEntriesFromDictionary:[NSDictionary dictionaryWithObjectsAndKeys:NSFullUserName(), NSAuthorDocumentAttribute, [NSDate date], NSCreationTimeDocumentAttribute, [NSLocalizedString(@"BibDesk export of ", @"Error description") stringByAppendingString:[[[self fileURL] path] lastPathComponent]], NSTitleDocumentAttribute, nil]];
-    }
+    [mutableAttributes setObject:docType forKey:NSDocumentTypeDocumentAttribute];
     
-    if (format & BDSKRTFTemplateFormat) {
-        return [fileTemplate RTFFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes];
-    } else if (format & BDSKRichHTMLTemplateFormat) {
-        [mutableAttributes setObject:NSHTMLTextDocumentType forKey:NSDocumentTypeDocumentAttribute];
-        NSError *error = nil;
-        return [fileTemplate dataFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes error:&error];
-    } else if (format & BDSKDocTemplateFormat) {
-        return [fileTemplate docFormatFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes];
-    } else if (format & BDSKDocxTemplateFormat) {
-        [mutableAttributes setObject:NSOfficeOpenXMLTextDocumentType forKey:NSDocumentTypeDocumentAttribute];
-        NSError *error = nil;
-        return [fileTemplate dataFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes error:&error];
-    } else if (format & BDSKOdtTemplateFormat) {
-        [mutableAttributes setObject:NSOpenDocumentTextDocumentType forKey:NSDocumentTypeDocumentAttribute];
-        NSError *error = nil;
-        return [fileTemplate dataFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes error:&error];
-    } else if (format & BDSKWebArchiveTemplateFormat) {
-        [mutableAttributes setObject:NSWebArchiveTextDocumentType forKey:NSDocumentTypeDocumentAttribute];
-        NSError *error = nil;
-        return [fileTemplate dataFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes error:&error];
-    } else return nil;
+    return [fileTemplate dataFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes error:NULL];
 }
 
 - (NSData *)dataUsingTemplate:(BDSKTemplate *)template{
