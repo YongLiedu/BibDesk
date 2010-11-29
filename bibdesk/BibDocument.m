@@ -1486,7 +1486,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 }
 
 - (NSData *)bibTeXDataUsingEncoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop relativeToPath:(NSString *)basePath error:(NSError **)outError{
-    NSParameterAssert(encoding != 0);
+    NSParameterAssert(encoding != 0 && encoding != BDSKNoStringEncoding);
 
     NSMutableData *outputData = [NSMutableData dataWithCapacity:4096];
     NSData *pubData;
@@ -1606,7 +1606,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 - (NSData *)RISDataUsingEncoding:(NSStringEncoding)encoding error:(NSError **)error{
 
-    NSParameterAssert(encoding);
+    NSParameterAssert(encoding != 0 && encoding != BDSKNoStringEncoding);
     
     NSString *RISString = [self RISStringForPublications:[self publicationsForSaving]];
     NSData *data = [RISString dataUsingEncoding:encoding allowLossyConversion:NO];
@@ -1619,7 +1619,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 - (NSData *)LTBDataUsingEncoding:(NSStringEncoding)encoding error:(NSError **)error{
 
-    NSParameterAssert(encoding);
+    NSParameterAssert(encoding != 0 && encoding != BDSKNoStringEncoding);
     
     NSPasteboard *pboard = [NSPasteboard pasteboardWithUniqueName];
     [pboardHelper declareType:NSStringPboardType dragCopyType:BDSKLTBDragCopyType forItems:[self publicationsForSaving] forPasteboard:pboard];
