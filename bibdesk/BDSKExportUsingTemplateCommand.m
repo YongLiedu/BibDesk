@@ -44,6 +44,7 @@
 #import "BibItem.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
+#import "BDSKTemplateObjectProxy.h"
 
 
 @implementation BDSKExportUsingTemplateCommand
@@ -166,37 +167,52 @@
 	}
     
     NSData *fileData = nil;
+    NSString *string = nil;
+    NSAttributedString *attrString = nil;
+    NSDictionary *docAttributes = nil;
+    BDSKTemplateFormat format = [template templateFormat];
     
-    if ([template templateFormat] & BDSKRichTextTemplateFormat) {
-        fileData = [document attributedStringDataForPublications:items publicationsContext:itemsContext usingTemplate:template];
-    } else {
-        fileData = [document stringDataForPublications:items publicationsContext:itemsContext usingTemplate:template];
-    }
+    if (format & BDSKRichTextTemplateFormat)
+        attrString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:document publications:items publicationsContext:itemsContext documentAttributes:&docAttributes];
+    else
+        string = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:document publications:items publicationsContext:itemsContext];
     
-    if (fileData == nil) {
+    if (string == nil && attrString == nil) {
         [self setScriptErrorNumber:NSInternalScriptError];
         [self setScriptErrorString:NSLocalizedString(@"Could not parse template.",@"Error description")];
         return nil;
     }
     
     if (fileURL) {
-        [fileData writeToURL:fileURL atomically:YES];
+        if (format & BDSKRTFDTemplateFormat) {
+            NSFileWrapper *fileWrapper = [attrString RTFDFileWrapperFromRange:NSMakeRange(0,[attrString length]) documentAttributes:docAttributes];
+            [fileWrapper writeToFile:[fileURL path] atomically:YES updateFilenames:NO];
+        } else if (format & BDSKRichTextTemplateFormat) {
+            NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionaryWithDictionary:docAttributes];
+            [mutableAttributes setObject:[template documentType] forKey:NSDocumentTypeDocumentAttribute];
+            fileData = [attrString dataFromRange:NSMakeRange(0,[attrString length]) documentAttributes:mutableAttributes error:NULL];
+            [fileData writeToURL:fileURL atomically:YES];
+        } else {
+            [string writeToURL:fileURL atomically:YES encoding:NSUTF8StringEncoding error:NULL];
+        }
         
         NSURL *destDirURL = [fileURL URLByDeletingLastPathComponent];
         for (NSURL *accessoryURL in [template accessoryFileURLs])
             [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
     } else {
         NSPasteboard *pboard = [NSPasteboard generalPasteboard];
-        NSString *string = nil;
-        if ([template templateFormat] & BDSKRichTextTemplateFormat) {
+        if (format & BDSKRTFDTemplateFormat) {
+            [pboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, NSRTFPboardType, NSRTFDPboardType, nil] owner:nil];
+            [pboard setData:[attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:docAttributes] forType:NSRTFPboardType];
+            [pboard setData:[attrString RTFDFromRange:NSMakeRange(0, [attrString length]) documentAttributes:docAttributes] forType:NSRTFDPboardType];
+        } else if (format & BDSKRichTextTemplateFormat) {
             [pboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, NSRTFPboardType, nil] owner:nil];
-            string = [[[[NSAttributedString alloc] initWithRTF:fileData documentAttributes:NULL] autorelease] string];
-            [pboard setData:fileData forType:NSRTFPboardType];
+            [pboard setData:[attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:docAttributes] forType:NSRTFPboardType];
         } else {
             [pboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, nil] owner:nil];
             string = [[[NSString alloc] initWithData:fileData encoding:NSUTF8StringEncoding] autorelease];
         }
-        [pboard setString:string forType:NSStringPboardType];
+        [pboard setString:(string ?: [attrString string]) forType:NSStringPboardType];
     }
     
 	return nil;
