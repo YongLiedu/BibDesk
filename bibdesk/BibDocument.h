@@ -283,13 +283,9 @@ extern NSString *BDSKDocumentPublicationsKey;
 - (BOOL)writeArchiveToURL:(NSURL *)fileURL error:(NSError **)outError;
 
 - (NSData *)stringDataUsingTemplate:(BDSKTemplate *)template;
-- (NSData *)stringDataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template;
 - (NSData *)attributedStringDataUsingTemplate:(BDSKTemplate *)template;
-- (NSData *)attributedStringDataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template;
 - (NSData *)dataUsingTemplate:(BDSKTemplate *)template;
-- (NSData *)dataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template;
 - (NSFileWrapper *)fileWrapperUsingTemplate:(BDSKTemplate *)template;
-- (NSFileWrapper *)fileWrapperForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template;
 
 - (NSData *)atomData;
 - (NSData *)MODSData;

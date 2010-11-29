@@ -1654,25 +1654,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 }
 
 - (NSData *)stringDataUsingTemplate:(BDSKTemplate *)template{
-    return [self stringDataForPublications:[self publicationsForSaving] publicationsContext:nil usingTemplate:template];
-}
-
-- (NSData *)stringDataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template{
-    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-    
     BDSKPRECONDITION(nil != template && ([template templateFormat] & BDSKPlainTextTemplateFormat));
     
-    NSString *fileTemplate = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items publicationsContext:itemsContext];
-    return [fileTemplate dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
+    NSString *string = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:[self publicationsForSaving]];
+    return [string dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
 }
 
 - (NSData *)attributedStringDataUsingTemplate:(BDSKTemplate *)template{
-    return [self attributedStringDataForPublications:[self publicationsForSaving] publicationsContext:nil usingTemplate:template];
-}
-
-- (NSData *)attributedStringDataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template{
-    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-    
     BDSKPRECONDITION(nil != template);
     BDSKPRECONDITION([template templateFormat] & (BDSKRTFTemplateFormat | BDSKDocTemplateFormat | BDSKDocxTemplateFormat | BDSKOdtTemplateFormat | BDSKWebArchiveTemplateFormat | BDSKRichHTMLTemplateFormat));
     
@@ -1681,7 +1669,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         return nil;
     
     NSDictionary *docAttributes = nil;
-    NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items publicationsContext:itemsContext documentAttributes:&docAttributes];
+    NSAttributedString *attrString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:[self publicationsForSaving] documentAttributes:&docAttributes];
     NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionaryWithDictionary:docAttributes];
     
     // create some useful metadata, with an option to disable for the paranoid
@@ -1689,32 +1677,19 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [mutableAttributes addEntriesFromDictionary:[NSDictionary dictionaryWithObjectsAndKeys:NSFullUserName(), NSAuthorDocumentAttribute, [NSDate date], NSCreationTimeDocumentAttribute, [NSLocalizedString(@"BibDesk export of ", @"Error description") stringByAppendingString:[[[self fileURL] path] lastPathComponent]], NSTitleDocumentAttribute, nil]];
     [mutableAttributes setObject:docType forKey:NSDocumentTypeDocumentAttribute];
     
-    return [fileTemplate dataFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes error:NULL];
+    return [attrString dataFromRange:NSMakeRange(0,[attrString length]) documentAttributes:mutableAttributes error:NULL];
 }
 
 - (NSData *)dataUsingTemplate:(BDSKTemplate *)template{
-    return [self dataForPublications:[self publicationsForSaving] publicationsContext:nil usingTemplate:template];
-}
-
-- (NSData *)dataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template{
-    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-    
     BDSKPRECONDITION(nil != template && nil != [template scriptPath]);
     
-    NSData *fileTemplate = [BDSKTemplateObjectProxy dataByParsingTemplate:template withObject:self publications:items publicationsContext:itemsContext];
-    return fileTemplate;
+    return [BDSKTemplateObjectProxy dataByParsingTemplate:template withObject:self publications:[self publicationsForSaving]];
 }
 
 - (NSFileWrapper *)fileWrapperUsingTemplate:(BDSKTemplate *)template{
-    return [self fileWrapperForPublications:[self publicationsForSaving] publicationsContext:nil usingTemplate:template];
-}
-
-- (NSFileWrapper *)fileWrapperForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template{
-    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-    
     BDSKPRECONDITION(nil != template && [template templateFormat] & BDSKRTFDTemplateFormat);
     NSDictionary *docAttributes = nil;
-    NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items publicationsContext:itemsContext documentAttributes:&docAttributes];
+    NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:[self publicationsForSaving] documentAttributes:&docAttributes];
     
     return [fileTemplate RTFDFileWrapperFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:docAttributes];
 }
