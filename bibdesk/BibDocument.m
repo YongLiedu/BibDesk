@@ -1116,12 +1116,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     // callers are responsible for making sure all edits are committed
     NSParameterAssert([self commitPendingEdits]);
     
-    if ([docType isEqualToString:BDSKArchiveDocumentType]) {
+    if ([docType isEqualToString:BDSKArchiveDocumentType])
         success = [self writeArchiveToURL:fileURL error:outError];
-    } else {
-        NSFileWrapper *fileWrapper = [self fileWrapperOfType:docType error:&nsError];
-        success = [fileWrapper writeToFile:[fileURL path] atomically:NO updateFilenames:NO];
-    }
+    else
+        success = [super writeToURL:fileURL ofType:docType];
     
     // see if this is our error or Apple's
     if (NO == success && [nsError isLocalError]) {
@@ -1291,7 +1289,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 }
 
 - (BOOL)writeArchiveToURL:(NSURL *)fileURL error:(NSError **)outError{
-    NSArray *items = [self publicationsForSaving];
     NSString *path = [[fileURL path] stringByDeletingPathExtension];
     NSFileManager *fm = [NSFileManager defaultManager];
     NSString *filePath;
@@ -1300,7 +1297,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSMutableSet *localFiles = [NSMutableSet set];
     
     if (success = [fm createDirectoryAtPath:path withIntermediateDirectories:NO attributes:nil error:NULL]) {
-        for (BibItem *item in items) {
+        for (BibItem *item in [self publicationsForSaving]) {
             for (BDSKLinkedFile *file in [item localFiles]) {
                 if (filePath = [[file URL] path]) {
                     [localFiles addObject:filePath];
@@ -1313,7 +1310,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         }
         
         NSStringEncoding encoding = [saveTextEncodingPopupButton encoding] != BDSKNoStringEncoding ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
-        NSData *bibtexData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO relativeToPath:commonParent error:outError];
+        NSData *bibtexData = [self bibTeXDataUsingEncoding:encoding droppingInternal:NO relativeToPath:commonParent error:outError];
         NSString *bibtexPath = [[path stringByAppendingPathComponent:[path lastPathComponent]] stringByAppendingPathExtension:@"bib"];
         
         success = [bibtexData writeToFile:bibtexPath options:0 error:outError];
@@ -1357,7 +1354,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     // check if we need a fileWrapper; only needed for RTFD templates
     BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:aType];
     if([selectedTemplate templateFormat] & BDSKRTFDTemplateFormat){
-        fileWrapper = [self fileWrapperForPublications:[self publicationsForSaving] usingTemplate:selectedTemplate];
+        fileWrapper = [self fileWrapperUsingTemplate:selectedTemplate];
         if(fileWrapper == nil){
             if (outError) 
                 *outError = [NSError localErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to create file wrapper for the selected template", @"Error description")];
@@ -1365,14 +1362,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }else if ([aType isEqualToString:BDSKArchiveDocumentType]){
         BDSKASSERT_NOT_REACHED("Should not save a fileWrapper for archive");
     }else{
-        NSError *error = nil;
-        NSData *data = [self dataOfType:aType error:&error];
-        if(data != nil && error == nil){
-            fileWrapper = [[[NSFileWrapper alloc] initRegularFileWithContents:data] autorelease];
-        } else {
-            if(outError != NULL)
-                *outError = error;
-        }
+        fileWrapper = [super fileWrapperOfType:aType error:outError];
     }
     return fileWrapper;
 }
@@ -1386,8 +1376,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     BOOL isBibTeX = [aType isEqualToString:BDSKBibTeXDocumentType];
     
-    NSArray *items = [self publicationsForSaving];
-    
     // export operations need their own encoding
     if (NSSaveToOperation == docState.currentSaveOperationType)
         encoding = [saveTextEncodingPopupButton encoding] != BDSKNoStringEncoding ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
@@ -1397,19 +1385,19 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if (isBibTeX){
         if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKAutoSortForCrossrefsKey])
             [self performSortForCrossrefs];
-        data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO relativeToPath:[[saveTargetURL path] stringByDeletingLastPathComponent] error:&error];
+        data = [self bibTeXDataUsingEncoding:encoding droppingInternal:NO relativeToPath:[[saveTargetURL path] stringByDeletingLastPathComponent] error:&error];
     }else if ([aType isEqualToString:BDSKRISDocumentType]){
-        data = [self RISDataForPublications:items encoding:encoding error:&error];
+        data = [self RISDataUsingEncoding:encoding error:&error];
     }else if ([aType isEqualToString:BDSKMinimalBibTeXDocumentType]){
-        data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:YES relativeToPath:[[saveTargetURL path] stringByDeletingLastPathComponent] error:&error];
+        data = [self bibTeXDataUsingEncoding:encoding droppingInternal:YES relativeToPath:[[saveTargetURL path] stringByDeletingLastPathComponent] error:&error];
     }else if ([aType isEqualToString:BDSKLTBDocumentType]){
-        data = [self LTBDataForPublications:items encoding:encoding error:&error];
+        data = [self LTBDataUsingEncoding:encoding error:&error];
     }else if ([aType isEqualToString:BDSKEndNoteDocumentType]){
-        data = [self endNoteDataForPublications:items];
+        data = [self endNoteData];
     }else if ([aType isEqualToString:BDSKMODSDocumentType]){
-        data = [self MODSDataForPublications:items];
+        data = [self MODSData];
     }else if ([aType isEqualToString:BDSKAtomDocumentType]){
-        data = [self atomDataForPublications:items];
+        data = [self atomData];
     }else{
         BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:aType];
         NSParameterAssert(nil != selectedTemplate);
@@ -1418,11 +1406,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         if (templateFormat & BDSKRTFDTemplateFormat) {
             // @@ shouldn't reach here, should have already redirected to fileWrapperOfType:forPublications:error:
         } else if ([selectedTemplate scriptPath] != nil) {
-            data = [self dataForPublications:items usingTemplate:selectedTemplate];
+            data = [self dataUsingTemplate:selectedTemplate];
         } else if (templateFormat & BDSKPlainTextTemplateFormat) {
-            data = [self stringDataForPublications:items usingTemplate:selectedTemplate];
+            data = [self stringDataUsingTemplate:selectedTemplate];
         } else {
-            data = [self attributedStringDataForPublications:items usingTemplate:selectedTemplate];
+            data = [self attributedStringDataUsingTemplate:selectedTemplate];
         }
     }
     
@@ -1464,16 +1452,14 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     return data;    
 }
 
-- (NSData *)atomDataForPublications:(NSArray *)items{
+- (NSData *)atomData{
     NSMutableData *d = [NSMutableData data];
     
     [d appendUTF8DataFromString:@"<?xml version=\"1.0\" encoding=\"UTF-8\"?><feed xmlns=\"http://purl.org/atom/ns#\">"];
     
-    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-    
     // TODO: output general feed info
     
-	for (BibItem *pub in items){
+	for (BibItem *pub in [self publicationsForSaving]){
         [d appendUTF8DataFromString:@"<entry><title>foo</title><description>foo-2</description>"];
         [d appendUTF8DataFromString:@"<content type=\"application/xml+mods\">"];
         [d appendUTF8DataFromString:[pub MODSString]];
@@ -1485,13 +1471,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     return d;    
 }
 
-- (NSData *)MODSDataForPublications:(NSArray *)items{
+- (NSData *)MODSData{
     NSMutableData *d = [NSMutableData data];
     
-    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-
     [d appendUTF8DataFromString:@"<?xml version=\"1.0\" encoding=\"UTF-8\"?><modsCollection xmlns=\"http://www.loc.gov/mods/v3\">"];
-	for (BibItem *pub in items){
+	for (BibItem *pub in [self publicationsForSaving]){
         [d appendUTF8DataFromString:[pub MODSString]];
         [d appendUTF8DataFromString:@"\n"];
     }
@@ -1500,20 +1484,18 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     return d;
 }
 
-- (NSData *)endNoteDataForPublications:(NSArray *)items{
+- (NSData *)endNoteData{
     NSMutableData *d = [NSMutableData data];
     
-    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-    
     [d appendUTF8DataFromString:@"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xml>\n<records>\n"];
-    for (BibItem *pub in items)
+    for (BibItem *pub in [self publicationsForSaving])
         [d appendUTF8DataFromString:[pub endNoteString]];
     [d appendUTF8DataFromString:@"</records>\n</xml>\n"];
     
     return d;
 }
 
-- (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop relativeToPath:(NSString *)basePath error:(NSError **)outError{
+- (NSData *)bibTeXDataUsingEncoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop relativeToPath:(NSString *)basePath error:(NSError **)outError{
     NSParameterAssert(encoding != 0);
 
     NSMutableData *outputData = [NSMutableData dataWithCapacity:4096];
@@ -1582,9 +1564,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     // output the bibs
     
-    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-
-    for (BibItem *pub in items){
+    for (BibItem *pub in [self publicationsForSaving]){
         if (isOK == NO) break;
         pubData = [pub bibTeXDataWithOptions:options relativeToPath:basePath encoding:encoding error:&error];
         if(isOK = pubData != nil){
@@ -1634,12 +1614,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         
 }
 
-- (NSData *)RISDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding error:(NSError **)error{
+- (NSData *)RISDataUsingEncoding:(NSStringEncoding)encoding error:(NSError **)error{
 
     NSParameterAssert(encoding);
     
-    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-    NSString *RISString = [self RISStringForPublications:items];
+    NSString *RISString = [self RISStringForPublications:[self publicationsForSaving]];
     NSData *data = [RISString dataUsingEncoding:encoding allowLossyConversion:NO];
     if (nil == data && error) {
         *error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]]];
@@ -1648,14 +1627,12 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 	return data;
 }
 
-- (NSData *)LTBDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding error:(NSError **)error{
+- (NSData *)LTBDataUsingEncoding:(NSStringEncoding)encoding error:(NSError **)error{
 
     NSParameterAssert(encoding);
     
-    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-    
     NSPasteboard *pboard = [NSPasteboard pasteboardWithUniqueName];
-    [pboardHelper declareType:NSStringPboardType dragCopyType:BDSKLTBDragCopyType forItems:items forPasteboard:pboard];
+    [pboardHelper declareType:NSStringPboardType dragCopyType:BDSKLTBDragCopyType forItems:[self publicationsForSaving] forPasteboard:pboard];
     NSString *ltbString = [pboard stringForType:NSStringPboardType];
     [pboardHelper clearPromisedTypesForPasteboard:pboard];
 	if(ltbString == nil){
@@ -1676,8 +1653,8 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 	return data;
 }
 
-- (NSData *)stringDataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template{
-    return [self stringDataForPublications:items publicationsContext:nil usingTemplate:template];
+- (NSData *)stringDataUsingTemplate:(BDSKTemplate *)template{
+    return [self stringDataForPublications:[self publicationsForSaving] publicationsContext:nil usingTemplate:template];
 }
 
 - (NSData *)stringDataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template{
@@ -1689,8 +1666,8 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     return [fileTemplate dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
 }
 
-- (NSData *)attributedStringDataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template{
-    return [self attributedStringDataForPublications:items publicationsContext:nil usingTemplate:template];
+- (NSData *)attributedStringDataUsingTemplate:(BDSKTemplate *)template{
+    return [self attributedStringDataForPublications:[self publicationsForSaving] publicationsContext:nil usingTemplate:template];
 }
 
 - (NSData *)attributedStringDataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template{
@@ -1727,8 +1704,8 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     } else return nil;
 }
 
-- (NSData *)dataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template{
-    return [self dataForPublications:items publicationsContext:nil usingTemplate:template];
+- (NSData *)dataUsingTemplate:(BDSKTemplate *)template{
+    return [self dataForPublications:[self publicationsForSaving] publicationsContext:nil usingTemplate:template];
 }
 
 - (NSData *)dataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template{
@@ -1740,8 +1717,8 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     return fileTemplate;
 }
 
-- (NSFileWrapper *)fileWrapperForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template{
-    return [self fileWrapperForPublications:items publicationsContext:nil usingTemplate:template];
+- (NSFileWrapper *)fileWrapperUsingTemplate:(BDSKTemplate *)template{
+    return [self fileWrapperForPublications:[self publicationsForSaving] publicationsContext:nil usingTemplate:template];
 }
 
 - (NSFileWrapper *)fileWrapperForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template{

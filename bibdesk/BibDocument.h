@@ -282,21 +282,21 @@ extern NSString *BDSKDocumentPublicationsKey;
 
 - (BOOL)writeArchiveToURL:(NSURL *)fileURL error:(NSError **)outError;
 
-- (NSData *)stringDataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template;
+- (NSData *)stringDataUsingTemplate:(BDSKTemplate *)template;
 - (NSData *)stringDataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template;
-- (NSData *)attributedStringDataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template;
+- (NSData *)attributedStringDataUsingTemplate:(BDSKTemplate *)template;
 - (NSData *)attributedStringDataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template;
-- (NSData *)dataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template;
+- (NSData *)dataUsingTemplate:(BDSKTemplate *)template;
 - (NSData *)dataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template;
-- (NSFileWrapper *)fileWrapperForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template;
+- (NSFileWrapper *)fileWrapperUsingTemplate:(BDSKTemplate *)template;
 - (NSFileWrapper *)fileWrapperForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template;
 
-- (NSData *)atomDataForPublications:(NSArray *)items;
-- (NSData *)MODSDataForPublications:(NSArray *)items;
-- (NSData *)endNoteDataForPublications:(NSArray *)items;
-- (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop relativeToPath:(NSString *)basePath error:(NSError **)outError;
-- (NSData *)RISDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding error:(NSError **)error;
-- (NSData *)LTBDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding error:(NSError **)error;
+- (NSData *)atomData;
+- (NSData *)MODSData;
+- (NSData *)endNoteData;
+- (NSData *)bibTeXDataUsingEncoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop relativeToPath:(NSString *)basePath error:(NSError **)outError;
+- (NSData *)RISDataUsingEncoding:(NSStringEncoding)encoding error:(NSError **)error;
+- (NSData *)LTBDataUsingEncoding:(NSStringEncoding)encoding error:(NSError **)error;
 
 - (BOOL)readFromBibTeXData:(NSData *)data fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 - (BOOL)readFromData:(NSData *)data ofStringType:(BDSKStringType)type fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
