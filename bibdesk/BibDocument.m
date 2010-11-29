@@ -1388,17 +1388,16 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 {
     NSData *data = nil;
     NSError *error = nil;
-    
-    BOOL isBibTeX = [aType isEqualToString:BDSKBibTeXDocumentType];
+    BOOL isBibTeX = [aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToString:BDSKMinimalBibTeXDocumentType];
     
     if (isBibTeX){
         if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKAutoSortForCrossrefsKey])
             [self performSortForCrossrefs];
-        data = [self bibTeXDataDroppingInternal:NO relativeToPath:[[saveTargetURL path] stringByDeletingLastPathComponent] error:&error];
+        NSString *basePath = [[saveTargetURL path] stringByDeletingLastPathComponent];
+        BOOL drop = [aType isEqualToString:BDSKMinimalBibTeXDocumentType];
+        data = [self bibTeXDataDroppingInternal:drop relativeToPath:basePath error:&error];
     }else if ([aType isEqualToString:BDSKRISDocumentType]){
         data = [self RISDataAndReturnError:&error];
-    }else if ([aType isEqualToString:BDSKMinimalBibTeXDocumentType]){
-        data = [self bibTeXDataDroppingInternal:YES relativeToPath:[[saveTargetURL path] stringByDeletingLastPathComponent] error:&error];
     }else if ([aType isEqualToString:BDSKLTBDocumentType]){
         data = [self LTBDataAndReturnError:&error];
     }else if ([aType isEqualToString:BDSKEndNoteDocumentType]){
