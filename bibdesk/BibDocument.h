@@ -288,9 +288,9 @@ extern NSString *BDSKDocumentPublicationsKey;
 - (NSData *)atomData;
 - (NSData *)MODSData;
 - (NSData *)endNoteData;
-- (NSData *)bibTeXDataUsingEncoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop relativeToPath:(NSString *)basePath error:(NSError **)outError;
-- (NSData *)RISDataUsingEncoding:(NSStringEncoding)encoding error:(NSError **)error;
-- (NSData *)LTBDataUsingEncoding:(NSStringEncoding)encoding error:(NSError **)error;
+- (NSData *)bibTeXDataDroppingInternal:(BOOL)drop relativeToPath:(NSString *)basePath error:(NSError **)outError;
+- (NSData *)RISDataAndReturnError:(NSError **)error;
+- (NSData *)LTBDataAndReturnError:(NSError **)error;
 
 - (BOOL)readFromBibTeXData:(NSData *)data fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 - (BOOL)readFromData:(NSData *)data ofStringType:(BDSKStringType)type fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
