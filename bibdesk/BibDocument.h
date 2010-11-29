@@ -282,8 +282,6 @@ extern NSString *BDSKDocumentPublicationsKey;
 
 - (BOOL)writeArchiveToURL:(NSURL *)fileURL error:(NSError **)outError;
 
-- (NSData *)stringDataUsingTemplate:(BDSKTemplate *)template;
-- (NSData *)attributedStringDataUsingTemplate:(BDSKTemplate *)template;
 - (NSData *)dataUsingTemplate:(BDSKTemplate *)template;
 - (NSFileWrapper *)fileWrapperUsingTemplate:(BDSKTemplate *)template;
 

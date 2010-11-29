@@ -1401,17 +1401,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }else{
         BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:aType];
         NSParameterAssert(nil != selectedTemplate);
-        BDSKTemplateFormat templateFormat = [selectedTemplate templateFormat];
-        
-        if (templateFormat & BDSKRTFDTemplateFormat) {
-            // @@ shouldn't reach here, should have already redirected to fileWrapperOfType:forPublications:error:
-        } else if ([selectedTemplate scriptPath] != nil) {
-            data = [self dataUsingTemplate:selectedTemplate];
-        } else if (templateFormat & BDSKPlainTextTemplateFormat) {
-            data = [self stringDataUsingTemplate:selectedTemplate];
-        } else {
-            data = [self attributedStringDataUsingTemplate:selectedTemplate];
-        }
+        data = [self dataUsingTemplate:selectedTemplate];
     }
     
     // grab the underlying error; if we recognize it, pass it up as a kBDSKDocumentSaveError
@@ -1653,37 +1643,32 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 	return data;
 }
 
-- (NSData *)stringDataUsingTemplate:(BDSKTemplate *)template{
-    BDSKPRECONDITION(nil != template && ([template templateFormat] & BDSKPlainTextTemplateFormat));
-    
-    NSString *string = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:[self publicationsForSaving]];
-    return [string dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
-}
-
-- (NSData *)attributedStringDataUsingTemplate:(BDSKTemplate *)template{
-    BDSKPRECONDITION(nil != template);
-    BDSKPRECONDITION([template templateFormat] & (BDSKRTFTemplateFormat | BDSKDocTemplateFormat | BDSKDocxTemplateFormat | BDSKOdtTemplateFormat | BDSKWebArchiveTemplateFormat | BDSKRichHTMLTemplateFormat));
-    
-    NSString *docType = [template documentType];
-    if (docType == nil || [docType isEqualToString:NSRTFDTextDocumentType] || [docType isEqualToString:NSPlainTextDocumentType])
-        return nil;
-    
-    NSDictionary *docAttributes = nil;
-    NSAttributedString *attrString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:[self publicationsForSaving] documentAttributes:&docAttributes];
-    NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionaryWithDictionary:docAttributes];
-    
-    // create some useful metadata, with an option to disable for the paranoid
-    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKDisableExportAttributesKey])
-        [mutableAttributes addEntriesFromDictionary:[NSDictionary dictionaryWithObjectsAndKeys:NSFullUserName(), NSAuthorDocumentAttribute, [NSDate date], NSCreationTimeDocumentAttribute, [NSLocalizedString(@"BibDesk export of ", @"Error description") stringByAppendingString:[[[self fileURL] path] lastPathComponent]], NSTitleDocumentAttribute, nil]];
-    [mutableAttributes setObject:docType forKey:NSDocumentTypeDocumentAttribute];
-    
-    return [attrString dataFromRange:NSMakeRange(0,[attrString length]) documentAttributes:mutableAttributes error:NULL];
-}
-
 - (NSData *)dataUsingTemplate:(BDSKTemplate *)template{
-    BDSKPRECONDITION(nil != template && nil != [template scriptPath]);
+    BDSKPRECONDITION(nil != template);
     
-    return [BDSKTemplateObjectProxy dataByParsingTemplate:template withObject:self publications:[self publicationsForSaving]];
+    NSData *data = nil;
+    
+    if ([template scriptPath]) {
+        data = [BDSKTemplateObjectProxy dataByParsingTemplate:template withObject:self publications:[self publicationsForSaving]];
+    } else if ([template templateFormat] & BDSKPlainTextTemplateFormat) {
+        NSString *string = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:[self publicationsForSaving]];
+        
+        data = [string dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
+    } else {
+        BDSKPRECONDITION([template templateFormat] != BDSKRTFDTemplateFormat);
+        
+        NSDictionary *docAttributes = nil;
+        NSAttributedString *attrString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:[self publicationsForSaving] documentAttributes:&docAttributes];
+        NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionaryWithDictionary:docAttributes];
+        
+        // create some useful metadata, with an option to disable for the paranoid
+        if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKDisableExportAttributesKey])
+            [mutableAttributes addEntriesFromDictionary:[NSDictionary dictionaryWithObjectsAndKeys:NSFullUserName(), NSAuthorDocumentAttribute, [NSDate date], NSCreationTimeDocumentAttribute, [NSLocalizedString(@"BibDesk export of ", @"Error description") stringByAppendingString:[[[self fileURL] path] lastPathComponent]], NSTitleDocumentAttribute, nil]];
+        [mutableAttributes setObject:[template documentType] forKey:NSDocumentTypeDocumentAttribute];
+        
+        data = [attrString dataFromRange:NSMakeRange(0, [attrString length]) documentAttributes:mutableAttributes error:NULL];
+    }
+    return data;
 }
 
 - (NSFileWrapper *)fileWrapperUsingTemplate:(BDSKTemplate *)template{
