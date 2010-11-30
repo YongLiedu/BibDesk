@@ -1117,18 +1117,12 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSParameterAssert([self commitPendingEdits]);
     
     if ([docType isEqualToString:BDSKArchiveDocumentType])
-        success = [self writeArchiveToURL:fileURL error:outError];
+        success = [self writeArchiveToURL:fileURL error:&nsError];
     else
-        success = [super writeToURL:fileURL ofType:docType];
+        success = [super writeToURL:fileURL ofType:docType error:&nsError];
     
     // see if this is our error or Apple's
     if (NO == success && [nsError isLocalError]) {
-        
-        // get offending BibItem if possible
-        BibItem *theItem = [nsError valueForKey:BDSKUnderlyingItemErrorKey];
-        if (theItem)
-            [self selectPublication:theItem];
-        
         NSString *errTitle = NSAutosaveOperation == docState.currentSaveOperationType ? NSLocalizedString(@"Unable to autosave file", @"Error description") : NSLocalizedString(@"Unable to save file", @"Error description");
         
         // @@ do this in fileWrapperOfType:forPublications:error:?  should just use error localizedDescription
