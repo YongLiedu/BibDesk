@@ -38,6 +38,7 @@
 
 #import "BDSKBookmark.h"
 #import "NSImage_BDSKExtensions.h"
+#import "BDSKRuntime.h"
 
 #define CHILDREN_KEY    @"Children"
 #define TITLE_KEY       @"Title"

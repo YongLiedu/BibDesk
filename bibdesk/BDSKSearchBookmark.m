@@ -38,6 +38,7 @@
 
 #import "BDSKSearchBookmark.h"
 #import "NSImage_BDSKExtensions.h"
+#import "BDSKRuntime.h"
 
 #define BOOKMARK_STRING     @"bookmark"
 #define FOLDER_STRING       @"folder"
