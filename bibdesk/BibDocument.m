@@ -1001,6 +1001,31 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [super changeSaveType:sender];
 }
 
+- (NSArray *)publicationsForSaving {
+    if (docState.currentSaveOperationType != NSSaveToOperation || [exportSelectionCheckButton state] != NSOnState)
+        return publications;
+    else if ([self numberOfSelectedPubs] == 0)
+        return groupedPublications;
+    else
+        return [self selectedPublications];
+}
+
+- (NSStringEncoding)encodingForSaving {
+    NSStringEncoding encoding = 0;
+    
+    // export operations need their own encoding
+    if (NSSaveToOperation == docState.currentSaveOperationType)
+        encoding = [saveTextEncodingPopupButton encoding] != BDSKNoStringEncoding ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
+    else if (NSSaveAsOperation == docState.currentSaveOperationType && [saveTextEncodingPopupButton encoding] != BDSKNoStringEncoding)
+        encoding = [saveTextEncodingPopupButton encoding];
+    else
+        encoding = [self documentStringEncoding];
+    
+    BDSKASSERT(encoding != 0 && encoding != BDSKNoStringEncoding);
+    
+    return encoding;
+}
+
 - (void)runModalSavePanelForSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo {
     // save this early, so we can setup the panel correctly, the other setting will come later
     docState.currentSaveOperationType = saveOperation;
@@ -1009,47 +1034,39 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 - (void)document:(NSDocument *)doc didSave:(BOOL)didSave contextInfo:(void *)contextInfo {
     NSDictionary *info = [(id)contextInfo autorelease];
-    NSURL *absoluteURL = [info objectForKey:@"URL"];
-    NSSaveOperationType saveOperation = [[info objectForKey:@"saveOperation"] unsignedIntegerValue];
     NSString *typeName = [info objectForKey:@"typeName"];
     NSInvocation *invocation = [info objectForKey:@"callback"];
     
     if (didSave) {
-        // compare -dataOfType:forPublications:error:
-        NSStringEncoding encoding = [self documentStringEncoding];
-        if (NSSaveToOperation == saveOperation) {
-            if (NO == [[NSSet setWithObjects:BDSKBibTeXDocumentType, BDSKMinimalBibTeXDocumentType, BDSKRISDocumentType, BDSKLTBDocumentType, nil] containsObject:typeName])
-                encoding = NSUTF8StringEncoding;
-            else
-                encoding = [saveTextEncodingPopupButton encoding] != BDSKNoStringEncoding ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
-        } else if (NSSaveAsOperation == saveOperation && [saveTextEncodingPopupButton encoding] != BDSKNoStringEncoding) {
-            // Set the string encoding according to the popup.  
-            // NB: the popup has the incorrect encoding if it wasn't displayed, for example for the Save action and saving using AppleScript, so don't reset encoding unless we're actually modifying this document through a menu .
-            encoding = [saveTextEncodingPopupButton encoding];
-            [self setDocumentStringEncoding:encoding];
+        NSStringEncoding encoding = NSUTF8StringEncoding;
+        if ([[NSSet setWithObjects:BDSKBibTeXDocumentType, BDSKMinimalBibTeXDocumentType, BDSKRISDocumentType, BDSKLTBDocumentType, nil] containsObject:typeName]) {
+            encoding = [self encodingForSaving];
+            // Set the string encoding according to the popup when Save As changed it
+            if (docState.currentSaveOperationType == NSSaveAsOperation)
+                [self setDocumentStringEncoding:encoding];
         }
         
         // set com.apple.TextEncoding for other apps
-        NSString *UTI = [[NSWorkspace sharedWorkspace] typeOfFile:[absoluteURL path] error:NULL];
+        NSString *UTI = [[NSWorkspace sharedWorkspace] typeOfFile:[saveTargetURL path] error:NULL];
         if (UTI && [[NSWorkspace sharedWorkspace] type:UTI conformsToType:(id)kUTTypePlainText])
-            [[NSFileManager defaultManager] setAppleStringEncoding:encoding atPath:[absoluteURL path] error:NULL];
+            [[NSFileManager defaultManager] setAppleStringEncoding:encoding atPath:[saveTargetURL path] error:NULL];
         
-        if (saveOperation == NSSaveToOperation) {
+        if (docState.currentSaveOperationType == NSSaveToOperation) {
             
             // write template accessory files if necessary
             BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:typeName];
             if(selectedTemplate){
-                NSURL *destDirURL = [absoluteURL URLByDeletingLastPathComponent];
+                NSURL *destDirURL = [saveTargetURL URLByDeletingLastPathComponent];
                 for (NSURL *accessoryURL in [selectedTemplate accessoryFileURLs])
                     [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
             }
             
-        } else if (saveOperation == NSSaveOperation || saveOperation == NSSaveAsOperation) {
+        } else if (docState.currentSaveOperationType == NSSaveOperation || docState.currentSaveOperationType == NSSaveAsOperation) {
             
             // rebuild metadata cache for this document whenever we save
             NSMutableArray *pubsInfo = [[NSMutableArray alloc] initWithCapacity:[publications count]];
             NSDictionary *cacheInfo;
-            BOOL update = (saveOperation == NSSaveOperation); // for saveTo we should update all items, as our path changes
+            BOOL update = (docState.currentSaveOperationType == NSSaveOperation); // for saveTo we should update all items, as our path changes
             
             for (BibItem *anItem in [self publications]) {
                 NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -1061,7 +1078,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                 @finally { [pool release]; }
             }
             
-            BDSKMetadataCacheOperation *operation = [[[BDSKMetadataCacheOperation alloc] initWithPublicationInfos:pubsInfo forDocumentURL:absoluteURL] autorelease];
+            BDSKMetadataCacheOperation *operation = [[[BDSKMetadataCacheOperation alloc] initWithPublicationInfos:pubsInfo forDocumentURL:saveTargetURL] autorelease];
             [metadataCacheQueue addOperation:operation];
             [pubsInfo release];
             
@@ -1069,11 +1086,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         
         // save our window setup if we save or export to BibTeX
         if ([[self class] isNativeType:typeName] || [typeName isEqualToString:BDSKMinimalBibTeXDocumentType])
-            [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forEncoding:encoding];
+            [self saveWindowSetupInExtendedAttributesAtURL:saveTargetURL forEncoding:encoding];
     }
     
-    [saveTargetURL release];
-    saveTargetURL = nil;
+    BDSKDESTROY(saveTargetURL);
     
     // reset the encoding popup so we know when it wasn't shown to the user next time
     [saveTextEncodingPopupButton setEncoding:BDSKNoStringEncoding];
@@ -1088,7 +1104,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [invocation invoke];
     }
     
-    if (didSave && (saveOperation == NSSaveOperation || saveOperation == NSSaveAsOperation)) {
+    if (didSave && (docState.currentSaveOperationType == NSSaveOperation || docState.currentSaveOperationType == NSSaveAsOperation)) {
         [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKSaveDocumentScriptHookName 
                                                      forPublications:publications
                                                             document:self];
@@ -1105,7 +1121,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         invocation = [NSInvocation invocationWithTarget:delegate selector:didSaveSelector];
         [invocation setArgument:&contextInfo atIndex:4];
     }
-    NSDictionary *info = [[NSDictionary alloc] initWithObjectsAndKeys:absoluteURL, @"URL", typeName, @"typeName", [NSNumber numberWithUnsignedInteger:saveOperation], @"saveOperation", invocation, @"callback", nil];
+    NSDictionary *info = [[NSDictionary alloc] initWithObjectsAndKeys:typeName, @"typeName", invocation, @"callback", nil];
     [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation delegate:self didSaveSelector:@selector(document:didSave:contextInfo:) contextInfo:info];
 }
 
@@ -1271,31 +1287,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 - (void)clearChangeCount{
 	[self updateChangeCount:NSChangeCleared];
-}
-
-- (NSArray *)publicationsForSaving {
-    if (docState.currentSaveOperationType != NSSaveToOperation || [exportSelectionCheckButton state] != NSOnState)
-        return publications;
-    else if ([self numberOfSelectedPubs] == 0)
-        return groupedPublications;
-    else
-        return [self selectedPublications];
-}
-
-- (NSStringEncoding)encodingForSaving {
-    NSStringEncoding encoding = 0;
-    
-    // export operations need their own encoding
-    if (NSSaveToOperation == docState.currentSaveOperationType)
-        encoding = [saveTextEncodingPopupButton encoding] != BDSKNoStringEncoding ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
-    else if (NSSaveAsOperation == docState.currentSaveOperationType && [saveTextEncodingPopupButton encoding] != BDSKNoStringEncoding)
-        encoding = [saveTextEncodingPopupButton encoding];
-    else
-        encoding = [self documentStringEncoding];
-    
-    BDSKASSERT(encoding != 0 && encoding != BDSKNoStringEncoding);
-    
-    return encoding;
 }
 
 - (BOOL)writeArchiveToURL:(NSURL *)fileURL error:(NSError **)outError{
