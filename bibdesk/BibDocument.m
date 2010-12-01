@@ -953,8 +953,8 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 }
 
 // if the user is saving in one of our plain text formats, give them an encoding option as well
-// this also requires overriding saveToURL:ofType:forSaveOperation:error:
-// to set the document's encoding before writing to the file
+// this also requires overriding saveToURL:ofType:forSaveOperation:delegate:didSaveSelector:contextInfo:
+// to set the document's encoding before after to the file
 - (BOOL)prepareSavePanel:(NSSavePanel *)savePanel{
     if([super prepareSavePanel:savePanel] == NO)
         return NO;
