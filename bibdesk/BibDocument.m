@@ -992,11 +992,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     return YES;
 }
 
+- (BOOL)needsEncodingForType:(NSString *)typeName {
+    return [[NSSet setWithObjects:BDSKBibTeXDocumentType, BDSKRISDocumentType, BDSKMinimalBibTeXDocumentType, BDSKLTBDocumentType, BDSKArchiveDocumentType, nil] containsObject:typeName];
+}
+
 // this is a private method, the action of the file format poup
 - (void)changeSaveType:(id)sender{
-    NSSet *typesWithEncoding = [NSSet setWithObjects:BDSKBibTeXDocumentType, BDSKRISDocumentType, BDSKMinimalBibTeXDocumentType, BDSKLTBDocumentType, BDSKArchiveDocumentType, nil];
-    NSString *selectedType = [[sender selectedItem] representedObject];
-    [saveTextEncodingPopupButton setEnabled:[typesWithEncoding containsObject:selectedType]];
+    [saveTextEncodingPopupButton setEnabled:[self needsEncodingForType:[[sender selectedItem] representedObject]]];
     if ([NSDocument instancesRespondToSelector:@selector(changeSaveType:)])
         [super changeSaveType:sender];
 }
@@ -1039,7 +1041,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     if (didSave) {
         NSStringEncoding encoding = NSUTF8StringEncoding;
-        if ([[NSSet setWithObjects:BDSKBibTeXDocumentType, BDSKMinimalBibTeXDocumentType, BDSKRISDocumentType, BDSKLTBDocumentType, nil] containsObject:typeName]) {
+        if ([self needsEncodingForType:typeName]) {
             encoding = [self encodingForSaving];
             // Set the string encoding according to the popup when Save As changed it
             if (docState.currentSaveOperationType == NSSaveAsOperation)
