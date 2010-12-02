@@ -1848,9 +1848,15 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         if (rv == NSAlertDefaultReturn) {
             // the user said to give up
             [[BDSKErrorObjectController sharedErrorObjectController] documentFailedLoad:self shouldEdit:NO]; // this hands the errors to a new error editor and sets that as the documentForErrors
+            // return NSUserCancelledError so NSDocumentController won't show another alert
+            if (outError)
+                *outError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSUserCancelledError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:error, NSUnderlyingErrorKey, nil]];
         }else if (rv == NSAlertAlternateReturn){
             // the user said to edit the file.
             [[BDSKErrorObjectController sharedErrorObjectController] documentFailedLoad:self shouldEdit:YES]; // this hands the errors to a new error editor and sets that as the documentForErrors
+            // return NSUserCancelledError so NSDocumentController won't show another alert
+            if (outError)
+                *outError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSUserCancelledError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:error, NSUnderlyingErrorKey, nil]];
         }else if(rv == NSAlertOtherReturn){
             // the user said to keep going, so if they save, they might clobber data...
             // if we don't return YES, NSDocumentController puts up its lame alert saying the document could not be opened, and we get no partial data
