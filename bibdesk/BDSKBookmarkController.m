@@ -95,6 +95,8 @@ static id sharedBookmarkController = nil;
                 BDSKBookmark *bookmark = [BDSKBookmark bookmarkWithDictionary:dict];
                 if (bookmark)
                     [bookmarks addObject:bookmark];
+                else
+                    NSLog(@"Failed to read bookmark: %@", dict);
 			}
 		}
         

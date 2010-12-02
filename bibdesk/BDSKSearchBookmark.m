@@ -217,8 +217,13 @@ static Class BDSKSearchBookmarkClass = Nil;
 - (id)initWithDictionary:(NSDictionary *)dictionary {
     if ([[dictionary objectForKey:BOOKMARK_TYPE_KEY] isEqualToString:FOLDER_STRING]) {
         NSMutableArray *newChildren = [NSMutableArray array];
-        for (NSDictionary *dict in [dictionary objectForKey:CHILDREN_KEY])
-            [newChildren addObject:[[[[self class] alloc] initWithDictionary:dict] autorelease]];
+        BDSKSearchBookmark *child;
+        for (NSDictionary *dict in [dictionary objectForKey:CHILDREN_KEY]) {
+            if (child = [BDSKSearchBookmark bookmarkWithDictionary:dict])
+                [newChildren addObject:child];
+            else
+                NSLog(@"Failed to read child bookmark: %@", dict);
+        }
         return [self initFolderWithChildren:newChildren label:[dictionary objectForKey:LABEL_KEY]];
     } else if ([[dictionary objectForKey:BOOKMARK_TYPE_KEY] isEqualToString:SEPARATOR_STRING]) {
         return [self initSeparator];

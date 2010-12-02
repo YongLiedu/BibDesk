@@ -82,6 +82,8 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
             BDSKSearchBookmark *bm = [BDSKSearchBookmark searchBookmarkWithDictionary:dict];
             if (bm)
                 [bookmarks addObject:bm];
+            else
+                NSLog(@"Failed to read bookmark: %@", dict);
         }
         
         bookmarkRoot = [[BDSKSearchBookmark alloc] initRootWithChildren:bookmarks];
