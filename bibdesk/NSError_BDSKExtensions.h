@@ -45,24 +45,24 @@
 
 enum {
     kBDSKUnknownError = coreFoundationUnknownErr, /* -4960 */
-    kBDSKDocumentSaveError,                      /* umbrella error type for document saving */
-    kBDSKStringEncodingError,                    /* unable to convert to desired encoding   */
-    kBDSKPropertyListDeserializationFailed,      /* NSPropertyListSerialization failed      */
-    kBDSKPropertyListSerializationFailed,
-    kBDSKNetworkConnectionFailed,                /* Unable to connect to a network          */
-    kBDSKFileNotFound,                           /* File not found (should have URL/path)   */
-    kBDSKAppleScriptError,                       /* AppleScript failed                      */
-    kBDSKParserIgnoredFrontMatter,               /* BDSKBibTeXParser ignored front matter   */
-    kBDSKParserFailed,                           /* Some parser failed for some reason      */
-    kBDSKParserUnsupported,                      /* No valid parser for string              */
-    kBDSKWebParserFailed,                        /* Some web parser failed for some reason  */
-    kBDSKWebParserUnsupported,                   /* No valid web parser for URL             */
-    kBDSKFileOperationFailed,                    /* Generic file operation failure          */
-    kBDSKURLOperationFailed,                     /* Generic URL operation failure           */
-    kBDSKComplexStringError,                     /* Complex string parsing failed           */
-    kBDSKCannotFindTemporaryDirectoryError,      /* Cannot find temporary directory         */
-    kBDSKCannotCreateTemporaryFileError,         /* Cannot create a temporary file          */
-    kBDSKDocumentOpenError,                      /* umbrella error type for document open   */
+    kBDSKDocumentSaveError = 1,                   /* umbrella error type for document saving */
+    kBDSKStringEncodingError,                     /* unable to convert to desired encoding   */
+    kBDSKPropertyListDeserializationFailed,       /* NSPropertyListSerialization failed      */
+    kBDSKPropertyListSerializationFailed,         /* NSPropertyListSerialization failed      */
+    kBDSKNetworkConnectionFailed,                 /* Unable to connect to a network          */
+    kBDSKFileNotFound,                            /* File not found (should have URL/path)   */
+    kBDSKAppleScriptError,                        /* AppleScript failed                      */
+    kBDSKParserIgnoredFrontMatter,                /* BDSKBibTeXParser ignored front matter   */
+    kBDSKParserFailed,                            /* Some parser failed for some reason      */
+    kBDSKParserUnsupported,                       /* No valid parser for string              */
+    kBDSKWebParserFailed,                         /* Some web parser failed for some reason  */
+    kBDSKWebParserUnsupported,                    /* No valid web parser for URL             */
+    kBDSKFileOperationFailed,                     /* Generic file operation failure          */
+    kBDSKURLOperationFailed,                      /* Generic URL operation failure           */
+    kBDSKComplexStringError,                      /* Complex string parsing failed           */
+    kBDSKCannotFindTemporaryDirectoryError,       /* Cannot find temporary directory         */
+    kBDSKCannotCreateTemporaryFileError,          /* Cannot create a temporary file          */
+    kBDSKDocumentOpenError,                       /* umbrella error type for document open   */
 };
 
 extern NSString *BDSKUnderlyingItemErrorKey;
