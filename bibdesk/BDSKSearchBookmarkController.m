@@ -79,10 +79,11 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
     if (self = [super initWithWindowNibName:@"SearchBookmarksWindow"]) {
         NSMutableArray *bookmarks = [NSMutableArray array];
         for (NSDictionary *dict in [[NSUserDefaults standardUserDefaults] arrayForKey:BDSKSearchGroupBookmarksKey]) {
-            BDSKSearchBookmark *bm = [BDSKSearchBookmark searchBookmarkWithDictionary:dict];
-            if (bm)
+            BDSKSearchBookmark *bm = [[BDSKSearchBookmark alloc] initWithDictionary:dict];
+            if (bm) {
                 [bookmarks addObject:bm];
-            else
+                [bm release];
+            } else
                 NSLog(@"Failed to read bookmark: %@", dict);
         }
         

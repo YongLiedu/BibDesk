@@ -222,9 +222,10 @@ static Class BDSKBookmarkClass = Nil;
         NSMutableArray *newChildren = [NSMutableArray array];
         BDSKBookmark *child;
         for (NSDictionary *dict in [dictionary objectForKey:CHILDREN_KEY]) {
-            if (child = [BDSKBookmark bookmarkWithDictionary:dict])
+            if (child = [[BDSKBookmark alloc] initWithDictionary:dict]) {
                 [newChildren addObject:child];
-            else
+                [child release];
+            } else
                 NSLog(@"Failed to read child bookmark: %@", dict);
         }
         return [self initFolderWithChildren:newChildren name:[dictionary objectForKey:TITLE_KEY]];

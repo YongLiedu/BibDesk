@@ -92,10 +92,11 @@ static id sharedBookmarkController = nil;
 		NSString *bookmarksPath = [applicationSupportPath stringByAppendingPathComponent:@"Bookmarks.plist"];
 		if ([[NSFileManager defaultManager] fileExistsAtPath:bookmarksPath]) {
 			for (NSDictionary *dict in [NSArray arrayWithContentsOfFile:bookmarksPath]) {
-                BDSKBookmark *bookmark = [BDSKBookmark bookmarkWithDictionary:dict];
-                if (bookmark)
+                BDSKBookmark *bookmark = [[BDSKBookmark alloc] initWithDictionary:dict];
+                if (bookmark) {
                     [bookmarks addObject:bookmark];
-                else
+                    [bookmark release];
+                } else
                     NSLog(@"Failed to read bookmark: %@", dict);
 			}
 		}
