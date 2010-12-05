@@ -87,10 +87,6 @@ static Class BDSKSearchBookmarkClass = Nil;
     return BDSKSearchBookmarkClass == self ? defaultPlaceholderSearchBookmark : [super allocWithZone:aZone];
 }
 
-+ (id)searchBookmarkFolderWithChildren:(NSArray *)aChildren label:(NSString *)aLabel {
-    return [[[self alloc] initFolderWithChildren:aChildren label:aLabel] autorelease];
-}
-
 + (id)searchBookmarkFolderWithLabel:(NSString *)aLabel {
     return [[[self alloc] initFolderWithLabel:aLabel] autorelease];
 }
@@ -101,10 +97,6 @@ static Class BDSKSearchBookmarkClass = Nil;
 
 + (id)searchBookmarkWithInfo:(NSDictionary *)aDictionary label:(NSString *)aLabel {
     return [[[self alloc] initWithInfo:aDictionary label:aLabel] autorelease];
-}
-
-+ (id)searchBookmarkWithDictionary:(NSDictionary *)dictionary {
-    return [[[self alloc] initWithDictionary:dictionary] autorelease];
 }
 
 - (id)initFolderWithChildren:(NSArray *)aChildren label:(NSString *)aLabel {

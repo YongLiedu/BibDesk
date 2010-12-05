@@ -49,11 +49,9 @@ typedef NSInteger BDSKSearchBookmarkType;
     BDSKSearchBookmark *parent;
 }
 
-+ (id)searchBookmarkFolderWithChildren:(NSArray *)aChildren label:(NSString *)aLabel;
 + (id)searchBookmarkFolderWithLabel:(NSString *)aLabel;
 + (id)searchBookmarkSeparator;
 + (id)searchBookmarkWithInfo:(NSDictionary *)aDictionary label:(NSString *)aLabel;
-+ (id)searchBookmarkWithDictionary:(NSDictionary *)dictionary;
 
 - (id)initFolderWithChildren:(NSArray *)aChildren label:(NSString *)aLabel;
 - (id)initFolderWithLabel:(NSString *)aLabel;
