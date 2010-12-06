@@ -48,6 +48,9 @@
 #import "BDSKTextWithIconCell.h"
 #import "NSMenu_BDSKExtensions.h"
 
+#define BDSKURLTransformerName @"BDSKURLTransformer"
+#define BDSKBibItemTransformerName @"BDSKBibItemTransformer"
+
 #define BDSKFileMigrationFrameAutosaveName @"BDSKFileMigrationWindow"
 
 @interface BDSKURLTransformer : NSValueTransformer
@@ -64,8 +67,8 @@
 + (void)initialize
 {
     BDSKINITIALIZE;
-    [NSValueTransformer setValueTransformer:[[[BDSKURLTransformer alloc] init] autorelease] forName:@"BDSKURLTransformer"];
-    [NSValueTransformer setValueTransformer:[[[BDSKBibItemTransformer alloc] init] autorelease] forName:@"BDSKBibItemTransformer"];
+    [NSValueTransformer setValueTransformer:[[[BDSKURLTransformer alloc] init] autorelease] forName:BDSKURLTransformerName];
+    [NSValueTransformer setValueTransformer:[[[BDSKBibItemTransformer alloc] init] autorelease] forName:BDSKBibItemTransformerName];
 }
 
 - (id)init

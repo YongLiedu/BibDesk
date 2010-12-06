@@ -50,6 +50,8 @@
 #import "BDSKPublicationsArray.h"
 #import "BDSKTableView.h"
 
+#define BDSKLineNumberTransformerName @"BDSKLineNumberTransformer"
+
 // put it here because IB chokes on it
 @interface BDSKLineNumberTransformer : NSValueTransformer @end
 
@@ -62,8 +64,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 + (void)initialize;
 {
     BDSKINITIALIZE;
-	[NSValueTransformer setValueTransformer:[[[BDSKLineNumberTransformer alloc] init] autorelease]
-									forName:@"BDSKLineNumberTransformer"];
+	[NSValueTransformer setValueTransformer:[[[BDSKLineNumberTransformer alloc] init] autorelease] forName:BDSKLineNumberTransformerName];
 }
 
 + (BDSKErrorObjectController *)sharedErrorObjectController;

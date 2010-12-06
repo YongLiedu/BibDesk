@@ -43,6 +43,8 @@
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKSharingServer.h"
 
+#define BDSKEnableSharingWithSelfKey @"BDSKEnableSharingWithSelf"
+
 // Registered at http://www.dns-sd.org/ServiceTypes.html with TXT keys "txtvers" and "authenticate."
 NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
 
@@ -117,7 +119,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
         // the service was removed in the meantime
         return;
     // In general, we want to ignore our own shared services, although this doesn't cause problems with the run loop anymore (since the DO servers have their own threads)  Since SystemConfiguration guarantees that we have a unique computer name, this should be safe.
-    if ([[aNetService name] isEqualToString:[[BDSKSharingServer defaultServer] sharingName]] && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelf"] == NO) {
+    if ([[aNetService name] isEqualToString:[[BDSKSharingServer defaultServer] sharingName]] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEnableSharingWithSelfKey] == NO) {
         switch ([[BDSKSharingServer defaultServer] status]) {
             case BDSKSharingStatusOff:
             case BDSKSharingStatusStarting:

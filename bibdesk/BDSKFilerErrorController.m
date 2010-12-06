@@ -45,6 +45,9 @@
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKPathColorTransformer.h"
 
+#define BDSKOldPathColorTransformerName @"BDSKOldPathColorTransformer"
+#define BDSKNewPathColorTransformerName @"BDSKNewPathColorTransformer"
+
 #define BDSKFilerSelectKey @"select"
 
 @implementation BDSKFilerErrorController
@@ -53,9 +56,9 @@
     BDSKINITIALIZE;
 	// register transformer class
 	[NSValueTransformer setValueTransformer:[[[BDSKOldPathColorTransformer alloc] init] autorelease]
-									forName:@"BDSKOldPathColorTransformer"];
+									forName:BDSKOldPathColorTransformerName];
 	[NSValueTransformer setValueTransformer:[[[BDSKNewPathColorTransformer alloc] init] autorelease]
-									forName:@"BDSKNewPathColorTransformer"];
+									forName:BDSKNewPathColorTransformerName];
 }
 
 - (id)initWithErrors:(NSArray *)infoDicts forField:(NSString *)field fromDocument:(BibDocument *)doc options:(NSInteger)mask {

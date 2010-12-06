@@ -57,6 +57,9 @@
 
 #define MAX_TRY_COUNT 20
 
+#define BDSKDisableRemoteChangeNotificationsKey @"BDSKDisableRemoteChangeNotifications"
+#define BDSKSharingServerMaxConnectionsKey @"BDSKSharingServerMaxConnections"
+
 static id sharedInstance = nil;
 
 // TXT record keys
@@ -215,7 +218,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 {
     // not the default connection here; we want to call our background thread, but only if it's running
     // add a hidden pref in case this traffic turns us into a bad network citizen; manual updates will still work
-    if([server shouldKeepRunning] && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableRemoteChangeNotifications"] == 0){
+    if([server shouldKeepRunning] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKDisableRemoteChangeNotificationsKey] == 0){
         [[server serverOnServerThread] notifyClientsOfChange];
     }    
 }
@@ -662,7 +665,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     // this hidden pref will be zero by default, but we'll add a limit here just in case it's needed
     static NSUInteger maxConnections = 0;
     if(maxConnections == 0)
-        maxConnections = MAX(20, [[NSUserDefaults standardUserDefaults] integerForKey:@"BDSKSharingServerMaxConnections"]);
+        maxConnections = MAX(20, [[NSUserDefaults standardUserDefaults] integerForKey:BDSKSharingServerMaxConnectionsKey]);
     
     BOOL allowConnection = [remoteClients count] < maxConnections;
     if(allowConnection){

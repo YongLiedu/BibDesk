@@ -42,6 +42,7 @@
 #import "BDAlias.h"
 #import <libkern/OSAtomic.h>
 
+#define BDSKUseXMLSpotlightCacheKey @"BDSKUseXMLSpotlightCache"
 
 @implementation BDSKMetadataCacheOperation
 
@@ -73,7 +74,7 @@
     @try {
 
         // hidden option to use XML plists for easier debugging, but the binary plists are more efficient
-        BOOL useXMLFormat = [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKUseXMLSpotlightCache"];
+        BOOL useXMLFormat = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKUseXMLSpotlightCacheKey];
         NSPropertyListFormat plistFormat = useXMLFormat ? NSPropertyListXMLFormat_v1_0 : NSPropertyListBinaryFormat_v1_0;
 
         NSString *cachePath = [fileManager spotlightCacheFolderPathByCreating:&error];

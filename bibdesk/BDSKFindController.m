@@ -53,6 +53,8 @@
 
 #define MAX_HISTORY_COUNT	10
 
+#define BDSKFindErrorDomain @"BDSKFindErrorDomain"
+
 static BDSKFindController *sharedFC = nil;
 
 enum {
@@ -451,7 +453,7 @@ enum {
                 NSString *description = NSLocalizedString(@"Invalid Regular Expression.", @"Error description");
                 NSString *reason = NSLocalizedString(@"The regular expression you entered is not valid.", @"Error reason");
                 NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
-                *error = [NSError errorWithDomain:@"BDSKFindErrorDomain" code:1 userInfo:userInfo];
+                *error = [NSError errorWithDomain:BDSKFindErrorDomain code:1 userInfo:userInfo];
             }
 			return NO;
 		}
@@ -461,7 +463,7 @@ enum {
             if(error != nil){
                 NSString *description = NSLocalizedString(@"Invalid BibTeX Macro.", @"Error description");
                 NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
-                *error = [NSError errorWithDomain:@"BDSKFindErrorDomain" code:1 userInfo:userInfo];
+                *error = [NSError errorWithDomain:BDSKFindErrorDomain code:1 userInfo:userInfo];
             }
 			return NO;
 		}
@@ -476,7 +478,7 @@ enum {
         if(error != nil){
             NSString *description = NSLocalizedString(@"Invalid BibTeX Macro.", @"Error description");
             NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
-            *error = [NSError errorWithDomain:@"BDSKFindErrorDomain" code:1 userInfo:userInfo];
+            *error = [NSError errorWithDomain:BDSKFindErrorDomain code:1 userInfo:userInfo];
         }
 		return NO;
 	}
@@ -490,7 +492,7 @@ enum {
             NSString *description = NSLocalizedString(@"Invalid Regular Expression.", @"Error description");
             NSString *reason = [NSString stringWithFormat:NSLocalizedString(@"The entry \"%@\" is not a valid regular expression.", @"Error reason"), [self findString]];
             NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
-            *error = [NSError errorWithDomain:@"BDSKFindErrorDomain" code:1 userInfo:userInfo];
+            *error = [NSError errorWithDomain:BDSKFindErrorDomain code:1 userInfo:userInfo];
         }
 		[findComboBox selectText:self];
 		return NO;
@@ -517,7 +519,7 @@ enum {
         if(error != nil){
             NSString *description = NSLocalizedString(@"Invalid BibTeX Macro", @"Error description");
             NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
-            *error = [NSError errorWithDomain:@"BDSKFindErrorDomain" code:1 userInfo:userInfo];
+            *error = [NSError errorWithDomain:BDSKFindErrorDomain code:1 userInfo:userInfo];
         }
 		[findComboBox selectText:self];
 		return NO;
@@ -532,7 +534,7 @@ enum {
         if(error != nil){
             NSString *description = NSLocalizedString(@"Invalid BibTeX Macro", @"Error description");
             NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
-            *error = [NSError errorWithDomain:@"BDSKFindErrorDomain" code:1 userInfo:userInfo];
+            *error = [NSError errorWithDomain:BDSKFindErrorDomain code:1 userInfo:userInfo];
         }
 		[replaceComboBox selectText:self];
 		return NO;

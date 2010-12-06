@@ -40,6 +40,8 @@
 #import "BibItem.h"
 #import "NSError_BDSKExtensions.h"
 
+#define BDSKShortJournalNameFieldKey @"BDSKShortJournalNameField"
+
 @implementation BDSKSciFinderParser
 
 + (BOOL)canParseString:(NSString *)string;
@@ -79,7 +81,7 @@ static NSString *__documentTypeString = @"Doc-Type";
 {
     BDSKINITIALIZE;
     correctFields = [[NSSet alloc] initWithObjects:BDSKVolumeString, @"Language", BDSKAbstractString, nil];
-    shortJournalNameString = [[[[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKShortJournalNameField"] fieldName] copy];
+    shortJournalNameString = [[[[NSUserDefaults standardUserDefaults] objectForKey:BDSKShortJournalNameFieldKey] fieldName] copy];
 }
 
 static void addKeyValueToAnnote(NSString *key, NSString *value, NSMutableDictionary *pubFields)

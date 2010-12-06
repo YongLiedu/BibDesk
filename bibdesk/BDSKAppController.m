@@ -87,6 +87,8 @@
 #define WIKI_URL @"http://sourceforge.net/apps/mediawiki/bibdesk/"
 #define TRACKER_URL @"http://sourceforge.net/tracker/?group_id=61487&atid=497423"
 
+#define BDSKUpdateCheckIntervalKey @"BDSKUpdateCheckIntervalKey"
+
 #define BDSKHistoryByDateKey @"BDSKHistoryByDate"
 #define BDSKIsRelaunchKey @"BDSKIsRelaunch"
 #define BDSKDidMigrateLocalUrlFormatDefaultsKey @"BDSKDidMigrateLocalUrlFormatDefaultsKey"
@@ -438,9 +440,9 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 #pragma mark Updater
 
 - (BOOL)updaterShouldPromptForPermissionToCheckForUpdates:(SUUpdater *)updater {
-    if ([[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKUpdateCheckIntervalKey"]) {
+    if ([[NSUserDefaults standardUserDefaults] objectForKey:BDSKUpdateCheckIntervalKey]) {
         // the user already used an older version of BibDesk
-        [updater setAutomaticallyChecksForUpdates:[[NSUserDefaults standardUserDefaults] integerForKey:@"BDSKUpdateCheckIntervalKey"] >= 0];
+        [updater setAutomaticallyChecksForUpdates:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKUpdateCheckIntervalKey] >= 0];
         return NO;
     }
     return YES;

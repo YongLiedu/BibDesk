@@ -55,6 +55,8 @@
 #import "NSInvocation_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
 
+#define BDSKShouldLogFilesAddedToMatchingSearchIndexKey @"BDSKShouldLogFilesAddedToMatchingSearchIndex"
+
 #define MAX_SEARCHKIT_RESULTS 10
 static CGFloat LEAF_ROW_HEIGHT = 20.0;
 static CGFloat GROUP_ROW_HEIGHT = 24.0;
@@ -577,7 +579,7 @@ static void normalizeScoresForItem(BDSKTreeNode *parent, CGFloat maxScore)
     [statusField performSelectorOnMainThread:@selector(setStringValue:) withObject:[NSLocalizedString(@"Indexing files", @"") stringByAppendingEllipsis] waitUntilDone:NO];
     
     // some HTML files cause a deadlock or crash in -[NSHTMLReader _loadUsingLibXML2] rdar://problem/4988303 (fixed in 10.5)
-    BOOL shouldLog = [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKShouldLogFilesAddedToMatchingSearchIndex"];
+    BOOL shouldLog = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldLogFilesAddedToMatchingSearchIndexKey];
     
     for (NSURL *url in absoluteURLs) {
         if (_matchFlags.shouldAbortThread) break;

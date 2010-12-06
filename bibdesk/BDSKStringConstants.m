@@ -36,14 +36,15 @@
 
 #import "BDSKStringConstants.h"
 
+#define BDSKAnnoteFieldNameKey @"BDSKAnnoteFieldName"
 
 @implementation NSString (BDSKStringConstants)
 
 + (void)initializeStringConstants
 {    
     // Hidden default to allow for JabRef interoperability; (RFE #1546931) this is an all-or-nothing switch.  Alternate would be to use a script hook to copy annote->review when closing an editor, but then you have lots of duplication.
-    if ([[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKAnnoteFieldName"] != nil)
-        BDSKAnnoteString = [[[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKAnnoteFieldName"] copy];
+    if ([[NSUserDefaults standardUserDefaults] objectForKey:BDSKAnnoteFieldNameKey] != nil)
+        BDSKAnnoteString = [[[NSUserDefaults standardUserDefaults] objectForKey:BDSKAnnoteFieldNameKey] copy];
 }
 
 @end

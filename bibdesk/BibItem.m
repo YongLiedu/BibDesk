@@ -85,6 +85,9 @@ NSString *BDSKBibItemNewValueKey = @"newValue";
 NSString *BDSKBibItemURLScheme = @"x-bdsk";
 
 #define DEFAULT_CITEKEY @"cite-key"
+
+#define BDSKFieldsToWriteIfEmptyKey @"BDSKFieldsToWriteIfEmpty"
+
 static NSSet *fieldsToWriteIfEmpty = nil;
 
 @interface BibItem (Private)
@@ -211,7 +214,7 @@ static NSMapTable *selectorTable = NULL;
     
     // hidden pref as support for RFE #1690155 https://sourceforge.net/tracker/index.php?func=detail&aid=1690155&group_id=61487&atid=497426
     // partially implemented; view will represent this as inherited unless it goes through -[BibItem valueOfField:inherit:], which fields like "Key" certainly will
-    NSArray *emptyFields = [[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKFieldsToWriteIfEmpty"];
+    NSArray *emptyFields = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKFieldsToWriteIfEmptyKey];
     if ([emptyFields count])
         fieldsToWriteIfEmpty = [[NSSet alloc] initWithArray:emptyFields];
 }

@@ -7,6 +7,9 @@
 
 #import "BDSKISIWebServices.h"
 
+#define BDSKISIEndpointKey @"BDSKISIEndpoint"
+#define BDSKISINamespaceKey @"BDSKISINamespace"
+
 static NSString *BDSKISINamespace = nil;
 static NSString *BDSKISIEndpoint = nil;
 
@@ -15,10 +18,10 @@ static NSString *BDSKISIEndpoint = nil;
 + (void)initialize
 {
     BDSKINITIALIZE;
-    BDSKISIEndpoint = [[[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKISIEndpoint"] copy];
+    BDSKISIEndpoint = [[[NSUserDefaults standardUserDefaults] objectForKey:BDSKISIEndpointKey] copy];
     if (nil == BDSKISIEndpoint)
         BDSKISIEndpoint = @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve";
-    BDSKISINamespace = [[[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKISINamespace"] copy];
+    BDSKISINamespace = [[[NSUserDefaults standardUserDefaults] objectForKey:BDSKISINamespaceKey] copy];
     if (nil == BDSKISINamespace)
         BDSKISINamespace = @"http://esti.isinet.com/soap/search";
 }

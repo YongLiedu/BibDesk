@@ -45,6 +45,8 @@
 #import <sys/resource.h>
 #import <pthread.h>
 
+#define BDSKTaskException @"BDSKTaskException"
+
 @interface BDSKTask (Private)
 
 + (void)_watchQueue;
@@ -86,8 +88,8 @@ static int _kqueue = -1;
     return task;
 }
 
-#define ASSERT_LAUNCH do { if (!_internal->_launched) { [NSException raise:@"BDSKTaskException" format:@"Task has not been launched"]; } } while (0)
-#define ASSERT_NOTLAUNCHED do { if (_internal->_launched) { [NSException raise:@"BDSKTaskException" format:@"Task has already been launched"]; } } while (0)
+#define ASSERT_LAUNCH do { if (!_internal->_launched) { [NSException raise:BDSKTaskException format:@"Task has not been launched"]; } } while (0)
+#define ASSERT_NOTLAUNCHED do { if (_internal->_launched) { [NSException raise:BDSKTaskException format:@"Task has already been launched"]; } } while (0)
 
 - (id)init
 {

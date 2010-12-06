@@ -91,6 +91,8 @@
 #import "BDSKLinkedFile.h"
 #import "BDSKSplitView.h"
 
+#define BDSKLyXPipePathKey @"BDSKLyXPipePath"
+
 @implementation BibDocument (Actions)
 
 static BOOL changingColors = NO;
@@ -505,7 +507,7 @@ static BOOL changingColors = NO;
     if ([self numberOfClickedOrSelectedPubs] == 0)
         return;
     
-    NSString *lyxPipePath = [[NSUserDefaults standardUserDefaults] stringForKey:@"BDSKLyXPipePath"];
+    NSString *lyxPipePath = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKLyXPipePathKey];
     NSFileManager *fm = [NSFileManager defaultManager];
     NSInteger fd = 0;
     

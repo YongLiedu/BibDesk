@@ -40,6 +40,11 @@
 #import "NSBezierPath_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
 
+#define BDSKImageNamePreviewDisplayTextTemplate     @"BDSKPreviewDisplayText"
+#define BDSKImageNamePreviewDisplayFilesTemplate    @"PreviewDisplayFiles"
+#define BDSKImageNamePreviewDisplayTeXTemplate      @"PreviewDisplayTeX"
+#define BDSKImageNameCautionIcon                    @"BDSKCautionIcon"
+
 @implementation NSImage (BDSKExtensions)
 
 + (void)drawAddBadgeAtPoint:(NSPoint)point {
@@ -102,7 +107,7 @@
         [path fill];
         [previewDisplayTextImage unlockFocus];
         [previewDisplayTextImage setTemplate:YES];
-        [previewDisplayTextImage setName:@"BDSKPreviewDisplayText"];
+        [previewDisplayTextImage setName:BDSKImageNamePreviewDisplayTextTemplate];
         
         previewDisplayFilesImage = [[NSImage alloc] initWithSize:NSMakeSize(11.0, 10.0)];
         [previewDisplayFilesImage lockFocus];
@@ -114,7 +119,7 @@
         [path stroke];
         [previewDisplayFilesImage unlockFocus];
         [previewDisplayFilesImage setTemplate:YES];
-        [previewDisplayFilesImage setName:@"BDSKPreviewDisplayFiles"];
+        [previewDisplayFilesImage setName:BDSKImageNamePreviewDisplayFilesTemplate];
         
         previewDisplayTeXImage = [[NSImage alloc] initWithSize:NSMakeSize(11.0, 10.0)];
         [previewDisplayTeXImage lockFocus];
@@ -132,7 +137,7 @@
         [path stroke];
         [previewDisplayTeXImage unlockFocus];
         [previewDisplayTeXImage setTemplate:YES];
-        [previewDisplayTeXImage setName:@"BDSKPreviewDisplayTeX"];
+        [previewDisplayTeXImage setName:BDSKImageNamePreviewDisplayTeXTemplate];
     }
 }
 
@@ -247,7 +252,7 @@
     static NSImage *image = nil;
     if (image == nil) {
         image = [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kAlertCautionIcon)] copy];
-        [image setName:@"BDSKCautionIcon"];
+        [image setName:BDSKImageNameCautionIcon];
 	}
     return image;
 }

@@ -46,6 +46,8 @@
 #import "BDSKPreferenceController.h"
 #import "BDSKFilerErrorController.h"
 
+#define BDSKFilerErrorDomain @"BDSKFilerErrorDomain"
+
 NSString *BDSKFilerFileKey = @"file";
 NSString *BDSKFilerPublicationKey = @"publication";
 NSString *BDSKFilerOldPathKey = @"oldPath";
@@ -374,7 +376,7 @@ static BDSKFiler *sharedFiler = nil;
             NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:status, NSLocalizedDescriptionKey, nil];
             if (fix != nil)
                 [userInfo setObject:fix forKey:NSLocalizedRecoverySuggestionErrorKey];
-            *error = [NSError errorWithDomain:@"BDSKFilerErrorDomain" code:statusFlag userInfo:userInfo];
+            *error = [NSError errorWithDomain:BDSKFilerErrorDomain code:statusFlag userInfo:userInfo];
             //NSLog(@"error \"%@\" occurred; suggested fix is \"%@\"", *error, fix);
         }
         return NO;

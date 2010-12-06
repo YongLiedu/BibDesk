@@ -47,6 +47,8 @@
 #import "UKDirectoryEnumerator.h"
 #import "BDSKReadWriteLock.h"
 
+#define BDSKDisableFileSearchIndexCacheKey @"BDSKDisableFileSearchIndexCacheKey"
+
 @interface BDSKFileSearchIndex (Private)
 
 + (NSString *)indexCacheFolder;
@@ -288,7 +290,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
     NSParameterAssert([setupLock condition] == INDEX_THREAD_DONE);
     
     // @@ temporary for testing
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableFileSearchIndexCacheKey"])
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKDisableFileSearchIndexCacheKey])
         return;
     
     if (skIndex && documentURL) {

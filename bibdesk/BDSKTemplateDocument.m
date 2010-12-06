@@ -62,6 +62,8 @@ static CGFloat BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0,
 NSString *BDSKTextTemplateDocumentType = @"Text Template";
 NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 
+#define BDSKTemplateDocumentErrorDomain @"BDSKTemplateDocumentErrorDomain"
+
 #define BDSKTemplateDocumentFrameAutosaveName @"BDSKTemplateDocument"
 
 #define BDSKTokenFieldDidChangeSelectionNotification @"BDSKTokenFieldDidChangeSelectionNotification"
@@ -415,7 +417,7 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
     }
     
     if (success == NO && outError)
-        *outError = [NSError errorWithDomain:@"BDSKTemplateDocumentErrorDomain" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to open file.", @"Error description"), NSLocalizedDescriptionKey, NSLocalizedString(@"This template cannot be opened by BibDesk. You should edit it manually.", @"Error description"), NSLocalizedRecoverySuggestionErrorKey, nil]];
+        *outError = [NSError errorWithDomain:BDSKTemplateDocumentErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to open file.", @"Error description"), NSLocalizedDescriptionKey, NSLocalizedString(@"This template cannot be opened by BibDesk. You should edit it manually.", @"Error description"), NSLocalizedRecoverySuggestionErrorKey, nil]];
     
     return success;
 }

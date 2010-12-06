@@ -39,6 +39,8 @@
 #import "BDSKRuntime.h"
 #import <objc/objc-runtime.h>
 
+#define BDSKAbstractImplementationException @"BDSKAbstractImplementation"
+
 #define WEAK_NULL NULL
 
 // wrappers around 10.5 only functions, use 10.4 API when the function is not defined
@@ -183,6 +185,6 @@ void BDSKAddClassMethodImplementationFromSelector(Class aClass, SEL aSelector, S
 
 void BDSKRequestConcreteImplementation(id self, SEL aSelector) {
     BDSKASSERT_NOT_REACHED("Concrete implementation needed");
-    [NSException raise:@"BDSKAbstractImplementation" format:@"%@ needs a concrete implementation of %@%@", [self class], [self class] == self ? @"+" : @"-", NSStringFromSelector(aSelector)];
+    [NSException raise:BDSKAbstractImplementationException format:@"%@ needs a concrete implementation of %@%@", [self class], [self class] == self ? @"+" : @"-", NSStringFromSelector(aSelector)];
     exit(1);  // notreached, but needed to pacify the compiler
 }

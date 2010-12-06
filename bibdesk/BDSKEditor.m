@@ -88,6 +88,8 @@
 
 #define WEAK_NULL NULL
 
+#define BDSKDownloadsDirectoryKey @"BDSKDownloadsDirectory"
+
 #define BDSKEditorFrameAutosaveName @"BDSKEditor window autosave name"
 static char BDSKEditorObservationContext;
 
@@ -1734,7 +1736,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 - (NSURL *)fileView:(FVFileView *)aFileView downloadDestinationWithSuggestedFilename:(NSString *)filename {
     NSURL *fileURL = nil;
     NSString *extension = [filename pathExtension];
-    NSString *downloadsDirectory = [[[NSUserDefaults standardUserDefaults] stringForKey:@"BDSKDownloadsDirectory"] stringByExpandingTildeInPath];
+    NSString *downloadsDirectory = [[[NSUserDefaults standardUserDefaults] stringForKey:BDSKDownloadsDirectoryKey] stringByExpandingTildeInPath];
     BOOL isDir;
     
     if (downloadsDirectory == nil && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey] && [NSString isEmptyString:extension] == NO)

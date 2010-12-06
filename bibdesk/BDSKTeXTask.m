@@ -49,6 +49,8 @@
 #import "BDSKTask.h"
 #import "BDSKReadWriteLock.h"
 
+#define BDSKTeXTaskRunLoopTimeoutKey @"BDSKTeXTaskRunLoopTimeout"
+
 @interface BDSKTeXPath : NSObject
 {
     NSString *fullPathWithoutExtension;
@@ -123,8 +125,8 @@ static double runLoopTimeout = 30;
     BDSKINITIALIZE;
     
     // returns 0 if the key doesn't exist
-    if ([[NSUserDefaults standardUserDefaults] floatForKey:@"BDSKTeXTaskRunLoopTimeout"] > 1)
-        runLoopTimeout = [[NSUserDefaults standardUserDefaults] floatForKey:@"BDSKTeXTaskRunLoopTimeout"];
+    if ([[NSUserDefaults standardUserDefaults] floatForKey:BDSKTeXTaskRunLoopTimeoutKey] > 1)
+        runLoopTimeout = [[NSUserDefaults standardUserDefaults] floatForKey:BDSKTeXTaskRunLoopTimeoutKey];
         
     upgradeTemplate();
     

@@ -39,6 +39,9 @@
 #import "BDSKPubMedXMLParser.h"
 #import "BibItem.h"
 
+#define BDSKAddPubMedXMLStringToAnnoteKey @"BDSKAddPubMedXMLStringToAnnote"
+#define BDSKEnablePubMedXMLTitleCasingKey @"BDSKEnablePubMedXMLTitleCasing"
+
 /*
  See documentation at
  
@@ -70,10 +73,10 @@ static bool _addXMLStringToAnnote = false;
 + (void)initialize
 {
     // this is messy, but may be useful for debugging
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKAddPubMedXMLStringToAnnote"])
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKAddPubMedXMLStringToAnnoteKey])
         _addXMLStringToAnnote = true;
     // allow for common titlecasing in PubMed if needed, but it seems to capitalize places and proper names correctly
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnablePubMedXMLTitleCasing"])
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKEnablePubMedXMLTitleCasingKey])
         _useTitlecase = true;
 }
 

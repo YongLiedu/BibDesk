@@ -74,6 +74,8 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKMacroResolver.h"
 
+#define BDSKDisableMigrationWarningKey @"BDSKDisableMigrationWarning"
+
 static char BDSKDocumentFileViewObservationContext;
 static char BDSKDocumentDefaultsObservationContext;
 
@@ -1106,7 +1108,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 
 - (void)handleTemporaryFileMigrationNotification:(NSNotification *)notification{
     // display after the window loads so we can use a sheet, and the migration controller window is in front
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableMigrationWarning"] == NO)
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKDisableMigrationWarningKey] == NO)
         docFlags.displayMigrationAlert = YES;
 }
 

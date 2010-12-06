@@ -42,6 +42,9 @@
 #import "BDSKBooleanValueTransformer.h"
 #import "BDSKRatingButton.h"
 
+#define BDSKBooleanValueTransformerName @"BDSKBooleanValueTransformer"
+#define BDSKTriStateValueTransformerName @"BDSKTriStateValueTransformer"
+
 static char BDSKConditionControllerObservationContext;
 
 @interface BDSKConditionController (BDSKPrivate)
@@ -56,8 +59,8 @@ static char BDSKConditionControllerObservationContext;
 + (void)initialize
 {
     BDSKINITIALIZE;
-    [NSValueTransformer setValueTransformer:[[[BDSKBooleanValueTransformer alloc] init] autorelease] forName:@"BDSKBooleanValueTransformer"];
-    [NSValueTransformer setValueTransformer:[[[BDSKTriStateValueTransformer alloc] init] autorelease] forName:@"BDSKTriStateValueTransformer"];
+    [NSValueTransformer setValueTransformer:[[[BDSKBooleanValueTransformer alloc] init] autorelease] forName:BDSKBooleanValueTransformerName];
+    [NSValueTransformer setValueTransformer:[[[BDSKTriStateValueTransformer alloc] init] autorelease] forName:BDSKTriStateValueTransformerName];
 }
 
 - (id)initWithFilterController:(BDSKFilterController *)aFilterController
