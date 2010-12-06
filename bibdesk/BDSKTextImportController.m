@@ -67,6 +67,7 @@
 #import "NSEvent_BDSKExtensions.h"
 #import "BDSKURLSheetController.h"
 
+#define BDSKTextImportControllerFrameAutosaveName @"BDSKTextImportController Frame Autosave Name"
 
 @interface BDSKTextImportController (Private)
 
@@ -175,7 +176,7 @@
     [itemTableView registerForDraggedTypes:[NSArray arrayWithObject:NSStringPboardType]];
     [itemTableView setDoubleAction:@selector(addTextToCurrentFieldAction:)];
     
-    [self setWindowFrameAutosaveName:@"BDSKTextImportController Frame Autosave Name"];
+    [self setWindowFrameAutosaveName:BDSKTextImportControllerFrameAutosaveName];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleFlagsChangedNotification:)

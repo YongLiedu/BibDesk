@@ -44,6 +44,8 @@
 #import "BDSKTextWithIconCell.h"
 #import "BDSKSeparatorCell.h"
 
+#define BDSKSearchBookmarksWindowFrameAutosaveName @"BDSKSearchBookmarksWindow"
+
 #define BDSKSearchBookmarkRowsPboardType @"BDSKSearchBookmarkRowsPboardType"
 
 #define BDSKSearchBookmarksToolbarIdentifier                    @"BDSKSearchBookmarksToolbarIdentifier"
@@ -95,7 +97,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
 
 - (void)windowDidLoad {
     [self setupToolbar];
-    [self setWindowFrameAutosaveName:@"BDSKSearchBookmarksWindow"];
+    [self setWindowFrameAutosaveName:BDSKSearchBookmarksWindowFrameAutosaveName];
     [outlineView setAutoresizesOutlineColumn:NO];
     [outlineView registerForDraggedTypes:[NSArray arrayWithObject:BDSKSearchBookmarkRowsPboardType]];
 }

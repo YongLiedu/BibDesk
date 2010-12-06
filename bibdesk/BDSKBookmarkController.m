@@ -49,6 +49,8 @@
 #import "BDSKBookmarkSheetController.h"
 #import "NSWindowController_BDSKExtensions.h"
 
+#define BDSKBookmarksWindowFrameAutosaveName @"BDSKBookmarksWindow"
+
 #define BDSKBookmarkRowsPboardType @"BDSKBookmarkRowsPboardType"
 
 #define BDSKBookmarksToolbarIdentifier                  @"BDSKBookmarksToolbarIdentifier"
@@ -111,7 +113,7 @@ static id sharedBookmarkController = nil;
 
 - (void)windowDidLoad {
     [self setupToolbar];
-    [self setWindowFrameAutosaveName:@"BDSKBookmarksWindow"];
+    [self setWindowFrameAutosaveName:BDSKBookmarksWindowFrameAutosaveName];
     [outlineView setAutoresizesOutlineColumn:NO];
     [outlineView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, BDSKWeblocFilePboardType, NSURLPboardType, nil]];
 }

@@ -91,6 +91,9 @@
 #define BDSKDownloadsDirectoryKey @"BDSKDownloadsDirectory"
 
 #define BDSKEditorFrameAutosaveName @"BDSKEditor window autosave name"
+#define BDSKEditorMainSplitViewAutosaveName @"BDSKEditorMainSplitView"
+#define BDSKEditorFileSplitViewAutosaveName @"BDSKEditorFileSplitView"
+
 static char BDSKEditorObservationContext;
 
 // offset of the table from the left window edge
@@ -199,8 +202,8 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [self setWindowFrameAutosaveNameOrCascade:BDSKEditorFrameAutosaveName];
     
     // Setup the splitview autosave frames, should be done after the statusBar and splitViews are setup
-    [mainSplitView setAutosaveName:@"BDSKEditorMainSplitView"];
-    [fileSplitView setAutosaveName:@"BDSKEditorFileSplitView"];
+    [mainSplitView setAutosaveName:BDSKEditorMainSplitViewAutosaveName];
+    [fileSplitView setAutosaveName:BDSKEditorFileSplitViewAutosaveName];
     if ([self windowFrameAutosaveName] == nil) {
         // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
         [mainSplitView setAutosaveName:nil];

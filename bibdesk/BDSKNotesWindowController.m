@@ -41,6 +41,7 @@
 #import "NSURL_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
 
+#define BDSKNotesWindowAutosaveName @"BDSKNotesWindow"
 
 @interface BDSKNotesWindowController (Private)
 - (void)reloadNotes;
@@ -85,7 +86,7 @@
 - (void)windowDidLoad {
     [self setWindowFrameAutosaveNameOrCascade:@"NotesWindow"];
     
-    [splitView setAutosaveName:@"BDSKNotesWindow"];
+    [splitView setAutosaveName:BDSKNotesWindowAutosaveName];
     if ([self windowFrameAutosaveName] == nil) {
         // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
         [splitView setAutosaveName:nil];

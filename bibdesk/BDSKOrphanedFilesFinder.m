@@ -55,6 +55,8 @@
 #import "BDSKTableView.h"
 #import "NSMenu_BDSKExtensions.h"
 
+#define BDSKOrphanedFilesWindowFrameAutosaveName @"BDSKOrphanedFilesWindow"
+
 @interface BDSKOrphanedFilesFinder (Private)
 - (void)refreshOrphanedFiles;
 - (void)findAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
@@ -83,7 +85,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 - (void)awakeFromNib{
-    [self setWindowFrameAutosaveName:@"BDSKOrphanedFilesWindow"];
+    [self setWindowFrameAutosaveName:BDSKOrphanedFilesWindowFrameAutosaveName];
     [tableView setDoubleAction:@selector(showFile:)];
     [tableView setFontNamePreferenceKey:BDSKOrphanedFilesTableViewFontNameKey];
     [tableView setFontSizePreferenceKey:BDSKOrphanedFilesTableViewFontSizeKey];

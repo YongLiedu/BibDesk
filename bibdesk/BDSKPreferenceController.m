@@ -44,6 +44,8 @@
 #import "BDSKVersionNumber.h"
 #import <Sparkle/Sparkle.h>
 
+#define BDSKPreferencesWindowFrameAutosaveName @"BDSKPreferencesWindow"
+
 #define LOCALIZATION_TABLE          @"Preferences"
 #define DEFAULTS_TABLE              @"Preferences"
 #define IDENTIFIER_KEY              @"identifier"
@@ -122,7 +124,7 @@ static id sharedController = nil;
     
     [self setupToolbar];
     [[self window] setShowsToolbarButton:NO];
-    [self setWindowFrameAutosaveName:@"BDSKPreferencesWindow"];
+    [self setWindowFrameAutosaveName:BDSKPreferencesWindowFrameAutosaveName];
     
     [[self window] setTitle:[self defaultWindowTitle]];
     

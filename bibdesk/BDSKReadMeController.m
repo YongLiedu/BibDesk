@@ -40,6 +40,8 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #include <sys/utsname.h>
 
+#define BDSKReadMeWindowFrameAutosaveName @"BDSKReadMeWindow"
+
 #define DOWNLOAD_URL @"http://bibdesk.sourceforge.net/"
 
 static BDSKReadMeController *sharedReadMeController = nil;
@@ -58,7 +60,7 @@ static BDSKRelNotesController *sharedRelNotesController = nil;
 }
 
 - (void)windowDidLoad {
-    [self setWindowFrameAutosaveName:@"BDSKReadMeWindow"];
+    [self setWindowFrameAutosaveName:BDSKReadMeWindowFrameAutosaveName];
     [[self window] setTitle:NSLocalizedString(@"ReadMe", "Window title")];
     [textView setString:@""];
     [textView replaceCharactersInRange:[textView selectedRange]

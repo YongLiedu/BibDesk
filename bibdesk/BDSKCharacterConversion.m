@@ -41,6 +41,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
 
+#define BDSKCharacterConversionFrameAutosaveName @"BDSKCharacterConversion"
 
 @implementation BDSKCharacterConversion
 
@@ -55,7 +56,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 - (id)init
 {
     BDSKPRECONDITION(sharedConversionEditor == nil);
-    if (self = [super initWithWindowNibName:@"BDSKCharacterConversion"]) {  
+    if (self = [super initWithWindowNibName:BDSKCharacterConversionFrameAutosaveName]) {  
 		
 		oneWayDict = [[NSMutableDictionary alloc] initWithCapacity:1];
 		twoWayDict = [[NSMutableDictionary alloc] initWithCapacity:1];

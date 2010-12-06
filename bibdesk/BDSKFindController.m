@@ -53,6 +53,8 @@
 
 #define MAX_HISTORY_COUNT	10
 
+#define BDSKFindPanelFrameAutosaveName @"BDSKFindPanel"
+
 #define BDSKFindErrorDomain @"BDSKFindErrorDomain"
 
 static BDSKFindController *sharedFC = nil;
@@ -121,7 +123,7 @@ enum {
 }
 
 - (void)windowDidLoad{
-    [self setWindowFrameAutosaveName:@"BDSKFindPanel"];
+    [self setWindowFrameAutosaveName:BDSKFindPanelFrameAutosaveName];
     
     [[self window] setCollectionBehavior:NSWindowCollectionBehaviorMoveToActiveSpace];
     

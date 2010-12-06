@@ -52,6 +52,8 @@
 #import "BDSKMacro.h"
 #import "BDSKGroupsArray.h"
 
+#define BDSKMacroWindowFrameAutosaveName @"BDSKMacroWindow"
+
 #define MACRO_COLUMNID      @"macro"
 #define DEFINITION_COLUMNID @"definition"
 
@@ -118,7 +120,7 @@
 
 - (void)windowDidLoad{
     if ([[macroResolver owner] isDocument])
-        [self setWindowFrameAutosaveNameOrCascade:@"BDSKMacroWindow"];
+        [self setWindowFrameAutosaveNameOrCascade:BDSKMacroWindowFrameAutosaveName];
     
     NSSortDescriptor *sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
     [arrayController setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];

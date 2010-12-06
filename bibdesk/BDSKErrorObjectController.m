@@ -52,6 +52,8 @@
 
 #define BDSKLineNumberTransformerName @"BDSKLineNumberTransformer"
 
+#define BDSKErrorPanelFrameAutosaveName @"BDSKErrorPanel"
+
 // put it here because IB chokes on it
 @interface BDSKLineNumberTransformer : NSValueTransformer @end
 
@@ -100,7 +102,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 - (void)awakeFromNib;
 {
-    [self setWindowFrameAutosaveName:@"BDSKErrorPanel"];
+    [self setWindowFrameAutosaveName:BDSKErrorPanelFrameAutosaveName];
     
     [[self window] setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
     [[self window] setContentBorderThickness:24.0 forEdge:NSMinYEdge];
