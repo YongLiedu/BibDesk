@@ -87,12 +87,7 @@
     if (err == noErr) {
         // password was on keychain, so flush the buffer and then modify the keychain if necessary
         if (passwordLength != strlen(passwordData) || strncmp(passwordData, oldPasswordData, passwordLength) != 0) {
-            SecKeychainAttribute attrs[] = {
-            { kSecAccountItemAttr, strlen(userNameCString), (char *)userNameCString },
-            { kSecServiceItemAttr, strlen(nameCString), (char *)nameCString } };
-            const SecKeychainAttributeList attributes = { sizeof(attrs) / sizeof(attrs[0]), attrs };
-            
-            err = SecKeychainItemModifyAttributesAndData(itemRef, &attributes, strlen(passwordData), passwordData);
+            err = SecKeychainItemModifyAttributesAndData(itemRef, NULL, strlen(passwordData), passwordData);
             result = (err == noErr);
         }
         SecKeychainItemFreeContent(NULL, (void *)oldPasswordData);
