@@ -98,7 +98,7 @@
         SecKeychainItemFreeContent(NULL, (void *)oldPasswordData);
     } else if (err == errSecItemNotFound) {
         // password not on keychain, so add it
-        err = SecKeychainAddGenericPassword(NULL, strlen(nameCString), nameCString, strlen(userNameCString), userNameCString, strlen(passwordData), passwordData, &itemRef);    
+        err = SecKeychainAddGenericPassword(NULL, strlen(nameCString), nameCString, strlen(userNameCString), userNameCString, strlen(passwordData), passwordData, NULL);    
         result = (err == noErr);
     } else {
         NSLog(@"Error %d occurred setting password", err);
