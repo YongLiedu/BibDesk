@@ -330,6 +330,7 @@ static Class BDSKBookmarkClass = Nil;
         [tinyIcon lockFocus];
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
         [icon drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+        [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationDefault];
         [tinyIcon unlockFocus];
         [icon addRepresentation:[[tinyIcon representations] lastObject]];
         [tinyIcon release];

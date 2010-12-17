@@ -69,6 +69,7 @@ static NSImage *unlockedIcon = nil;
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
         [[self icon] drawInRect:iconRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
         [badge drawInRect:badgeRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:0.65];
+        [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationDefault];
         [image unlockFocus];
         
         iconRect = NSMakeRect(0.0, 0.0, 16.0, 16.0);
@@ -80,6 +81,7 @@ static NSImage *unlockedIcon = nil;
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
         [[self icon] drawInRect:iconRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
         [badge drawInRect:badgeRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:0.65];
+        [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationDefault];
         [tinyImage unlockFocus];
         [image addRepresentation:[[tinyImage representations] lastObject]];
         [tinyImage release];
@@ -100,6 +102,7 @@ static NSImage *unlockedIcon = nil;
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
         [[self icon] drawInRect:iconRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
         [badge drawInRect:badgeRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:0.65];
+        [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationDefault];
         [image unlockFocus];
         
         iconRect = NSMakeRect(0.0, 0.0, 16.0, 16.0);

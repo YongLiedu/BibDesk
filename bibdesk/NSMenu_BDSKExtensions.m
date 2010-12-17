@@ -381,6 +381,7 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
         [newImage lockFocus];
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
         [image drawInRect:NSMakeRect(0, 0, dstSize.width, dstSize.height) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+        [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationDefault];
         [newImage unlockFocus];
         [self setImage:newImage];
         [newImage release];
