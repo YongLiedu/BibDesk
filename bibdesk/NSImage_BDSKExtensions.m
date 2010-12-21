@@ -41,8 +41,8 @@
 #import "NSAttributedString_BDSKExtensions.h"
 
 #define BDSKImageNamePreviewDisplayTextTemplate     @"BDSKPreviewDisplayText"
-#define BDSKImageNamePreviewDisplayFilesTemplate    @"PreviewDisplayFiles"
-#define BDSKImageNamePreviewDisplayTeXTemplate      @"PreviewDisplayTeX"
+#define BDSKImageNamePreviewDisplayFilesTemplate    @"BDSKPreviewDisplayFiles"
+#define BDSKImageNamePreviewDisplayTeXTemplate      @"BDSKPreviewDisplayTeX"
 #define BDSKImageNameCautionIcon                    @"BDSKCautionIcon"
 
 @implementation NSImage (BDSKExtensions)
