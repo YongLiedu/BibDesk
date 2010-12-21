@@ -86,11 +86,20 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.0, 0.1, 0.2, 0.25, 0.35, 0.5, 
 
 - (IBAction)printSelection:(id)sender {
     NSPrintInfo *printInfo = [[[[self window] windowController] document] printInfo];
+    if (printInfo == nil)
+        printInfo = [NSPrintInfo sharedPrintInfo];
     [self printWithInfo:printInfo autoRotate:YES];
 }
 
 - (IBAction)printDocument:(id)sender {
-    [[[[self window] windowController] document] printDocument:sender];
+    id wc = [[self window] windowController];
+    NSDocument *doc = [wc document];
+    if (doc)
+        [doc printDocument:sender];
+    else if ([wc respondsToSelector:_cmd])
+        [wc printDocument:sender];
+    else
+        NSBeep();
 }
 
 #pragma mark Copying

@@ -329,16 +329,12 @@ static BDSKPreviewer *sharedPreviewer = nil;
 // first responder gets this
 - (void)printDocument:(id)sender{
     NSInteger tabIndex = [tabView indexOfTabViewItem:[tabView selectedTabViewItem]];
-    if (tabIndex == BDSKPreviewerTabIndexPDF) {
-        [pdfView printWithInfo:[NSPrintInfo sharedPrintInfo] autoRotate:NO];
-    } else {
-        NSTextView *textView = tabIndex == BDSKPreviewerTabIndexRTF ? rtfPreviewView : logView;
-        NSPrintOperation *printOp = [NSPrintOperation printOperationWithAttributedString:[textView textStorage] printInfo:nil settings:nil];
-        [printOp setShowsPrintPanel:YES];
-        [printOp setShowsProgressPanel:YES];
-        [printOp setCanSpawnSeparateThread:YES];
-        [printOp runOperationModalForWindow:[self window] delegate:nil didRunSelector:NULL contextInfo:NULL];
-    }
+    if (tabIndex == BDSKPreviewerTabIndexPDF)
+        [pdfView printSelection:sender];
+    else if (tabIndex == BDSKPreviewerTabIndexRTF)
+        [(BDSKZoomableTextView *)rtfPreviewView printSelection:sender];
+    else if (tabIndex == BDSKPreviewerTabIndexLog)
+        [(BDSKZoomableTextView *)logView printSelection:sender];
 }
 
 #pragma mark Drawing methods
