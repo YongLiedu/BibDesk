@@ -91,15 +91,11 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.0, 0.1, 0.2, 0.25, 0.35, 0.5, 
     [self printWithInfo:printInfo autoRotate:YES];
 }
 
-- (IBAction)printDocument:(id)sender {
-    id wc = [[self window] windowController];
-    NSDocument *doc = [wc document];
-    if (doc)
-        [doc printDocument:sender];
-    else if ([wc respondsToSelector:_cmd])
-        [wc printDocument:sender];
-    else
-        NSBeep();
+// we don't want to steal the printDocument: action from the responder chain
+- (void)printDocument:(id)sender{}
+
+- (BOOL)respondsToSelector:(SEL)aSelector {
+    return aSelector != @selector(printDocument:) && [super respondsToSelector:aSelector];
 }
 
 #pragma mark Copying
