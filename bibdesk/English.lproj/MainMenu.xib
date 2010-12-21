@@ -370,7 +370,8 @@
 								<object class="NSMenuItem" id="576797284">
 									<reference key="NSMenu" ref="490454653"/>
 									<string key="NSTitle">Print Selection…</string>
-									<string key="NSKeyEquiv"/>
+									<string key="NSKeyEquiv">p</string>
+									<int key="NSKeyEquivModMask">1572864</int>
 									<int key="NSMnemonicLoc">2147483647</int>
 									<reference key="NSOnImage" ref="570548833"/>
 									<reference key="NSMixedImage" ref="523458683"/>
@@ -6294,6 +6295,7 @@
 							<string>openLinkedFile:</string>
 							<string>openLinkedURL:</string>
 							<string>previewAction:</string>
+							<string>printSelection:</string>
 							<string>raiseAddField:</string>
 							<string>raiseChangeFieldName:</string>
 							<string>raiseDelField:</string>
@@ -6311,6 +6313,7 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>NSMenuItem</string>
 							<string>NSMenuItem</string>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -6365,6 +6368,7 @@
 							<string>openLinkedFile:</string>
 							<string>openLinkedURL:</string>
 							<string>previewAction:</string>
+							<string>printSelection:</string>
 							<string>raiseAddField:</string>
 							<string>raiseChangeFieldName:</string>
 							<string>raiseDelField:</string>
@@ -6454,6 +6458,10 @@
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">previewAction:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">printSelection:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
