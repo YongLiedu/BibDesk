@@ -39,5 +39,4 @@
 
 
 @interface BibDocument (Menus)
-- (BOOL) validatePrintDocumentMenuItem:(NSMenuItem*) menuItem;
 @end

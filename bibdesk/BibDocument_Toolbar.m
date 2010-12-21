@@ -258,9 +258,7 @@
     // Optional method   self message is sent to us since we are the target of some toolbar item actions
     // (for example:  of the save items action)
     BOOL enable = YES;
-    if ([[toolbarItem itemIdentifier] isEqualToString: NSToolbarPrintItemIdentifier]) {
-		enable = [self validatePrintDocumentMenuItem:nil];
-    }else if([[toolbarItem itemIdentifier] isEqualToString: BibDocumentToolbarEditItemIdentifier]
+    if([[toolbarItem itemIdentifier] isEqualToString: BibDocumentToolbarEditItemIdentifier]
 			 || [[toolbarItem itemIdentifier] isEqualToString: BibDocumentToolbarActionItemIdentifier]){
         if([self numberOfSelectedPubs] == 0) enable = NO;
     }else if([[toolbarItem itemIdentifier] isEqualToString: BibDocumentToolbarDeleteItemIdentifier]){

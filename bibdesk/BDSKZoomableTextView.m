@@ -40,6 +40,7 @@
 #import "NSScrollview_BDSKExtensions.h"
 #import "NSView_BDSKExtensions.h"
 #import "BDSKHighlightingPopUpButton.h"
+#import "NSPrintOperation_BDSKExtensions.h"
 
 
 @interface NSResponder (BDSKGesturesPrivate)
@@ -85,6 +86,12 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.1, 0.2, 0.25, 0.35, 0.5, 0.6, 
     // make sure we have a horizontal scroller to show the popup
     [self makeScalePopUpButton];
     [[self enclosingScrollView] setAutohidesScrollers:NO];
+}
+
+- (void)printDocument:(id)sender {
+    NSPrintInfo *printInfo = [[[[self window] windowController] document] printInfo];
+    NSPrintOperation *printOp = [NSPrintOperation printOperationWithAttributedString:[self textStorage] printInfo:printInfo settings:nil];
+    [printOp runOperationModalForWindow:[self window] delegate:nil didRunSelector:NULL contextInfo:NULL];
 }
 
 #pragma mark Instance methods - scaling related

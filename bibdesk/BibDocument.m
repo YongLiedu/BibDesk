@@ -2644,28 +2644,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 #pragma mark -
 #pragma mark Printing support
 
-- (IBAction)printDocument:(id)sender{
-    if (bottomPreviewDisplay == BDSKPreviewDisplayTeX)
-        [[previewer pdfView] printWithInfo:[self printInfo] autoRotate:YES];
-    else
-        [super printDocument:sender];
-}
-
 - (NSPrintOperation *)printOperationWithSettings:(NSDictionary *)printSettings error:(NSError **)outError {
-    NSAttributedString *attrString = nil;
-    NSString *string = nil;
-    if (bottomPreviewDisplay == BDSKPreviewDisplayText)
-        attrString = [bottomPreviewTextView textStorage];
-    else if (sidePreviewDisplay == BDSKPreviewDisplayText)
-        attrString = [sidePreviewTextView textStorage];
-    else
-        // this occurs only when both FileViews are displayed, probably never happens
-        string = [self bibTeXStringForPublications:[self selectedPublications]];
-    if (attrString == nil) {
-        if (string == nil)
-            string = NSLocalizedString(@"Error: nothing to print from document preview", @"printing error");
-        attrString = [[[NSAttributedString alloc] initWithString:string attributeName:NSFontAttributeName attributeValue:[NSFont userFontOfSize:0.0]] autorelease];
-    }
+    NSString *string = [self bibTeXStringForPublications:[self publications]];
+    NSAttributedString *attrString = [[[NSAttributedString alloc] initWithString:string attributeName:NSFontAttributeName attributeValue:[NSFont userFontOfSize:0.0]] autorelease];
     return [NSPrintOperation printOperationWithAttributedString:attrString printInfo:[self printInfo] settings:printSettings];
 }
 

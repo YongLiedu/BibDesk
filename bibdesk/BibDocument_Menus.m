@@ -231,21 +231,6 @@
 	return ([self numberOfSelectedPubs] > 0 && [self hasExternalGroupsSelected] == NO);
 }	
 
-- (BOOL) validatePrintDocumentMenuItem:(NSMenuItem*) menuItem {
-	if ([self numberOfSelectedPubs] == 0)
-        return NO;
-    // even if there is a selection, we may have an error condition with nothing to print
-    // see comments on exception in -printableView, which is the main motivation for this validation
-    else if(bottomPreviewDisplay == BDSKPreviewDisplayTeX)
-        return [[previewer pdfView] document] != nil;
-    else if (bottomPreviewDisplay == BDSKPreviewDisplayText)
-        return [bottomPreviewTextView textStorage] != nil;
-    else if (sidePreviewDisplay == BDSKPreviewDisplayText)
-        return [sidePreviewTextView textStorage] != nil;
-    else
-        return YES;
-}
-
 - (BOOL) validateToggleShowingCustomCiteDrawerMenuItem:(NSMenuItem*) menuItem {
     [menuItem setTitle:[drawerController isDrawerOpen] ? NSLocalizedString(@"Hide Custom \\cite Commands", @"Menu item title") : NSLocalizedString(@"Show Custom \\cite Commands", @"Menu item title")];
 	return YES;
