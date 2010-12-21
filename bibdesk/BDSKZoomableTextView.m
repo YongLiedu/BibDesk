@@ -88,7 +88,7 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.1, 0.2, 0.25, 0.35, 0.5, 0.6, 
     [[self enclosingScrollView] setAutohidesScrollers:NO];
 }
 
-- (void)printDocument:(id)sender {
+- (IBAction)printSelection:(id)sender {
     NSPrintInfo *printInfo = [[[[self window] windowController] document] printInfo];
     NSPrintOperation *printOp = [NSPrintOperation printOperationWithAttributedString:[self textStorage] printInfo:printInfo settings:nil];
     [printOp runOperationModalForWindow:[self window] delegate:nil didRunSelector:NULL contextInfo:NULL];

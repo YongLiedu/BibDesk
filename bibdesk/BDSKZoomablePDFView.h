@@ -51,4 +51,6 @@
 - (void)setScrollerSize:(NSControlSize)controlSize;
 - (void)makeScalePopUpButton;
 
+- (IBAction)printSelection:(id)sender;
+
 @end

@@ -65,6 +65,8 @@
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSEvent_BDSKExtensions.h"
 #import "NSViewAnimation_BDSKExtensions.h"
+#import "NSAttributedString_BDSKExtensions.h"
+#import "NSPrintOperation_BDSKExtensions.h"
 
 #import "BDSKTypeManager.h"
 #import "BDSKScriptHookManager.h"
@@ -653,6 +655,21 @@ static BOOL changingColors = NO;
         changingColors = NO;
         [[self undoManager] setActionName:NSLocalizedString(@"Change Color", @"Undo action name")];
     }
+}
+
+- (void)printPublications:(NSArray *)pubs {
+    NSString *string = [self bibTeXStringForPublications:pubs];
+    NSAttributedString *attrString = [[[NSAttributedString alloc] initWithString:string attributeName:NSFontAttributeName attributeValue:[NSFont userFontOfSize:0.0]] autorelease];
+    NSPrintOperation *printOp = [NSPrintOperation printOperationWithAttributedString:attrString printInfo:[self printInfo] settings:nil];
+    [printOp runOperationModalForWindow:documentWindow delegate:nil didRunSelector:NULL contextInfo:NULL];
+}
+
+- (IBAction)printSelection:(id)sender {
+    NSArray *pubs = [self numberOfSelectedPubs] == 0 ? groupedPublications : [self selectedPublications];
+    NSString *string = [self bibTeXStringForPublications:pubs];
+    NSAttributedString *attrString = [[[NSAttributedString alloc] initWithString:string attributeName:NSFontAttributeName attributeValue:[NSFont userFontOfSize:0.0]] autorelease];
+    NSPrintOperation *printOp = [NSPrintOperation printOperationWithAttributedString:attrString printInfo:[self printInfo] settings:nil];
+    [printOp runOperationModalForWindow:documentWindow delegate:nil didRunSelector:NULL contextInfo:NULL];
 }
 
 #pragma mark URL actions

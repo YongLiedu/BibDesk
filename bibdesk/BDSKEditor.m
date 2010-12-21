@@ -1187,6 +1187,10 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     }
 }
 
+- (IBAction)printSelection:(id)sender {
+    [[self document] printPublications:[NSArray arrayWithObjects:publication, nil]];
+}
+
 #pragma mark Menus
 
 - (void)menuNeedsUpdate:(NSMenu *)menu{

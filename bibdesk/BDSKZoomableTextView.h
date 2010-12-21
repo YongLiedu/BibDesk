@@ -59,4 +59,6 @@
 
 - (void)makeScalePopUpButton;
 
+- (IBAction)printSelection:(id)sender;
+
 @end

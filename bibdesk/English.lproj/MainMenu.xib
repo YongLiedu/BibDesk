@@ -367,6 +367,14 @@
 									<reference key="NSOnImage" ref="570548833"/>
 									<reference key="NSMixedImage" ref="523458683"/>
 								</object>
+								<object class="NSMenuItem" id="576797284">
+									<reference key="NSMenu" ref="490454653"/>
+									<string key="NSTitle">Print Selection…</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="570548833"/>
+									<reference key="NSMixedImage" ref="523458683"/>
+								</object>
 							</object>
 						</object>
 					</object>
@@ -3370,6 +3378,14 @@
 					</object>
 					<int key="connectionID">1324</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">printSelection:</string>
+						<reference key="source" ref="485804586"/>
+						<reference key="destination" ref="576797284"/>
+					</object>
+					<int key="connectionID">1327</int>
+				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<object class="NSArray" key="orderedObjects">
@@ -3613,6 +3629,7 @@
 							<reference ref="868057337"/>
 							<reference ref="186851757"/>
 							<reference ref="485350054"/>
+							<reference ref="576797284"/>
 						</object>
 						<reference key="parent" ref="1003230695"/>
 					</object>
@@ -4897,6 +4914,11 @@
 						</object>
 						<reference key="parent" ref="1009501869"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">1325</int>
+						<reference key="object" ref="576797284"/>
+						<reference key="parent" ref="490454653"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -5084,6 +5106,8 @@
 					<string>1320.IBPluginDependency</string>
 					<string>1321.IBEditorWindowLastContentRect</string>
 					<string>1321.IBPluginDependency</string>
+					<string>1325.IBPluginDependency</string>
+					<string>1325.ImportedFromIB2</string>
 					<string>134.IBPluginDependency</string>
 					<string>134.ImportedFromIB2</string>
 					<string>136.IBPluginDependency</string>
@@ -5573,6 +5597,8 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
 					<string>{{131, 321}, {275, 493}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
@@ -5778,7 +5804,7 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{135, 511}, {329, 303}}</string>
+					<string>{{135, 491}, {329, 323}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -5844,7 +5870,7 @@
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">1324</int>
+			<int key="maxID">1327</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -8467,6 +8493,107 @@
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
+					<string key="className">BDSKZoomablePDFView</string>
+					<string key="superclassName">PDFView</string>
+					<object class="NSMutableDictionary" key="actions">
+						<bool key="EncodedWithXMLCoder">YES</bool>
+						<object class="NSArray" key="dict.sortedKeys">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>printSelection:</string>
+							<string>scalePopUpAction:</string>
+						</object>
+						<object class="NSMutableArray" key="dict.values">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
+							<string>id</string>
+						</object>
+					</object>
+					<object class="NSMutableDictionary" key="actionInfosByName">
+						<bool key="EncodedWithXMLCoder">YES</bool>
+						<object class="NSArray" key="dict.sortedKeys">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>printSelection:</string>
+							<string>scalePopUpAction:</string>
+						</object>
+						<object class="NSMutableArray" key="dict.values">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<object class="IBActionInfo">
+								<string key="name">printSelection:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">scalePopUpAction:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+						</object>
+					</object>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKZoomablePDFView.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">BDSKZoomableTextView</string>
+					<string key="superclassName">NSTextView</string>
+					<object class="NSMutableDictionary" key="actions">
+						<bool key="EncodedWithXMLCoder">YES</bool>
+						<object class="NSArray" key="dict.sortedKeys">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>printSelection:</string>
+							<string>scalePopUpAction:</string>
+							<string>zoomIn:</string>
+							<string>zoomOut:</string>
+							<string>zoomToActualSize:</string>
+						</object>
+						<object class="NSMutableArray" key="dict.values">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
+						</object>
+					</object>
+					<object class="NSMutableDictionary" key="actionInfosByName">
+						<bool key="EncodedWithXMLCoder">YES</bool>
+						<object class="NSArray" key="dict.sortedKeys">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>printSelection:</string>
+							<string>scalePopUpAction:</string>
+							<string>zoomIn:</string>
+							<string>zoomOut:</string>
+							<string>zoomToActualSize:</string>
+						</object>
+						<object class="NSMutableArray" key="dict.values">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<object class="IBActionInfo">
+								<string key="name">printSelection:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">scalePopUpAction:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">zoomIn:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">zoomOut:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">zoomToActualSize:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+						</object>
+					</object>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKZoomableTextView.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
 					<string key="className">BibDocument</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
@@ -8755,6 +8882,7 @@
 							<string>pageUpInPreview:</string>
 							<string>postItemToWeblog:</string>
 							<string>previewAction:</string>
+							<string>printSelection:</string>
 							<string>refreshSharedBrowsing:</string>
 							<string>refreshSharing:</string>
 							<string>removeSelectedPubs:</string>
@@ -8780,6 +8908,7 @@
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -8874,6 +9003,7 @@
 							<string>pageUpInPreview:</string>
 							<string>postItemToWeblog:</string>
 							<string>previewAction:</string>
+							<string>printSelection:</string>
 							<string>refreshSharedBrowsing:</string>
 							<string>refreshSharing:</string>
 							<string>removeSelectedPubs:</string>
@@ -9029,6 +9159,10 @@
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">previewAction:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">printSelection:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">

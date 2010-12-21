@@ -126,6 +126,9 @@
 - (IBAction)sendToLyX:(id)sender;
 - (IBAction)postItemToWeblog:(id)sender;
 
+- (void)printPublications:(NSArray *)pubs;
+- (IBAction)printSelection:(id)sender;
+
 #pragma mark URL actions
 
 #pragma mark | URL Field actions
