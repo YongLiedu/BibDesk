@@ -42,38 +42,38 @@
 #import "BDSKFilter.h"
 
 enum {
-	BDSKASGroupContain = 'CGCt',
-	BDSKASGroupNotContain = 'CGNC',
-	BDSKASContain = 'CCnt',
-	BDSKASNotContain = 'CNCt',
-	BDSKASEqual = 'CEqu',
-	BDSKASNotEqual = 'CNEq',
-	BDSKASStartWith = 'CStt',
-	BDSKASEndWith = 'CEnd',
-	BDSKASSmaller = 'CBef',
-	BDSKASLarger = 'CAft'
+	BDSKScriptingGroupContain = 'CGCt',
+	BDSKScriptingGroupNotContain = 'CGNC',
+	BDSKScriptingContain = 'CCnt',
+	BDSKScriptingNotContain = 'CNCt',
+	BDSKScriptingEqual = 'CEqu',
+	BDSKScriptingNotEqual = 'CNEq',
+	BDSKScriptingStartWith = 'CStt',
+	BDSKScriptingEndWith = 'CEnd',
+	BDSKScriptingSmaller = 'CBef',
+	BDSKScriptingLarger = 'CAft'
 };
 
 enum {
-	BDSKASCountEqual = 'CCEq',
-	BDSKASCountNotEqual = 'CCNE',
-	BDSKASCountLarger = 'CCLa',
-	BDSKASCountSmaller = 'CCSm'
+	BDSKScriptingCountEqual = 'CCEq',
+	BDSKScriptingCountNotEqual = 'CCNE',
+	BDSKScriptingCountLarger = 'CCLa',
+	BDSKScriptingCountSmaller = 'CCSm'
 };
 
 enum {
-    BDSKASToday = 'CTdy', 
-    BDSKASYesterday = 'CYst', 
-    BDSKASThisWeek = 'CTWk', 
-    BDSKASLastWeek = 'CLWk', 
-    BDSKASExactly = 'CAgo', 
-    BDSKASInLast = 'CLPe', 
-    BDSKASNotInLast = 'CNLP', 
-    BDSKASBetween = 'CPeR', 
-    BDSKASDate = 'CDat', 
-    BDSKASAfterDate = 'CADt', 
-    BDSKASBeforeDate = 'CBDt', 
-    BDSKASInDateRange = 'CDtR'
+    BDSKScriptingToday = 'CTdy', 
+    BDSKScriptingYesterday = 'CYst', 
+    BDSKScriptingThisWeek = 'CTWk', 
+    BDSKScriptingLastWeek = 'CLWk', 
+    BDSKScriptingExactly = 'CAgo', 
+    BDSKScriptingInLast = 'CLPe', 
+    BDSKScriptingNotInLast = 'CNLP', 
+    BDSKScriptingBetween = 'CPeR', 
+    BDSKScriptingDate = 'CDat', 
+    BDSKScriptingAfterDate = 'CADt', 
+    BDSKScriptingBeforeDate = 'CBDt', 
+    BDSKScriptingInDateRange = 'CDtR'
 };
 
 @interface BDSKCondition (BDSKPrivate)
@@ -91,18 +91,18 @@ enum {
         if (comparisonNumber == nil) {
         } else if ([self isDateCondition]) {
             switch ([comparisonNumber unsignedIntValue]) {
-                case BDSKASToday:       [self setDateComparison:BDSKToday];         break; 
-                case BDSKASYesterday:   [self setDateComparison:BDSKYesterday];     break; 
-                case BDSKASThisWeek:    [self setDateComparison:BDSKThisWeek];      break; 
-                case BDSKASLastWeek:    [self setDateComparison:BDSKLastWeek];      break; 
-                case BDSKASExactly:     [self setDateComparison:BDSKExactly];       break; 
-                case BDSKASInLast:      [self setDateComparison:BDSKInLast];        break; 
-                case BDSKASNotInLast:   [self setDateComparison:BDSKNotInLast];     break; 
-                case BDSKASBetween:     [self setDateComparison:BDSKBetween];       break; 
-                case BDSKASDate:        [self setDateComparison:BDSKDate];          break; 
-                case BDSKASAfterDate:   [self setDateComparison:BDSKAfterDate];     break; 
-                case BDSKASBeforeDate:  [self setDateComparison:BDSKBeforeDate];    break; 
-                case BDSKASInDateRange: [self setDateComparison:BDSKInDateRange];   break;
+                case BDSKScriptingToday:       [self setDateComparison:BDSKToday];         break; 
+                case BDSKScriptingYesterday:   [self setDateComparison:BDSKYesterday];     break; 
+                case BDSKScriptingThisWeek:    [self setDateComparison:BDSKThisWeek];      break; 
+                case BDSKScriptingLastWeek:    [self setDateComparison:BDSKLastWeek];      break; 
+                case BDSKScriptingExactly:     [self setDateComparison:BDSKExactly];       break; 
+                case BDSKScriptingInLast:      [self setDateComparison:BDSKInLast];        break; 
+                case BDSKScriptingNotInLast:   [self setDateComparison:BDSKNotInLast];     break; 
+                case BDSKScriptingBetween:     [self setDateComparison:BDSKBetween];       break; 
+                case BDSKScriptingDate:        [self setDateComparison:BDSKDate];          break; 
+                case BDSKScriptingAfterDate:   [self setDateComparison:BDSKAfterDate];     break; 
+                case BDSKScriptingBeforeDate:  [self setDateComparison:BDSKBeforeDate];    break; 
+                case BDSKScriptingInDateRange: [self setDateComparison:BDSKInDateRange];   break;
                 default:
                 {
                     NSScriptCommand *cmd = [NSScriptCommand currentCommand];
@@ -113,14 +113,14 @@ enum {
             }
         } else if ([self isAttachmentCondition]) {
             switch ([comparisonNumber unsignedIntValue]) {
-                case BDSKASCountEqual:      [self setAttachmentComparison:BDSKCountEqual];           break;
-                case BDSKASCountNotEqual:   [self setAttachmentComparison:BDSKCountNotEqual];        break;
-                case BDSKASCountLarger:     [self setAttachmentComparison:BDSKCountLarger];          break;
-                case BDSKASCountSmaller:    [self setAttachmentComparison:BDSKCountSmaller];         break;
-                case BDSKASContain:         [self setAttachmentComparison:BDSKAttachmentContain];    break;
-                case BDSKASNotContain:      [self setAttachmentComparison:BDSKAttachmentNotContain]; break;
-                case BDSKASStartWith:       [self setAttachmentComparison:BDSKAttachmentStartWith];  break;
-                case BDSKASEndWith:         [self setAttachmentComparison:BDSKAttachmentEndWith];    break;
+                case BDSKScriptingCountEqual:      [self setAttachmentComparison:BDSKCountEqual];           break;
+                case BDSKScriptingCountNotEqual:   [self setAttachmentComparison:BDSKCountNotEqual];        break;
+                case BDSKScriptingCountLarger:     [self setAttachmentComparison:BDSKCountLarger];          break;
+                case BDSKScriptingCountSmaller:    [self setAttachmentComparison:BDSKCountSmaller];         break;
+                case BDSKScriptingContain:         [self setAttachmentComparison:BDSKAttachmentContain];    break;
+                case BDSKScriptingNotContain:      [self setAttachmentComparison:BDSKAttachmentNotContain]; break;
+                case BDSKScriptingStartWith:       [self setAttachmentComparison:BDSKAttachmentStartWith];  break;
+                case BDSKScriptingEndWith:         [self setAttachmentComparison:BDSKAttachmentEndWith];    break;
                 default:
                 {
                     NSScriptCommand *cmd = [NSScriptCommand currentCommand];
@@ -131,16 +131,16 @@ enum {
             }
         } else {
             switch ([comparisonNumber unsignedIntValue]) {
-                case BDSKASGroupContain:    [self setStringComparison:BDSKGroupContain];    break;
-                case BDSKASGroupNotContain: [self setStringComparison:BDSKGroupNotContain]; break;
-                case BDSKASContain:         [self setStringComparison:BDSKContain];         break;
-                case BDSKASNotContain:      [self setStringComparison:BDSKNotContain];      break;
-                case BDSKASEqual:           [self setStringComparison:BDSKEqual];           break;
-                case BDSKASNotEqual:        [self setStringComparison:BDSKNotEqual];        break;
-                case BDSKASStartWith:       [self setStringComparison:BDSKStartWith];       break;
-                case BDSKASEndWith:         [self setStringComparison:BDSKEndWith];         break;
-                case BDSKASSmaller:         [self setStringComparison:BDSKSmaller];         break;
-                case BDSKASLarger:          [self setStringComparison:BDSKLarger];          break;
+                case BDSKScriptingGroupContain:    [self setStringComparison:BDSKGroupContain];    break;
+                case BDSKScriptingGroupNotContain: [self setStringComparison:BDSKGroupNotContain]; break;
+                case BDSKScriptingContain:         [self setStringComparison:BDSKContain];         break;
+                case BDSKScriptingNotContain:      [self setStringComparison:BDSKNotContain];      break;
+                case BDSKScriptingEqual:           [self setStringComparison:BDSKEqual];           break;
+                case BDSKScriptingNotEqual:        [self setStringComparison:BDSKNotEqual];        break;
+                case BDSKScriptingStartWith:       [self setStringComparison:BDSKStartWith];       break;
+                case BDSKScriptingEndWith:         [self setStringComparison:BDSKEndWith];         break;
+                case BDSKScriptingSmaller:         [self setStringComparison:BDSKSmaller];         break;
+                case BDSKScriptingLarger:          [self setStringComparison:BDSKLarger];          break;
                 default:
                 {
                     NSScriptCommand *cmd = [NSScriptCommand currentCommand];
@@ -227,45 +227,45 @@ enum {
 - (NSInteger)scriptingComparison {
     if ([self isDateCondition]) {
         switch ([self dateComparison]) {
-            case BDSKToday:         return BDSKASToday;
-            case BDSKYesterday:     return BDSKASYesterday;
-            case BDSKThisWeek:      return BDSKASThisWeek;
-            case BDSKLastWeek:      return BDSKASLastWeek;
-            case BDSKExactly:       return BDSKASExactly;
-            case BDSKInLast:        return BDSKASInLast;
-            case BDSKNotInLast:     return BDSKASNotInLast;
-            case BDSKBetween:       return BDSKASBetween;
-            case BDSKDate:          return BDSKASDate;
-            case BDSKAfterDate:     return BDSKASAfterDate;
-            case BDSKBeforeDate:    return BDSKASBeforeDate;
+            case BDSKToday:         return BDSKScriptingToday;
+            case BDSKYesterday:     return BDSKScriptingYesterday;
+            case BDSKThisWeek:      return BDSKScriptingThisWeek;
+            case BDSKLastWeek:      return BDSKScriptingLastWeek;
+            case BDSKExactly:       return BDSKScriptingExactly;
+            case BDSKInLast:        return BDSKScriptingInLast;
+            case BDSKNotInLast:     return BDSKScriptingNotInLast;
+            case BDSKBetween:       return BDSKScriptingBetween;
+            case BDSKDate:          return BDSKScriptingDate;
+            case BDSKAfterDate:     return BDSKScriptingAfterDate;
+            case BDSKBeforeDate:    return BDSKScriptingBeforeDate;
             case BDSKInDateRange:   return BDSKInDateRange;
-            default:                return BDSKASToday;
+            default:                return BDSKScriptingToday;
         }
     } else if ([self isAttachmentCondition]) {
         switch ([self attachmentComparison]) {
-            case BDSKCountEqual:            return BDSKASCountEqual;
-            case BDSKCountNotEqual:         return BDSKASCountNotEqual;
-            case BDSKCountLarger:           return BDSKASCountLarger;
-            case BDSKCountSmaller:          return BDSKASCountSmaller;
-            case BDSKAttachmentContain:     return BDSKASContain;
-            case BDSKAttachmentNotContain:  return BDSKASNotContain;
-            case BDSKAttachmentStartWith:   return BDSKASStartWith;
-            case BDSKAttachmentEndWith:     return BDSKASEndWith;
-            default:                        return BDSKASCountEqual;
+            case BDSKCountEqual:            return BDSKScriptingCountEqual;
+            case BDSKCountNotEqual:         return BDSKScriptingCountNotEqual;
+            case BDSKCountLarger:           return BDSKScriptingCountLarger;
+            case BDSKCountSmaller:          return BDSKScriptingCountSmaller;
+            case BDSKAttachmentContain:     return BDSKScriptingContain;
+            case BDSKAttachmentNotContain:  return BDSKScriptingNotContain;
+            case BDSKAttachmentStartWith:   return BDSKScriptingStartWith;
+            case BDSKAttachmentEndWith:     return BDSKScriptingEndWith;
+            default:                        return BDSKScriptingCountEqual;
         }
     } else {
         switch ([self stringComparison]) {
-            case BDSKGroupContain:      return BDSKASGroupContain;
-            case BDSKGroupNotContain:   return BDSKASGroupNotContain;
-            case BDSKContain:           return BDSKASContain;
-            case BDSKNotContain:        return BDSKASNotContain;
-            case BDSKEqual:             return BDSKASEqual;
-            case BDSKNotEqual:          return BDSKASNotEqual;
-            case BDSKStartWith:         return BDSKASStartWith;
-            case BDSKEndWith:           return BDSKASEndWith;
-            case BDSKSmaller:           return BDSKASSmaller;
-            case BDSKLarger:            return BDSKASLarger;
-            default:                    return BDSKASContain;
+            case BDSKGroupContain:      return BDSKScriptingGroupContain;
+            case BDSKGroupNotContain:   return BDSKScriptingGroupNotContain;
+            case BDSKContain:           return BDSKScriptingContain;
+            case BDSKNotContain:        return BDSKScriptingNotContain;
+            case BDSKEqual:             return BDSKScriptingEqual;
+            case BDSKNotEqual:          return BDSKScriptingNotEqual;
+            case BDSKStartWith:         return BDSKScriptingStartWith;
+            case BDSKEndWith:           return BDSKScriptingEndWith;
+            case BDSKSmaller:           return BDSKScriptingSmaller;
+            case BDSKLarger:            return BDSKScriptingLarger;
+            default:                    return BDSKScriptingContain;
         }
     }
 }
