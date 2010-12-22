@@ -1472,13 +1472,21 @@
 
         <enumeration name="period unit" code="PerU">
             <enumerator name="day period" code="PDay"
-                description="A period in days."/>
+                description="A period in days.">
+                <cocoa integer-value="1"/>
+            </enumerator>
             <enumerator name="week period" code="PWek"
-                description="A period in weeks."/>
+                description="A period in weeks.">
+                <cocoa integer-value="2"/>
+            </enumerator>
             <enumerator name="month period" code="PMnt"
-                description="A period in months."/>
+                description="A period in months.">
+                <cocoa integer-value="3"/>
+            </enumerator>
             <enumerator name="year period" code="PYer"
-                description="A period in years."/>
+                description="A period in years.">
+                <cocoa integer-value="4"/>
+            </enumerator>
         </enumeration>
         
         <record-type name="search server info" code="SRVI">
@@ -1526,13 +1534,21 @@
 
         <enumeration name="search server type" code="SrvT">
             <enumerator name="Entrez" code="Entr"
-                description="Entrez search server."/>
+                description="Entrez search server.">
+                <cocoa string-value="entrez"/>
+            </enumerator>
             <enumerator name="Z3950" code="Zoom"
-                description="Z3950 search server."/>
+                description="Z3950 search server.">
+                <cocoa string-value="zoom"/>
+            </enumerator>
             <enumerator name="ISI" code="ISI "
-                description="ISI Web of Sciences search server."/>
+                description="ISI Web of Sciences search server.">
+                <cocoa string-value="isi"/>
+            </enumerator>
             <enumerator name="DBLP" code="DBLP"
-                description="DBLP search server."/>
+                description="DBLP search server.">
+                <cocoa string-value="dblp"/>
+            </enumerator>
         </enumeration>
         
         <record-type name="note" code="Note"

@@ -76,13 +76,6 @@ enum {
     BDSKASInDateRange = 'CDtR'
 };
 
-enum {
-    BDSKASPeriodDay = 'PDay',
-    BDSKASPeriodWeek = 'PWek',
-    BDSKASPeriodMonth = 'PMnt',
-    BDSKASPeriodYear = 'PYer'
-};
-
 @interface BDSKCondition (BDSKPrivate)
 - (void)startObserving;
 @end
@@ -165,14 +158,8 @@ enum {
                 id value;
                 if (value = [newValue objectForKey:@"numberValue"]) {
                     [self setNumberValue:[value integerValue]];
-                    if (value = [newValue objectForKey:@"periodValue"]) {
-                        switch ([value unsignedIntValue]) {
-                            case BDSKASPeriodDay:   [self setPeriodValue:BDSKPeriodDay];    break;
-                            case BDSKASPeriodWeek:  [self setPeriodValue:BDSKPeriodWeek];   break;
-                            case BDSKASPeriodMonth: [self setPeriodValue:BDSKPeriodMonth];  break;
-                            case BDSKASPeriodYear:  [self setPeriodValue:BDSKPeriodYear];   break;
-                        }
-                    }
+                    if (value = [newValue objectForKey:@"periodValue"])
+                        [self setPeriodValue:[value integerValue]];
                     if (value = [newValue objectForKey:@"andNumberValue"])
                         [self setAndNumberValue:[value integerValue]];
                 } else if (value = [newValue objectForKey:@"dateValue"]) {
@@ -285,20 +272,13 @@ enum {
 
 - (id)scriptingValue {
     if ([self isDateCondition]) {
-        NSInteger scriptingPeriodValue = BDSKASPeriodDay;
-        switch ([self periodValue]) {
-            case BDSKPeriodDay:     scriptingPeriodValue = BDSKASPeriodDay;     break;
-            case BDSKPeriodWeek:    scriptingPeriodValue = BDSKASPeriodWeek;    break;
-            case BDSKPeriodMonth:   scriptingPeriodValue = BDSKASPeriodMonth;   break;
-            case BDSKPeriodYear:    scriptingPeriodValue = BDSKASPeriodYear;    break;
-        }
         switch ([self dateComparison]) {
             case BDSKExactly: 
             case BDSKInLast: 
             case BDSKNotInLast: 
-                return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInteger:numberValue], @"numberValue", [NSNumber numberWithInteger:scriptingPeriodValue], @"periodValue", nil];
+                return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInteger:numberValue], @"numberValue", [NSNumber numberWithInteger:periodValue], @"periodValue", nil];
             case BDSKBetween:
-                return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInteger:numberValue], @"numberValue", [NSNumber numberWithInteger:andNumberValue], @"andNumberValue", [NSNumber numberWithInteger:scriptingPeriodValue], @"periodValue", nil];
+                return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInteger:numberValue], @"numberValue", [NSNumber numberWithInteger:andNumberValue], @"andNumberValue", [NSNumber numberWithInteger:periodValue], @"periodValue", nil];
             case BDSKDate: 
             case BDSKAfterDate: 
             case BDSKBeforeDate: 

@@ -182,17 +182,7 @@
             properties = mutableProperties;
             group = [[BDSKScriptGroup alloc] initWithName:nil scriptPath:path scriptArguments:arguments scriptType:[[NSWorkspace sharedWorkspace] isAppleScriptFileAtPath:path] ? BDSKAppleScriptType : BDSKShellScriptType];
         } else if ([class isSubclassOfClass:[BDSKSearchGroup class]]) {
-            NSString *aType = BDSKSearchGroupEntrez;
-            NSDictionary *info = [properties objectForKey:@"scriptingServerInfo"];
-            if ([properties objectForKey:@"type"]) {
-                switch ([[info objectForKey:@"type"] unsignedIntValue]) {
-                    case BDSKScriptingSearchGroupEntrez: aType = BDSKSearchGroupEntrez; break;
-                    case BDSKScriptingSearchGroupZoom: aType = BDSKSearchGroupZoom; break;
-                    case BDSKScriptingSearchGroupISI: aType = BDSKSearchGroupISI; break;
-                    case BDSKScriptingSearchGroupDBLP: aType = BDSKSearchGroupDBLP; break;
-                    default: break;
-                }
-            }
+            NSString *aType = [properties objectForKey:@"scriptingServerType"] ?: BDSKSearchGroupEntrez;
             group = [[BDSKSearchGroup alloc] initWithServerInfo:[BDSKServerInfo defaultServerInfoWithType:aType] searchTerm:nil];
         } else if ([class isSubclassOfClass:[BDSKWebGroup class]]) {
             group = [[BDSKWebGroup alloc] init];

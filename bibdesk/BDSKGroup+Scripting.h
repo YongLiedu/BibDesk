@@ -49,13 +49,6 @@
 #import "BDSKLastImportGroup.h"
 #import "BDSKWebGroup.h"
 
-enum {
-    BDSKScriptingSearchGroupEntrez = 'Entr',
-    BDSKScriptingSearchGroupZoom = 'Zoom',
-    BDSKScriptingSearchGroupISI = 'ISI ',
-    BDSKScriptingSearchGroupDBLP = 'DBLP'
-};
-
 @class BDSKMacro, BibItem, BibAuthor, BDSKCondition;
 
 @interface BDSKGroup (Scripting)
@@ -163,7 +156,7 @@ enum {
 - (NSDictionary *)scriptingServerInfo;
 - (void)setScriptingServerInfo:(NSDictionary *)info;
 
-- (NSInteger)scriptingServerType;
+- (NSString *)scriptingServerType;
 
 - (NSString *)scriptingServerName;
 

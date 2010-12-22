@@ -429,24 +429,15 @@
     [self setSearchTerm:newSearchTerm];
 }
 
+- (NSString *)scriptingServerType {
+    return [self type];
+}
 
 - (NSDictionary *)scriptingServerInfo {
     BDSKServerInfo *serverInfo = [self serverInfo];
     NSMutableDictionary *info = [NSMutableDictionary dictionary];
-    BDSKServerType serverType = 0;
     
-    if ([serverInfo isEntrez])
-        serverType = BDSKScriptingSearchGroupEntrez;
-    else if ([serverInfo isZoom])
-        serverType = BDSKScriptingSearchGroupZoom;
-    else if ([serverInfo isISI])
-        serverType = BDSKScriptingSearchGroupISI;
-    else if ([serverInfo isDBLP])
-        serverType = BDSKScriptingSearchGroupDBLP;
-    else
-        return nil;
-    
-    [info setValue:[NSNumber numberWithInteger:serverType] forKey:@"type"];
+    [info setValue:[serverInfo type] forKey:@"type"];
     [info setValue:[serverInfo name] forKey:@"name"];
     [info setValue:[serverInfo database] forKey:@"database"];
     if ([serverInfo isZoom]) {
@@ -463,25 +454,7 @@
 }
 
 - (void)setScriptingServerInfo:(NSDictionary *)info {
-    NSString *serverType = [self type];
-     
-    switch ([[info objectForKey:@"type"] unsignedIntValue]) {
-        case BDSKScriptingSearchGroupEntrez:
-            serverType = BDSKSearchGroupEntrez;
-            break;
-        case BDSKScriptingSearchGroupZoom:
-            serverType = BDSKSearchGroupZoom;
-            break;
-        case BDSKScriptingSearchGroupISI:
-            serverType = BDSKSearchGroupISI;
-            break;
-        case BDSKScriptingSearchGroupDBLP:
-            serverType = BDSKSearchGroupDBLP;
-            break;
-        default:
-            break;
-    }
-    
+    NSString *serverType = [info objectForKey:@"type"] ?: [self type];
     BDSKMutableServerInfo *serverInfo = nil;
     NSString *serverName = [info valueForKey:@"name"];
     NSString *database = [info valueForKey:@"database"];
@@ -552,20 +525,6 @@
         [cmd setScriptErrorString:NSLocalizedString(@"Invalid server info.",@"Error description")];
     }
     [serverInfo release];
-}
-
-- (NSInteger)scriptingServerType {
-    NSString *type = [self type];
-    if ([type isEqualToString:BDSKSearchGroupEntrez])
-        return BDSKScriptingSearchGroupEntrez;
-    else if ([type isEqualToString:BDSKSearchGroupZoom])
-        return BDSKScriptingSearchGroupZoom;
-    else if ([type isEqualToString:BDSKSearchGroupISI])
-        return BDSKScriptingSearchGroupISI;
-    else if ([type isEqualToString:BDSKSearchGroupDBLP])
-        return BDSKScriptingSearchGroupDBLP;
-    else
-        return 0;
 }
 
 - (NSString *)scriptingServerName {
