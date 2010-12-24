@@ -46,9 +46,6 @@ enum {
 #pragma mark -
 
 // EncodingPopUpButton is a subclass of NSPopUpButton which provides the ability to automatically recompute its contents on changes to the encodings list. This allows sprinkling these around the app any have them automatically update themselves.  EncodingPopUpButtonCell is the corresponding cell. It would normally not be needed, but we really want to know when the cell's selectedItem is changed, as we want to prevent the last item ("Customize...") from being selected.
-@interface BDSKEncodingPopUpButtonCell : NSPopUpButtonCell
-@end
-
 @implementation BDSKEncodingPopUpButtonCell
 
 // Do not allow selecting the "Customize" item and the separator before it. (Note that the customize item can be chosen and an action will be sent, but the selection doesn't change to it.)

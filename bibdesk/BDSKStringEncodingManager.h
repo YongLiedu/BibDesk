@@ -48,6 +48,9 @@
 - (void)handleEncodingsListChanged:(NSNotification *)notification;
 @end
 
+@interface BDSKEncodingPopUpButtonCell : NSPopUpButtonCell
+@end
+
 
 @interface BDSKStringEncodingManager : NSObject {
     IBOutlet NSMatrix *encodingMatrix;

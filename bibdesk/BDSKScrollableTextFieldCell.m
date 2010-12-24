@@ -116,6 +116,18 @@
 	return self;
 }
 
+- (id)initWithCoder:(NSCoder *)coder {
+    if (self = [super initWithCoder:coder]) {
+		scrollStep = 0;
+		isLeftButtonHighlighted = NO;
+		isRightButtonHighlighted = NO;
+		isClipped = NO;
+		
+		[self stringHasChanged];
+    }
+    return self;
+}
+
 #pragma mark Actions and accessors
 
 - (IBAction)scrollForward:(id)sender {
