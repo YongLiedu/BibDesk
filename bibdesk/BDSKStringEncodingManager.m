@@ -87,13 +87,13 @@ enum {
             [newCell setFont:[[self cell] font]];
             [self setCell:newCell];
             [newCell release];
-
-            [self setAutoenablesItems:NO];
-            
-            defaultEncoding = [BDSKStringEncodingManager defaultEncoding];
-            
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleEncodingsListChanged:) name:BDSKEncodingsListChangedNotification object:nil];
         }
+
+        [self setAutoenablesItems:NO];
+        
+        defaultEncoding = [BDSKStringEncodingManager defaultEncoding];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleEncodingsListChanged:) name:BDSKEncodingsListChangedNotification object:nil];
     }
     return self;
 }
