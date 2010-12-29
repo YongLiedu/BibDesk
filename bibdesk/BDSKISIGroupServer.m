@@ -466,7 +466,7 @@ static NSString *nodeStringsForXPathJoinedByString(NSXMLNode *child, NSString *X
     NSArray *nodes = [child nodesForXPath:XPath error:NULL];
     NSString *toReturn = nil;
     if ([nodes count]) {
-        nodes = [nodes valueForKey:@"stringValuevalueForKey:@"];
+        nodes = [nodes valueForKey:@"stringValue"];
         toReturn = [nodes componentsJoinedByString:join];
     }
     return toReturn;
