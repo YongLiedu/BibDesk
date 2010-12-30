@@ -89,6 +89,7 @@
         CP = Address; 
         CT = Title; 
         CY = Address; 
+        DO = Doi; 
         ED = Editor; 
         IS = Number; 
         JA = Journal; 

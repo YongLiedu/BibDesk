@@ -150,12 +150,7 @@
 	NSString *oldString = nil;
     NSString *newString = nil;
 	
-    // most RIS uses IS for issue number
-    if([tag isEqualToString:@"IS"])
-        key = BDSKNumberString;
-	else
-        key = [[BDSKTypeManager sharedManager] fieldNameForRISTag:tag];
-	if(key == nil) key = [tag fieldName];
+    key = [[BDSKTypeManager sharedManager] fieldNameForRISTag:tag] ?: [tag fieldName];
 	oldString = [pubDict objectForKey:key];
 	
 	BOOL isAuthor = [key isPersonField];
