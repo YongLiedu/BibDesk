@@ -1,7 +1,7 @@
 // BDSKComplexString.m
 // Created by Michael McCracken, 2004
 /*
- This software is Copyright (c) 2004-2010
+ This software is Copyright (c) 2004-2011
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without

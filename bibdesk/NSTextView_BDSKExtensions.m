@@ -2,7 +2,7 @@
 
 //  Created by Michael McCracken on Thu Jul 18 2002.
 /*
- This software is Copyright (c) 2002-2010
+ This software is Copyright (c) 2002-2011
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
