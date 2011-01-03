@@ -90,10 +90,10 @@ static NSMutableArray *_finishedDownloads = nil;
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
-    if (nil == [url host] || NSOrderedSame != [[url host] isEqualToString:@"ieeexplore.ieee.org"])
+    if (nil == [url host] || NSOrderedSame != [[url host] caseInsensitiveCompare:@"ieeexplore.ieee.org"])
         return NO;
         
-	if ([[url path] isEqualToString:abstractPageURLPath] || [[url path] isEqualToString:searchResultPageURLPath])
+	if (NSOrderedSame == [[url path] caseInsensitiveCompare:abstractPageURLPath] || NSOrderedSame == [[url path] caseInsensitiveCompare:searchResultPageURLPath])
         return YES;
     
     return [[[xmlDocument rootElement] nodesForXPath:containsAbstractPlusLinkNode error:NULL] count] > 0;
@@ -169,7 +169,7 @@ static NSMutableArray *_finishedDownloads = nil;
     NSError *error = nil;    
     NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
     
-    if ([[url path] isEqualToString:abstractPageURLPath] == NO && [[url path] isEqualToString:searchResultPageURLPath] == NO) {
+    if ([[url path] caseInsensitiveCompare:abstractPageURLPath] != NSOrderedSame && [[url path] caseInsensitiveCompare:searchResultPageURLPath] != NSOrderedSame) {
         
         // parse all links on a TOC page
         
