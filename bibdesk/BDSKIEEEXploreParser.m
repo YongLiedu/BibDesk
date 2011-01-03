@@ -94,7 +94,7 @@ static NSMutableArray *_finishedDownloads = nil;
         return NO;
         
 	if ([[url path] isEqualToString:abstractPageURLPath] || [[url path] isEqualToString:searchResultPageURLPath])
-        return NO;
+        return YES;
     
     return [[[xmlDocument rootElement] nodesForXPath:containsAbstractPlusLinkNode error:NULL] count] > 0;
 }
