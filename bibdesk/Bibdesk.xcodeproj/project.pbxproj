@@ -76,7 +76,6 @@
 		CE0391910F612ED5001808EA /* sharing.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE0391900F612ED5001808EA /* sharing.tiff */; };
 		CE0391F90F6166FB001808EA /* importBadge.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE0391F80F6166FA001808EA /* importBadge.tiff */; };
 		CE03C0CB127D751D00F62F51 /* BDSKWebViewModalDialogController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE03C0C9127D751D00F62F51 /* BDSKWebViewModalDialogController.m */; };
-		CE044A4412667EB500CE55C4 /* BDSKDownloadManager.h in Headers */ = {isa = PBXBuildFile; fileRef = CE044A4212667EB500CE55C4 /* BDSKDownloadManager.h */; };
 		CE044A4512667EB500CE55C4 /* BDSKDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE044A4312667EB500CE55C4 /* BDSKDownloadManager.m */; };
 		CE04583D0FB6FBBF003CAF5D /* Scroller_Divider.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE04583B0FB6FBBF003CAF5D /* Scroller_Divider.tiff */; };
 		CE04583E0FB6FBBF003CAF5D /* Scroller_Background.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE04583C0FB6FBBF003CAF5D /* Scroller_Background.tiff */; };
@@ -2934,7 +2933,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				CE044A4412667EB500CE55C4 /* BDSKDownloadManager.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
