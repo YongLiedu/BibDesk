@@ -72,31 +72,31 @@ function doLoad() {
 						<br />
 						<span class="status">
 <!-- Localize text -->
-						<$status=0?>Downloading<?$status=1?>Finished<?$status=2?>Failed</$status?>
+						<$status=0?>T&eacute;l&eacute;chargement en cours<?$status=1?>Termin&eacute;<?$status=2?>&Eacute;chec</$status?>
 						</span>
 					</td>
 					<td>
 <!-- Localize values and titles -->
 						<$status=0?>
-						<input class="button" type="button" value="Cancel" title="Cancel download" onClick="cancelDownload(<$uniqueID/>)" />
+						<input class="button" type="button" value="Annuler" title="Annuler le t&eacute;l&eacute;chargement" onClick="cancelDownload(<$uniqueID/>)" />
 						<?$status?>
-						<input class="button" type="button" value="Remove" title="Remove download" onClick="removeDownload(<$uniqueID/>)" />
+						<input class="button" type="button" value="Supprimer" title="Supprimer le t&eacute;l&eacute;chargement" onClick="removeDownload(<$uniqueID/>)" />
 						</$status?>
 					</td>
 				</tr>
 				</$downloads>
 			</table>
 <!-- Localize value and title -->
-			<input class="clear" type="button" value="Clear" title="Remove all finished and failed downloads" onClick="clearDownloads()" />
+			<input class="clear" type="button" value="Effacer" title="Supprimer tous les t&eacute;l&eacute;chargements termin&eacute;s et annul&eacute;s" onClick="clearDownloads()" />
 		</form>
 		<?$downloads?>
 <!-- Localize text -->
-		<h1>No Downloads</h1>
+		<h1>Pas de t&eacute;l&eacute;chargement</h1>
 		</$downloads?>
 		<form class="prefs">
 <!-- Localize text -->
-		<input type="checkbox" onClick="downloads.removeFinishedDownloads = this.checked" <$removeFinishedDownloads?>checked</$removeFinishedDownloads?> />Automatically remove finished downloads<br />
-		<input type="checkbox" onClick="downloads.removeFailedDownloads = this.checked" <$removeFailedDownloads?>checked</$removeFailedDownloads?> />Automatically remove failed downloads
+		<input type="checkbox" onClick="downloads.removeFinishedDownloads = this.checked" <$removeFinishedDownloads?>checked</$removeFinishedDownloads?> />Effacer automatiquement les t&eacute;l&eacute;chargements termin&eacute;s<br />
+		<input type="checkbox" onClick="downloads.removeFailedDownloads = this.checked" <$removeFailedDownloads?>checked</$removeFailedDownloads?> />Effacer automatiquement les t&eacute;l&eacute;chargements qui ont &eacute;chou&eacute;
 		</form>
 		
 	</body>
