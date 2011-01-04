@@ -45,7 +45,7 @@
 				<string key="NSWindowContentMaxSize">{456, 637}</string>
 				<string key="NSWindowContentMinSize">{134.145, 10}</string>
 				<object class="NSView" key="NSWindowView" id="698076964">
-					<reference key="NSNextResponder"/>
+					<nil key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
 					<object class="NSMutableArray" key="NSSubviews">
 						<bool key="EncodedWithXMLCoder">YES</bool>
@@ -59,7 +59,6 @@
 									<int key="NSvFlags">290</int>
 									<string key="NSFrame">{{9, 14}, {255, 17}}</string>
 									<reference key="NSSuperview" ref="455039504"/>
-									<reference key="NSWindow"/>
 									<bool key="NSEnabled">YES</bool>
 									<object class="NSTextFieldCell" key="NSCell" id="655900585">
 										<int key="NSCellFlags">68288064</int>
@@ -94,14 +93,11 @@
 							</object>
 							<string key="NSFrameSize">{273, 39}</string>
 							<reference key="NSSuperview" ref="698076964"/>
-							<reference key="NSWindow"/>
 							<string key="NSClassName">BDSKBackgroundView</string>
 							<string key="NSExtension">NSView</string>
 						</object>
 					</object>
 					<string key="NSFrameSize">{273, 39}</string>
-					<reference key="NSSuperview"/>
-					<reference key="NSWindow"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
 				<string key="NSMinSize">{134.145, 32}</string>
@@ -246,9 +242,9 @@
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{84, 714}, {273, 39}}</string>
+					<string>{{63, 737}, {273, 39}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{84, 714}, {273, 39}}</string>
+					<string>{{63, 737}, {273, 39}}</string>
 					<boolean value="YES"/>
 					<boolean value="YES"/>
 					<boolean value="YES"/>
@@ -631,21 +627,21 @@
 				<object class="IBPartialClassDescription">
 					<string key="className">NSApplication</string>
 					<string key="superclassName">NSResponder</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="1055009556">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="298427774">
 						<string key="majorKey">IBFrameworkSource</string>
 						<string key="minorKey">AppKit.framework/Headers/NSApplication.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSApplication</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="873360589">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="777072523">
 						<string key="majorKey">IBFrameworkSource</string>
 						<string key="minorKey">AppKit.framework/Headers/NSApplicationScripting.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSApplication</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="774245529">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="938849539">
 						<string key="majorKey">IBFrameworkSource</string>
 						<string key="minorKey">AppKit.framework/Headers/NSColorPanel.h</string>
 					</object>
@@ -682,7 +678,7 @@
 				<object class="IBPartialClassDescription">
 					<string key="className">NSControl</string>
 					<string key="superclassName">NSView</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="994726225">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="981859209">
 						<string key="majorKey">IBFrameworkSource</string>
 						<string key="minorKey">AppKit.framework/Headers/NSControl.h</string>
 					</object>
@@ -698,7 +694,7 @@
 				<object class="IBPartialClassDescription">
 					<string key="className">NSMenu</string>
 					<string key="superclassName">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="465469491">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="90725086">
 						<string key="majorKey">IBFrameworkSource</string>
 						<string key="minorKey">AppKit.framework/Headers/NSMenu.h</string>
 					</object>
@@ -719,19 +715,19 @@
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSObject</string>
-					<reference key="sourceIdentifier" ref="1055009556"/>
+					<reference key="sourceIdentifier" ref="298427774"/>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSObject</string>
-					<reference key="sourceIdentifier" ref="873360589"/>
+					<reference key="sourceIdentifier" ref="777072523"/>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSObject</string>
-					<reference key="sourceIdentifier" ref="774245529"/>
+					<reference key="sourceIdentifier" ref="938849539"/>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSObject</string>
-					<reference key="sourceIdentifier" ref="994726225"/>
+					<reference key="sourceIdentifier" ref="981859209"/>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSObject</string>
@@ -770,7 +766,7 @@
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSObject</string>
-					<reference key="sourceIdentifier" ref="465469491"/>
+					<reference key="sourceIdentifier" ref="90725086"/>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSObject</string>
@@ -816,7 +812,7 @@
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="1004216696">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="562412882">
 						<string key="majorKey">IBFrameworkSource</string>
 						<string key="minorKey">AppKit.framework/Headers/NSView.h</string>
 					</object>
@@ -1191,7 +1187,7 @@
 				<object class="IBPartialClassDescription">
 					<string key="className">NSView</string>
 					<string key="superclassName">NSResponder</string>
-					<reference key="sourceIdentifier" ref="1004216696"/>
+					<reference key="sourceIdentifier" ref="562412882"/>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSWindow</string>
