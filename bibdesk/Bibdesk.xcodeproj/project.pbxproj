@@ -1282,8 +1282,8 @@
 		CEB5D6971072AE950001C135 /* French */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = French; path = French.lproj/TextImport.xib; sourceTree = "<group>"; };
 		CEB772E80A34529D00B8A299 /* NSAttributedString_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSAttributedString_BDSKExtensions.h; sourceTree = "<group>"; };
 		CEB772E90A34529D00B8A299 /* NSAttributedString_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSAttributedString_BDSKExtensions.m; sourceTree = "<group>"; };
-		CEB9D5CD126CF0A000C1FADB /* French */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = French; path = French.lproj/WebGroupDownloads.html; sourceTree = "<group>"; };
-		CEB9D5CE126CF0A400C1FADB /* German */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = German; path = German.lproj/WebGroupDownloads.html; sourceTree = "<group>"; };
+		CEB9D5CD126CF0A000C1FADB /* French */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = French; path = French.lproj/WebGroupDownloads.html; sourceTree = "<group>"; };
+		CEB9D5CE126CF0A400C1FADB /* German */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = German; path = German.lproj/WebGroupDownloads.html; sourceTree = "<group>"; };
 		CEBA63D50A7CA0B400588BB7 /* BDSKCrossrefFormatter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCrossrefFormatter.h; sourceTree = "<group>"; };
 		CEBA63D60A7CA0B400588BB7 /* BDSKCrossrefFormatter.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKCrossrefFormatter.m; sourceTree = "<group>"; };
 		CEBB8D8709C8B0D90074C79E /* Font.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Font.tiff; sourceTree = "<group>"; };
