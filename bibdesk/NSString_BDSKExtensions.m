@@ -1047,6 +1047,10 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return [selfUTI caseInsensitiveCompare:otherUTI];
 }
 
+- (BOOL)isCaseInsensitiveEqual:(NSString *)aString {
+    return [self caseInsensitiveCompare:aString] == NSOrderedSame;
+}
+
 #pragma mark -
 
 - (BOOL)booleanValue{

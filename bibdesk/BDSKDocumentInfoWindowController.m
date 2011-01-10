@@ -40,6 +40,7 @@
 #import "BibDocument.h"
 #import "NSDictionary_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "NSString_BDSKExtensions.h"
 
 
 @implementation BDSKDocumentInfoWindowController
@@ -199,7 +200,7 @@
 		}
         
         if([info objectForKey:object]){
-            if([key caseInsensitiveCompare:object] != NSOrderedSame){			
+            if([key isCaseInsensitiveEqual:object] == NO){			
                 [tv reloadData];
                 [tv selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
                 [tableView editColumn:0 row:row withEvent:nil select:YES];

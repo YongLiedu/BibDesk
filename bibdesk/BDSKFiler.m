@@ -45,6 +45,7 @@
 #import "BDSKLinkedFile.h"
 #import "BDSKPreferenceController.h"
 #import "BDSKFilerErrorController.h"
+#import "NSString_BDSKExtensions.h"
 
 #define BDSKFilerErrorDomain @"BDSKFilerErrorDomain"
 
@@ -346,7 +347,7 @@ static BDSKFiler *sharedFiler = nil;
                         }
                     }
                 }else if([self moveItemAtPath:resolvedPath toPath:resolvedNewPath error:NULL]){
-                    if([[resolvedPath pathExtension] caseInsensitiveCompare:@"pdf"] == NSOrderedSame){
+                    if([[resolvedPath pathExtension] isCaseInsensitiveEqual:@"pdf"]){
                         NSString *notesPath = [[resolvedPath stringByDeletingPathExtension] stringByAppendingPathExtension:@"skim"];
                         NSString *newNotesPath = [[resolvedNewPath stringByDeletingPathExtension] stringByAppendingPathExtension:@"skim"];
                         if([self fileExistsAtPath:notesPath] && [self fileExistsAtPath:newNotesPath] == NO){

@@ -43,6 +43,7 @@
 #import "BDSKBibTeXParser.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
+#import "NSString_BDSKExtensions.h"
 
 // private protocols for inter-thread messaging
 @protocol BDSKDBLPGroupServerMainThread <BDSKAsyncDOServerMainThread>
@@ -245,7 +246,7 @@ static void fixEEURL(BibItem *pub)
     NSNumber *endYear = [NSNumber numberWithInteger:[[[[[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar] autorelease] components:NSYearCalendarUnit fromDate:[NSDate date]] year]];
     
     NSArray *searchResults = nil;
-    if ([database caseInsensitiveCompare:@"authors"] == NSOrderedSame) {
+    if ([database isCaseInsensitiveEqual:@"authors"]) {
         BibAuthor *author = [BibAuthor authorWithName:searchTerm];
         BDSKDBLPAllPublicationsAuthorYear *invocation = [[BDSKDBLPAllPublicationsAuthorYear alloc] init];    
         [invocation setParameters:([author firstName] ?: @"")

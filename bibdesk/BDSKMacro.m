@@ -40,6 +40,7 @@
 #import "BDSKMacroResolver.h"
 #import "BDSKOwnerProtocol.h"
 #import "NSObject_BDSKExtensions.h"
+#import "NSString_BDSKExtensions.h"
 
 
 @implementation BDSKMacro
@@ -86,7 +87,7 @@
 - (BOOL)isEqual:(id)other {
     if ([other isMemberOfClass:[self class]] == NO)
         return NO;
-    return [[self name] caseInsensitiveCompare:[other name]] == NSOrderedSame && 
+    return [[self name] isCaseInsensitiveEqual:[other name]] && 
            [[self macroResolver] isEqual:[other macroResolver]];
 }
 

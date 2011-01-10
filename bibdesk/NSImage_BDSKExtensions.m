@@ -39,6 +39,7 @@
 #import "NSImage_BDSKExtensions.h"
 #import "NSBezierPath_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
+#import "NSString_BDSKExtensions.h"
 
 #define BDSKImageNamePreviewDisplayTextTemplate     @"BDSKPreviewDisplayText"
 #define BDSKImageNamePreviewDisplayFilesTemplate    @"BDSKPreviewDisplayFiles"
@@ -287,13 +288,13 @@
     NSString *scheme = [aURL scheme];
     OSType typeCode = kInternetLocationGenericIcon;
     
-    if([scheme caseInsensitiveCompare:@"http"] == NSOrderedSame || [scheme caseInsensitiveCompare:@"https"] == NSOrderedSame)
+    if([scheme isCaseInsensitiveEqual:@"http"] || [scheme isCaseInsensitiveEqual:@"https"])
         typeCode = kInternetLocationHTTPIcon;
-    else if([scheme caseInsensitiveCompare:@"ftp"] == NSOrderedSame)
+    else if([scheme isCaseInsensitiveEqual:@"ftp"])
         typeCode = kInternetLocationFTPIcon;
-    else if([scheme caseInsensitiveCompare:@"mailto"] == NSOrderedSame)
+    else if([scheme isCaseInsensitiveEqual:@"mailto"])
         typeCode = kInternetLocationMailIcon;
-    else if([scheme caseInsensitiveCompare:@"news"] == NSOrderedSame)
+    else if([scheme isCaseInsensitiveEqual:@"news"])
         typeCode = kInternetLocationNewsIcon;
     
     return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(typeCode)];

@@ -48,6 +48,7 @@
 #import "BDSKDBLPGroupServer.h"
 #import "BDSKGroup+Scripting.h"
 #import "BibItem.h"
+#import "NSString_BDSKExtensions.h"
 
 NSString *BDSKSearchGroupEntrez = @"entrez";
 NSString *BDSKSearchGroupZoom = @"zoom";
@@ -114,11 +115,11 @@ NSString *BDSKSearchGroupURLScheme = @"x-bdsk-search";
     [options setValue:[bdsksearchURL user] forKey:@"username"];
     
     if (aPort == nil) {
-        if ([aHost caseInsensitiveCompare:BDSKSearchGroupEntrez] == NSOrderedSame)
+        if ([aHost isCaseInsensitiveEqual:BDSKSearchGroupEntrez])
             aType = BDSKSearchGroupEntrez;
-        else if ([aHost caseInsensitiveCompare:BDSKSearchGroupISI] == NSOrderedSame)
+        else if ([aHost isCaseInsensitiveEqual:BDSKSearchGroupISI])
             aType = BDSKSearchGroupISI;
-        else if ([aHost caseInsensitiveCompare:BDSKSearchGroupDBLP] == NSOrderedSame)
+        else if ([aHost isCaseInsensitiveEqual:BDSKSearchGroupDBLP])
             aType = BDSKSearchGroupDBLP;
     }
     
@@ -127,22 +128,22 @@ NSString *BDSKSearchGroupURLScheme = @"x-bdsk-search";
         if (idx != NSNotFound && idx > 0) {
             NSString *key = [query substringToIndex:idx];
             NSString *value = [[query substringFromIndex:idx + 1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-            if ([key caseInsensitiveCompare:@"searchTerm"] == NSOrderedSame || [key caseInsensitiveCompare:@"term"] == NSOrderedSame) {
+            if ([key isCaseInsensitiveEqual:@"searchTerm"] || [key isCaseInsensitiveEqual:@"term"]) {
                 aSearchTerm = value;
-            } else if ([key caseInsensitiveCompare:@"name"] == NSOrderedSame) {
+            } else if ([key isCaseInsensitiveEqual:@"name"]) {
                 aName = value;
-            } else if ([key caseInsensitiveCompare:@"database"] == NSOrderedSame || [key caseInsensitiveCompare:@"db"] == NSOrderedSame) {
+            } else if ([key isCaseInsensitiveEqual:@"database"] || [key isCaseInsensitiveEqual:@"db"]) {
                 aDatabase = value;
             } else {
-                if ([key caseInsensitiveCompare:@"password"] == NSOrderedSame) {
+                if ([key isCaseInsensitiveEqual:@"password"]) {
                     key = @"password";
-                } else if ([key caseInsensitiveCompare:@"username"] == NSOrderedSame || [key caseInsensitiveCompare:@"user"] == NSOrderedSame) {
+                } else if ([key isCaseInsensitiveEqual:@"username"] || [key isCaseInsensitiveEqual:@"user"]) {
                     key = @"username";
-                } else if ([key caseInsensitiveCompare:@"recordSyntax"] == NSOrderedSame || [key caseInsensitiveCompare:@"syntax"] == NSOrderedSame) {
+                } else if ([key isCaseInsensitiveEqual:@"recordSyntax"] || [key isCaseInsensitiveEqual:@"syntax"]) {
                     key = @"recordSyntax";
-                } else if ([key caseInsensitiveCompare:@"resultEncoding"] == NSOrderedSame || [key caseInsensitiveCompare:@"encoding"] == NSOrderedSame) {
+                } else if ([key isCaseInsensitiveEqual:@"resultEncoding"] || [key isCaseInsensitiveEqual:@"encoding"]) {
                     key = @"resultEncoding";
-                } else if ([key caseInsensitiveCompare:@"removeDiacritics"] == NSOrderedSame) {
+                } else if ([key isCaseInsensitiveEqual:@"removeDiacritics"]) {
                     key = @"removeDiacritics";
                     if ([value boolValue])
                         value = @"YES";

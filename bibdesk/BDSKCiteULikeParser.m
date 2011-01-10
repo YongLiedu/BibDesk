@@ -39,12 +39,13 @@
 #import <WebKit/WebKit.h>
 #import "BibItem.h"
 #import "BDSKBibTeXParser.h"
+#import "NSString_BDSKExtensions.h"
 
 @implementation BDSKCiteULikeParser
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
-    if ([url host] == nil || [[url host] caseInsensitiveCompare:@"www.citeulike.org"] != NSOrderedSame){
+    if ([url host] == nil || [[url host] isCaseInsensitiveEqual:@"www.citeulike.org"] == NO){
         return NO;
     }
     

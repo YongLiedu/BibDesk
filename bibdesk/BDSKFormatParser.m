@@ -1052,9 +1052,9 @@ static NSDictionary *errorAttr = nil;
 				errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Specifier %%%C must be followed by a {'field'} name.", @"Error description"), specifier];
 				break;
 			}
-            if ([string caseInsensitiveCompare:BDSKCiteKeyString] == NSOrderedSame || [string caseInsensitiveCompare:@"Cite-Key"] == NSOrderedSame || [string caseInsensitiveCompare:@"Citekey"] == NSOrderedSame)
+            if ([string isCaseInsensitiveEqual:BDSKCiteKeyString] || [string isCaseInsensitiveEqual:@"Cite-Key"] || [string isCaseInsensitiveEqual:@"Citekey"])
 				string = BDSKCiteKeyString;
-			else if ([string caseInsensitiveCompare:BDSKPubTypeString] == NSOrderedSame)
+			else if ([string isCaseInsensitiveEqual:BDSKPubTypeString])
 				string = BDSKPubTypeString;
             else
                 string = [[self stringBySanitizingString:string forField:BDSKCiteKeyString] fieldName]; // cite-key sanitization is strict, so we use that for fieldnames

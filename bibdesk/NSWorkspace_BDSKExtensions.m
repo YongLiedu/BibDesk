@@ -39,6 +39,7 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import <Carbon/Carbon.h>
 #import "NSURL_BDSKExtensions.h"
+#import "NSString_BDSKExtensions.h"
 
 #define BDSKDefaultBrowserKey @"BDSKDefaultBrowserKey"
 
@@ -295,7 +296,7 @@
     NSMutableString *scriptString = nil;
     NSString *mailAppID = [(NSString *)LSCopyDefaultHandlerForURLScheme(CFSTR("mailto")) autorelease];
     
-    if ([@"com.microsoft.entourage" caseInsensitiveCompare:mailAppID] == NSOrderedSame) {
+    if ([@"com.microsoft.entourage" isCaseInsensitiveEqual:mailAppID]) {
         scriptString = [NSMutableString stringWithString:@"tell application \"Microsoft Entourage\"\n"];
         [scriptString appendString:@"activate\n"];
         [scriptString appendFormat:@"set m to make new draft window with properties {subject: \"%@\", visible: true}\n", subject ?: @""];
@@ -308,7 +309,7 @@
             [scriptString appendFormat:@"make new attachment with properties {file: POSIX file \"%@\"}\n", fileName];
         [scriptString appendString:@"end tell\n"];
         [scriptString appendString:@"end tell\n"];
-    } else if ([@"com.barebones.mailsmith" caseInsensitiveCompare:mailAppID] == NSOrderedSame) {
+    } else if ([@"com.barebones.mailsmith" isCaseInsensitiveEqual:mailAppID]) {
         scriptString = [NSMutableString stringWithString:@"tell application \"Mailsmith\"\n"];
         [scriptString appendString:@"activate\n"];
         [scriptString appendFormat:@"set m to make new message window with properties {subject: \"%@\", visible: true}\n", subject ?: @""];
@@ -321,7 +322,7 @@
             [scriptString appendFormat:@"make new enclosure with properties {file: POSIX file \"%@\"}\n", fileName];
         [scriptString appendString:@"end tell\n"];
         [scriptString appendString:@"end tell\n"];
-    } else if ([@"com.mailplaneapp.Mailplane" caseInsensitiveCompare:mailAppID] == NSOrderedSame) {
+    } else if ([@"com.mailplaneapp.Mailplane" isCaseInsensitiveEqual:mailAppID]) {
         scriptString = [NSMutableString stringWithString:@"tell application \"Mailplane\"\n"];
         [scriptString appendString:@"activate\n"];
         [scriptString appendFormat:@"set m to make new outgoing message with properties {subject: \"%@\", visible: true}\n", subject ?: @""];
@@ -334,7 +335,7 @@
             [scriptString appendFormat:@"make new mail attachment with properties {path: \"%@\"}\n", fileName];
         [scriptString appendString:@"end tell\n"];
         [scriptString appendString:@"end tell\n"];
-    } else if ([@"com.postbox-inc.postboxexpress" caseInsensitiveCompare:mailAppID] == NSOrderedSame) {
+    } else if ([@"com.postbox-inc.postboxexpress" isCaseInsensitiveEqual:mailAppID]) {
         scriptString = [NSMutableString stringWithString:@"tell application \"PostboxExpress\"\n"];
         [scriptString appendString:@"activate\n"];
         [scriptString appendFormat:@"send message subject \"%@\"", subject ?: @""];
@@ -346,7 +347,7 @@
             [scriptString appendFormat:@" attachment \"%@\"", [files objectAtIndex:0]];
         [scriptString appendString:@"\n"];
         [scriptString appendString:@"end tell\n"];
-    } else if ([@"com.postbox-inc.postbox" caseInsensitiveCompare:mailAppID] == NSOrderedSame) {
+    } else if ([@"com.postbox-inc.postbox" isCaseInsensitiveEqual:mailAppID]) {
         scriptString = [NSMutableString stringWithString:@"tell application \"Postbox\"\n"];
         [scriptString appendString:@"activate\n"];
         [scriptString appendFormat:@"send message subject \"%@\"", subject ?: @""];

@@ -42,6 +42,7 @@
 #import "NSError_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
 #import <AGRegex/AGRegex.h>
+#import "NSString_BDSKExtensions.h"
 
 // sometimes the link says AbstractPlus, sometimes it only says Abstract. This should catch both:
 static NSString *containsAbstractPlusLinkNode = @"//a[contains(lower-case(text()),'abstract')]";
@@ -90,10 +91,10 @@ static NSMutableArray *_finishedDownloads = nil;
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
-    if (nil == [url host] || NSOrderedSame != [[url host] caseInsensitiveCompare:@"ieeexplore.ieee.org"])
+    if (nil == [url host] || [[url host] isCaseInsensitiveEqual:@"ieeexplore.ieee.org"] == NO)
         return NO;
         
-	if (NSOrderedSame == [[url path] caseInsensitiveCompare:abstractPageURLPath] || NSOrderedSame == [[url path] caseInsensitiveCompare:searchResultPageURLPath])
+	if ([[url path] isCaseInsensitiveEqual:abstractPageURLPath] || [[url path] isCaseInsensitiveEqual:searchResultPageURLPath])
         return YES;
     
     return [[[xmlDocument rootElement] nodesForXPath:containsAbstractPlusLinkNode error:NULL] count] > 0;
@@ -169,7 +170,7 @@ static NSMutableArray *_finishedDownloads = nil;
     NSError *error = nil;    
     NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
     
-    if ([[url path] caseInsensitiveCompare:abstractPageURLPath] != NSOrderedSame && [[url path] caseInsensitiveCompare:searchResultPageURLPath] != NSOrderedSame) {
+    if ([[url path] isCaseInsensitiveEqual:abstractPageURLPath] == NO && [[url path] isCaseInsensitiveEqual:searchResultPageURLPath] == NO) {
         
         // parse all links on a TOC page
         

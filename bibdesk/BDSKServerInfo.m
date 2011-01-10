@@ -375,8 +375,8 @@ static NSSet *optionsSet = nil;
         
         // ZOOMConnection will consider any unrecognized string to be marc-8, but check here
         if (NO == isValid) {
-            if ([[*value stringByRemovingString:@"-"] caseInsensitiveCompare:@"marc8"] == NSOrderedSame || 
-                [[*value stringByRemovingString:@"-"] caseInsensitiveCompare:@"ansel"] == NSOrderedSame)
+            if ([[*value stringByRemovingString:@"-"] isCaseInsensitiveEqual:@"marc8"] || 
+                [[*value stringByRemovingString:@"-"] isCaseInsensitiveEqual:@"ansel"])
                 isValid = YES;
         }
     }

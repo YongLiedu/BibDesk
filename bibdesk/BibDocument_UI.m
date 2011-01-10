@@ -73,6 +73,7 @@
 #import "NSTableView_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKMacroResolver.h"
+#import "NSString_BDSKExtensions.h"
 
 #define BDSKDisableMigrationWarningKey @"BDSKDisableMigrationWarning"
 
@@ -1005,12 +1006,12 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
             continue;
         
         // invalidate groups that depend on inherited values
-        if ([key caseInsensitiveCompare:crossref] == NSOrderedSame)
+        if ([key isCaseInsensitiveEqual:crossref])
             [pub invalidateGroupNames];
         
         // change the crossrefs if we change the parent cite key
         if (oldKey) {
-            if ([oldKey caseInsensitiveCompare:crossref] == NSOrderedSame)
+            if ([oldKey isCaseInsensitiveEqual:crossref])
                 [pub setField:BDSKCrossrefString toValue:key];
             changeInfo.pub = pub;
             

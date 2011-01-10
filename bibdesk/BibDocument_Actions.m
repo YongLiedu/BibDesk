@@ -1522,7 +1522,7 @@ static BOOL changingColors = NO;
     for (BibItem *aPub in arrayOfPubs){
         NSString *newKey = [aPub suggestedCiteKey];
         NSString *crossref = [aPub valueOfField:BDSKCrossrefString inherit:NO];
-        if (crossref != nil && [crossref caseInsensitiveCompare:newKey] == NSOrderedSame) {
+        if (crossref != nil && [crossref isCaseInsensitiveEqual:newKey]) {
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Could not generate cite key",@"Message in alert dialog when failing to generate cite key") 
                                              defaultButton:nil
                                            alternateButton:nil

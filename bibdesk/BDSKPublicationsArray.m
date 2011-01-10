@@ -40,6 +40,7 @@
 #import "BDSKMultiValueDictionary.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
+#import "NSString_BDSKExtensions.h"
 
 
 @interface BDSKPublicationsArray (Private)
@@ -241,7 +242,7 @@
 		return NO;
     
 	for (BibItem *pub in publications) {
-		if ([key caseInsensitiveCompare:[pub valueOfField:BDSKCrossrefString inherit:NO]] == NSOrderedSame) {
+		if ([key isCaseInsensitiveEqual:[pub valueOfField:BDSKCrossrefString inherit:NO]]) {
 			return YES;
         }
 	}

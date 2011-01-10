@@ -41,12 +41,13 @@
 #import "BDSKBibTeXParser.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
+#import "NSString_BDSKExtensions.h"
 
 @implementation BDSKACMDLParser
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
-    if ([url host] == nil || [[url host] caseInsensitiveCompare:@"portal.acm.org"] != NSOrderedSame){
+    if ([url host] == nil || [[url host] isCaseInsensitiveEqual:@"portal.acm.org"] == NO){
         return NO;
     }
     

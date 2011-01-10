@@ -41,6 +41,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSCharacterSet_BDSKExtensions.h"
+#import "NSString_BDSKExtensions.h"
 
 // do not localized these strings
 NSString *BDSKTemplateRoleString = @"role";
@@ -272,7 +273,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     for (id aNode in [self exportTemplates]) {
         if ([aNode isLeaf] == NO && [aNode mainPageTemplateURL] != nil) {
             name = [aNode valueForKey:BDSKTemplateNameString];
-            if (name != nil && [fileType caseInsensitiveCompare:[aNode valueForKey:BDSKTemplateRoleString]] == NSOrderedSame)
+            if (name != nil && [fileType isCaseInsensitiveEqual:[aNode valueForKey:BDSKTemplateRoleString]])
                 return name;
         }
     }

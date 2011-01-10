@@ -75,7 +75,7 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
  Only accept the bibdesk:webgroup URL.
 */
 + (BOOL)canInitWithRequest:(NSURLRequest *)theRequest {
-	return [[[theRequest URL] scheme] caseInsensitiveCompare:BDSKBibDeskScheme] == NSOrderedSame;
+	return [[[theRequest URL] scheme] isCaseInsensitiveEqual:BDSKBibDeskScheme];
 }
 
 + (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request {
@@ -100,19 +100,19 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
     NSURL *theURL = [request URL];
     NSString *resourceSpecifier = [theURL resourceSpecifier];
 	
-    if ([WEBGROUP_SPECIFIER caseInsensitiveCompare:resourceSpecifier] == NSOrderedSame) {
+    if ([WEBGROUP_SPECIFIER isCaseInsensitiveEqual:resourceSpecifier]) {
         static NSData *welcomeHTMLData = nil;
         if (welcomeHTMLData == nil)
             welcomeHTMLData = [[self HTMLDataUsingTemplateFile:@"WebGroupStartPage" usingObject:[BDSKWebParser class]] copy];
         [self loadData:welcomeHTMLData MIMEType:@"text/html"];
-    } else if ([DOWNLOADS_SPECIFIER caseInsensitiveCompare:resourceSpecifier] == NSOrderedSame) {
+    } else if ([DOWNLOADS_SPECIFIER isCaseInsensitiveEqual:resourceSpecifier]) {
         NSData *data = [self HTMLDataUsingTemplateFile:@"WebGroupDownloads" usingObject:[BDSKDownloadManager sharedManager]];
         [self loadData:data MIMEType:@"text/html"];
     } else if ([resourceSpecifier hasCaseInsensitivePrefix:FILEICON_SPECIFIER]) {
         NSString *extension = [resourceSpecifier substringFromIndex:[FILEICON_SPECIFIER length]];
         NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFileType:extension];
         [self loadData:[icon TIFFRepresentation] MIMEType:@"image/tiff"];
-    } else if ([HELP_SPECIFIER caseInsensitiveCompare:[[resourceSpecifier pathComponents] firstObject]] == NSOrderedSame) {
+    } else if ([HELP_SPECIFIER isCaseInsensitiveEqual:[[resourceSpecifier pathComponents] firstObject]]) {
         // when there's no "//" the URL we get has percent escapes including in particular the # character, which would we don't want
         NSString *URLString = [NSString stringWithFormat:@"%@://%@", BDSKBibDeskScheme, [resourceSpecifier stringByReplacingPercentEscapes]];
         NSURLResponse *response = [[NSURLResponse alloc] initWithURL:theURL MIMEType:@"text/html" expectedContentLength:-1 textEncodingName:nil];
@@ -121,7 +121,7 @@ NSURL *BDSKBibDeskWebGroupURL = nil;
         [client URLProtocolDidFinishLoading:self];
         [response release];
         [redirectRequest release];
-    } else if ([HELP_SPECIFIER caseInsensitiveCompare:[theURL host]] == NSOrderedSame) {
+    } else if ([HELP_SPECIFIER isCaseInsensitiveEqual:[theURL host]]) {
         NSString *path = [theURL path];
         if ([path hasPrefix:@"/"])
             path = [path substringFromIndex:1];

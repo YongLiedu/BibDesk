@@ -47,6 +47,7 @@
 #import "BDSKPreferenceRecord.h"
 #import "BDSKTableView.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "NSString_BDSKExtensions.h"
 
 // this corresponds with the menu item order in the nib
 enum {
@@ -387,7 +388,7 @@ static NSSet *alwaysDisabledFields = nil;
             error = [NSString stringWithFormat:NSLocalizedString(@"The file \"%@\" does not exist.", @"Informative text in alert dialog"), object];
         } else if (isDir) {
             error = [NSString stringWithFormat:NSLocalizedString(@"\"%@\" is not a file.", @"Informative text in alert dialog"), object];
-        } else if ([extension caseInsensitiveCompare:@"bib"] != NSOrderedSame && [extension caseInsensitiveCompare:@"bst"] != NSOrderedSame) {
+        } else if ([extension isCaseInsensitiveEqual:@"bib"] == NO && [extension isCaseInsensitiveEqual:@"bst"] == NO) {
             error = [NSString stringWithFormat:NSLocalizedString(@"The file \"%@\" is neither a BibTeX bibliography file nor a BibTeX style file.", @"Informative text in alert dialog"), object];
         }
         if (error) {
@@ -425,7 +426,7 @@ static NSSet *alwaysDisabledFields = nil;
     for (NSString *file in fileNames) {
         NSString *extension = [file pathExtension];
         if ([fm fileExistsAtPath:[file stringByStandardizingPath]] == NO ||
-            ([extension caseInsensitiveCompare:@"bib"] != NSOrderedSame && [extension caseInsensitiveCompare:@"bst"] != NSOrderedSame))
+            ([extension isCaseInsensitiveEqual:@"bib"] == NO && [extension isCaseInsensitiveEqual:@"bst"] == NO))
             continue;
         [globalMacroFiles addObject:file];
     }

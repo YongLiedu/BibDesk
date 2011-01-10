@@ -40,13 +40,14 @@
 #import "BibItem.h"
 #import "BDSKBibTeXParser.h"
 #import <AGRegex/AGRegex.h>
+#import "NSString_BDSKExtensions.h"
 
 @implementation BDSKHubmedParser
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
-    if ([url host] == nil || [[url host] caseInsensitiveCompare:@"www.hubmed.org"] != NSOrderedSame || 
-        [[url path] caseInsensitiveCompare:@"/display.cgi"] != NSOrderedSame){
+    if ([url host] == nil || [[url host] isCaseInsensitiveEqual:@"www.hubmed.org"] == NO || 
+        [[url path] isCaseInsensitiveEqual:@"/display.cgi"] == NO){
         return NO;
     }
     

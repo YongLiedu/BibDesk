@@ -330,7 +330,7 @@ enum {
 
 - (NSString *)typeForContentsOfURL:(NSURL *)inAbsoluteURL error:(NSError **)outError {
     if (openType == BDSKOpenTemplate)
-        return [[[inAbsoluteURL path] pathExtension] caseInsensitiveCompare:@"rtf"] == NSOrderedSame ? BDSKRichTextTemplateDocumentType : BDSKTextTemplateDocumentType;
+        return [[[inAbsoluteURL path] pathExtension] isCaseInsensitiveEqual:@"rtf"] ? BDSKRichTextTemplateDocumentType : BDSKTextTemplateDocumentType;
     return [super typeForContentsOfURL:inAbsoluteURL error:outError];
 }
 

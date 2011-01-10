@@ -41,6 +41,7 @@
 #import "BDSKTypeManager.h"
 #import "NSArray_BDSKExtensions.h"
 #import "CFString_BDSKExtensions.h"
+#import "NSString_BDSKExtensions.h"
 
 
 @implementation BDSKCompletionManager
@@ -169,7 +170,7 @@ static id sharedManager = nil;
 	NSInteger i, count = [completions count];
 	for (i = 0; i < count; i++) {
         string = [completions objectAtIndex:i];
-		if ([[string stringByRemovingCurlyBraces] caseInsensitiveCompare:matchString]) {
+		if ([[string stringByRemovingCurlyBraces] isCaseInsensitiveEqual:matchString] == NO) {
             *idx = i;
 			break;
 		}

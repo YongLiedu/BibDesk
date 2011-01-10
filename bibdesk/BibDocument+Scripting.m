@@ -67,6 +67,7 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKServerInfo.h"
 #import "BDSKBibTeXParser.h"
+#import "NSString_BDSKExtensions.h"
 
 
 @implementation BibDocument (Scripting)
@@ -387,7 +388,7 @@
 
 - (BDSKGroup *)valueInScriptingGroupsWithName:(NSString *)name {
     for (BDSKGroup *group in [self scriptingGroups]) {
-        if ([[group stringValue] caseInsensitiveCompare:name] == NSOrderedSame)
+        if ([[group stringValue] isCaseInsensitiveEqual:name])
             return group;
     }
     return nil;
@@ -533,7 +534,7 @@
                 return group;
     } else {
         for (BDSKCategoryGroup *group in [groups categoryGroups])
-            if ([[group name] caseInsensitiveCompare:name] == NSOrderedSame)
+            if ([[group name] isCaseInsensitiveEqual:name])
                 return group;
     }
     return nil;
@@ -692,7 +693,7 @@
 
 - (BDSKGroup *)valueInLibraryGroupsWithName:(NSString *)name {
     BDSKGroup *group = [[self groups] libraryGroup];
-    return [[group name] caseInsensitiveCompare:name] == NSOrderedSame ? group : nil;
+    return [[group name] isCaseInsensitiveEqual:name] ? group : nil;
 }
 
 #pragma mark -
@@ -709,7 +710,7 @@
 
 - (BDSKGroup *)valueInLastImportGroupsWithName:(NSString *)name {
     BDSKGroup *group = [groups lastImportGroup];
-    return [[group name] caseInsensitiveCompare:name] == NSOrderedSame && [group count] ? group : nil;
+    return [[group name] isCaseInsensitiveEqual:name] && [group count] ? group : nil;
 }
 
 #pragma mark Properties

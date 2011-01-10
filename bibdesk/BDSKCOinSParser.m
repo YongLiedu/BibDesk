@@ -41,6 +41,7 @@
 #import <AGRegex/AGRegex.h>
 #import "NSXMLNode_BDSKExtensions.h"
 #import "BDSKLinkedFile.h"
+#import "NSString_BDSKExtensions.h"
 
 /*
  The COinS or Z3988 format is a microformat which is embedded in web pages to include bibliographic information there.
@@ -217,7 +218,7 @@
 			else if ([key isEqualToString:@"rft_id"] || [key isEqualToString:@"rft.identifier"]) { 
 				// these are most likely URLs or DOI type information
 				NSURL * URL = [NSURL URLWithString:value];
-				if (URL && ([@"http" caseInsensitiveCompare:[URL scheme]] == NSOrderedSame || [@"https" caseInsensitiveCompare:[URL scheme]] == NSOrderedSame)) {
+				if (URL && ([@"http" isCaseInsensitiveEqual:[URL scheme]] || [@"https" isCaseInsensitiveEqual:[URL scheme]])) {
                     // add http/https URLs to the FileView items only, rather than the Url field. This lets us process more than one of them and avoid adding links to library catalogue entries to the BibTeX record. I haven't seen other usable URL typese yet.
                     [files addObject:[BDSKLinkedFile linkedFileWithURL:URL delegate:nil]];
 				}

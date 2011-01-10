@@ -538,7 +538,7 @@
             NSString *extension = [file pathExtension];
             file = [file stringByStandardizingPath];
             if ([fm fileExistsAtPath:file] == NO ||
-                ([extension caseInsensitiveCompare:@"bib"] != NSOrderedSame && [extension caseInsensitiveCompare:@"bst"] != NSOrderedSame))
+                ([extension isCaseInsensitiveEqual:@"bib"] == NO && [extension isCaseInsensitiveEqual:@"bst"] == NO))
                 continue;
             NSString *fileStr = [NSString stringWithContentsOfFile:file encoding:0 guessEncoding:YES];
             if (fileStr != nil)

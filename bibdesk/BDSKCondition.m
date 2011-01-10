@@ -280,9 +280,9 @@ static char BDSKConditionObservationContext;
                 value = [NSString stringWithFormat:@"%C%@%C", 0x1E, stringValue, 0x1E];
             } else {
                 if (comparison == BDSKEqual) 
-                    return ([value caseInsensitiveCompare:itemValue] == NSOrderedSame);
+                    return ([value isCaseInsensitiveEqual:itemValue]);
                 else if (comparison == BDSKNotEqual) 
-                    return ([value caseInsensitiveCompare:itemValue] != NSOrderedSame);
+                    return ([value isCaseInsensitiveEqual:itemValue] == NO);
             }
         } 
         

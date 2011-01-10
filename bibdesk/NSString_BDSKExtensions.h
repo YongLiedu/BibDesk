@@ -375,6 +375,8 @@ An inline buffer is used for speed in accessing each character.
 */
 - (NSComparisonResult)UTICompare:(NSString *)other basePath:(NSString *)basePath;
 
+- (BOOL)isCaseInsensitiveEqual:(NSString *)aString;
+
 #pragma mark -
 
 /*!

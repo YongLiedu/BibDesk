@@ -912,7 +912,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 	newKey = [publication suggestedCiteKey];
     
     NSString *crossref = [publication valueOfField:BDSKCrossrefString inherit:NO];
-    if (crossref != nil && [crossref caseInsensitiveCompare:newKey] == NSOrderedSame) {
+    if (crossref != nil && [crossref isCaseInsensitiveEqual:newKey]) {
         NSAlert *nsAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Could not generate cite key", @"Message in alert dialog when failing to generate cite key") 
                                          defaultButton:nil
                                        alternateButton:nil
@@ -2285,8 +2285,8 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 	BibItem *sender = (BibItem *)[notification object];
 	NSString *crossref = [publication valueOfField:BDSKCrossrefString inherit:NO];
 	BOOL parentDidChange = (crossref != nil && 
-							([crossref caseInsensitiveCompare:[sender citeKey]] == NSOrderedSame || 
-							 [crossref caseInsensitiveCompare:[userInfo objectForKey:BDSKBibItemOldValueKey]] == NSOrderedSame));
+							([crossref isCaseInsensitiveEqual:[sender citeKey]] || 
+							 [crossref isCaseInsensitiveEqual:[userInfo objectForKey:BDSKBibItemOldValueKey]]));
 	
     // If it is not our item or his crossref parent, we don't care, but our parent may have changed his cite key
 	if (sender != publication && NO == parentDidChange) {
@@ -2425,7 +2425,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 	
 	if ([NSString isEmptyString:crossref] == NO) {
         for (id pub in [[notification userInfo] objectForKey:BDSKDocumentPublicationsKey]) {
-            if ([crossref caseInsensitiveCompare:[pub valueForKey:@"citeKey"]] == NSOrderedSame) {
+            if ([crossref isCaseInsensitiveEqual:[pub valueForKey:@"citeKey"]]) {
                 // changes in the parent cannot change the field names, as custom fields are never inherited
                 [self reloadTable];
                 break;

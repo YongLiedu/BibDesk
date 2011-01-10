@@ -400,9 +400,9 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 		return YES;
     
     // cite key and type should be compared case-insensitively from BibTeX's perspective
-	if ([[self citeKey] caseInsensitiveCompare:[aBI citeKey]] != NSOrderedSame)
+	if ([[self citeKey] isCaseInsensitiveEqual:[aBI citeKey]] == NO)
 		return NO;
-	if ([[self pubType] caseInsensitiveCompare:[aBI pubType]] != NSOrderedSame)
+	if ([[self pubType] isCaseInsensitiveEqual:[aBI pubType]] == NO)
 		return NO;
 	
 	// compare only the standard fields; are these all we should compare?
@@ -437,7 +437,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 		return [NSString isEmptyString:crossref2];
 	else if ([NSString isEmptyString:crossref2])
 		return NO;
-	return ([crossref1 caseInsensitiveCompare:crossref2] == NSOrderedSame);
+	return ([crossref1 isCaseInsensitiveEqual:crossref2]);
 }
 
 - (BOOL)isEquivalentToItem:(BibItem *)aBI{ 
@@ -445,7 +445,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 		return YES;
     
     // type should be compared case-insensitively from BibTeX's perspective
-	if ([[self pubType] caseInsensitiveCompare:[aBI pubType]] != NSOrderedSame)
+	if ([[self pubType] isCaseInsensitiveEqual:[aBI pubType]] == NO)
 		return NO;
 	
 	// compare only the standard fields; are these all we should compare?
@@ -479,7 +479,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 		return [NSString isEmptyString:crossref2];
 	else if ([NSString isEmptyString:crossref2])
 		return NO;
-	return ([crossref1 caseInsensitiveCompare:crossref2] == NSOrderedSame);
+	return ([crossref1 isCaseInsensitiveEqual:crossref2]);
 }
 
 - (BOOL)isIdenticalToItem:(BibItem *)aBI{ 
@@ -1080,7 +1080,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 - (NSInteger)canSetCrossref:(NSString *)aCrossref andCiteKey:(NSString *)aCiteKey{
     NSInteger errorCode = BDSKNoCrossrefError;
     if ([NSString isEmptyString:aCrossref] == NO) {
-        if ([aCiteKey caseInsensitiveCompare:aCrossref] == NSOrderedSame)
+        if ([aCiteKey isCaseInsensitiveEqual:aCrossref])
             errorCode = BDSKSelfCrossrefError;
         else if ([NSString isEmptyString:[[[owner publications] itemForCiteKey:aCrossref] valueOfField:BDSKCrossrefString inherit:NO]] == NO)
             errorCode = BDSKChainCrossrefError;
@@ -3007,7 +3007,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 			foundToken = [scanner scanUpToString:@" and " intoString:&token];
 		if(foundToken){
 			token = [token stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet];
-			if([NSString isEmptyString:token] == NO && [token caseInsensitiveCompare:groupName] != NSOrderedSame){
+			if([NSString isEmptyString:token] == NO && [token isCaseInsensitiveEqual:groupName] == NO){
 				[string appendString:lastDelimiter];
 				[string appendString:token];
 				addedToken = YES;
@@ -3133,7 +3133,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 			token = [token stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet];
 			if([NSString isEmptyString:token] == NO){
 				[string appendString:lastDelimiter];
-				if([token caseInsensitiveCompare:groupName] == NSOrderedSame)
+				if([token isCaseInsensitiveEqual:groupName])
 					[string appendString:newGroupName];
 				else
 					[string appendString:token];

@@ -54,7 +54,7 @@ static NSString *normalizedKey(NSString *key) {
         normKey = key;
     } else {
         for (NSString *specialKey in specialKeys) {
-            if ([specialKey caseInsensitiveCompare:key] == NSOrderedSame) {
+            if ([specialKey isCaseInsensitiveEqual:key]) {
                 normKey = specialKey;
                 break;
             }

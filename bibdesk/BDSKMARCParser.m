@@ -342,7 +342,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
             subValue = [NSString stringWithFormat:@"%@ and %@", tmpValue, subValue];
         }else if([subTag isEqualToString:MARCRelatorSubTag]){
             // this is the person role, see if it is an editor
-            if([subValue caseInsensitiveCompare:@"editor"] != NSOrderedSame || tmpValue == nil)
+            if([subValue isCaseInsensitiveEqual:@"editor"] == NO || tmpValue == nil)
                 return;
             NSRange range = [tmpValue rangeOfString:@" and " options:NSBackwardsSearch];
             if(range.location == NSNotFound){

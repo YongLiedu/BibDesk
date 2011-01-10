@@ -46,6 +46,7 @@
 #import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
 #import "NSError_BDSKExtensions.h"
+#import "NSString_BDSKExtensions.h"
 
 NSString *BDSKMacroResolverTypeKey = @"type";
 NSString *BDSKMacroResolverMacroKey = @"macro";
@@ -160,7 +161,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
         
         NSString *aMacro = [node value];
         
-        if ([aMacro caseInsensitiveCompare:macro] == NSOrderedSame)
+        if ([aMacro isCaseInsensitiveEqual:macro])
             return YES;
         
         NSString *aString = dictionary ? [dictionary objectForKey:aMacro] : [self valueOfMacro:aMacro];
@@ -359,9 +360,9 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
         NSString *fileContent = [NSString stringWithContentsOfFile:file encoding:0 guessEncoding:YES];
         NSDictionary *macroDefs = nil;
         if (fileContent == nil) continue;
-        if ([[file pathExtension] caseInsensitiveCompare:@"bib"] == NSOrderedSame)
+        if ([[file pathExtension] isCaseInsensitiveEqual:@"bib"])
             macroDefs = [BDSKBibTeXParser macrosFromBibTeXString:fileContent macroResolver:nil];
-        else if ([[file pathExtension] caseInsensitiveCompare:@"bst"] == NSOrderedSame)
+        else if ([[file pathExtension] isCaseInsensitiveEqual:@"bst"])
             macroDefs = [BDSKBibTeXParser macrosFromBibTeXStyle:fileContent macroResolver:nil];
         else continue;
         if (macroDefs != nil) {

@@ -79,6 +79,7 @@
 #import "BDSKAppController.h"
 #import "BDSKFileContentSearchController.h"
 #import "NSEvent_BDSKExtensions.h"
+#import "NSString_BDSKExtensions.h"
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
 
@@ -787,7 +788,7 @@
                 NSArray *filenames = [pboard propertyListForType:NSFilenamesPboardType];
                 if ([filenames count] == 1) {
                     NSString *file = [filenames lastObject];
-                    if([[file pathExtension] caseInsensitiveCompare:@"aux"] == NSOrderedSame)
+                    if([[file pathExtension] isCaseInsensitiveEqual:@"aux"])
                         return [self selectItemsInAuxFileAtPath:file];
                 }
             }
