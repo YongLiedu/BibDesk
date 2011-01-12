@@ -161,7 +161,7 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
 }
 
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSCancelButton)
+    if (returnCode == NSFileHandlingPanelCancelButton)
         return;
     
     BDAlias *alias = [BDAlias aliasWithURL:[sheet URL]];

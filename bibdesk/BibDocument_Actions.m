@@ -1065,7 +1065,7 @@ static BOOL changingColors = NO;
 }
 
 - (void)chooseLinkedFilePanelDidEnd:(NSOpenPanel *)oPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSOKButton) {
+    if (returnCode == NSFileHandlingPanelOKButton) {
         BibItem *publication = nil;
         if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
             NSArray *selPubs = [self selectedPublications];
@@ -1852,7 +1852,7 @@ static BOOL changingColors = NO;
 }
 
 - (void)chooseAuxPanelDidEnd:(NSOpenPanel *)openPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSCancelButton)
+    if (returnCode == NSFileHandlingPanelCancelButton)
         return;
     
 	NSString *path = [[openPanel filenames] objectAtIndex:0];

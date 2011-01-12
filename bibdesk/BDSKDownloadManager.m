@@ -177,7 +177,7 @@ static id sharedManager = nil;
 	
     // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
     NSInteger returnCode = [sPanel runModalForDirectory:nil file:filename];
-    if (returnCode == NSOKButton)
+    if (returnCode == NSFileHandlingPanelOKButton)
         [URLDownload setDestination:[sPanel filename] allowOverwrite:YES];
     else
         [URLDownload cancel];

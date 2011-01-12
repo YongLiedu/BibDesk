@@ -781,7 +781,7 @@
     // this is the initial file load, the main window is not yet there
     NSWindow *docWindow = [(NSWindow *)contextInfo autorelease];
     
-    if (returnCode == NSOKButton) {
+    if (returnCode == NSFileHandlingPanelOKButton) {
         NSString *fileName = [sheet filename];
         // first try to parse the file
         if([document addPublicationsFromFile:fileName verbose:NO error:NULL]){
@@ -804,7 +804,7 @@
 }
 	
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if(returnCode == NSOKButton){
+    if(returnCode == NSFileHandlingPanelOKButton){
         NSURL *url = [[sheet URLs] lastObject];
 		NSTextStorage *text = [sourceTextView textStorage];
 		NSLayoutManager *layoutManager = [[text layoutManagers] objectAtIndex:0];
@@ -872,7 +872,7 @@
 
 - (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     
-	if (returnCode == NSOKButton) {
+	if (returnCode == NSFileHandlingPanelOKButton) {
 		if ([[[[webView mainFrame] dataSource] data] writeToFile:[sheet filename] atomically:YES]) {
 			NSURL *fileURL = [NSURL fileURLWithPath:[sheet filename]];
 			
@@ -1081,7 +1081,7 @@
 	
     // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
     NSInteger returnCode = [sPanel runModalForDirectory:nil file:filename];
-    if (returnCode == NSOKButton) {
+    if (returnCode == NSFileHandlingPanelOKButton) {
         [download setDestination:[sPanel filename] allowOverwrite:YES];
     } else {
         [self cancelDownload];

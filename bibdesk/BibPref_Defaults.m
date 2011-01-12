@@ -533,7 +533,7 @@ static NSSet *alwaysDisabledFields = nil;
 
 - (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(NSInteger)returnCode contextInfo:(void  *)contextInfo{
     NSString *bundleID;
-    if (returnCode == NSOKButton)
+    if (returnCode == NSFileHandlingPanelOKButton)
         bundleID = [[NSBundle bundleWithPath:[panel filename]] bundleIdentifier];
     else
         bundleID = [[sud dictionaryForKey:BDSKDefaultViewersKey] objectForKey:@"pdf"];
@@ -616,7 +616,7 @@ static NSSet *alwaysDisabledFields = nil;
 }
 
 - (void)addGlobalMacroFilePanelDidEnd:(NSOpenPanel *)openPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if(returnCode == NSCancelButton)
+    if(returnCode == NSFileHandlingPanelCancelButton)
         return;
     
     [globalMacroFiles addNonDuplicateObjectsFromArray:[openPanel filenames]];

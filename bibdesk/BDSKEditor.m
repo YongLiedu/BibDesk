@@ -588,7 +588,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 
 - (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
 
-    if(returnCode == NSOKButton){
+    if(returnCode == NSFileHandlingPanelOKButton){
         NSUInteger anIndex = (NSUInteger)contextInfo;
         NSURL *aURL = [[sheet URLs] objectAtIndex:0];
         BOOL shouldAutoFile = [disableAutoFileButton state] == NSOffState && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey];
@@ -1759,7 +1759,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         [sPanel setCanSelectHiddenExtension:YES];
         
         // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
-        if (NSOKButton == [sPanel runModalForDirectory:nil file:filename])
+        if (NSFileHandlingPanelOKButton == [sPanel runModalForDirectory:nil file:filename])
             fileURL = [sPanel URL];
     }
     return fileURL;

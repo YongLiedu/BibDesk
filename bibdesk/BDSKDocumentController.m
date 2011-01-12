@@ -193,7 +193,7 @@ enum {
     NSInteger result = [super runModalOpenPanel:openPanel forTypes:extensions];
     
     if (accessoryController) {
-        if (result == NSOKButton) {
+        if (result == NSFileHandlingPanelOKButton) {
             lastSelectedEncoding = [accessoryController encoding];
             
             if (openType == BDSKOpenUsingFilter) {

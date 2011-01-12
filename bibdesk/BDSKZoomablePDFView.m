@@ -147,7 +147,7 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.0, 0.1, 0.2, 0.25, 0.35, 0.5, 
 - (void)saveDocumentSheetDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode  contextInfo:(void  *)contextInfo;
 {
     NSError *error = nil;
-    if(returnCode == NSOKButton){
+    if(returnCode == NSFileHandlingPanelOKButton){
         // -[PDFDocument writeToURL:] returns YES even if you don't have write permission, so we'll use NSData rdar://problem/4475062
         NSData *data = [[self document] dataRepresentation];
         

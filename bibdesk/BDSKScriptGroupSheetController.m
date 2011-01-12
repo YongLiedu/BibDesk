@@ -136,7 +136,7 @@
 }
 
 - (void)chooseScriptPathPanelDidEnd:(NSOpenPanel *)oPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSOKButton) {
+    if (returnCode == NSFileHandlingPanelOKButton) {
         NSURL *url = [[oPanel URLs] firstObject];
         [self setPath:[url path]];
     }

@@ -258,7 +258,7 @@
 - (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(NSInteger)returnCode contextInfo:(BDSKTemplate *)aNode
 {
     NSURL *fileURL = [[panel URLs] lastObject];
-    if(NSOKButton == returnCode && nil != fileURL){
+    if(NSFileHandlingPanelOKButton == returnCode && nil != fileURL){
         // this will set the name property
         [aNode setValue:fileURL forKey:BDSKTemplateFileURLString];
     }

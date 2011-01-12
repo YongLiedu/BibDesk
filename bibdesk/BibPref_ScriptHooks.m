@@ -62,7 +62,7 @@
 }
 
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSCancelButton)
+    if (returnCode == NSFileHandlingPanelCancelButton)
         return;
     
 	NSString *path = [[sheet filenames] objectAtIndex: 0];

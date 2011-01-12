@@ -107,7 +107,7 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
 }
 
 - (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-	if (returnCode == NSOKButton)
+	if (returnCode == NSFileHandlingPanelOKButton)
 		[[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[self URLsFromPathsAndDirectories:[panel filenames]]];
 }
 

@@ -182,7 +182,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-	if (returnCode == NSOKButton) {
+	if (returnCode == NSFileHandlingPanelOKButton) {
 		NSString *path = [[sheet filenames] objectAtIndex: 0];
 		[sud setObject:path forKey:BDSKPapersFolderPathKey];
 	}

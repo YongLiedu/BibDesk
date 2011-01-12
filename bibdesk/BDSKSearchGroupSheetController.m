@@ -300,7 +300,7 @@
 
 - (void)resetAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 {
-    if (returnCode == NSOKButton) {
+    if (returnCode == NSAlertDefaultReturn) {
         [[BDSKSearchGroupServerManager sharedManager] resetServers];
         [self reloadServersSelectingServerNamed:DEFAULT_SERVER_NAME];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchGroupServersDidChangeNotification object:self];
