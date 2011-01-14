@@ -980,7 +980,7 @@
 									<reference key="NSControlView" ref="845438608"/>
 									<int key="NSButtonFlags">1211912703</int>
 									<int key="NSButtonFlags2">2</int>
-									<object class="NSCustomResource" key="NSNormalImage" id="11025409">
+									<object class="NSCustomResource" key="NSNormalImage" id="586766456">
 										<string key="NSClassName">NSImage</string>
 										<string key="NSResourceName">NSSwitch</string>
 									</object>
@@ -1018,7 +1018,7 @@
 									<reference key="NSControlView" ref="303204111"/>
 									<int key="NSButtonFlags">1211912703</int>
 									<int key="NSButtonFlags2">2</int>
-									<reference key="NSNormalImage" ref="11025409"/>
+									<reference key="NSNormalImage" ref="586766456"/>
 									<reference key="NSAlternateImage" ref="871172050"/>
 									<string key="NSAlternateContents"/>
 									<string key="NSKeyEquivalent"/>

@@ -2,13 +2,13 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1050</int>
-		<string key="IBDocument.SystemVersion">10F569</string>
-		<string key="IBDocument.InterfaceBuilderVersion">804</string>
-		<string key="IBDocument.AppKitVersion">1038.29</string>
-		<string key="IBDocument.HIToolboxVersion">461.00</string>
+		<string key="IBDocument.SystemVersion">10J567</string>
+		<string key="IBDocument.InterfaceBuilderVersion">823</string>
+		<string key="IBDocument.AppKitVersion">1038.35</string>
+		<string key="IBDocument.HIToolboxVersion">462.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
-			<string key="NS.object.0">804</string>
+			<string key="NS.object.0">823</string>
 		</object>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -588,7 +588,7 @@
 														<reference ref="604771515"/>
 														<object class="NSMenuItem" id="622198767">
 															<reference key="NSMenu" ref="1028951569"/>
-															<string key="NSTitle">Item2</string>
+															<string key="NSTitle">Item1</string>
 															<string key="NSKeyEquiv"/>
 															<int key="NSKeyEquivModMask">1048576</int>
 															<int key="NSMnemonicLoc">2147483647</int>
@@ -868,7 +868,7 @@
 																			<reference key="NSControlView" ref="587477429"/>
 																			<int key="NSButtonFlags">1211912703</int>
 																			<int key="NSButtonFlags2">0</int>
-																			<object class="NSCustomResource" key="NSNormalImage" id="867907599">
+																			<object class="NSCustomResource" key="NSNormalImage" id="23013197">
 																				<string key="NSClassName">NSImage</string>
 																				<string key="NSResourceName">NSRadioButton</string>
 																			</object>
@@ -890,7 +890,7 @@
 																			<reference key="NSControlView" ref="587477429"/>
 																			<int key="NSButtonFlags">1211912703</int>
 																			<int key="NSButtonFlags2">0</int>
-																			<reference key="NSNormalImage" ref="867907599"/>
+																			<reference key="NSNormalImage" ref="23013197"/>
 																			<reference key="NSAlternateImage" ref="443150369"/>
 																			<string key="NSAlternateContents"/>
 																			<int key="NSPeriodicDelay">400</int>
@@ -904,7 +904,7 @@
 																			<reference key="NSControlView" ref="587477429"/>
 																			<int key="NSButtonFlags">1211912703</int>
 																			<int key="NSButtonFlags2">0</int>
-																			<reference key="NSNormalImage" ref="867907599"/>
+																			<reference key="NSNormalImage" ref="23013197"/>
 																			<reference key="NSAlternateImage" ref="443150369"/>
 																			<string key="NSAlternateContents"/>
 																			<int key="NSPeriodicDelay">400</int>
@@ -922,7 +922,7 @@
 																		<reference key="NSSupport" ref="187092848"/>
 																		<int key="NSButtonFlags">1211912703</int>
 																		<int key="NSButtonFlags2">0</int>
-																		<reference key="NSNormalImage" ref="867907599"/>
+																		<reference key="NSNormalImage" ref="23013197"/>
 																		<reference key="NSAlternateImage" ref="443150369"/>
 																		<string key="NSAlternateContents"/>
 																		<int key="NSPeriodicDelay">400</int>
