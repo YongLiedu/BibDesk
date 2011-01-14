@@ -2,10 +2,10 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1050</int>
-		<string key="IBDocument.SystemVersion">10H574</string>
+		<string key="IBDocument.SystemVersion">10J567</string>
 		<string key="IBDocument.InterfaceBuilderVersion">823</string>
 		<string key="IBDocument.AppKitVersion">1038.35</string>
-		<string key="IBDocument.HIToolboxVersion">461.00</string>
+		<string key="IBDocument.HIToolboxVersion">462.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
 			<string key="NS.object.0">823</string>
@@ -33,7 +33,7 @@
 				<string key="NSClassName">NSApplication</string>
 			</object>
 			<object class="NSCustomView" id="532508739">
-				<reference key="NSNextResponder"/>
+				<nil key="NSNextResponder"/>
 				<int key="NSvFlags">256</int>
 				<object class="NSMutableArray" key="NSSubviews">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -42,7 +42,6 @@
 						<int key="NSvFlags">258</int>
 						<string key="NSFrame">{{176, 6}, {225, 26}}</string>
 						<reference key="NSSuperview" ref="532508739"/>
-						<reference key="NSWindow"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSPopUpButtonCell" key="NSCell" id="331880758">
 							<int key="NSCellFlags">-2076049856</int>
@@ -99,7 +98,6 @@
 						<int key="NSvFlags">256</int>
 						<string key="NSFrame">{{13, 12}, {157, 17}}</string>
 						<reference key="NSSuperview" ref="532508739"/>
-						<reference key="NSWindow"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSTextFieldCell" key="NSCell" id="167455718">
 							<int key="NSCellFlags">67239424</int>
@@ -129,8 +127,6 @@
 					</object>
 				</object>
 				<string key="NSFrameSize">{414, 40}</string>
-				<reference key="NSSuperview"/>
-				<reference key="NSWindow"/>
 				<object class="NSMutableString" key="NSClassName">
 					<characters key="NS.bytes">NSView</characters>
 				</object>
@@ -493,7 +489,7 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{63, 630}, {414, 40}}</string>
+					<string>{{105, 690}, {400, 40}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -536,7 +532,7 @@
 				<object class="IBPartialClassDescription">
 					<string key="className">BDSKEncodingPopUpButton</string>
 					<string key="superclassName">NSPopUpButton</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="97829740">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="38035039">
 						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">BDSKStringEncodingManager.h</string>
 					</object>
@@ -544,7 +540,7 @@
 				<object class="IBPartialClassDescription">
 					<string key="className">BDSKEncodingPopUpButtonCell</string>
 					<string key="superclassName">NSPopUpButtonCell</string>
-					<reference key="sourceIdentifier" ref="97829740"/>
+					<reference key="sourceIdentifier" ref="38035039"/>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">BDSKOpenAccessoryViewController</string>

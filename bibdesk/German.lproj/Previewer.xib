@@ -2,10 +2,10 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1050</int>
-		<string key="IBDocument.SystemVersion">10F569</string>
-		<string key="IBDocument.InterfaceBuilderVersion">804</string>
-		<string key="IBDocument.AppKitVersion">1038.29</string>
-		<string key="IBDocument.HIToolboxVersion">461.00</string>
+		<string key="IBDocument.SystemVersion">10J567</string>
+		<string key="IBDocument.InterfaceBuilderVersion">823</string>
+		<string key="IBDocument.AppKitVersion">1038.35</string>
+		<string key="IBDocument.HIToolboxVersion">462.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<bool key="EncodedWithXMLCoder">YES</bool>
 			<object class="NSArray" key="dict.sortedKeys">
@@ -15,7 +15,7 @@
 			</object>
 			<object class="NSMutableArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>
-				<string>804</string>
+				<string>823</string>
 				<string>1.1.0</string>
 			</object>
 		</object>
@@ -453,7 +453,7 @@
 				<string key="NSWindowContentMaxSize">{1.79769e+308, 1.79769e+308}</string>
 				<string key="NSWindowContentMinSize">{213, 107}</string>
 				<object class="NSView" key="NSWindowView" id="910224462">
-					<reference key="NSNextResponder"/>
+					<nil key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
 					<object class="NSMutableArray" key="NSSubviews">
 						<bool key="EncodedWithXMLCoder">YES</bool>
@@ -473,7 +473,6 @@
 											<object class="NSPSMatrix" key="NSDrawMatrix"/>
 											<string key="NSFrame">{{100, 30}, {32, 32}}</string>
 											<reference key="NSSuperview" ref="501106449"/>
-											<reference key="NSWindow"/>
 											<int key="NSpiFlags">28682</int>
 											<double key="NSMaxValue">100</double>
 										</object>
@@ -487,7 +486,6 @@
 													<int key="NSvFlags">256</int>
 													<string key="NSFrame">{{21, 1}, {214, 14}}</string>
 													<reference key="NSSuperview" ref="969200000"/>
-													<reference key="NSWindow"/>
 													<bool key="NSEnabled">YES</bool>
 													<object class="NSTextFieldCell" key="NSCell" id="410899519">
 														<int key="NSCellFlags">67239424</int>
@@ -523,7 +521,6 @@
 													</object>
 													<string key="NSFrame">{{4, 0}, {16, 16}}</string>
 													<reference key="NSSuperview" ref="969200000"/>
-													<reference key="NSWindow"/>
 													<bool key="NSEnabled">YES</bool>
 													<object class="NSImageCell" key="NSCell" id="941167750">
 														<int key="NSCellFlags">130560</int>
@@ -542,26 +539,21 @@
 											</object>
 											<string key="NSFrame">{{0, 72}, {232, 20}}</string>
 											<reference key="NSSuperview" ref="501106449"/>
-											<reference key="NSWindow"/>
 											<string key="NSClassName">NSView</string>
 										</object>
 									</object>
 									<string key="NSFrame">{{0, 15}, {233, 92}}</string>
 									<reference key="NSSuperview" ref="780163303"/>
-									<reference key="NSWindow"/>
 									<string key="NSClassName">NSView</string>
 								</object>
 							</object>
 							<string key="NSFrameSize">{233, 107}</string>
 							<reference key="NSSuperview" ref="910224462"/>
-							<reference key="NSWindow"/>
 							<string key="NSClassName">BDSKCollapsibleView</string>
 							<string key="NSExtension">NSView</string>
 						</object>
 					</object>
 					<string key="NSFrameSize">{233, 107}</string>
-					<reference key="NSSuperview"/>
-					<reference key="NSWindow"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
 				<string key="NSMinSize">{213, 129}</string>
@@ -942,9 +934,7 @@
 					<string>200118.IBShouldRemoveOnLegacySave</string>
 					<string>200119.IBPluginDependency</string>
 					<string>200119.IBShouldRemoveOnLegacySave</string>
-					<string>5.IBEditorWindowLastContentRect</string>
 					<string>5.IBPluginDependency</string>
-					<string>5.IBWindowTemplateEditedContentRect</string>
 					<string>5.ImportedFromIB2</string>
 					<string>5.windowTemplate.hasMinSize</string>
 					<string>5.windowTemplate.maxSize</string>
@@ -1015,9 +1005,7 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{167, 364}, {552, 122}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{167, 364}, {552, 122}}</string>
 					<boolean value="YES"/>
 					<boolean value="YES"/>
 					<string>{1.79769e+308, 1.79769e+308}</string>
@@ -1039,9 +1027,9 @@
 					<string>BDSKZoomableTextView</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{89, 534}, {233, 107}}</string>
+					<string>{{168, 554}, {213, 107}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{89, 534}, {233, 107}}</string>
+					<string>{{168, 554}, {213, 107}}</string>
 					<boolean value="YES"/>
 					<boolean value="YES"/>
 					<string>{1.79769e+308, 1.79769e+308}</string>
@@ -1062,7 +1050,7 @@
 						<object class="IBToolTipAttribute" key="NS.object.0">
 							<string key="name">ToolTip</string>
 							<reference key="object" ref="337877904"/>
-							<string key="toolTip">TeX had errors</string>
+							<string key="toolTip">Es sind Fehler in TeX aufgetreten</string>
 						</object>
 					</object>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -1356,13 +1344,6 @@
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSApplication</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKScriptMenu.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSApplication</string>
 					<string key="superclassName">NSResponder</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBUserSource</string>
@@ -1371,10 +1352,24 @@
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSCell</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKCenterScaledImageCell.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSCell</string>
 					<string key="superclassName">NSObject</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBUserSource</string>
 						<string key="minorKey"/>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSControl</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="405867832">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKFieldEditor.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
@@ -1404,7 +1399,165 @@
 					<string key="className">NSObject</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKBookmarkOutlineView.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKCitationFormatter.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKComplexStringFormatter.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">BDSKDocumentSearch.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKDragImageView.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKDragTextField.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKDragWindow.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKEditorTableView.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<reference key="sourceIdentifier" ref="405867832"/>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKFieldNameFormatter.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKFileContentSearchController.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKGroupOutlineView.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKItemPasteboardHelper.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKLinkedFile.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKMainTableView.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKNotesWindowController.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKOrphanedFileServer.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKOutlineView.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKSplitView.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKSpotlightView.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKStatusBar.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKTableView.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKTeXTask.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKTemplateDocument.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
@@ -1418,7 +1571,42 @@
 					<string key="className">NSObject</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKTextImportController.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKTypeSelectHelper.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKUndoManager.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BibPref_Export.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">NSObject_BDSKExtensions.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">vendorsrc/harmless/AMButtonBar.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
@@ -1448,13 +1636,6 @@
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBUserSource</string>
 						<string key="minorKey"/>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSTextField</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKFieldEditor.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
@@ -1789,6 +1970,13 @@
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBFrameworkSource</string>
 						<string key="minorKey">ExceptionHandling.framework/Headers/NSExceptionHandler.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBFrameworkSource</string>
+						<string key="minorKey">FileView.framework/Headers/FVFileView.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">

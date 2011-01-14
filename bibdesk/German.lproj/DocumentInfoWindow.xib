@@ -2,13 +2,13 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1050</int>
-		<string key="IBDocument.SystemVersion">10F569</string>
-		<string key="IBDocument.InterfaceBuilderVersion">804</string>
-		<string key="IBDocument.AppKitVersion">1038.29</string>
-		<string key="IBDocument.HIToolboxVersion">461.00</string>
+		<string key="IBDocument.SystemVersion">10J567</string>
+		<string key="IBDocument.InterfaceBuilderVersion">823</string>
+		<string key="IBDocument.AppKitVersion">1038.35</string>
+		<string key="IBDocument.HIToolboxVersion">462.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
-			<string key="NS.object.0">804</string>
+			<string key="NS.object.0">823</string>
 		</object>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -45,7 +45,7 @@
 				<string key="NSWindowContentMaxSize">{1.79769e+308, 1.79769e+308}</string>
 				<string key="NSWindowContentMinSize">{300, 107}</string>
 				<object class="NSView" key="NSWindowView" id="464892125">
-					<reference key="NSNextResponder"/>
+					<nil key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
 					<object class="NSMutableArray" key="NSSubviews">
 						<bool key="EncodedWithXMLCoder">YES</bool>
@@ -54,7 +54,6 @@
 							<int key="NSvFlags">289</int>
 							<string key="NSFrame">{{280, 12}, {82, 32}}</string>
 							<reference key="NSSuperview" ref="464892125"/>
-							<reference key="NSWindow"/>
 							<int key="NSTag">1</int>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSButtonCell" key="NSCell" id="819789599">
@@ -92,14 +91,12 @@
 											<int key="NSvFlags">256</int>
 											<string key="NSFrameSize">{374, 159}</string>
 											<reference key="NSSuperview" ref="681039450"/>
-											<reference key="NSWindow"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSTableHeaderView" key="NSHeaderView" id="775599559">
 												<reference key="NSNextResponder" ref="557016441"/>
 												<int key="NSvFlags">256</int>
 												<string key="NSFrameSize">{374, 17}</string>
 												<reference key="NSSuperview" ref="557016441"/>
-												<reference key="NSWindow"/>
 												<reference key="NSTableView" ref="714387839"/>
 											</object>
 											<object class="_NSCornerView" key="NSCornerView" id="281940838">
@@ -107,7 +104,6 @@
 												<int key="NSvFlags">-2147483392</int>
 												<string key="NSFrame">{{-26, 0}, {16, 17}}</string>
 												<reference key="NSSuperview" ref="861032825"/>
-												<reference key="NSWindow"/>
 											</object>
 											<object class="NSMutableArray" key="NSTableColumns">
 												<bool key="EncodedWithXMLCoder">YES</bool>
@@ -226,7 +222,6 @@
 									</object>
 									<string key="NSFrame">{{1, 17}, {374, 159}}</string>
 									<reference key="NSSuperview" ref="861032825"/>
-									<reference key="NSWindow"/>
 									<reference key="NSNextKeyView" ref="714387839"/>
 									<reference key="NSDocView" ref="714387839"/>
 									<reference key="NSBGColor" ref="914585464"/>
@@ -237,7 +232,6 @@
 									<int key="NSvFlags">-2147483392</int>
 									<string key="NSFrame">{{-30, 17}, {15, 159}}</string>
 									<reference key="NSSuperview" ref="861032825"/>
-									<reference key="NSWindow"/>
 									<reference key="NSTarget" ref="861032825"/>
 									<string key="NSAction">_doScroller:</string>
 									<double key="NSPercent">0.83684210000000003</double>
@@ -247,7 +241,6 @@
 									<int key="NSvFlags">-2147483392</int>
 									<string key="NSFrame">{{1, -30}, {359, 15}}</string>
 									<reference key="NSSuperview" ref="861032825"/>
-									<reference key="NSWindow"/>
 									<int key="NSsFlags">1</int>
 									<reference key="NSTarget" ref="861032825"/>
 									<string key="NSAction">_doScroller:</string>
@@ -262,7 +255,6 @@
 									</object>
 									<string key="NSFrame">{{1, 0}, {374, 17}}</string>
 									<reference key="NSSuperview" ref="861032825"/>
-									<reference key="NSWindow"/>
 									<reference key="NSNextKeyView" ref="775599559"/>
 									<reference key="NSDocView" ref="775599559"/>
 									<reference key="NSBGColor" ref="914585464"/>
@@ -272,7 +264,6 @@
 							</object>
 							<string key="NSFrame">{{0, 60}, {376, 177}}</string>
 							<reference key="NSSuperview" ref="464892125"/>
-							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="681039450"/>
 							<int key="NSsFlags">562</int>
 							<reference key="NSVScroller" ref="497734491"/>
@@ -287,7 +278,6 @@
 							<int key="NSvFlags">289</int>
 							<string key="NSFrame">{{172, 12}, {108, 32}}</string>
 							<reference key="NSSuperview" ref="464892125"/>
-							<reference key="NSWindow"/>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSButtonCell" key="NSCell" id="1036490750">
 								<int key="NSCellFlags">67239424</int>
@@ -309,7 +299,6 @@
 							<int key="NSvFlags">292</int>
 							<string key="NSFrame">{{20, 19}, {47, 23}}</string>
 							<reference key="NSSuperview" ref="464892125"/>
-							<reference key="NSWindow"/>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSSegmentedCell" key="NSCell" id="500164069">
 								<int key="NSCellFlags">67239424</int>
@@ -347,8 +336,6 @@
 						</object>
 					</object>
 					<string key="NSFrameSize">{376, 236}</string>
-					<reference key="NSSuperview"/>
-					<reference key="NSWindow"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
 				<string key="NSMinSize">{300, 129}</string>
@@ -693,7 +680,7 @@
 						<object class="IBToolTipAttribute" key="NS.object.0">
 							<string key="name">ToolTip</string>
 							<reference key="object" ref="861032825"/>
-							<string key="toolTip">Document info which can be used in templates and autogeneration formats.</string>
+							<string key="toolTip">Dokumenteninformation, die in Vorlagen und Formate zum automatischen Erstellen verwendet werden kann.</string>
 						</object>
 					</object>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -832,13 +819,6 @@
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">BDSKRichTextFormat.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSApplication</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKScriptMenu.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">

@@ -2,13 +2,13 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1040</int>
-		<string key="IBDocument.SystemVersion">10H574</string>
-		<string key="IBDocument.InterfaceBuilderVersion">804</string>
+		<string key="IBDocument.SystemVersion">10J567</string>
+		<string key="IBDocument.InterfaceBuilderVersion">823</string>
 		<string key="IBDocument.AppKitVersion">1038.35</string>
-		<string key="IBDocument.HIToolboxVersion">461.00</string>
+		<string key="IBDocument.HIToolboxVersion">462.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
-			<string key="NS.object.0">804</string>
+			<string key="NS.object.0">823</string>
 		</object>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -159,7 +159,7 @@
 								<object class="NSScroller" id="61824406">
 									<reference key="NSNextResponder" ref="580219536"/>
 									<int key="NSvFlags">256</int>
-									<string key="NSFrame">{{870, 1}, {15, 84}}</string>
+									<string key="NSFrame">{{870, 1}, {15, 99}}</string>
 									<reference key="NSSuperview" ref="580219536"/>
 									<reference key="NSTarget" ref="580219536"/>
 									<string key="NSAction">_doScroller:</string>
@@ -228,6 +228,7 @@
 																					<string>Apple PNG pasteboard type</string>
 																					<string>Apple URL pasteboard type</string>
 																					<string>CorePasteboardFlavorType 0x6D6F6F76</string>
+																					<string>CorePasteboardFlavorType 0x75726C20</string>
 																					<string>NSColor pasteboard type</string>
 																					<string>NSFilenamesPboardType</string>
 																					<string>NSStringPboardType</string>
@@ -347,7 +348,7 @@
 															<bool key="NSEnabled">YES</bool>
 															<object class="NSTextFieldCell" key="NSCell" id="630226599">
 																<int key="NSCellFlags">67239424</int>
-																<int key="NSCellFlags2">272760832</int>
+																<int key="NSCellFlags2">272629760</int>
 																<string key="NSContents">Präfix:</string>
 																<object class="NSFont" key="NSSupport" id="26">
 																	<string key="NSName">LucidaGrande</string>
@@ -402,6 +403,7 @@
 																					<string>Apple PNG pasteboard type</string>
 																					<string>Apple URL pasteboard type</string>
 																					<string>CorePasteboardFlavorType 0x6D6F6F76</string>
+																					<string>CorePasteboardFlavorType 0x75726C20</string>
 																					<string>NSColor pasteboard type</string>
 																					<string>NSFilenamesPboardType</string>
 																					<string>NSStringPboardType</string>
@@ -521,7 +523,7 @@
 															<bool key="NSEnabled">YES</bool>
 															<object class="NSTextFieldCell" key="NSCell" id="840183385">
 																<int key="NSCellFlags">67239424</int>
-																<int key="NSCellFlags2">272760832</int>
+																<int key="NSCellFlags2">272629760</int>
 																<string key="NSContents">Trenner für Eintrag:</string>
 																<reference key="NSSupport" ref="26"/>
 																<reference key="NSControlView" ref="358947666"/>
@@ -563,6 +565,7 @@
 																					<string>Apple PNG pasteboard type</string>
 																					<string>Apple URL pasteboard type</string>
 																					<string>CorePasteboardFlavorType 0x6D6F6F76</string>
+																					<string>CorePasteboardFlavorType 0x75726C20</string>
 																					<string>NSColor pasteboard type</string>
 																					<string>NSFilenamesPboardType</string>
 																					<string>NSStringPboardType</string>
@@ -682,7 +685,7 @@
 															<bool key="NSEnabled">YES</bool>
 															<object class="NSTextFieldCell" key="NSCell" id="584610379">
 																<int key="NSCellFlags">67239424</int>
-																<int key="NSCellFlags2">272760832</int>
+																<int key="NSCellFlags2">272629760</int>
 																<string key="NSContents">Endung:</string>
 																<reference key="NSSupport" ref="26"/>
 																<reference key="NSControlView" ref="551557953"/>
@@ -719,7 +722,7 @@
 												<reference key="NSControlView" ref="38181194"/>
 												<int key="NSButtonFlags">1211912703</int>
 												<int key="NSButtonFlags2">2</int>
-												<object class="NSCustomResource" key="NSNormalImage" id="699039606">
+												<object class="NSCustomResource" key="NSNormalImage" id="171687475">
 													<string key="NSClassName">NSImage</string>
 													<string key="NSResourceName">NSSwitch</string>
 												</object>
@@ -813,7 +816,7 @@
 															<boolean value="YES"/>
 															<object class="NSAttributedString" id="495244339">
 																<string key="NSString">0</string>
-																<object class="NSDictionary" key="NSAttributes" id="159679861">
+																<object class="NSDictionary" key="NSAttributes" id="178925241">
 																	<bool key="EncodedWithXMLCoder">YES</bool>
 																	<object class="NSArray" key="dict.sortedKeys" id="0">
 																		<bool key="EncodedWithXMLCoder">YES</bool>
@@ -841,7 +844,7 @@
 													</object>
 													<object class="NSAttributedString" key="NS.nan">
 														<string key="NSString">NaN</string>
-														<reference key="NSAttributes" ref="159679861"/>
+														<reference key="NSAttributes" ref="178925241"/>
 													</object>
 													<object class="NSDecimalNumberPlaceholder" key="NS.min" id="638783233">
 														<int key="NS.exponent">0</int>
@@ -994,7 +997,7 @@
 												<reference key="NSControlView" ref="565092434"/>
 												<int key="NSButtonFlags">1211912703</int>
 												<int key="NSButtonFlags2">2</int>
-												<reference key="NSNormalImage" ref="699039606"/>
+												<reference key="NSNormalImage" ref="171687475"/>
 												<reference key="NSAlternateImage" ref="145791845"/>
 												<string key="NSAlternateContents"/>
 												<string key="NSKeyEquivalent"/>
@@ -1016,7 +1019,7 @@
 												<reference key="NSControlView" ref="595388310"/>
 												<int key="NSButtonFlags">1211912703</int>
 												<int key="NSButtonFlags2">2</int>
-												<reference key="NSNormalImage" ref="699039606"/>
+												<reference key="NSNormalImage" ref="171687475"/>
 												<reference key="NSAlternateImage" ref="145791845"/>
 												<string key="NSAlternateContents"/>
 												<string key="NSKeyEquivalent"/>
@@ -1180,7 +1183,7 @@
 																<reference key="NSControlView" ref="1018935168"/>
 																<int key="NSButtonFlags">1211912703</int>
 																<int key="NSButtonFlags2">2</int>
-																<reference key="NSNormalImage" ref="699039606"/>
+																<reference key="NSNormalImage" ref="171687475"/>
 																<reference key="NSAlternateImage" ref="145791845"/>
 																<string key="NSAlternateContents"/>
 																<int key="NSPeriodicDelay">400</int>
@@ -1894,7 +1897,7 @@
 						<object class="NSTextFieldCell" key="NSCell" id="996894130">
 							<int key="NSCellFlags">67239424</int>
 							<int key="NSCellFlags2">272629760</int>
-							<string key="NSContents">Join style:</string>
+							<string key="NSContents">Stil für Verbindungen:</string>
 							<reference key="NSSupport" ref="729414828"/>
 							<reference key="NSControlView" ref="909812618"/>
 							<reference key="NSBackgroundColor" ref="500249433"/>
@@ -1910,7 +1913,7 @@
 						<object class="NSTextFieldCell" key="NSCell" id="861161813">
 							<int key="NSCellFlags">67239424</int>
 							<int key="NSCellFlags2">272629760</int>
-							<string key="NSContents">Name style:</string>
+							<string key="NSContents">Stil für Namen:</string>
 							<reference key="NSSupport" ref="729414828"/>
 							<reference key="NSControlView" ref="241147139"/>
 							<reference key="NSBackgroundColor" ref="500249433"/>
@@ -2116,7 +2119,7 @@
 										<boolean value="YES"/>
 										<object class="NSAttributedString" id="508654053">
 											<string key="NSString">Inherit</string>
-											<reference key="NSAttributes" ref="159679861"/>
+											<reference key="NSAttributes" ref="178925241"/>
 										</object>
 										<string>.</string>
 										<integer value="1000"/>
@@ -2136,7 +2139,7 @@
 								</object>
 								<object class="NSAttributedString" key="NS.nan">
 									<string key="NSString">NaN</string>
-									<reference key="NSAttributes" ref="159679861"/>
+									<reference key="NSAttributes" ref="178925241"/>
 								</object>
 								<reference key="NS.min" ref="638783233"/>
 								<reference key="NS.max" ref="638783233"/>
@@ -2260,7 +2263,7 @@
 							<reference key="NSControlView" ref="682655381"/>
 							<int key="NSButtonFlags">1211912703</int>
 							<int key="NSButtonFlags2">2</int>
-							<reference key="NSNormalImage" ref="699039606"/>
+							<reference key="NSNormalImage" ref="171687475"/>
 							<reference key="NSAlternateImage" ref="145791845"/>
 							<string key="NSAlternateContents"/>
 							<string key="NSKeyEquivalent"/>
@@ -2282,7 +2285,7 @@
 							<reference key="NSControlView" ref="422745688"/>
 							<int key="NSButtonFlags">1211912703</int>
 							<int key="NSButtonFlags2">2</int>
-							<reference key="NSNormalImage" ref="699039606"/>
+							<reference key="NSNormalImage" ref="171687475"/>
 							<reference key="NSAlternateImage" ref="145791845"/>
 							<string key="NSAlternateContents"/>
 							<string key="NSKeyEquivalent"/>
@@ -2788,7 +2791,7 @@
 						<object class="NSTextFieldCell" key="NSCell" id="552022750">
 							<int key="NSCellFlags">67239424</int>
 							<int key="NSCellFlags2">272629760</int>
-							<string key="NSContents">Join style:</string>
+							<string key="NSContents">Stil für Verbindungen:</string>
 							<reference key="NSSupport" ref="729414828"/>
 							<reference key="NSControlView" ref="625348848"/>
 							<reference key="NSBackgroundColor" ref="500249433"/>
@@ -4473,7 +4476,7 @@
 									<bool key="EncodedWithXMLCoder">YES</bool>
 									<boolean value="NO"/>
 									<boolean value="NO"/>
-									<string>No Special Fields</string>
+									<string>Keine speziellen Felder</string>
 								</object>
 							</object>
 							<int key="NSNibBindingConnectorVersion">2</int>
@@ -6873,7 +6876,6 @@
 					<string>1025.ImportedFromIB2</string>
 					<string>103.IBPluginDependency</string>
 					<string>103.ImportedFromIB2</string>
-					<string>104.IBEditorWindowLastContentRect</string>
 					<string>104.IBPluginDependency</string>
 					<string>104.ImportedFromIB2</string>
 					<string>106.IBPluginDependency</string>
@@ -6898,7 +6900,6 @@
 					<string>1203.ImportedFromIB2</string>
 					<string>127.IBPluginDependency</string>
 					<string>127.ImportedFromIB2</string>
-					<string>1425.IBEditorWindowLastContentRect</string>
 					<string>1425.IBPluginDependency</string>
 					<string>1425.ImportedFromIB2</string>
 					<string>1427.IBPluginDependency</string>
@@ -6909,7 +6910,6 @@
 					<string>1429.ImportedFromIB2</string>
 					<string>1430.IBPluginDependency</string>
 					<string>1430.ImportedFromIB2</string>
-					<string>144.IBEditorWindowLastContentRect</string>
 					<string>144.IBPluginDependency</string>
 					<string>144.ImportedFromIB2</string>
 					<string>1447.IBPluginDependency</string>
@@ -6966,7 +6966,6 @@
 					<string>1536.ImportedFromIB2</string>
 					<string>1537.IBPluginDependency</string>
 					<string>1537.ImportedFromIB2</string>
-					<string>1538.IBEditorWindowLastContentRect</string>
 					<string>1538.IBPluginDependency</string>
 					<string>1538.ImportedFromIB2</string>
 					<string>1541.IBPluginDependency</string>
@@ -7015,7 +7014,6 @@
 					<string>1563.ImportedFromIB2</string>
 					<string>1564.IBPluginDependency</string>
 					<string>1564.ImportedFromIB2</string>
-					<string>1719.IBEditorWindowLastContentRect</string>
 					<string>1719.IBPluginDependency</string>
 					<string>1719.ImportedFromIB2</string>
 					<string>1720.IBPluginDependency</string>
@@ -7034,7 +7032,6 @@
 					<string>1726.ImportedFromIB2</string>
 					<string>1727.IBPluginDependency</string>
 					<string>1727.ImportedFromIB2</string>
-					<string>1759.IBEditorWindowLastContentRect</string>
 					<string>1759.IBPluginDependency</string>
 					<string>1759.ImportedFromIB2</string>
 					<string>1760.IBPluginDependency</string>
@@ -7053,7 +7050,6 @@
 					<string>1766.ImportedFromIB2</string>
 					<string>1767.IBPluginDependency</string>
 					<string>1767.ImportedFromIB2</string>
-					<string>1814.IBEditorWindowLastContentRect</string>
 					<string>1814.IBPluginDependency</string>
 					<string>1814.ImportedFromIB2</string>
 					<string>1815.IBPluginDependency</string>
@@ -7170,7 +7166,6 @@
 					<string>285.ImportedFromIB2</string>
 					<string>299.IBPluginDependency</string>
 					<string>299.ImportedFromIB2</string>
-					<string>358.IBEditorWindowLastContentRect</string>
 					<string>358.IBPluginDependency</string>
 					<string>358.ImportedFromIB2</string>
 					<string>5.IBEditorWindowLastContentRect</string>
@@ -7180,7 +7175,6 @@
 					<string>5.windowTemplate.hasMinSize</string>
 					<string>5.windowTemplate.maxSize</string>
 					<string>5.windowTemplate.minSize</string>
-					<string>589.IBEditorWindowLastContentRect</string>
 					<string>589.IBPluginDependency</string>
 					<string>589.ImportedFromIB2</string>
 					<string>590.IBPluginDependency</string>
@@ -7201,7 +7195,6 @@
 					<string>6.ImportedFromIB2</string>
 					<string>700.IBPluginDependency</string>
 					<string>700.ImportedFromIB2</string>
-					<string>804.IBEditorWindowLastContentRect</string>
 					<string>804.IBPluginDependency</string>
 					<string>804.ImportedFromIB2</string>
 					<string>805.IBPluginDependency</string>
@@ -7212,7 +7205,6 @@
 					<string>870.ImportedFromIB2</string>
 					<string>871.IBPluginDependency</string>
 					<string>871.ImportedFromIB2</string>
-					<string>88.IBEditorWindowLastContentRect</string>
 					<string>88.IBPluginDependency</string>
 					<string>88.ImportedFromIB2</string>
 					<string>934.IBPluginDependency</string>
@@ -7234,43 +7226,6 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{139, 762}, {225, 23}}</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>{{74, 407}, {315, 30}}</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>{{65, 700}, {622, 30}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -7327,7 +7282,40 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{662, 754}, {130, 23}}</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -7376,7 +7364,6 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{72, 342}, {622, 30}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -7389,106 +7376,6 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>{{72, 273}, {622, 30}}</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>{{70, 205}, {622, 30}}</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -7531,17 +7418,113 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{66, 636}, {315, 30}}</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{10, 151}, {884, 675}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{10, 151}, {884, 675}}</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
+					<string>{{21, 147}, {834, 675}}</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>{{21, 147}, {834, 675}}</string>
 					<boolean value="YES"/>
 					<boolean value="YES"/>
 					<string>{1.79769e+308, 1.79769e+308}</string>
 					<string>{800, 575}</string>
-					<string>{{71, 578}, {622, 30}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -7562,7 +7545,6 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{72, 476}, {622, 64}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -7573,7 +7555,6 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{65, 757}, {622, 30}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
