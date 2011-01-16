@@ -212,7 +212,7 @@ ZSBhdXNnZXfDpGhsdGVuIEVpbnRyw6RnZSBlcm5ldXQgenUgYmV3ZWdlbi4KA</string>
 														<reference key="NSControlView" ref="106490577"/>
 														<int key="NSButtonFlags">1215582719</int>
 														<int key="NSButtonFlags2">2</int>
-														<object class="NSCustomResource" key="NSNormalImage" id="767638362">
+														<object class="NSCustomResource" key="NSNormalImage" id="868189397">
 															<string key="NSClassName">NSImage</string>
 															<string key="NSResourceName">NSSwitch</string>
 														</object>
@@ -502,7 +502,7 @@ ZSBhdXNnZXfDpGhsdGVuIEVpbnRyw6RnZSBlcm5ldXQgenUgYmV3ZWdlbi4KA</string>
 							<object class="NSButtonCell" key="NSCell" id="476631001">
 								<int key="NSCellFlags">67239424</int>
 								<int key="NSCellFlags2">0</int>
-								<string key="NSContents">Retry forces moves according to Fix</string>
+								<string key="NSContents">Erneut versuchen verschiebt wie in der Fix-Spalte angegeben</string>
 								<object class="NSFont" key="NSSupport">
 									<string key="NSName">LucidaGrande</string>
 									<double key="NSSize">13</double>
@@ -511,7 +511,7 @@ ZSBhdXNnZXfDpGhsdGVuIEVpbnRyw6RnZSBlcm5ldXQgenUgYmV3ZWdlbi4KA</string>
 								<reference key="NSControlView" ref="189276793"/>
 								<int key="NSButtonFlags">1211912703</int>
 								<int key="NSButtonFlags2">2</int>
-								<reference key="NSNormalImage" ref="767638362"/>
+								<reference key="NSNormalImage" ref="868189397"/>
 								<reference key="NSAlternateImage" ref="379601028"/>
 								<string key="NSAlternateContents"/>
 								<string key="NSKeyEquivalent"/>
