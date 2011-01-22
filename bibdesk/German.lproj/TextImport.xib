@@ -645,7 +645,7 @@
 																</object>
 																<object class="NSMenuItem" id="1017032092">
 																	<reference key="NSMenu" ref="689041488"/>
-																	<string key="NSTitle">Cite Key generieren</string>
+																	<string key="NSTitle">Cite Key erstellen</string>
 																	<string key="NSKeyEquiv"/>
 																	<int key="NSKeyEquivModMask">1048576</int>
 																	<int key="NSMnemonicLoc">2147483647</int>

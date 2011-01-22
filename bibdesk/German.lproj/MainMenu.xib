@@ -1656,7 +1656,7 @@
 								</object>
 								<object class="NSMenuItem" id="84078477">
 									<reference key="NSMenu" ref="192358750"/>
-									<string key="NSTitle">Cite Key generieren</string>
+									<string key="NSTitle">Cite Key erstellen</string>
 									<string key="NSKeyEquiv">k</string>
 									<int key="NSKeyEquivModMask">1048576</int>
 									<int key="NSMnemonicLoc">2147483647</int>
@@ -1790,7 +1790,7 @@
 								<bool key="EncodedWithXMLCoder">YES</bool>
 								<object class="NSMenuItem" id="971272277">
 									<reference key="NSMenu" ref="489770033"/>
-									<string key="NSTitle">Neue Sammlungssuche…</string>
+									<string key="NSTitle">Neue Sammlungssuche</string>
 									<string key="NSKeyEquiv"/>
 									<int key="NSKeyEquivModMask">1048576</int>
 									<int key="NSMnemonicLoc">2147483647</int>
