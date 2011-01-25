@@ -143,7 +143,21 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
         [undoManager setDelegate:self];
         [self setUndoManager:undoManager];
         
-        templateOptions = [[NSDictionary alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"TemplateOptions" ofType:@"plist"]];
+        NSBundle *bundle = [NSBundle mainBundle];
+        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithContentsOfFile:[bundle pathForResource:@"TemplateOptions" ofType:@"plist"]];
+        
+        for (NSString *key in [tmpDict allKeys]) {
+            NSMutableArray *array = [NSMutableArray array];
+            for (NSDictionary *dict in [tmpDict objectForKey:key]) {
+                NSMutableDictionary *mutableDict = [dict mutableCopy];
+                [mutableDict setObject:[bundle localizedStringForKey:[dict objectForKey:@"displayName"] value:@"" table:@"TemplateOptions"] forKey:@"displayName"];
+                [array addObject:mutableDict];
+                [mutableDict release];
+            }
+            [tmpDict setObject:array forKey:key];
+        }
+        templateOptions = [tmpDict copy];
+        [tmpDict release];
         
         for (NSString *type in [[BDSKTypeManager sharedManager] types]) {
             if ([type isEqualToString:BDSKArticleString])
@@ -815,7 +829,7 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
         NSMenu *submenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:[key stringByAppendingString:@"Key"]];
         [submenu setTitle:[key stringByAppendingString:@"Key"]];
         for (NSDictionary *dict in [templateOptions valueForKey:key]) {
-            NSMenuItem *item = [submenu addItemWithTitle:[bundle localizedStringForKey:[dict objectForKey:@"displayName"] value:@"" table:@"TemplateOptions"]
+            NSMenuItem *item = [submenu addItemWithTitle:[dict objectForKey:@"displayName"]
                                                   action:@selector(changeValueFromMenu:) keyEquivalent:@""];
             [item setTarget:self];
             [item setRepresentedObject:[transformer reverseTransformedValue:[dict objectForKey:@"key"]]];
