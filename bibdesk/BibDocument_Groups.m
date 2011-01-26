@@ -1066,7 +1066,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	NSInteger row = [groupOutlineView clickedRow];
     if (row == -1 && [groupOutlineView numberOfSelectedRows] == 1)
         row = [groupOutlineView selectedRow];
-	if (row != -1) {
+	if (row == -1) {
 		NSBeep();
 		return;
 	} 
