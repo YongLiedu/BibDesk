@@ -1075,6 +1075,8 @@
 }
 
 - (void)outlineViewSelectionDidChange:(NSNotification *)notification {
+    if (docFlags.ignoreGroupSelectionChange)
+        return;
     NSNotification *note = [NSNotification notificationWithName:BDSKGroupTableSelectionChangedNotification object:self];
     [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:nil];
     docFlags.didImport = NO;

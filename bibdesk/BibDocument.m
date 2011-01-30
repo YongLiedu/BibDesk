@@ -244,6 +244,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
         docState.lastFileViewWidth = 0.0;
         docState.lastWebViewFraction = 0.0;
         docFlags.isAnimating = NO;
+        docFlags.ignoreGroupSelectionChange = NO;
         
         // these are temporary state variables
         docFlags.dragFromExternalGroups = NO;

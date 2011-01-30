@@ -490,7 +490,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 - (void)updateCategoryGroupsPreservingSelection:(BOOL)preserve{
 
     // this is a hack to keep us from getting selection change notifications while sorting (which updates the TeX and attributed text previews)
-    [groupOutlineView setDelegate:nil];
+    docFlags.ignoreGroupSelectionChange = YES;
     
     NSPoint scrollPoint = [tableView scrollPositionAsPercentage];    
     
@@ -582,8 +582,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     if (didSelect)
         [tableView setScrollPositionAsPercentage:scrollPoint];
     
-	// reset ourself as delegate
-    [groupOutlineView setDelegate:self];
+	// reset
+    docFlags.ignoreGroupSelectionChange = NO;
 }
 
 // force the smart groups to refilter their items, so the group content and count get redisplayed
@@ -1522,8 +1522,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	}
     
     // this is a hack to keep us from getting selection change notifications while sorting (which updates the TeX and attributed text previews)
-    [groupOutlineView setDelegate:nil];
-	
+    docFlags.ignoreGroupSelectionChange = YES;
+
     // cache the selection
 	NSArray *selectedGroups = [self selectedGroups];
     
@@ -1550,8 +1550,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	[self selectGroups:selectedGroups];
 	[self displaySelectedGroups];
 	
-    // reset ourself as delegate
-    [groupOutlineView setDelegate:self];
+    // reset
+    docFlags.ignoreGroupSelectionChange = NO;
 }
 
 #pragma mark Importing
