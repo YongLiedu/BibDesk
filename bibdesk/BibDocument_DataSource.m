@@ -173,6 +173,8 @@
 }
 
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
+    if (docFlags.ignoreSelectionChange)
+        return;
 	NSTableView *tv = [aNotification object];
     if(tv == tableView || ([self isDisplayingFileContentSearch] && tv == [fileSearchController tableView])){
         NSNotification *note = [NSNotification notificationWithName:BDSKTableSelectionChangedNotification object:self];

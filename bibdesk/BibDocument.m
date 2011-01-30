@@ -244,6 +244,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
         docState.lastFileViewWidth = 0.0;
         docState.lastWebViewFraction = 0.0;
         docFlags.isAnimating = NO;
+        docFlags.ignoreSelectionChange = NO;
         docFlags.ignoreGroupSelectionChange = NO;
         
         // these are temporary state variables
@@ -2504,7 +2505,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     // @@ DON'T RETURN WITHOUT RESETTING THIS!
     // this is a hack to keep us from getting selection change notifications while sorting (which updates the TeX and attributed text previews)
-    [tableView setDelegate:nil];
+    docFlags.ignoreSelectionChange = YES;
     
     // cache the selection; this works for multiple publications
     NSArray *pubsToSelect = nil;
@@ -2525,8 +2526,8 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     [self selectPublications:pubsToSelect];
     [tableView scrollRowToCenter:[tableView selectedRow]]; // just go to the last one
 
-    // reset ourself as delegate
-    [tableView setDelegate:self];
+    // reset
+    docFlags.ignoreSelectionChange = YES;
 }
 
 - (void)saveSortOrder{ 

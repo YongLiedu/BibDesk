@@ -248,6 +248,7 @@ extern NSString *BDSKDocumentPublicationsKey;
         unsigned int        displayMigrationAlert:1;
         unsigned int        inOptionKeyState:1;
         unsigned int        isAnimating:1;
+        unsigned int        ignoreSelectionChange:1;
         unsigned int        ignoreGroupSelectionChange:1;
     } docFlags;
     
