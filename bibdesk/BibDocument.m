@@ -2527,7 +2527,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     [tableView scrollRowToCenter:[tableView selectedRow]]; // just go to the last one
 
     // reset
-    docFlags.ignoreSelectionChange = YES;
+    docFlags.ignoreSelectionChange = NO;
 }
 
 - (void)saveSortOrder{ 
