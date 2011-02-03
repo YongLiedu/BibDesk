@@ -42,6 +42,7 @@
 #import "NSCharacterSet_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
 #import "CFString_BDSKExtensions.h"
+#import "BDSKConverter.h"
 
 @interface BibAuthor (Private)
 
@@ -492,7 +493,7 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
     // components of the first name used in fuzzy comparisons
     
     // @@ see note on firstLetterCharacterString() function for possible issues with this
-    firstNames = firstName ? (id)BDStringCreateComponentsSeparatedByCharacterSetTrimWhitespace(CFAllocatorGetDefault(), (CFStringRef)firstName, separatorSet, FALSE) : [[NSArray alloc] init];
+    firstNames = firstName ? (id)BDStringCreateComponentsSeparatedByCharacterSetTrimWhitespace(CFAllocatorGetDefault(), (CFStringRef)[firstName stringByDeTeXifyingString], separatorSet, FALSE) : [[NSArray alloc] init];
 
     // fuzzy comparison  name
     // don't bother with spaces for this comparison (and whitespace is already collapsed)
