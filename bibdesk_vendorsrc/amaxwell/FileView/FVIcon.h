@@ -129,6 +129,16 @@
  This does not redisplay the icon; needsRenderForSize: and renderOffscreen must be called to redraw. */
 - (void)showPreviousPage;
 
+/** Set the internal page index to 1.
+ 
+ This does not redisplay the icon; needsRenderForSize: and renderOffscreen must be called to redraw. */
+- (void)showFirstPage;
+
+/** Set the internal page index to the last page.
+ 
+ This does not redisplay the icon; needsRenderForSize: and renderOffscreen must be called to redraw. */
+- (void)showLastPage;
+
 @end
 
 @interface FVIcon (Creation)

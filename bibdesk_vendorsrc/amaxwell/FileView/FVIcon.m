@@ -149,6 +149,8 @@ static inline id _placeholderForZone(NSZone *aZone)
 - (NSUInteger)currentPageIndex { return 1; }
 - (void)showNextPage { /* do nothing */ }
 - (void)showPreviousPage { /* do nothing */ }
+- (void)showFirstPage { /* do nothing */ }
+- (void)showLastPage { /* do nothing */ }
 
 @end
 

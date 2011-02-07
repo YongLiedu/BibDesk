@@ -211,6 +211,26 @@ static CGLayerRef   _pageLayer = NULL;
     [self unlock];
 }
 
+- (void)showFirstPage;
+{
+    [self lock];
+    _currentPage = 1;
+    _pdfPage = NULL;
+    CGImageRelease(_thumbnail);
+    _thumbnail = NULL;
+    [self unlock];
+}
+
+- (void)showLastPage;
+{
+    [self lock];
+    _currentPage = _pageCount;
+    _pdfPage = NULL;
+    CGImageRelease(_thumbnail);
+    _thumbnail = NULL;
+    [self unlock];
+}
+
 // roughly 50% of a typical page minimum dimension
 #define FVMaxPDFThumbnailDimension 310
 

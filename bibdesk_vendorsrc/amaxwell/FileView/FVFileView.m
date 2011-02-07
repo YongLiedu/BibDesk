@@ -3292,6 +3292,28 @@ static NSRect _rectWithCorners(const NSPoint aPoint, const NSPoint bPoint) {
     }
 }
 
+- (void)moveToBeginningOfDocument:(id)sender;
+{
+    if ([_selectionIndexes count] == 1) {
+        FVIcon *anIcon = [self iconAtIndex:[_selectionIndexes firstIndex]];
+        if ([anIcon currentPageIndex] > 1) {
+            [anIcon showFirstPage];
+            [self _redisplayIconAfterPageChanged:anIcon];
+        }
+    }
+}
+
+- (void)moveToEndOfDocument:(id)sender;
+{
+    if ([_selectionIndexes count] == 1) {
+        FVIcon *anIcon = [self iconAtIndex:[_selectionIndexes firstIndex]];
+        if ([anIcon currentPageIndex] < [anIcon pageCount]) {
+            [anIcon showLastPage];
+            [self _redisplayIconAfterPageChanged:anIcon];
+        }
+    }
+}
+
 - (void)insertNewline:(id)sender;
 {
     if ([_selectionIndexes count])
