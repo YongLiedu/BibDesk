@@ -72,29 +72,35 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
 
 + (id)sharedBookmarkController {
     if (sharedBookmarkController == nil)
-        sharedBookmarkController = [[self alloc] init];
+        [[[self alloc] init] autorelease];
     return sharedBookmarkController;
 }
 
 + (id)allocWithZone:(NSZone *)zone {
-    BDSKPRECONDITION(sharedBookmarkController == nil);
-    return [super allocWithZone:zone];
+    return [sharedBookmarkController retain] ?: [super allocWithZone:zone];
 }
 
 - (id)init {
-    if (self = [super initWithWindowNibName:@"SearchBookmarksWindow"]) {
-        NSMutableArray *bookmarks = [NSMutableArray array];
-        for (NSDictionary *dict in [[NSUserDefaults standardUserDefaults] arrayForKey:BDSKSearchGroupBookmarksKey]) {
-            BDSKSearchBookmark *bm = [[BDSKSearchBookmark alloc] initWithDictionary:dict];
-            if (bm) {
-                [bookmarks addObject:bm];
-                [bm release];
-            } else
-                NSLog(@"Failed to read bookmark: %@", dict);
+    if (sharedBookmarkController == nil) {
+        if (self = [super initWithWindowNibName:@"SearchBookmarksWindow"]) {
+            NSMutableArray *bookmarks = [NSMutableArray array];
+            for (NSDictionary *dict in [[NSUserDefaults standardUserDefaults] arrayForKey:BDSKSearchGroupBookmarksKey]) {
+                BDSKSearchBookmark *bm = [[BDSKSearchBookmark alloc] initWithDictionary:dict];
+                if (bm) {
+                    [bookmarks addObject:bm];
+                    [bm release];
+                } else
+                    NSLog(@"Failed to read bookmark: %@", dict);
+            }
+            
+            bookmarkRoot = [[BDSKSearchBookmark alloc] initRootWithChildren:bookmarks];
+            [self startObservingBookmarks:[NSArray arrayWithObject:bookmarkRoot]];
         }
-        
-        bookmarkRoot = [[BDSKSearchBookmark alloc] initRootWithChildren:bookmarks];
-        [self startObservingBookmarks:[NSArray arrayWithObject:bookmarkRoot]];
+        sharedBookmarkController = [self retain];
+    } else if (self != sharedBookmarkController) {
+        BDSKASSERT_NOT_REACHED("shouldn't be able to create multiple instances");
+        [self release];
+        self = [sharedBookmarkController retain];
     }
     return self;
 }

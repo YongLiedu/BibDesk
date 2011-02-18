@@ -75,12 +75,8 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     return sharedFinder;
 }
 
-+ (id)allocWithZone:(NSZone *)zone {
-    BDSKPRECONDITION(sharedFinder == nil);
-    return [super allocWithZone:zone];
-}
-
 - (id)init {
+    BDSKPRECONDITION(sharedFinder == nil);
     if (self = [super init]) {
         orphanedFiles = [[NSMutableArray alloc] init];
         wasLaunched = NO;

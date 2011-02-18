@@ -93,13 +93,9 @@ static id sharedInstance = nil;
     return sharedInstance;
 }
 
-+ (id)allocWithZone:(NSZone *)zone {
-    BDSKPRECONDITION(sharedInstance == nil);
-    return [super allocWithZone:zone];
-}
-
 - (id)init
 {
+    BDSKPRECONDITION(sharedInstance == nil);
     self = [super initWithWindowNibName:[self windowNibName]];
     if (self) {
         matches = [[NSMutableArray alloc] init];

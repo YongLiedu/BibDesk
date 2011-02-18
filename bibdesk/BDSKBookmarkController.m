@@ -80,37 +80,43 @@ static id sharedBookmarkController = nil;
 
 + (id)sharedBookmarkController {
     if (sharedBookmarkController == nil)
-        sharedBookmarkController = [[self alloc] init];
+        [[[self alloc] init] autorelease];
     return sharedBookmarkController;
 }
 
 + (id)allocWithZone:(NSZone *)zone {
-    BDSKPRECONDITION(sharedBookmarkController == nil);
-    return [super allocWithZone:zone];
+    return [sharedBookmarkController retain] ?: [super allocWithZone:zone];
 }
 
 - (id)init {
-    if (self = [super initWithWindowNibName:@"BookmarksWindow"]) {
-		undoManager = nil;
-        
-        NSMutableArray *bookmarks = [NSMutableArray array];
-		NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
-		NSString *bookmarksPath = [applicationSupportPath stringByAppendingPathComponent:@"Bookmarks.plist"];
-		if ([[NSFileManager defaultManager] fileExistsAtPath:bookmarksPath]) {
-			for (NSDictionary *dict in [NSArray arrayWithContentsOfFile:bookmarksPath]) {
-                BDSKBookmark *bookmark = [[BDSKBookmark alloc] initWithDictionary:dict];
-                if (bookmark) {
-                    [bookmarks addObject:bookmark];
-                    [bookmark release];
-                } else
-                    NSLog(@"Failed to read bookmark: %@", dict);
-			}
-		}
-        
-        bookmarkRoot = [[BDSKBookmark alloc] initRootWithChildren:bookmarks];
-        [self startObservingBookmarks:[NSArray arrayWithObject:bookmarkRoot]];
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminateNotification:) name:NSApplicationWillTerminateNotification object:nil];
+    if (sharedBookmarkController == nil) {
+        if (self = [super initWithWindowNibName:@"BookmarksWindow"]) {
+            undoManager = nil;
+            
+            NSMutableArray *bookmarks = [NSMutableArray array];
+            NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
+            NSString *bookmarksPath = [applicationSupportPath stringByAppendingPathComponent:@"Bookmarks.plist"];
+            if ([[NSFileManager defaultManager] fileExistsAtPath:bookmarksPath]) {
+                for (NSDictionary *dict in [NSArray arrayWithContentsOfFile:bookmarksPath]) {
+                    BDSKBookmark *bookmark = [[BDSKBookmark alloc] initWithDictionary:dict];
+                    if (bookmark) {
+                        [bookmarks addObject:bookmark];
+                        [bookmark release];
+                    } else
+                        NSLog(@"Failed to read bookmark: %@", dict);
+                }
+            }
+            
+            bookmarkRoot = [[BDSKBookmark alloc] initRootWithChildren:bookmarks];
+            [self startObservingBookmarks:[NSArray arrayWithObject:bookmarkRoot]];
+            
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminateNotification:) name:NSApplicationWillTerminateNotification object:nil];
+        }
+        sharedBookmarkController = [self retain];
+    } else if (self != sharedBookmarkController) {
+        BDSKASSERT_NOT_REACHED("shouldn't be able to create multiple instances");
+        [self release];
+        self = [sharedBookmarkController retain];
     }
     return self;
 }
