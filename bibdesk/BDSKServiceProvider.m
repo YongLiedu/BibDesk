@@ -57,8 +57,12 @@ static id sharedServiceProvider = nil;
     return sharedServiceProvider;
 }
 
-- (id)init {
++ (id)allocWithZone:(NSZone *)zone {
     BDSKPRECONDITION(sharedServiceProvider == nil);
+    return [super allocWithZone:zone];
+}
+
+- (id)init {
     self = [super init];
     return self;
 }

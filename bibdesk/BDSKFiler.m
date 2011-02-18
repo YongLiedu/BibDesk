@@ -67,8 +67,12 @@ static BDSKFiler *sharedFiler = nil;
 	return sharedFiler;
 }
 
-- (id)init{
++ (id)allocWithZone:(NSZone *)zone {
     BDSKPRECONDITION(sharedFiler == nil);
+    return [super allocWithZone:zone];
+}
+
+- (id)init{
 	self = [super initWithWindowNibName:@"AutoFileProgress"];
 	return self;
 }

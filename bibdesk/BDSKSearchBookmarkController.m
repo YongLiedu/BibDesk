@@ -76,8 +76,12 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
     return sharedBookmarkController;
 }
 
-- (id)init {
++ (id)allocWithZone:(NSZone *)zone {
     BDSKPRECONDITION(sharedBookmarkController == nil);
+    return [super allocWithZone:zone];
+}
+
+- (id)init {
     if (self = [super initWithWindowNibName:@"SearchBookmarksWindow"]) {
         NSMutableArray *bookmarks = [NSMutableArray array];
         for (NSDictionary *dict in [[NSUserDefaults standardUserDefaults] arrayForKey:BDSKSearchGroupBookmarksKey]) {

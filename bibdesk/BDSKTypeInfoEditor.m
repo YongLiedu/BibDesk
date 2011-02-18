@@ -58,9 +58,13 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
     return sharedTypeInfoEditor;
 }
 
++ (id)allocWithZone:(NSZone *)zone {
+    BDSKPRECONDITION(sharedTypeInfoEditor == nil);
+    return [super allocWithZone:zone];
+}
+
 - (id)init
 {
-    BDSKPRECONDITION(sharedTypeInfoEditor == nil);
     if (self = [super initWithWindowNibName:@"BDSKTypeInfoEditor"]) {
         canEditDefaultTypes = NO;
         

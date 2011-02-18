@@ -84,12 +84,18 @@ static CGFloat GROUP_ROW_HEIGHT = 24.0;
 
 @implementation BDSKFileMatcher
 
+static id sharedInstance = nil;
+
 + (id)sharedInstance;
 {
-    static id sharedInstance = nil;
     if (nil == sharedInstance)
         sharedInstance = [[self alloc] init];
     return sharedInstance;
+}
+
++ (id)allocWithZone:(NSZone *)zone {
+    BDSKPRECONDITION(sharedInstance == nil);
+    return [super allocWithZone:zone];
 }
 
 - (id)init

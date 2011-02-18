@@ -53,9 +53,13 @@ static BDSKCharacterConversion *sharedConversionEditor;
     return sharedConversionEditor;
 }
 
++ (id)allocWithZone:(NSZone *)zone {
+    BDSKPRECONDITION(sharedConversionEditor == nil);
+    return [super allocWithZone:zone];
+}
+
 - (id)init
 {
-    BDSKPRECONDITION(sharedConversionEditor == nil);
     if (self = [super initWithWindowNibName:BDSKCharacterConversionFrameAutosaveName]) {  
 		
 		oneWayDict = [[NSMutableDictionary alloc] initWithCapacity:1];

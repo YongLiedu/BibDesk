@@ -86,6 +86,11 @@ enum {
     return sharedFC;
 }
 
++ (id)allocWithZone:(NSZone *)zone {
+    BDSKPRECONDITION(sharedFC == nil);
+    return [super allocWithZone:zone];
+}
+
 - (id)init {
     if (self = [super initWithWindowNibName:@"BDSKFindPanel"]) {
 		NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSFindPboard];
