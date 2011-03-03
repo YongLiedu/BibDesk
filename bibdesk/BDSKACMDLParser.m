@@ -1,27 +1,28 @@
 //
 //  BDSKACMDLParser.m
+//  Bibdesk
 //
-//  Created by Michael O. McCracken on 9/26/07.
+//  Created by Douglas Stebila on 3/3/11.
 /*
- This software is Copyright (c) 2007-2011
- Michael O. McCracken. All rights reserved.
-
+ This software is Copyright (c) 2010-2011
+ Douglas Stebila. All rights reserved.
+ 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
  are met:
-
+ 
  - Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
-
+ notice, this list of conditions and the following disclaimer.
+ 
  - Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in
-    the documentation and/or other materials provided with the
-    distribution.
-
- - Neither the name of Michael O. McCracken nor the names of any
-    contributors may be used to endorse or promote products derived
-    from this software without specific prior written permission.
-
+ notice, this list of conditions and the following disclaimer in
+ the documentation and/or other materials provided with the
+ distribution.
+ 
+ - Neither the name of Douglas Stebila nor the names of any
+ contributors may be used to endorse or promote products derived
+ from this software without specific prior written permission.
+ 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -36,129 +37,88 @@
  */
 
 #import "BDSKACMDLParser.h"
-#import <WebKit/WebKit.h>
-#import "BibItem.h"
 #import "BDSKBibTeXParser.h"
+#import "BibItem.h"
 #import "NSError_BDSKExtensions.h"
-#import "NSArray_BDSKExtensions.h"
-#import "NSString_BDSKExtensions.h"
+#import "NSXMLNode_BDSKExtensions.h"
+#import <AGRegex/AGRegex.h>
+
 
 @implementation BDSKACMDLParser
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
-    if ([url host] == nil || [[url host] isCaseInsensitiveEqual:@"portal.acm.org"] == NO){
+    if (nil == [url host] || NO == [[[url host] lowercaseString] isEqualToString:@"portal.acm.org"]){
         return NO;
     }
     
-    NSString *containsBibTexLinkNode = @"//a[contains(text(),'BibTeX')]";
+    NSError *error;
+    NSArray *nodes = [xmlDocument nodesForXPath:@".//meta[@name='citation_abstract_html_url']/@content" error:&error];
+    if ([nodes count] == 0) return NO;
+    NSString *node = [[nodes objectAtIndex:0] stringValue];
     
-    NSError *error = nil;    
-
-    bool nodecountisok =  [[[xmlDocument rootElement] nodesForXPath:containsBibTexLinkNode error:&error] count] > 0;
-
-    return nodecountisok;
+    AGRegex *doiRegex = [AGRegex regexWithPattern:@"^http://portal.acm.org/citation.cfm.id=[0-9]*\\.[0-9]*$"];
+	return ([doiRegex findInString:node] != nil);
+	
 }
-
-
-// Despite the name, this method assumes there's only one bibitem to be had from the document. 
-// A potential enhancement would be to recognize documents that are index lists of citations
-// and follow links two levels deep to get bibitems from each citation in the list.
 
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
-    NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
-    
-    
-    NSString *BibTeXLinkNodePath = @"//a[contains(text(),'BibTeX')]";
-    
-    NSError *error = nil;    
+	
+    NSMutableArray *items = [NSMutableArray arrayWithCapacity:1];
+	
+	NSError *error = nil;
+	NSStringEncoding encoding = NSASCIIStringEncoding;
+	
+	// extract article number and parent number
+    NSArray *nodes = [xmlDocument nodesForXPath:@".//meta[@name='citation_abstract_html_url']/@content" error:&error];
+    if ([nodes count] == 0) return items;
+    NSString *node = [[nodes objectAtIndex:0] stringValue];
 
-    NSArray *BibTeXLinkNodes = [[xmlDocument rootElement] nodesForXPath:BibTeXLinkNodePath
-                                                    error:&error];
+    AGRegex *doiRegex = [AGRegex regexWithPattern:@"^http://portal.acm.org/citation.cfm.id=([0-9]*)\\.([0-9]*)$"];
+	AGRegexMatch *match = [doiRegex findInString:node];
+	if ([match count] != 3) {
+		return items;
+	}
+	NSString *parentNumber = [match groupAtIndex:1];
+	NSString *articleNumber = [match groupAtIndex:2];
+	
+	// download BibTeX data
+	NSString *bibtexURLString = [NSString stringWithFormat:@"http://portal.acm.org/downformats.cfm?id=%@&parent_id=%@&expformat=bibtex", articleNumber, parentNumber];
+	NSURL *bibtexURL = [NSURL URLWithString:bibtexURLString];
+	NSString *bibtexData = [NSString stringWithContentsOfURL:bibtexURL usedEncoding:&encoding error:&error];
+	if (bibtexData == nil) {
+		return items;
+	}
+	
+	// remove characters before the first @ symbol
+	NSRange range = [bibtexData rangeOfString:@"@"];
+	if (range.location == NSNotFound) {
+		return items;
+	}
+	bibtexData = [bibtexData substringFromIndex:range.location];
     
-    if ([BibTeXLinkNodes count] < 1) {
-        if (outError) *outError = error;
-        return nil;
-    }
+    // remove spaces in cite key (for some reason, ACM will use author names with spaces in the cite key
+    // but btparse chokes on these)
+	range = [bibtexData rangeOfString:@","];
+	if (range.location == NSNotFound) {
+		return items;
+	}
+    NSRange newrange;
+    newrange.length = range.location;
+    newrange.location = 0;
+    bibtexData = [bibtexData stringByReplacingOccurrencesOfString:@" " withString:@"" options:0 range:newrange];
     
-    NSXMLNode *btlinknode = [BibTeXLinkNodes objectAtIndex:0];
-    NSString *onClickValue = [btlinknode stringValueOfAttribute:@"onclick"];
-
-    // string should look like "window.open('.*');". Trim off the outer stuff:
-    
-    // check length in case this changes at some point in future, though!
-    if ([onClickValue length] < 16) {
-        if (outError) {
-            *outError = [NSError localErrorWithCode:kBDSKWebParserFailed localizedDescription:NSLocalizedString(@"Window URL path string shorter than expected", @"ACM parser error")];
-            return nil;
-        }
-    }
-    
-    NSString *bibTeXWindowURLPath = [onClickValue substringWithRange:NSMakeRange(13, [onClickValue length] - 13 - 3)];
-    
-    NSURL *btwinURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@/%@", [url host], bibTeXWindowURLPath]];
-
-    NSXMLDocument *btxmlDoc = [[NSXMLDocument alloc] initWithContentsOfURL:btwinURL
-                                                                   options:NSXMLDocumentTidyHTML
-                                                                     error:&error];
-    [btxmlDoc autorelease];
-    
-    
-    NSString *prePath = @".//pre";
-    
-    NSArray *preNodes = [[btxmlDoc rootElement] nodesForXPath:prePath
-                                                           error:&error];
-    if ([preNodes count] < 1) {
-        if (outError) *outError = error;
-        return nil;
-    }
-    
-    // see http://portal.acm.org/citation.cfm?id=1185814&coll=Portal&dl=GUIDE&CFID=42263270&CFTOKEN=40475994#
-    // which gives a bibtex string in two parts, each part enclosed in a <pre> tag (is it just me or does it look like a drunk made this site?)
-    NSString *preString;
-    if ([preNodes count] == 0)
-        preString = [[preNodes objectAtIndex:0] stringValue];
-    else
-        preString = [[preNodes valueForKey:@"stringValue"] componentsJoinedByString:@" "];
-    
-    
-    BOOL isPartialData = NO;
-    
-    NSArray* bibtexItems = [BDSKBibTeXParser itemsFromString:preString owner:nil isPartialData:&isPartialData error:&error];
-    if ([bibtexItems count] == 0){
-        // display a fake item in the table rather than the annoying modal failure alert
-        NSString *errMsg = NSLocalizedString(@"Unable to parse as BibTeX", @"google scholar error");
-        NSDictionary *pubFields = [NSDictionary dictionaryWithObjectsAndKeys:errMsg, BDSKTitleString, nil];
-        BibItem *errorItem = [[BibItem alloc] initWithType:BDSKMiscString citeKey:nil pubFields:pubFields isNew:YES];
-        [items addObject:errorItem];
-        [errorItem release];
-    }
-    else {
-        [items addObjectsFromArray:bibtexItems];
-    }
-    
-    BibItem *bibtexItem = [items objectAtIndex:0]; 
-
-    // Get the PDF URL, if possible:
-    
-    NSArray *pdfLinkNodes = [[xmlDocument rootElement] nodesForXPath:@"//a[contains(@name, 'FullText')]"
-                                                               error:&error];
-    if ([pdfLinkNodes count] > 0){
-        NSXMLNode *pdfLinkNode = [pdfLinkNodes objectAtIndex:0];
-        NSString *hrefValue = [pdfLinkNode stringValueOfAttribute:@"href"];
-        
-        NSString *pdfURLString = [NSString stringWithFormat:@"http://%@/%@", [url host], hrefValue];
-        
-        [bibtexItem setField:BDSKUrlString toValue:pdfURLString];
-    }
-    
-    return items;  
-    
+	// parse BibTeX data
+	NSArray *parsedItems = [BDSKBibTeXParser itemsFromString:bibtexData owner:nil isPartialData:NO error:outError];
+	if (parsedItems) {
+		[items addObjectsFromArray:parsedItems];
+	}
+	
+	return items;  
 }
-
 
 + (NSDictionary *)parserInfo {
-    return [BDSKWebParser parserInfoWithName:@"ACM" address:@"http://portal.acm.org/" description:nil feature:BDSKParserFeaturePublic];
+	return [BDSKWebParser parserInfoWithName:@"ACM" address:@"http://portal.acm.org/" description:nil feature:BDSKParserFeaturePublic];
 }
 
-@end 
+@end
