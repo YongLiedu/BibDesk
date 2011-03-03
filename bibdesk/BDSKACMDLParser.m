@@ -48,7 +48,7 @@
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
-    if (nil == [url host] || NO == [[[url host] lowercaseString] isEqualToString:@"portal.acm.org"]){
+    if (nil == [url host] || NO == [[url host] isCaseInsensitiveEqual:@"portal.acm.org"]){
         return NO;
     }
     
