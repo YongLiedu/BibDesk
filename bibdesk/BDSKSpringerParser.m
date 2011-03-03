@@ -111,8 +111,21 @@
 	NSString *doi = [xmlNode searchXPath:@".//div[@id='ContentHeading']/div[@class='heading enumeration']//span[@class='doi']/span[@class='value']" addTo:pubFields forKey:BDSKDoiString];
 
 	// set pages
-	[xmlNode searchXPath:@".//div[@id='ContentHeading']/div[@class='heading enumeration']//span[@class='pagination']" addTo:pubFields forKey:BDSKPagesString];
-
+	NSString *pages = [xmlNode searchXPath:@".//div[@id='ContentHeading']/div[@class='heading enumeration']//span[@class='pagination']" addTo:pubFields forKey:BDSKPagesString];
+    if (pages != nil) {
+        AGRegex *pagesRegex = [AGRegex regexWithPattern:@"^([0-9]*)-([0-9]*)?"];
+        AGRegexMatch *match = [pagesRegex findInString:pages];
+        if ([match count] == 3) {
+            NSMutableString *page = [[match groupAtIndex:1] mutableCopy];
+            NSString *endPage = [match groupAtIndex:2];
+            [page appendString:@"--"];
+            if([page length] - 2 > [endPage length])
+                [page appendString:[page substringToIndex:[page length] - [endPage length] - 2]];
+            [page appendString:endPage];
+            [pubFields setObject:page forKey:BDSKPagesString];
+            [page release];
+        }
+    }
 	// set authors
 	[pubFields setValue:[BDSKSpringerParser authorStringFromXMLNode:xmlNode searchXPath:@".//div[@id='ContentHeading']/div[@class='heading primitive']/div[@class='text']/p[@class='authors']/a"] forKey:BDSKAuthorString];
 	// set editors
