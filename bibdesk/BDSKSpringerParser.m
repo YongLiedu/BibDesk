@@ -39,6 +39,7 @@
 #import "BDSKSpringerParser.h"
 #import "BibItem.h"
 #import "NSError_BDSKExtensions.h"
+#import "NSArray_BDSKExtensions.h"
 #import "NSXMLNode_BDSKExtensions.h"
 #import <AGRegex/AGRegex.h>
 
@@ -54,236 +55,101 @@
         return NO;
     }
 
-	NSString *itemType = [[xmlDocument rootElement] searchXPath:@".//span[@id=\"ctl00_PageHeadingLabel\"]" addTo:nil forKey:nil];
-	if ([itemType isEqualToString:@"Journal Article"]) {
-		return YES;
-	} else if ([itemType isEqualToString:@"Book Chapter"]) {
-		return YES;
-	} else if ([itemType isEqualToString:@"Book"]) {
-		return YES;
-	}
-	
-	return NO;
+	return YES;
 	
 }
 
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
-	
-    NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
-	
-	NSString *itemType = [[xmlDocument rootElement] searchXPath:@".//span[@id=\"ctl00_PageHeadingLabel\"]" addTo:nil forKey:nil];
-
-	if ([itemType isEqualToString:@"Journal Article"]) {
-		BibItem *item = [BDSKSpringerParser journalArticleFromXMLDocument:xmlDocument fromURL:url error:outError];
-		[items addObject:item];
-		[item release];
-	} else if ([itemType isEqualToString:@"Book Chapter"]) {
-		BibItem *item = [BDSKSpringerParser bookChapterFromXMLDocument:xmlDocument fromURL:url error:outError];
-		[items addObject:item];
-		[item release];
-	} else if ([itemType isEqualToString:@"Book"]) {
-		BibItem *item = [BDSKSpringerParser bookFromXMLDocument:xmlDocument fromURL:url error:outError];
-		[items addObject:item];
-		[item release];
-	}
-	
+    NSMutableArray *items = [NSMutableArray arrayWithCapacity:1];
+    BibItem *item = [BDSKSpringerParser itemFromXMLDocument:xmlDocument fromURL:url error:outError];
+    if (item != nil) {
+        [items addObject:item];
+        [item release];
+    }
 	return items;  
-	
 }
 
-+ (NSString *)authorStringFromXMLNode:(NSXMLNode *)xmlNode {
-	// this is annoying because the SpringerLink HTML is not properly nested
-	// we have to get the AuthorGroup string, chop the junk off the end of it, then remove all the extra junk that's inside of it
++ (NSString *)authorStringFromXMLNode:(NSXMLNode *)xmlNode searchXPath:(NSString *)xPath {
 	NSError *error = nil;
-	NSArray *authorNodes = [xmlNode nodesForXPath:@".//p[@class=\"AuthorGroup\"]" error:&error];
-	if ([authorNodes count] == 0) {
-		return nil;
-	}
-	NSString *authorXMLString = [[authorNodes objectAtIndex:0] XMLString];
-	// trim junk off the end
-	NSRange r = [authorXMLString rangeOfString:@"<table"];
-	if (r.location != NSNotFound) {
-		authorXMLString = [authorXMLString substringToIndex:r.location];
-	}
-	// trim junk off the beginning
-	r = [authorXMLString rangeOfString:@">"];
-	if (r.location != NSNotFound) {
-		authorXMLString = [authorXMLString substringFromIndex:r.location + 1];
-	}
-	// trim junk out of the middle
-	AGRegex *regex = [AGRegex regexWithPattern:@"<[^>]*>"];
-	authorXMLString = [regex replaceWithString:@"<>" inString:authorXMLString];
-	regex = [AGRegex regexWithPattern:@">and"];
-	authorXMLString = [regex replaceWithString:@">," inString:authorXMLString];
-	regex = [AGRegex regexWithPattern:@"<[^,]*"];
-	authorXMLString = [regex replaceWithString:@"" inString:authorXMLString];
-	regex = [AGRegex regexWithPattern:@","];
-	authorXMLString = [regex replaceWithString:@" and " inString:authorXMLString];
-	return authorXMLString;
+	NSArray *authorNodes = [xmlNode nodesForXPath:xPath error:&error];
+    NSMutableArray *authorStrings = [[NSMutableArray alloc] initWithCapacity:[authorNodes count]];
+    NSXMLNode *node;
+    for (node in authorNodes) {
+        [authorStrings addObject:[node stringValue]];
+    }
+	return [authorStrings componentsJoinedByAnd];;
 }
 
-+ (BibItem *)bookFromXMLDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
-	
++ (BibItem *)itemFromXMLDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
+    
 	NSXMLNode *xmlNode = [xmlDocument rootElement];
 	NSMutableDictionary *pubFields = [NSMutableDictionary dictionary];
 	NSMutableArray *filesArray = [NSMutableArray arrayWithCapacity:0];
-	
+    
+    NSString *pubType = BDSKMiscString;
+    // set publication type
+    NSString *pubTypeGuess = [xmlNode searchXPath:@".//div[@id='ContentHeading']/div[@class='heading enumeration']/div[@class='primary']/a/@title" addTo:nil forKey:nil];
+    if (pubTypeGuess != nil) {
+        if ([pubTypeGuess isEqualToString:@"Link to the Book of this Chapter"]) {
+            pubType = BDSKChapterString;
+        } else if ([pubTypeGuess isEqualToString:@"Link to the Journal of this Article"]) {
+            pubType = BDSKArticleString;
+        } else {
+            return nil;
+        }
+    }
+    
 	// set title
-	[xmlNode searchXPath:@".//h2[@class='MPReader_Profiles_SpringerLink_Content_PrimitiveHeadingControlName']" addTo:pubFields forKey:BDSKTitleString];
-	[xmlNode searchXPath:@".//h2[@class='MPReader_Profiles_SpringerLink_Content_PrimitiveHeadingControlName']" addTo:pubFields forKey:BDSKBooktitleString];
-	// set note from subtitle
-	[xmlNode searchXPath:@".//div[@class='labelValue subtitle']" addTo:pubFields forKey:@"Note"];
-	// set publisher
-	[xmlNode searchXPath:@".//td[.='Publisher']/following-sibling::td" addTo:pubFields forKey:BDSKPublisherString];
+	[xmlNode searchXPath:@".//div[@id='ContentHeading']/div[@class='heading primitive']/div[@class='text']/h1" addTo:pubFields forKey:BDSKTitleString];
+	// set book or journal
+    if ([pubType isEqualToString:BDSKChapterString]) {
+        [xmlNode searchXPath:@".//div[@id='ContentHeading']/div[@class='heading enumeration']/div[@class='primary']/a" addTo:pubFields forKey:BDSKBooktitleString];
+    } else if ([pubType isEqualToString:BDSKArticleString]) {
+        [xmlNode searchXPath:@".//div[@id='ContentHeading']/div[@class='heading enumeration']/div[@class='primary']/a" addTo:pubFields forKey:BDSKJournalString];
+    }
 	// set DOI and store for later use
-	NSString *doi = [xmlNode searchXPath:@".//td[.='DOI']/following-sibling::td" addTo:pubFields forKey:BDSKDoiString];
-	// set year
-	[xmlNode searchXPath:@".//td[.='Copyright']/following-sibling::td" addTo:pubFields forKey:BDSKYearString];
+	NSString *doi = [xmlNode searchXPath:@".//div[@id='ContentHeading']/div[@class='heading enumeration']//span[@class='doi']/span[@class='value']" addTo:pubFields forKey:BDSKDoiString];
+
+	// set pages
+	[xmlNode searchXPath:@".//div[@id='ContentHeading']/div[@class='heading enumeration']//span[@class='pagination']" addTo:pubFields forKey:BDSKPagesString];
+
+	// set authors
+	[pubFields setValue:[BDSKSpringerParser authorStringFromXMLNode:xmlNode searchXPath:@".//div[@id='ContentHeading']/div[@class='heading primitive']/div[@class='text']/p[@class='authors']/a"] forKey:BDSKAuthorString];
+	// set editors
+	[pubFields setValue:[BDSKSpringerParser authorStringFromXMLNode:xmlNode searchXPath:@".//div[@id='ContentHeading']/div[@class='heading primitive']/div[@class='text']/p[@class='editors']/a"] forKey:BDSKEditorString];
 	// set series
-	[xmlNode searchXPath:@".//td[.='Book Series']/following-sibling::td/a" addTo:pubFields forKey:BDSKSeriesString];
-	// set ISBN
-	[xmlNode searchXPath:@".//td[.='ISBN']/following-sibling::td" addTo:pubFields forKey:@"Isbn"];
-	// set edition
-	[xmlNode searchXPath:@".//td[.='Edition']/following-sibling::td" addTo:pubFields forKey:@"Edition"];
-	
-	// parse volume number
-	NSString *volumeString = [xmlNode searchXPath:@".//td[.='Volume']/following-sibling::td" addTo:nil forKey:nil];
-	if (volumeString != nil) {
-		AGRegex *volRegex = [AGRegex regexWithPattern:@"^Volume ([^/]*)"];
-		AGRegexMatch *volMatch = [volRegex findInString:volumeString];
+    if ([pubType isEqualToString:BDSKChapterString]) {
+        [xmlNode searchXPath:@".//div[@id='ContentHeading']/div[@class='heading enumeration']/div[@class='secondary']/a" addTo:pubFields forKey:BDSKSeriesString];
+    }
+    
+    // volume, number, and year
+    NSString *vyString = [xmlNode searchXPath:@".//div[@id='ContentHeading']/div[@class='heading enumeration']/div[@class='secondary']" addTo:nil forKey:nil];
+    if (vyString != nil) {
+        // parse volume number
+		AGRegex *volRegex = [AGRegex regexWithPattern:@"Volume ([0-9]*)[^0-9]"];
+		AGRegexMatch *volMatch = [volRegex findInString:vyString];
 		// set volume
 		if (nil != [volMatch groupAtIndex:1]) {
 			[pubFields setValue:[volMatch groupAtIndex:1] forKey:BDSKVolumeString];
 		}
-	}
-	
-	// URL to DOI
-	if (doi != nil) {
-		[filesArray addObject:[BDSKLinkedFile linkedFileWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://dx.doi.org/%@", doi]] delegate:nil]];
-	}
-	
-	return [[BibItem alloc] initWithType:BDSKBookString citeKey:nil pubFields:pubFields files:filesArray isNew:YES];
-	
-}
-
-+ (BibItem *)bookChapterFromXMLDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
-
-	NSXMLNode *xmlNode = [xmlDocument rootElement];
-	NSMutableDictionary *pubFields = [NSMutableDictionary dictionary];
-	NSMutableArray *filesArray = [NSMutableArray arrayWithCapacity:0];
-
-	// set title
-	[xmlNode searchXPath:@".//h2[@class='MPReader_Profiles_SpringerLink_Content_PrimitiveHeadingControlName']" addTo:pubFields forKey:BDSKTitleString];
-	// set note from subtitle
-	[xmlNode searchXPath:@".//div[@class='labelValue subtitle']" addTo:pubFields forKey:@"Note"];
-	// set book
-	[xmlNode searchXPath:@".//td[.='Book']/following-sibling::td/a" addTo:pubFields forKey:BDSKBooktitleString];
-	// set publisher
-	[xmlNode searchXPath:@".//td[.='Publisher']/following-sibling::td" addTo:pubFields forKey:BDSKPublisherString];
-	// set DOI and store for later use
-	NSString *doi = [xmlNode searchXPath:@".//td[.='DOI']/following-sibling::td" addTo:pubFields forKey:BDSKDoiString last:YES];
-	
-    // set pages
-	NSString *pages = [xmlNode searchXPath:@".//td[.='Pages']/following-sibling::td" addTo:pubFields forKey:BDSKPagesString];
-    if (pages != nil) {
-        AGRegex *pagesRegex = [AGRegex regexWithPattern:@"^([0-9]*)-([0-9]*)?"];
-        AGRegexMatch *match = [pagesRegex findInString:pages];
-        if ([match count] == 3) {
-            NSMutableString *page = [[match groupAtIndex:1] mutableCopy];
-            NSString *endPage = [match groupAtIndex:2];
-            [page appendString:@"--"];
-            if([page length] - 2 > [endPage length])
-                [page appendString:[page substringToIndex:[page length] - [endPage length] - 2]];
-            [page appendString:endPage];
-            [pubFields setObject:page forKey:BDSKPagesString];
-            [page release];
-        }
-    }
-    
-	// set authors
-	[pubFields setValue:[BDSKSpringerParser authorStringFromXMLNode:xmlNode] forKey:BDSKAuthorString];
-	// set year
-	[xmlNode searchXPath:@".//td[.='Copyright']/following-sibling::td" addTo:pubFields forKey:BDSKYearString];
-	// set series
-	[xmlNode searchXPath:@".//td[.='Book Series']/following-sibling::td/a" addTo:pubFields forKey:BDSKSeriesString];
-
-	// parse volume number
-	NSString *volumeString = [xmlNode searchXPath:@".//td[.='Volume']/following-sibling::td" addTo:nil forKey:nil];
-	if (volumeString != nil) {
-		AGRegex *volRegex = [AGRegex regexWithPattern:@"^Volume (.*)/.*"];
-		AGRegexMatch *volMatch = [volRegex findInString:volumeString];
-		// set volume
-		if (nil != [volMatch groupAtIndex:1]) {
-			[pubFields setValue:[volMatch groupAtIndex:1] forKey:BDSKVolumeString];
-		}
-	}
-	
-	// URL to PDF
-	[filesArray addObject:[BDSKLinkedFile linkedFileWithURL:[NSURL URLWithString:@"fulltext.pdf" relativeToURL:url] delegate:nil]];
-	// URL to DOI
-	if (doi != nil) {
-		[filesArray addObject:[BDSKLinkedFile linkedFileWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://dx.doi.org/%@", doi]] delegate:nil]];
-	}
-
-	return [[BibItem alloc] initWithType:BDSKChapterString citeKey:nil pubFields:pubFields files:filesArray isNew:YES];
-
-}
-	
-+ (BibItem *)journalArticleFromXMLDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
-	
-	NSXMLNode *xmlNode = [xmlDocument rootElement];
-	NSMutableDictionary *pubFields = [NSMutableDictionary dictionary];
-	NSMutableArray *filesArray = [NSMutableArray arrayWithCapacity:0];
-	
-	// set title
-	[xmlNode searchXPath:@".//h2[@class=\"MPReader_Profiles_SpringerLink_Content_PrimitiveHeadingControlName\"]" addTo:pubFields forKey:BDSKTitleString];
-	// set journal
-	[xmlNode searchXPath:@".//td[.='Journal']/following-sibling::td/a" addTo:pubFields forKey:BDSKJournalString];
-	// set DOI and store for later use
-	NSString *doi = [xmlNode searchXPath:@".//td[.='DOI']/following-sibling::td" addTo:pubFields forKey:BDSKDoiString];
-	
-    // set pages
-	NSString *pages = [xmlNode searchXPath:@".//td[.='Pages']/following-sibling::td" addTo:pubFields forKey:BDSKPagesString];
-    if (pages != nil) {
-        AGRegex *pagesRegex = [AGRegex regexWithPattern:@"^([0-9]*)-([0-9]*)?"];
-        AGRegexMatch *match = [pagesRegex findInString:pages];
-        if ([match count] == 3) {
-            NSMutableString *page = [[match groupAtIndex:1] mutableCopy];
-            NSString *endPage = [match groupAtIndex:2];
-            [page appendString:@"--"];
-            if([page length] - 2 > [endPage length])
-                [page appendString:[page substringToIndex:[page length] - [endPage length] - 2]];
-            [page appendString:endPage];
-            [pubFields setObject:page forKey:BDSKPagesString];
-            [page release];
-        }
-    }
-    
-	// set authors
-	[pubFields setValue:[BDSKSpringerParser authorStringFromXMLNode:xmlNode] forKey:BDSKAuthorString];
-	
-	// parse volume, issue number
-	NSString *issueString = [xmlNode searchXPath:@".//td[.='Issue']/following-sibling::td/a" addTo:nil forKey:nil];
-	if (issueString != nil) {
-		AGRegex *issRegex = [AGRegex regexWithPattern:@"^Volume (.*), Number (.*) / ([^,]*), ([0-9]*)$"];
-		AGRegexMatch *issMatch = [issRegex findInString:issueString];
-		// set volume
-		if (nil != [issMatch groupAtIndex:1]) {
-			[pubFields setValue:[issMatch groupAtIndex:1] forKey:BDSKVolumeString];
-		}
+        // parse issue number
+		AGRegex *numRegex = [AGRegex regexWithPattern:@"Number ([0-9]*)[^0-9]"];
+		AGRegexMatch *numMatch = [numRegex findInString:vyString];
 		// set number
-		if (nil != [issMatch groupAtIndex:2]) {
-			[pubFields setValue:[issMatch groupAtIndex:2] forKey:BDSKNumberString];
+		if (nil != [numMatch groupAtIndex:1]) {
+			[pubFields setValue:[numMatch groupAtIndex:1] forKey:BDSKNumberString];
 		}
-		// set month
-		if (nil != [issMatch groupAtIndex:3]) {
-			[pubFields setValue:[issMatch groupAtIndex:3] forKey:BDSKMonthString];
-		}
+        // parse year
+		AGRegex *yearRegex = [AGRegex regexWithPattern:@"[^0-9]([12][0-9][0-9][0-9])[^0-9]"];
+		AGRegexMatch *yearMatch = [yearRegex findInString:vyString];
 		// set year
-		if (nil != [issMatch groupAtIndex:3]) {
-			[pubFields setValue:[issMatch groupAtIndex:4] forKey:BDSKYearString];
+		if (nil != [yearMatch groupAtIndex:1]) {
+            // only if it appears before the string DOI to avoid confusing parts of the DOI as the year
+            if ([vyString rangeOfString:[yearMatch groupAtIndex:1]].location < [vyString rangeOfString:@"DOI"].location) {
+                [pubFields setValue:[yearMatch groupAtIndex:1] forKey:BDSKYearString];
+            }
 		}
-	}
+    }
 	
 	// URL to PDF
 	[filesArray addObject:[BDSKLinkedFile linkedFileWithURL:[NSURL URLWithString:@"fulltext.pdf" relativeToURL:url] delegate:nil]];
@@ -291,9 +157,9 @@
 	if (doi != nil) {
 		[filesArray addObject:[BDSKLinkedFile linkedFileWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://dx.doi.org/%@", doi]] delegate:nil]];
 	}
-	
-	return [[BibItem alloc] initWithType:BDSKArticleString citeKey:nil pubFields:pubFields files:filesArray isNew:YES];
-	
+    
+	return [[BibItem alloc] initWithType:pubType citeKey:nil pubFields:pubFields files:filesArray isNew:YES];
+    
 }
 
 + (NSDictionary *)parserInfo {

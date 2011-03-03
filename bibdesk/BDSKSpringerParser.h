@@ -42,8 +42,6 @@
 
 
 @interface BDSKSpringerParser: NSObject <BDSKWebParser>
-+ (NSString *)authorStringFromXMLNode:(NSXMLNode *)xmlNode;
-+ (BibItem *)bookFromXMLDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError;
-+ (BibItem *)bookChapterFromXMLDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError;
-+ (BibItem *)journalArticleFromXMLDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError;
++ (NSString *)authorStringFromXMLNode:(NSXMLNode *)xmlNode searchXPath:(NSString *)xPath;
++ (BibItem *)itemFromXMLDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError;
 @end
