@@ -40,7 +40,6 @@
 #import <Cocoa/Cocoa.h>
 
 extern NSString *BDSKBibDeskScheme;
-extern NSURL *BDSKBibDeskWebGroupURL;
 
 @interface BDSKBibDeskProtocol : NSURLProtocol
 @end

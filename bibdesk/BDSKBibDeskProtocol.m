@@ -58,18 +58,12 @@
 #define HELP_START_FILE     @"BibDeskHelp.html"
 
 NSString *BDSKBibDeskScheme = @"bibdesk";
-NSURL *BDSKBibDeskWebGroupURL = nil;
 
 @interface BDSKBibDeskProtocol (Private)
 - (NSData *)HTMLDataUsingTemplateFile:(NSString *)template usingObject:(id)object;
 @end
 
 @implementation BDSKBibDeskProtocol
-
-+ (void)initialize {
-    BDSKINITIALIZE;
-    BDSKBibDeskWebGroupURL = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"%@:%@", BDSKBibDeskScheme, WEBGROUP_SPECIFIER]];
-}
 
 /*
  Only accept the bibdesk:webgroup URL.
