@@ -123,13 +123,22 @@ static char _FVFileViewContentObservationContext;
 
 #pragma mark -
 
-@interface FVAnimation : NSAnimation
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+@protocol FVAnimationDelegate <NSAnimationDelegate>
+@optional
+- (void)animation:(NSAnimation *)animation didReachProgress:(NSAnimationProgress)progress;
 @end
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-@interface FVFileView (SKNSAnimationDelegate) <NSAnimationDelegate>
+@interface FVFileView (FVAnimationDelegate) <FVAnimationDelegate>
 @end
 #endif
+
+@interface FVAnimation : NSAnimation
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <FVAnimationDelegate>)delegate;
+- (void)setDelegate:(id <FVAnimationDelegate>)newDelegate;
+#endif
+@end
 
 #pragma mark -
 
@@ -4199,7 +4208,13 @@ static uint32_t SuperFastHash (const char * data, int len) {
 
 - (void)setCurrentProgress:(NSAnimationProgress)progress {
     [super setCurrentProgress:progress];
-    [[self delegate] animation:self didReachProgress:progress];
+    if ([[self delegate] respondsToSelector:@selector(animation:didReachProgress:)])
+        [[self delegate] animation:self didReachProgress:progress];
 }
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <FVAnimationDelegate>)delegate { return (id <FVAnimationDelegate>)[super delegate]; }
+- (void)setDelegate:(id <FVAnimationDelegate>)newDelegate { [super setDelegate:newDelegate]; }
+#endif
 
 @end
