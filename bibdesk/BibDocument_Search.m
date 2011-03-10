@@ -50,6 +50,7 @@
 #import "BDSKPreviewer.h"
 #import "BDSKOverlayWindow.h"
 #import "BibDocument_Groups.h"
+#import "BibDocument_DataSource.h"
 #import "BDSKMainTableView.h"
 #import "BDSKFindController.h"
 #import "BDSKItemSearchIndexes.h"

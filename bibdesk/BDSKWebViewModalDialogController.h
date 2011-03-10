@@ -41,7 +41,7 @@
 
 @class BDSKStatusBar;
 
-@interface BDSKWebViewModalDialogController : NSWindowController <BDSKWebViewDelegate> {
+@interface BDSKWebViewModalDialogController : NSWindowController <BDSKWebViewDelegate, NSWindowDelegate> {
     BDSKWebView *webView;
     BDSKStatusBar *statusBar;
 }

@@ -542,8 +542,8 @@ enum {
 #if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
 - (id <BDSKMainTableViewDelegate>)delegate { return (id <BDSKMainTableViewDelegate>)[super delegate]; }
 - (void)setDelegate:(id <BDSKMainTableViewDelegate>)newDelegate { [super setDelegate:newDelegate]; }
-- (id <BDSKMainTableViewDelegate>)dataSource { return (id <BDSKMainTableViewDelegate>)[super dataSource]; }
-- (void)setDataSource:(id <BDSKMainTableViewDelegate>)newDataSource { [super setDataSource:newDataSource]; }
+- (id <BDSKMainTableViewDataSource>)dataSource { return (id <BDSKMainTableViewDataSource>)[super dataSource]; }
+- (void)setDataSource:(id <BDSKMainTableViewDataSource>)newDataSource { [super setDataSource:newDataSource]; }
 #endif
 
 @end
