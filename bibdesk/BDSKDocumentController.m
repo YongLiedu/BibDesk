@@ -59,6 +59,13 @@ enum {
     BDSKOpenTemplate
 };
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+@interface NSDocumentController (BDSKDeprecated)
+// we don't want this to be flagged as deprecated, because Apple's replacement using UTIs is too buggy, and there's no replacement for this method
+- (NSArray *)fileExtensionsFromType:(NSString *)documentTypeName;
+@end
+#endif
+
 @interface BDSKDocumentController (BDSKPrivate)
 - (void)handleWindowDidBecomeMainNotification:(NSNotification *)notification;
 @end
