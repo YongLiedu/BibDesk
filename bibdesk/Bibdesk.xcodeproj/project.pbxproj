@@ -451,7 +451,6 @@
 		F94DE74C09CB46FF00B5FD51 /* BDSKPersistentSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = F94DE74A09CB46FF00B5FD51 /* BDSKPersistentSearch.m */; };
 		F95CC0C3087F5378002C5694 /* NSFileManager_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F95CC0C1087F5378002C5694 /* NSFileManager_BDSKExtensions.m */; };
 		F95D3FAF09DDF6A900D793A6 /* BibPref_Sharing.m in Sources */ = {isa = PBXBuildFile; fileRef = F95D3FAD09DDF6A900D793A6 /* BibPref_Sharing.m */; };
-		F95ED6950B07BA4E00000BBF /* ExceptionHandling.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F95ED6910B07BA4E00000BBF /* ExceptionHandling.framework */; };
 		F963E4500A1D81B000695DDC /* exportPrefs.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F963E44F0A1D81AF00695DDC /* exportPrefs.tiff */; };
 		F963E45B0A1D828100695DDC /* BDSKTreeNode.m in Sources */ = {isa = PBXBuildFile; fileRef = F963E42B0A1D7ADD00695DDC /* BDSKTreeNode.m */; };
 		F963E45D0A1D828200695DDC /* BibPref_Export.m in Sources */ = {isa = PBXBuildFile; fileRef = F963E4360A1D7B3600695DDC /* BibPref_Export.m */; };
@@ -1725,7 +1724,6 @@
 				F91B7F28092BEB5A00976F6F /* AddressBook.framework in Frameworks */,
 				F9DF3BC209B7605E00342ADE /* SystemConfiguration.framework in Frameworks */,
 				F92ECBA009DEF86600A244D0 /* Security.framework in Frameworks */,
-				F95ED6950B07BA4E00000BBF /* ExceptionHandling.framework in Frameworks */,
 				CEE8DEC90E5C3FB700EFA97F /* yaz.framework in Frameworks */,
 				CEE8DECA0E5C3FB700EFA97F /* AGRegex.framework in Frameworks */,
 				CEE8DECB0E5C3FB700EFA97F /* FileView.framework in Frameworks */,
