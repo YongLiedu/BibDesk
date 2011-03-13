@@ -137,8 +137,8 @@
 				fieldName = BDSKTitleString;
 				publicationType = @"book";
 			}
-			else if ([key isEqualToString:@"rft.title"]) { // general title
-				fieldName = BDSKTitleString;
+			else if ([key isEqualToString:@"rft.title"]) { // general journal title
+				fieldName = BDSKJournalString;
 			}
 			else if ([key isEqualToString:@"rft.jtitle"]) { // full journal title
 				fieldName = BDSKJournalString;				
