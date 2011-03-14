@@ -105,6 +105,7 @@
         for (NSDictionary *anItem in publicationInfos) {
             if ([self isCancelled]) {
                 NSLog(@"Application will quit without finishing writing metadata cache.");
+                break;
             } else {
                 NSString *citeKey = [anItem objectForKey:@"net_sourceforge_bibdesk_citekey"];
                 if (citeKey) {
