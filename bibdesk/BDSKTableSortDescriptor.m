@@ -211,7 +211,8 @@
 
 - (id)initWithCoder:(NSCoder *)aCoder
 {
-    if (self = [super initWithCoder:aCoder]) {
+    self = [super initWithCoder:aCoder];
+    if (self) {
         [self cacheKeys];
         selector = [self selector];
         ascending = [self ascending];

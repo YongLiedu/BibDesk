@@ -240,7 +240,8 @@ static NSMapTable *selectorTable = NULL;
 }
 
 - (id)initWithType:(NSString *)type citeKey:(NSString *)key pubFields:(NSDictionary *)fieldsDict files:(NSArray *)filesArray isNew:(BOOL)isNew{ 
-    if (self = [super init]){
+    self = [super init];
+    if (self){
 		if(fieldsDict){
 			pubFields = [fieldsDict mutableCopy];
 		}else{

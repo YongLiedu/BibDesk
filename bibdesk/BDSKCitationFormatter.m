@@ -62,7 +62,8 @@ static NSCharacterSet *keyCharSet = nil;
 }
 
 - (id)initWithDelegate:(id<BDSKCitationFormatterDelegate>)aDelegate {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         delegate = aDelegate;
     }
     return self;

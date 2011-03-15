@@ -119,7 +119,8 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
 }
 
 - (id)init {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         NSFont *font = [NSFont userFontOfSize:0.0];
         
         specialTokens = [[NSMutableArray alloc] init];

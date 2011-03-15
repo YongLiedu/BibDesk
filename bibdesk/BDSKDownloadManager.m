@@ -54,7 +54,8 @@ static id sharedManager = nil;
 }
 
 - (id)init {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         downloads = [[NSMutableArray alloc] init];
     }
     return self;
@@ -200,7 +201,8 @@ static id sharedManager = nil;
 static NSUInteger currentUniqueID = 0;
 
 - (id)initWithURLDownload:(NSURLDownload *)aURLDownload {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         uniqueID = ++currentUniqueID;
         URL = [[[aURLDownload request] URL] retain];
         fileURL = nil;

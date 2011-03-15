@@ -42,7 +42,8 @@
 @implementation BDSKManyToManyDictionary
 
 - (id)init {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         dictionary = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
         inverseDictionary = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     }

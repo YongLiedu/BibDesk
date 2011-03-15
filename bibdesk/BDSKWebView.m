@@ -81,7 +81,8 @@
 @implementation BDSKWebView
 
 - (id)initWithFrame:(NSRect)frameRect frameName:(NSString *)frameName groupName:(NSString *)groupName {
-    if (self = [super initWithFrame:frameRect frameName:frameName groupName:@"BibDeskWebGroup"]) {
+    self = [super initWithFrame:frameRect frameName:frameName groupName:@"BibDeskWebGroup"];
+    if (self) {
         [self setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
         webDelegate = [[BDSKWebDelegate alloc] init];
         [self setFrameLoadDelegate:webDelegate];
@@ -465,7 +466,8 @@ static id sharedHandler = nil;
 }
 
 - (id)init {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         webView = [[WebView alloc] init];
         [webView setPolicyDelegate:self];  
     }

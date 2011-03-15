@@ -1311,7 +1311,8 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 @implementation BDSKFileViewObject
 
 - (id)initWithURL:(NSURL *)aURL string:(NSString *)aString {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         URL = [aURL copy];
         string = [aString copy];
     }

@@ -56,7 +56,8 @@
 
 - (id)init;
 {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         NSZone *zone = [self zone];
         publications = [[NSMutableArray allocWithZone:zone] init];
         itemsForCiteKeys = [[BDSKMultiValueDictionary allocWithZone:zone] initWithCaseInsensitiveKeys:YES];
@@ -68,7 +69,8 @@
 // custom initializers should be explicitly defined in concrete subclasses to be supported, we should not rely on inheritance
 - (id)initWithArray:(NSArray *)anArray;
 {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         NSZone *zone = [self zone];
         publications = [[NSMutableArray allocWithZone:zone] initWithArray:anArray];
         itemsForCiteKeys = [[BDSKMultiValueDictionary allocWithZone:zone] initWithCaseInsensitiveKeys:YES];

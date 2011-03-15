@@ -80,7 +80,8 @@ static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedStr
 @implementation BDSKValueTemplateTag
 
 - (id)initWithKeyPath:(NSString *)aKeyPath {
-    if (self = [super init])
+    self = [super init];
+    if (self)
         keyPath = [aKeyPath copy];
     return self;
 }
@@ -103,7 +104,8 @@ static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedStr
 @implementation BDSKRichValueTemplateTag
 
 - (id)initWithKeyPath:(NSString *)aKeyPath attributes:(NSDictionary *)anAttributes {
-    if (self = [super initWithKeyPath:aKeyPath]) {
+    self = [super initWithKeyPath:aKeyPath];
+    if (self) {
         attributes = [anAttributes copy];
     }
     return self;
@@ -132,7 +134,8 @@ static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedStr
 @implementation BDSKCollectionTemplateTag
 
 - (id)initWithKeyPath:(NSString *)aKeyPath itemTemplateString:(NSString *)anItemTemplateString separatorTemplateString:(NSString *)aSeparatorTemplateString {
-    if (self = [super initWithKeyPath:aKeyPath]) {
+    self = [super initWithKeyPath:aKeyPath];
+    if (self) {
         itemTemplateString = [anItemTemplateString retain];
         separatorTemplateString = [aSeparatorTemplateString retain];
         itemTemplate = nil;
@@ -170,7 +173,8 @@ static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedStr
 @implementation BDSKRichCollectionTemplateTag
 
 - (id)initWithKeyPath:(NSString *)aKeyPath itemTemplateAttributedString:(NSAttributedString *)anItemTemplateAttributedString separatorTemplateAttributedString:(NSAttributedString *)aSeparatorTemplateAttributedString {
-    if (self = [super initWithKeyPath:aKeyPath]) {
+    self = [super initWithKeyPath:aKeyPath];
+    if (self) {
         itemTemplateAttributedString = [anItemTemplateAttributedString retain];
         separatorTemplateAttributedString = [aSeparatorTemplateAttributedString retain];
         itemTemplate = nil;
@@ -208,7 +212,8 @@ static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedStr
 @implementation BDSKConditionTemplateTag
 
 - (id)initWithKeyPath:(NSString *)aKeyPath matchType:(BDSKTemplateTagMatchType)aMatchType matchStrings:(NSArray *)aMatchStrings subtemplates:(NSArray *)aSubtemplates {
-    if (self = [super initWithKeyPath:aKeyPath]) {
+    self = [super initWithKeyPath:aKeyPath];
+    if (self) {
         matchType = aMatchType;
         matchStrings = [aMatchStrings copy];
         subtemplates = [aSubtemplates mutableCopy];
@@ -267,7 +272,8 @@ static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedStr
 @implementation BDSKTextTemplateTag
 
 - (id)initWithText:(NSString *)aText {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         text = [aText retain];
     }
     return self;
@@ -302,7 +308,8 @@ static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedStr
 @implementation BDSKRichTextTemplateTag
 
 - (id)initWithAttributedText:(NSAttributedString *)anAttributedText {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         attributedText = [anAttributedText retain];
     }
     return self;
@@ -348,7 +355,8 @@ static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedStr
 @implementation BDSKAttributeTemplate
 
 - (id)initWithTemplate:(NSArray *)aTemplate range:(NSRange)aRange attributeClass:(Class)aClass {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         template = [aTemplate copy];
         range = aRange;
         attributeClass = aClass;

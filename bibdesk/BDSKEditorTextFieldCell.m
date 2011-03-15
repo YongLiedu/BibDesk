@@ -59,14 +59,16 @@
 }
 
 - (id)initTextCell:(NSString *)aString {
-    if (self = [super initTextCell:aString]) {
+    self = [super initTextCell:aString];
+    if (self) {
         [self commonInit];
     }
     return self;
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
         [self commonInit];
     }
     return self;

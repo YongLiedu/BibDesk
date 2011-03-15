@@ -52,7 +52,8 @@
 
 // designated initializer
 - (id)initWithDocument:(BibDocument *)aDocument {
-    if (self = [super initWithWindowNibName:@"DocumentInfoWindow"]) {
+    self = [super initWithWindowNibName:@"DocumentInfoWindow"];
+    if (self) {
         document = aDocument;
         info = nil;
         keys = nil;

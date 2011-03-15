@@ -60,7 +60,8 @@
 
 - (id)init
 {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         queueLock = [[NSConditionLock alloc] initWithCondition:QUEUE_EMPTY];
         queue = [[NSMutableArray alloc] init];
         shouldKeepRunning = 1;

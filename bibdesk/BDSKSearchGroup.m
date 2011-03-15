@@ -70,7 +70,8 @@ NSString *BDSKSearchGroupURLScheme = @"x-bdsk-search";
 - (id)initWithServerInfo:(BDSKServerInfo *)info searchTerm:(NSString *)string;
 {
     NSString *aName = (([info name] ?: [info database]) ?: string) ?: NSLocalizedString(@"Empty", @"Name for empty search group");
-    if (self = [super initWithName:aName]) {
+    self = [super initWithName:aName];
+    if (self) {
         if ([info type] == nil) {
             [self release];
             self = nil;
@@ -89,7 +90,8 @@ NSString *BDSKSearchGroupURLScheme = @"x-bdsk-search";
     NSArray *aHistory = [groupDict objectForKey:@"history"];
     BDSKServerInfo *serverInfo = [[BDSKServerInfo alloc] initWithDictionary:groupDict];
     
-    if (self = [self initWithServerInfo:serverInfo searchTerm:aSearchTerm]) {
+    self = [self initWithServerInfo:serverInfo searchTerm:aSearchTerm];
+    if (self) {
         [self setHistory:aHistory];
     }
     [serverInfo release];
@@ -180,7 +182,8 @@ NSString *BDSKSearchGroupURLScheme = @"x-bdsk-search";
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
         searchTerm = [[decoder decodeObjectForKey:@"searchTerm"] retain];
         
         history = nil;

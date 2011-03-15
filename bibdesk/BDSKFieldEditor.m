@@ -51,7 +51,8 @@
 @implementation BDSKFieldEditor
 
 - (id)init {
-	if (self = [super initWithFrame:NSZeroRect]) {
+    self = [super initWithFrame:NSZeroRect];
+    if (self) {
 		[self setFieldEditor:YES];
 		delegatedDraggedTypes = nil;
         isEditing = NO;

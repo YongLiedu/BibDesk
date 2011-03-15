@@ -65,7 +65,8 @@ static BDSKConverter *sharedConverter = nil;
 
 - (id)init{
     BDSKPRECONDITION(sharedConverter == nil);
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         [self loadDict];
     }
     return self;

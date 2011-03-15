@@ -50,7 +50,8 @@
 @implementation BDSKNotesWindowController
 
 - (id)initWithURL:(NSURL *)aURL {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         if (aURL == nil) {
             [self release];
             return nil;

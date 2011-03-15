@@ -53,7 +53,8 @@
 }
 
 - (id)initWithGroup:(BDSKURLGroup *)aGroup {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         group = [aGroup retain];
         urlString = [[[group URL] absoluteString] retain];
         undoManager = nil;

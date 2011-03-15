@@ -137,7 +137,8 @@ static NSImage *unlockedIcon = nil;
 - (id)initWithClient:(BDSKSharingClient *)aClient;
 {
     NSParameterAssert(aClient != nil);
-    if (self = [super initWithName:[aClient name]]) {
+    self = [super initWithName:[aClient name]];
+    if (self) {
 
         client = [aClient retain];
         

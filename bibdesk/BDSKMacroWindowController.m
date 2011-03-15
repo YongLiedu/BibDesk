@@ -65,7 +65,8 @@
 }
 
 - (id)initWithMacroResolver:(BDSKMacroResolver *)aMacroResolver {
-    if (self = [super initWithWindowNibName:@"MacroWindow"]) {
+    self = [super initWithWindowNibName:@"MacroWindow"];
+    if (self) {
         macroResolver = [aMacroResolver retain];
         
         // a shadow array to keep the macro keys of the document.

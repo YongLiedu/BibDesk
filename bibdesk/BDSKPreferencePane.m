@@ -44,7 +44,8 @@
 @implementation BDSKPreferencePane
 
 - (id)initWithRecord:(BDSKPreferenceRecord *)aRecord forPreferenceController:(BDSKPreferenceController *)aController {
-    if (self = [super initWithNibName:[aRecord nibName] ?: [self nibName] bundle:nil]) {
+    self = [super initWithNibName:[aRecord nibName] ?: [self nibName] bundle:nil];
+    if (self) {
         [self setRepresentedObject:aRecord];
         preferenceController = aController;
         isViewLoaded = NO;

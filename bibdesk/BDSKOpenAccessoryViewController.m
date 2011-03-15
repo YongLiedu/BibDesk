@@ -47,7 +47,8 @@
 @implementation BDSKOpenAccessoryViewController
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-    if (self = [super initWithNibName:@"BDSKOpenAccessoryView" bundle:nil]) {
+    self = [super initWithNibName:@"BDSKOpenAccessoryView" bundle:nil];
+    if (self) {
         // make sure the nib is loaded
         [self view];
     }

@@ -47,7 +47,8 @@
 }
 
 - (id)initWithDelegate:(id<BDSKComplexStringFormatterDelegate>)anObject macroResolver:(BDSKMacroResolver *)aMacroResolver {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
 		editAsComplexString = NO;
 		[self setMacroResolver:aMacroResolver];
 		[self setDelegate:anObject];

@@ -56,7 +56,8 @@
 }
 
 - (id)initWithConditions:(NSArray *)newConditions {
-	if (self = [super init]) {
+    self = [super init];
+    if (self) {
 		conditions = [[NSMutableArray alloc] initWithArray:newConditions copyItems:YES];
 		conjunction = BDSKAnd;
 		group = nil;
@@ -85,7 +86,8 @@
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-	if (self = [super init]) {
+    self = [super init];
+    if (self) {
 		conditions = [[NSMutableArray alloc] initWithArray:[decoder decodeObjectForKey:@"conditions"]];
 		conjunction = [decoder decodeIntegerForKey:@"conjunction"];
 		group = nil;

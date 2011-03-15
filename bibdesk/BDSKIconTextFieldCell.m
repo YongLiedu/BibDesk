@@ -52,7 +52,8 @@
 #define IMAGE_OFFSET (1.0)
 
 - (id)initTextCell:(NSString *)aString {
-    if (self = [super initTextCell:aString]) {
+    self = [super initTextCell:aString];
+    if (self) {
         imageCell = [[NSImageCell alloc] init];
         [imageCell setImageScaling:NSImageScaleProportionallyUpOrDown];
     }
@@ -60,7 +61,8 @@
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
         imageCell = [[decoder decodeObjectForKey:@"imageCell"] retain];
         if (imageCell == nil) {
             imageCell = [[NSImageCell alloc] init];

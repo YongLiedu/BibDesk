@@ -43,7 +43,8 @@
 @implementation BDSKSplitView
 
 - (id)initWithCoder:(NSCoder *)coder{
-    if (self = [super initWithCoder:coder]) {
+    self = [super initWithCoder:coder];
+    if (self) {
         if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_5 && [self dividerStyle] == NSSplitViewDividerStyleThick)
             [self setDividerStyle:3]; // NSSplitViewDividerStylePaneSplitter
     }

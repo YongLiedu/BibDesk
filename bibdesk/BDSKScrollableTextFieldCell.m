@@ -105,7 +105,8 @@
 
 - (id)initTextCell:(NSString *)aString
 {
-	if (self = [super initTextCell:aString]) {
+    self = [super initTextCell:aString];
+    if (self) {
 		scrollStep = 0;
 		isLeftButtonHighlighted = NO;
 		isRightButtonHighlighted = NO;
@@ -117,7 +118,8 @@
 }
 
 - (id)initWithCoder:(NSCoder *)coder {
-    if (self = [super initWithCoder:coder]) {
+    self = [super initWithCoder:coder];
+    if (self) {
 		scrollStep = 0;
 		isLeftButtonHighlighted = NO;
 		isRightButtonHighlighted = NO;

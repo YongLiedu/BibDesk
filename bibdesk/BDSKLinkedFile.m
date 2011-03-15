@@ -424,7 +424,8 @@ static Class BDSKLinkedFileClass = Nil;
     NSString *relPath = [aPath relativePathFromPath:basePath];
     AliasHandle anAlias = BDSKPathToAliasHandle((CFStringRef)aPath, (CFStringRef)basePath);
     
-    if (self = [self initWithAlias:anAlias relativePath:relPath delegate:aDelegate]) {
+    self = [self initWithAlias:anAlias relativePath:relPath delegate:aDelegate];
+    if (self) {
         if (basePath)
             // this initalizes the FSRef and update the alias
             [self fileRef];
@@ -720,7 +721,8 @@ static Class BDSKLinkedFileClass = Nil;
 
 - (id)initWithURL:(NSURL *)aURL delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         if (aURL) {
             URL = [aURL copy];
         } else {
@@ -750,7 +752,8 @@ static Class BDSKLinkedFileClass = Nil;
 
 - (id)initWithCoder:(NSCoder *)coder
 {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         if ([coder allowsKeyedCoding]) {
             URL = [[coder decodeObjectForKey:@"URL"] retain];
         } else {

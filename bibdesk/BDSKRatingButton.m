@@ -55,7 +55,8 @@
 
 // for IB
 - (id)initWithCoder:(NSCoder *)coder {
-	if (self = [super initWithCoder:coder]) {
+    self = [super initWithCoder:coder];
+    if (self) {
 		NSButtonCell *oldCell = [self cell];
 		if ([oldCell isKindOfClass:[[self class] cellClass]] == NO) {
 			BDSKRatingButtonCell *newCell = [[[[self class] cellClass] alloc] init];

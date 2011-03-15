@@ -64,7 +64,8 @@ static char BDSKEditorTextViewDefaultsObservationContext;
 
 - (id)initWithCoder:(NSCoder *)coder
 {
-    if (self = [super initWithCoder:coder]) {
+    self = [super initWithCoder:coder];
+    if (self) {
         [self doCommonSetup];
     }
     return self;
@@ -72,7 +73,8 @@ static char BDSKEditorTextViewDefaultsObservationContext;
 
 - (id)initWithFrame:(NSRect)frameRect textContainer:(NSTextContainer *)container;
 {
-    if (self = [super initWithFrame:frameRect textContainer:container]) {
+    self = [super initWithFrame:frameRect textContainer:container];
+    if (self) {
         [self doCommonSetup];
     }
     return self;    

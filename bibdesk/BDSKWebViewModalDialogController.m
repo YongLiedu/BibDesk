@@ -46,7 +46,8 @@
 - (id)init {
     NSUInteger mask = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
     NSWindow *window = [[[NSWindow alloc] initWithContentRect:NSMakeRect(0.0, 0.0, 200.0, 200.0) styleMask:mask backing:NSBackingStoreBuffered defer:YES] autorelease];
-    if (self = [self initWithWindow:window]) {
+    self = [self initWithWindow:window];
+    if (self) {
         [window setDelegate:self];
         webView = [[BDSKWebView alloc] init];
         [webView setDelegate:self];

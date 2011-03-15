@@ -68,7 +68,8 @@
 
 - (id)initWithGroup:(BDSKSearchGroup *)aGroup;
 {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         group = [aGroup retain];
         undoManager = nil;
         

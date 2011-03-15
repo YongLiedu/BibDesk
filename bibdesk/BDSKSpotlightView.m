@@ -46,7 +46,8 @@
 @implementation BDSKSpotlightView;
 
 - (id)initWithFrame:(NSRect)frameRect flipped:(BOOL)isFlipped {
-    if (self = [super initWithFrame:frameRect]) {
+    self = [super initWithFrame:frameRect];
+    if (self) {
         flipped = isFlipped;
     }
     return self;

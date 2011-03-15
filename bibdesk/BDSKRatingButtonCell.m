@@ -52,7 +52,8 @@
 
 // designated initializer
 - (id)initWithMaxRating:(NSUInteger)aRating {
-	if (self = [super initTextCell:@""]) {
+    self = [super initTextCell:@""];
+    if (self) {
 		rating = 0;
 		maxRating = aRating;
 		[self setImagePosition:NSImageOnly];
@@ -69,7 +70,8 @@
 }
 
 - (id)initWithCoder:(NSCoder *)coder {
-	if (self = [super initWithCoder:coder]) {
+    self = [super initWithCoder:coder];
+    if (self) {
 		rating = 0;
 		maxRating = 5;
 	}

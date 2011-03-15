@@ -243,7 +243,8 @@ static Class BDSKSearchBookmarkClass = Nil;
 @implementation BDSKServerSearchBookmark
 
 - (id)initWithInfo:(NSDictionary *)aDictionary label:(NSString *)aLabel {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         info = [aDictionary copy];
         label = [aLabel copy];
     }
@@ -308,7 +309,8 @@ static Class BDSKSearchBookmarkClass = Nil;
 @implementation BDSKFolderSearchBookmark
 
 - (id)initFolderWithChildren:(NSArray *)aChildren label:(NSString *)aLabel {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         label = [aLabel copy];
         children = [aChildren mutableCopy];
         [children setValue:self forKey:@"parent"];

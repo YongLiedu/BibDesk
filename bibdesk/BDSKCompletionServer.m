@@ -64,7 +64,8 @@ static id sharedCompletionServer = nil;
 
 - (id)init {
     BDSKPRECONDITION(sharedCompletionServer == nil);
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         connection = [[NSConnection alloc] initWithReceivePort:[NSPort port] sendPort:nil];
         NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKCompletionServer)];
         [connection setRootObject:checker];

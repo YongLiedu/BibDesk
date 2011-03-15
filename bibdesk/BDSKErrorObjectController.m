@@ -79,7 +79,8 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 - (id)init;
 {
     BDSKPRECONDITION(sharedErrorObjectController == nil);
-    if (self = [super initWithWindowNibName:@"BDSKErrorPanel"]) {
+    self = [super initWithWindowNibName:@"BDSKErrorPanel"];
+    if (self) {
         errors = [[NSMutableArray alloc] initWithCapacity:10];
         managers = [[NSMutableArray alloc] initWithCapacity:4];
         lastIndex = 0;

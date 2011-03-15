@@ -47,7 +47,8 @@
 }
 
 - (id)initWithCoder:(NSCoder*)coder {
-	if (self = [super initWithCoder:coder]) {
+    self = [super initWithCoder:coder];
+    if (self) {
 		NSTextFieldCell *oldCell = [self cell];
         if ([oldCell isKindOfClass:[[self class] cellClass]] == NO) {
             BDSKScrollableTextFieldCell *myCell = [[[[self class] cellClass] alloc] initTextCell:[oldCell stringValue]];

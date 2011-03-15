@@ -52,7 +52,8 @@
 }
 
 - (id)initWithGroup:(BDSKScriptGroup *)aGroup {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         group = [aGroup retain];
         path = [[group scriptPath] retain];
         arguments = [[group scriptArguments] retain];

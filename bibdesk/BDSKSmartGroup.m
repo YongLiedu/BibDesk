@@ -54,7 +54,8 @@
 
 // designated initializer
 - (id)initWithName:(id)aName filter:(BDSKFilter *)aFilter {
-    if (self = [super initWithName:aName]) {
+    self = [super initWithName:aName];
+    if (self) {
         filter = [aFilter copy];
         [filter setGroup:self];
     }
@@ -87,7 +88,8 @@
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
         filter = [[decoder decodeObjectForKey:@"filter"] retain];
         [filter setGroup:self];
     }

@@ -67,7 +67,8 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.0, 0.1, 0.2, 0.25, 0.35, 0.5, 
 #pragma mark Instance methods
 
 - (id)initWithFrame:(NSRect)frameRect {
-    if (self = [super initWithFrame:frameRect]) {
+    self = [super initWithFrame:frameRect];
+    if (self) {
         scalePopUpButton = nil;
         pinchZoomFactor = 1.0;
         [self makeScalePopUpButton];
@@ -76,7 +77,8 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.0, 0.1, 0.2, 0.25, 0.35, 0.5, 
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
         scalePopUpButton = nil;
         pinchZoomFactor = 1.0;
         [self makeScalePopUpButton];

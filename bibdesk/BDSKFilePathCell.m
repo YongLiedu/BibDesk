@@ -52,14 +52,16 @@ static BDSKFilePathFormatter *filePathFormatter = nil;
 }
 
 - (id)initTextCell:(NSString *)aString {
-    if (self = [super initTextCell:aString]) {
+    self = [super initTextCell:aString];
+    if (self) {
         [self setFormatter:filePathFormatter];
     }
     return self;
 }
 
 - (id)initWithCoder:(NSCoder *)coder {
-    if (self = [super initWithCoder:coder]) {
+    self = [super initWithCoder:coder];
+    if (self) {
         if ([self formatter] == nil)
             [self setFormatter:filePathFormatter];
     }

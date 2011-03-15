@@ -129,7 +129,8 @@
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
         scriptPath = [[decoder decodeObjectForKey:@"scriptPath"] retain];
         scriptArguments = [[decoder decodeObjectForKey:@"scriptArguments"] retain];
         scriptType = [decoder decodeIntegerForKey:@"scriptType"];

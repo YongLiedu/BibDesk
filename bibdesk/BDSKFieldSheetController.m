@@ -42,7 +42,8 @@
 @implementation BDSKFieldSheetController
 
 - (id)initWithPrompt:(NSString *)promptString fieldsArray:(NSArray *)fields{
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         [self window]; // make sure the nib is loaded
         field = nil;
         [self setPrompt:promptString];
@@ -162,7 +163,8 @@
 @implementation BDSKChangeFieldSheetController
 
 - (id)initWithPrompt:(NSString *)promptString fieldsArray:(NSArray *)fields replacePrompt:(NSString *)newPromptString replaceFieldsArray:(NSArray *)newFields {
-    if (self = [super initWithPrompt:promptString fieldsArray:fields]) {
+    self = [super initWithPrompt:promptString fieldsArray:fields];
+    if (self) {
         [self window]; // make sure the nib is loaded
         field = nil;
         [self setReplacePrompt:newPromptString];

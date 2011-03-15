@@ -705,7 +705,8 @@ static BDSKPreviewer *sharedPreviewer = nil;
 }
 
 - (id)initWithBibTeXString:(NSString *)aString citeKeys:(NSArray *)aKeys generatedTypes:(NSInteger)aTypes {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         bibTeXString = [aString copy];
         citeKeys = [aKeys copy];
         generatedTypes = aTypes;

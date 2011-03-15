@@ -55,7 +55,8 @@
 
 // we should always be unbordered and pulldown
 - (id)initTextCell:(NSString *)stringValue pullsDown:(BOOL)pullsDown{
-    if (self = [super initTextCell:stringValue pullsDown:YES]) {
+    self = [super initTextCell:stringValue pullsDown:YES];
+    if (self) {
 		[self makeButtonCell];
         [self setBordered:NO];
     }
@@ -63,7 +64,8 @@
 }
 
 - (id)initWithCoder:(NSCoder *)coder{
-	if (self = [super initWithCoder:coder]) {
+    self = [super initWithCoder:coder];
+    if (self) {
 		[self makeButtonCell];
         [self setBordered:NO];
 	}

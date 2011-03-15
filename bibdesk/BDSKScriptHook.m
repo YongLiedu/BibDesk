@@ -50,7 +50,8 @@
 
 // designated initializer
 - (id)initWithName:(NSString *)aName script:(NSAppleScript *)aScript {
-	if (self = [super init]) {
+    self = [super init];
+    if (self) {
         if (aScript == nil || aName == nil) {
             [self release];
             self = nil;

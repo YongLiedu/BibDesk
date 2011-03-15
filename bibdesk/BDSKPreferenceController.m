@@ -99,7 +99,8 @@ static id sharedController = nil;
 
 - (id)init {
     if (sharedController == nil) {
-        if (self = [super initWithWindowNibName:@"Preferences"]) {
+        self = [super initWithWindowNibName:@"Preferences"];
+        if (self) {
             categories = [[NSMutableArray alloc] init];
             categoryDicts = [[NSMutableDictionary alloc] init];
             records = [[NSMutableDictionary alloc] init];

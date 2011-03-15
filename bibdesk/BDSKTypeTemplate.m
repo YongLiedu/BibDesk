@@ -50,7 +50,8 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
 }
 
 - (id)initWithPubType:(NSString *)aPubType requiredTokens:(NSArray *)required optionalTokens:(NSArray *)optional {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         pubType = [aPubType retain];
         itemTemplate = [[NSArray alloc] init];
         requiredTokens = [[NSArray alloc] initWithArray:required];

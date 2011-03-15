@@ -42,7 +42,8 @@
 @implementation BDSKGradientView
 
 - (id)initWithFrame:(NSRect)frame {
-    if (self = [super initWithFrame:frame]) {
+    self = [super initWithFrame:frame];
+    if (self) {
         gradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.65 alpha:1.0] endingColor:[NSColor colorWithCalibratedWhite:0.8 alpha:1.0]];
     }
     return self;

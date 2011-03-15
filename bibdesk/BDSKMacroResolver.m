@@ -96,7 +96,8 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 }
 
 - (id)initWithOwner:(id<BDSKOwner>)anOwner{
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         macroDefinitions = nil;
         owner = anOwner;
         modification = 0;
@@ -294,7 +295,8 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 @implementation BDSKGlobalMacroResolver
 
 - (id)initWithOwner:(id<BDSKOwner>)anOwner{
-    if (self = [super initWithOwner:nil]) {
+    self = [super initWithOwner:nil];
+    if (self) {
         // store system-defined macros for the months.
         NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
         if ([[[formatter calendar] calendarIdentifier] isEqualToString:NSGregorianCalendar] == NO)

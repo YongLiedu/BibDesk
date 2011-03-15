@@ -57,7 +57,8 @@
         self = [BDSKEmptyGroup allocWithZone:zone];
         aName = [aKey isPersonField] ? [BibAuthor emptyAuthor] : @"";
     }
-    if (self = [super initWithName:aName]) {
+    self = [super initWithName:aName];
+    if (self) {
         key = [aKey copy];
     }
     return self;
@@ -83,7 +84,8 @@
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
         key = [[decoder decodeObjectForKey:@"key"] retain];
     }
     return self;

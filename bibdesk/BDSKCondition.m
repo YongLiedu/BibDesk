@@ -74,7 +74,8 @@ static char BDSKConditionObservationContext;
 }
 
 - (id)init {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         key = [@"" retain];
         stringValue = [@"" retain];
         stringComparison = BDSKContain;
@@ -97,7 +98,8 @@ static char BDSKConditionObservationContext;
 }
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
-	if (self = [self init]) {
+    self = [self init];
+    if (self) {
         NSString *aKey = [dictionary objectForKey:@"key"];
         
         // Backwards compatibility check.  Old versions of BibDesk used BDSKAllFieldsString = NSLocalizedString(@"Any Field", @"").  Before the first localization was introduced, the definition was changed to @"AllFields", which is locale-independent and more clearly related to the constant string; unfortunately, I didn't realize the definition was being saved to disk in smart groups.  However, we use BDSKAllFieldsString consistentlyin the meaning of @"Any Field", in smart groups and searching. Rather than change the definition back again and break groups added in the meantime, we'll just check for "AllField" here (must be unlocalized) and use the new constant string.
@@ -135,7 +137,8 @@ static char BDSKConditionObservationContext;
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-	if (self = [self init]) {
+    self = [self init];
+    if (self) {
 		// the order is important
 		[self setKey:[decoder decodeObjectForKey:@"key"]];
 		[self setComparison:[decoder decodeIntegerForKey:@"comparison"]];

@@ -77,7 +77,8 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (id)init {
     BDSKPRECONDITION(sharedFinder == nil);
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         orphanedFiles = [[NSMutableArray alloc] init];
         wasLaunched = NO;
     }

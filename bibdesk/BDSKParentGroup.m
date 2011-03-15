@@ -55,7 +55,8 @@
 @implementation BDSKParentGroup
 
 - (id)initWithName:(NSString *)aName {
-    if (self = [super initWithName:aName]) {
+    self = [super initWithName:aName];
+    if (self) {
         children = [[NSMutableArray alloc] init];
     }
     return self;
@@ -63,7 +64,8 @@
 
 - (id)initWithCoder:(NSCoder *)decoder {
     BDSKASSERT_NOT_REACHED("Parent groups should never be decoded");
-    if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
         children = [[NSMutableArray alloc] init];
     }
     return self;
@@ -403,7 +405,8 @@
 @implementation BDSKSmartParentGroup
 
 - (id)init {
-   if (self = [self initWithName:NSLocalizedString(@"SMART", @"source list group row title")]) {
+    self = [self initWithName:NSLocalizedString(@"SMART", @"source list group row title")];
+    if (self) {
         hasLastImportGroup = NO;
     }
     return self;

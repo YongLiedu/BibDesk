@@ -137,7 +137,8 @@ static double runLoopTimeout = 30;
 }
 
 - (id)initWithFileName:(NSString *)newFileName{
-	if (self = [super init]) {
+    self = [super init];
+    if (self) {
 		
 		NSFileManager *fm = [NSFileManager defaultManager];
         NSString *dirPath = [fm makeTemporaryDirectoryWithBasename:newFileName];

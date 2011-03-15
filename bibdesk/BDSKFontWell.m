@@ -76,14 +76,16 @@
 }
 
 - (id)initWithFrame:(NSRect)frame {
-    if (self = [super initWithFrame:frame]) {
+    self = [super initWithFrame:frame];
+    if (self) {
         [self commonInit];
     }
     return self;
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
 		NSButtonCell *oldCell = [self cell];
 		if (NO == [oldCell isKindOfClass:[[self class] cellClass]]) {
 			BDSKFontWellCell *newCell = [[[[self class] cellClass] alloc] init];
@@ -309,14 +311,16 @@
 }
  
 - (id)initTextCell:(NSString *)aString {
-	if (self = [super initTextCell:aString]) {
+    self = [super initTextCell:aString];
+    if (self) {
 		[self commonInit];
 	}
 	return self;
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-	if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
         [self commonInit];
 	}
 	return self;

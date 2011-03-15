@@ -112,7 +112,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (id)initWithTitle:(NSString *)aTitle {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         title = [aTitle copy];
         fontName = nil;
         fontSize = 0.0;
@@ -123,7 +124,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         title = [[decoder decodeObjectForKey:TITLE_KEY] retain];
         fontName = [[decoder decodeObjectForKey:FONTNAME_KEY] retain];
         fontSize = [decoder decodeDoubleForKey:FONTSIZE_KEY];
@@ -271,14 +273,16 @@ NSString *BDSKRichTextString = @"Rich Text";
 @implementation BDSKTagToken
 
 - (id)initWithTitle:(NSString *)aTitle {
-    if (self = [super initWithTitle:aTitle]) {
+    self = [super initWithTitle:aTitle];
+    if (self) {
         key = nil;
     }
     return self;
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
         key = [[decoder decodeObjectForKey:KEY_KEY] retain];
     }
     return self;
@@ -349,7 +353,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 @implementation BDSKValueTagToken
 
 - (id)initWithTitle:(NSString *)aTitle {
-    if (self = [super initWithTitle:aTitle]) {
+    self = [super initWithTitle:aTitle];
+    if (self) {
         appendingKey = nil;
         prefix = nil;
         suffix = nil;
@@ -358,7 +363,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
         appendingKey = [[decoder decodeObjectForKey:APPENDINGKEY_KEY] retain];
         prefix = [[decoder decodeObjectForKey:PREFIX_KEY] retain];
         suffix = [[decoder decodeObjectForKey:SUFFIX_KEY] retain];
@@ -488,7 +494,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 @implementation BDSKFieldTagToken
 
 - (id)initWithTitle:(NSString *)aTitle {
-    if (self = [super initWithTitle:aTitle]) {
+    self = [super initWithTitle:aTitle];
+    if (self) {
         casingKey = nil;
         cleaningKey = nil;
     }
@@ -496,7 +503,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
         casingKey = [[decoder decodeObjectForKey:CASINGKEY_KEY] retain];
         cleaningKey = [[decoder decodeObjectForKey:CLEANINGKEY_KEY] retain];
     }
@@ -617,14 +625,16 @@ NSString *BDSKRichTextString = @"Rich Text";
 @implementation BDSKURLTagToken
 
 - (id)initWithTitle:(NSString *)aTitle {
-    if (self = [super initWithTitle:aTitle]) {
+    self = [super initWithTitle:aTitle];
+    if (self) {
         urlFormatKey = [([aTitle isLocalFileField] ? @"path" : @"absoluteString" ) retain];
     }
     return self;
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
         urlFormatKey = [[decoder decodeObjectForKey:URLFORMATKEY_KEY] retain];
     }
     return self;
@@ -708,7 +718,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 @implementation BDSKPersonTagToken
 
 - (id)initWithTitle:(NSString *)aTitle {
-    if (self = [super initWithTitle:aTitle]) {
+    self = [super initWithTitle:aTitle];
+    if (self) {
         nameStyleKey = [@"name" retain];
         joinStyleKey = [@"@componentsJoinedByCommaAndAnd" retain];
     }
@@ -716,7 +727,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
         nameStyleKey = [[decoder decodeObjectForKey:NAMESTYLEKEY_KEY] retain];
         joinStyleKey = [[decoder decodeObjectForKey:JOINSTYLEKEY_KEY] retain];
     }
@@ -818,7 +830,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 @implementation BDSKLinkedFileTagToken
 
 - (id)initWithTitle:(NSString *)aTitle {
-    if (self = [super initWithTitle:aTitle]) {
+    self = [super initWithTitle:aTitle];
+    if (self) {
         linkedFileFormatKey = [([aTitle isEqualToString:BDSKLocalFileString] ? @"path" : @"URL.absoluteString" ) retain];
         linkedFileJoinStyleKey = [@"@firstObject" retain];
     }
@@ -826,7 +839,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
         linkedFileFormatKey = [[decoder decodeObjectForKey:LINKEDFILEFORMATKEY_KEY] retain];
         linkedFileJoinStyleKey = [[decoder decodeObjectForKey:LINKEDFILEJOINSTYLEKEY_KEY] retain];
     }
@@ -926,14 +940,16 @@ NSString *BDSKRichTextString = @"Rich Text";
 @implementation BDSKDateTagToken
 
 - (id)initWithTitle:(NSString *)aTitle {
-    if (self = [super initWithTitle:aTitle]) {
+    self = [super initWithTitle:aTitle];
+    if (self) {
         dateFormatKey = [@"description" retain];
     }
     return self;
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
         dateFormatKey = [[decoder decodeObjectForKey:DATEFORMATKEY_KEY] retain];
     }
     return self;
@@ -1017,7 +1033,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 @implementation BDSKNumberTagToken
 
 - (id)initWithTitle:(NSString *)aTitle {
-    if (self = [super initWithTitle:aTitle]) {
+    self = [super initWithTitle:aTitle];
+    if (self) {
         counterStyleKey = nil;
         counterCasingKey = nil;
     }
@@ -1025,7 +1042,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
         counterStyleKey = [[decoder decodeObjectForKey:COUNTERSTYLEKEY_KEY] retain];
         counterCasingKey = [[decoder decodeObjectForKey:COUNTERCASINGKEY_KEY] retain];
     }
@@ -1126,7 +1144,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 @implementation BDSKTextToken
 
 - (id)initWithTitle:(NSString *)aTitle {
-    if (self = [super initWithTitle:aTitle]) {
+    self = [super initWithTitle:aTitle];
+    if (self) {
         field = nil;
         altText = [@"" retain];
     }
@@ -1134,7 +1153,8 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
         field = [[decoder decodeObjectForKey:FIELD_KEY] retain];
         altText = [[decoder decodeObjectForKey:ALTTEXT_KEY] retain];
     }

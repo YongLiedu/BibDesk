@@ -65,7 +65,8 @@ static NSArray *noCountCellValueKeys = nil;
 
 // designated initializer
 - (id)initWithName:(id)aName {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         name = [aName copy];
         count = 0;
         document = nil;
@@ -88,7 +89,8 @@ static NSArray *noCountCellValueKeys = nil;
 // NSCoding protocol, used to remember group selection, but only for non-external groups
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         name = [[decoder decodeObjectForKey:@"name"] retain];
         count = [decoder decodeIntegerForKey:@"count"];
         uniqueID = (id)BDCreateUniqueString();

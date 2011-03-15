@@ -49,7 +49,8 @@
 }
 
 - (id)initWithCoder:(NSCoder *)coder{
-	if (self = [super initWithCoder:coder]) {
+    self = [super initWithCoder:coder];
+    if (self) {
 		if ([[self cell] isKindOfClass:[[self class] cellClass]] == NO) {
 			id oldCell = [self cell];
 			id cell = [[[[[self class] cellClass] alloc] initTextCell:@"" pullsDown:YES] autorelease];

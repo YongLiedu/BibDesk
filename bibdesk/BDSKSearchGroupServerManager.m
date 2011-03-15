@@ -89,7 +89,8 @@ static BOOL isSearchFileAtPath(NSString *path) {
 
 - (id)init {
     BDSKPRECONDITION(sharedManager == nil);
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         NSSortDescriptor *typeSort = [[[NSSortDescriptor alloc] initWithKey:@"serverType" ascending:YES selector:@selector(compare:)] autorelease];
         NSSortDescriptor *nameSort = [[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
         

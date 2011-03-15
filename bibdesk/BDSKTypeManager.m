@@ -110,7 +110,8 @@ static NSString *BDSKUserTypeInfoPath() {
 
 - (id)init{
     BDSKPRECONDITION(sharedManager == nil);
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         
         NSDictionary *typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:TYPE_INFO_FILENAME ofType:@"plist"]];
         NSDictionary *userTypeInfoDict = [NSDictionary dictionaryWithContentsOfFile:BDSKUserTypeInfoPath()] ?: typeInfoDict;

@@ -94,7 +94,8 @@
 }
 
 - (id)initWithObject:(id)anObject publications:(NSArray *)items publicationsContext:(NSArray *)itemsContext template:(BDSKTemplate *)aTemplate {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         object = [anObject retain];
         publications = [items copy];
         publicationsContext = [itemsContext copy];

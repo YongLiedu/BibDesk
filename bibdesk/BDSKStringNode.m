@@ -74,7 +74,8 @@
 }
 
 - (id)initWithType:(BDSKStringNodeType)aType value:(NSString *)s{
-	if (self = [super init]) {
+    self = [super init];
+    if (self) {
 		type = aType;
 		value = [s copy];
 	}
@@ -95,7 +96,8 @@
 
 - (id)initWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
-        if (self = [super init]) {
+        self = [super init];
+        if (self) {
             type = [coder decodeIntegerForKey:@"type"];
             value = [[coder decodeObjectForKey:@"value"] retain];
         }

@@ -243,7 +243,8 @@ static Class BDSKBookmarkClass = Nil;
 @implementation BDSKURLBookmark
 
 - (id)initWithUrlString:(NSString *)aUrlString name:(NSString *)aName {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         urlString = [aUrlString copy];
         name = [aName copy];
     }
@@ -345,7 +346,8 @@ static Class BDSKBookmarkClass = Nil;
 @implementation BDSKFolderBookmark
 
 - (id)initFolderWithChildren:(NSArray *)aChildren name:(NSString *)aName {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         name = [aName copy];
         children = [aChildren mutableCopy];
         [children setValue:self forKey:@"parent"];

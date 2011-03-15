@@ -59,7 +59,8 @@
 @implementation BDSKComplexStringEditor
 
 - (id)initWithMacroResolver:(BDSKMacroResolver *)aMacroResolver {
-	if (self = [super initWithWindowNibName:@"ComplexStringEditor"]) {
+    self = [super initWithWindowNibName:@"ComplexStringEditor"];
+    if (self) {
 		tableView = nil;
         macroResolver = [aMacroResolver retain];
 		row = -1;

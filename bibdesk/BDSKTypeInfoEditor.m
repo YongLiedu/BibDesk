@@ -61,7 +61,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 - (id)init
 {
     BDSKPRECONDITION(sharedTypeInfoEditor == nil);
-    if (self = [super initWithWindowNibName:@"BDSKTypeInfoEditor"]) {
+    self = [super initWithWindowNibName:@"BDSKTypeInfoEditor"];
+    if (self) {
         canEditDefaultTypes = NO;
         
 		fieldsForTypesDict = [[NSMutableDictionary alloc] init];

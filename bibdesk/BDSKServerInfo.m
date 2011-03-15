@@ -80,7 +80,8 @@
 
 - (id)initWithType:(NSString *)aType name:(NSString *)aName database:(NSString *)aDbase host:(NSString *)aHost port:(NSString *)aPort options:(NSDictionary *)opts;
 {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         type = [aType copy];
         name = [aName copy];
         database = [aDbase copy];
@@ -112,7 +113,8 @@
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         type = [[decoder decodeObjectForKey:TYPE_KEY] retain];
         name = [[decoder decodeObjectForKey:NAME_KEY] retain];
         database = [[decoder decodeObjectForKey:DATABASE_KEY] retain];

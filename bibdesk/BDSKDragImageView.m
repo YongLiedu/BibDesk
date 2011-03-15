@@ -42,7 +42,8 @@
 @implementation BDSKDragImageView
 
 - (id)initWithFrame:(NSRect)frameRect {
-	if (self = [super initWithFrame:frameRect]) {
+    self = [super initWithFrame:frameRect];
+    if (self) {
 		delegate = nil;
 		highlight = NO;
 	}
@@ -50,7 +51,8 @@
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-	if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
 		delegate = nil;
 		highlight = NO;
 	}

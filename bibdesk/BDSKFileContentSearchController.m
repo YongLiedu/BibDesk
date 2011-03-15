@@ -63,7 +63,8 @@
 
 - (id)initForOwner:(id<BDSKOwner>)owner
 {    
-    if (self = [super initWithNibName:@"BDSKFileContentSearch" bundle:nil]) {
+    self = [super initWithNibName:@"BDSKFileContentSearch" bundle:nil];
+    if (self) {
         results = nil;
         filteredResults = nil;
         filterURLs = nil;

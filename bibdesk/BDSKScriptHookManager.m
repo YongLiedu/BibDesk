@@ -88,7 +88,8 @@ static NSArray *scriptHookNames = nil;
 
 - (id)init {
     BDSKPRECONDITION(sharedManager == nil);
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
 		scriptHooks = [[NSMutableDictionary alloc] initWithCapacity:3];
 	}
 	return self;

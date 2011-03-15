@@ -52,7 +52,8 @@ NSString *BDSKUnderlyingItemErrorKey = @"BDSKUnderlyingItemError";
 
 - (id)initWithDomain:(NSString *)domain code:(NSInteger)code userInfo:(NSDictionary *)dict;
 {
-    if (self = [super initWithDomain:domain code:code userInfo:nil]) {
+    self = [super initWithDomain:domain code:code userInfo:nil];
+    if (self) {
         mutableUserInfo = [[NSMutableDictionary alloc] init];
         [mutableUserInfo addEntriesFromDictionary:dict];
         // we override code with our own storage so it can be set
@@ -63,7 +64,8 @@ NSString *BDSKUnderlyingItemErrorKey = @"BDSKUnderlyingItemError";
 
 - (id)initLocalErrorWithCode:(NSInteger)code localizedDescription:(NSString *)description;
 {
-    if (self = [self initWithDomain:[NSError localErrorDomain] code:code userInfo:nil]) {
+    self = [self initWithDomain:[NSError localErrorDomain] code:code userInfo:nil];
+    if (self) {
         [self setValue:description forKey:NSLocalizedDescriptionKey];
     }
     return self;

@@ -100,7 +100,8 @@ static CFCharacterSetRef dashSet = NULL;
 }
 
 - (id)initWithName:(NSString *)aName publication:(BibItem *)aPub forField:(NSString *)aField{
-	if (self = [super init]) {
+    self = [super init];
+    if (self) {
 		// set this first so we have the document for parser errors
         publication = aPub; // don't retain this, since it retains us
         

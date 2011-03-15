@@ -43,7 +43,8 @@
 @implementation BDSKEdgeView
 
 - (id)initWithFrame:(NSRect)frame {
-    if (self = [super initWithFrame:frame]) {
+    self = [super initWithFrame:frame];
+    if (self) {
        NSColor *lightColor = [NSColor colorWithDeviceWhite:0.75 alpha:1.0];
        NSColor *darkColor = [NSColor colorWithDeviceWhite:0.55 alpha:1.0];
 	   edgeColors = [[NSMutableArray alloc] initWithObjects:lightColor, lightColor, lightColor, darkColor, nil];
@@ -53,7 +54,8 @@
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-	if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
 		edgeColors = [[decoder decodeObjectForKey:@"edgeColors"] mutableCopy];
 		edges = [decoder decodeIntegerForKey:@"edges"];
 	}

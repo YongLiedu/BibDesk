@@ -53,7 +53,8 @@
 @implementation BDSKPreferenceRecord
 
 - (id)initWithDictionary:(NSDictionary *)aDictionary {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         BDSKPRECONDITION(aDictionary != nil);
         icon = [aDictionary valueForKey:ICON_KEY] ? [[NSImage imageNamed:[aDictionary valueForKey:ICON_KEY]] retain] : nil;
         helpURL = [aDictionary valueForKey:HELP_URL_KEY] ? [[NSURL alloc] initWithString:[aDictionary valueForKey:HELP_URL_KEY]] : nil;

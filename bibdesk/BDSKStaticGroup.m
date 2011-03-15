@@ -49,7 +49,8 @@
 
 // designated initializer
 - (id)initWithName:(id)aName publications:(NSArray *)array {
-    if (self = [super initWithName:aName]) {
+    self = [super initWithName:aName];
+    if (self) {
         publications = [[NSMutableArray alloc] initWithArray:array];
         [self setCount:[array count]];
     }
@@ -65,7 +66,8 @@
 - (id)initWithDictionary:(NSDictionary *)groupDict {
     NSString *aName = [[groupDict objectForKey:@"group name"] stringByUnescapingGroupPlistEntities];
     NSArray *keys = [[groupDict objectForKey:@"keys"] componentsSeparatedByString:@","];
-    if (self = [self initWithName:aName publications:nil]) {
+    self = [self initWithName:aName publications:nil];
+    if (self) {
         tmpKeys = [keys retain];
     }
     return self;
@@ -79,7 +81,8 @@
 
 // we don't really care about the publications for unarchoving, as we only use NSCoding to remember group selection
 - (id)initWithCoder:(NSCoder *)decoder {
-    if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
         publications = [[NSMutableArray alloc] init];
     }
     return self;

@@ -66,7 +66,8 @@
 }
 
 - (id)init {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         pubFields = [[NSDictionary alloc] initWithObjectsAndKeys:
 			NSLocalizedString(@"BibDesk, a great application to manage your bibliographies", @"Title for preview item in preferences"), BDSKTitleString, 
 			@"McCracken, M. and Maxwell, A. and Hofman, C. M. and Porst, S. S. and Howison, J. and Routley, M. and Spiegel, S.", BDSKAuthorString, 

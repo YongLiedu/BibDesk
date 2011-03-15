@@ -275,7 +275,8 @@ NSArray *__BDStringCreateNodesFromBibTeXString(NSString *btstring, NSError **out
 /* designated initializer */
 - (id)initWithNodes:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)aMacroResolver{
     BDSKASSERT([nodesArray count] > 0);
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         nodes = [nodesArray copyWithZone:[self zone]];
         // we don't retain, as the macroResolver might retain us as a macro value
         macroResolver = (aMacroResolver == [BDSKMacroResolver defaultMacroResolver]) ? nil : aMacroResolver;
@@ -290,7 +291,8 @@ NSArray *__BDStringCreateNodesFromBibTeXString(NSString *btstring, NSError **out
 
 - (id)initWithInheritedValue:(NSString *)aValue {
     BDSKASSERT(aValue != nil);
-    if (self = [self initWithNodes:[aValue nodes] macroResolver:[aValue macroResolver]]) {
+    self = [self initWithNodes:[aValue nodes] macroResolver:[aValue macroResolver]];
+    if (self) {
         isComplex = [aValue isComplex];
 		isInherited = YES;
 	}
@@ -331,7 +333,8 @@ Rather than relying on the same call sequence to be used, I think we should igno
 
 - (id)initWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
-        if (self = [super init]) {
+        self = [super init];
+        if (self) {
             BDSKASSERT([coder isKindOfClass:[NSKeyedUnarchiver class]]);
             nodes = [[coder decodeObjectForKey:@"nodes"] retain];
             isComplex = [coder decodeBoolForKey:@"complex"];

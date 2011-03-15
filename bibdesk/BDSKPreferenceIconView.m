@@ -64,7 +64,8 @@
 @implementation BDSKPreferenceIconView
 
 - (id)initWithPreferenceController:(BDSKPreferenceController *)aController {
-    if (self = [super initWithFrame:NSZeroRect]) {
+    self = [super initWithFrame:NSZeroRect];
+    if (self) {
         NSCell *prototype = [[NSCell alloc] init];
         [prototype setEnabled:NO];
         matrix = [[NSMatrix alloc] initWithFrame:NSZeroRect mode:NSHighlightModeMatrix prototype:prototype numberOfRows:0 numberOfColumns:0];

@@ -48,7 +48,8 @@
 @implementation BDSKFieldCollection 
 
 - (id)initWithItem:(BibItem *)anItem{
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         item = anItem;
         usedFields = [[NSMutableSet alloc] init];
         type = BDSKStringFieldCollection;
@@ -114,7 +115,8 @@
 @implementation BDSKFieldArray
 
 - (id)initWithFieldCollection:(BDSKFieldCollection *)collection fieldNames:(NSArray *)array{
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         fieldCollection = [collection retain];
         fieldNames = [[NSMutableArray alloc] initWithCapacity:[array count]];
         for (NSString *name in array) 

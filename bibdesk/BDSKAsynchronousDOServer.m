@@ -73,7 +73,8 @@ struct BDSKDOServerFlags {
 
 - (id)init
 {
-    if (self = [super init]) {       
+    self = [super init];
+    if (self) {       
         // set up flags
         serverFlags = NSZoneCalloc(NSDefaultMallocZone(), 1, sizeof(struct BDSKDOServerFlags));
         serverFlags->shouldKeepRunning = 1;

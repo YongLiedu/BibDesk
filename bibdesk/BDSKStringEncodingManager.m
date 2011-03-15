@@ -64,7 +64,8 @@ enum {
 }
 
 - (id)initWithFrame:(NSRect)frameRect {
-	if (self = [super initWithFrame:frameRect]) {
+    self = [super initWithFrame:frameRect];
+    if (self) {
             [self setAutoenablesItems:NO];
             
             defaultEncoding = BDSKNoStringEncoding;
@@ -75,7 +76,8 @@ enum {
 }
 
 - (id)initWithCoder:(NSCoder *)coder{
-	if (self = [super initWithCoder:coder]) {
+    self = [super initWithCoder:coder];
+    if (self) {
 		if ([[self cell] isKindOfClass:[[self class] cellClass]] == NO) {
             BDSKEncodingPopUpButtonCell *newCell = [[[[self class] cellClass] alloc] init];
             [newCell setAction:[[self cell] action]];

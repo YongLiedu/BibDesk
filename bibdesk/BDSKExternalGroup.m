@@ -51,7 +51,8 @@ NSString *BDSKExternalGroupSucceededKey = @"succeeded";
 - (id)initWithName:(NSString *)aName {
     NSAssert(aName != nil, @"External group requires a name");
 
-    if (self = [super initWithName:aName]) {
+    self = [super initWithName:aName];
+    if (self) {
         publications = nil;
         macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         searchIndexes = [BDSKItemSearchIndexes new];
@@ -61,7 +62,8 @@ NSString *BDSKExternalGroupSucceededKey = @"succeeded";
 
 - (id)initWithCoder:(NSCoder *)decoder {
     BDSKASSERT_NOT_REACHED("External groups should never be decoded");
-    if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
         publications = nil;
         macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         searchIndexes = [BDSKItemSearchIndexes new];

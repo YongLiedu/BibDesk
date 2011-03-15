@@ -56,7 +56,8 @@ static BDSKCharacterConversion *sharedConversionEditor;
 - (id)init
 {
     BDSKPRECONDITION(sharedConversionEditor == nil);
-    if (self = [super initWithWindowNibName:BDSKCharacterConversionFrameAutosaveName]) {  
+    self = [super initWithWindowNibName:BDSKCharacterConversionFrameAutosaveName];
+    if (self) {  
 		
 		oneWayDict = [[NSMutableDictionary alloc] initWithCapacity:1];
 		twoWayDict = [[NSMutableDictionary alloc] initWithCapacity:1];

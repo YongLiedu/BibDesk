@@ -64,7 +64,8 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 
 - (id)init{
     BDSKPRECONDITION(sharedBrowser == nil);
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         sharingClients = nil;
         browser = nil;
         unresolvedNetServices = nil;

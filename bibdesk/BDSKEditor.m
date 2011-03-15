@@ -139,7 +139,8 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 }
 
 - (id)initWithPublication:(BibItem *)aBib{
-    if (self = [super initWithWindowNibName:@"BDSKEditor"]) {
+    self = [super initWithWindowNibName:@"BDSKEditor"];
+    if (self) {
         
         publication = [aBib retain];
         fields = [[NSMutableArray alloc] init];

@@ -90,7 +90,8 @@ static id sharedBookmarkController = nil;
 
 - (id)init {
     if (sharedBookmarkController == nil) {
-        if (self = [super initWithWindowNibName:@"BookmarksWindow"]) {
+        self = [super initWithWindowNibName:@"BookmarksWindow"];
+        if (self) {
             undoManager = nil;
             
             NSMutableArray *bookmarks = [NSMutableArray array];

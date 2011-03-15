@@ -66,7 +66,8 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.1, 0.2, 0.25, 0.35, 0.5, 0.6, 
 #pragma mark Instance methods
 
 - (id)initWithFrame:(NSRect)rect {
-    if (self = [super initWithFrame:rect]) {
+    self = [super initWithFrame:rect];
+    if (self) {
 		scaleFactor = 1.0;
         pinchZoomFactor = 1.0;
     }
@@ -74,7 +75,8 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.1, 0.2, 0.25, 0.35, 0.5, 0.6, 
 }
 
 - (id)initWithCoder:(NSCoder *)coder {
-    if (self = [super initWithCoder:coder]) {
+    self = [super initWithCoder:coder];
+    if (self) {
 		scaleFactor = 1.0;
         pinchZoomFactor = 1.0;
     }

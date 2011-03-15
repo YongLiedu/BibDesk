@@ -62,7 +62,8 @@
 }
 
 - (id)initWithErrors:(NSArray *)infoDicts forField:(NSString *)field fromDocument:(BibDocument *)doc options:(NSInteger)mask {
-    if (self = [super initWithWindowNibName:@"AutoFile"]) {
+    self = [super initWithWindowNibName:@"AutoFile"];
+    if (self) {
         document = [doc retain];
         fieldName = [field retain];
         options = mask;

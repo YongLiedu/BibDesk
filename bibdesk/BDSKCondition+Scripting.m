@@ -83,7 +83,8 @@ enum {
 @implementation BDSKCondition (Scripting)
 
 - (id)initWithScriptingProperties:(NSDictionary *)properties {
-    if (self = [self init]) {
+    self = [self init];
+    if (self) {
         
         [self setKey:[properties objectForKey:@"scriptingKey"]];
         

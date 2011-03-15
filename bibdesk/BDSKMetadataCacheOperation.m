@@ -47,7 +47,8 @@
 @implementation BDSKMetadataCacheOperation
 
 - (id)initWithPublicationInfos:(NSArray *)pubInfos forDocumentURL:(NSURL *)aURL {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         publicationInfos = [pubInfos copy];
         documentURL = [aURL copy];
     }

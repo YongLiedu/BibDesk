@@ -51,7 +51,8 @@
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-	if (self = [super initWithCoder:decoder]) {
+    self = [super initWithCoder:decoder];
+    if (self) {
 		collapseEdges = [decoder decodeIntegerForKey:@"collapseEdges"];
 		minSize.width = [decoder decodeDoubleForKey:@"minSize.width"];
 		minSize.height = [decoder decodeDoubleForKey:@"minSize.height"];

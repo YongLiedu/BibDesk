@@ -88,7 +88,8 @@ enum {
 
 - (id)init {
     BDSKPRECONDITION(sharedFC == nil);
-    if (self = [super initWithWindowNibName:@"BDSKFindPanel"]) {
+    self = [super initWithWindowNibName:@"BDSKFindPanel"];
+    if (self) {
 		NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSFindPboard];
 		NSString *availableType = [pboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
         

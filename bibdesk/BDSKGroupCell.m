@@ -86,7 +86,8 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
 }
 
 - (id)initTextCell:(NSString *)aString {
-    if (self = [super initTextCell:aString]) {
+    self = [super initTextCell:aString];
+    if (self) {
         [self setEditable:YES];
         [self setScrollable:YES];
         [self setWraps:NO];
@@ -98,7 +99,8 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
 // NSCoding
 
 - (id)initWithCoder:(NSCoder *)coder {
-	if (self = [super initWithCoder:coder]) {
+    self = [super initWithCoder:coder];
+    if (self) {
         [self commonInit];
 	}
 	return self;

@@ -58,7 +58,8 @@ static NSOperationQueue *searchQueue = nil;
 }
 
 - (id)initWithDelegate:(id)aDelegate {
-    if (self = [super init]) {
+    self = [super init];
+    if (self) {
         delegate = aDelegate;
         search = NULL;
         isSearching = 0;
