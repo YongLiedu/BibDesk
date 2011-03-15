@@ -581,7 +581,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
         NSSet *allGroups = [NSSet setWithArray:[groups allChildren]];
         NSMutableArray *groupsToSelect = [NSMutableArray array];
         for (BDSKGroup *group in [NSKeyedUnarchiver unarchiveObjectWithData:groupData]) {
-            if (group = [allGroups member:group])
+            if ((group = [allGroups member:group]))
                 [groupsToSelect addObject:group];
         }
         if ([groupsToSelect count])
@@ -948,7 +948,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 	NSPopUpButton *popup;
 	
 	for (NSView *subview in [view subviews]) {
-		if (popup = popUpButtonSubview(subview))
+		if ((popup = popUpButtonSubview(subview)))
 			return popup;
 	}
 	return nil;
@@ -1303,10 +1303,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     BOOL success = YES;
     NSMutableSet *localFiles = [NSMutableSet set];
     
-    if (success = [fm createDirectoryAtPath:folderPath withIntermediateDirectories:NO attributes:nil error:NULL]) {
+    if ((success = [fm createDirectoryAtPath:folderPath withIntermediateDirectories:NO attributes:nil error:NULL])) {
         for (BibItem *item in [self publicationsForSaving]) {
             for (BDSKLinkedFile *file in [item localFiles]) {
-                if (filePath = [file path]) {
+                if ((filePath = [file path])) {
                     [localFiles addObject:filePath];
                     if (commonParent)
                         commonParent = [[filePath stringByDeletingLastPathComponent] commonRootPathOfFile:commonParent];
@@ -1753,13 +1753,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         NSMutableDictionary *oldGroups = [NSMutableDictionary dictionary];
         NSData *groupData;
         
-        if (groupData = [[self groups] serializedGroupsDataOfType:BDSKSmartGroupType])
+        if ((groupData = [[self groups] serializedGroupsDataOfType:BDSKSmartGroupType]))
             [oldGroups setObject:groupData forKey:[NSNumber numberWithInteger:BDSKSmartGroupType]];
-        if (groupData = [[self groups] serializedGroupsDataOfType:BDSKStaticGroupType])
+        if ((groupData = [[self groups] serializedGroupsDataOfType:BDSKStaticGroupType]))
             [oldGroups setObject:groupData forKey:[NSNumber numberWithInteger:BDSKStaticGroupType]];
-        if (groupData = [[self groups] serializedGroupsDataOfType:BDSKURLGroupType])
+        if ((groupData = [[self groups] serializedGroupsDataOfType:BDSKURLGroupType]))
             [oldGroups setObject:groupData forKey:[NSNumber numberWithInteger:BDSKURLGroupType]];
-        if (groupData = [[self groups] serializedGroupsDataOfType:BDSKScriptGroupType])
+        if ((groupData = [[self groups] serializedGroupsDataOfType:BDSKScriptGroupType]))
             [oldGroups setObject:groupData forKey:[NSNumber numberWithInteger:BDSKScriptGroupType]];
          
         [[[self undoManager] prepareWithInvocationTarget:self] setPublications:oldPubs macros:oldMacros documentInfo:documentInfo groups:oldGroups frontMatter:frontMatter encoding:[self documentStringEncoding]];
@@ -1772,7 +1772,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         
         // first remove all editor windows, as they will be invalid afterwards
         NSWindowController *wc;
-        while (wc = [wcEnum nextObject]) {
+        while ((wc = [wcEnum nextObject])) {
             if ([wc respondsToSelector:@selector(discardEditing)])
                 [wc discardEditing];
             [wc close];
@@ -2196,7 +2196,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSArray *newPubs = [self extractPublicationsFromFiles:[NSArray arrayWithObject:fileName] unparseableFiles:nil verbose:verbose error:&error];
     BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
     
-    if (temporaryCiteKey = [[error userInfo] valueForKey:@"temporaryCiteKey"])
+    if ((temporaryCiteKey = [[error userInfo] valueForKey:@"temporaryCiteKey"]))
         error = nil; // accept temporary cite keys, but show a warning later
     
     if ([newPubs count] == 0) {

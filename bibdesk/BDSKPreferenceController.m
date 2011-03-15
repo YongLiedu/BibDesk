@@ -227,7 +227,7 @@ static id sharedController = nil;
     NSURL *helpURL;
     if (helpBookName && (helpAnchor = [[self selectedPane] helpAnchor]))
         [[NSHelpManager sharedHelpManager] openHelpAnchor:helpAnchor inBook:helpBookName];
-    else if (helpURL = [[self selectedPane] helpURL])
+    else if ((helpURL = [[self selectedPane] helpURL]))
         [[NSWorkspace sharedWorkspace] openURL:helpURL];
 }
 
@@ -412,35 +412,35 @@ static id sharedController = nil;
         if (toolbarItems == nil)
             toolbarItems = [[NSMutableDictionary alloc] init];
         if ([itemIdentifier isEqualToString:BDSKPreferencesToolbarShowAllItemIdentifier]) {
-            if (item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier]) {
+            if ((item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier])) {
                 [item setTarget:self];
                 [item setAction:@selector(showAll:)];
                 [item setImage:[NSImage imageNamed:@"NSApplicationIcon"]];
                 [item setLabel:NSLocalizedString(@"Show All", @"Toolbar item label")];
             }
         } else if ([itemIdentifier isEqualToString:BDSKPreferencesToolbarPreviousItemIdentifier]) {
-            if (item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier]) {
+            if ((item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier])) {
                 [item setTarget:self];
                 [item setAction:@selector(showPreviousPane:)];
                 [item setImage:[NSImage imageNamed:@"previous"]];
                 [item setLabel:NSLocalizedString(@"Previous", @"Toolbar item label")];
             }
         } else if ([itemIdentifier isEqualToString:BDSKPreferencesToolbarNextItemIdentifier]) {
-            if (item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier]) {
+            if ((item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier])) {
                 [item setTarget:self];
                 [item setAction:@selector(showNextPane:)];
                 [item setImage:[NSImage imageNamed:@"next"]];
                 [item setLabel:NSLocalizedString(@"Next", @"Toolbar item label")];
             }
         } else if ([itemIdentifier isEqualToString:BDSKPreferencesToolbarSearchItemIdentifier]) {
-            if (item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier]) {
+            if ((item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier])) {
                 [item setMinSize:[searchField frame].size];
                 [item setMaxSize:NSMakeSize(200.0, NSHeight([searchField frame]))];
                 [item setView:searchField];
                 [item setLabel:NSLocalizedString(@"Search", @"Toolbar item label")];
             }
-        } else if (pane = [self paneForIdentifier:itemIdentifier]) {
-            if (item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier]) {
+        } else if ((pane = [self paneForIdentifier:itemIdentifier])) {
+            if ((item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier])) {
                 [item setTarget:self];
                 [item setAction:@selector(showPane:)];
                 [item setImage:[pane icon]];

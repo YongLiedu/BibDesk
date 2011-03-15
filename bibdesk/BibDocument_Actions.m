@@ -471,7 +471,7 @@ static BOOL changingColors = NO;
         template = [BDSKTemplate templateForStyle:templateName];
     
     for (BDSKLinkedFile *file in [pubs valueForKeyPath:@"@unionOfArrays.localFiles"]) {
-        if (path = [[file URL] path])
+        if ((path = [[file URL] path]))
             [files addObject:path];
     }
     
@@ -701,7 +701,7 @@ static BOOL changingColors = NO;
         
         // the user said to go ahead
         for (BibItem *pub in [self clickedOrSelectedPublications]) {
-            if (fileURL = [pub localFileURLForField:field])
+            if ((fileURL = [pub localFileURLForField:field]))
                 [[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:[self fileContentSearchString]];
         }
     }
@@ -738,7 +738,7 @@ static BOOL changingColors = NO;
         NSURL *fileURL;
         
         for (BibItem *pub in [self clickedOrSelectedPublications]) {
-            if (fileURL = [pub localFileURLForField:field])
+            if ((fileURL = [pub localFileURLForField:field]))
                 [[NSWorkspace sharedWorkspace]  selectFile:[fileURL path] inFileViewerRootedAtPath:nil];
         }
     }

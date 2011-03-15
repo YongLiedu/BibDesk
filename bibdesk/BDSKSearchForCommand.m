@@ -225,7 +225,7 @@ There could be other extensions, like matching for every word with conjunction o
 		if([pubAuthors count] > 2){
             [surnames appendString:@" et al"];
 		} else {
-            while (auth = [authEnum nextObject])
+            while ((auth = [authEnum nextObject]))
                 [surnames appendFormat:@"-%@", [auth lastName]];
         }
 	}

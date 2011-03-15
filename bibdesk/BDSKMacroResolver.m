@@ -340,7 +340,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     
     for (NSString *key in macros) {
         // we don't check for circular macros, there shouldn't be any. Or do we want to be paranoid?
-        if (value = [NSString stringWithBibTeXString:[macros objectForKey:key] macroResolver:self error:&error])
+        if ((value = [NSString stringWithBibTeXString:[macros objectForKey:key] macroResolver:self error:&error]))
             [macroDefinitions setObject:value forKey:key];
         else
             NSLog(@"Ignoring invalid complex macro: %@", [error localizedDescription]);

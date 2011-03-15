@@ -55,7 +55,7 @@
 
 - (void)Leopard_removeAllItems {
     NSUInteger numItems = 0;
-    while (numItems = [self numberOfItems])
+    while ((numItems = [self numberOfItems]))
         [self removeItemAtIndex:numItems - 1];
 }
 

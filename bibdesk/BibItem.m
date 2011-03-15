@@ -1321,7 +1321,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
             if (range.location > start) {
                 range = NSMakeRange(start, range.location - start);
                 keyString = [string substringWithRange:range];
-                if (pub = [[[self owner] publications] itemForCiteKey:keyString])
+                if ((pub = [[[self owner] publications] itemForCiteKey:keyString]))
                     [pubs addObject:pub];
             }
         }
@@ -1426,7 +1426,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     NSURL *fileURL;
     
     for (BDSKLinkedFile *file in [self localFiles]) {
-        if (fileURL = [file URL]) {
+        if ((fileURL = [file URL])) {
             NSString *notes = [fileURL textSkimNotes];
             if ([notes length] == 0)
                 continue;
@@ -1474,7 +1474,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     // create an array of all local-URLs this object could have
     NSMutableArray *urls = [[NSMutableArray alloc] initWithCapacity:5];
     for (BDSKLinkedFile *file in [self localFiles]) {
-        if (aURL = [file URL]) {
+        if ((aURL = [file URL])) {
             // SearchKit cannot handle alias files, so we resolve those
             if (CFURLGetFSRef((CFURLRef)aURL, &fileRef) && noErr == FSResolveAliasFileWithMountFlags(&fileRef, TRUE, &isFolder, &wasAliased, kResolveAliasFileNoUI) && wasAliased)
                 aURL = [(id)CFURLCreateFromFSRef(CFGetAllocator((CFURLRef)aURL), &fileRef) autorelease];
@@ -1553,12 +1553,12 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     BDSKLinkedFile *file;
     
     for (file in [self localFiles]) {
-        if (url = [file URL])
+        if ((url = [file URL]))
             [mutableArray addObject:[url absoluteString]];
     }
     
     for (file in [self remoteURLs]) {
-        if (url = [file URL])
+        if ((url = [file URL]))
             [mutableArray addObject:[url absoluteString]];
     }
 
@@ -2086,14 +2086,14 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     
     [s appendString:@"<pdf-urls>"];
     for (file in [self localFiles]) {
-        if (value = [[file URL] absoluteString])
+        if ((value = [[file URL] absoluteString]))
             [s appendStrings:@"<url>", [value stringByEscapingBasicXMLEntitiesUsingUTF8], @"</url>", nil];
     }
     [s appendString:@"</pdf-urls>"];
     
     [s appendString:@"<related-urls>"];
     for (file in [self remoteURLs]) {
-        if (value = [[file URL] absoluteString])
+        if ((value = [[file URL] absoluteString]))
             [s appendStrings:@"<url>", [value stringByEscapingBasicXMLEntitiesUsingUTF8], @"</url>", nil];
     }
     [s appendString:@"</related-urls>"];
@@ -2124,9 +2124,9 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
     [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
     [formatter setDateFormat:@"dd/MM/yyyy"];
-    if (date = [self dateAdded])
+    if ((date = [self dateAdded]))
         [s appendStrings:@"<added-date>", [formatter stringFromDate:date], @"</added-date>", nil];
-    if (date = [self dateModified])
+    if ((date = [self dateModified]))
         [s appendStrings:@"<modified-date>", [formatter stringFromDate:date], @"</modified-date>", nil];
     
     [s appendString:@"</record>\n"];
@@ -2304,7 +2304,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     NSString *notes;
     
     for (BDSKLinkedFile *file in [self localFiles]) {
-        if (url = [file URL]) {
+        if ((url = [file URL])) {
             notes = [url textSkimNotes];
             if ([notes length]) {
                 if ([string length])
@@ -2324,7 +2324,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     NSAttributedString *seperatorString = [[[NSMutableAttributedString alloc] initWithString:@"\n\n"] autorelease];
     
     for (BDSKLinkedFile *file in [self localFiles]) {
-        if (url = [file URL]) {
+        if ((url = [file URL])) {
             notes = [url richTextSkimNotes];
             if ([notes length]) {
                 if ([attrString length])
@@ -2581,7 +2581,7 @@ static void addFilesToArray(const void *value, void *context)
     // resolve aliases in the containing dir, as most NSFileManager methods do not follow them, and NSWorkspace can't open aliases
 	// we don't resolve the last path component if it's an alias, as this is used in auto file, which should move the alias rather than the target file 
     // if the path to the file does not exist resolvedURL is nil, so we return the unresolved path
-    if (resolvedURL = [localURL fileURLByResolvingAliasesBeforeLastPathComponent])
+    if ((resolvedURL = [localURL fileURLByResolvingAliasesBeforeLastPathComponent]))
         localURL = resolvedURL;
     
     return localURL;

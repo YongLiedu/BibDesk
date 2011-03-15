@@ -362,7 +362,7 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
             parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateString:[str substringWithRange:itemRange]];
         }
         
-        if (templateDict = [self convertPubTemplate:parsedTemplate defaultFont:font]) {
+        if ((templateDict = [self convertPubTemplate:parsedTemplate defaultFont:font])) {
             NSArray *defaultItemTemplate = [templateDict objectForKey:@""];
             NSArray *itemTemplate;
             BDSKTypeTemplate *template;
@@ -402,7 +402,7 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
                 } else {
                     template = [typeTemplates objectAtIndex:currentIndex];
                 }
-                if (itemTemplate = [templateDict objectForKey:type]) {
+                if ((itemTemplate = [templateDict objectForKey:type])) {
                     [template setIncluded:YES];
                     [template setItemTemplate:itemTemplate];
                 } else {
@@ -1338,7 +1338,7 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
     for (i = 0; i < count; i++) {
         for (j = count; j > i; j--) {
             key = [[keys subarrayWithRange:NSMakeRange(i, j - i)] componentsJoinedByString:@"."];
-            if (property = [self propertyForKey:key tokenType:type])
+            if ((property = [self propertyForKey:key tokenType:type]))
                 break;
         }
         if (j > i)
@@ -1369,7 +1369,7 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
         NSArray *tokens;
         if ([keys count] != 2 || [[keys objectAtIndex:0] isEqualToString:@"fields"] == NO)
             return nil;
-        if (tokens = [self tokensForTextTag:tag allowText:NO defaultFont:defaultFont]) {
+        if ((tokens = [self tokensForTextTag:tag allowText:NO defaultFont:defaultFont])) {
             if ([tokens count] == 1) {
                 token = [tokens lastObject];
                 [token setField:[keys lastObject]];
@@ -1416,17 +1416,17 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
     for (BDSKTemplateTag *tag in templateArray) {
         switch ([(BDSKTemplateTag *)tag type]) {
             case BDSKTextTemplateTagType:
-                if (token = [self tokensForTextTag:tag allowText:YES defaultFont:defaultFont])
+                if ((token = [self tokensForTextTag:tag allowText:YES defaultFont:defaultFont]))
                     [result addObjectsFromArray:token];
                 else return nil;
                 break;
             case BDSKValueTemplateTagType:
-                if (token = [self tokenForValueTag:(BDSKValueTemplateTag *)tag defaultFont:defaultFont])
+                if ((token = [self tokenForValueTag:(BDSKValueTemplateTag *)tag defaultFont:defaultFont]))
                     [result addObject:token];
                 else return nil;
                 break;
             case BDSKConditionTemplateTagType:
-                if (token = [self tokenForConditionTag:(BDSKConditionTemplateTag *)tag defaultFont:defaultFont])
+                if ((token = [self tokenForConditionTag:(BDSKConditionTemplateTag *)tag defaultFont:defaultFont]))
                     [result addObject:token];
                 else return nil;
                 break;
@@ -1451,12 +1451,12 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
         NSUInteger i = 0, keyCount = [matchStrings count], count = [[(BDSKConditionTemplateTag *)tag subtemplates] count];
         
         for (i = 0; i < count; i++) {
-            if (itemTemplate = [self convertItemTemplate:[(BDSKConditionTemplateTag *)tag subtemplateAtIndex:i] defaultFont:defaultFont])
+            if ((itemTemplate = [self convertItemTemplate:[(BDSKConditionTemplateTag *)tag subtemplateAtIndex:i] defaultFont:defaultFont]))
                 [result setObject:itemTemplate forKey:i < keyCount ? [(NSString *)[matchStrings objectAtIndex:i] entryType] : @""];
             else return nil;
         }
     } else {
-        if (itemTemplate = [self convertItemTemplate:templateArray defaultFont:defaultFont])
+        if ((itemTemplate = [self convertItemTemplate:templateArray defaultFont:defaultFont]))
             [result setObject:itemTemplate forKey:@""];
         else return nil;
     }

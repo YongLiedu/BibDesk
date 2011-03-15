@@ -3060,7 +3060,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                 
             }
         } else if ([field isLocalFileField]) {
-            if (type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, nil]]) {
+            if ((type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, nil]])) {
                 
                 NSURL *url = nil;
                 NSString *filename = nil;
@@ -3091,7 +3091,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                 
             }
         } else if ([field isRemoteURLField]) {
-            if (type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil]]) {
+            if ((type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil]])) {
                 
                 NSString *urlString = nil;
                 if ([type isEqualToString:NSURLPboardType])

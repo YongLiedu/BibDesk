@@ -152,7 +152,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
             [knownFiles addObject:[BDSKFile fileWithURL:fileURL]];
         for (BibItem *pub in [doc publications]) {
             for (BDSKLinkedFile *file in [pub localFiles]) {
-                if (fileURL = [file URL])
+                if ((fileURL = [file URL]))
                     [knownFiles addObject:[BDSKFile fileWithURL:fileURL]];
             }
         }

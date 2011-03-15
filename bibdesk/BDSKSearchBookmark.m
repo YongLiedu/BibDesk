@@ -211,7 +211,7 @@ static Class BDSKSearchBookmarkClass = Nil;
         NSMutableArray *newChildren = [NSMutableArray array];
         BDSKSearchBookmark *child;
         for (NSDictionary *dict in [dictionary objectForKey:CHILDREN_KEY]) {
-            if (child = [[BDSKSearchBookmark alloc] initWithDictionary:dict]) {
+            if ((child = [[BDSKSearchBookmark alloc] initWithDictionary:dict])) {
                 [newChildren addObject:child];
                 [child release];
             } else

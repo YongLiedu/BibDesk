@@ -735,7 +735,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 - (void)removeSpinnersFromSuperview {
     NSEnumerator *spinnerEnum = [groupSpinners objectEnumerator];
     NSProgressIndicator *spinner;
-    while (spinner = [spinnerEnum nextObject])
+    while ((spinner = [spinnerEnum nextObject]))
         [spinner removeFromSuperview];
 }
 
@@ -1117,7 +1117,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     if (NO == [WebURLsWithTitlesClass respondsToSelector:@selector(writeURLs:andTitles:toPasteboard:)])
         WebURLsWithTitlesClass = Nil;
     
-    if (data = [(NSData *)CFURLCreateData(nil, (CFURLRef)url, kCFStringEncodingUTF8, true) autorelease])
+    if ((data = [(NSData *)CFURLCreateData(nil, (CFURLRef)url, kCFStringEncodingUTF8, true) autorelease]))
         theUTI = (NSString *)([url isFileURL] ? kUTTypeFileURL : kUTTypeURL);
     
     if (WebURLsWithTitlesClass) {

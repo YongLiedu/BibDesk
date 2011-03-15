@@ -238,7 +238,7 @@ enum {
             NSURL *tmpFileURL = [NSURL fileURLWithPath:[[NSFileManager defaultManager] temporaryFileWithBasename:tmpFileName]];
             
             if ([filteredString writeToURL:tmpFileURL atomically:YES encoding:encoding error:outError]) {
-                if (doc = [super makeDocumentWithContentsOfURL:tmpFileURL ofType:BDSKBibTeXDocumentType error:outError])
+                if ((doc = [super makeDocumentWithContentsOfURL:tmpFileURL ofType:BDSKBibTeXDocumentType error:outError]))
                     [(BibDocument *)doc markAsImported];
                 [[NSFileManager defaultManager] removeItemAtPath:[tmpFileURL path] error:NULL];
             }

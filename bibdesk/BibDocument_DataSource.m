@@ -300,7 +300,7 @@
 
                 while(row != NSNotFound){
                     pub = [shownPublications objectAtIndex:row];
-                    if (path = [[pub localFileURLForField:dragColumnId] path]){
+                    if ((path = [[pub localFileURLForField:dragColumnId] path])){
                         [filePaths addObject:path];
                         NSError *xerror = nil;
                         // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
@@ -349,7 +349,7 @@
                     pub = [shownPublications objectAtIndex:row];
                     
                     for (BDSKLinkedFile *file in [pub localFiles]) {
-                        if (path = [file path]) {
+                        if ((path = [file path])) {
                             [filePaths addObject:path];
                             NSError *xerror = nil;
                             // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
@@ -1307,18 +1307,18 @@
             if ([url isFileURL] && [[[url path] pathExtension] isEqualToString:@"bdsksearch"]) {
                 NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfURL:url];
                 Class groupClass = NSClassFromString([dictionary objectForKey:@"class"]);
-                if (group = [[[(groupClass ?: [BDSKSearchGroup class]) alloc] initWithDictionary:dictionary] autorelease]) {
+                if ((group = [[[(groupClass ?: [BDSKSearchGroup class]) alloc] initWithDictionary:dictionary] autorelease])) {
                     [groups addSearchGroup:(BDSKSearchGroup *)group];
                     lastGroup = group;
                 }
             } else if ([[url scheme] isEqualToString:BDSKSearchGroupURLScheme]) {
-                if (group = [[[BDSKSearchGroup alloc] initWithURL:url] autorelease]) {
+                if ((group = [[[BDSKSearchGroup alloc] initWithURL:url] autorelease])) {
                     [groups addSearchGroup:(BDSKSearchGroup *)group];
                     lastGroup = group;
                     undoable = YES;
                 }
             } else {
-                if (group = [[[BDSKURLGroup alloc] initWithURL:url] autorelease]) {
+                if ((group = [[[BDSKURLGroup alloc] initWithURL:url] autorelease])) {
                     [groups addURLGroup:(BDSKURLGroup *)group];
                     lastGroup = group;
                     undoable = YES;

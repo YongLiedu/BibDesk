@@ -236,7 +236,7 @@ static void destroyTemporaryDirectory()
     NSString *lyxPipePath = nil;
     BDSKVersionNumber *version = nil;
     
-    while (file = [dirEnum nextObject]) {
+    while ((file = [dirEnum nextObject])) {
         NSString *fullPath = [appSupportPath stringByAppendingPathComponent:file];
         NSDictionary *fileAttributes = [self attributesOfItemAtPath:fullPath error:NULL];
         if ([[fileAttributes fileType] isEqualToString:NSFileTypeDirectory]) {
@@ -332,7 +332,7 @@ static void destroyTemporaryDirectory()
     CFURLRef tempItemsURL = NULL;
     if (noErr == FSFindFolder(catalogInfo.volume, kTemporaryFolderType, kCreateFolder, &tempItemsRef)) {
         NSLog(@"Error %d:  the system was unable to find your temporary items folder on volume %i.", err, kTemporaryFolderType, catalogInfo.volume);
-    } else if (tempItemsURL = CFURLCreateFromFSRef(kCFAllocatorDefault, &tempItemsRef)) {
+    } else if ((tempItemsURL = CFURLCreateFromFSRef(kCFAllocatorDefault, &tempItemsRef))) {
         tempItemsPath = [(NSURL *)tempItemsURL path];
         CFRelease(tempItemsURL);
     }
@@ -344,7 +344,7 @@ static void destroyTemporaryDirectory()
     
     if (tempItemsPath) {
         // Don't pass in paths that are already inside Temporary Items or you might get back the same path you passed in.
-        if (tempFileName = [self uniqueFilePathWithName:[path lastPathComponent] atPath:tempItemsPath]) {
+        if ((tempFileName = [self uniqueFilePathWithName:[path lastPathComponent] atPath:tempItemsPath])) {
             NSInteger fd = open((const char *)[self fileSystemRepresentationWithPath:tempFileName], O_EXCL | O_WRONLY | O_CREAT | O_TRUNC, 0666);
             if (fd != -1)
                 close(fd); // no unlink, were are on the 'create' branch
@@ -357,7 +357,7 @@ static void destroyTemporaryDirectory()
         if (outError)
             *outError = nil; // Ignore any previous error
         // Try to use the same directory.  Can't just call -uniqueFilenameFromName:path since we want a NEW file name (-uniqueFilenameFromName: would just return the input path and the caller expecting a path where it can put something temporarily, i.e., different from the input path).
-        if (tempFileName = [self uniqueFilePathWithName:[path lastPathComponent] atPath:[path stringByDeletingLastPathComponent]]) {
+        if ((tempFileName = [self uniqueFilePathWithName:[path lastPathComponent] atPath:[path stringByDeletingLastPathComponent]])) {
             NSInteger fd = open((const char *)[self fileSystemRepresentationWithPath:tempFileName], O_EXCL | O_WRONLY | O_CREAT | O_TRUNC, 0666);
             if (fd != -1)
                 close(fd); // no unlink, were are on the 'create' branch

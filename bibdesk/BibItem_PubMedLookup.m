@@ -77,7 +77,7 @@
 										 options:AGRegexMultiline|AGRegexCaseInsensitive];
 	AGRegexMatch *match;
 	NSEnumerator *doienum = [doiRegex findEnumeratorInString:self];
-	while (match = [doienum nextObject] ) {
+	while ((match = [doienum nextObject])) {
 		NSString* doi;
 		if([match groupAtIndex:1]!=nil && [match groupAtIndex:2]!=nil){			
 			doi = [NSString stringWithFormat:@"\"%@/%@\" [AID]",[match groupAtIndex:1],[match groupAtIndex:2]];

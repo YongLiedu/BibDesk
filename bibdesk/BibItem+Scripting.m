@@ -554,7 +554,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 	NSString * key;
 	NSString * value;
 	
-	while (key = [keyEnum nextObject]) {
+	while ((key = [keyEnum nextObject])) {
 		value = [f objectForKey:key];
 		if (![value isEqualTo:@""]) {
 			[ar addObject:key];

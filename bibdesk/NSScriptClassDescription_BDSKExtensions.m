@@ -57,14 +57,14 @@
     NSScriptClassDescription *otherAncestor = aClassDescription;
     NSMutableArray *otherAncestors = [NSMutableArray arrayWithObjects:otherAncestor, nil];
     
-    while (otherAncestor = [otherAncestor superclassDescription])
+    while ((otherAncestor = [otherAncestor superclassDescription]))
         [otherAncestors addObject:otherAncestor];
     do {
         for (otherAncestor in otherAncestors) {
             if ([myAncestor isEqual:otherAncestor])
                 return myAncestor;
         }
-    } while (myAncestor = [myAncestor superclassDescription]);
+    } while ((myAncestor = [myAncestor superclassDescription]));
     
     return nil;
 }

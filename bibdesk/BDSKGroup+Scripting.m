@@ -476,15 +476,15 @@
                 [serverInfo setHost:host];
             if (port)
                 [serverInfo setPort:port];
-            if (value = [info valueForKey:@"username"])
+            if ((value = [info valueForKey:@"username"]))
                 [serverInfo setUsername:value];
-            if (value = [info valueForKey:@"password"])
+            if ((value = [info valueForKey:@"password"]))
                 [serverInfo setPassword:value];
-            if (value = [info valueForKey:@"recordSyntax"])
+            if ((value = [info valueForKey:@"recordSyntax"]))
                 [serverInfo setRecordSyntax:value];
-            if (value = [info valueForKey:@"resultEncoding"])
+            if ((value = [info valueForKey:@"resultEncoding"]))
                 [serverInfo setResultEncoding:value];
-            if (number = [info valueForKey:@"removeDiacritics"])
+            if ((number = [info valueForKey:@"removeDiacritics"]))
                 [serverInfo setRemoveDiacritics:[number boolValue]];
         }
     } else {

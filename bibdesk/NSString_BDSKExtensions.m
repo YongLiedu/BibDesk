@@ -1016,7 +1016,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     NSString *theUTI = nil;
     NSURL *fileURL = nil;
     // !!! We return nil when a file doesn't exist if it's a properly resolvable path/URL, but we have no way of checking existence with a relative path.  Returning nil is preferable, since then nonexistent files will be sorted to the top or bottom and they're easy to find.
-    if (fileURL = CreateFileURLFromPathOrURLString(aPath, basePath)) {
+    if ((fileURL = CreateFileURLFromPathOrURLString(aPath, basePath))) {
         // UTI will be nil for a file that doesn't exist, yet had an absolute/resolvable path
         if (fileURL) {
             theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:[[[fileURL path] stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL];

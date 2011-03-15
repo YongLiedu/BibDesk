@@ -624,7 +624,7 @@ static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
     if ([sourceTagValues count]) {
         NSString *sourceTagValue;
         for (NSString *sourceTagName in sourceXMLTagPriority) {
-            if (sourceTagValue = [sourceTagValues objectForKey:sourceTagName]) {
+            if ((sourceTagValue = [sourceTagValues objectForKey:sourceTagName])) {
                 [pubFields setObject:sourceTagValue forKey:sourceField];
                 break;
             }
@@ -761,7 +761,7 @@ static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs,
     NSDictionary *replacedPub;
     
     for (pub in sourcePubs) {
-        if (value = [pub objectForKey:fieldName])
+        if ((value = [pub objectForKey:fieldName]))
             [sourcePubIndex setValue:pub forKey:value];
     }
     

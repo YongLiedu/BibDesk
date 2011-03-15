@@ -240,7 +240,7 @@ enum {
         NSColor *color;
         NSRect ignored, rect;
         for (row = visibleRows.location; row < NSMaxRange(visibleRows); row++) {
-            if (color = [[self delegate] tableView:self highlightColorForRow:row]) {
+            if ((color = [[self delegate] tableView:self highlightColorForRow:row])) {
                 [NSGraphicsContext saveGraphicsState];
                 [color set];
                 NSDivideRect([self rectOfRow:row], &ignored, &rect, 1.0, NSMaxYEdge);

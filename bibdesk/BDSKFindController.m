@@ -1100,7 +1100,7 @@ enum {
                 origStr = [[file URL] absoluteString];
                 if([theRegex findInString:origStr]){
                     origStr = [theRegex replaceWithString:replStr inString:origStr];
-                    if (replFile = [[BDSKLinkedFile alloc] initWithURL:[NSURL URLWithString:origStr]]) {
+                    if ((replFile = [[BDSKLinkedFile alloc] initWithURL:[NSURL URLWithString:origStr]])) {
                         [[bibItem mutableArrayValueForKey:@"files"] replaceObjectAtIndex:idx withObject:replFile];
                         number++;
                         [replFile release];
@@ -1120,7 +1120,7 @@ enum {
             if([theRegex findInString:origStr]){
                 origStr = [theRegex replaceWithString:replStr inString:origStr];
                 if(replaceAsMacro || findAsMacro){
-                    if (complexStr = [NSString stringWithBibTeXString:origStr macroResolver:[theDocument macroResolver] error:NULL]) {
+                    if ((complexStr = [NSString stringWithBibTeXString:origStr macroResolver:[theDocument macroResolver] error:NULL])) {
                         [bibItem setField:field toStringValue:complexStr];
                         number++;
                     }
@@ -1161,7 +1161,7 @@ enum {
             NSMutableArray *files = [bibItem mutableArrayValueForKey:@"files"];
             BDSKLinkedFile *replFile;
             
-            if (replFile = [[BDSKLinkedFile alloc] initWithURL:[NSURL URLWithString:replStr]]) {
+            if ((replFile = [[BDSKLinkedFile alloc] initWithURL:[NSURL URLWithString:replStr]])) {
                 if([remoteURLs count] == 0){
                     if(shouldSetWhenEmpty == NO) {
                         [replFile release];
@@ -1225,7 +1225,7 @@ enum {
                 idx = [[bibItem files] indexOfObjectIdenticalTo:file];
                 if (idx == NSNotFound) continue;
                 origStr = [[file URL] absoluteString];
-                if (replFile = [[BDSKLinkedFile alloc] initWithURL:[NSURL URLWithString:[replStr stringByAppendingString:origStr]]]) {
+                if ((replFile = [[BDSKLinkedFile alloc] initWithURL:[NSURL URLWithString:[replStr stringByAppendingString:origStr]]])) {
                     [[bibItem mutableArrayValueForKey:@"files"] replaceObjectAtIndex:idx withObject:replFile];
                     number++;
                     [replFile release];
@@ -1280,7 +1280,7 @@ enum {
                 idx = [[bibItem files] indexOfObjectIdenticalTo:file];
                 if (idx == NSNotFound) continue;
                 origStr = [[file URL] absoluteString];
-                if (replFile = [[BDSKLinkedFile alloc] initWithURL:[NSURL URLWithString:[origStr stringByAppendingString:replStr]]]) {
+                if ((replFile = [[BDSKLinkedFile alloc] initWithURL:[NSURL URLWithString:[origStr stringByAppendingString:replStr]]])) {
                     [[bibItem mutableArrayValueForKey:@"files"] replaceObjectAtIndex:idx withObject:replFile];
                     number++;
                     [replFile release];

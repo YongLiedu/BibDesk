@@ -261,7 +261,7 @@
     NSMutableArray *array = [NSMutableArray array];
     BibItem *pub;
     for (NSURL *idURL in anArray) {
-        if (pub = [itemsForIdentifierURLs objectForKey:idURL])
+        if ((pub = [itemsForIdentifierURLs objectForKey:idURL]))
             [array addObject:pub];
     }
     return array;

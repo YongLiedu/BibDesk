@@ -167,7 +167,7 @@
         // search for arXiv ID
         nodes = [arxivLinkNode nodesForXPath:arxivIDNodePath error:&error];
         if (nil != nodes && 1 == [nodes count]) {
-            if (string = [[nodes objectAtIndex:0] stringValue]) {
+            if ((string = [[nodes objectAtIndex:0] stringValue])) {
                 string = [string stringByRemovingSurroundingWhitespaceAndNewlines];
                 if ([string hasCaseInsensitivePrefix:@"arXiv:"])
                     string = [string substringFromIndex:6];
@@ -180,7 +180,7 @@
         
         if (nil != nodes && 1 == [nodes count]) {
             // successfully found the result PDF url
-            if (string = [[nodes objectAtIndex:0] stringValueOfAttribute:@"href"]) {
+            if ((string = [[nodes objectAtIndex:0] stringValueOfAttribute:@"href"])) {
                 // fix relative urls
                 if (NO == [string hasCaseInsensitivePrefix:@"http"])
                     string = [[NSURL URLWithString:string relativeToURL:url] absoluteString];
@@ -191,7 +191,7 @@
         // search for title
         nodes = [arxivMetaNode nodesForXPath:titleNodePath error:&error];
         if (nil != nodes && 1 == [nodes count]) {
-            if (string = [[[nodes objectAtIndex:0] childAtIndex:1] stringValue]) {
+            if ((string = [[[nodes objectAtIndex:0] childAtIndex:1] stringValue])) {
                 string = [string stringByRemovingSurroundingWhitespaceAndNewlines];
                 [pubFields setValue:string forKey:BDSKTitleString];
             }
@@ -200,7 +200,7 @@
         // search for authors
         nodes = [arxivMetaNode nodesForXPath:authorsNodePath error:&error];
         if (nil != nodes && 0 < [nodes count]) {
-            if (string = [[nodes valueForKeyPath:@"stringValue.stringByRemovingSurroundingWhitespaceAndNewlines"] componentsJoinedByString:@" and "]) {
+            if ((string = [[nodes valueForKeyPath:@"stringValue.stringByRemovingSurroundingWhitespaceAndNewlines"] componentsJoinedByString:@" and "])) {
                 [pubFields setValue:string forKey:BDSKAuthorString];
             }
         }
@@ -211,7 +211,7 @@
             NSXMLNode *journalRefNode = [nodes objectAtIndex:0];
             // actual journal ref comes after a span containing a label
             if ([journalRefNode childCount] > 1) {
-                if (string = [[journalRefNode childAtIndex:1] stringValue]) {
+                if ((string = [[journalRefNode childAtIndex:1] stringValue])) {
                     string = [string stringByRemovingSurroundingWhitespaceAndNewlines];
                     // try to get full journal ref components, as "Journal Volume (Year) Pages"
                     AGRegexMatch *match = [journalRegex1 findInString:string];
@@ -246,7 +246,7 @@
             NSXMLNode *abstractNode = [nodes objectAtIndex:0];
             if (isAbstract && [abstractNode childCount] > 1)
                 abstractNode = [abstractNode childAtIndex:1];
-            if (string = [abstractNode stringValue]) {
+            if ((string = [abstractNode stringValue])) {
                 string = [string stringByRemovingSurroundingWhitespaceAndNewlines];
                 [pubFields setValue:string forKey:BDSKAbstractString];
             }
@@ -256,13 +256,13 @@
         if ([pubFields valueForKey:BDSKYearString] == nil && (string = [pubFields valueForKey:@"Eprint"])) {
             // try new format, yymm.nnnn
             AGRegexMatch *match = [eprintRegex1 findInString:string];
-            if (string = [match groupAtIndex:1]) {
+            if ((string = [match groupAtIndex:1])) {
                 [pubFields setValue:[@"20" stringByAppendingString:string] forKey:BDSKYearString];
                 [pubFields setValue:[match groupAtIndex:2] forKey:BDSKMonthString];
             } else {
                 // try old format, yymmnnn
                 match = [eprintRegex2 findInString:string];
-                if (string = [match groupAtIndex:1]) {
+                if ((string = [match groupAtIndex:1])) {
                     [pubFields setValue:[([string integerValue] < 90 ? @"20" : @"19") stringByAppendingString:string] forKey:BDSKYearString];
                     [pubFields setValue:[match groupAtIndex:2] forKey:BDSKMonthString];
                 }

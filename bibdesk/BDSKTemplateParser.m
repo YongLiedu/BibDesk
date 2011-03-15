@@ -490,7 +490,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 if (subtemplate == nil && [[tag subtemplates] count] > count)
                     subtemplate = [tag subtemplateAtIndex:count];
                 if (subtemplate != nil) {
-                    if (keyValue = [self stringFromTemplateArray:subtemplate usingObject:object atIndex:anIndex delegate:delegate])
+                    if ((keyValue = [self stringFromTemplateArray:subtemplate usingObject:object atIndex:anIndex delegate:delegate]))
                         [result appendString:keyValue];
                 }
                 

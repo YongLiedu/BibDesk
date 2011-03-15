@@ -378,7 +378,7 @@ static NSString *stringWithoutComments(NSString *string) {
             CFStringTrimWhitespace((CFMutableStringRef)value);
             
             key = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-            if (value = [NSString stringWithBibTeXString:value macroResolver:macroResolver error:&error])
+            if ((value = [NSString stringWithBibTeXString:value macroResolver:macroResolver error:&error]))
                 [macros setObject:value forKey:key];
             else
                 NSLog(@"Ignoring invalid complex macro: %@", [error localizedDescription]);
@@ -464,7 +464,7 @@ static NSString *stringWithoutComments(NSString *string) {
         CFStringTrimWhitespace((CFMutableStringRef)value);
         
         key = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        if (value = [NSString stringWithBibTeXString:value macroResolver:macroResolver error:&error])
+        if ((value = [NSString stringWithBibTeXString:value macroResolver:macroResolver error:&error]))
             [macros setObject:value forKey:key];
         else
             NSLog(@"Ignoring invalid complex macro: %@", [error localizedDescription]);
@@ -651,22 +651,22 @@ static NSString *createNameStringForComponent(CFAllocatorRef alloc, bt_name *the
     
     NSString *nameString = nil;
     
-    if (nameString = createNameStringForComponent(alloc, theName, BTN_FIRST, encoding)) {
+    if ((nameString = createNameStringForComponent(alloc, theName, BTN_FIRST, encoding))) {
         [parts setObject:nameString forKey:@"first"];
         [nameString release];
     }
     
-    if (nameString = createNameStringForComponent(alloc, theName, BTN_VON, encoding)) {
+    if ((nameString = createNameStringForComponent(alloc, theName, BTN_VON, encoding))) {
         [parts setObject:nameString forKey:@"von"];
         [nameString release];
     }
     
-    if (nameString = createNameStringForComponent(alloc, theName, BTN_LAST, encoding)) {
+    if ((nameString = createNameStringForComponent(alloc, theName, BTN_LAST, encoding))) {
         [parts setObject:nameString forKey:@"last"];
         [nameString release];
     }
     
-    if (nameString = createNameStringForComponent(alloc, theName, BTN_JR, encoding)) {
+    if ((nameString = createNameStringForComponent(alloc, theName, BTN_JR, encoding))) {
         [parts setObject:nameString forKey:@"jr"];
         [nameString release];
     }
@@ -874,7 +874,7 @@ static BOOL addMacroToDictionary(AST *entry, NSMutableDictionary *dictionary, BD
     char *fieldname = NULL;
     BOOL success = YES;
     
-    while (field = bt_next_field (entry, field, &fieldname)){
+    while ((field = bt_next_field (entry, field, &fieldname))){
         NSString *macroKey = copyCheckedString(field->text, field->line, filePath, encoding);
         NSCAssert(macroKey != nil, @"Macro keys must be ASCII");
         NSString *macroString = copyStringFromBTField(field, filePath, macroResolver, encoding); // handles TeXification
@@ -1022,7 +1022,7 @@ static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dict
     char *fieldname;
     BOOL hadProblems = NO;
     
-    while (field = bt_next_field (entry, field, &fieldname))
+    while ((field = bt_next_field (entry, field, &fieldname)))
     {
         // Get fieldname as a capitalized NSString
         tmpStr = copyCheckedString(fieldname, field->line, filePath, parserEncoding);

@@ -88,7 +88,7 @@
 	if ( [ZMathIDs count] == itemCount) { // make sure our ZMath array contains enough elements
 		for (i = 0; i < itemCount; i++) {
 			if ([result objectAtIndex:i] == [NSNull null]) {
-				if (item = [ZMathIDs objectAtIndex:i]) {
+				if ((item = [ZMathIDs objectAtIndex:i])) {
 					[list addObject:item];
 				}
 			}

@@ -65,7 +65,7 @@ static BOOL isSearchFileAtPath(NSString *path) {
     if ([[NSFileManager defaultManager] fileExistsAtPath:serversPath isDirectory:&isDir] && isDir) {
         NSDirectoryEnumerator *dirEnum = [[NSFileManager defaultManager] enumeratorAtPath:serversPath];
         NSString *file;
-        while (file = [dirEnum nextObject]) {
+        while ((file = [dirEnum nextObject])) {
             if ([[[dirEnum fileAttributes] valueForKey:NSFileType] isEqualToString:NSFileTypeDirectory]) {
                 [dirEnum skipDescendents];
             } else if (isSearchFileAtPath([serversPath stringByAppendingPathComponent:file])) {

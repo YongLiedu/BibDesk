@@ -143,7 +143,7 @@
         if ([settings isKindOfClass:[NSDictionary class]]) {
             settings = [[settings mutableCopy] autorelease];
             id value;
-            if (value = [settings objectForKey:NSPrintDetailedErrorReporting])
+            if ((value = [settings objectForKey:NSPrintDetailedErrorReporting]))
                 [settings setObject:[NSNumber numberWithBool:[value unsignedIntValue] == 'lwdt'] forKey:NSPrintDetailedErrorReporting];
             if ((value = [settings objectForKey:NSPrintPrinterName]) && (value = [NSPrinter printerWithName:value]))
                 [settings setObject:value forKey:NSPrintPrinter];

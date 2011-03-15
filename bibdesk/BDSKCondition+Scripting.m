@@ -157,15 +157,15 @@ enum {
         } else if ([self isDateCondition]) {
             if ([newValue isKindOfClass:[NSDictionary class]]) {
                 id value;
-                if (value = [newValue objectForKey:@"numberValue"]) {
+                if ((value = [newValue objectForKey:@"numberValue"])) {
                     [self setNumberValue:[value integerValue]];
-                    if (value = [newValue objectForKey:@"periodValue"])
+                    if ((value = [newValue objectForKey:@"periodValue"]))
                         [self setPeriodValue:[value integerValue]];
-                    if (value = [newValue objectForKey:@"andNumberValue"])
+                    if ((value = [newValue objectForKey:@"andNumberValue"]))
                         [self setAndNumberValue:[value integerValue]];
-                } else if (value = [newValue objectForKey:@"dateValue"]) {
+                } else if ((value = [newValue objectForKey:@"dateValue"])) {
                     [self setDateValue:value];
-                    if (value = [newValue objectForKey:@"toDateValue"])
+                    if ((value = [newValue objectForKey:@"toDateValue"]))
                         [self setToDateValue:value];
                 }
             } else if ([newValue isKindOfClass:[NSDate class]]) {

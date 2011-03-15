@@ -119,36 +119,36 @@ static NSArray *dcProperties(NSXMLNode *node, NSString *key)
         [pubDict setObject:joinedArrayComponents(authors, @" and ") forKey:BDSKAuthorString];
         
         // arm: most of these probably don't have to be arrays, at least for ADS
-        if (array = dcProperties(node, @"title"))
+        if ((array = dcProperties(node, @"title")))
         [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKTitleString];
         
-        if (array = dcProperties(node, @"subject"))
+        if ((array = dcProperties(node, @"subject")))
         [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKKeywordsString];
         
-        if (array = dcProperties(node, @"publisher"))
+        if ((array = dcProperties(node, @"publisher")))
         [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKPublisherString];
         
-        if (array = dcProperties(node, @"location"))
+        if ((array = dcProperties(node, @"location")))
         [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:@"Location"];
         
-        if (array = dcProperties(node, @"date"))
+        if ((array = dcProperties(node, @"date")))
             [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKDateString];
 
-        if (array = dcProperties(node, @"description")) {
+        if ((array = dcProperties(node, @"description"))) {
             NSString *cleanString = joinedArrayComponents(array, @"; ");
             cleanString = [cleanString stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             if (cleanString)
                 [pubDict setObject:cleanString forKey:BDSKAbstractString];
         }
         
-        if (array = dcProperties(node, @"relation"))
+        if ((array = dcProperties(node, @"relation")))
             [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKUrlString];
 
         // ADS lumps Journal, Volume, Issue, pages into @"source", which is stupid;
         // for conferences, it adds date/location/editors as well, so this is hopeless.
         
         // using @"Note" field is more sensible, but probably less obvious to the user
-        if (array = dcProperties(node, @"source"))
+        if ((array = dcProperties(node, @"source")))
             [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKJournalString];
 
         // this XML is a mess

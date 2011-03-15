@@ -60,7 +60,7 @@ static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedStr
     
     while (NSMaxRange(range) < len) {
         id aLink = [attrString attribute:NSLinkAttributeName atIndex:NSMaxRange(range) longestEffectiveRange:&range inRange:NSMakeRange(NSMaxRange(range), len - NSMaxRange(range))];
-        if (linkTemplate = copyTemplateForLink(aLink, range)) {
+        if ((linkTemplate = copyTemplateForLink(aLink, range))) {
             [templates addObject:linkTemplate];
             [linkTemplate release];
         }

@@ -402,7 +402,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     for (NSDictionary *note in [self SkimNotes]) {
         note = [note mutableCopy];
         id value;
-        if (value = [note objectForKey:@"bounds"]) {
+        if ((value = [note objectForKey:@"bounds"])) {
             NSRect nsBounds = NSRectFromString(value);
             Rect qdBounds;
             qdBounds.left = round(NSMinX(nsBounds));
@@ -411,10 +411,10 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
             qdBounds.top = round(NSMaxY(nsBounds));
             [note setValue:[NSData dataWithBytes:&qdBounds length:sizeof(Rect)] forKey:@"bounds"];
         }
-        if (value = [note objectForKey:@"pageIndex"]) {
+        if ((value = [note objectForKey:@"pageIndex"])) {
             [note setValue:[NSNumber numberWithUnsignedInteger:[value unsignedIntegerValue] + 1] forKey:@"pageIndex"];
         }
-        if (value = [note objectForKey:@"borderStyle"]) {
+        if ((value = [note objectForKey:@"borderStyle"])) {
             NSString *style = nil;
             switch ([value integerValue]) {
                 case kPDFBorderStyleSolid: style = @"solid"; break;
@@ -425,21 +425,21 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
             }
             [note setValue:style forKey:@"borderStyle"];
         }
-        if (value = [note objectForKey:@"startPoint"]) {
+        if ((value = [note objectForKey:@"startPoint"])) {
             NSPoint nsPoint = NSPointFromString(value);
             Point qdPoint;
             qdPoint.h = round(nsPoint.x);
             qdPoint.v = round(nsPoint.y);
             [note setValue:[NSData dataWithBytes:&qdPoint length:sizeof(Point)] forKey:@"startPoint"];
         }
-        if (value = [note objectForKey:@"endPoint"]) {
+        if ((value = [note objectForKey:@"endPoint"])) {
             NSPoint nsPoint = NSPointFromString(value);
             Point qdPoint;
             qdPoint.h = round(nsPoint.x);
             qdPoint.v = round(nsPoint.y);
             [note setValue:[NSData dataWithBytes:&qdPoint length:sizeof(Point)] forKey:@"endPoint"];
         }
-        if (value = [note objectForKey:@"startLineStyle"]) {
+        if ((value = [note objectForKey:@"startLineStyle"])) {
             NSString *style = nil;
             switch ([value integerValue]) {
                 case kPDFLineStyleNone: style = @"none"; break;
@@ -451,7 +451,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
             }
             [note setValue:style forKey:@"startLineStyle"];
         }
-        if (value = [note objectForKey:@"endLineStyle"]) {
+        if ((value = [note objectForKey:@"endLineStyle"])) {
             NSString *style = nil;
             switch ([value integerValue]) {
                 case kPDFLineStyleNone: style = @"none"; break;
@@ -463,7 +463,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
             }
             [note setValue:style forKey:@"endLineStyle"];
         }
-        if (value = [note objectForKey:@"iconType"]) {
+        if ((value = [note objectForKey:@"iconType"])) {
             NSString *style = nil;
             switch ([value integerValue]) {
                 case kPDFTextAnnotationIconComment: style = @"comment"; break;
@@ -476,13 +476,13 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
             }
             [note setValue:style forKey:@"iconType"];
         }
-        if (value = [note objectForKey:@"text"]) {
+        if ((value = [note objectForKey:@"text"])) {
             [note setValue:[[[NSTextStorage alloc] initWithAttributedString:value] autorelease] forKey:@"text"];
         }
-        if (value = [note objectForKey:@"image"]) {
+        if ((value = [note objectForKey:@"image"])) {
             [note setValue:[NSAppleEventDescriptor descriptorWithDescriptorType:typeTIFF data:[value TIFFRepresentation]] forKey:@"image"];
         }
-        if (value = [note objectForKey:@"quadrilateralPoints"]) {
+        if ((value = [note objectForKey:@"quadrilateralPoints"])) {
             NSMutableArray *pathList = [NSMutableArray array];
             NSMutableArray *points = [NSMutableArray array];
             for (NSString *pointString in value) {
@@ -499,7 +499,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
             [note setValue:nil forKey:@"quadrilateralPoints"];
             [note setValue:pathList forKey:@"pointLists"];
         }
-        if (value = [note objectForKey:@"pointLists"]) {
+        if ((value = [note objectForKey:@"pointLists"])) {
             NSMutableArray *pathList = [NSMutableArray array];
             for (NSArray *path in value) {
                 NSMutableArray *points = [NSMutableArray array];
