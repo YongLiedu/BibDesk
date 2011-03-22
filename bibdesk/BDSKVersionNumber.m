@@ -160,6 +160,10 @@
     [super dealloc];
 }
 
+- (NSString *)description {
+    return [NSString stringWithFormat:@"<%@: %@>", [self class], [self originalVersionString]];
+}
+
 #pragma mark API
 
 - (NSString *)originalVersionString;
