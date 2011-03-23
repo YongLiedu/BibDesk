@@ -167,6 +167,10 @@ static char _FVFileViewContentObservationContext;
 - (void)_handleFinderLabelChanged:(NSNotification *)note;
 - (void)_updateBinding:(NSString *)binding;
 - (void)_setSelectionIndexes:(NSIndexSet *)indexSet;
+- (void)_previewURLs:(NSArray *)iconURLs;
+- (void)_previewURL:(NSURL *)aURL forIconInRect:(NSRect)iconRect;
+- (void)_updatePreviewer;
+- (void)handlePreviewerWillClose:(NSNotification *)aNote;
 
 @end
 
@@ -233,6 +237,7 @@ static char _FVFileViewContentObservationContext;
     _fvFlags.dropOperation = FVDropBefore;
     _fvFlags.isRescaling = NO;
     _fvFlags.scheduledLiveResize = NO;
+    _fvFlags.controllingSharedPreviewer = NO;
     _selectionIndexes = [[NSIndexSet alloc] init];
     _lastClickedIndex = NSNotFound;
     _rubberBandRect = NSZeroRect;
@@ -730,12 +735,8 @@ static char _FVFileViewContentObservationContext;
         
         NSAccessibilityPostNotification(NSAccessibilityUnignoredAncestor(self), NSAccessibilityFocusedUIElementChangedNotification);
         
-        FVPreviewer *previewer = [FVPreviewer sharedPreviewer];
-        NSUInteger firstIndex = [_selectionIndexes firstIndex];
-        if ([previewer isPreviewing] && NSNotFound != firstIndex) {
-            [previewer setWebViewContextMenuDelegate:[self delegate]];
-            [previewer previewURL:[self URLAtIndex:firstIndex] forIconInRect:[[previewer window] frame]];
-        }
+        if (_fvFlags.controllingSharedPreviewer)
+            [self _updatePreviewer];
     }
 }
 
@@ -970,6 +971,14 @@ static char _FVFileViewContentObservationContext;
         }
         
         [_operationQueue cancel];
+        
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:FVPreviewerWillCloseNotification object:nil];
+    }
+    else {
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handlePreviewerWillClose:)
+                                                     name:FVPreviewerWillCloseNotification
+                                                   object:nil];
     }
     
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NSViewFrameDidChangeNotification object:nil];
@@ -1705,6 +1714,11 @@ static inline bool __equal_timespecs(const struct timespec *ts1, const struct ti
         [newSelIndexes removeIndexesInRange:NSMakeRange(numIcons, lastSelIndex + 1 - numIcons)];
         [self _setSelectionIndexes:newSelIndexes];
         [newSelIndexes release];
+    }
+    else if (_fvFlags.controllingSharedPreviewer) {
+        // Content or ordering of selection (may) have changed, so reload any previews
+        // Only modify the previewer if this view is controlling it, though!
+        [self _updatePreviewer];
     }
     
     [self _resetViewLayout];
@@ -3031,14 +3045,8 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
         // change selection first, as Finder does
         if ([event clickCount] > 1 && [self _URLAtPoint:p] != nil) {
             if (flags & NSAlternateKeyMask) {
-                FVPreviewer *previewer = [FVPreviewer sharedPreviewer];
-                [previewer setWebViewContextMenuDelegate:[self delegate]];
                 [self _getGridRow:&r column:&c atPoint:p];
-                NSRect iconRect = [self _rectOfIconInRow:r column:c];
-                iconRect = [self convertRect:iconRect toView:nil];
-                NSPoint origin = [[self window] convertBaseToScreen:iconRect.origin];
-                iconRect.origin = origin;
-                [previewer previewURL:[self _URLAtPoint:p] forIconInRect:iconRect];
+                [self _previewURL:[self _URLAtPoint:p] forIconInRect:[self _rectOfIconInRow:r column:c]];
             } else {
                 [self openSelectedURLs:self];
             }
@@ -3485,18 +3493,12 @@ static NSRect _rectWithCorners(const NSPoint aPoint, const NSPoint bPoint) {
         [previewer stopPreviewing];
     }
     else if ([_selectionIndexes count] == 1) {
-        [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:[self delegate]];
         NSUInteger r, c;
         [self _getGridRow:&r column:&c ofIndex:[_selectionIndexes lastIndex]];
-        NSRect iconRect = [self _rectOfIconInRow:r column:c];
-        iconRect = [self convertRect:iconRect toView:nil];
-        NSPoint origin = [[self window] convertBaseToScreen:iconRect.origin];
-        iconRect.origin = origin;
-        [previewer previewURL:[[self _selectedURLs] lastObject] forIconInRect:iconRect];
+        [self _previewURL:[[self _selectedURLs] lastObject] forIconInRect:[self _rectOfIconInRow:r column:c]];
     }
     else {
-        [previewer setWebViewContextMenuDelegate:nil];
-        [previewer previewFileURLs:[self _selectedURLs]];
+        [self _previewURLs:[self _selectedURLs]];
     }
 }
 
@@ -3912,6 +3914,51 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
         NSUInteger selIndex = [_selectionIndexes firstIndex];
         if (NSNotFound != selIndex)
             [self _downloadURLAtIndex:selIndex];
+    }
+}
+
+#pragma mark Quick Look support
+
+- (void)handlePreviewerWillClose:(NSNotification *)aNote
+{
+    /*
+     Necessary to reset in case of the window close button, which doesn't go through
+     our action methods.
+     */
+    _fvFlags.controllingSharedPreviewer = NO;
+}
+
+- (void)_previewURLs:(NSArray *)iconURLs
+{
+    [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:nil];
+    [[FVPreviewer sharedPreviewer] previewFileURLs:iconURLs];
+    _fvFlags.controllingSharedPreviewer = YES;
+}
+
+- (void)_previewURL:(NSURL *)aURL forIconInRect:(NSRect)iconRect
+{
+    iconRect = [self convertRect:iconRect toView:nil];
+    iconRect.origin = [[self window] convertBaseToScreen:iconRect.origin];
+    [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:[self delegate]];
+    [[FVPreviewer sharedPreviewer] previewURL:aURL forIconInRect:iconRect];    
+    _fvFlags.controllingSharedPreviewer = YES;
+}
+
+- (void)_updatePreviewer
+{
+    // reload might result in an empty view...
+    if ([_selectionIndexes count] == 0) {
+        if ([[FVPreviewer sharedPreviewer] isPreviewing]) {
+            [[FVPreviewer sharedPreviewer] stopPreviewing];
+        }
+    }
+    else if ([_selectionIndexes count] == 1) {
+        NSUInteger r, c;
+        [self _getGridRow:&r column:&c ofIndex:[_selectionIndexes firstIndex]];
+        [self _previewURL:[self URLAtIndex:[_selectionIndexes firstIndex]] forIconInRect:[self _rectOfIconInRow:r column:c]];
+    }
+    else {
+        [self _previewURLs:[self _selectedURLs]];
     }
 }
 
