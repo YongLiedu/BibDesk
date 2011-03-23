@@ -30,6 +30,7 @@
 		CE07BD4310E789FE00686ACC /* _FVFullScreenContentView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE07BD3F10E789FE00686ACC /* _FVFullScreenContentView.m */; };
 		CE07BD4410E789FE00686ACC /* _FVPreviewerWindow.h in Headers */ = {isa = PBXBuildFile; fileRef = CE07BD4010E789FE00686ACC /* _FVPreviewerWindow.h */; };
 		CE07BD4510E789FE00686ACC /* _FVPreviewerWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = CE07BD4110E789FE00686ACC /* _FVPreviewerWindow.m */; };
+		CE0CA9FE133A18E300A2B6D5 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE0CA9FD133A18E300A2B6D5 /* IOKit.framework */; };
 		CE65FC5C0F72578D0089F9DC /* _FVMappedDataProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = CE65FC580F72578D0089F9DC /* _FVMappedDataProvider.h */; };
 		CE65FC5D0F72578D0089F9DC /* _FVMappedDataProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = CE65FC590F72578D0089F9DC /* _FVMappedDataProvider.m */; };
 		CE65FC5E0F72578D0089F9DC /* _FVSplitSet.h in Headers */ = {isa = PBXBuildFile; fileRef = CE65FC5A0F72578D0089F9DC /* _FVSplitSet.h */; };
@@ -196,6 +197,7 @@
 		CE07BD3F10E789FE00686ACC /* _FVFullScreenContentView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _FVFullScreenContentView.m; sourceTree = "<group>"; };
 		CE07BD4010E789FE00686ACC /* _FVPreviewerWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _FVPreviewerWindow.h; sourceTree = "<group>"; };
 		CE07BD4110E789FE00686ACC /* _FVPreviewerWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _FVPreviewerWindow.m; sourceTree = "<group>"; };
+		CE0CA9FD133A18E300A2B6D5 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = /System/Library/Frameworks/IOKit.framework; sourceTree = "<absolute>"; };
 		CE3D8F3A125E8BA000AE0232 /* German */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		CE3D8F3B125E8BA700AE0232 /* German */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/FileView.strings; sourceTree = "<group>"; };
 		CE65FC580F72578D0089F9DC /* _FVMappedDataProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _FVMappedDataProvider.h; sourceTree = "<group>"; };
@@ -295,6 +297,7 @@
 				CEFC1F410F6AD24600B2AEE6 /* Accelerate.framework in Frameworks */,
 				F980F0930CCC3C2E0067C1DF /* libz.dylib in Frameworks */,
 				CEFC1F690F6AD46D00B2AEE6 /* QuickLook.framework in Frameworks */,
+				CE0CA9FE133A18E300A2B6D5 /* IOKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -345,6 +348,7 @@
 				F946922F0CA5710500AC2772 /* QuickLook.framework */,
 				F94692300CA5710500AC2772 /* WebKit.framework */,
 				CEFC1F400F6AD24600B2AEE6 /* Accelerate.framework */,
+				CE0CA9FD133A18E300A2B6D5 /* IOKit.framework */,
 				1058C7B0FEA5585E11CA2CBB /* Linked Frameworks */,
 				1058C7B2FEA5585E11CA2CBB /* Other Frameworks */,
 			);
