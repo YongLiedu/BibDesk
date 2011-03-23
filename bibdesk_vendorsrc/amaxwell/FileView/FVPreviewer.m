@@ -42,8 +42,9 @@
 #import <WebKit/WebKit.h>
 #import <pthread.h>
 #import "_FVPreviewerWindow.h"
+#import "FVTextIcon.h" // for NSAttributedString initialization check
 
-#define USE_LAYER_BACKING 0
+NSString * const FVPreviewerWillCloseNotification = @"FVPreviewerWillCloseNotification";
 
 @implementation FVPreviewer
 
@@ -58,6 +59,10 @@
 
 + (BOOL)useQuickLookForURL:(NSURL *)aURL;
 {
+    /*
+     !!! The conditions here must be consistent with those in contentViewForURL:shouldUseQuickLook:
+     or else we'll end up using qlmanage unintentionally.
+     */
     
     // early return
     NSSet *webviewSchemes = [NSSet setWithObjects:@"http", @"https", @"ftp", nil];
@@ -91,7 +96,7 @@
     else if (UTTypeConformsTo(theUTI, kUTTypePDF) || UTTypeConformsTo(theUTI, FVSTR("com.adobe.postscript"))) {
         return NO;
     }
-    else if (UTTypeConformsTo(theUTI, FVSTR("public.composite-content")) || UTTypeConformsTo(theUTI, kUTTypeText)) {
+    else if ([FVTextIcon canInitWithUTI:(NSString *)theUTI]) {
         NSAttributedString *string = [[[NSAttributedString alloc] initWithURL:aURL documentAttributes:NULL] autorelease];
         return (string == nil);
     }
@@ -158,16 +163,6 @@
         [fullScreenButton setImage:[NSImage imageNamed:NSImageNameEnterFullScreenTemplate]];
         [fullScreenButton setAlternateImage:[NSImage imageNamed:NSImageNameExitFullScreenTemplate]];
         [fullScreenButton setRefusesFirstResponder:YES];
-        
-        // only set delegate on alpha animation, since we only need the delegate callback once
-        CABasicAnimation *fadeAnimation = [CABasicAnimation animationWithKeyPath:@"alphaValue"];
-        [fadeAnimation setDelegate:self];
-        
-        NSMutableDictionary *animations = [NSMutableDictionary dictionary];
-        [animations addEntriesFromDictionary:[[self window] animations]];
-        [animations setObject:fadeAnimation forKey:@"alphaValue"];
-        
-        [[self window] setAnimations:animations];
     }
     else {
         [fullScreenButton removeFromSuperview];
@@ -179,57 +174,53 @@
 - (void)windowWillClose:(NSNotification *)notification
 {
     [self setWebViewContextMenuDelegate:nil];
+    // notify observers that they're no longer managing the previewer
+    [[NSNotificationCenter defaultCenter] postNotificationName:FVPreviewerWillCloseNotification object:self];
 }
 
-- (NSWindow *)windowAnimator
+- (void)animationDidEnd:(NSAnimation*)animation;
 {
-    NSWindow *theWindow = [self window];
-    return [theWindow respondsToSelector:@selector(animator)] ? [theWindow animator] : theWindow;
-}
-
-- (void)animationDidStop:(CAPropertyAnimation *)anim finished:(BOOL)flag;
-{
-    if (flag && [[self window] alphaValue] < 0.01) {
-        [[self window] close];
-    }
-    else {
+    if (NO == closeAfterAnimation) {
         [contentView selectFirstTabViewItem:nil];
         // highlight around button isn't drawn unless the window is key, which happens randomly unless we force it here
         [[self window] makeKeyAndOrderFront:nil];
         [[self window] makeFirstResponder:fullScreenButton];
     }
-#if USE_LAYER_BACKING
-    [[[self window] contentView] setWantsLayer:NO];
-#endif
 }
 
 - (BOOL)windowShouldClose:(id)sender
 {
     [[NSUserDefaults standardUserDefaults] setObject:NSStringFromRect([[self window] frame]) forKey:[self windowFrameAutosaveName]];
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-        // make sure it doesn't respond to keystrokes while fading out
-        [[self window] makeFirstResponder:nil];
-        // image is now possibly out of sync due to scrolling/resizing
-        NSView *currentView = [[contentView tabViewItemAtIndex:0] view];
-        NSBitmapImageRep *imageRep = [currentView bitmapImageRepForCachingDisplayInRect:[currentView bounds]];
-        [currentView cacheDisplayInRect:[currentView bounds] toBitmapImageRep:imageRep];
-        NSImage *image = [[NSImage alloc] initWithSize:[imageRep size]];
-        [image addRepresentation:imageRep];
-        [animationView setImage:image];
-        [image release];
-        [contentView selectLastTabViewItem:nil];
-#if USE_LAYER_BACKING
-        [[[self window] contentView] setWantsLayer:YES];
-        [[self window] display];
-#endif
-        [NSAnimationContext beginGrouping];
-        [[self windowAnimator] setAlphaValue:0.0];
-        // shrink back to the icon frame
-        if (NSIsEmptyRect(previousIconFrame) == NO)
-            [[self windowAnimator] setFrame:previousIconFrame display:YES];
-        [NSAnimationContext endGrouping];
-        return NO;
+
+    // make sure it doesn't respond to keystrokes while fading out
+    [[self window] makeFirstResponder:nil];
+    // image is now possibly out of sync due to scrolling/resizing
+    NSView *currentView = [[contentView tabViewItemAtIndex:0] view];
+    NSBitmapImageRep *imageRep = [currentView bitmapImageRepForCachingDisplayInRect:[currentView bounds]];
+    [currentView cacheDisplayInRect:[currentView bounds] toBitmapImageRep:imageRep];
+    NSImage *image = [[NSImage alloc] initWithSize:[imageRep size]];
+    [image addRepresentation:imageRep];
+    [animationView setImage:image];
+    [image release];
+    [contentView selectLastTabViewItem:nil];
+
+    closeAfterAnimation = YES;
+    // using NSAnimationEaseOut causes a double animation or something; it seems badly broken
+    NSViewAnimation *animation = [[NSViewAnimation alloc] initWithDuration:0.3 animationCurve:NSAnimationEaseInOut]; 
+    [animation setAnimationBlockingMode:NSAnimationBlocking];
+    [animation setFrameRate:30.0];
+    NSMutableDictionary *windowDict = [NSMutableDictionary dictionary];
+    [windowDict setObject:[self window] forKey:NSViewAnimationTargetKey];
+    if (NSIsEmptyRect(previousIconFrame) == NO) {
+        [windowDict setObject:[NSValue valueWithRect:[[self window] frame]] forKey:NSViewAnimationStartFrameKey];
+        [windowDict setObject:[NSValue valueWithRect:previousIconFrame] forKey:NSViewAnimationEndFrameKey];
     }
+    [windowDict setObject:NSViewAnimationFadeOutEffect forKey:NSViewAnimationEffectKey];
+    [animation setViewAnimations:[NSArray arrayWithObject:windowDict]];
+    [animation setDelegate:self];
+    [animation startAnimation];
+    [animation release];   
+
     return YES;
 }
 
@@ -242,8 +233,15 @@
     qlTask = nil;    
 }
 
+- (void)setCurrentURL:(NSURL *)aURL
+{
+    [currentURL autorelease];
+    currentURL = [aURL copy];
+}
+
 - (void)stopPreviewing;
 {
+    [self setCurrentURL:nil];
     [self _killTask];
 
     if (windowLoaded && [[self window] isVisible]) {
@@ -293,6 +291,9 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
 
 - (void)_loadAttributedString:(NSAttributedString *)string documentAttributes:(NSDictionary *)attrs inView:(NSTextView *)theView
 {
+    [theView setSelectedRange:NSMakeRange(0, 0)];
+    [theView scrollRangeToVisible:NSMakeRange(0, 0)];
+    
     NSTextStorage *textStorage = [theView textStorage];
     [textStorage setAttributedString:string];
     NSColor *backgroundColor = nil;
@@ -387,7 +388,7 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
             [movie release];
         }
     }
-    else if (UTTypeConformsTo(theUTI, FVSTR("public.composite-content")) || UTTypeConformsTo(theUTI, kUTTypeText)) {
+    else if ([FVTextIcon canInitWithUTI:(NSString *)theUTI]) {
         theView = textView;
         NSDictionary *attrs;
         NSAttributedString *string = [[NSAttributedString alloc] initWithURL:representedURL documentAttributes:&attrs];
@@ -541,50 +542,45 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
         }
 
         // don't reset the window frame if it's already on-screen
-        NSRect newWindowFrame = [theWindow isVisible] ? [theWindow frame] : [self savedFrame];
-        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-            
-            [theWindow setAlphaValue:0.0];
-            [[self window] makeKeyAndOrderFront:nil];
+        NSRect newWindowFrame = [theWindow isVisible] ? [theWindow frame] : [self savedFrame];            
+        [theWindow setAlphaValue:0.0];
+        [[self window] makeKeyAndOrderFront:nil];
+        
+        // select the new view and set the window's frame in order to get the view's new frame
+        [contentView selectFirstTabViewItem:nil];
+        NSRect oldWindowFrame = [[self window] frame];
+        [[self window] setFrame:newWindowFrame display:YES];
+        
+        // cache the new view to an image
+        NSBitmapImageRep *imageRep = [newView bitmapImageRepForCachingDisplayInRect:[newView bounds]];
+        [newView cacheDisplayInRect:[newView bounds] toBitmapImageRep:imageRep];
+        [[self window] setFrame:oldWindowFrame display:NO];
+        NSImage *image = [[NSImage alloc] initWithSize:[imageRep size]];
+        [image addRepresentation:imageRep];
+        [animationView setImage:image];
+        [image release];
+        
+        [contentView selectLastTabViewItem:nil];
+        
+        // animate ~30 fps for 0.3 seconds
+        NSViewAnimation *animation = [[NSViewAnimation alloc] initWithDuration:0.3 animationCurve:NSAnimationEaseIn]; 
+        [animation setFrameRate:30.0];
+        [animation setAnimationBlockingMode:NSAnimationBlocking];
+        NSMutableDictionary *windowDict = [NSMutableDictionary dictionary];
+        [windowDict setObject:theWindow forKey:NSViewAnimationTargetKey];
+        [windowDict setObject:NSViewAnimationFadeInEffect forKey:NSViewAnimationEffectKey];
 
-            if (NO == NSEqualRects(newWindowFrame, NSZeroRect)) {
-                // select the new view and set the window's frame in order to get the view's new frame
-                [contentView selectFirstTabViewItem:nil];
-                NSRect oldWindowFrame = [[self window] frame];
-                [[self window] setFrame:newWindowFrame display:YES];
-                
-                // cache the new view to an image
-                NSBitmapImageRep *imageRep = [newView bitmapImageRepForCachingDisplayInRect:[newView bounds]];
-                [newView cacheDisplayInRect:[newView bounds] toBitmapImageRep:imageRep];
-                [[self window] setFrame:oldWindowFrame display:NO];
-                NSImage *image = [[NSImage alloc] initWithSize:[imageRep size]];
-                [image addRepresentation:imageRep];
-                [animationView setImage:image];
-                [image release];
-
-#if USE_LAYER_BACKING
-                // now select the animation view and start animating
-                [[[self window] contentView] setWantsLayer:YES];
-                [(NSView *)[[self window] contentView] display];
-#endif
-                [contentView selectLastTabViewItem:nil];
-
-                [NSAnimationContext beginGrouping];
-                [[self windowAnimator] setFrame:newWindowFrame display:YES];
-                [[self windowAnimator] setAlphaValue:1.0];
-                [NSAnimationContext endGrouping];
-            }
-            else {
-                // saved frame was set to zero rect (not previously in defaults database) and user will adjust
-                [[self windowAnimator] setAlphaValue:1.0];
-            }
+        // if we had a previously saved frame in the defaults database, set it as the target
+        if (NO == NSEqualRects(newWindowFrame, NSZeroRect)) {            
+            [windowDict setObject:[NSValue valueWithRect:[theWindow frame]] forKey:NSViewAnimationStartFrameKey];
+            [windowDict setObject:[NSValue valueWithRect:newWindowFrame] forKey:NSViewAnimationEndFrameKey]; 
         }
-        else {
-            [contentView selectFirstTabViewItem:nil];
-            if (NO == NSEqualRects(newWindowFrame, NSZeroRect))
-                [[self window] setFrame:newWindowFrame display:YES animate:YES];
-            [self showWindow:self];
-        }    
+        
+        [animation setViewAnimations:[NSArray arrayWithObject:windowDict]];
+        [animation setDelegate:self];
+        closeAfterAnimation = NO;
+        [animation startAnimation];
+        [animation release];  
         
         [(_FVPreviewerWindow *)[self window] resetKeyStatus];
     }
@@ -593,6 +589,7 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
 - (void)previewURL:(NSURL *)absoluteURL forIconInRect:(NSRect)screenRect
 {
     FVAPIParameterAssert(nil != absoluteURL);
+    [self setCurrentURL:absoluteURL];
 
     // set up a rect in the middle of the main screen for a default value from which to animate
     if (NSEqualRects(screenRect, NSZeroRect)) {
@@ -637,6 +634,13 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
         [[[self window] contentView] enterFullScreenMode:[[self window] screen] withOptions:nil];
         [[fullScreenButton cell] setBackgroundStyle:NSBackgroundStyleLight];
     }
+}
+
+- (void)doubleClickedPreviewWindow
+{
+    NSParameterAssert([[self window] isVisible]);
+    NSParameterAssert(currentURL);
+    [[NSWorkspace sharedWorkspace] openURL:currentURL];
 }
 
 // esc is typically bound to complete: instead of cancel: in a textview

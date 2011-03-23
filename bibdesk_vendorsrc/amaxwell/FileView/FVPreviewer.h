@@ -39,6 +39,10 @@
 #import <Cocoa/Cocoa.h>
 #import <Quartz/Quartz.h>
 
+/** Notification posted when the window closes.
+ @warning This is a temporary hack for FileView internals, and must not be relied on! */
+FV_PRIVATE_EXTERN NSString * const FVPreviewerWillCloseNotification;
+
 @class FVScaledImageView, QTMovieView, PDFView, WebView;
 /** FVPreviewer displays and manages a single-window preview.
  
@@ -64,6 +68,8 @@
     NSRect                     previousIconFrame;
     BOOL                       windowLoaded;
     NSTask                     *qlTask;
+    NSURL                      *currentURL;
+    BOOL                        closeAfterAnimation;
 }
 
 /** Shared instance.
