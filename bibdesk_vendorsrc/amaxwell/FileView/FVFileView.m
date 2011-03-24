@@ -3560,10 +3560,16 @@ static NSRect _rectWithCorners(const NSPoint aPoint, const NSPoint bPoint) {
 
 - (IBAction)previewAction:(id)sender;
 {
-    FVPreviewer *previewer = [FVPreviewer sharedPreviewer];
-    if ([previewer isPreviewing]) {
-        [previewer stopPreviewing];
+    if ([[FVPreviewer sharedPreviewer] isPreviewing]) {
+        [[FVPreviewer sharedPreviewer] stopPreviewing];
     }
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+    else if (_fvFlags.controllingQLPreviewPanel) {
+        [[QLPreviewPanelClass sharedPreviewPanel] orderOut:nil];
+        [[QLPreviewPanelClass sharedPreviewPanel] setDataSource:nil];
+        [[QLPreviewPanelClass sharedPreviewPanel] setDelegate:nil];
+    }
+#endif
     else if ([_selectionIndexes count] == 1) {
         NSUInteger r, c;
         [self _getGridRow:&r column:&c ofIndex:[_selectionIndexes lastIndex]];
