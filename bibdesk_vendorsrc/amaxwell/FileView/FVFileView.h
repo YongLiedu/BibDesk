@@ -222,6 +222,7 @@ typedef NSInteger FVDisplayMode;
         unsigned int updatingFromSlider:1;
         unsigned int hasArrows:1;
         unsigned int controllingSharedPreviewer:1;
+        unsigned int controllingQLPreviewPanel:1;
     } _fvFlags;
     NSSize                   _padding;
     NSSize                   _iconSize;

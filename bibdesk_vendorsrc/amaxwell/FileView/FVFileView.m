@@ -62,6 +62,8 @@
 // draws grid and margin frames
 #define DEBUG_GRID 0
 
+static Class QLPreviewPanelClass = Nil;
+
 static NSString *FVWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 static char _FVFileViewContentObservationContext;
@@ -124,13 +126,17 @@ static char _FVFileViewContentObservationContext;
 #pragma mark -
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+
 @protocol FVAnimationDelegate <NSAnimationDelegate>
 @optional
 - (void)animation:(NSAnimation *)animation didReachProgress:(NSAnimationProgress)progress;
 @end
 
-@interface FVFileView (FVAnimationDelegate) <FVAnimationDelegate>
+#import <Quartz/Quartz.h>
+
+@interface FVFileView (FVSnowLeopard) <FVAnimationDelegate, QLPreviewPanelDataSource, QLPreviewPanelDelegate>
 @end
+
 #endif
 
 @interface FVAnimation : NSAnimation
@@ -197,6 +203,13 @@ static char _FVFileViewContentObservationContext;
     
     FVINITIALIZE(FVFileView);
     
+    // even without loading the framework on 10.5, this returns a class
+    QLPreviewPanelClass = Nil;
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_5) 
+        QLPreviewPanelClass = NSClassFromString(@"QLPreviewPanel");
+#endif
+    
     // QTMovie raises if +initialize isn't sent on the AppKit thread
     [QTMovie class];
 }
@@ -238,6 +251,7 @@ static char _FVFileViewContentObservationContext;
     _fvFlags.isRescaling = NO;
     _fvFlags.scheduledLiveResize = NO;
     _fvFlags.controllingSharedPreviewer = NO;
+    _fvFlags.controllingQLPreviewPanel = NO;
     _selectionIndexes = [[NSIndexSet alloc] init];
     _lastClickedIndex = NSNotFound;
     _rubberBandRect = NSZeroRect;
@@ -735,7 +749,7 @@ static char _FVFileViewContentObservationContext;
         
         NSAccessibilityPostNotification(NSAccessibilityUnignoredAncestor(self), NSAccessibilityFocusedUIElementChangedNotification);
         
-        if (_fvFlags.controllingSharedPreviewer)
+        if (_fvFlags.controllingSharedPreviewer || _fvFlags.controllingQLPreviewPanel)
             [self _updatePreviewer];
     }
 }
@@ -1715,7 +1729,7 @@ static inline bool __equal_timespecs(const struct timespec *ts1, const struct ti
         [self _setSelectionIndexes:newSelIndexes];
         [newSelIndexes release];
     }
-    else if (_fvFlags.controllingSharedPreviewer) {
+    else if (_fvFlags.controllingSharedPreviewer || _fvFlags.controllingQLPreviewPanel) {
         // Content or ordering of selection (may) have changed, so reload any previews
         // Only modify the previewer if this view is controlling it, though!
         [self _updatePreviewer];
@@ -3193,6 +3207,64 @@ static NSRect _rectWithCorners(const NSPoint aPoint, const NSPoint bPoint) {
 
 #pragma mark User interaction
 
+- (BOOL)_tryToPerform:(SEL)aSelector inViewAndDescendants:(NSView *)aView
+{
+    if ([aView isHiddenOrHasHiddenAncestor])
+        return NO;
+    
+    /*
+     Since WebView returns YES from tryToPerform:@selector(pageDown:), but actually does nothing,
+     we have to find an enclosing scrollview.  This sucks, but it'll at least work for anything
+     in FVPreviewer.
+     */
+    if ([aView enclosingScrollView] && [[aView enclosingScrollView] tryToPerform:aSelector with:nil])
+        return YES;
+    
+    NSEnumerator *subviewEnum = [[aView subviews] objectEnumerator];
+    while ((aView = [subviewEnum nextObject]) != nil) {
+        if ([aView isHiddenOrHasHiddenAncestor])
+            continue;
+        if ([self _tryToPerform:aSelector inViewAndDescendants:aView])
+            return YES;
+    }
+    return NO;
+}
+
+- (void)_tryToPerformInPreviewer:(SEL)aSelector
+{
+    /*
+     When you show a Quick Look panel in Finder, arrow keys control Finder icon navigation,
+     but page up/page down control the Quick Look panel.  Since the QL panel actually appears
+     to intercept pageUp:/pageDown: without sending them to the delegate, this code is 
+     currently only called on FVPreviewer.
+     
+     Implementing pageUp:/pageDown: in FVPreviewer and walking the responder chain
+     led to an infinite loop with the PDFView.  Walking subviews is slightly unpleasant, but
+     it doesn't (and shouldn't) crash.
+     */        
+    NSWindow *window = nil;
+    if ([[FVPreviewer sharedPreviewer] isPreviewing])
+        window = [[FVPreviewer sharedPreviewer] window];
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+    else if (_fvFlags.controllingQLPreviewPanel)
+        window = [QLPreviewPanelClass sharedPreviewPanel];
+#endif
+    
+    if ([self _tryToPerform:aSelector inViewAndDescendants:[window contentView]] == NO)
+        [super doCommandBySelector:aSelector];
+}
+
+- (void)doCommandBySelector:(SEL)aSelector
+{
+    if (aSelector == @selector(pageUp:) || aSelector == @selector(pageDown:)) {
+        
+        [self _tryToPerformInPreviewer:aSelector];
+    }
+    else {
+        [super doCommandBySelector:aSelector];
+    }
+}
+
 - (void)scrollItemAtIndexToVisible:(NSUInteger)anIndex
 {
     NSUInteger r = 0, c = 0;
@@ -3930,18 +4002,60 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
 
 - (void)_previewURLs:(NSArray *)iconURLs
 {
-    [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:nil];
-    [[FVPreviewer sharedPreviewer] previewFileURLs:iconURLs];
-    _fvFlags.controllingSharedPreviewer = YES;
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+    if (_fvFlags.controllingQLPreviewPanel) {
+        if ([[FVPreviewer sharedPreviewer] isPreviewing]) {
+            [[FVPreviewer sharedPreviewer] stopPreviewing];
+        }
+        [[QLPreviewPanelClass sharedPreviewPanel] reloadData];
+        [[QLPreviewPanelClass sharedPreviewPanel] refreshCurrentPreviewItem];
+    }
+    else if (QLPreviewPanelClass) {
+        if ([[FVPreviewer sharedPreviewer] isPreviewing]) {
+            [[FVPreviewer sharedPreviewer] stopPreviewing];
+        }
+        [[QLPreviewPanelClass sharedPreviewPanel] makeKeyAndOrderFront:nil];        
+    }
+    else
+#endif
+    {
+        [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:nil];
+        [[FVPreviewer sharedPreviewer] previewFileURLs:iconURLs];
+        _fvFlags.controllingSharedPreviewer = YES;
+    }
 }
 
 - (void)_previewURL:(NSURL *)aURL forIconInRect:(NSRect)iconRect
 {
-    iconRect = [self convertRect:iconRect toView:nil];
-    iconRect.origin = [[self window] convertBaseToScreen:iconRect.origin];
-    [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:[self delegate]];
-    [[FVPreviewer sharedPreviewer] previewURL:aURL forIconInRect:iconRect];    
-    _fvFlags.controllingSharedPreviewer = YES;
+    if (Nil == QLPreviewPanelClass || [FVPreviewer useQuickLookForURL:aURL] == NO) {
+        iconRect = [self convertRect:iconRect toView:nil];
+        iconRect.origin = [[self window] convertBaseToScreen:iconRect.origin];
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+        // note: controllingQLPreviewPanel is only true if QLPreviewPanelClass exists, but clang doesn't know that
+        if (_fvFlags.controllingQLPreviewPanel && Nil != QLPreviewPanelClass) {
+            iconRect = [[QLPreviewPanelClass sharedPreviewPanel] frame];
+            [[QLPreviewPanelClass sharedPreviewPanel] performSelector:@selector(orderOut:) withObject:nil afterDelay:0.0];
+        }
+#endif
+        [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:[self delegate]];
+        [[FVPreviewer sharedPreviewer] previewURL:aURL forIconInRect:iconRect];    
+        _fvFlags.controllingSharedPreviewer = YES;
+    }
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+    else if (_fvFlags.controllingQLPreviewPanel) {
+        if ([[FVPreviewer sharedPreviewer] isPreviewing]) {
+            [[FVPreviewer sharedPreviewer] stopPreviewing];
+        }
+        [[QLPreviewPanelClass sharedPreviewPanel] reloadData];
+        [[QLPreviewPanelClass sharedPreviewPanel] refreshCurrentPreviewItem];
+    }
+    else {
+        if ([[FVPreviewer sharedPreviewer] isPreviewing]) {
+            [[FVPreviewer sharedPreviewer] stopPreviewing];
+        }
+        [[QLPreviewPanelClass sharedPreviewPanel] makeKeyAndOrderFront:nil]; 
+    }
+#endif
 }
 
 - (void)_updatePreviewer
@@ -3951,6 +4065,13 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
         if ([[FVPreviewer sharedPreviewer] isPreviewing]) {
             [[FVPreviewer sharedPreviewer] stopPreviewing];
         }
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+        else if (_fvFlags.controllingQLPreviewPanel) {
+            [[QLPreviewPanelClass sharedPreviewPanel] orderOut:nil];
+            [[QLPreviewPanelClass sharedPreviewPanel] setDataSource:nil];
+            [[QLPreviewPanelClass sharedPreviewPanel] setDelegate:nil];
+        }
+#endif
     }
     else if ([_selectionIndexes count] == 1) {
         NSUInteger r, c;
@@ -3961,6 +4082,69 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
         [self _previewURLs:[self _selectedURLs]];
     }
 }
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+
+// gets sent while doing keyboard navigation when the panel is up
+- (BOOL)previewPanel:(QLPreviewPanel *)panel handleEvent:(NSEvent *)event;
+{
+    /*
+     This works fine if navigating icons via the FileView with arrow keys, but breaks
+     down when navigating BibDesk's tableview with arrow keys and the QL panel, since in that
+     case the delegate should be the table's delegate.  FVPreviewer works better in that case,
+     since it doesn't frob the responder chain like QLPreviewPanel.  This is enough of an edge 
+     case that it's not worth a great deal of trouble, though.
+     */
+    if ([event type] == NSKeyDown) {
+        [self interpretKeyEvents:[NSArray arrayWithObject:event]];
+        return YES;
+    }
+    return NO;
+}
+
+- (BOOL)acceptsPreviewPanelControl:(QLPreviewPanel *)panel;
+{
+    return YES;
+}
+
+- (void)beginPreviewPanelControl:(QLPreviewPanel *)panel;
+{
+    _fvFlags.controllingQLPreviewPanel = YES;
+    [[QLPreviewPanelClass sharedPreviewPanel] setDataSource:self];
+    [[QLPreviewPanelClass sharedPreviewPanel] setDelegate:self];
+    [[QLPreviewPanelClass sharedPreviewPanel] reloadData];    
+}
+
+- (void)endPreviewPanelControl:(QLPreviewPanel *)panel;
+{
+    _fvFlags.controllingQLPreviewPanel = NO;
+    [[QLPreviewPanelClass sharedPreviewPanel] setDataSource:nil];
+    [[QLPreviewPanelClass sharedPreviewPanel] setDelegate:nil];
+}
+
+- (NSInteger)numberOfPreviewItemsInPreviewPanel:(QLPreviewPanel *)panel;
+{
+    return [[self _selectedURLs] count];
+}
+
+- (id <QLPreviewItem>)previewPanel:(QLPreviewPanel *)panel previewItemAtIndex:(NSInteger)idx;
+{
+    return [[self _selectedURLs] objectAtIndex:idx];
+}
+
+- (NSRect)previewPanel:(QLPreviewPanel *)panel sourceFrameOnScreenForPreviewItem:(id <QLPreviewItem>)item;
+{
+    NSUInteger r, c;
+    NSRect iconRect = NSZeroRect;
+    if ([self numberOfPreviewItemsInPreviewPanel:panel] == 1 && [self _getGridRow:&r column:&c ofIndex:[_selectionIndexes lastIndex]]) {
+        iconRect = [self _rectOfIconInRow:r column:c];
+        iconRect = [self convertRect:iconRect toView:nil];
+        iconRect.origin = [[self window] convertBaseToScreen:iconRect.origin];
+    }
+    return iconRect;
+}
+
+#endif
 
 #pragma mark Accessibility
 
