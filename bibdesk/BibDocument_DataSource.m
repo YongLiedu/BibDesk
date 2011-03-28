@@ -1529,7 +1529,7 @@
     if ([aURL isFileURL])
         return NO == [[NSWorkspace sharedWorkspace] openURL:aURL withSearchString:[self fileContentSearchString]];
     else
-        return [[NSWorkspace sharedWorkspace] openLinkedURL:aURL];
+        return NO == [[NSWorkspace sharedWorkspace] openLinkedURL:aURL];
 }
 
 - (void)fileView:(FVFileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
