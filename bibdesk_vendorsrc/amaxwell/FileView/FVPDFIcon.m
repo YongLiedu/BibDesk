@@ -184,6 +184,13 @@ static CGLayerRef   _pageLayer = NULL;
     [self lock];
     CGImageRelease(_thumbnail);
     _thumbnail = NULL;
+    if (_pdfDoc && _isMapped) [_FVMappedDataProvider releaseProviderForURL:_fileURL];
+    CGPDFDocumentRelease(_pdfDoc);
+    _pdfDoc = NULL;
+    _pdfPage = NULL;
+    _currentPage = 1;
+    _pageCount = 0;
+    _isMapped = NO;
     [self unlock];
 }
 
