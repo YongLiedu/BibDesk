@@ -525,6 +525,10 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 #pragma mark -
 
 - (void)customFieldsDidChange:(NSNotification *)aNotification{
+    [self resetGroupsAndPeople];
+}
+
+- (void)resetGroupsAndPeople{
 	[groups removeAllObjects];
     // these fields may change type, so our cached values should be discarded
     [people release];

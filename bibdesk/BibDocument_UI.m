@@ -1044,7 +1044,11 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 	if ([[[aNotification userInfo] objectForKey:BDSKMacroResolverTypeKey] isEqualToString:BDSKMacroResolverSetType])
         return; // this will be handled after loading finished
     
-    [tableView reloadData];
+    [publications makeObjectsPerformSelector:@selector(resetGroupsAndPeople)];
+    
+    // current group field may have changed its type (string->person)
+    [self updateSmartGroups];
+    [self updateCategoryGroupsPreservingSelection:YES];
     [self updatePreviews];
 }
 

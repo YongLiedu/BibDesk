@@ -817,6 +817,8 @@ enum {
 
 - (NSURL *)bdskURL;
 
+- (void)resetGroupsAndPeople;
+
 @end
 
 @class PDFMetadata;
