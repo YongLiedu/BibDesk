@@ -44,17 +44,13 @@ enum {
     BDSKAddOnly
 };
 
-extern IMP BDSKSetMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types, BOOL isInstance, NSInteger options);
-extern IMP BDSKSetMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector, BOOL isInstance, NSInteger options);
+extern IMP BDSKSetInstanceMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types, NSInteger options);
+extern IMP BDSKSetInstanceMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector, NSInteger options);
 
 extern IMP BDSKReplaceInstanceMethodImplementation(Class aClass, SEL aSelector, IMP anImp);
-extern IMP BDSKReplaceClassMethodImplementation(Class aClass, SEL aSelector, IMP anImp);
 extern void BDSKAddInstanceMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types);
-extern void BDSKAddClassMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types);
 
 extern IMP BDSKReplaceInstanceMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
-extern IMP BDSKReplaceClassMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
 extern void BDSKAddInstanceMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
-extern void BDSKAddClassMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
 
 extern void BDSKRequestConcreteImplementation(id self, SEL aSelector);
