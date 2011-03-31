@@ -175,6 +175,7 @@ static char _FVFileViewContentObservationContext;
 - (void)_setSelectionIndexes:(NSIndexSet *)indexSet;
 - (void)_previewURLs:(NSArray *)iconURLs;
 - (void)_previewURL:(NSURL *)aURL forIconInRect:(NSRect)iconRect;
+- (void)_stopPreviewing;
 - (void)_updatePreviewer;
 - (void)handlePreviewerWillClose:(NSNotification *)aNote;
 
@@ -3207,64 +3208,6 @@ static NSRect _rectWithCorners(const NSPoint aPoint, const NSPoint bPoint) {
 
 #pragma mark User interaction
 
-- (BOOL)_tryToPerform:(SEL)aSelector inViewAndDescendants:(NSView *)aView
-{
-    if ([aView isHiddenOrHasHiddenAncestor])
-        return NO;
-    
-    /*
-     Since WebView returns YES from tryToPerform:@selector(pageDown:), but actually does nothing,
-     we have to find an enclosing scrollview.  This sucks, but it'll at least work for anything
-     in FVPreviewer.
-     */
-    if ([aView enclosingScrollView] && [[aView enclosingScrollView] tryToPerform:aSelector with:nil])
-        return YES;
-    
-    NSEnumerator *subviewEnum = [[aView subviews] objectEnumerator];
-    while ((aView = [subviewEnum nextObject]) != nil) {
-        if ([aView isHiddenOrHasHiddenAncestor])
-            continue;
-        if ([self _tryToPerform:aSelector inViewAndDescendants:aView])
-            return YES;
-    }
-    return NO;
-}
-
-- (void)_tryToPerformInPreviewer:(SEL)aSelector
-{
-    /*
-     When you show a Quick Look panel in Finder, arrow keys control Finder icon navigation,
-     but page up/page down control the Quick Look panel.  Since the QL panel actually appears
-     to intercept pageUp:/pageDown: without sending them to the delegate, this code is 
-     currently only called on FVPreviewer.
-     
-     Implementing pageUp:/pageDown: in FVPreviewer and walking the responder chain
-     led to an infinite loop with the PDFView.  Walking subviews is slightly unpleasant, but
-     it doesn't (and shouldn't) crash.
-     */        
-    NSWindow *window = nil;
-    if ([[FVPreviewer sharedPreviewer] isPreviewing])
-        window = [[FVPreviewer sharedPreviewer] window];
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-    else if (_fvFlags.controllingQLPreviewPanel)
-        window = [QLPreviewPanelClass sharedPreviewPanel];
-#endif
-    
-    if ([self _tryToPerform:aSelector inViewAndDescendants:[window contentView]] == NO)
-        [super doCommandBySelector:aSelector];
-}
-
-- (void)doCommandBySelector:(SEL)aSelector
-{
-    if (aSelector == @selector(pageUp:) || aSelector == @selector(pageDown:)) {
-        
-        [self _tryToPerformInPreviewer:aSelector];
-    }
-    else {
-        [super doCommandBySelector:aSelector];
-    }
-}
-
 - (void)scrollItemAtIndexToVisible:(NSUInteger)anIndex
 {
     NSUInteger r = 0, c = 0;
@@ -3560,16 +3503,9 @@ static NSRect _rectWithCorners(const NSPoint aPoint, const NSPoint bPoint) {
 
 - (IBAction)previewAction:(id)sender;
 {
-    if ([[FVPreviewer sharedPreviewer] isPreviewing]) {
-        [[FVPreviewer sharedPreviewer] stopPreviewing];
+    if ([[FVPreviewer sharedPreviewer] isPreviewing] || _fvFlags.controllingQLPreviewPanel) {
+        [self _stopPreviewing];
     }
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-    else if (_fvFlags.controllingQLPreviewPanel) {
-        [[QLPreviewPanelClass sharedPreviewPanel] orderOut:nil];
-        [[QLPreviewPanelClass sharedPreviewPanel] setDataSource:nil];
-        [[QLPreviewPanelClass sharedPreviewPanel] setDelegate:nil];
-    }
-#endif
     else if ([_selectionIndexes count] == 1) {
         NSUInteger r, c;
         [self _getGridRow:&r column:&c ofIndex:[_selectionIndexes lastIndex]];
@@ -4064,20 +4000,25 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
 #endif
 }
 
+- (void)_stopPreviewing
+{
+    if ([[FVPreviewer sharedPreviewer] isPreviewing]) {
+        [[FVPreviewer sharedPreviewer] stopPreviewing];
+    }
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+    else if (_fvFlags.controllingQLPreviewPanel) {
+        [[QLPreviewPanelClass sharedPreviewPanel] orderOut:nil];
+        [[QLPreviewPanelClass sharedPreviewPanel] setDataSource:nil];
+        [[QLPreviewPanelClass sharedPreviewPanel] setDelegate:nil];
+    }
+#endif
+}
+
 - (void)_updatePreviewer
 {
     // reload might result in an empty view...
     if ([_selectionIndexes count] == 0) {
-        if ([[FVPreviewer sharedPreviewer] isPreviewing]) {
-            [[FVPreviewer sharedPreviewer] stopPreviewing];
-        }
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-        else if (_fvFlags.controllingQLPreviewPanel) {
-            [[QLPreviewPanelClass sharedPreviewPanel] orderOut:nil];
-            [[QLPreviewPanelClass sharedPreviewPanel] setDataSource:nil];
-            [[QLPreviewPanelClass sharedPreviewPanel] setDelegate:nil];
-        }
-#endif
+        [self _stopPreviewing];
     }
     else if ([_selectionIndexes count] == 1) {
         NSUInteger r, c;
@@ -4087,6 +4028,55 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
     else {
         [self _previewURLs:[self _selectedURLs]];
     }
+}
+
+- (BOOL)_tryToPerform:(SEL)aSelector inViewAndDescendants:(NSView *)aView
+{
+    if ([aView isHiddenOrHasHiddenAncestor])
+        return NO;
+    
+    /*
+     Since WebView returns YES from tryToPerform:@selector(pageDown:), but actually does nothing,
+     we have to find an enclosing scrollview.  This sucks, but it'll at least work for anything
+     in FVPreviewer.
+     */
+    if ([aView enclosingScrollView] && [[aView enclosingScrollView] tryToPerform:aSelector with:nil])
+        return YES;
+    
+    NSEnumerator *subviewEnum = [[aView subviews] objectEnumerator];
+    while ((aView = [subviewEnum nextObject]) != nil) {
+        if ([aView isHiddenOrHasHiddenAncestor])
+            continue;
+        if ([self _tryToPerform:aSelector inViewAndDescendants:aView])
+            return YES;
+    }
+    return NO;
+}
+
+- (void)doCommandBySelector:(SEL)aSelector
+{
+    NSWindow *previewWindow = nil;
+    
+    if (aSelector == @selector(pageUp:) || aSelector == @selector(pageDown:)) {
+        /*
+         When you show a Quick Look panel in Finder, arrow keys control Finder icon navigation,
+         but page up/page down control the Quick Look panel.  Since the QL panel actually appears
+         to intercept pageUp:/pageDown: without sending them to the delegate, this code is 
+         currently only called on FVPreviewer.
+         
+         Implementing pageUp:/pageDown: in FVPreviewer and walking the responder chain
+         led to an infinite loop with the PDFView.  Walking subviews is slightly unpleasant, but
+         it doesn't (and shouldn't) crash.
+         */        
+        if ([[FVPreviewer sharedPreviewer] isPreviewing])
+            previewWindow = [[FVPreviewer sharedPreviewer] window];
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+        else if (_fvFlags.controllingQLPreviewPanel)
+            previewWindow = [QLPreviewPanelClass sharedPreviewPanel];
+#endif
+    }
+    if (previewWindow == nil || [self _tryToPerform:aSelector inViewAndDescendants:[previewWindow contentView]] == NO)
+        [super doCommandBySelector:aSelector];
 }
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
