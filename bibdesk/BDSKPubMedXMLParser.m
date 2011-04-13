@@ -280,6 +280,30 @@ static inline void addStringValueOfNodeForField(NSXMLNode *child, NSString *fiel
     [keywordString release];
 }
 
++ (void)_addAbstractNode:(NSXMLNode *)listNode toDictionary:(NSMutableDictionary *)pubFields
+{
+    if ([[listNode children] count] == 0)
+        return;
+    
+    NSMutableString *abstractString = [NSMutableString new];
+    
+    for (NSXMLElement *abstractNode in [listNode children]) {
+        
+        if ([[abstractNode name] isEqualToString:@"AbstractText"]) {
+            NSString *label = [[abstractNode attributeForName:@"Label"] stringValue];
+            if ([abstractString length] > 0)
+                [abstractString appendString:@"\n"];
+            if ([label length] > 0){
+                [abstractString appendString:label];
+                [abstractString appendString:@": "];
+            }
+            [abstractString appendString:[abstractNode stringValue]];
+        }
+    }
+    [pubFields setObject:abstractString forKey:BDSKAbstractString];
+    [abstractString release];
+}
+
 + (NSArray *)_itemsFromDocument:(NSXMLDocument *)doc error:(NSError **)outError;
 {
     NSArray *articles = [doc nodesForXPath:@"//PubmedArticle" error:outError];
@@ -297,9 +321,10 @@ static inline void addStringValueOfNodeForField(NSXMLNode *child, NSString *fiel
         [self _addMeshNode:[citation firstNodeForXPath:@"./MeshHeadingList"] toDictionary:pubFields];
         [self _addKeywordNode:[citation firstNodeForXPath:@"./KeywordList"] toDictionary:pubFields];
         
+        [self _addAbstractNode:[citation firstNodeForXPath:@"./Article/Abstract"] toDictionary:pubFields];
+        
         NSString *title = [[citation firstNodeForXPath:@"./Article/ArticleTitle"] stringValue];
         addStringToDictionaryIfNotNil([title stringByRemovingSuffix:@"."], BDSKTitleString, pubFields);        
-        addStringValueOfNodeForField([citation firstNodeForXPath:@"./Article/Abstract/AbstractText"], BDSKAbstractString, pubFields);
         addStringValueOfNodeForField([citation firstNodeForXPath:@"./Article/Pagination/MedlinePgn"], BDSKPagesString, pubFields);
         addStringValueOfNodeForField([citation firstNodeForXPath:@"./PMID"], @"Pmid", pubFields);
         
