@@ -39,7 +39,7 @@
 #import "BDSKCompletionServer.h"
 #import "BDSKCompletionServerProtocol.h"
 #import "BibDocument.h"
-#import "BDSKSearchForCommand.h"
+#import "BibDocument_Search.h"
 #import "BDSKPublicationsArray.h"
 
 #define BIBDESK_SERVER_NAME @"BDSKCompletionServer"
@@ -91,7 +91,7 @@ static id sharedCompletionServer = nil;
 
     for (BibDocument *document in [NSApp orderedDocuments]) {
         
-        NSArray *pubs = [NSString isEmptyString:searchString] ? [document publications] : [document findMatchesFor:searchString];
+        NSArray *pubs = [NSString isEmptyString:searchString] ? [document publications] : [document publicationsMatchingString:searchString];
         [results addObjectsFromArray:[pubs valueForKey:@"completionObject"]];
     }
 	return results;

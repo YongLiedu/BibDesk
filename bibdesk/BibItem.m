@@ -1601,6 +1601,30 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     return dict;
 }    
 
+- (BOOL)matchesString:(NSString *)searchterm {
+    NSString *string;
+    
+    string = [self citeKey];
+	if (string && CFStringFindWithOptions((CFStringRef)string,(CFStringRef)searchterm, CFRangeMake(0, [string length]), kCFCompareCaseInsensitive, NULL))
+        return YES;
+    
+	for (BibAuthor *auth in [self allPeople]) {
+        string = [auth lastName] ?: [auth name];
+        if (string && CFStringFindWithOptions((CFStringRef)string,(CFStringRef)searchterm, CFRangeMake(0, [string length]), kCFCompareCaseInsensitive, NULL))
+            return YES;
+	}
+    
+    string = [self displayTitle];
+	if (string && CFStringFindWithOptions((CFStringRef)string,(CFStringRef)searchterm, CFRangeMake(0, [string length]), kCFCompareCaseInsensitive, NULL))
+        return YES;
+    
+    string = [self valueForKey:BDSKKeywordsString];
+	if (string && CFStringFindWithOptions((CFStringRef)string,(CFStringRef)searchterm, CFRangeMake(0, [string length]), kCFCompareCaseInsensitive, NULL))
+        return YES;
+    
+    return NO;
+}
+
 #pragma mark -
 #pragma mark BibTeX strings
 

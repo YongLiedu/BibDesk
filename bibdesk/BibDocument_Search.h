@@ -67,4 +67,8 @@ extern NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString);
 
 - (NSString *)selectedStringForFind;
 
+#pragma mark Completion
+
+- (NSArray *)publicationsMatchingString:(NSString *)searchterm;
+
 @end

@@ -38,7 +38,14 @@
 
 #import "BDSKSearchForCommand.h"
 #import "BibAuthor.h"
+#import "BibItem.h"
+#import "BibDocument.h"
+#import "BibDocument_Search.h"
 
+
+@interface BibItem (Finding)
+- (NSString *)stringForCompletion;
+@end
 
 
 /* ssp: 2004-07-20
@@ -96,15 +103,15 @@ The command should have the form
 	if ([receiver isKindOfClass:[NSApplication class]] && dP == nil) {
 		// we are sent to the application and there is no direct paramter that might redirect the command
 		for (BibDocument *bd in [NSApp orderedDocuments])
-			[results addObjectsFromArray:[bd findMatchesFor:searchterm]];
+			[results addObjectsFromArray:[bd publicationsMatchingString:searchterm]];
 	} else if ([receiver isKindOfClass:[BibDocument class]] || [dPO isKindOfClass:[BibDocument class]]) {
 		// the condition above might not be good enough
 		// we are sent or addressed to a document
-		[results addObjectsFromArray:[(BibDocument*)dPO findMatchesFor:searchterm]];
+		[results addObjectsFromArray:[(BibDocument*)dPO publicationsMatchingString:searchterm]];
 	} else if ([receiver isKindOfClass:[NSArray class]]){
         for (id anObject in receiver) {
             if ([anObject isKindOfClass:[BibDocument class]])
-                [results addObjectsFromArray:[anObject findMatchesFor:searchterm]];
+                [results addObjectsFromArray:[anObject publicationsMatchingString:searchterm]];
         }
         
     } else {
@@ -116,18 +123,11 @@ The command should have the form
 
 	
 	if (forCompletion) {
-		/* we're doing this for completion, so return a different array. Instead of an array of publications (BibItems) this will simply be an array of strings containing the cite key, the authors' surnames and the title for the publication. This could be sufficient for completion and allows the application possibly integrating with BibDesk to remain ignorant of the inner workings of BibItems.
-		*/
-		NSInteger i = 0;
-		NSInteger n = [results count];
+		// we're doing this for completion, so return a different array. Instead of an array of publications (BibItems) this will simply be an array of strings containing the cite key, the authors' surnames and the title for the publication. This could be sufficient for completion and allows the application possibly integrating with BibDesk to remain ignorant of the inner workings of BibItems.
+		NSInteger i, n = [results count];
 		BibItem * result;
-		id  resultObject;
-		while (i < n) {
-			result = [results objectAtIndex:i];
-			resultObject = [result stringForCompletion];
-			[results replaceObjectAtIndex:i withObject:resultObject];
-			i++;
-		}
+		for (i = 0; i < n; i++)
+			[results replaceObjectAtIndex:i withObject:[[results objectAtIndex:i] stringForCompletion]];
 		// sort alphabetically
 		[results sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	}
@@ -139,75 +139,7 @@ The command should have the form
 @end
 
 
-
-
-
-
-
-/* ssp: 2004-07-21
-Category on BibDocument to aid finding
-*/
-@implementation BibDocument (Finding)
-
-
-/* ssp: 2004-07-21
-This method returns an array of BibItems matching a given searchterm
-Currently we match a publication if the searchterm is completely found in either the cite key, any author's surname or the publication's title.
-This could be made more flexible (but who'd want more preferences?)
-There could be other extensions, like matching for every word with conjunction or disjunction. Again that would make things less obvious (and wouldn't be useful for supporting completion, which I have in mind when writing this)
-*/
-- (NSArray*) findMatchesFor:(NSString*) searchterm {
-	NSMutableArray * found = [NSMutableArray array];
-	
-	// run through all publications
-	for (BibItem *pub in publications) {
-		if ([pub matchesString:searchterm]) {
-			// we've got a match, so add
-			[found addObject:pub];
-		}
-	}
-
-	return found;
-}
-
-@end
-
-
 @implementation BibItem (Finding)
-
-
-- (BOOL)matchesString:(NSString *)searchterm {
-
-    // search authors and editors
-    NSMutableSet *authors = [[NSMutableSet alloc] initWithCapacity:5];
-    for (NSArray *array in [[self people] objectEnumerator])
-        [authors addObjectsFromArray:array];
-    
-	NSMutableString *string = [[NSMutableString alloc] initWithCapacity:20];	
-
-	for (BibAuthor *auth in authors) {
-        NSString *name = [auth lastName] ?: [auth name];
-        if (nil != name) {
-            [string appendString:name];
-            [string appendFormat:@"%C", 0x1E];
-        }
-	}
-    
-    [authors release];
-    
-    // these are all guaranteed to be non-nil
-    [string appendString:[self citeKey]];
-    [string appendFormat:@"%C", 0x1E];
-    [string appendString:[self displayTitle]];
-    [string appendFormat:@"%C", 0x1E];
-    [string appendString:[self keywords]];
-    [string appendFormat:@"%C", 0x1E];
-
-	Boolean result = CFStringFindWithOptions((CFStringRef)string,(CFStringRef)searchterm, CFRangeMake(0, [string length]), kCFCompareCaseInsensitive, NULL);
-    [string release];
-    
-    return result;
-}
 
 // returns a string displayed by the autocomplete plugin
 

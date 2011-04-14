@@ -37,24 +37,7 @@
  */
 
 #import <Foundation/Foundation.h>
-#import "BibDocument.h"
-#import "BibItem.h"
-#import "BibItem+Scripting.h"
 
 
-@interface BDSKSearchForCommand : NSScriptCommand {
-
-}
-
-@end
-
-
-
-@interface BibDocument (Finding)
-- (NSArray*) findMatchesFor:(NSString*) searchterm;
-@end
-
-@interface BibItem (Finding)
-- (BOOL) matchesString:(NSString*) searchterm;
-- (NSString *) stringForCompletion;
+@interface BDSKSearchForCommand : NSScriptCommand
 @end

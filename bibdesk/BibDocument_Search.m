@@ -418,4 +418,17 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     return nil;
 }
 
+#pragma mark Completion
+
+- (NSArray *)publicationsMatchingString:(NSString *)searchterm {
+	NSMutableArray *found = [NSMutableArray array];
+	
+	for (BibItem *pub in publications) {
+		if ([pub matchesString:searchterm])
+			[found addObject:pub];
+	}
+
+	return found;
+}
+
 @end

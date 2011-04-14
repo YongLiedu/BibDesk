@@ -689,6 +689,7 @@ enum {
 - (NSDictionary *)searchIndexInfo;
 - (NSDictionary *)metadataCacheInfoForUpdate:(BOOL)update;
 - (id)completionObject;
+- (BOOL)matchesString:(NSString *)searchterm;
 
 /*!
     @method bibTeXString
