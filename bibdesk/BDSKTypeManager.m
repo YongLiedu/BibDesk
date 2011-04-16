@@ -149,7 +149,7 @@ static NSString *BDSKUserTypeInfoPath() {
         // this set is used for warning the user on manual entry of a citekey; allows ASCII characters and some math symbols
         // arm: up through 1.3.12 we allowed non-ASCII characters in here, but btparse chokes on them and so does BibTeX.  TLC 2nd ed. says that cite keys are TeX commands, and subject to the same restrictions as such [a-zA-Z0-9], but this is generally relaxed in the case of BibTeX to include some punctuation.
         tmpSet = [[NSCharacterSet characterSetWithRange:NSMakeRange(21, 126 - 21)] mutableCopy];
-        [tmpSet removeCharactersInString:@" '\"@,\\#}{~%()"];
+        [tmpSet removeCharactersInString:@" '\"@,\\#}{~%()="];
         [tmpSet invert];
         invalidCiteKeyCharSet = [tmpSet copy];
         [tmpSet release];
