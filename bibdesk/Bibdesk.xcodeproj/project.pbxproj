@@ -80,6 +80,8 @@
 		CE04583D0FB6FBBF003CAF5D /* Scroller_Divider.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE04583B0FB6FBBF003CAF5D /* Scroller_Divider.tiff */; };
 		CE04583E0FB6FBBF003CAF5D /* Scroller_Background.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE04583C0FB6FBBF003CAF5D /* Scroller_Background.tiff */; };
 		CE071ED10F213EB300244F5C /* BDSKArxivParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE071ECF0F213EB300244F5C /* BDSKArxivParser.m */; };
+		CE095D51135C52B5000E4396 /* BDSKSelectCommand.h in Headers */ = {isa = PBXBuildFile; fileRef = CE095D4F135C52B5000E4396 /* BDSKSelectCommand.h */; };
+		CE095D52135C52B5000E4396 /* BDSKSelectCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE095D50135C52B5000E4396 /* BDSKSelectCommand.m */; };
 		CE09CEA70DDEF65E00F3F2FE /* BDSKCompletionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE09CEA50DDEF65E00F3F2FE /* BDSKCompletionManager.m */; };
 		CE0B3B3C1292E1A500BA05EB /* BDSKErrorObject.m in Sources */ = {isa = PBXBuildFile; fileRef = CE0B3B3A1292E1A500BA05EB /* BDSKErrorObject.m */; };
 		CE0EB4440DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE0EB4420DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.m */; };
@@ -864,6 +866,8 @@
 		CE05CF5C0D7743940034C2A8 /* WebURLsWithTitles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebURLsWithTitles.h; sourceTree = "<group>"; };
 		CE071ECE0F213EB300244F5C /* BDSKArxivParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKArxivParser.h; sourceTree = "<group>"; };
 		CE071ECF0F213EB300244F5C /* BDSKArxivParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKArxivParser.m; sourceTree = "<group>"; };
+		CE095D4F135C52B5000E4396 /* BDSKSelectCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSelectCommand.h; sourceTree = "<group>"; };
+		CE095D50135C52B5000E4396 /* BDSKSelectCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSelectCommand.m; sourceTree = "<group>"; };
 		CE09CEA40DDEF65E00F3F2FE /* BDSKCompletionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKCompletionManager.h; sourceTree = "<group>"; };
 		CE09CEA50DDEF65E00F3F2FE /* BDSKCompletionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKCompletionManager.m; sourceTree = "<group>"; };
 		CE0B3B3A1292E1A500BA05EB /* BDSKErrorObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKErrorObject.m; sourceTree = "<group>"; };
@@ -1981,6 +1985,7 @@
 				CE3011AB0D5CC46F00C0B7FA /* BDSKRemoveCommand.m */,
 				CEC3158B0F24D0B9008D2C75 /* BDSKRichTextFormat.m */,
 				CED65DCB0907A338003EED90 /* BDSKScriptHook+Scripting.m */,
+				CE095D50135C52B5000E4396 /* BDSKSelectCommand.m */,
 				F9022FBE07580B9400C3F701 /* BibAuthor+Scripting.m */,
 				F9022FC307580B9400C3F701 /* BibDocument+Scripting.m */,
 				F9022FC507580B9400C3F701 /* BibItem+Scripting.m */,
@@ -2713,6 +2718,7 @@
 				F920DAFC075C2B69000C5FCA /* BDSKSearchForCommand.h */,
 				CEFE212F1259E6CB00DAD553 /* BDSKSearchGroupServerManager.h */,
 				CEBC676C0B4A845F00CE0B2D /* BDSKSearchGroupViewController.h */,
+				CE095D4F135C52B5000E4396 /* BDSKSelectCommand.h */,
 				CE9666430B46B70C003BAB9A /* BDSKServerInfo.h */,
 				CE4A0E111115ABEF000A95C5 /* BDSKServiceProvider.h */,
 				F92EF32009E6242100A244D0 /* BDSKSharedGroup.h */,
@@ -2931,6 +2937,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
+				CE095D51135C52B5000E4396 /* BDSKSelectCommand.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3769,6 +3776,7 @@
 				CE03C0CB127D751D00F62F51 /* BDSKWebViewModalDialogController.m in Sources */,
 				CE3263C5128806C3000040EC /* BDSKFieldCollection.m in Sources */,
 				CE0B3B3C1292E1A500BA05EB /* BDSKErrorObject.m in Sources */,
+				CE095D52135C52B5000E4396 /* BDSKSelectCommand.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

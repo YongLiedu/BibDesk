@@ -479,6 +479,15 @@
             </parameter>
         </command>
         
+        <command name="select" code="BDSKselA"
+			description="Select publications or groups in a document.">
+            <cocoa class="BDSKSelectCommand"/>
+            <direct-parameter description="The publications or groups to select.">
+                <type type="publication" list="yes"/>
+                <type type="group" list="yes"/>
+            </direct-parameter>
+        </command>
+        
         <command name="show" code="BDSKshow"
 			description="Shows an author or a publication in a separate window for editing.">
             <cocoa class="BDSKShowCommand"/>
@@ -1031,6 +1040,9 @@
             <responds-to name="remove">
                 <cocoa method=""/>
             </responds-to>
+            <responds-to name="select">
+                <cocoa method=""/>
+            </responds-to>
             <responds-to name="show">
                 <cocoa method=""/>
             </responds-to>
@@ -1235,6 +1247,9 @@
 				description="Macros defined in the group">
 				<cocoa key="macros"/>
 			</element>
+            <responds-to name="select">
+                <cocoa method=""/>
+            </responds-to>
         </class>
         
         <class name="library group" plural="library groups" code="Libr" inherits="group"
