@@ -44,6 +44,8 @@
 #import "NSString_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSEvent_BDSKExtensions.h"
+#import "NSFileManager_BDSKExtensions.h"
+#import "NSArray_BDSKExtensions.h"
 
 
 @interface WebView (BDSKSnowLeopardDeclarations)
@@ -439,6 +441,34 @@
         [resultListener chooseFilename:[openPanel filename]];
     else
         [resultListener cancel];
+}
+
+// This is a private WebUIDelegate method that is called by WebPDFView
+- (void)webView:(WebView *)sender saveFrameView:(WebFrameView *)frameView showingPanel:(BOOL)showingPanel {
+    WebResource *resource = [[[frameView webFrame] dataSource] mainResource];
+    NSData *data = [resource data];
+    NSString *downloadsDir = [NSSearchPathForDirectoriesInDomains(NSDownloadsDirectory, NSUserDomainMask, YES) firstObject];
+    NSString *filename = [[resource URL] lastPathComponent];
+    NSString *theExt = nil;
+    CFStringRef theUTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, (CFStringRef)[resource MIMEType], NULL);
+    if (theUTI) {
+        theExt = [(id)UTTypeCopyPreferredTagWithClass(theUTI, kUTTagClassFilenameExtension) autorelease];
+        CFRelease(theUTI);
+        if (theExt && [[filename pathExtension] isCaseInsensitiveEqual:theExt] == NO)
+            filename = [filename stringByAppendingPathExtension:theExt];
+    }
+    filename = [[NSFileManager defaultManager] uniqueFilePathWithName:filename atPath:downloadsDir];
+    if (showingPanel) {
+        NSSavePanel *savePanel = [NSSavePanel savePanel];
+        if (theExt)
+            [savePanel setRequiredFileType:theExt];
+        [savePanel setAllowsOtherFileTypes:YES];
+        NSInteger returnCode = [savePanel runModalForDirectory:downloadsDir file:[filename lastPathComponent]];
+        if (returnCode == NSFileHandlingPanelCancelButton)
+            return;
+        filename = [savePanel filename];
+    }
+    [data writeToFile:filename atomically:YES];
 }
 
 #pragma mark WebEditingDelegate protocol
