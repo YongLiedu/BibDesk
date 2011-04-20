@@ -38,7 +38,6 @@
 
 #import "BDSKEditorTableView.h"
 #import "BDSKEditorTextFieldCell.h"
-#import "BDSKFieldEditor.h"
 
 
 @implementation BDSKEditorTableView
