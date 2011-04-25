@@ -41,5 +41,6 @@
 
 @interface BDSKEditorTableView : NSTableView {
     BOOL endEditing;
+    BOOL didSetValue;
 }
 @end
