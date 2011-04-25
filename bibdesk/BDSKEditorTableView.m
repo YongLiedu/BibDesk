@@ -40,6 +40,11 @@
 #import "BDSKEditorTextFieldCell.h"
 
 
+@interface NSTableView (BDSKApplePrivate)
+- (void)_dataSourceSetValue:(id)value forColumn:(NSTableColumn *)tableColumn row:(NSInteger)row;
+@end
+
+
 @implementation BDSKEditorTableView
 
 - (void)mouseDown:(NSEvent *)theEvent {
@@ -72,13 +77,40 @@
 	[super mouseDown:theEvent];
 }
 
+// private method called from -[NSTableView textDidEndEditing:]
+- (void)_dataSourceSetValue:(id)value forColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
+    [super _dataSourceSetValue:value forColumn:tableColumn row:row];
+    didSetValue = YES;
+}
+
 - (void)textDidEndEditing:(NSNotification *)aNotification {
     NSInteger editedRow = [self editedRow];
     NSInteger editedColumn = [self editedColumn];
+    NSTableColumn *editedTableColumn = [[self tableColumns] objectAtIndex:editedColumn];
+    
+    /*
+     NSTableView has an optimization of sorts where the value will not be set if the string in the cell
+     is identical to the old string.  When you want to change e.g. year={2009} to year=2009, this becomes
+     a problem.  I got fed up with deleting the old string, then setting the new raw string.
+     
+     Note that the cell's objectValue is an NSCFString, so we have to work with the formatter directly
+     in order to get the (possibly complex) edited string.
+     */
+    didSetValue = NO;
+    id oldValue = editedRow >= 0 ? [[[self dataSource] tableView:self objectValueForTableColumn:editedTableColumn row:editedRow] retain] : nil;
+    NSCell *editedCell = [self preparedCellAtColumn:editedColumn row:editedRow];
+    id newValue = nil;
+    [[editedCell formatter] getObjectValue:&newValue forString:[[aNotification object] string] errorDescription:NULL];
     
     endEditing = YES;
     [super textDidEndEditing:aNotification];
     endEditing = NO;
+    
+    // only try setting if NSTableView did not, and if these are not equal as complex strings
+    if (didSetValue == NO && [oldValue isEqualAsComplexString:newValue] == NO && 
+        [self respondsToSelector:@selector(_dataSourceSetValue:forColumn:row:)])
+        [self _dataSourceSetValue:newValue forColumn:editedTableColumn row:editedRow];
+    [oldValue release];
     
     // on Leopard, we have to manually handle tab/return movements to avoid losing focus
     // http://www.cocoabuilder.com/archive/message/cocoa/2007/10/31/191866
