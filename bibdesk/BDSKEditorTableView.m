@@ -86,7 +86,6 @@
 - (void)textDidEndEditing:(NSNotification *)aNotification {
     NSInteger editedRow = [self editedRow];
     NSInteger editedColumn = [self editedColumn];
-    NSTableColumn *editedTableColumn = [[self tableColumns] objectAtIndex:editedColumn];
     
     /*
      NSTableView has an optimization of sorts where the value will not be set if the string in the cell
@@ -96,21 +95,27 @@
      Note that the cell's objectValue is an NSCFString, so we have to work with the formatter directly
      in order to get the (possibly complex) edited string.
      */
-    didSetValue = NO;
-    id oldValue = editedRow >= 0 ? [[[self dataSource] tableView:self objectValueForTableColumn:editedTableColumn row:editedRow] retain] : nil;
-    NSCell *editedCell = [self preparedCellAtColumn:editedColumn row:editedRow];
+    BOOL shouldCheckValue = NO;
     id newValue = nil;
-    [[editedCell formatter] getObjectValue:&newValue forString:[[aNotification object] string] errorDescription:NULL];
+    if (editedColumn >= 0 && editedRow >= 0 && [self respondsToSelector:@selector(_dataSourceSetValue:forColumn:row:)]) {
+        NSCell *editedCell = [self preparedCellAtColumn:editedColumn row:editedRow];
+        id oldValue = [editedCell objectValue];
+        if ([[editedCell formatter] getObjectValue:&newValue forString:[[aNotification object] string] errorDescription:NULL]) {
+            shouldCheckValue = [oldValue respondsToSelector:@selector(isEqualAsComplexString:)] && [newValue respondsToSelector:@selector(isEqualAsComplexString:)] && 
+                               [oldValue isEqualAsComplexString:newValue] == NO;
+            newValue = [newValue copy];
+        }
+    }
+    didSetValue = NO;
     
     endEditing = YES;
     [super textDidEndEditing:aNotification];
     endEditing = NO;
     
     // only try setting if NSTableView did not, and if these are not equal as complex strings
-    if (didSetValue == NO && [oldValue isEqualAsComplexString:newValue] == NO && 
-        [self respondsToSelector:@selector(_dataSourceSetValue:forColumn:row:)])
-        [self _dataSourceSetValue:newValue forColumn:editedTableColumn row:editedRow];
-    [oldValue release];
+    if (didSetValue == NO && shouldCheckValue)
+        [self _dataSourceSetValue:newValue forColumn:[[self tableColumns] objectAtIndex:editedColumn] row:editedRow];
+    [newValue release];
     
     // on Leopard, we have to manually handle tab/return movements to avoid losing focus
     // http://www.cocoabuilder.com/archive/message/cocoa/2007/10/31/191866
