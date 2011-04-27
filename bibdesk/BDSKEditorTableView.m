@@ -89,11 +89,11 @@
     
     /*
      NSTableView has an optimization of sorts where the value will not be set if the string in the cell
-     is identical to the old string.  When you want to change e.g. year={2009} to year=2009, this becomes
+     is equal to the old string.  When you want to change e.g. year={2009} to year=2009, this becomes
      a problem.  I got fed up with deleting the old string, then setting the new raw string.
      
-     Note that the cell's objectValue is an NSCFString, so we have to work with the formatter directly
-     in order to get the (possibly complex) edited string.
+     Note that the current cell's objectValue is still the old value, so we have to work with the formatter
+     directly in order to get the (possibly complex) edited string.
      */
     BOOL shouldCheckValue = NO;
     id newValue = nil;
