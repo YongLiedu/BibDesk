@@ -99,12 +99,15 @@
     id newValue = nil;
     if (editedColumn >= 0 && editedRow >= 0 && [self respondsToSelector:@selector(_dataSourceSetValue:forColumn:row:)]) {
         NSCell *editedCell = [self preparedCellAtColumn:editedColumn row:editedRow];
+        NSFormatter *formatter = [editedCell formatter];
         id oldValue = [editedCell objectValue];
-        if ([[editedCell formatter] getObjectValue:&newValue forString:[[aNotification object] string] errorDescription:NULL]) {
-            shouldCheckValue = [oldValue respondsToSelector:@selector(isEqualAsComplexString:)] && [newValue respondsToSelector:@selector(isEqualAsComplexString:)] && 
+        newValue = [[aNotification object] string];
+        if (formatter == nil || [formatter getObjectValue:&newValue forString:newValue errorDescription:NULL]) {
+            shouldCheckValue = [oldValue respondsToSelector:@selector(isEqualAsComplexString:)] && 
+                               [newValue respondsToSelector:@selector(isEqualAsComplexString:)] && 
                                [oldValue isEqualAsComplexString:newValue] == NO;
-            newValue = [newValue copy];
         }
+        newValue = [newValue copy];
     }
     didSetValue = NO;
     
