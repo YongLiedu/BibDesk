@@ -141,6 +141,7 @@
 @interface BDSKTextImportItemTableView : BDSKTableView {
     BOOL temporaryTypeSelectMode;
     NSResponder *savedFirstResponder;
+    BOOL didSetValue;
 }
 - (BOOL)isInTemporaryTypeSelectMode;
 - (void)startTemporaryTypeSelectMode;

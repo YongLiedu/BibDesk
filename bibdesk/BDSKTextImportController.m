@@ -1702,6 +1702,10 @@
 
 #pragma mark -
 
+@interface NSTableView (BDSKApplePrivate2)
+- (void)_dataSourceSetValue:(id)value forColumn:(NSTableColumn *)tableColumn row:(NSInteger)row;
+@end
+
 @implementation BDSKTextImportItemTableView
 
 - (BOOL)performKeyEquivalent:(NSEvent *)theEvent{
@@ -1818,6 +1822,44 @@
     [aTypeSelectHelper setCyclesSimilarResults:YES];
     [self setTypeSelectHelper:aTypeSelectHelper];
     [aTypeSelectHelper release];
+}
+
+- (void)textDidEndEditing:(NSNotification *)aNotification {
+    /*
+     NSTableView has an optimization of sorts where the value will not be set if the string in the cell
+     is equal to the old string.  When you want to change e.g. year={2009} to year=2009, this becomes
+     a problem.  I got fed up with deleting the old string, then setting the new raw string.
+     
+     Note that the current cell's objectValue is still the old value, so we have to work with the formatter
+     directly in order to get the (possibly complex) edited string.
+     */
+    NSInteger editedRow = [self editedRow];
+    NSInteger editedColumn = [self editedColumn];
+    BOOL shouldCheckValue = NO;
+    id newValue = nil;
+    if (editedColumn >= 0 && editedRow >= 0 && [self respondsToSelector:@selector(_dataSourceSetValue:forColumn:row:)]) {
+        NSCell *editedCell = [self preparedCellAtColumn:editedColumn row:editedRow];
+        NSFormatter *formatter = [editedCell formatter];
+        id oldValue = [editedCell objectValue];
+        newValue = [[aNotification object] string];
+        if (formatter == nil || [formatter getObjectValue:&newValue forString:newValue errorDescription:NULL]) {
+            shouldCheckValue = [oldValue respondsToSelector:@selector(isEqualAsComplexString:)] && 
+                               [newValue respondsToSelector:@selector(isEqualAsComplexString:)] && 
+                               [oldValue isEqualAsComplexString:newValue] == NO;
+        }
+        newValue = [newValue copy];
+    }
+    didSetValue = NO;
+    
+    [super textDidEndEditing:aNotification];
+    
+    // only try setting if NSTableView did not, and if these are not equal as complex strings
+    if (didSetValue == NO && shouldCheckValue)
+        [self _dataSourceSetValue:newValue forColumn:[[self tableColumns] objectAtIndex:editedColumn] row:editedRow];
+    [newValue release];
+    
+    // on Leopard, we have to manually handle tab/return movements to avoid losing focus
+    // http://www.cocoabuilder.com/archive/message/cocoa/2007/10/31/191866
 }
 
 #pragma mark Delegate and DataSource
