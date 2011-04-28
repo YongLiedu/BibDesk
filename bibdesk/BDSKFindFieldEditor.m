@@ -41,15 +41,6 @@
 
 @implementation BDSKFindFieldEditor
 
-- (id)initWithFrame:(NSRect)frameRect {
-    self = [super initWithFrame:frameRect];
-    if (self) {
-		[self setFieldEditor:YES];
-		[self setUsesFindPanel:NO];
-	}
-	return self;
-}
-
 - (BOOL)respondsToSelector:(SEL)aSelector {
     return aSelector != @selector(performFindPanelAction:) && [super respondsToSelector:aSelector];
 }

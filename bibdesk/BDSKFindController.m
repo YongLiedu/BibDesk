@@ -1328,7 +1328,8 @@ enum {
 
 - (id)windowWillReturnFieldEditor:(NSWindow *)sender toObject:(id)anObject {
 	if (findFieldEditor == nil) {
-		findFieldEditor = [[BDSKFindFieldEditor alloc] initWithFrame:NSZeroRect];
+		findFieldEditor = [[BDSKFindFieldEditor alloc] init];
+        [findFieldEditor setFieldEditor:YES];
 	}
 	return findFieldEditor;
 }
