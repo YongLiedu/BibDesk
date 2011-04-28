@@ -2439,7 +2439,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
         if ([self allowsDownloading] && [_downloads count]) {
             NSEnumerator *dlEnum = [_downloads objectEnumerator];
             FVDownload *download;
-            while (download = [dlEnum nextObject]) {
+            while ((download = [dlEnum nextObject])) {
                 NSUInteger anIndex = [download indexInView];
                 // we only draw a if there's an active download for this URL/index pair
                 if (anIndex < [self numberOfIcons] && [[self URLAtIndex:anIndex] isEqual:[download downloadURL]])
