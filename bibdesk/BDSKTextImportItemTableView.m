@@ -46,6 +46,13 @@
 @end
 
 
+@interface BDSKTextImportItemTableView (Private)
+- (void)startTemporaryTypeSelectMode;
+- (void)endTemporaryTypeSelectMode;
+- (BOOL)performActionForRow:(NSInteger)row;
+@end
+
+
 @implementation BDSKTextImportItemTableView
 
 - (BOOL)performKeyEquivalent:(NSEvent *)theEvent{

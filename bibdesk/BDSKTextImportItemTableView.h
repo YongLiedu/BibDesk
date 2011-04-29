@@ -53,10 +53,6 @@
 }
 
 - (BOOL)isInTemporaryTypeSelectMode;
-- (void)startTemporaryTypeSelectMode;
-- (void)endTemporaryTypeSelectMode;
-
-- (BOOL)performActionForRow:(NSInteger)row;
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
 - (id <BDSKTextImportItemTableViewDelegate>)delegate;
