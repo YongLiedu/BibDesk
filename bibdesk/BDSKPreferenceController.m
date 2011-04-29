@@ -345,7 +345,6 @@ static id sharedController = nil;
             } else if (shouldUnselect == BDSKPreferencePaneUnselectLater) {
                 [self setDelayedPaneIdentifier:identifier];
             }
-            [[self window] recalculateKeyViewLoop];
         }
     }
 }
@@ -629,6 +628,7 @@ static id sharedController = nil;
         contentRect.origin.y = NSMaxY(screenRect) - NSHeight(contentRect);
         
 	[[self window] setFrame:contentRect display:display animate:display];
+    [[self window] recalculateKeyViewLoop];
 }
 
 - (void)updateSearchAndShowAll:(BOOL)showAll {
