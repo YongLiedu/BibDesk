@@ -345,6 +345,7 @@ static id sharedController = nil;
             } else if (shouldUnselect == BDSKPreferencePaneUnselectLater) {
                 [self setDelayedPaneIdentifier:identifier];
             }
+            [[self window] recalculateKeyViewLoop];
         }
     }
 }
