@@ -38,17 +38,10 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKOwnerProtocol.h"
-#import "BDSKTableView.h"
+#import "BDSKTextImportItemTableView.h"
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKCitationFormatter.h"
 #import "BDSKWebView.h"
-
-@protocol BDSKTextImportItemTableViewDelegate <BDSKTableViewDelegate>
-- (void)tableViewDidChangeTemporaryTypeSelectMode:(NSTableView *)tView;
-- (BOOL)tableView:(NSTableView *)tView performActionForRow:(NSInteger)row;
-@end
-
-#pragma mark -
 
 @class BibDocument, BibItem, BDSKEdgeView, WebDownload, BDSKComplexStringEditor;
 @class BDSKCiteKeyFormatter, BDSKCrossrefFormatter;
@@ -134,27 +127,4 @@
 - (void)saveFileAsLocalUrl:(id)sender;
 - (void)downloadLinkedFileAsLocalUrl:(id)sender;
 
-@end
-
-#pragma mark -
-
-@interface BDSKTextImportItemTableView : BDSKTableView {
-    BOOL temporaryTypeSelectMode;
-    NSResponder *savedFirstResponder;
-    BOOL didSetValue;
-}
-- (BOOL)isInTemporaryTypeSelectMode;
-- (void)startTemporaryTypeSelectMode;
-- (void)endTemporaryTypeSelectMode;
-- (BOOL)performActionForRow:(NSInteger)row;
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-- (id <BDSKTextImportItemTableViewDelegate>)delegate;
-- (void)setDelegate:(id <BDSKTextImportItemTableViewDelegate>)newDelegate;
-#endif
-@end
-
-#pragma mark -
-
-@interface BDSKImportTextView : NSTextView {}
-- (IBAction)makePlainText:(id)sender;
 @end
