@@ -46,14 +46,40 @@
 @end
 
 
-@interface BDSKTextImportItemTableView (Private)
-- (void)startTemporaryTypeSelectMode;
-- (void)endTemporaryTypeSelectMode;
-- (BOOL)performActionForRow:(NSInteger)row;
-@end
-
-
 @implementation BDSKTextImportItemTableView
+
+- (BOOL)isInTemporaryTypeSelectMode {
+    return temporaryTypeSelectMode;
+}
+
+- (void)startTemporaryTypeSelectMode {
+    if (temporaryTypeSelectMode)
+        return;
+    temporaryTypeSelectMode = YES;
+    savedFirstResponder = [[self window] firstResponder];
+    if ([savedFirstResponder isKindOfClass:[NSTextView class]] && [(NSTextView *)savedFirstResponder isFieldEditor])
+        savedFirstResponder = (NSResponder *)[(NSTextView *)savedFirstResponder delegate];
+    [[self window] makeFirstResponder:self];
+    if ([self selectedRow] == -1 && [self numberOfRows] > 0)
+        [self selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+    [[self delegate] tableViewDidChangeTemporaryTypeSelectMode:self];
+}
+
+- (void)endTemporaryTypeSelectMode  {
+    if (temporaryTypeSelectMode == NO)
+        return;
+    temporaryTypeSelectMode = NO;
+    [[self window] makeFirstResponder:savedFirstResponder];
+    savedFirstResponder = nil;
+    [[self delegate] tableViewDidChangeTemporaryTypeSelectMode:self];
+}
+
+- (BOOL)performActionForRow:(NSInteger)row {
+    BOOL rv = [[self delegate] tableView:self performActionForRow:row];
+    if (rv == NO)
+        NSBeep();
+    return rv;
+}
 
 - (BOOL)performKeyEquivalent:(NSEvent *)theEvent{
     
@@ -122,41 +148,6 @@
     }
     
     [super keyDown:event];
-}
-
-- (BOOL)isInTemporaryTypeSelectMode {
-    return temporaryTypeSelectMode;
-}
-
-- (void)startTemporaryTypeSelectMode {
-    if (temporaryTypeSelectMode)
-        return;
-    temporaryTypeSelectMode = YES;
-    savedFirstResponder = [[self window] firstResponder];
-    if ([savedFirstResponder isKindOfClass:[NSTextView class]] && [(NSTextView *)savedFirstResponder isFieldEditor])
-        savedFirstResponder = (NSResponder *)[(NSTextView *)savedFirstResponder delegate];
-    [[self window] makeFirstResponder:self];
-    if ([self selectedRow] == -1 && [self numberOfRows] > 0)
-        [self selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
-    [[self delegate] tableViewDidChangeTemporaryTypeSelectMode:self];
-}
-
-- (void)endTemporaryTypeSelectMode  {
-    if (temporaryTypeSelectMode == NO)
-        return;
-    temporaryTypeSelectMode = NO;
-    [[self window] makeFirstResponder:savedFirstResponder];
-    savedFirstResponder = nil;
-    [[self delegate] tableViewDidChangeTemporaryTypeSelectMode:self];
-}
-
-- (BOOL)performActionForRow:(NSInteger)row {
-    if ([[self delegate] tableView:self performActionForRow:row]) {
-        return YES;
-    } else {
-        NSBeep();
-        return NO;
-    }
 }
 
 - (BOOL)resignFirstResponder {
