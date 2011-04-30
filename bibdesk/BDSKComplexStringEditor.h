@@ -57,7 +57,4 @@
 
 - (BOOL)isAttached;
 
-- (BDSKMacroResolver *)macroResolver;
-- (void)setMacroResolver:(BDSKMacroResolver *)newMacroResolver;
-
 @end

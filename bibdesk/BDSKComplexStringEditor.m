@@ -77,17 +77,6 @@
     [super dealloc];
 }
 
-- (BDSKMacroResolver *)macroResolver {
-    return macroResolver;
-}
-
-- (void)setMacroResolver:(BDSKMacroResolver *)newMacroResolver {
-    if (macroResolver != newMacroResolver) {
-        [macroResolver release];
-        macroResolver = [newMacroResolver retain];
-    }
-}
-
 - (BOOL)attachToTableView:(NSTableView *)aTableView atRow:(NSInteger)aRow column:(NSInteger)aColumn withValue:(NSString *)aString {
 	if ([self isAttached]) 
 		return NO; // we are already busy editing
