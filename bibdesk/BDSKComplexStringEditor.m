@@ -89,7 +89,8 @@
 	
 	[tableView scrollRowToVisible:row];
 	[self setExpandedValue:aString];
-	[self cellWindowDidBecomeKey:nil]; //draw the focus ring we are covering
+    if (enabled)
+        [self cellWindowDidBecomeKey:nil]; //draw the focus ring we are covering
 	[self cellFrameDidChange:nil]; // reset the frame and show the window
     // track changes in the text, the frame and the window's key status of the tableView
     [self registerForNotifications];
@@ -107,7 +108,6 @@
 
 - (void)registerForNotifications {
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-	NSWindow *tableViewWindow = [tableView window];
 	NSView *contentView = (NSView *)[[tableView enclosingScrollView] contentView] ?: (NSView *)tableView;
 	
     [nc addObserver:self
@@ -129,14 +129,6 @@
 		   selector:@selector(cellFrameDidChange:)
 			   name:NSViewBoundsDidChangeNotification
 			 object:contentView];
-	[nc addObserver:self
-		   selector:@selector(cellWindowDidBecomeKey:)
-			   name:NSWindowDidBecomeKeyNotification
-			 object:tableViewWindow];
-	[nc addObserver:self
-		   selector:@selector(cellWindowDidResignKey:)
-			   name:NSWindowDidResignKeyNotification
-			 object:tableViewWindow];
     [nc addObserver:self
            selector:@selector(tableViewColumnDidResize:)
                name:NSTableViewColumnDidResizeNotification
@@ -145,21 +137,34 @@
            selector:@selector(tableViewColumnDidMove:)
                name:NSTableViewColumnDidMoveNotification
              object:tableView];
+    if (enabled) {
+        NSWindow *tableViewWindow = [tableView window];
+        [nc addObserver:self
+               selector:@selector(cellWindowDidBecomeKey:)
+                   name:NSWindowDidBecomeKeyNotification
+                 object:tableViewWindow];
+        [nc addObserver:self
+               selector:@selector(cellWindowDidResignKey:)
+                   name:NSWindowDidResignKeyNotification
+                 object:tableViewWindow];
+    }
 }
 
 - (void)unregisterForNotifications {
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-	NSWindow *tableViewWindow = [tableView window];
 	NSView *contentView = (NSView *)[[tableView enclosingScrollView] contentView] ?: (NSView *)tableView;
 	
 	[nc removeObserver:self name:NSControlTextDidChangeNotification object:tableView];
 	[nc removeObserver:self name:NSControlTextDidEndEditingNotification object:tableView];
 	[nc removeObserver:self name:NSViewFrameDidChangeNotification object:contentView];
 	[nc removeObserver:self name:NSViewBoundsDidChangeNotification object:contentView];
-	[nc removeObserver:self name:NSWindowDidBecomeKeyNotification object:tableViewWindow];
-	[nc removeObserver:self name:NSWindowDidResignKeyNotification object:tableViewWindow];
     [nc removeObserver:self name:NSTableViewColumnDidResizeNotification object:tableView];
     [nc removeObserver:self name:NSTableViewColumnDidMoveNotification object:tableView];
+    if (enabled) {
+        NSWindow *tableViewWindow = [tableView window];
+        [nc removeObserver:self name:NSWindowDidBecomeKeyNotification object:tableViewWindow];
+        [nc removeObserver:self name:NSWindowDidResignKeyNotification object:tableViewWindow];
+    }
 }
 
 - (void)remove {
@@ -226,7 +231,7 @@
 }
 
 - (void)cellWindowDidBecomeKey:(NSNotification *)notification {
-	[backgroundView setShowFocusRing:enabled];
+	[backgroundView setShowFocusRing:YES];
 }
 
 - (void)cellWindowDidResignKey:(NSNotification *)notification {
