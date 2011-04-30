@@ -48,17 +48,14 @@
 	NSTableView *tableView;
 	NSInteger row;
 	NSInteger column;
-    BOOL editable;
+    BOOL enabled;
 }
 
-- (id)initWithMacroResolver:(BDSKMacroResolver *)aMacroResolver;
+- (id)initWithMacroResolver:(BDSKMacroResolver *)aMacroResolver enabled:(BOOL)isEnabled;
 
 - (BOOL)attachToTableView:(NSTableView *)aTableView atRow:(NSInteger)aRow column:(NSInteger)aColumn withValue:(NSString *)aString;
 
-- (BOOL)isEditing;
-
-- (BOOL)isEditable;
-- (void)setEditable:(BOOL)flag;
+- (BOOL)isAttached;
 
 - (BDSKMacroResolver *)macroResolver;
 - (void)setMacroResolver:(BDSKMacroResolver *)newMacroResolver;

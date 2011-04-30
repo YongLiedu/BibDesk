@@ -1609,7 +1609,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         if (editorFlags.isEditable == NO)
             return NO;
         NSInteger row = [tableView editedRow];
-		return (row != -1 && [complexStringEditor isEditing] == NO && 
+		return (row != -1 && [complexStringEditor isAttached] == NO && 
                 [[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString] == NO && [[fields objectAtIndex:row] isCitationField] == NO);
     }
 	else if (theAction == @selector(toggleSidebar:)) {
@@ -1917,12 +1917,10 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 - (BOOL)editSelectedCellAsMacro{
 	NSInteger row = [tableView selectedRow];
     // this should never happen
-    if ([complexStringEditor isEditing] || row == -1) 
+    if ([complexStringEditor isAttached] || row == -1) 
         return NO;
-	if (complexStringEditor == nil) {
-    	complexStringEditor = [[BDSKComplexStringEditor alloc] initWithMacroResolver:[publication macroResolver]];
-        [complexStringEditor setEditable:editorFlags.isEditable];
-	}
+	if (complexStringEditor == nil)
+    	complexStringEditor = [[BDSKComplexStringEditor alloc] initWithMacroResolver:[publication macroResolver] enabled:editorFlags.isEditable];
     NSString *value = [publication valueOfField:[fields objectAtIndex:row]];
 	NSText *fieldEditor = [tableView currentEditor];
 	[tableCellFormatter setEditAsComplexString:YES];
@@ -2494,7 +2492,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 - (NSRange)control:(NSControl *)control textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
     if (control != tableView) {
 		return charRange;
-	} else if ([complexStringEditor isEditing]) {
+	} else if ([complexStringEditor isAttached]) {
 		return [[BDSKCompletionManager sharedManager] rangeForUserCompletion:charRange 
 								  forBibTeXString:[textView string]];
 	} else {
@@ -2514,7 +2512,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 - (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(NSInteger *)idx{
     if (control != tableView) {
 		return words;
-	} else if ([complexStringEditor isEditing]) {
+	} else if ([complexStringEditor isAttached]) {
 		return [[BDSKCompletionManager sharedManager] possibleMatches:[[publication macroResolver] allMacroDefinitions] 
 						   forBibTeXString:[textView string] 
 								partialWordRange:charRange 

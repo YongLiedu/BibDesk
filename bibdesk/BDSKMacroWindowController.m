@@ -349,12 +349,10 @@
 - (BOOL)editSelectedCellAsMacro{
     NSInteger row = [tableView selectedRow];
 	// this should never happen
-    if ([complexStringEditor isEditing] || row == -1) 
+    if ([complexStringEditor isAttached] || row == -1) 
 		return NO;
-	if(complexStringEditor == nil) {
-        complexStringEditor = [[BDSKComplexStringEditor alloc] initWithMacroResolver:macroResolver];
-        [complexStringEditor setEditable:isEditable];
-    }
+	if(complexStringEditor == nil)
+        complexStringEditor = [[BDSKComplexStringEditor alloc] initWithMacroResolver:macroResolver enabled:isEditable];
     BDSKMacro *macro = [[arrayController arrangedObjects] objectAtIndex:row];
 	NSString *value = [macro value];
 	NSText *fieldEditor = [tableView currentEditor];

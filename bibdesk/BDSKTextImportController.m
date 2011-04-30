@@ -971,7 +971,7 @@
 		return YES;
 	} else if ([menuItem action] == @selector(editSelectedFieldAsRawBibTeX:)) {
 		NSInteger row = [itemTableView selectedRow];
-		return (row != -1 && [complexStringEditor isEditing] == NO && [[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString] == NO && [[fields objectAtIndex:row] isCitationField] == NO);
+		return (row != -1 && [complexStringEditor isAttached] == NO && [[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString] == NO && [[fields objectAtIndex:row] isCitationField] == NO);
 	} else if ([menuItem action] == @selector(generateCiteKey:)) {
 		// need to set the title, as the document can change it in the main menu
 		[menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Menu item title")];
@@ -1182,7 +1182,7 @@
 - (NSRange)control:(NSControl *)control textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
     if (control != itemTableView) {
 		return charRange;
-	} else if ([complexStringEditor isEditing]) {
+	} else if ([complexStringEditor isAttached]) {
 		return [[BDSKCompletionManager sharedManager] rangeForUserCompletion:charRange 
 								  forBibTeXString:[textView string]];
 	} else {
@@ -1196,7 +1196,7 @@
 - (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(NSInteger *)idx{
     if (control != itemTableView) {
 		return words;
-	} else if ([complexStringEditor isEditing]) {
+	} else if ([complexStringEditor isAttached]) {
 		return [[BDSKCompletionManager sharedManager] possibleMatches:[[document macroResolver] allMacroDefinitions] 
 						   forBibTeXString:[textView string] 
 								partialWordRange:charRange 
@@ -1230,10 +1230,10 @@
 - (BOOL)editSelectedCellAsMacro{
 	NSInteger row = [itemTableView selectedRow];
     // this should never happen
-	if ([complexStringEditor isEditing] || row == -1 || [[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString] || [[fields objectAtIndex:row] isCitationField]) 
+	if ([complexStringEditor isAttached] || row == -1 || [[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString] || [[fields objectAtIndex:row] isCitationField]) 
 		return NO;
 	if (complexStringEditor == nil)
-    	complexStringEditor = [[BDSKComplexStringEditor alloc] initWithMacroResolver:[self macroResolver]];
+    	complexStringEditor = [[BDSKComplexStringEditor alloc] initWithMacroResolver:[self macroResolver] enabled:YES];
     NSString *value = [item valueOfField:[fields objectAtIndex:row]];
 	NSText *fieldEditor = [itemTableView currentEditor];
 	[tableCellFormatter setEditAsComplexString:YES];

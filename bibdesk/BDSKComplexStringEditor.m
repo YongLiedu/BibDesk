@@ -42,8 +42,6 @@
 
 @interface BDSKComplexStringEditor (Private)
 
-- (void)endEditingAndOrderOut;
-
 - (void)setExpandedValue:(NSString *)expandedValue;
 - (void)setError:(NSError *)error;
 
@@ -58,33 +56,25 @@
 
 @implementation BDSKComplexStringEditor
 
-- (id)initWithMacroResolver:(BDSKMacroResolver *)aMacroResolver {
+- (id)initWithMacroResolver:(BDSKMacroResolver *)aMacroResolver enabled:(BOOL)isEnabled {
     self = [super initWithWindowNibName:@"ComplexStringEditor"];
     if (self) {
 		tableView = nil;
         macroResolver = [aMacroResolver retain];
 		row = -1;
 		column = -1;
-        editable = YES;
+        enabled = isEnabled;
 	}
 	return self;
 }
 
 - (id)init {
-    return [self initWithMacroResolver:nil];
+    return [self initWithMacroResolver:nil enabled:YES];
 }
 
 - (void)dealloc {
     BDSKDESTROY(macroResolver);
     [super dealloc];
-}
-
-- (BOOL)isEditable {
-    return editable;
-}
-
-- (void)setEditable:(BOOL)flag {
-    editable = flag;
 }
 
 - (BDSKMacroResolver *)macroResolver {
@@ -99,7 +89,7 @@
 }
 
 - (BOOL)attachToTableView:(NSTableView *)aTableView atRow:(NSInteger)aRow column:(NSInteger)aColumn withValue:(NSString *)aString {
-	if ([self isEditing]) 
+	if ([self isAttached]) 
 		return NO; // we are already busy editing
     
 	tableView = [aTableView retain];
@@ -118,7 +108,7 @@
 	return YES;
 }
 
-- (BOOL)isEditing {
+- (BOOL)isAttached {
 	return (tableView != nil);
 }
 
@@ -183,15 +173,14 @@
     [nc removeObserver:self name:NSTableViewColumnDidMoveNotification object:tableView];
 }
 
-- (void)endEditingAndOrderOut {
+- (void)remove {
     // we're going away now, so we can unregister for the notifications we registered for earlier
 	[self unregisterForNotifications];
     [[tableView window] removeChildWindow:[self window]];
-    [[self window] orderOut:self];
+    [[self window] orderOut:nil];
 	
 	// release the temporary objects
-	[tableView release];
-	tableView = nil; // we should set this to nil, as we use this as a flag that we are editing
+	BDSKDESTROY(tableView); // we should set this to nil, as we use this as a flag that we are editing
 	row = -1;
 	column = -1;
 }
@@ -248,7 +237,7 @@
 }
 
 - (void)cellWindowDidBecomeKey:(NSNotification *)notification {
-	[backgroundView setShowFocusRing:[self isEditable]];
+	[backgroundView setShowFocusRing:enabled];
 }
 
 - (void)cellWindowDidResignKey:(NSNotification *)notification {
@@ -259,16 +248,16 @@
 
 - (void)windowWillClose:(NSNotification *)notification {
 	// this gets called whenever an editor window closes
-	if ([self isEditing]){
+	if ([self isAttached]){
         //BDSKASSERT_NOT_REACHED("macro textfield window closed while editing");
-		[self endEditingAndOrderOut];
+		[self remove];
     }
 }
 
 #pragma mark NSControl notification handlers
 
 - (void)controlTextDidEndEditing:(NSNotification *)notification {
-    [self endEditingAndOrderOut];
+    [self remove];
 }
 
 - (void)controlTextDidChange:(NSNotification *)notification {
