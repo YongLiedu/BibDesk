@@ -78,8 +78,9 @@
 - (BOOL)isPartialStringValid:(NSString **)partialStringPtr proposedSelectedRange:(NSRangePointer)proposedSelRangePtr originalString:(NSString *)origString originalSelectedRange:(NSRange)origSelRange errorDescription:(NSString **)error{
     NSAttributedString *attrString = nil;
     NSString *format = [[*partialStringPtr copy] autorelease];
+    NSString *errorString = nil;
     
-	[BDSKFormatParser validateFormat:&format attributedFormat:&attrString forField:parseField error:NULL];
+	[BDSKFormatParser validateFormat:&format attributedFormat:&attrString forField:parseField error:&errorString];
     format = [attrString string];
 	
 	if (NO == [format isEqualToString:*partialStringPtr]) {
@@ -93,6 +94,7 @@
 			else
 				*proposedSelRangePtr = NSMakeRange(length, 0);
 		}
+        if (error) *error = errorString;
 		return NO;
 	} else return YES;
 }
