@@ -564,7 +564,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 - (NSString *)complexStringByAppendingString:(NSString *)string{
 	NSString *newString = nil;
     if ([self isComplex] == NO) {
-        newString = [[nodes objectAtIndex:0] complexStringByAppendingString:string];
+        newString = [[[nodes objectAtIndex:0] value] complexStringByAppendingString:string];
     } else if ([string isEqualAsComplexString:@""]) {
         newString = self;
     } else {
