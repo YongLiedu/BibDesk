@@ -167,7 +167,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
         
         NSString *aString = dictionary ? [dictionary objectForKey:aMacro] : [self valueOfMacro:aMacro];
         
-        if ([self string:aString dependsOnMacro:macro])
+        if ([self string:aString dependsOnMacro:macro inMacroDefinitions:dictionary])
             return YES;
     }
     return NO;
