@@ -80,7 +80,6 @@
 		CE04583D0FB6FBBF003CAF5D /* Scroller_Divider.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE04583B0FB6FBBF003CAF5D /* Scroller_Divider.tiff */; };
 		CE04583E0FB6FBBF003CAF5D /* Scroller_Background.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE04583C0FB6FBBF003CAF5D /* Scroller_Background.tiff */; };
 		CE071ED10F213EB300244F5C /* BDSKArxivParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE071ECF0F213EB300244F5C /* BDSKArxivParser.m */; };
-		CE095D51135C52B5000E4396 /* BDSKSelectCommand.h in Headers */ = {isa = PBXBuildFile; fileRef = CE095D4F135C52B5000E4396 /* BDSKSelectCommand.h */; };
 		CE095D52135C52B5000E4396 /* BDSKSelectCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE095D50135C52B5000E4396 /* BDSKSelectCommand.m */; };
 		CE09CEA70DDEF65E00F3F2FE /* BDSKCompletionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE09CEA50DDEF65E00F3F2FE /* BDSKCompletionManager.m */; };
 		CE0B3B3C1292E1A500BA05EB /* BDSKErrorObject.m in Sources */ = {isa = PBXBuildFile; fileRef = CE0B3B3A1292E1A500BA05EB /* BDSKErrorObject.m */; };
@@ -120,9 +119,7 @@
 		CE3256000A1748D0002D6E4C /* NSGeometry_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3255FE0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.m */; };
 		CE325FCE0A1A74E9002D6E4C /* BDSKTemplateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE325FCC0A1A74E9002D6E4C /* BDSKTemplateParser.m */; };
 		CE3263C5128806C3000040EC /* BDSKFieldCollection.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3263C3128806C3000040EC /* BDSKFieldCollection.m */; };
-		CE33D606136AB73600ACE924 /* BDSKTextImportItemTableView.h in Headers */ = {isa = PBXBuildFile; fileRef = CE33D604136AB73600ACE924 /* BDSKTextImportItemTableView.h */; };
 		CE33D607136AB73600ACE924 /* BDSKTextImportItemTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE33D605136AB73600ACE924 /* BDSKTextImportItemTableView.m */; };
-		CE33D61B136AB8A700ACE924 /* BDSKImportTextView.h in Headers */ = {isa = PBXBuildFile; fileRef = CE33D619136AB8A700ACE924 /* BDSKImportTextView.h */; };
 		CE33D61C136AB8A700ACE924 /* BDSKImportTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE33D61A136AB8A700ACE924 /* BDSKImportTextView.m */; };
 		CE3402750E014B3800A7FFE6 /* NSNumber_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3402730E014B3800A7FFE6 /* NSNumber_BDSKExtensions.m */; };
 		CE3448020A11302F0026A92A /* BDSKPreviewItem.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3448000A11302F0026A92A /* BDSKPreviewItem.m */; };
@@ -2949,9 +2946,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				CE095D51135C52B5000E4396 /* BDSKSelectCommand.h in Headers */,
-				CE33D606136AB73600ACE924 /* BDSKTextImportItemTableView.h in Headers */,
-				CE33D61B136AB8A700ACE924 /* BDSKImportTextView.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
