@@ -37,23 +37,21 @@
  */
 
 #import "BDSKStringNode.h"
+#import "BDSKComplexString.h"
 
 
 @implementation BDSKStringNode
 
 + (BDSKStringNode *)nodeWithQuotedString:(NSString *)s{
-    BDSKStringNode *node = [[BDSKStringNode alloc] initWithType:BDSKStringNodeString value:s];
-	return [node autorelease];
+    return [[[BDSKStringNode alloc] initWithType:BDSKStringNodeString value:s] autorelease];
 }
 
 + (BDSKStringNode *)nodeWithNumberString:(NSString *)s{
-    BDSKStringNode *node = [[BDSKStringNode alloc] initWithType:BDSKStringNodeNumber value:s];
-	return [node autorelease];
+    return [[[BDSKStringNode alloc] initWithType:BDSKStringNodeNumber value:s] autorelease];
 }
 
 + (BDSKStringNode *)nodeWithMacroString:(NSString *)s{
-    BDSKStringNode *node = [[BDSKStringNode alloc] initWithType:BDSKStringNodeMacro value:s];
-	return [node autorelease];
+    return [[[BDSKStringNode alloc] initWithType:BDSKStringNodeMacro value:s] autorelease];
 }
 
 - (BDSKStringNode *)initWithQuotedString:(NSString *)s{
@@ -69,15 +67,14 @@
 }
 
 - (id)init{
-	self = [self initWithType:BDSKStringNodeString value:@""];
-	return self;
+	return [self initWithType:BDSKStringNodeString value:@""];
 }
 
 - (id)initWithType:(BDSKStringNodeType)aType value:(NSString *)s{
     self = [super init];
     if (self) {
 		type = aType;
-		value = [s copy];
+		value = [s copyUninherited];
 	}
 	return self;
 }
@@ -123,10 +120,7 @@
 }
 
 - (BOOL)isEqual:(BDSKStringNode *)other{
-    if(type == [other type] &&
-       [value isEqualToString:[other value]])
-        return YES;
-    return NO;
+    return (type == [other type] && [value isEqualToString:[other value]]);
 }
 
 - (NSComparisonResult)compareNode:(BDSKStringNode *)aNode{
@@ -150,7 +144,7 @@
 }
 
 - (NSString *)description{
-    return [NSString stringWithFormat:@"type: %ld, %@", (long)type, value];
+    return [NSString stringWithFormat:@"<%@: %ld, %@>", [self class], (long)type, value];
 }
 
 @end
