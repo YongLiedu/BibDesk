@@ -329,6 +329,8 @@ With that change, our NSCoding methods get called, but calling -[super initWithC
 Rather than relying on the same call sequence to be used, I think we should ignore super's implementation.
 */
 
+- (Class)classForCoder { return BDSKComplexStringClass; }
+- (Class)classForArchiver { return BDSKComplexStringClass; }
 - (Class)classForKeyedArchiver { return BDSKComplexStringClass; }
 
 - (id)initWithCoder:(NSCoder *)coder{
