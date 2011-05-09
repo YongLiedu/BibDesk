@@ -1478,6 +1478,8 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         isOK = [outputData appendDataFromString:templateFile encoding:encoding error:&error];
         if(NO == isOK)
             [error setValue:NSLocalizedString(@"Unable to convert template string.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
+    } else if ([NSString isEmptyString:frontMatter]) {
+        shouldAppendFrontMatter = NO;
     }
     
     NSData *doubleNewlineData = [@"\n\n" dataUsingEncoding:encoding];
