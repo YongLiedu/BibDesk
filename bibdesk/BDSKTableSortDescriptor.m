@@ -239,6 +239,11 @@
     [super dealloc];
 }
 
+- (id)reversedSortDescriptor
+{
+    return [[[[self class] alloc] initWithKey:[self key] ascending:NO == ascending selector:selector userInfo:userInfo] autorelease];
+}
+
 static inline void __GetValuesUsingCache(BDSKTableSortDescriptor *sort, id object1, id object2, id *value1, id *value2)
 {
     CFIndex i;
