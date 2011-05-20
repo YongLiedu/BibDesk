@@ -229,7 +229,7 @@
 
 - (id)copyWithZone:(NSZone *)aZone
 {
-    return [[[self class] allocWithZone:aZone] initWithKey:[self key] ascending:[self ascending] selector:[self selector]];
+    return [[[self class] allocWithZone:aZone] initWithKey:[self key] ascending:[self ascending] selector:[self selector] userInfo:userInfo];
 }
 
 - (void)dealloc
