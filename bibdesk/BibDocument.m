@@ -689,6 +689,10 @@ static NSOperationQueue *metadataCacheQueue = nil;
     return mainWindowSetupDictionary;
 }
 
+static inline BOOL isImportOrderOrRelevance(NSString *key) {
+    return [key isEqualToString:BDSKImportOrderString] || [key isEqualToString:BDSKRelevanceString];
+}
+
 - (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL forEncoding:(NSStringEncoding)encoding {
     
     NSString *path = [anURL path];
@@ -698,12 +702,10 @@ static NSOperationQueue *metadataCacheQueue = nil;
         NSMutableDictionary *dictionary = [[self mainWindowSetupDictionaryFromExtendedAttributes] mutableCopy];
         
         NSString *savedSortKey = nil;
-        if ([sortKey isEqualToString:BDSKImportOrderString] || [sortKey isEqualToString:BDSKRelevanceString]) {
-            if ([previousSortKey isEqualToString:BDSKImportOrderString] == NO && [previousSortKey isEqualToString:BDSKRelevanceString] == NO) 
-                savedSortKey = previousSortKey;
-        } else {
+        if (isImportOrderOrRelevance(sortKey) == NO)
             savedSortKey = sortKey;
-        }
+        else if (isImportOrderOrRelevance(previousSortKey) == NO) 
+            savedSortKey = previousSortKey;
         
         [dictionary setObject:[[[tableView tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString] forKey:BDSKShownColsNamesKey];
         [dictionary setObject:[self currentTableColumnWidthsAndIdentifiers] forKey:BDSKColumnWidthsKey];
@@ -2477,7 +2479,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         // save new sorting selector, and re-sort the array.
         if (sortKey)
             [tableView setIndicatorImage:nil inTableColumn:[tableView tableColumnWithIdentifier:sortKey]];
-        if ([sortKey isEqualToString:BDSKImportOrderString] || [sortKey isEqualToString:BDSKRelevanceString]) {
+        if (isImportOrderOrRelevance(sortKey)) {
             // this is probably after removing an ImportOrder or Relevance column, try to reinstate the previous sort order
             if ([key isEqualToString:previousSortKey])
                 docFlags.sortDescending = docFlags.previousSortDescending;
@@ -2536,12 +2538,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     // @@ if we switch to NSArrayController, we should just archive the sort descriptors (see BDSKFileContentSearchController)
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
     NSString *savedSortKey = nil;
-    if ([sortKey isEqualToString:BDSKImportOrderString] || [sortKey isEqualToString:BDSKRelevanceString]) {
-        if ([previousSortKey isEqualToString:BDSKImportOrderString] == NO && [previousSortKey isEqualToString:BDSKRelevanceString] == NO) 
-            savedSortKey = previousSortKey;
-    } else {
+    if (isImportOrderOrRelevance(sortKey) == NO)
         savedSortKey = sortKey;
-    }
+    else if (isImportOrderOrRelevance(previousSortKey) == NO) 
+        savedSortKey = previousSortKey;
     if (savedSortKey)
         [sud setObject:savedSortKey forKey:BDSKDefaultSortedTableColumnKey];
     [sud setBool:docFlags.sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
