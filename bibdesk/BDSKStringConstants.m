@@ -101,6 +101,8 @@ NSString *BDSKShownColsNamesKey = @"Shown Column Names";
 NSString *BDSKColumnWidthsKey = @"Column Widths by Name";
 NSString *BDSKDefaultSortedTableColumnKey = @"Default table column to sort new documents";
 NSString *BDSKDefaultSortedTableColumnIsDescendingKey = @"Default table column sort order";
+NSString *BDSKDefaultSubsortedTableColumnKey = @"Default table column to subsort new documents";
+NSString *BDSKDefaultSubsortedTableColumnIsDescendingKey = @"Default table column subsort order";
 NSString *BDSKSortGroupsKey = @"BDSKSortGroupsKey";
 NSString *BDSKSortGroupsDescendingKey = @"BDSKSortGroupsDescendingKey";
 

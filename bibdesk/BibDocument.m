@@ -493,9 +493,13 @@ static NSOperationQueue *metadataCacheQueue = nil;
     tableColumnWidths = [[xattrDefaults objectForKey:BDSKColumnWidthsKey] retain];
     [tableView setupTableColumnsWithIdentifiers:[xattrDefaults objectForKey:BDSKShownColsNamesKey] ?: [sud objectForKey:BDSKShownColsNamesKey]];
     sortKey = [[xattrDefaults objectForKey:BDSKDefaultSortedTableColumnKey] ?: [sud objectForKey:BDSKDefaultSortedTableColumnKey] retain];
-    previousSortKey = [sortKey retain];
-    docFlags.sortDescending = [xattrDefaults  boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey defaultValue:[sud boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey]];
-    docFlags.previousSortDescending = docFlags.sortDescending;
+    docFlags.sortDescending = [xattrDefaults boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey defaultValue:[sud boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey]];
+    previousSortKey = [[xattrDefaults objectForKey:BDSKDefaultSubsortedTableColumnKey] ?: [sud objectForKey:BDSKDefaultSubsortedTableColumnKey] retain];
+    docFlags.previousSortDescending = [xattrDefaults boolForKey:BDSKDefaultSubsortedTableColumnIsDescendingKey defaultValue:[sud boolForKey:BDSKDefaultSubsortedTableColumnIsDescendingKey]];
+    if (previousSortKey == nil) {
+        previousSortKey = [sortKey retain];
+        docFlags.previousSortDescending = docFlags.sortDescending;
+    }
     [tableView setHighlightedTableColumn:[tableView tableColumnWithIdentifier:sortKey]];
     
     [sortGroupsKey autorelease];
@@ -702,15 +706,30 @@ static inline BOOL isImportOrderOrRelevance(NSString *key) {
         NSMutableDictionary *dictionary = [[self mainWindowSetupDictionaryFromExtendedAttributes] mutableCopy];
         
         NSString *savedSortKey = nil;
-        if (isImportOrderOrRelevance(sortKey) == NO)
+        BOOL savedSortDescending = docFlags.sortDescending;
+        NSString *savedSubsortKey = nil;
+        BOOL savedSubsortDescending = docFlags.previousSortDescending;
+        if (isImportOrderOrRelevance(sortKey) == NO) {
             savedSortKey = sortKey;
-        else if (isImportOrderOrRelevance(previousSortKey) == NO) 
+            savedSortDescending = docFlags.sortDescending;
+        } else if (isImportOrderOrRelevance(previousSortKey) == NO)  {
             savedSortKey = previousSortKey;
+            savedSortDescending = docFlags.previousSortDescending;
+        }
+        if (isImportOrderOrRelevance(previousSortKey) == NO) {
+            savedSubsortKey = previousSortKey;
+            savedSubsortDescending = docFlags.previousSortDescending;
+        } else {
+            savedSubsortKey = savedSortKey;
+            savedSubsortDescending = savedSortDescending;
+        }
         
         [dictionary setObject:[[[tableView tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString] forKey:BDSKShownColsNamesKey];
         [dictionary setObject:[self currentTableColumnWidthsAndIdentifiers] forKey:BDSKColumnWidthsKey];
         [dictionary setObject:savedSortKey ?: BDSKTitleString forKey:BDSKDefaultSortedTableColumnKey];
-        [dictionary setBoolValue:docFlags.sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
+        [dictionary setBoolValue:savedSortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
+        [dictionary setObject:savedSubsortKey ?: BDSKTitleString forKey:BDSKDefaultSubsortedTableColumnKey];
+        [dictionary setBoolValue:savedSortDescending forKey:BDSKDefaultSubsortedTableColumnIsDescendingKey];
         [dictionary setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
         [dictionary setBoolValue:docFlags.sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
         [dictionary setRectValue:[documentWindow frame] forKey:BDSKDocumentWindowFrameKey];
@@ -2538,13 +2557,31 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     // @@ if we switch to NSArrayController, we should just archive the sort descriptors (see BDSKFileContentSearchController)
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
     NSString *savedSortKey = nil;
-    if (isImportOrderOrRelevance(sortKey) == NO)
+    BOOL savedSortDescending = docFlags.sortDescending;
+    NSString *savedSubsortKey = nil;
+    BOOL savedSubsortDescending = docFlags.previousSortDescending;
+    if (isImportOrderOrRelevance(sortKey) == NO) {
         savedSortKey = sortKey;
-    else if (isImportOrderOrRelevance(previousSortKey) == NO) 
+        savedSortDescending = docFlags.sortDescending;
+    } else if (isImportOrderOrRelevance(previousSortKey) == NO) {
         savedSortKey = previousSortKey;
-    if (savedSortKey)
+        savedSortDescending = docFlags.previousSortDescending;
+    }
+    if (isImportOrderOrRelevance(previousSortKey) == NO) {
+        savedSubsortKey = sortKey;
+        savedSubsortDescending = docFlags.sortDescending;
+    } else {
+        savedSubsortKey = savedSortKey;
+        savedSubsortDescending = savedSortDescending;
+    }
+    if (savedSortKey) {
         [sud setObject:savedSortKey forKey:BDSKDefaultSortedTableColumnKey];
-    [sud setBool:docFlags.sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
+        [sud setBool:savedSortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
+    }
+    if (savedSubsortKey) {
+        [sud setObject:savedSortKey forKey:BDSKDefaultSubsortedTableColumnKey];
+        [sud setBool:savedSortDescending forKey:BDSKDefaultSubsortedTableColumnIsDescendingKey];
+    }
     [sud setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
     [sud setBool:docFlags.sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];    
 }  
