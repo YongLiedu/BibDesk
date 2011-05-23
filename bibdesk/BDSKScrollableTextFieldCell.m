@@ -40,6 +40,11 @@
 #import "NSGeometry_BDSKExtensions.h"
 
 
+@interface BDSKScrollableTextFieldCell (BDSKPrivate)
+- (CGFloat)stringWidth;
+- (void)updateScroll;
+@end
+
 @implementation BDSKScrollableTextFieldCell
 
 #pragma mark Class methods: images
@@ -111,8 +116,7 @@
 		isLeftButtonHighlighted = NO;
 		isRightButtonHighlighted = NO;
 		isClipped = NO;
-		
-		[self stringHasChanged];
+		lastSize = NSZeroSize;
 	}
 	return self;
 }
@@ -124,8 +128,7 @@
 		isLeftButtonHighlighted = NO;
 		isRightButtonHighlighted = NO;
 		isClipped = NO;
-		
-		[self stringHasChanged];
+		lastSize = NSZeroSize;
     }
     return self;
 }
@@ -196,6 +199,11 @@
 }
 
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView{
+    if (NSEqualSizes(lastSize, cellFrame.size) == NO) {
+        lastSize = cellFrame.size;
+        [self updateScroll];
+    }
+    
 	NSAttributedString *attrString = [self attributedStringValue];
 	NSRect textRect = NSInsetRect([self textRectForBounds:cellFrame], 1.0, 0.0);
 	NSPoint textOrigin = textRect.origin;
@@ -245,7 +253,7 @@
 	return [[self attributedStringValue] size].width;
 }
 
-- (void)stringHasChanged {
+- (void)updateScroll {
 	CGFloat stringWidth = [self stringWidth];
 	NSRect cellFrame = [[self controlView] bounds];
     
@@ -253,10 +261,7 @@
 	
     NSRect textRect = [self textRectForBounds:cellFrame];
 	
-	if (NSWidth(textRect) > 2.0 && stringWidth > NSWidth(textRect) - 2.0)
-		isClipped = YES;
-	else 
-		isClipped = NO;
+	isClipped = (NSWidth(textRect) > 2.0 && stringWidth > NSWidth(textRect) - 2.0);
 
 	textRect = NSInsetRect([self textRectForBounds:cellFrame], 1.0, 0.0);
 	
@@ -264,6 +269,21 @@
 	maxScrollStep = ceil(2 * stringWidth / NSWidth(textRect)) - 2;
 	if (maxScrollStep < 0 ) 
 		maxScrollStep = 0;
+}
+
+- (void)setStringValue:(NSString *)string {
+	[super setStringValue:string];
+	[self updateScroll];
+}
+
+- (void)setObjectValue:(id<NSCopying>)object {
+	[super setObjectValue:object];
+	[self updateScroll];
+}
+
+- (void)setAttributedStringValue:(NSAttributedString *)attribStr {
+	[super setAttributedStringValue:attribStr];
+	[self updateScroll];
 }
 
 @end

@@ -46,6 +46,7 @@
 	BOOL isLeftButtonHighlighted;
 	BOOL isRightButtonHighlighted;
 	BOOL isClipped;
+    NSSize lastSize;
 }
 
 + (NSImage *)scrollArrowImageForButton:(BDSKScrollButton)button highlighted:(BOOL)highlighted;
@@ -58,8 +59,5 @@
 
 - (NSRect)buttonRect:(BDSKScrollButton)button forBounds:(NSRect)theRect;
 - (NSRect)textRectForBounds:(NSRect)theRect;
-
-- (CGFloat)stringWidth;
-- (void)stringHasChanged;
 
 @end

@@ -70,7 +70,7 @@
 	}
 	return self;
 }
-					   
+
 - (void)mouseDown:(NSEvent *)theEvent {
     NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
 	BDSKScrollableTextFieldCell *cell = (BDSKScrollableTextFieldCell *)[self cell];
@@ -117,36 +117,6 @@
 				break;
 		}
 	}
-}
-
-- (void)setStringValue:(NSString *)string {
-	[super setStringValue:string];
-	if ([[self cell] isKindOfClass:[BDSKScrollableTextFieldCell class]])
-		[(BDSKScrollableTextFieldCell *)[self cell] stringHasChanged];
-}
-
-- (void)setObjectValue:(id<NSCopying>)object {
-	[super setObjectValue:object];
-	if ([[self cell] isKindOfClass:[BDSKScrollableTextFieldCell class]])
-		[(BDSKScrollableTextFieldCell *)[self cell] stringHasChanged];
-}
-
-- (void)setAttributedStringValue:(NSAttributedString *)attribStr {
-	[super setAttributedStringValue:attribStr];
-	if ([[self cell] isKindOfClass:[BDSKScrollableTextFieldCell class]])
-		[(BDSKScrollableTextFieldCell *)[self cell] stringHasChanged];
-}
-
-- (void)setFrame:(NSRect)frameRect {
-    [super setFrame:frameRect];
-	if ([[self cell] isKindOfClass:[BDSKScrollableTextFieldCell class]])
-		[(BDSKScrollableTextFieldCell *)[self cell] stringHasChanged];
-}
-
-- (void)setFrameSize:(NSSize)newSize {
-    [super setFrameSize:newSize];
-	if ([[self cell] isKindOfClass:[BDSKScrollableTextFieldCell class]])
-		[(BDSKScrollableTextFieldCell *)[self cell] stringHasChanged];
 }
 
 @end
