@@ -226,7 +226,7 @@
 {
     if ([keyEvent type] != NSKeyDown)
         return NO;
-    if ([keyEvent deviceIndependentModifierFlags] & ~NSShiftKeyMask & ~NSAlternateKeyMask & ~NSAlphaShiftKeyMask)
+    if ([keyEvent deviceIndependentModifierFlags] & ~NSShiftKeyMask & ~NSAlternateKeyMask & ~NSAlphaShiftKeyMask & ~NSNumericPadKeyMask)
         return NO;
     
     static NSCharacterSet *nonAlphanumericCharacterSet = nil;
