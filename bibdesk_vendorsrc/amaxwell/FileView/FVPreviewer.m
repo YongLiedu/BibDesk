@@ -633,11 +633,11 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
     FVAPIAssert(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4, @"Full screen is only available on 10.5 and later");
     if ([[[self window] contentView] isInFullScreenMode]) {
         [[[self window] contentView] exitFullScreenModeWithOptions:nil];
-        [[fullScreenButton cell] setBackgroundStyle:NSBackgroundStyleDark];
+        //[[fullScreenButton cell] setBackgroundStyle:NSBackgroundStyleDark];
     }
     else {
         [[[self window] contentView] enterFullScreenMode:[[self window] screen] withOptions:nil];
-        [[fullScreenButton cell] setBackgroundStyle:NSBackgroundStyleLight];
+        //[[fullScreenButton cell] setBackgroundStyle:NSBackgroundStyleLight];
     }
 }
 
@@ -667,7 +667,7 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
     
     if ([[[self window] contentView] isInFullScreenMode]) {
         [[[self window] contentView] exitFullScreenModeWithOptions:nil];
-        [[fullScreenButton cell] setBackgroundStyle:NSBackgroundStyleDark];
+        //[[fullScreenButton cell] setBackgroundStyle:NSBackgroundStyleDark];
     }
     else {
         [self stopPreviewing];

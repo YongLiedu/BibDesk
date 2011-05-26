@@ -44,6 +44,7 @@
 - (BOOL)enterFullScreenMode:(NSScreen *)screen withOptions:(NSDictionary *)options;
 {
     _windowDelegate = (FVPreviewer *)[[self window] delegate];
+    [self setNeedsDisplay:YES];
     return [super enterFullScreenMode:screen withOptions:options];
 }
 
@@ -51,6 +52,7 @@
 {
     _windowDelegate = nil;
     [super exitFullScreenModeWithOptions:options];
+    [self setNeedsDisplay:YES];
 }
 
 - (void)keyDown:(NSEvent *)event
@@ -76,6 +78,13 @@
     }
     else {
         [super keyDown:event];
+    }
+}
+
+- (void)drawRect:(NSRect)rect {
+    if ([self isInFullScreenMode]) {
+        [[NSColor blackColor] set];
+        NSRectFill(rect);
     }
 }
 
