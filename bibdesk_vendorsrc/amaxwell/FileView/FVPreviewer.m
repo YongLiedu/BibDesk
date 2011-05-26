@@ -253,7 +253,6 @@ NSString * const FVPreviewerWillCloseNotification = @"FVPreviewerWillCloseNotifi
         
         if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 && [[[self window] contentView] isInFullScreenMode]) {
             [[[self window] contentView] exitFullScreenModeWithOptions:nil];
-            [[fullScreenButton cell] setBackgroundStyle:NSBackgroundStyleDark];
         }
         
         // performClose: invokes windowShouldClose: and then closes the window, so state gets saved
@@ -633,11 +632,9 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
     FVAPIAssert(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4, @"Full screen is only available on 10.5 and later");
     if ([[[self window] contentView] isInFullScreenMode]) {
         [[[self window] contentView] exitFullScreenModeWithOptions:nil];
-        //[[fullScreenButton cell] setBackgroundStyle:NSBackgroundStyleDark];
     }
     else {
         [[[self window] contentView] enterFullScreenMode:[[self window] screen] withOptions:nil];
-        //[[fullScreenButton cell] setBackgroundStyle:NSBackgroundStyleLight];
     }
 }
 
@@ -667,7 +664,6 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
     
     if ([[[self window] contentView] isInFullScreenMode]) {
         [[[self window] contentView] exitFullScreenModeWithOptions:nil];
-        //[[fullScreenButton cell] setBackgroundStyle:NSBackgroundStyleDark];
     }
     else {
         [self stopPreviewing];
