@@ -867,13 +867,13 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     [self setImported:isDelete == NO forPublications:pubs inGroup:nil];
 }
 
-- (BOOL)sortKeyDependsOnKey:(NSString *)key{
+static BOOL sortKeyDependsOnKey(NSString *sortKey, NSString *key) {
     if (key == nil)
         return YES;
     else if([sortKey isEqualToString:BDSKTitleString])
         return [key isEqualToString:BDSKTitleString] || [key isEqualToString:BDSKChapterString] || [key isEqualToString:BDSKPagesString] || [key isEqualToString:BDSKPubTypeString];
     else if([sortKey isEqualToString:BDSKContainerString])
-        return [key isEqualToString:BDSKContainerString] || [key isEqualToString:BDSKJournalString] || [key isEqualToString:BDSKBooktitleString] || [key isEqualToString:BDSKVolumeString] || [key isEqualToString:BDSKSeriesString] || [key isEqualToString:BDSKPubTypeString];
+        return [key isEqualToString:BDSKJournalString] || [key isEqualToString:BDSKBooktitleString] || [key isEqualToString:BDSKVolumeString] || [key isEqualToString:BDSKSeriesString] || [key isEqualToString:BDSKPubTypeString];
     else if([sortKey isEqualToString:BDSKPubDateString])
         return [key isEqualToString:BDSKYearString] || [key isEqualToString:BDSKMonthString];
     else if([sortKey isEqualToString:BDSKFirstAuthorString] || [sortKey isEqualToString:BDSKSecondAuthorString] || [sortKey isEqualToString:BDSKThirdAuthorString] || [sortKey isEqualToString:BDSKLastAuthorString])
@@ -886,8 +886,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         return [sortKey isEqualToString:key];
 }
 
-- (BOOL)searchKeyDependsOnKey:(NSString *)key{
-    NSString *searchKey = [[searchField stringValue] isEqualToString:@""] ? nil : [searchButtonBar representedObjectOfSelectedButton];
+static BOOL searchKeyDependsOnKey(NSString *searchKey, NSString *key) {
     if ([searchKey isEqualToString:BDSKSkimNotesString] || [searchKey isEqualToString:BDSKFileContentSearchString])
         return [key isEqualToString:BDSKLocalFileString];
     else if (key == nil)
@@ -1022,9 +1021,9 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     
     if ([changedKey isEqualToString:[self currentGroupField]] || changedKey == nil)
         docFlags.itemChangeMask |= BDSKItemChangedGroupFieldMask;
-    if ([self sortKeyDependsOnKey:changedKey])
+    if (sortKeyDependsOnKey(sortKey, changedKey) || sortKeyDependsOnKey(previousSortKey, changedKey))
         docFlags.itemChangeMask |= BDSKItemChangedSortKeyMask;
-    if ([self searchKeyDependsOnKey:changedKey])
+    if ([self isDisplayingSearchButtons] && searchKeyDependsOnKey([searchButtonBar representedObjectOfSelectedButton], changedKey))
         docFlags.itemChangeMask |= BDSKItemChangedSearchKeyMask;
     if ([changedKey isEqualToString:BDSKLocalFileString] || [changedKey isEqualToString:BDSKRemoteURLString])
         docFlags.itemChangeMask |= BDSKItemChangedFilesMask;
