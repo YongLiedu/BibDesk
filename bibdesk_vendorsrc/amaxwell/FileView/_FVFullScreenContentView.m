@@ -88,4 +88,8 @@
     }
 }
 
+- (BOOL)isOpaque {
+    return [self isInFullScreenMode];
+}
+
 @end
