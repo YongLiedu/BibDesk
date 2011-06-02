@@ -2515,7 +2515,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         if (oldTC)
             [tableView setIndicatorImage:nil inTableColumn:oldTC];
     }
-    [tableView setIndicatorImage:[NSImage imageNamed:(sortDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator")] inTableColumn:newTC];
+    [tableView setIndicatorImageForAscending:!sortDescending inTableColumn:newTC];
     
     // @@ DON'T RETURN WITHOUT RESETTING THIS!
     // this is a hack to keep us from getting selection change notifications while sorting (which updates the TeX and attributed text previews)

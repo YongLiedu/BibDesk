@@ -51,6 +51,7 @@
 #import "BibDocument.h"
 #import "BDSKMacro.h"
 #import "BDSKGroupsArray.h"
+#import "NSTableView_BDSKExtensions.h"
 
 #define BDSKMacroWindowFrameAutosaveName @"BDSKMacroWindow"
 
@@ -602,8 +603,7 @@
     if ([newKey isEqualToString:oldKey] == NO)
         [tableView setIndicatorImage:nil inTableColumn:[tableView highlightedTableColumn]];
     [tableView setHighlightedTableColumn:tableColumn]; 
-    [tableView setIndicatorImage:[sortDescriptor ascending] ? [NSImage imageNamed:@"NSAscendingSortIndicator"] : [NSImage imageNamed:@"NSDescendingSortIndicator"]
-                   inTableColumn:tableColumn];
+    [tableView setIndicatorImageForAscending:[sortDescriptor ascending] inTableColumn:tableColumn];
     
     [arrayController rearrangeObjects];
     [tableView reloadData];

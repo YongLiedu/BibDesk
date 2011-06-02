@@ -95,6 +95,10 @@ static BOOL (*original_validateUserInterfaceItem)(id, SEL, id) = NULL;
     return selectedIndexes;
 }
 
+- (void)setIndicatorImageForAscending:(BOOL)ascending inTableColumn:(NSTableColumn *)tc {
+    [self setIndicatorImage:[NSImage imageNamed:ascending ? @"NSAscendingSortIndicator" : @"NSDescendingSortIndicator"] inTableColumn:tc];
+}
+
 #pragma mark Drop highlight
 
 + (void)load {

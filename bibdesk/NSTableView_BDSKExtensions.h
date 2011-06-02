@@ -47,4 +47,6 @@
 - (NSInteger)clickedOrSelectedRow;
 - (NSIndexSet *)clickedOrSelectedRowIndexes;
 
+- (void)setIndicatorImageForAscending:(BOOL)ascending inTableColumn:(NSTableColumn *)tc;
+
 @end
