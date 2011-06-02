@@ -410,11 +410,16 @@ static NSDictionary *errorAttr = nil;
                 	// keywords
 					// look for [slash]
 					NSString *slash = (isLocalFile) ? @"-" : @"/";
+					NSString *sep = nil;
 					if ([scanner scanString:@"[" intoString:NULL]) {
 						if (NO == [scanner scanUpToString:@"]" intoString:&slash]) slash = @"";
 						[scanner scanString:@"]" intoString:NULL];
+                        if ([scanner scanString:@"[" intoString:NULL]) {
+                            if (NO == [scanner scanUpToString:@"]" intoString:&sep]) sep = @"";
+                            [scanner scanString:@"]" intoString:NULL];
+                        }
 					}
-					NSString *keywordsString = [pub stringValueOfField:BDSKKeywordsString];
+                    NSString *keywordsString = [pub stringValueOfField:BDSKKeywordsString];
 					NSUInteger i, numWords = 0;
                     if (NO == [scanner scanUnsignedInteger:&numWords]) numWords = 0;
 					if ([NSString isEmptyString:keywordsString] == NO) {
@@ -440,7 +445,9 @@ static NSDictionary *errorAttr = nil;
                             keyword = [self stringByStrictlySanitizingString:keyword forField:fieldName]; 
 							if (NO == [slash isEqualToString:@"/"])
 								keyword = [keyword stringByReplacingCharactersInSet:slashCharSet withString:slash];
-							[parsedStr appendString:keyword]; 
+							if (i > 0 && [NSString isEmptyString:keyword] == NO && [NSString isEmptyString:sep] == NO)
+                                [parsedStr appendString:sep]; 
+                            [parsedStr appendString:keyword]; 
 						}
 					}
 					break;
@@ -555,6 +562,7 @@ static NSDictionary *errorAttr = nil;
                     NSString *key = nil;
                     NSString *sepChars = nil;
                     NSString *slash = (isLocalFile) ? @"-" : @"/";
+                    NSString *sep = nil;
                     if ([scanner scanString:@"{" intoString:NULL] &&
 						[scanner scanUpToString:@"}" intoString:&key] &&
 						[scanner scanString:@"}" intoString:NULL]) {
@@ -566,6 +574,10 @@ static NSDictionary *errorAttr = nil;
                             if ([scanner scanString:@"[" intoString:NULL]) {
                                 if (NO == [scanner scanUpToString:@"]" intoString:&slash]) slash = @"";
                                 [scanner scanString:@"]" intoString:NULL];
+                                if ([scanner scanString:@"[" intoString:NULL]) {
+                                    if (NO == [scanner scanUpToString:@"]" intoString:&sep]) sep = @"";
+                                    [scanner scanString:@"]" intoString:NULL];
+                                }
                             }
                         }
                         NSString *wordsString = [pub stringValueOfField:key];
@@ -594,6 +606,8 @@ static NSDictionary *errorAttr = nil;
                                 word = [self stringByStrictlySanitizingString:word forField:fieldName]; 
                                 if (NO == [slash isEqualToString:@"/"])
                                     word = [word stringByReplacingCharactersInSet:slashCharSet withString:slash];
+                                if (i > 0 && [NSString isEmptyString:word] == NO && [NSString isEmptyString:sep] == NO)
+                                    [parsedStr appendString:sep]; 
                                 [parsedStr appendString:word]; 
                             }
                         }
@@ -1067,7 +1081,7 @@ static NSDictionary *errorAttr = nil;
 		// check optional arguments
 		if ([validOptArgSpecifierChars characterIsMember:specifier]) {
 			if (NO == [scanner isAtEnd]) {
-				NSInteger i, numOpts = ((specifier == 'A' || specifier == 'P' || specifier == 's')? 3 : ((specifier == 'a' || specifier == 'p' || specifier == 'w')? 2 : 1));
+				NSInteger i, numOpts = ((specifier == 'A' || specifier == 'P' || specifier == 'w' || specifier == 's')? 3 : ((specifier == 'a' || specifier == 'p' || specifier == 'k')? 2 : 1));
 				for (i = 0; i < numOpts && [scanner scanString:@"[" intoString: NULL]; i++) {
 					if (NO == [scanner scanUpToString:@"]" intoString:&string]) 
 						string = @"";

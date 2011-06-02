@@ -3699,7 +3699,7 @@ The specifiers are displayed in blue, the optional parameters in green.
 
 @c End of macro definitions
 
-@multitable {@b{%s\{}\i{Field}\b{[][][]\}0}} {Bibliography document file name, without extension} {name separator, initial separator, et al., max number of editors}
+@multitable {@b{%w\{}\i{Field}\b{[ ][/][]\}0}} {Bibliography document file name, without extension} {name separator, initial separator, et al., max number of editors}
 @headitem Specifier @tab Replaced content description @tab Optional parameters
 @item @specparam{%a, [][]00}
 @tab Author last names
@@ -3725,9 +3725,9 @@ The specifiers are displayed in blue, the optional parameters in green.
 @tab Year with century
 @item @spec{%m}
 @tab Month as decimal number
-@item @specparam{%k, [/]0 }
+@item @specparam{%k, [/][]0 }
 @tab Keywords concatenated together
-@tab slash replacement, max number of keywords
+@tab slash replacement, separator, max number of keywords
 @item @spec{%l}
 @tab File name of the linked file, without extension
 @item @spec{%L}
@@ -3739,9 +3739,9 @@ The specifiers are displayed in blue, the optional parameters in green.
 @item @specargparam{%f, Field, [/]0 }
 @tab Arbitrary field, also @samp{Cite Key} or @samp{BibTeX Type}
 @tab slash replacement, max length
-@item @specargparam{%w, Field, [ ][/]0 }
+@item @specargparam{%w, Field, [ ][/][]0 }
 @tab Words of arbitrary field
-@tab separator characters, slash replacement, max number of words
+@tab separator characters, slash replacement, separator, max number of words
 @item @specargparam{%c, Field, 3}
 @tab Arbitrary field as initials (acronym)
 @tab max length of words to ignore
