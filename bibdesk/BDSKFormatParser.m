@@ -562,11 +562,11 @@ static NSDictionary *errorAttr = nil;
                         if ([scanner scanString:@"[" intoString:NULL]) {
                             if (NO == [scanner scanUpToString:@"]" intoString:&sepChars]) sepChars = @" ";
                             [scanner scanString:@"]" intoString:NULL];
-                        }
-                        // look for [slash]
-                        if ([scanner scanString:@"[" intoString:NULL]) {
-                            if (NO == [scanner scanUpToString:@"]" intoString:&slash]) slash = @"";
-                            [scanner scanString:@"]" intoString:NULL];
+                            // look for [slash]
+                            if ([scanner scanString:@"[" intoString:NULL]) {
+                                if (NO == [scanner scanUpToString:@"]" intoString:&slash]) slash = @"";
+                                [scanner scanString:@"]" intoString:NULL];
+                            }
                         }
                         NSString *wordsString = [pub stringValueOfField:key];
                         NSUInteger i, numWords = 0;
