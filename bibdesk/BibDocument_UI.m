@@ -867,23 +867,23 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     [self setImported:isDelete == NO forPublications:pubs inGroup:nil];
 }
 
-static BOOL sortKeyDependsOnKey(NSString *sortKey, NSString *key) {
+static BOOL sortKeyDependsOnKey(NSString *aSortKey, NSString *key) {
     if (key == nil)
         return YES;
-    else if([sortKey isEqualToString:BDSKTitleString])
+    else if([aSortKey isEqualToString:BDSKTitleString])
         return [key isEqualToString:BDSKTitleString] || [key isEqualToString:BDSKChapterString] || [key isEqualToString:BDSKPagesString] || [key isEqualToString:BDSKPubTypeString];
-    else if([sortKey isEqualToString:BDSKContainerString])
+    else if([aSortKey isEqualToString:BDSKContainerString])
         return [key isEqualToString:BDSKJournalString] || [key isEqualToString:BDSKBooktitleString] || [key isEqualToString:BDSKVolumeString] || [key isEqualToString:BDSKSeriesString] || [key isEqualToString:BDSKPubTypeString];
-    else if([sortKey isEqualToString:BDSKPubDateString])
+    else if([aSortKey isEqualToString:BDSKPubDateString])
         return [key isEqualToString:BDSKYearString] || [key isEqualToString:BDSKMonthString];
-    else if([sortKey isEqualToString:BDSKFirstAuthorString] || [sortKey isEqualToString:BDSKSecondAuthorString] || [sortKey isEqualToString:BDSKThirdAuthorString] || [sortKey isEqualToString:BDSKLastAuthorString])
+    else if([aSortKey isEqualToString:BDSKFirstAuthorString] || [aSortKey isEqualToString:BDSKSecondAuthorString] || [aSortKey isEqualToString:BDSKThirdAuthorString] || [aSortKey isEqualToString:BDSKLastAuthorString])
         return [key isEqualToString:BDSKAuthorString];
-    else if([sortKey isEqualToString:BDSKFirstAuthorEditorString] || [sortKey isEqualToString:BDSKSecondAuthorEditorString] || [sortKey isEqualToString:BDSKThirdAuthorEditorString] || [sortKey isEqualToString:BDSKLastAuthorEditorString])
+    else if([aSortKey isEqualToString:BDSKFirstAuthorEditorString] || [aSortKey isEqualToString:BDSKSecondAuthorEditorString] || [aSortKey isEqualToString:BDSKThirdAuthorEditorString] || [aSortKey isEqualToString:BDSKLastAuthorEditorString])
         return [key isEqualToString:BDSKAuthorString] || [key isEqualToString:BDSKEditorString];
-    else if([sortKey isEqualToString:BDSKColorString] || [sortKey isEqualToString:BDSKColorLabelString])
+    else if([aSortKey isEqualToString:BDSKColorString] || [aSortKey isEqualToString:BDSKColorLabelString])
         return [key isEqualToString:BDSKColorString] || [key isEqualToString:BDSKColorLabelString];
     else
-        return [sortKey isEqualToString:key];
+        return [aSortKey isEqualToString:key];
 }
 
 static BOOL searchKeyDependsOnKey(NSString *searchKey, NSString *key) {
@@ -1021,7 +1021,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     
     if ([changedKey isEqualToString:[self currentGroupField]] || changedKey == nil)
         docFlags.itemChangeMask |= BDSKItemChangedGroupFieldMask;
-    if (sortKeyDependsOnKey(sortKey, changedKey) || sortKeyDependsOnKey(previousSortKey, changedKey))
+    if ((tmpSortKey && sortKeyDependsOnKey(tmpSortKey, changedKey)) || sortKeyDependsOnKey(sortKey, changedKey) || sortKeyDependsOnKey(previousSortKey, changedKey))
         docFlags.itemChangeMask |= BDSKItemChangedSortKeyMask;
     if ([self isDisplayingSearchButtons] && searchKeyDependsOnKey([searchButtonBar representedObjectOfSelectedButton], changedKey))
         docFlags.itemChangeMask |= BDSKItemChangedSearchKeyMask;

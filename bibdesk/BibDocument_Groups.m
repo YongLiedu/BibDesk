@@ -355,14 +355,8 @@ The groupedPublications array is a subset of the publications array, developed b
         
         [tableView setAlternatingRowBackgroundColors:[NSColor controlAlternatingRowBackgroundColors]];
         [tableView removeTableColumnWithIdentifier:BDSKImportOrderString];
-        if ([previousSortKey isEqualToString:BDSKImportOrderString]) {
-            [previousSortKey release];
-            previousSortKey = [BDSKTitleString retain];
-            docFlags.previousSortDescending = NO;
-        }
-        if ([sortKey isEqualToString:BDSKImportOrderString]) {
-            newSortKey = [[previousSortKey retain] autorelease];
-        }
+        if ([tmpSortKey isEqualToString:BDSKImportOrderString])
+            newSortKey = sortKey;
         [self hideSearchGroupView];
         [self hideWebGroupView];
     }

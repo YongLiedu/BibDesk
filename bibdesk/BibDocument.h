@@ -173,6 +173,7 @@ extern NSString *BDSKDocumentPublicationsKey;
 
     NSString *sortKey;
     NSString *previousSortKey;
+    NSString *tmpSortKey;
     NSString *sortGroupsKey;
     
 #pragma mark Menu variables
@@ -241,6 +242,7 @@ extern NSString *BDSKDocumentPublicationsKey;
         unsigned int        itemChangeMask:4;
         unsigned int        sortDescending:1;
         unsigned int        previousSortDescending:1;
+        unsigned int        tmpSortDescending:1;
         unsigned int        sortGroupsDescending:1;
         unsigned int        dragFromExternalGroups:1;
         unsigned int        isDocumentClosed:1;

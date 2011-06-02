@@ -221,13 +221,8 @@
         [searchButtonBar setAction:NULL];
         [searchButtonBar selectButtonWithRepresentedObject:BDSKAllFieldsString];
         
-        if ([previousSortKey isEqualToString:BDSKRelevanceString]) {
-            [previousSortKey release];
-            previousSortKey = [BDSKTitleString retain];
-            docFlags.previousSortDescending = NO;
-        }
-        if ([sortKey isEqualToString:BDSKRelevanceString])
-            [self sortPubsByKey:[[previousSortKey retain] autorelease]];
+        if ([tmpSortKey isEqualToString:BDSKRelevanceString])
+            [self sortPubsByKey:sortKey];
     }
 }
 
