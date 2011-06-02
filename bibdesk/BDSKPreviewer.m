@@ -176,8 +176,8 @@ static BDSKPreviewer *sharedPreviewer = nil;
         // overlay the progressIndicator over the contentView
         [progressOverlay overlayView:[[self window] contentView]];
         
-        pdfScaleFactor = [[NSUserDefaults standardUserDefaults] floatForKey:BDSKPreviewPDFScaleFactorKey];
-        rtfScaleFactor = [[NSUserDefaults standardUserDefaults] floatForKey:BDSKPreviewRTFScaleFactorKey];
+        pdfScaleFactor = [[NSUserDefaults standardUserDefaults] doubleForKey:BDSKPreviewPDFScaleFactorKey];
+        rtfScaleFactor = [[NSUserDefaults standardUserDefaults] doubleForKey:BDSKPreviewRTFScaleFactorKey];
         
         // register to observe when the preview needs to be updated (handle this here rather than on a per document basis as the preview is currently global for the application)
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -535,11 +535,11 @@ static BDSKPreviewer *sharedPreviewer = nil;
     // save the scalefactors of the views
     CGFloat scaleFactor = ([pdfView autoScales] ? 0.0 : [pdfView scaleFactor]);
 
-	if (fabs(scaleFactor - [[NSUserDefaults standardUserDefaults] floatForKey:BDSKPreviewPDFScaleFactorKey]) > 0.01)
-		[[NSUserDefaults standardUserDefaults] setFloat:scaleFactor forKey:BDSKPreviewPDFScaleFactorKey];
+	if (fabs(scaleFactor - [[NSUserDefaults standardUserDefaults] doubleForKey:BDSKPreviewPDFScaleFactorKey]) > 0.01)
+		[[NSUserDefaults standardUserDefaults] setDouble:scaleFactor forKey:BDSKPreviewPDFScaleFactorKey];
 	scaleFactor = [(BDSKZoomableTextView *)rtfPreviewView scaleFactor];
-	if (fabs(scaleFactor - [[NSUserDefaults standardUserDefaults] floatForKey:BDSKPreviewRTFScaleFactorKey]) > 0.01)
-		[[NSUserDefaults standardUserDefaults] setFloat:scaleFactor forKey:BDSKPreviewRTFScaleFactorKey];
+	if (fabs(scaleFactor - [[NSUserDefaults standardUserDefaults] doubleForKey:BDSKPreviewRTFScaleFactorKey]) > 0.01)
+		[[NSUserDefaults standardUserDefaults] setDouble:scaleFactor forKey:BDSKPreviewRTFScaleFactorKey];
     
     // make sure we don't process anything else; the TeX task will take care of its own cleanup
     [server stopDOServer];

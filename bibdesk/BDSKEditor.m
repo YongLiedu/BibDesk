@@ -268,7 +268,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     
     [[fileView enclosingScrollView] setBackgroundColor:[fileView backgroundColor]];
     [fileView setDisplayMode:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKEditorFileViewDisplayModeKey]];
-    [fileView setIconScale:[[NSUserDefaults standardUserDefaults] floatForKey:BDSKEditorFileViewIconScaleKey]];
+    [fileView setIconScale:[[NSUserDefaults standardUserDefaults] doubleForKey:BDSKEditorFileViewIconScaleKey]];
     [fileView addObserver:self forKeyPath:@"iconScale" options:0 context:&BDSKEditorObservationContext];
     [fileView addObserver:self forKeyPath:@"displayMode" options:0 context:&BDSKEditorObservationContext];
     [fileView setEditable:editorFlags.isEditable];
@@ -1816,7 +1816,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if (context == &BDSKEditorObservationContext) {
         [[NSUserDefaults standardUserDefaults] setInteger:[fileView displayMode] forKey:BDSKEditorFileViewDisplayModeKey];
-        [[NSUserDefaults standardUserDefaults] setFloat:[fileView iconScale] forKey:BDSKEditorFileViewIconScaleKey];
+        [[NSUserDefaults standardUserDefaults] setDouble:[fileView iconScale] forKey:BDSKEditorFileViewIconScaleKey];
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }

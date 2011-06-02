@@ -78,13 +78,13 @@
 }
 
 - (void)updateFontDisplayUI{
-    [publicationsFontWell setFontSize:[sud floatForKey:BDSKMainTableViewFontSizeKey]];
+    [publicationsFontWell setFontSize:[sud doubleForKey:BDSKMainTableViewFontSizeKey]];
     [publicationsFontWell setFontName:[sud stringForKey:BDSKMainTableViewFontNameKey]];
-    [groupsFontWell setFontSize:[sud floatForKey:BDSKGroupTableViewFontSizeKey]];
+    [groupsFontWell setFontSize:[sud doubleForKey:BDSKGroupTableViewFontSizeKey]];
     [groupsFontWell setFontName:[sud stringForKey:BDSKGroupTableViewFontNameKey]];
-    [personsFontWell setFontSize:[sud floatForKey:BDSKPersonTableViewFontSizeKey]];
+    [personsFontWell setFontSize:[sud doubleForKey:BDSKPersonTableViewFontSizeKey]];
     [personsFontWell setFontName:[sud stringForKey:BDSKPersonTableViewFontNameKey]];
-    [abstractFontWell setFontSize:[sud floatForKey:BDSKEditorFontSizeKey]];
+    [abstractFontWell setFontSize:[sud doubleForKey:BDSKEditorFontSizeKey]];
     [abstractFontWell setFontName:[sud stringForKey:BDSKEditorFontNameKey]];
 }
 
@@ -139,22 +139,22 @@
 }
 
 - (IBAction)changePublicationsFont:(id)sender {
-    [sud setFloat:[sender fontSize] forKey:BDSKMainTableViewFontSizeKey];
+    [sud setDouble:[sender fontSize] forKey:BDSKMainTableViewFontSizeKey];
     [sud setObject:[sender fontName] forKey:BDSKMainTableViewFontNameKey];
 }
 
 - (IBAction)changeGroupsFont:(id)sender {
-    [sud setFloat:[sender fontSize] forKey:BDSKGroupTableViewFontSizeKey];
+    [sud setDouble:[sender fontSize] forKey:BDSKGroupTableViewFontSizeKey];
     [sud setObject:[sender fontName] forKey:BDSKGroupTableViewFontNameKey];
 }
 
 - (IBAction)changePersonsFont:(id)sender {
-    [sud setFloat:[sender fontSize] forKey:BDSKPersonTableViewFontSizeKey];
+    [sud setDouble:[sender fontSize] forKey:BDSKPersonTableViewFontSizeKey];
     [sud setObject:[sender fontName] forKey:BDSKPersonTableViewFontNameKey];
 }
 
 - (IBAction)changeAbstractFont:(id)sender {
-    [sud setFloat:[sender fontSize] forKey:BDSKEditorFontNameKey];
+    [sud setDouble:[sender fontSize] forKey:BDSKEditorFontNameKey];
     [sud setObject:[sender fontName] forKey:BDSKEditorFontNameKey];
 }
 

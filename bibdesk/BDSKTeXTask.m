@@ -125,8 +125,8 @@ static double runLoopTimeout = 30;
     BDSKINITIALIZE;
     
     // returns 0 if the key doesn't exist
-    if ([[NSUserDefaults standardUserDefaults] floatForKey:BDSKTeXTaskRunLoopTimeoutKey] > 1)
-        runLoopTimeout = [[NSUserDefaults standardUserDefaults] floatForKey:BDSKTeXTaskRunLoopTimeoutKey];
+    if ([[NSUserDefaults standardUserDefaults] doubleForKey:BDSKTeXTaskRunLoopTimeoutKey] > 1)
+        runLoopTimeout = [[NSUserDefaults standardUserDefaults] doubleForKey:BDSKTeXTaskRunLoopTimeoutKey];
         
     upgradeTemplate();
     

@@ -521,8 +521,8 @@ static NSOperationQueue *metadataCacheQueue = nil;
     [bottomFileView setBackgroundColor:[[NSColor controlAlternatingRowBackgroundColors] lastObject]];
     [[bottomFileView enclosingScrollView] setBackgroundColor:[bottomFileView backgroundColor]];
     
-    CGFloat iconScale = [xattrDefaults doubleForKey:BDSKSideFileViewIconScaleKey defaultValue:[sud floatForKey:BDSKSideFileViewIconScaleKey]];
-    FVDisplayMode displayMode = [xattrDefaults doubleForKey:BDSKSideFileViewDisplayModeKey defaultValue:[sud floatForKey:BDSKSideFileViewDisplayModeKey]];
+    CGFloat iconScale = [xattrDefaults doubleForKey:BDSKSideFileViewIconScaleKey defaultValue:[sud doubleForKey:BDSKSideFileViewIconScaleKey]];
+    FVDisplayMode displayMode = [xattrDefaults doubleForKey:BDSKSideFileViewDisplayModeKey defaultValue:[sud doubleForKey:BDSKSideFileViewDisplayModeKey]];
     [sideFileView setDisplayMode:displayMode];
     if (displayMode == FVDisplayModeGrid) {
         if (iconScale < 0.00001)
@@ -531,7 +531,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
             [sideFileView setIconScale:iconScale];
     }
 
-    iconScale = [xattrDefaults doubleForKey:BDSKBottomFileViewIconScaleKey defaultValue:[sud floatForKey:BDSKBottomFileViewIconScaleKey]];
+    iconScale = [xattrDefaults doubleForKey:BDSKBottomFileViewIconScaleKey defaultValue:[sud doubleForKey:BDSKBottomFileViewIconScaleKey]];
     displayMode = [xattrDefaults integerForKey:BDSKBottomFileViewDisplayModeKey defaultValue:[sud integerForKey:BDSKBottomFileViewDisplayModeKey]];
     [bottomFileView setDisplayMode:displayMode];
     if (displayMode == FVDisplayModeGrid) {

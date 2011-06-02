@@ -159,7 +159,7 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
     NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
     
     NSString *fontName = [sud objectForKey:fontNamePrefKey];
-    CGFloat fontSize = [sud floatForKey:fontSizePrefKey];
+    CGFloat fontSize = [sud doubleForKey:fontSizePrefKey];
 	NSFont *font = nil;
         
     if(fontName != nil)
@@ -168,14 +168,14 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
         font = [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:[self cellControlSize]]];
     font = [fontManager convertFont:font];
     
-    [sud setFloat:[font pointSize] forKey:fontSizePrefKey];
+    [sud setDouble:[font pointSize] forKey:fontSizePrefKey];
     [sud setObject:[font fontName] forKey:fontNamePrefKey];
 }
 
 - (void)outlineViewFontChanged {
     if (fontNamePreferenceKey && fontSizePreferenceKey) {
         NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:fontNamePreferenceKey];
-        CGFloat fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:fontSizePreferenceKey];
+        CGFloat fontSize = [[NSUserDefaults standardUserDefaults] doubleForKey:fontSizePreferenceKey];
         NSFont *font = nil;
         
         if(fontName != nil)
@@ -202,7 +202,7 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
 - (void)updateFontPanel:(NSNotification *)notification {
     if ([[[self window] firstResponder] isEqual:self] && fontNamePreferenceKey && fontSizePreferenceKey) {
         NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:fontNamePreferenceKey];
-        CGFloat fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:fontSizePreferenceKey];
+        CGFloat fontSize = [[NSUserDefaults standardUserDefaults] doubleForKey:fontSizePreferenceKey];
         [[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
     }
 }

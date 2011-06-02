@@ -1262,12 +1262,12 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         if (object == sideFileView) {
             FVDisplayMode displayMode = [sideFileView displayMode];
             CGFloat iconScale = displayMode == FVDisplayModeGrid ? [sideFileView iconScale] : 0.0;
-            [[NSUserDefaults standardUserDefaults] setFloat:iconScale forKey:BDSKSideFileViewIconScaleKey];
+            [[NSUserDefaults standardUserDefaults] setDouble:iconScale forKey:BDSKSideFileViewIconScaleKey];
             [[NSUserDefaults standardUserDefaults] setInteger:displayMode forKey:BDSKSideFileViewDisplayModeKey];
         } else if (object == bottomFileView) {
             FVDisplayMode displayMode = [bottomFileView displayMode];
             CGFloat iconScale = displayMode == FVDisplayModeGrid ? [bottomFileView iconScale] : 0.0;
-            [[NSUserDefaults standardUserDefaults] setFloat:iconScale forKey:BDSKBottomFileViewIconScaleKey];
+            [[NSUserDefaults standardUserDefaults] setDouble:iconScale forKey:BDSKBottomFileViewIconScaleKey];
             [[NSUserDefaults standardUserDefaults] setInteger:displayMode forKey:BDSKBottomFileViewDisplayModeKey];
         }
     } else if (context == &BDSKDocumentDefaultsObservationContext) {

@@ -95,7 +95,7 @@ static char BDSKEditorTextViewDefaultsObservationContext;
     NSFont *font = [[NSFontManager sharedFontManager] convertFont:[self font]];
     
     // save it to prefs for next time
-    [[NSUserDefaults standardUserDefaults] setFloat:[font pointSize] forKey:BDSKEditorFontSizeKey];
+    [[NSUserDefaults standardUserDefaults] setDouble:[font pointSize] forKey:BDSKEditorFontSizeKey];
     [[NSUserDefaults standardUserDefaults] setObject:[font fontName] forKey:BDSKEditorFontNameKey];
 }
 
@@ -121,7 +121,7 @@ static char BDSKEditorTextViewDefaultsObservationContext;
 - (void)updateFontFromPreferences;
 {
     NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKEditorFontNameKey];
-    CGFloat fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:BDSKEditorFontSizeKey];
+    CGFloat fontSize = [[NSUserDefaults standardUserDefaults] doubleForKey:BDSKEditorFontSizeKey];
     NSFont *font = nil;
     
     if(fontName != nil)
