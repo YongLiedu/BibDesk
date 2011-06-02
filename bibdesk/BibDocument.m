@@ -2499,23 +2499,28 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
     
     NSString *userInfo = [[self fileURL] path];
-    NSMutableArray *sortDescriptors = [NSMutableArray array];
-    if (tmpSortKey)
-        [sortDescriptors addObject:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:tmpSortKey ascending:!docFlags.tmpSortDescending userInfo:userInfo]];
-    [sortDescriptors addObject:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:sortKey ascending:!docFlags.sortDescending userInfo:userInfo]];
-    [sortDescriptors addObject:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:previousSortKey ascending:!docFlags.previousSortDescending userInfo:userInfo]];
-    [tableView setSortDescriptors:sortDescriptors]; // just using this to store them; it's really a no-op
+    NSMutableArray *sortDescriptors = [NSMutableArray arrayWithObjects:
+        [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:sortKey ascending:!docFlags.sortDescending userInfo:userInfo], 
+        [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:previousSortKey ascending:!docFlags.previousSortDescending userInfo:userInfo], nil];
     
     // Set the graphic for the new column header
     NSTableColumn *oldTC = [tableView highlightedTableColumn];
-    NSTableColumn *newTC = [tableView tableColumnWithIdentifier:(tmpSortKey ?: sortKey)];
-    BOOL sortDescending = tmpSortKey == nil ? docFlags.sortDescending : docFlags.tmpSortDescending;
+    NSTableColumn *newTC;
+    BOOL ascending;
+    if (tmpSortKey) {
+        newTC = [tableView tableColumnWithIdentifier:tmpSortKey];
+        ascending = !docFlags.tmpSortDescending;
+        [sortDescriptors insertObject:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:tmpSortKey ascending:!docFlags.tmpSortDescending userInfo:userInfo] atIndex:0];
+    } else {
+        newTC = [tableView tableColumnWithIdentifier:sortKey];
+        ascending = !docFlags.sortDescending;
+    }
     if ([oldTC isEqual:newTC] == NO) {
         [tableView setHighlightedTableColumn:newTC];
         if (oldTC)
             [tableView setIndicatorImage:nil inTableColumn:oldTC];
     }
-    [tableView setIndicatorImageForAscending:!sortDescending inTableColumn:newTC];
+    [tableView setIndicatorImageForAscending:ascending inTableColumn:newTC];
     
     // @@ DON'T RETURN WITHOUT RESETTING THIS!
     // this is a hack to keep us from getting selection change notifications while sorting (which updates the TeX and attributed text previews)
