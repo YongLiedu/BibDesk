@@ -235,6 +235,16 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     return [[self path] precomposedStringWithCanonicalMapping];
 }
 
+- (NSComparisonResult)UTICompare:(NSURL *)other {
+    NSString *otherUTI = [[NSWorkspace sharedWorkspace] typeOfFile:[other path] error:NULL];
+    NSString *selfUTI = [[NSWorkspace sharedWorkspace] typeOfFile:[self path] error:NULL];
+    if (nil == selfUTI)
+        return (nil == otherUTI ? NSOrderedSame : NSOrderedDescending);
+    if (nil == otherUTI)
+        return NSOrderedAscending;
+    return [selfUTI caseInsensitiveCompare:otherUTI];
+}
+
 #pragma mark Skim Notes
 
 - (NSArray *)SkimNotes {

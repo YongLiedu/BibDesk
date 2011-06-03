@@ -51,6 +51,8 @@
 + (NSCharacterSet *)illegalURLCharacterSet;
 - (NSString *)precomposedPath;
 
+- (NSComparisonResult)UTICompare:(NSURL *)other;
+
 - (NSArray *)SkimNotes;
 - (NSString *)textSkimNotes;
 - (NSAttributedString *)richTextSkimNotes;

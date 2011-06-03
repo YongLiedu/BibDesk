@@ -2498,10 +2498,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         docFlags.previousSortDescending = docFlags.sortDescending;
     }
     
-    NSString *userInfo = [[self fileURL] path];
     NSMutableArray *sortDescriptors = [NSMutableArray arrayWithObjects:
-        [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:sortKey ascending:!docFlags.sortDescending userInfo:userInfo], 
-        [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:previousSortKey ascending:!docFlags.previousSortDescending userInfo:userInfo], nil];
+        [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:sortKey ascending:!docFlags.sortDescending], 
+        [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:previousSortKey ascending:!docFlags.previousSortDescending], nil];
     
     // Set the graphic for the new column header
     NSTableColumn *oldTC = [tableView highlightedTableColumn];
@@ -2510,7 +2509,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if (tmpSortKey) {
         newTC = [tableView tableColumnWithIdentifier:tmpSortKey];
         ascending = !docFlags.tmpSortDescending;
-        [sortDescriptors insertObject:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:tmpSortKey ascending:!docFlags.tmpSortDescending userInfo:userInfo] atIndex:0];
+        [sortDescriptors insertObject:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:tmpSortKey ascending:!docFlags.tmpSortDescending] atIndex:0];
     } else {
         newTC = [tableView tableColumnWithIdentifier:sortKey];
         ascending = !docFlags.sortDescending;

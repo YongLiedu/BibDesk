@@ -42,15 +42,12 @@
 #import "NSColor_BDSKExtensions.h"
 #import "BibAuthor.h"
 #import "NSString_BDSKExtensions.h"
+#import "NSURL_BDSKExtensions.h"
 
 
 @implementation BDSKTableSortDescriptor
 
 + (BDSKTableSortDescriptor *)tableSortDescriptorForIdentifier:(NSString *)tcID ascending:(BOOL)ascend{
-    return [self tableSortDescriptorForIdentifier:tcID ascending:ascend userInfo:nil];
-}
-
-+ (BDSKTableSortDescriptor *)tableSortDescriptorForIdentifier:(NSString *)tcID ascending:(BOOL)ascend userInfo:(id)userInfo{
 
     NSParameterAssert([NSString isEmptyString:tcID] == NO);
     
@@ -151,15 +148,7 @@
     }else if([tcID isLocalFileField]){
         
         // compare UTI for file fields so the subsort is more useful
-        if ([userInfo respondsToSelector:@selector(stringByStandardizingPath)])
-            userInfo = [userInfo stringByStandardizingPath];
-        else
-            userInfo = nil;
-        BOOL isDir = NO;
-        if (userInfo && [[NSFileManager defaultManager] fileExistsAtPath:userInfo isDirectory:&isDir] && isDir)
-            sortDescriptor = [[self alloc] initWithKey:tcID ascending:ascend selector:@selector(UTICompare:basePath:) userInfo:userInfo];
-        else
-            sortDescriptor = [[self alloc] initWithKey:tcID ascending:ascend selector:@selector(UTICompare:)];
+        sortDescriptor = [[self alloc] initWithKey:[NSString stringWithFormat:@"URLFields.%@", tcID] ascending:ascend selector:@selector(UTICompare:)];
         
     }else if([tcID isEqualToString:BDSKLocalFileString]){
         
@@ -193,18 +182,12 @@
 
 - (id)initWithKey:(NSString *)key ascending:(BOOL)flag selector:(SEL)theSel;
 {
-    return [self initWithKey:key ascending:flag selector:theSel userInfo:nil];
-}
-
-- (id)initWithKey:(NSString *)key ascending:(BOOL)flag selector:(SEL)theSel userInfo:(id)info;
-{
     if(self = [super initWithKey:key ascending:flag selector:theSel]){
         [self cacheKeys];
         
         // since NSSortDescriptor ivars are declared @private, we have to use @defs to access them directly; use our own instead, since this won't be subclassed
         selector = theSel;
         ascending = flag;
-        userInfo = [info retain];
     }
     return self;
 }
@@ -216,7 +199,6 @@
         [self cacheKeys];
         selector = [self selector];
         ascending = [self ascending];
-        userInfo = [([aCoder allowsKeyedCoding] ? [aCoder decodeObjectForKey:@"userInfo"] : [aCoder decodeObject]) retain];
     }
     return self;
 }
@@ -224,24 +206,22 @@
 - (void)encodeWithCoder:(NSCoder *)aCoder
 {
     [super encodeWithCoder:aCoder];
-    [aCoder allowsKeyedCoding] ? [aCoder encodeObject:userInfo forKey:@"userInfo"] : [aCoder encodeObject:userInfo];
 }
 
 - (id)copyWithZone:(NSZone *)aZone
 {
-    return [[[self class] allocWithZone:aZone] initWithKey:[self key] ascending:[self ascending] selector:[self selector] userInfo:userInfo];
+    return [[[self class] allocWithZone:aZone] initWithKey:[self key] ascending:[self ascending] selector:[self selector]];
 }
 
 - (void)dealloc
 {
     BDSKCFDESTROY(keys);
-    BDSKDESTROY(userInfo);
     [super dealloc];
 }
 
 - (id)reversedSortDescriptor
 {
-    return [[[[self class] alloc] initWithKey:[self key] ascending:NO == ascending selector:selector userInfo:userInfo] autorelease];
+    return [[[[self class] alloc] initWithKey:[self key] ascending:NO == ascending selector:selector] autorelease];
 }
 
 static inline void __GetValuesUsingCache(BDSKTableSortDescriptor *sort, id object1, id object2, id *value1, id *value2)
@@ -284,18 +264,10 @@ static inline void __GetValuesUsingCache(BDSKTableSortDescriptor *sort, id objec
     
     NSComparisonResult result;
     
-    if (userInfo) {
-        // we use the IMP directly since performSelector: returns an id
-        typedef NSComparisonResult (*comparatorIMP)(id, SEL, id, id);
-        comparatorIMP comparator = (comparatorIMP)[value1 methodForSelector:selector];
-        result = comparator(value1, selector, value2, userInfo);
-    } else {
-        // we use the IMP directly since performSelector: returns an id
-        typedef NSComparisonResult (*comparatorIMP)(id, SEL, id);
-        comparatorIMP comparator = (comparatorIMP)[value1 methodForSelector:selector];
-        result = comparator(value1, selector, value2);
-    }
-    
+    // we use the IMP directly since performSelector: returns an id
+    typedef NSComparisonResult (*comparatorIMP)(id, SEL, id);
+    comparatorIMP comparator = (comparatorIMP)[value1 methodForSelector:selector];
+    result = comparator(value1, selector, value2);
     
     return ascending ? result : -result;
 }

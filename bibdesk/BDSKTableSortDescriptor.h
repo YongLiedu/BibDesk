@@ -45,12 +45,8 @@
     CFIndex keyCount;
     SEL selector;
     BOOL ascending;
-    id userInfo;
 }
 
-+ (BDSKTableSortDescriptor *)tableSortDescriptorForIdentifier:(NSString *)tcID ascending:(BOOL)ascend userInfo:(id)userInfo;
 + (BDSKTableSortDescriptor *)tableSortDescriptorForIdentifier:(NSString *)tcID ascending:(BOOL)ascend;
-
-- (id)initWithKey:(NSString *)key ascending:(BOOL)flag selector:(SEL)theSel userInfo:(id)info;
 
 @end

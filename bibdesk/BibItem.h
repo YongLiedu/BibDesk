@@ -795,6 +795,8 @@ enum {
 // NSURL equivalents of the localFilePath... methods
 - (NSURL *)localFileURLForField:(NSString *)field;
 
+- (BDSKFieldCollection *)URLFields;
+
 - (BOOL)isValidLocalFilePath:(NSString *)proposedPath;
 
 - (void)customFieldsDidChange:(NSNotification *)aNotification;

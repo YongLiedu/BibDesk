@@ -2631,6 +2631,12 @@ static void addFilesToArray(const void *value, void *context)
 	return [[self localURL] path];
 }
 
+- (BDSKFieldCollection *)URLFields {
+    BDSKFieldCollection *collection = [[[BDSKFieldCollection alloc] initWithItem:self] autorelease];
+    [collection setType:BDSKURLFieldCollection];
+    return collection;
+}
+
 #pragma mark File conversion
 
 typedef struct _conversionContext {
