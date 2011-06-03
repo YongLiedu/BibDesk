@@ -149,10 +149,8 @@
 
 - (void)rebuildTypeSelectSearchCache;
 {    
-    if (searchCache)
-        [searchCache release];
-    
-    searchCache = [[dataSource typeSelectHelperSelectionItems:self] retain];
+    BDSKDESTROY(searchCache);
+    // this will be actually rebuild when we need it
 }
 
 - (BOOL)processKeyDownEvent:(NSEvent *)keyEvent;
@@ -262,7 +260,7 @@
 - (NSArray *)searchCache;
 {
     if (searchCache == nil)
-        [self rebuildTypeSelectSearchCache];
+        searchCache = [[dataSource typeSelectHelperSelectionItems:self] retain];
     return searchCache;
 }
 
