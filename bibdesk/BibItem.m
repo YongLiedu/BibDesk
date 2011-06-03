@@ -1351,11 +1351,13 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         NSDate *date = [self date];
         if(nil == date) 
             return nil;
-        NSString *format = [NSString isEmptyString:[self valueOfField:BDSKMonthString]] ? @"yyyy" : @"MMM yyyy";
-        NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
-        [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
-        [formatter setDateFormat:format];
-        [formatter setLocale:[NSLocale currentLocale]]; // is this necessary?
+        static NSDateFormatter *formatter = nil;
+        if (formatter == nil) {
+            formatter = [[[NSDateFormatter alloc] init] autorelease];
+            [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+            [formatter setLocale:[NSLocale currentLocale]]; // is this necessary?
+        }
+        [formatter setDateFormat:[NSString isEmptyString:[self valueOfField:BDSKMonthString]] ? @"yyyy" : @"MMM yyyy"];
         return [formatter stringFromDate:date];
      }else if([field isEqualToString: BDSKFirstAuthorString] ){
         return [[self authorAtIndex:0] displayName];
