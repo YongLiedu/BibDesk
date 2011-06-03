@@ -1353,7 +1353,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
             return nil;
         static NSDateFormatter *formatter = nil;
         if (formatter == nil) {
-            formatter = [[[NSDateFormatter alloc] init] autorelease];
+            formatter = [[NSDateFormatter alloc] init];
             [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
             [formatter setLocale:[NSLocale currentLocale]]; // is this necessary?
         }
