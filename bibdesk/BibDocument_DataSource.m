@@ -809,14 +809,14 @@
     if(searchString == nil || (sortKey == nil && tmpSortKey == nil))
         [self updateStatus]; // resets the status line to its default value
     else if([tv isEqual:tableView]) 
-        [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Finding item with %@: \"%@\"", @"Status message:Finding item with [sorting field]: \"[search string]\""), [(tmpSortKey ?: sortKey) localizedFieldName], searchString]];
+        [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Finding item with %@: \"%@\"", @"Status message:Finding item with [sorting field]: \"[search string]\""), [sortKey localizedFieldName], searchString]];
 }
 
 - (void)tableView:(NSTableView *)tv typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString{
     if(sortKey == nil && tmpSortKey == nil)
         [self updateStatus]; // resets the status line to its default value
     else if([tv isEqual:tableView]) 
-        [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"No item with %@: \"%@\"", @"Status message:No item with [sorting field]: \"[search string]\""), [(tmpSortKey ?: sortKey) localizedFieldName], searchString]];
+        [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"No item with %@: \"%@\"", @"Status message:No item with [sorting field]: \"[search string]\""), [sortKey localizedFieldName], searchString]];
 }
 
 // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
@@ -831,16 +831,15 @@
         
         NSUInteger i, count = [shownPublications count];
         NSMutableArray *a = [NSMutableArray arrayWithCapacity:count];
-        NSString *key = tmpSortKey ?: sortKey;
         
         // table datasource returns an NSImage for URL fields, so we'll ignore those columns
-        if(nil != key && [key isGeneralURLField] == NO){
+        if(nil != sortKey && [sortKey isGeneralURLField] == NO){
             BibItem *pub;
             id value;
             
             for (i = 0; i < count; i++){
                 pub = [shownPublications objectAtIndex:i];
-                value = [pub displayValueOfField:key];
+                value = [pub displayValueOfField:sortKey];
                 
                 // use @"" for nil values; ensure typeahead index matches shownPublications index
                 [a addObject:value ? [value description] : @""];
