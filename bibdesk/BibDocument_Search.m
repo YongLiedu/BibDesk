@@ -222,7 +222,7 @@
         [searchButtonBar selectButtonWithRepresentedObject:BDSKAllFieldsString];
         
         if ([tmpSortKey isEqualToString:BDSKRelevanceString])
-            [self sortPubsByKey:sortKey];
+            [self sortPubsByKey:[self isDisplayingSearchGroupView] || [self isDisplayingWebGroupView] ? BDSKImportOrderString : sortKey];
     }
 }
 
