@@ -2151,9 +2151,12 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     AddXMLField(@"custom8",@"Custom8");
     
     NSDate *date = [self dateAdded];
-    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
-    [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
-    [formatter setDateFormat:@"dd/MM/yyyy"];
+    static NSDateFormatter *formatter = nil;
+    if (formatter == nil) {
+        formatter = [[NSDateFormatter alloc] init];
+        [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+        [formatter setDateFormat:@"dd/MM/yyyy"];
+    }
     if ((date = [self dateAdded]))
         [s appendStrings:@"<added-date>", [formatter stringFromDate:date], @"</added-date>", nil];
     if ((date = [self dateModified]))
