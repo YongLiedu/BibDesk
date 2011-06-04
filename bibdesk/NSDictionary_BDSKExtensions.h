@@ -74,10 +74,8 @@
 - (BOOL)boolForKey:(NSString *)key defaultValue:(BOOL)defaultValue;
 - (NSInteger)integerForKey:(NSString *)key defaultValue:(NSInteger)defaultValue;
 - (NSUInteger)unsignedIntegerForKey:(NSString *)key defaultValue:(NSUInteger)defaultValue;
-- (float)floatForKey:(NSString *)key defaultValue:(float)defaultValue;
 - (double)doubleForKey:(NSString *)key defaultValue:(double)defaultValue;
 - (NSPoint)pointForKey:(NSString *)key defaultValue:(NSPoint)defaultValue;
-- (NSSize)sizeForKey:(NSString *)key defaultValue:(NSSize)defaultValue;
 - (NSRect)rectForKey:(NSString *)key defaultValue:(NSRect)defaultValue;
 
 @end
@@ -88,13 +86,11 @@
 
 - (id)initForCaseInsensitiveKeys;
 
-- (void)setBoolValue:(BOOL)value forKey:(NSString *)key;
-- (void)setIntegerValue:(NSInteger)value forKey:(NSString *)key;
-- (void)setUnsignedIntegerValue:(NSUInteger)value forKey:(NSString *)key;
-- (void)setFloatValue:(float)value forKey:(NSString *)key;
-- (void)setDoubleValue:(double)value forKey:(NSString *)key;
-- (void)setPointValue:(NSPoint)value forKey:(NSString *)key;
-- (void)setSizeValue:(NSSize)value forKey:(NSString *)key;
-- (void)setRectValue:(NSRect)value forKey:(NSString *)key;
+- (void)setBool:(BOOL)value forKey:(NSString *)key;
+- (void)setInteger:(NSInteger)value forKey:(NSString *)key;
+- (void)setUnsignedInteger:(NSUInteger)value forKey:(NSString *)key;
+- (void)setDouble:(double)value forKey:(NSString *)key;
+- (void)setPoint:(NSPoint)value forKey:(NSString *)key;
+- (void)setRect:(NSRect)value forKey:(NSString *)key;
 
 @end

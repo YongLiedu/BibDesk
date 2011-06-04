@@ -109,11 +109,6 @@
     return [value respondsToSelector:@selector(unsignedIntegerValue)] ? [value unsignedIntegerValue] : [value respondsToSelector:@selector(integerValue)] ? (NSUInteger)[value integerValue] : defaultValue;
 }
 
-- (float)floatForKey:(NSString *)key defaultValue:(float)defaultValue {
-    id value = [self objectForKey:key];
-    return [value respondsToSelector:@selector(floatValue)] ? [value floatValue] : defaultValue;
-}
-
 - (double)doubleForKey:(NSString *)key defaultValue:(double)defaultValue {
     id value = [self objectForKey:key];
     return [value respondsToSelector:@selector(doubleValue)] ? [value doubleValue] : defaultValue;
@@ -125,16 +120,6 @@
         return [value pointValue];
     else if ([value isKindOfClass:[NSString class]] && NO == [NSString isEmptyString:value])
         return NSPointFromString(value);
-    else
-        return defaultValue;
-}
-
-- (NSSize)sizeForKey:(NSString *)key defaultValue:(NSSize)defaultValue {
-    id value = [self objectForKey:key];
-    if ([value respondsToSelector:@selector(sizeValue)])
-        return [value sizeValue];
-    else if ([value isKindOfClass:[NSString class]] && NO == [NSString isEmptyString:value])
-        return NSSizeFromString(value);
     else
         return defaultValue;
 }
@@ -162,45 +147,35 @@
 
 // The rest of these methods are copied from NSMutableData-OFExtensions.m
 
-- (void)setBoolValue:(BOOL)value forKey:(NSString *)key {
+- (void)setBool:(BOOL)value forKey:(NSString *)key {
     NSNumber *number = [[NSNumber alloc] initWithBool:value];
     [self setObject:number forKey:key];
     [number release];
 }
 
-- (void)setIntegerValue:(NSInteger)value forKey:(NSString *)key {
+- (void)setInteger:(NSInteger)value forKey:(NSString *)key {
     NSNumber *number = [[NSNumber alloc] initWithInteger:value];
     [self setObject:number forKey:key];
     [number release];
 }
 
-- (void)setUnsignedIntegerValue:(NSUInteger)value forKey:(NSString *)key {
+- (void)setUnsignedInteger:(NSUInteger)value forKey:(NSString *)key {
     NSNumber *number = [[NSNumber alloc] initWithUnsignedInteger:value];
     [self setObject:number forKey:key];
     [number release];
 }
 
-- (void)setFloatValue:(float)value forKey:(NSString *)key {
-    NSNumber *number = [[NSNumber alloc] initWithFloat:value];
-    [self setObject:number forKey:key];
-    [number release];
-}
-
-- (void)setDoubleValue:(double)value forKey:(NSString *)key {
+- (void)setDouble:(double)value forKey:(NSString *)key {
     NSNumber *number = [[NSNumber alloc] initWithDouble:value];
     [self setObject:number forKey:key];
     [number release];
 }
 
-- (void)setPointValue:(NSPoint)value forKey:(NSString *)key {
+- (void)setPoint:(NSPoint)value forKey:(NSString *)key {
     [self setObject:NSStringFromPoint(value) forKey:key];
 }
 
-- (void)setSizeValue:(NSSize)value forKey:(NSString *)key {
-    [self setObject:NSStringFromSize(value) forKey:key];
-}
-
-- (void)setRectValue:(NSRect)value forKey:(NSString *)key {
+- (void)setRect:(NSRect)value forKey:(NSString *)key {
     [self setObject:NSStringFromRect(value) forKey:key];
 }
 

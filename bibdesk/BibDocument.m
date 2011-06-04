@@ -706,24 +706,24 @@ static NSOperationQueue *metadataCacheQueue = nil;
         [dictionary setObject:[[[tableView tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString] forKey:BDSKShownColsNamesKey];
         [dictionary setObject:[self currentTableColumnWidthsAndIdentifiers] forKey:BDSKColumnWidthsKey];
         [dictionary setObject:sortKey ?: BDSKTitleString forKey:BDSKDefaultSortedTableColumnKey];
-        [dictionary setBoolValue:docFlags.sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
+        [dictionary setBool:docFlags.sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
         if (previousSortKey) {
             [dictionary setObject:previousSortKey forKey:BDSKDefaultSubsortedTableColumnKey];
-            [dictionary setBoolValue:docFlags.previousSortDescending forKey:BDSKDefaultSubsortedTableColumnIsDescendingKey];
+            [dictionary setBool:docFlags.previousSortDescending forKey:BDSKDefaultSubsortedTableColumnIsDescendingKey];
         }
         [dictionary setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
-        [dictionary setBoolValue:docFlags.sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
-        [dictionary setRectValue:[documentWindow frame] forKey:BDSKDocumentWindowFrameKey];
-        [dictionary setDoubleValue:[groupSplitView fraction] forKey:BDSKGroupSplitViewFractionKey];
+        [dictionary setBool:docFlags.sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
+        [dictionary setRect:[documentWindow frame] forKey:BDSKDocumentWindowFrameKey];
+        [dictionary setDouble:[groupSplitView fraction] forKey:BDSKGroupSplitViewFractionKey];
         // of the 3 splitviews, the fraction of the first divider would be considered, so fallback to the fraction from the nib
         if (NO == [self hasWebGroupsSelected])
-            [dictionary setDoubleValue:[splitView fraction] forKey:BDSKMainTableSplitViewFractionKey];
-        [dictionary setDoubleValue:docState.lastWebViewFraction forKey:BDSKWebViewFractionKey];
+            [dictionary setDouble:[splitView fraction] forKey:BDSKMainTableSplitViewFractionKey];
+        [dictionary setDouble:docState.lastWebViewFraction forKey:BDSKWebViewFractionKey];
         [dictionary setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
         
         // we can't just use -documentStringEncoding, because that may be different for SaveTo
         if (encoding != BDSKNoStringEncoding)
-            [dictionary setUnsignedIntegerValue:encoding forKey:BDSKDocumentStringEncodingKey];
+            [dictionary setUnsignedInteger:encoding forKey:BDSKDocumentStringEncodingKey];
         
         // encode groups so we can select them later with isEqual: (saving row indexes would not be as reliable)
         [dictionary setObject:([self hasExternalGroupsSelected] ? [NSData data] : [NSKeyedArchiver archivedDataWithRootObject:[self selectedGroups]]) forKey:BDSKSelectedGroupsKey];
@@ -732,24 +732,24 @@ static NSOperationQueue *metadataCacheQueue = nil;
         if ([selectedKeys count] == 0 || [self hasExternalGroupsSelected])
             selectedKeys = [NSArray array];
         [dictionary setObject:selectedKeys forKey:BDSKSelectedPublicationsKey];
-        [dictionary setPointValue:[tableView scrollPositionAsPercentage] forKey:BDSKDocumentScrollPercentageKey];
+        [dictionary setPoint:[tableView scrollPositionAsPercentage] forKey:BDSKDocumentScrollPercentageKey];
         
-        [dictionary setIntegerValue:bottomPreviewDisplay forKey:BDSKBottomPreviewDisplayKey];
+        [dictionary setInteger:bottomPreviewDisplay forKey:BDSKBottomPreviewDisplayKey];
         [dictionary setObject:bottomPreviewDisplayTemplate forKey:BDSKBottomPreviewDisplayTemplateKey];
-        [dictionary setIntegerValue:sidePreviewDisplay forKey:BDSKSidePreviewDisplayKey];
+        [dictionary setInteger:sidePreviewDisplay forKey:BDSKSidePreviewDisplayKey];
         [dictionary setObject:sidePreviewDisplayTemplate forKey:BDSKSidePreviewDisplayTemplateKey];
         
-        [dictionary setIntegerValue:[bottomFileView displayMode] forKey:BDSKBottomFileViewDisplayModeKey];
-        [dictionary setDoubleValue:([bottomFileView displayMode] == FVDisplayModeGrid ? [bottomFileView iconScale] : 0.0) forKey:BDSKBottomFileViewIconScaleKey];
-        [dictionary setIntegerValue:[sideFileView displayMode] forKey:BDSKSideFileViewDisplayModeKey];
-        [dictionary setDoubleValue:([sideFileView displayMode] == FVDisplayModeGrid ? [sideFileView iconScale] : 0.0) forKey:BDSKSideFileViewIconScaleKey];
+        [dictionary setInteger:[bottomFileView displayMode] forKey:BDSKBottomFileViewDisplayModeKey];
+        [dictionary setDouble:([bottomFileView displayMode] == FVDisplayModeGrid ? [bottomFileView iconScale] : 0.0) forKey:BDSKBottomFileViewIconScaleKey];
+        [dictionary setInteger:[sideFileView displayMode] forKey:BDSKSideFileViewDisplayModeKey];
+        [dictionary setDouble:([sideFileView displayMode] == FVDisplayModeGrid ? [sideFileView iconScale] : 0.0) forKey:BDSKSideFileViewIconScaleKey];
         
-        [dictionary setDoubleValue:[(BDSKZoomableTextView *)bottomPreviewTextView scaleFactor] forKey:BDSKBottomPreviewScaleFactorKey];
-        [dictionary setDoubleValue:[(BDSKZoomableTextView *)sidePreviewTextView scaleFactor] forKey:BDSKSidePreviewScaleFactorKey];
+        [dictionary setDouble:[(BDSKZoomableTextView *)bottomPreviewTextView scaleFactor] forKey:BDSKBottomPreviewScaleFactorKey];
+        [dictionary setDouble:[(BDSKZoomableTextView *)sidePreviewTextView scaleFactor] forKey:BDSKSidePreviewScaleFactorKey];
         
         if(previewer){
-            [dictionary setDoubleValue:[previewer PDFScaleFactor] forKey:BDSKPreviewPDFScaleFactorKey];
-            [dictionary setDoubleValue:[previewer RTFScaleFactor] forKey:BDSKPreviewRTFScaleFactorKey];
+            [dictionary setDouble:[previewer PDFScaleFactor] forKey:BDSKPreviewPDFScaleFactorKey];
+            [dictionary setDouble:[previewer RTFScaleFactor] forKey:BDSKPreviewRTFScaleFactorKey];
         }
         
         if(fileSearchController){
