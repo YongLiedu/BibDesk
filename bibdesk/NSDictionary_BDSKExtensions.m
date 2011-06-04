@@ -134,6 +134,22 @@
         return defaultValue;
 }
 
+- (BOOL)boolForKeyOrDefaultValue:(NSString *)key {
+    return [self boolForKey:key defaultValue:[[NSUserDefaults standardUserDefaults] boolForKey:key]];
+}
+
+- (NSInteger)integerForKeyOrDefaultValue:(NSString *)key {
+    return [self integerForKey:key defaultValue:[[NSUserDefaults standardUserDefaults] integerForKey:key]];
+}
+
+- (double)doubleForKeyOrDefaultValue:(NSString *)key {
+    return [self doubleForKey:key defaultValue:[[NSUserDefaults standardUserDefaults] doubleForKey:key]];
+}
+
+- (id)objectForKeyOrDefaultValue:(NSString *)key {
+    return [self objectForKey:key] ?: [[NSUserDefaults standardUserDefaults] objectForKey:key];
+}
+
 @end
 
 #pragma mark -

@@ -411,7 +411,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
     // this is the controller for the main window
     [aController setShouldCloseDocument:YES];
     
-    NSUserDefaults* sud = [NSUserDefaults standardUserDefaults];
+    NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
     
     // hidden default to remove xattrs; this presently occurs before we use them, but it may need to be earlier at some point
     if ([sud boolForKey:BDSKRemoveExtendedAttributesFromDocumentsKey] && [self fileURL])
@@ -434,10 +434,10 @@ static NSOperationQueue *metadataCacheQueue = nil;
     [groupButtonView setMinSize:[groupButtonView frame].size];
     [groupButtonView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
     
-    bottomPreviewDisplay = [xattrDefaults integerForKey:BDSKBottomPreviewDisplayKey defaultValue:[sud integerForKey:BDSKBottomPreviewDisplayKey]];
-    bottomPreviewDisplayTemplate = [[xattrDefaults objectForKey:BDSKBottomPreviewDisplayTemplateKey] ?: [sud stringForKey:BDSKBottomPreviewDisplayTemplateKey] retain];
-    sidePreviewDisplay = [xattrDefaults integerForKey:BDSKSidePreviewDisplayKey defaultValue:[sud integerForKey:BDSKSidePreviewDisplayKey]];
-    sidePreviewDisplayTemplate = [[xattrDefaults objectForKey:BDSKSidePreviewDisplayTemplateKey] ?: [sud stringForKey:BDSKSidePreviewDisplayTemplateKey] retain];
+    bottomPreviewDisplay = [xattrDefaults integerForKeyOrDefaultValue:BDSKBottomPreviewDisplayKey];
+    bottomPreviewDisplayTemplate = [[xattrDefaults objectForKeyOrDefaultValue:BDSKBottomPreviewDisplayTemplateKey] retain];
+    sidePreviewDisplay = [xattrDefaults integerForKeyOrDefaultValue:BDSKSidePreviewDisplayKey];
+    sidePreviewDisplayTemplate = [[xattrDefaults objectForKeyOrDefaultValue:BDSKSidePreviewDisplayTemplateKey] retain];
         
     bottomTemplatePreviewMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
     [bottomTemplatePreviewMenu setDelegate:self];
@@ -494,11 +494,11 @@ static NSOperationQueue *metadataCacheQueue = nil;
     [groupOutlineView setFontSizePreferenceKey:BDSKGroupTableViewFontSizeKey];
     
     tableColumnWidths = [[xattrDefaults objectForKey:BDSKColumnWidthsKey] retain];
-    [tableView setupTableColumnsWithIdentifiers:[xattrDefaults objectForKey:BDSKShownColsNamesKey] ?: [sud objectForKey:BDSKShownColsNamesKey]];
-    sortKey = [[xattrDefaults objectForKey:BDSKDefaultSortedTableColumnKey] ?: [sud objectForKey:BDSKDefaultSortedTableColumnKey] retain];
-    docFlags.sortDescending = [xattrDefaults boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey defaultValue:[sud boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey]];
-    previousSortKey = [[xattrDefaults objectForKey:BDSKDefaultSubsortedTableColumnKey] ?: [sud objectForKey:BDSKDefaultSubsortedTableColumnKey] retain];
-    docFlags.previousSortDescending = [xattrDefaults boolForKey:BDSKDefaultSubsortedTableColumnIsDescendingKey defaultValue:[sud boolForKey:BDSKDefaultSubsortedTableColumnIsDescendingKey]];
+    [tableView setupTableColumnsWithIdentifiers:[xattrDefaults objectForKeyOrDefaultValue:BDSKShownColsNamesKey]];
+    sortKey = [[xattrDefaults objectForKeyOrDefaultValue:BDSKDefaultSortedTableColumnKey] retain];
+    docFlags.sortDescending = [xattrDefaults boolForKeyOrDefaultValue:BDSKDefaultSortedTableColumnIsDescendingKey];
+    previousSortKey = [[xattrDefaults objectForKeyOrDefaultValue:BDSKDefaultSubsortedTableColumnKey] retain];
+    docFlags.previousSortDescending = [xattrDefaults boolForKeyOrDefaultValue:BDSKDefaultSubsortedTableColumnIsDescendingKey];
     if (previousSortKey == nil) {
         previousSortKey = [sortKey retain];
         docFlags.previousSortDescending = docFlags.sortDescending;
@@ -506,10 +506,10 @@ static NSOperationQueue *metadataCacheQueue = nil;
     [tableView setHighlightedTableColumn:[tableView tableColumnWithIdentifier:sortKey]];
     
     [sortGroupsKey autorelease];
-    sortGroupsKey = [[xattrDefaults objectForKey:BDSKSortGroupsKey] ?: [sud objectForKey:BDSKSortGroupsKey] retain];
-    docFlags.sortGroupsDescending = [xattrDefaults boolForKey:BDSKSortGroupsDescendingKey defaultValue:[sud boolForKey:BDSKSortGroupsDescendingKey]];
+    sortGroupsKey = [[xattrDefaults objectForKeyOrDefaultValue:BDSKSortGroupsKey] retain];
+    docFlags.sortGroupsDescending = [xattrDefaults boolForKeyOrDefaultValue:BDSKSortGroupsDescendingKey];
     // don't use setter, because we don't want to change the prefs here, and the value should be nil at this point
-    currentGroupField = [([xattrDefaults objectForKey:BDSKCurrentGroupFieldKey] ?: [sud objectForKey:BDSKCurrentGroupFieldKey]) copy];
+    currentGroupField = [[xattrDefaults objectForKeyOrDefaultValue:BDSKCurrentGroupFieldKey] copy];
     [[groups categoryParent] setName:[NSString isEmptyString:currentGroupField] ? NSLocalizedString(@"FIELD", @"source list group row title") : [currentGroupField uppercaseString]];
     
     [tableView setDoubleAction:@selector(editPubOrOpenURLAction:)];
@@ -521,8 +521,8 @@ static NSOperationQueue *metadataCacheQueue = nil;
     [bottomFileView setBackgroundColor:[[NSColor controlAlternatingRowBackgroundColors] lastObject]];
     [[bottomFileView enclosingScrollView] setBackgroundColor:[bottomFileView backgroundColor]];
     
-    CGFloat iconScale = [xattrDefaults doubleForKey:BDSKSideFileViewIconScaleKey defaultValue:[sud doubleForKey:BDSKSideFileViewIconScaleKey]];
-    FVDisplayMode displayMode = [xattrDefaults doubleForKey:BDSKSideFileViewDisplayModeKey defaultValue:[sud doubleForKey:BDSKSideFileViewDisplayModeKey]];
+    CGFloat iconScale = [xattrDefaults doubleForKeyOrDefaultValue:BDSKSideFileViewIconScaleKey];
+    FVDisplayMode displayMode = [xattrDefaults doubleForKeyOrDefaultValue:BDSKSideFileViewDisplayModeKey];
     [sideFileView setDisplayMode:displayMode];
     if (displayMode == FVDisplayModeGrid) {
         if (iconScale < 0.00001)
@@ -531,8 +531,8 @@ static NSOperationQueue *metadataCacheQueue = nil;
             [sideFileView setIconScale:iconScale];
     }
 
-    iconScale = [xattrDefaults doubleForKey:BDSKBottomFileViewIconScaleKey defaultValue:[sud doubleForKey:BDSKBottomFileViewIconScaleKey]];
-    displayMode = [xattrDefaults integerForKey:BDSKBottomFileViewDisplayModeKey defaultValue:[sud integerForKey:BDSKBottomFileViewDisplayModeKey]];
+    iconScale = [xattrDefaults doubleForKeyOrDefaultValue:BDSKBottomFileViewIconScaleKey];
+    displayMode = [xattrDefaults integerForKeyOrDefaultValue:BDSKBottomFileViewDisplayModeKey];
     [bottomFileView setDisplayMode:displayMode];
     if (displayMode == FVDisplayModeGrid) {
         if (iconScale < 0.00001)

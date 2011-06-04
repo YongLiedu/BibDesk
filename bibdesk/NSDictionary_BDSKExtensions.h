@@ -78,6 +78,12 @@
 - (NSPoint)pointForKey:(NSString *)key defaultValue:(NSPoint)defaultValue;
 - (NSRect)rectForKey:(NSString *)key defaultValue:(NSRect)defaultValue;
 
+// these get the default value from NSUserDefaults
+- (BOOL)boolForKeyOrDefaultValue:(NSString *)key;
+- (NSInteger)integerForKeyOrDefaultValue:(NSString *)key;
+- (double)doubleForKeyOrDefaultValue:(NSString *)key;
+- (id)objectForKeyOrDefaultValue:(NSString *)key;
+
 @end
 
 #pragma mark -
