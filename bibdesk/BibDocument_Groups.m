@@ -1515,6 +1515,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         }
 	}
     
+    if (key) {
+        [[NSUserDefaults standardUserDefaults] setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
+        [[NSUserDefaults standardUserDefaults] setBool:docFlags.sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];    
+    }
+    
     // this is a hack to keep us from getting selection change notifications while sorting (which updates the TeX and attributed text previews)
     docFlags.ignoreGroupSelectionChange = YES;
 

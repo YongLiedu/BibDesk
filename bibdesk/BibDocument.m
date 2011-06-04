@@ -648,7 +648,6 @@ static NSOperationQueue *metadataCacheQueue = nil;
     
     if([drawerController isDrawerOpen])
         [drawerController toggle:nil];
-    [self saveSortOrder];
     [self saveWindowSetupInExtendedAttributesAtURL:[self fileURL] forEncoding:BDSKNoStringEncoding];
     
     // reset the previewer; don't send [self updatePreviews:] here, as the tableview will be gone by the time the queue posts the notification
@@ -2468,6 +2467,8 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if (key == nil && sortKey == nil)
         return;
     
+    BOOL shouldSave = NO;
+    
     if (key == nil) {
         // a nil argument means resort the current column in the same order
     } else if ([key isEqualToString:BDSKImportOrderString] == NO && [key isEqualToString:BDSKRelevanceString] == NO) {
@@ -2478,10 +2479,12 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             [sortKey release];
             sortKey = [key retain];
             docFlags.sortDescending = NO;
+            shouldSave = YES;
         } else if (tmpSortKey == nil) {
             // User clicked same column, change sort order, 
             // however if tmpSortKey was set this is probably after removing an ImportOrder or Relevance column, and we should reinstate the previous sort order
             docFlags.sortDescending = !docFlags.sortDescending;
+            shouldSave = YES;
         }
         BDSKDESTROY(tmpSortKey);
     } else if ([tmpSortKey isEqualToString:key]) {
@@ -2496,6 +2499,14 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if (previousSortKey == nil) {
         previousSortKey = [sortKey retain];
         docFlags.previousSortDescending = docFlags.sortDescending;
+    }
+    
+    if (shouldSave) {
+        NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
+        [sud setObject:sortKey forKey:BDSKDefaultSortedTableColumnKey];
+        [sud setBool:docFlags.sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
+        [sud setObject:previousSortKey forKey:BDSKDefaultSubsortedTableColumnKey];
+        [sud setBool:docFlags.previousSortDescending forKey:BDSKDefaultSubsortedTableColumnIsDescendingKey];
     }
     
     NSMutableArray *sortDescriptors = [NSMutableArray arrayWithObjects:
@@ -2543,21 +2554,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     // reset
     docFlags.ignoreSelectionChange = NO;
 }
-
-- (void)saveSortOrder{ 
-    // @@ if we switch to NSArrayController, we should just archive the sort descriptors (see BDSKFileContentSearchController)
-    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
-    if (sortKey) {
-        [sud setObject:sortKey forKey:BDSKDefaultSortedTableColumnKey];
-        [sud setBool:docFlags.sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
-    }
-    if (previousSortKey) {
-        [sud setObject:previousSortKey forKey:BDSKDefaultSubsortedTableColumnKey];
-        [sud setBool:docFlags.previousSortDescending forKey:BDSKDefaultSubsortedTableColumnIsDescendingKey];
-    }
-    [sud setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
-    [sud setBool:docFlags.sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];    
-}  
 
 #pragma mark -
 #pragma mark Selection

@@ -421,13 +421,6 @@ extern NSString *BDSKDocumentPublicationsKey;
 - (void)setDocumentStringEncoding:(NSStringEncoding)encoding;
 
 /*!
-    @method     saveSortOrder
-    @abstract   Saves current sort order to preferences, to be restored on next launch/document open.
-    @discussion (comprehensive description)
-*/
-- (void)saveSortOrder;
-
-/*!
     @method     userChangedField:ofPublications:from:to:
     @abstract   Autofiles and generates citekey if we should and runs a script hook
     @discussion (comprehensive description)
