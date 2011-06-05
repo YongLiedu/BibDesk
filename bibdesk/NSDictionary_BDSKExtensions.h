@@ -75,8 +75,6 @@
 - (NSInteger)integerForKey:(NSString *)key defaultValue:(NSInteger)defaultValue;
 - (NSUInteger)unsignedIntegerForKey:(NSString *)key defaultValue:(NSUInteger)defaultValue;
 - (double)doubleForKey:(NSString *)key defaultValue:(double)defaultValue;
-- (NSPoint)pointForKey:(NSString *)key defaultValue:(NSPoint)defaultValue;
-- (NSRect)rectForKey:(NSString *)key defaultValue:(NSRect)defaultValue;
 
 // these get the default value from NSUserDefaults
 - (BOOL)boolForKeyOrDefaultValue:(NSString *)key;
@@ -96,7 +94,5 @@
 - (void)setInteger:(NSInteger)value forKey:(NSString *)key;
 - (void)setUnsignedInteger:(NSUInteger)value forKey:(NSString *)key;
 - (void)setDouble:(double)value forKey:(NSString *)key;
-- (void)setPoint:(NSPoint)value forKey:(NSString *)key;
-- (void)setRect:(NSRect)value forKey:(NSString *)key;
 
 @end

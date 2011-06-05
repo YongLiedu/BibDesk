@@ -114,26 +114,6 @@
     return [value respondsToSelector:@selector(doubleValue)] ? [value doubleValue] : defaultValue;
 }
 
-- (NSPoint)pointForKey:(NSString *)key defaultValue:(NSPoint)defaultValue {
-    id value = [self objectForKey:key];
-    if ([value respondsToSelector:@selector(pointValue)])
-        return [value pointValue];
-    else if ([value isKindOfClass:[NSString class]] && NO == [NSString isEmptyString:value])
-        return NSPointFromString(value);
-    else
-        return defaultValue;
-}
-
-- (NSRect)rectForKey:(NSString *)key defaultValue:(NSRect)defaultValue {
-    id value = [self objectForKey:key];
-    if ([value respondsToSelector:@selector(rectValue)])
-        return [value rectValue];
-    else if ([value isKindOfClass:[NSString class]] && NO == [NSString isEmptyString:value])
-        return NSRectFromString(value);
-    else
-        return defaultValue;
-}
-
 - (BOOL)boolForKeyOrDefaultValue:(NSString *)key {
     return [self boolForKey:key defaultValue:[[NSUserDefaults standardUserDefaults] boolForKey:key]];
 }
@@ -185,14 +165,6 @@
     NSNumber *number = [[NSNumber alloc] initWithDouble:value];
     [self setObject:number forKey:key];
     [number release];
-}
-
-- (void)setPoint:(NSPoint)value forKey:(NSString *)key {
-    [self setObject:NSStringFromPoint(value) forKey:key];
-}
-
-- (void)setRect:(NSRect)value forKey:(NSString *)key {
-    [self setObject:NSStringFromRect(value) forKey:key];
 }
 
 @end

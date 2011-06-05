@@ -450,7 +450,8 @@ static NSOperationQueue *metadataCacheQueue = nil;
     [sidePreviewButton setMenu:sideTemplatePreviewMenu forSegment:0];
     [sidePreviewButton selectSegmentWithTag:sidePreviewDisplay];
     
-    NSRect frameRect = [xattrDefaults rectForKey:BDSKDocumentWindowFrameKey defaultValue:NSZeroRect];
+    // this gives NSZeroRect for incompatible or nil values
+    NSRect frameRect = NSRectFromString([xattrDefaults objectForKey:BDSKDocumentWindowFrameKey]);
     
     [aController setWindowFrameAutosaveNameOrCascade:@"Main Window Frame Autosave" setFrame:frameRect];
             
@@ -596,7 +597,9 @@ static NSOperationQueue *metadataCacheQueue = nil;
     }
     
     [self selectItemsForCiteKeys:[xattrDefaults objectForKey:BDSKSelectedPublicationsKey] ?: [NSArray array] selectLibrary:NO];
-    NSPoint scrollPoint = [xattrDefaults pointForKey:BDSKDocumentScrollPercentageKey defaultValue:NSZeroPoint];
+    
+    // this gives NSZeroPoint when the value is incompatible or missing
+    NSPoint scrollPoint = NSPointFromString([xattrDefaults objectForKey:BDSKDocumentScrollPercentageKey]);
     [tableView setScrollPositionAsPercentage:scrollPoint];
     
     [self updatePreviews];
@@ -715,7 +718,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
         }
         [dictionary setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
         [dictionary setBool:docFlags.sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
-        [dictionary setRect:[documentWindow frame] forKey:BDSKDocumentWindowFrameKey];
+        [dictionary setObject:NSStringFromRect([documentWindow frame]) forKey:BDSKDocumentWindowFrameKey];
         [dictionary setDouble:[groupSplitView fraction] forKey:BDSKGroupSplitViewFractionKey];
         // of the 3 splitviews, the fraction of the first divider would be considered, so fallback to the fraction from the nib
         if (NO == [self hasWebGroupsSelected])
@@ -734,7 +737,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
         if ([selectedKeys count] == 0 || [self hasExternalGroupsSelected])
             selectedKeys = [NSArray array];
         [dictionary setObject:selectedKeys forKey:BDSKSelectedPublicationsKey];
-        [dictionary setPoint:[tableView scrollPositionAsPercentage] forKey:BDSKDocumentScrollPercentageKey];
+        [dictionary setObject:NSStringFromPoint([tableView scrollPositionAsPercentage]) forKey:BDSKDocumentScrollPercentageKey];
         
         [dictionary setInteger:bottomPreviewDisplay forKey:BDSKBottomPreviewDisplayKey];
         [dictionary setObject:bottomPreviewDisplayTemplate forKey:BDSKBottomPreviewDisplayTemplateKey];
