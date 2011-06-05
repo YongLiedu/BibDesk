@@ -46,7 +46,7 @@
 - (NSURL *)fileURLValue {
     NSURL *fileURL = nil;
     DescType descType = [self descriptorType];
-    if (descType == typeFileURL || descType == typeFSRef || descType == typeAlias || descType == 'fss ') {
+    if (descType == typeFileURL || descType == typeFSRef || descType == typeAlias || descType == 'fss ' || type == 'bmrk') {
         NSAppleEventDescriptor *descriptor = descType == typeFileURL ? self : [self coerceToDescriptorType:typeFileURL];
         CFDataRef data = (CFDataRef)[descriptor data];
         fileURL = [(id)CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL) autorelease];
