@@ -272,7 +272,7 @@ extern NSString *BDSKDocumentPublicationsKey;
  */
 - (id)init;
 
-- (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL forEncoding:(NSStringEncoding)encoding;
+- (NSDictionary *)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL forEncoding:(NSStringEncoding)encoding;
 - (NSDictionary *)mainWindowSetupDictionaryFromExtendedAttributes;
 - (BOOL)isMainDocument;
 - (BOOL)commitPendingEdits;

@@ -695,13 +695,15 @@ static NSOperationQueue *metadataCacheQueue = nil;
     return mainWindowSetupDictionary;
 }
 
-- (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL forEncoding:(NSStringEncoding)encoding {
+- (NSDictionary *)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL forEncoding:(NSStringEncoding)encoding {
     
     NSString *path = [anURL path];
+    NSMutableDictionary *dictionary = nil;
+    
     if (path && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKDisableDocumentExtendedAttributesKey] == NO) {
         
         // We could set each of these as a separate attribute name on the file, but then we'd need to muck around with prepending net.sourceforge.bibdesk. to each key, and that seems messy.
-        NSMutableDictionary *dictionary = [[self mainWindowSetupDictionaryFromExtendedAttributes] mutableCopy];
+        dictionary = [[self mainWindowSetupDictionaryFromExtendedAttributes] mutableCopy];
         
         [dictionary setObject:[[[tableView tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString] forKey:BDSKShownColsNamesKey];
         [dictionary setObject:[self currentTableColumnWidthsAndIdentifiers] forKey:BDSKColumnWidthsKey];
@@ -764,9 +766,6 @@ static NSOperationQueue *metadataCacheQueue = nil;
         }
         [dictionary setObject:groupsToExpand forKey:BDSKDocumentGroupsToExpandKey];
         
-        [mainWindowSetupDictionary release];
-        mainWindowSetupDictionary = [dictionary copy];
-        
         NSError *error;
         
         if ([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:BDSKMainWindowExtendedAttributeKey 
@@ -784,9 +783,9 @@ static NSOperationQueue *metadataCacheQueue = nil;
                 }
             }
         }
-        
-        [dictionary release];
-    } 
+    }
+    
+    return [dictionary autorelease];
 }
 
 #pragma mark -
@@ -1091,8 +1090,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         }
         
         // save our window setup if we save or export to BibTeX
-        if ([[self class] isNativeType:typeName] || [typeName isEqualToString:BDSKMinimalBibTeXDocumentType])
-            [self saveWindowSetupInExtendedAttributesAtURL:saveTargetURL forEncoding:encoding];
+        if ([[self class] isNativeType:typeName] || [typeName isEqualToString:BDSKMinimalBibTeXDocumentType]) {
+            NSDictionary *dictionary = [self saveWindowSetupInExtendedAttributesAtURL:saveTargetURL forEncoding:encoding];
+            if (dictionary && (docState.currentSaveOperationType == NSSaveOperation || docState.currentSaveOperationType == NSSaveAsOperation)) {
+                [mainWindowSetupDictionary release];
+                mainWindowSetupDictionary = [dictionary copy];
+            }
+        }
     }
     
     BDSKDESTROY(saveTargetURL);
