@@ -281,7 +281,7 @@ static void fixLegacyTableColumnIdentifiers()
     // register NSURL as conversion handler for file types
     [NSAppleEventDescriptor registerConversionHandler:[NSURL class]
                                              selector:@selector(fileURLWithAEDesc:)
-                                   forDescriptorTypes:typeFileURL, typeAlias, typeFSRef, 'fss ', 'bmrk', nil];
+                                   forDescriptorTypes:typeFileURL, typeAlias, typeFSRef, 'fss ', nil];
     
     // register URL handler
     [[NSAppleEventManager sharedAppleEventManager] setEventHandler:self andSelector:@selector(handleGetURLEvent:withReplyEvent:) forEventClass:kInternetEventClass andEventID:kAEGetURL];
