@@ -345,8 +345,7 @@ static NSDictionary *errorAttr = nil;
 						if (numWords == 0) numWords = [words count];
                         BOOL isFirst = YES;
 						for (i = 0; i < [words count] && numWords > 0; i++) { 
-                            word = [[words objectAtIndex:i] stringByTrimmingCharactersInSet:[NSCharacterSet punctuationCharacterSet]]; 
-                            word = [self stringByStrictlySanitizingString:word forField:fieldName]; 
+                            word = [self stringByStrictlySanitizingString:[words objectAtIndex:i] forField:fieldName]; 
 							if (isLocalFile) {
 								word = [word stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
 							}
