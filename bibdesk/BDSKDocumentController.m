@@ -271,14 +271,14 @@ enum {
         
         // use a local variable in case it wasn't passed in, so we can always log this failure
         NSError *error;
-        document = [super openDocumentWithContentsOfURL:fileURL display:YES error:&error];
+        document = [super openDocumentWithContentsOfURL:fileURL display:displayDocument error:&error];
         
         if (document == nil) {
             NSLog(@"document at URL %@ failed to open for reason: %@", fileURL, [error localizedFailureReason]);
             // assign to the outError or we'll crash...
             if (outError) *outError = error;
-        } else if(![document selectItemForPartialItem:dictionary]) {
-                NSBeep();
+        } else if(displayDocument && NO == [document selectItemForPartialItem:dictionary]) {
+            NSBeep();
         }
         
     } else if ([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.bdsksearch"]) {
