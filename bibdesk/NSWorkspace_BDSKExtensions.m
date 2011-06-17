@@ -309,6 +309,19 @@
             [scriptString appendFormat:@"make new attachment with properties {file: POSIX file \"%@\"}\n", fileName];
         [scriptString appendString:@"end tell\n"];
         [scriptString appendString:@"end tell\n"];
+    } else if ([@"com.microsoft.outlook" isCaseInsensitiveEqual:mailAppID]) {
+        scriptString = [NSMutableString stringWithString:@"tell application \"Microsoft Outlook\"\n"];
+        [scriptString appendString:@"activate\n"];
+        [scriptString appendFormat:@"set m to make new draft window with properties {subject: \"%@\", visible: true}\n", subject ?: @""];
+        [scriptString appendString:@"tell m\n"];
+        if (receiver)
+            [scriptString appendFormat:@"set recipient to {address: {address: \"%@\", display name: \"%@\"}, recipient type: to recipient}}\n", receiver, receiver];
+        if (body)
+            [scriptString appendFormat:@"set content to \"%@\"\n", body];
+        for (NSString *fileName in files)
+            [scriptString appendFormat:@"make new attachment with properties {file: POSIX file \"%@\"}\n", fileName];
+        [scriptString appendString:@"end tell\n"];
+        [scriptString appendString:@"end tell\n"];
     } else if ([@"com.barebones.mailsmith" isCaseInsensitiveEqual:mailAppID]) {
         scriptString = [NSMutableString stringWithString:@"tell application \"Mailsmith\"\n"];
         [scriptString appendString:@"activate\n"];
