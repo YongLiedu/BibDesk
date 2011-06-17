@@ -48,9 +48,10 @@ enum {
 	BDSKMaxYEdgeMask = 1 << NSMaxYEdge,
 	BDSKEveryEdgeMask = BDSKMinXEdgeMask | BDSKMinYEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask,
 };
+typedef NSUInteger BDSKRectEdgeMask;
 
 @interface BDSKEdgeView : BDSKContainerView {
-	NSInteger edges;
+	BDSKRectEdgeMask edges;
 	NSMutableArray *edgeColors;
 }
 
@@ -59,7 +60,7 @@ enum {
 	@abstract Returns the mask for the edges that the view should draw
 	@discussion (discussion)
 */
-- (NSInteger)edges;
+- (BDSKRectEdgeMask)edges;
 
 /*!
 	@method setEdges:
@@ -68,7 +69,7 @@ enum {
 	@discussion (discussion)
 	@param mask The mask to set
 */
-- (void)setEdges:(NSInteger)mask;
+- (void)setEdges:(BDSKRectEdgeMask)mask;
 
 /*!
 	@method setEdgeColor

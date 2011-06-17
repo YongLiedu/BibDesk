@@ -88,11 +88,11 @@
 	}
 }
 
-- (NSInteger)edges {
+- (BDSKRectEdgeMask)edges {
 	return edges;
 }
 
-- (void)setEdges:(NSInteger)mask {
+- (void)setEdges:(BDSKRectEdgeMask)mask {
 	if (mask != edges) {
 		edges = mask;
 		[contentView setFrame:[self contentRect]];

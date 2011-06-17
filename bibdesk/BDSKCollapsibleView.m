@@ -76,11 +76,11 @@
 	minSize = size;
 }
 
-- (NSInteger)collapseEdges {
+- (BDSKRectEdgeMask)collapseEdges {
 	return collapseEdges;
 }
 
-- (void)setCollapseEdges:(NSInteger)mask {
+- (void)setCollapseEdges:(BDSKRectEdgeMask)mask {
 	if (mask != collapseEdges) {
 		collapseEdges = mask;
 		[contentView setFrame:[self contentRect]];
