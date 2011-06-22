@@ -131,7 +131,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void)insertObject:(NSURL *)newURL inLinkedFilesAtIndex:(NSUInteger)idx {
-    if ([[self owner] isDocument]) {
+    if ([self owner] == nil || [[self owner] isDocument]) {
         BDSKLinkedFile *file = [BDSKLinkedFile linkedFileWithURL:newURL delegate:self];
         if (file) {
             NSArray *localFiles = [self localFiles];
@@ -160,7 +160,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void)insertObject:(NSString *)newURLString inLinkedURLsAtIndex:(NSUInteger)idx {
-    if ([[self owner] isDocument]) {
+    if ([self owner] == nil || [[self owner] isDocument]) {
         NSURL *newURL = [NSURL URLWithStringByNormalizingPercentEscapes:newURLString];
         BDSKLinkedFile *file = [BDSKLinkedFile linkedFileWithURL:newURL delegate:self];
         if (file) {
@@ -206,7 +206,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void)setScriptingType:(NSString *)newType {
-    if ([[self owner] isDocument]) {
+    if ([self owner] == nil || [[self owner] isDocument]) {
         [self setPubType:(NSString *)newType];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else {
@@ -221,7 +221,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void)setScriptingCiteKey:(NSString *)newKey {
-    if ([[self owner] isDocument]) {
+    if ([self owner] == nil || [[self owner] isDocument]) {
         [self setCiteKey:(NSString *)newKey];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else {
@@ -236,7 +236,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void)setScriptingTitle:(NSString*)newTitle {
-    if ([[self owner] isDocument]) {
+    if ([self owner] == nil || [[self owner] isDocument]) {
         [self setField:BDSKTitleString toValue:newTitle];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else {
@@ -252,7 +252,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void) setMonth:(NSString*) newMonth {
-    if ([[self owner] isDocument]) {
+    if ([self owner] == nil || [[self owner] isDocument]) {
         [self setField:BDSKMonthString toValue:newMonth];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else {
@@ -268,7 +268,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void) setYear:(NSString*) newYear {
-    if ([[self owner] isDocument]) {
+    if ([self owner] == nil || [[self owner] isDocument]) {
         [self setField:BDSKYearString toValue:newYear];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else {
@@ -305,7 +305,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void)setScriptingColor:(NSColor *)newColor {
-    if ([[self owner] isDocument]) {
+    if ([self owner] == nil || [[self owner] isDocument]) {
         if ([newColor isEqual:[NSNull null]])
             newColor = nil;
         [self setColor:newColor];
@@ -331,7 +331,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void) setRemoteURLString:(NSString*) newURLString{
-    if ([[self owner] isDocument]) {
+    if ([self owner] == nil || [[self owner] isDocument]) {
         BDSKLinkedFile *file = [BDSKLinkedFile linkedFileWithURLString:newURLString];
         if (file == nil)
             return;
@@ -359,7 +359,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void) setLocalURLString:(NSString*) newPath {
-    if ([[self owner] isDocument]) {
+    if ([self owner] == nil || [[self owner] isDocument]) {
         NSURL *newURL = [newPath hasPrefix:@"file://"] ? [NSURL URLWithString:newPath] : [NSURL fileURLWithPath:[newPath stringByExpandingTildeInPath]];
         if (newURL == nil)
             return;
@@ -389,7 +389,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void) setAbstract:(NSString*) newAbstract {
-    if ([[self owner] isDocument]) {
+    if ([self owner] == nil || [[self owner] isDocument]) {
         [self setField:BDSKAbstractString toValue:newAbstract];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else {
@@ -404,7 +404,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void) setAnnotation:(NSString*) newAnnotation {
-    if ([[self owner] isDocument]) {
+    if ([self owner] == nil || [[self owner] isDocument]) {
         [self setField:BDSKAnnoteString toValue:newAnnotation];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else {
@@ -419,7 +419,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void) setRssDescription:(NSString*) newDesc {
-    if ([[self owner] isDocument]) {
+    if ([self owner] == nil || [[self owner] isDocument]) {
         [self setField:BDSKRssDescriptionString toValue:newDesc];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else {
@@ -465,7 +465,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void)setKeywords:(NSString *)keywords{
-    if ([[self owner] isDocument]) {
+    if ([self owner] == nil || [[self owner] isDocument]) {
         [self setField:BDSKKeywordsString toValue:keywords];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else {
@@ -480,7 +480,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void)setScriptingRating:(NSInteger)rating{
-    if ([[self owner] isDocument]) {
+    if ([self owner] == nil || [[self owner] isDocument]) {
         [self setRating:rating];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else {
