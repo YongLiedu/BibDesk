@@ -147,16 +147,4 @@ NSString *BDSKBibDeskScheme = @"bibdesk";
     return [string dataUsingEncoding:NSUTF8StringEncoding];
 }
 
-- (NSData *)welcomeHTMLData {
-	static NSData *data = nil;
-    if (data == nil) {
-        data = [[self HTMLDataUsingTemplateFile:@"WebGroupStartPage" usingObject:[BDSKWebParser class]] copy];
-    }
-    return data;
-}
-
-- (NSData *)downloadsHTMLData {
-    return [self HTMLDataUsingTemplateFile:@"WebGroupDownloads" usingObject:[BDSKDownloadManager sharedManager]];
-}
-
 @end
