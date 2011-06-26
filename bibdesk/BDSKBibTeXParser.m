@@ -141,13 +141,13 @@ static NSString *stringWithoutComments(NSString *string) {
     
     AGRegex *btRegex = [[AGRegex alloc] initWithPattern:/* type of item */ @"^@[[:alpha:]]+[ \\t]*[{(]" 
                                                         /* spaces       */ @"[ \\n\\r\\t]*" 
-                                                        /* cite key     */ @"[a-zA-Z0-9\\.,:/*!&$^_-]+?" 
+                                                        /* cite key     */ @"[a-zA-Z0-9\\.,:;/*!&$^_-]+?" 
                                                         /* spaces       */ @"[ \\n\\r\\t]*," 
                                                 options:AGRegexMultiline];
     
     // AGRegex doesn't recognize \r as a $ (bug #1420791), but normalizing is slow; use \r\n in regex instead
     BOOL found = ([btRegex findInString:stringWithoutComments(string)] != nil);
-    [btRegex release];
+    [btRegex release];NSLog(@"%i",found);
     return found;
 }
 
