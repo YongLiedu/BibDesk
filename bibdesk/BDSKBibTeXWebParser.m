@@ -61,39 +61,31 @@
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
 	
 	// get a plain text representation of the document, erasing any XML tags along the way
-	NSString *document = [xmlDocument XMLStringWithOptions:NSXMLDocumentTextKind];
+	NSString *inputString = [xmlDocument XMLStringWithOptions:NSXMLDocumentTextKind];
 	AGRegex *cleanRegex = [AGRegex regexWithPattern:@"<[^>]*>"];
-	document = [cleanRegex replaceWithString:@"" inString:document];
+	inputString = [cleanRegex replaceWithString:@"" inString:inputString];
 	
-    NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
+    NSMutableArray *items = [NSMutableArray array];
 	
 	// get a list of all things that might be the beginnings of a BibTeX item
 	AGRegex *regex = [AGRegex regexWithPattern:@"@[[:alpha:]]+[ \\t]*[{(]"];
-	NSArray *sourceItems = [regex findAllInString:document];
-
-	NSUInteger i;
-	for (i = 0; i < [sourceItems count]; i++) {
+	NSArray *sourceItems = [regex findAllInString:inputString];
+	NSUInteger i, iMax = [sourceItems count];
+    
+	for (i = 0; i < iMax; i++) {
 		AGRegexMatch *match = [sourceItems objectAtIndex:i];
 		NSString *sourceItem;
 		NSRange r = [match range];
-		if (i < [sourceItems count] - 1) {
+		if (i < iMax - 1)
 			// if this isn't the last item, then we need to trim the next item off of it
 			// since the BibTeX parser will parse as many consecutive BibTeX strings as it can find
-			NSRange r2 = [[sourceItems objectAtIndex:i+1] range];
-			NSRange r3;
-			r3.location = r.location;
-			r3.length = r2.location - r.location + 1;
-			sourceItem = [document substringWithRange:r3];
-		} else {
-			sourceItem = [document substringFromIndex:r.location];
-		}
+			r.length = [[sourceItems objectAtIndex:i+1] range].location - r.location;
+		else
+			r.length = [inputString length] - r.location;
+        sourceItem = [inputString substringWithRange:r];
 		// parse this string as BibTeX, if we can
-		if ([BDSKBibTeXParser canParseString:sourceItem]) {
-			NSArray *parsedItems = [BDSKBibTeXParser itemsFromString:sourceItem owner:nil isPartialData:NO error:outError];
-			if (parsedItems) {
-				[items addObjectsFromArray:parsedItems];
-			}
-		}
+		if ([BDSKBibTeXParser canParseString:sourceItem])
+			[items addObjectsFromArray:[BDSKBibTeXParser itemsFromString:sourceItem owner:nil isPartialData:NO error:outError]];
 	}
 	
 	return items;  
