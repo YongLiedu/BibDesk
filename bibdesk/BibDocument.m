@@ -2424,20 +2424,18 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 }
 
 - (NSArray *)publicationsForURLFromPasteboard:(NSPasteboard *)pboard error:(NSError **)error {
-    
-    NSMutableArray *pubs = nil;
-    
+    NSArray *pubs = nil;
     NSURL *theURL = [WebView URLFromPasteboard:pboard];
     if (theURL) {
-        BibItem *newBI = [[[BibItem alloc] init] autorelease];
-        pubs = [NSMutableArray array];
+        BibItem *newBI = [[BibItem alloc] init];
         [newBI addFileForURL:theURL autoFile:NO runScriptHook:YES];
         [newBI setPubType:@"webpage"];
         [newBI setField:@"Lastchecked" toValue:[[NSDate date] dateDescription]];
         NSString *title = [WebView URLTitleFromPasteboard:pboard];
         if (title)
             [newBI setField:BDSKTitleString toValue:title];
-        [pubs addObject:newBI];
+        pubs = [NSArray arrayWithObject:newBI];
+        [newBI release];
     } else if (error) {
         *error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Did not find expected URL on the pasteboard", @"Error description")];
     }
