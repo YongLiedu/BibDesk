@@ -2163,15 +2163,14 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }else if([type isEqualToString:NSFilenamesPboardType]){
 		NSArray *pbArray = [pb propertyListForType:NSFilenamesPboardType]; // we will get an array
         // try this first, in case these files are a type we can open
-        NSMutableArray *unparseableFiles = [[NSMutableArray alloc] initWithCapacity:[pbArray count]];
-        newPubs = [self extractPublicationsFromFiles:pbArray unparseableFiles:unparseableFiles verbose:verbose error:&error];
+        NSArray *unparseableFiles = nil;
+        newPubs = [self extractPublicationsFromFiles:pbArray unparseableFiles:&unparseableFiles verbose:verbose error:&error];
 		if(temporaryCiteKey = [[error userInfo] objectForKey:@"temporaryCiteKey"])
             error = nil; // accept temporary cite keys, but show a warning later
         if ([unparseableFiles count] > 0) {
             newFilePubs = [self publicationsForFiles:unparseableFiles error:&error];
             newPubs = [newPubs arrayByAddingObjectsFromArray:newFilePubs];
         }
-        [unparseableFiles release];
     }else if([type isEqualToString:BDSKWeblocFilePboardType]){
         NSURL *pbURL = [NSURL URLWithString:[pb stringForType:BDSKWeblocFilePboardType]]; 	
 		if([pbURL isFileURL])
@@ -2200,7 +2199,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 - (NSArray *)addPublicationsFromFile:(NSString *)fileName verbose:(BOOL)verbose error:(NSError **)outError{
     NSError *error = nil;
     NSString *temporaryCiteKey = nil;
-    NSArray *newPubs = [self extractPublicationsFromFiles:[NSArray arrayWithObject:fileName] unparseableFiles:nil verbose:verbose error:&error];
+    NSArray *newPubs = [self extractPublicationsFromFiles:[NSArray arrayWithObject:fileName] unparseableFiles:NULL verbose:verbose error:&error];
     BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
     
     if ((temporaryCiteKey = [[error userInfo] valueForKey:@"temporaryCiteKey"]))
@@ -2321,63 +2320,65 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 }
 
 // sniff the contents of each file, returning them in an array of BibItems, while unparseable files are added to the mutable array passed as a parameter
-- (NSArray *)extractPublicationsFromFiles:(NSArray *)filenames unparseableFiles:(NSMutableArray *)unparseableFiles verbose:(BOOL)verbose error:(NSError **)outError {
-    NSString *contentString;
+- (NSArray *)extractPublicationsFromFiles:(NSArray *)filenames unparseableFiles:(NSArray **)unparseableFiles verbose:(BOOL)verbose error:(NSError **)outError {
     NSMutableArray *array = [NSMutableArray array];
+    NSMutableArray *unparseableFilesArray = nil;
     BDSKStringType type = BDSKUnknownStringType;
     
     // some common types that people might use as attachments; we don't need to sniff these
     NSSet *unreadableTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"pdf", @"ps", @"eps", @"doc", @"htm", @"textClipping", @"webloc", @"html", @"rtf", @"tiff", @"tif", @"png", @"jpg", @"jpeg", nil];
     
-    for (NSString *fileName in filenames){
+    for (NSString *fileName in filenames) {
         type = BDSKUnknownStringType;
         
         // we /can/ create a string from these (usually), but there's no point in wasting the memory
         
         NSString *theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:[[fileName stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL];
-        if([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.bdsksearch"]){
+        if ([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.bdsksearch"]) {
             NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfFile:fileName];
             Class aClass = NSClassFromString([dictionary objectForKey:@"class"]);
             BDSKSearchGroup *group = [[[(aClass ?: [BDSKSearchGroup class]) alloc] initWithDictionary:dictionary] autorelease];
             if(group)
                 [groups addSearchGroup:group];
-        }else if([unreadableTypes containsObject:[fileName pathExtension]]){
-            [unparseableFiles addObject:fileName];
-        }else {
-        
-            // try to create a string
-            contentString = [[NSString alloc] initWithContentsOfFile:fileName encoding:[self documentStringEncoding] guessEncoding:YES];
+        } else {
+            NSError *parseError = nil;
+            NSArray *contentArray = nil;
             
-            if(contentString != nil){
-                if([theUTI isEqualToUTI:@"org.tug.tex.bibtex"])
-                    type = BDSKBibTeXStringType;
-                else if([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.ris"])
-                    type = BDSKRISStringType;
-                else
-                    type = [contentString contentStringType];
+            if ([unreadableTypes containsObject:[fileName pathExtension]] == NO) {
+        
+                // try to create a string
+                NSString *contentString = [[NSString alloc] initWithContentsOfFile:fileName encoding:[self documentStringEncoding] guessEncoding:YES];
                 
-                NSError *parseError = nil;
-                NSArray *contentArray = (type == BDSKUnknownStringType) ? nil : [self publicationsForString:contentString type:type verbose:verbose error:&parseError];
-                
-                if(contentArray == nil){
-                    // unable to parse, we link the file and can ignore the error
-                    [unparseableFiles addObject:fileName];
-                } else {
-                    // forward any temporaryCiteKey warning
-                    if(parseError && outError) *outError = parseError;
-                    [array addObjectsFromArray:contentArray];
+                if (contentString != nil) {
+                    if ([theUTI isEqualToUTI:@"org.tug.tex.bibtex"])
+                        type = BDSKBibTeXStringType;
+                    else if([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.ris"])
+                        type = BDSKRISStringType;
+                    else
+                        type = [contentString contentStringType];
+                    
+                    if (type != BDSKUnknownStringType)
+                        contentArray = [self publicationsForString:contentString type:type verbose:verbose error:&parseError];
+                    
+                    [contentString release];
                 }
-                
-                [contentString release];
-                contentString = nil;
-                
-            } else {
-                // unable to create the string
-                [unparseableFiles addObject:fileName];
+            }
+            if (contentArray) {
+                // forward any temporaryCiteKey warning
+                if (parseError && outError) *outError = parseError;
+                [array addObjectsFromArray:contentArray];
+            } else if (unparseableFiles) {
+                // unable to parse or find valid type, we link the file and can ignore the error
+                if (unparseableFilesArray == nil)
+                    unparseableFilesArray = [NSMutableArray array];
+                [unparseableFilesArray addObject:fileName];
             }
         }
     }
-
+    
+    if (unparseableFiles)
+        *unparseableFiles = unparseableFilesArray;
+    
     return array;
 }
 

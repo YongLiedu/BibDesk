@@ -374,7 +374,7 @@ extern NSString *BDSKDocumentPublicationsKey;
 - (NSArray *)publicationsFromArchivedData:(NSData *)data;
 - (NSArray *)publicationsForString:(NSString *)string type:(BDSKStringType)type verbose:(BOOL)verbose error:(NSError **)error;
 - (NSArray *)publicationsForFiles:(NSArray *)filenames error:(NSError **)error;
-- (NSArray *)extractPublicationsFromFiles:(NSArray *)filenames unparseableFiles:(NSMutableArray *)unparseableFiles verbose:(BOOL)verbose error:(NSError **)error;
+- (NSArray *)extractPublicationsFromFiles:(NSArray *)filenames unparseableFiles:(NSArray **)unparseableFiles verbose:(BOOL)verbose error:(NSError **)error;
 - (NSArray *)publicationsForURLFromPasteboard:(NSPasteboard *)pboard error:(NSError **)error;
 
 // Private methods
