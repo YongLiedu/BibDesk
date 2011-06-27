@@ -141,7 +141,7 @@ static NSString *stringWithoutComments(NSString *string) {
     
     AGRegex *btRegex = [[AGRegex alloc] initWithPattern:/* type of item */ @"^@[[:alpha:]]+[ \\t]*[{(]" 
                                                         /* spaces       */ @"[ \\n\\r\\t]*" 
-                                                        /* cite key     */ @"[a-zA-Z0-9\\.,:;/*!&$^_-]+?" 
+                                                        /* cite key     */ @"[a-zA-Z0-9!$&*+-./:;<>?\\[\\]^_`|]+?" 
                                                         /* spaces       */ @"[ \\n\\r\\t]*," 
                                                 options:AGRegexMultiline];
     
