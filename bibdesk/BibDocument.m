@@ -2196,10 +2196,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     return newPubs;
 }
 
-- (NSArray *)addPublicationsFromFile:(NSString *)fileName verbose:(BOOL)verbose error:(NSError **)outError{
+- (NSArray *)addPublicationsFromFile:(NSString *)fileName error:(NSError **)outError{
     NSError *error = nil;
     NSString *temporaryCiteKey = nil;
-    NSArray *newPubs = [self extractPublicationsFromFiles:[NSArray arrayWithObject:fileName] unparseableFiles:NULL verbose:verbose error:&error];
+    NSArray *newPubs = [self extractPublicationsFromFiles:[NSArray arrayWithObject:fileName] unparseableFiles:NULL verbose:NO error:&error];
     BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
     
     if ((temporaryCiteKey = [[error userInfo] valueForKey:@"temporaryCiteKey"]))

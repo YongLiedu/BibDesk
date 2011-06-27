@@ -784,7 +784,7 @@
     if (returnCode == NSFileHandlingPanelOKButton) {
         NSString *fileName = [sheet filename];
         // first try to parse the file
-        if([document addPublicationsFromFile:fileName verbose:NO error:NULL]){
+        if([document addPublicationsFromFile:fileName error:NULL]){
             // succeeded to parse the file, we return immediately
             [self didEndSheet:sheet returnCode:returnCode contextInfo:NULL];
         }else{

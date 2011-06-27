@@ -370,7 +370,7 @@ extern NSString *BDSKDocumentPublicationsKey;
 /* Paste related methods */
 - (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)shouldSelect edit:(BOOL)shouldEdit;
 - (NSArray *)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)select verbose:(BOOL)verbose error:(NSError **)error;
-- (NSArray *)addPublicationsFromFile:(NSString *)fileName verbose:(BOOL)verbose error:(NSError **)outError;
+- (NSArray *)addPublicationsFromFile:(NSString *)fileName error:(NSError **)outError;
 - (NSArray *)publicationsFromArchivedData:(NSData *)data;
 - (NSArray *)publicationsForString:(NSString *)string type:(BDSKStringType)type verbose:(BOOL)verbose error:(NSError **)error;
 - (NSArray *)publicationsForFiles:(NSArray *)filenames error:(NSError **)error;
