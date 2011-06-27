@@ -332,7 +332,7 @@
 
 - (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(NSUInteger)idx {
 	if ([pub macroResolver] == nil || [pub macroResolver] == macroResolver) {
-        [self insertPublication:pub atIndex:idx];
+        [self insertPublications:[NSArray arrayWithObjects:pub, nil] atIndexes:[NSIndexSet indexSetWithIndex:idx]];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else if ([[pub owner] isEqual:self] == NO) {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];

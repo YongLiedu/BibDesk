@@ -349,12 +349,10 @@ extern NSString *BDSKDocumentPublicationsKey;
 - (NSArray *)shownPublications;
 
 - (BDSKGroupsArray *)groups;
-- (void)insertPublications:(NSArray *)pubs atIndexes:(NSIndexSet *)indexes;
-- (void)insertPublication:(BibItem *)pub atIndex:(NSUInteger)index;
 
+- (void)insertPublications:(NSArray *)pubs atIndexes:(NSIndexSet *)indexes;
 - (void)addPublications:(NSArray *)pubArray;
 - (void)addPublication:(BibItem *)pub;
-
 - (void)removePublicationsAtIndexes:(NSIndexSet *)indexes;
 - (void)removePublications:(NSArray *)pubs;
 - (void)removePublication:(BibItem *)pub;

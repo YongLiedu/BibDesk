@@ -804,11 +804,11 @@ static NSOperationQueue *metadataCacheQueue = nil;
     [notesSearchIndex resetWithPublications:newPubs];
 }    
 
-- (BDSKPublicationsArray *) publications{
+- (BDSKPublicationsArray *)publications{
     return publications;
 }
 
-- (NSArray *) shownPublications{
+- (NSArray *)shownPublications{
     return shownPublications;
 }
 
@@ -830,16 +830,13 @@ static NSOperationQueue *metadataCacheQueue = nil;
 													  userInfo:notifInfo];
 }
 
-- (void)insertPublication:(BibItem *)pub atIndex:(NSUInteger)idx {
-    [self insertPublications:[NSArray arrayWithObject:pub] atIndexes:[NSIndexSet indexSetWithIndex:idx]];
-}
-
 - (void)addPublications:(NSArray *)pubs{
     [self insertPublications:pubs atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0,[pubs count])]];
 }
 
 - (void)addPublication:(BibItem *)pub{
-    [self insertPublication:pub atIndex:0]; // insert new pubs at the beginning, so item number is handled properly
+    // insert new pubs at the beginning, so item number is handled properly
+    [self insertPublications:[NSArray arrayWithObject:pub] atIndexes:[NSIndexSet indexSetWithIndex:0]];
 }
 
 - (void)removePublicationsAtIndexes:(NSIndexSet *)indexes{
@@ -872,8 +869,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
 }
 
 - (void)removePublication:(BibItem *)pub{
-	NSIndexSet *indexes = [NSIndexSet indexSetWithIndex:[publications indexOfObjectIdenticalTo:pub]];
-    [self removePublicationsAtIndexes:indexes];
+    [self removePublicationsAtIndexes:[NSIndexSet indexSetWithIndex:[publications indexOfObjectIdenticalTo:pub]]];
 }
 
 #pragma mark Groups accessors
