@@ -784,10 +784,14 @@
     if (returnCode == NSFileHandlingPanelOKButton) {
         NSString *fileName = [sheet filename];
         // first try to parse the file
-        if([document addPublicationsFromFile:fileName error:NULL]){
+        NSError *error = nil;
+        NSArray *newPubs = [document extractPublicationsFromFiles:[NSArray arrayWithObject:fileName] unparseableFiles:NULL verbose:NO error:&error];
+        BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
+        if ([newPubs count]) {
+            [document addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:[[error userInfo] valueForKey:@"temporaryCiteKey"] selectLibrary:YES edit:shouldEdit];
             // succeeded to parse the file, we return immediately
             [self didEndSheet:sheet returnCode:returnCode contextInfo:NULL];
-        }else{
+        } else {
             [sheet orderOut:nil];
             
             // show the main window

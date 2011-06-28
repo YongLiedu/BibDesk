@@ -2141,6 +2141,8 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSString *type = [pb availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
     NSArray *newPubs = nil;
     NSArray *newFilePubs = nil;
+    NSArray *newFiles = nil;
+    NSURL *newURL = nil;
 	NSError *error = nil;
     NSString *temporaryCiteKey = nil;
     BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
@@ -2152,41 +2154,36 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         NSString *pbString = [pb stringForType:BDSKReferenceMinerStringPboardType]; 	
         // sniffing the string for RIS is broken because RefMiner puts junk at the beginning
 		newPubs = [self publicationsForString:pbString type:BDSKReferenceMinerStringType verbose:verbose error:&error];
-        if(temporaryCiteKey = [[error userInfo] valueForKey:@"temporaryCiteKey"])
-            error = nil; // accept temporary cite keys, but show a warning later
     }else if([type isEqualToString:NSStringPboardType]){
         NSString *pbString = [pb stringForType:NSStringPboardType]; 	
 		// sniff the string to see what its type is
 		newPubs = [self publicationsForString:pbString type:BDSKUnknownStringType verbose:verbose error:&error];
-        if(temporaryCiteKey = [[error userInfo] valueForKey:@"temporaryCiteKey"])
-            error = nil; // accept temporary cite keys, but show a warning later
     }else if([type isEqualToString:NSFilenamesPboardType]){
 		NSArray *pbArray = [pb propertyListForType:NSFilenamesPboardType]; // we will get an array
         // try this first, in case these files are a type we can open
-        NSArray *unparseableFiles = nil;
-        newPubs = [self extractPublicationsFromFiles:pbArray unparseableFiles:&unparseableFiles verbose:verbose error:&error];
-		if(temporaryCiteKey = [[error userInfo] objectForKey:@"temporaryCiteKey"])
-            error = nil; // accept temporary cite keys, but show a warning later
-        if ([unparseableFiles count] > 0) {
-            newFilePubs = [self publicationsForFiles:unparseableFiles error:&error];
-            newPubs = [newPubs arrayByAddingObjectsFromArray:newFilePubs];
-        }
+        newPubs = [self extractPublicationsFromFiles:pbArray unparseableFiles:&newFiles verbose:verbose error:&error];
     }else if([type isEqualToString:BDSKWeblocFilePboardType]){
-        NSURL *pbURL = [NSURL URLWithString:[pb stringForType:BDSKWeblocFilePboardType]]; 	
-		if([pbURL isFileURL])
-            newPubs = newFilePubs = [self publicationsForFiles:[NSArray arrayWithObject:[pbURL path]] error:&error];
-        else
-            newPubs = [self publicationsForURLFromPasteboard:pb error:&error];
+        newURL = [NSURL URLWithString:[pb stringForType:BDSKWeblocFilePboardType]]; 	
     }else if([type isEqualToString:NSURLPboardType]){
-        NSURL *pbURL = [NSURL URLFromPasteboard:pb]; 	
-		if([pbURL isFileURL])
-            newPubs = newFilePubs = [self publicationsForFiles:[NSArray arrayWithObject:[pbURL path]] error:&error];
-        else
-            newPubs = [self publicationsForURLFromPasteboard:pb error:&error];
+        newURL = [NSURL URLFromPasteboard:pb]; 	
 	}else{
         // errors are key, value
         error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Did not find anything appropriate on the pasteboard", @"Error description")];
 	}
+    
+    if(newURL){
+		if([newURL isFileURL])
+            newFiles = [NSArray arrayWithObject:[newURL path]];
+        else
+            newPubs = [self publicationsForURL:newURL title:[WebView URLTitleFromPasteboard:pb]];
+    }
+    if([newFiles count]){
+        newFilePubs = [self publicationsForFiles:newFiles];
+        newPubs = newPubs ? [newPubs arrayByAddingObjectsFromArray:newFilePubs]: newFilePubs;
+    }
+    
+    if(temporaryCiteKey = [[error userInfo] objectForKey:@"temporaryCiteKey"])
+        error = nil; // accept temporary cite keys, but show a warning later
     
     if ([newPubs count] > 0) 
 		[self addPublications:newPubs publicationsToAutoFile:newFilePubs temporaryCiteKey:temporaryCiteKey selectLibrary:shouldSelect edit:shouldEdit];
@@ -2194,24 +2191,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         *outError = error;
     
     return newPubs;
-}
-
-- (NSArray *)addPublicationsFromFile:(NSString *)fileName error:(NSError **)outError{
-    NSError *error = nil;
-    NSString *temporaryCiteKey = nil;
-    NSArray *newPubs = [self extractPublicationsFromFiles:[NSArray arrayWithObject:fileName] unparseableFiles:NULL verbose:NO error:&error];
-    BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
-    
-    if ((temporaryCiteKey = [[error userInfo] valueForKey:@"temporaryCiteKey"]))
-        error = nil; // accept temporary cite keys, but show a warning later
-    
-    if ([newPubs count] == 0) {
-        if (outError) *outError = error;
-        return nil;
-    } else {
-        [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:temporaryCiteKey selectLibrary:YES edit:shouldEdit];
-        return newPubs;
-    }
 }
 
 - (NSArray *)publicationsFromArchivedData:(NSData *)data{
@@ -2382,7 +2361,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     return array;
 }
 
-- (NSArray *)publicationsForFiles:(NSArray *)filenames error:(NSError **)error {
+- (NSArray *)publicationsForFiles:(NSArray *)filenames {
     NSMutableArray *newPubs = [NSMutableArray arrayWithCapacity:[filenames count]];
 	NSURL *url = nil;
     	
@@ -2405,13 +2384,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             }
             
 			// GJ try parsing pdf to extract info that is then used to get a PubMed record
-			if(newBI == nil && [[[NSWorkspace sharedWorkspace] typeOfFile:[[fnStr stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL] isEqualToUTI:(NSString *)kUTTypePDF] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTermKey])
-				newBI = [BibItem itemByParsingPDFFile:fnStr];			
-			
-            // fall back on the least reliable metadata source (hidden pref)
-            if(newBI == nil && [[[NSWorkspace sharedWorkspace] typeOfFile:[[fnStr stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL] isEqualToUTI:(NSString *)kUTTypePDF] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldUsePDFMetadataKey])
-                newBI = [BibItem itemWithPDFMetadata:[PDFMetadata metadataForURL:url error:&xerror]];
-			
+			if(newBI == nil && [[[NSWorkspace sharedWorkspace] typeOfFile:[[fnStr stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL] isEqualToUTI:(NSString *)kUTTypePDF]){
+                if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTermKey])
+                    newBI = [BibItem itemByParsingPDFFile:fnStr];			
+                // fall back on the least reliable metadata source (hidden pref)
+                if(newBI == nil && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldUsePDFMetadataKey])
+                    newBI = [BibItem itemWithPDFMetadata:[PDFMetadata metadataForURL:url error:&xerror]];
+			}
             if(newBI == nil)
                 newBI = [[[BibItem alloc] init] autorelease];
             
@@ -2423,22 +2402,16 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 	return newPubs;
 }
 
-- (NSArray *)publicationsForURLFromPasteboard:(NSPasteboard *)pboard error:(NSError **)error {
+- (NSArray *)publicationsForURL:(NSURL *)aURL title:(NSString *)aTitle {
     NSArray *pubs = nil;
-    NSURL *theURL = [WebView URLFromPasteboard:pboard];
-    if (theURL) {
-        BibItem *newBI = [[BibItem alloc] init];
-        [newBI addFileForURL:theURL autoFile:NO runScriptHook:YES];
-        [newBI setPubType:@"webpage"];
-        [newBI setField:@"Lastchecked" toValue:[[NSDate date] dateDescription]];
-        NSString *title = [WebView URLTitleFromPasteboard:pboard];
-        if (title)
-            [newBI setField:BDSKTitleString toValue:title];
-        pubs = [NSArray arrayWithObject:newBI];
-        [newBI release];
-    } else if (error) {
-        *error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Did not find expected URL on the pasteboard", @"Error description")];
-    }
+    BibItem *newBI = [[BibItem alloc] init];
+    [newBI addFileForURL:aURL autoFile:NO runScriptHook:YES];
+    [newBI setPubType:@"webpage"];
+    [newBI setField:@"Lastchecked" toValue:[[NSDate date] dateDescription]];
+    if (aTitle)
+        [newBI setField:BDSKTitleString toValue:aTitle];
+    pubs = [NSArray arrayWithObject:newBI];
+    [newBI release];
     
 	return pubs;
 }
