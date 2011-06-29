@@ -2079,13 +2079,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 	[self addPublications:newPubs];
     if ([self hasLibraryGroupSelected])
         [self selectPublications:newPubs];
-	if (pubsToAutoFile != nil){
-        // tried checking [pb isEqual:[NSPasteboard pasteboardWithName:NSDragPboard]] before using delay, but pb is a CFPasteboardUnique
-        for (pub in pubsToAutoFile) {
-            for (BDSKLinkedFile *file in [pub localFiles])
-                [pub autoFileLinkedFile:file];
-        }
-    }
     
     BOOL autoGenerate = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKCiteKeyAutogenerateKey];
     NSMutableArray *autogeneratePubs = [NSMutableArray arrayWithCapacity:[newPubs count]];
@@ -2100,6 +2093,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         }
     }
     [self generateCiteKeysForPublications:autogeneratePubs];
+    
+    for (pub in pubsToAutoFile) {
+        for (BDSKLinkedFile *file in [pub localFiles])
+            [pub autoFileLinkedFile:file];
+    }
     
     // set Date-Added to the current date, since unarchived items will have their own (incorrect) date
     NSString *importDate = [[NSDate date] description];
