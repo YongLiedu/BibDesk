@@ -2385,14 +2385,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 }
 
 - (NSArray *)publicationsForURL:(NSURL *)aURL title:(NSString *)aTitle {
-    NSArray *pubs = nil;
-    BibItem *newBI = [[BibItem alloc] init];
-    [newBI addFileForURL:aURL autoFile:NO runScriptHook:YES];
-    [newBI setPubType:@"webpage"];
-    [newBI setField:@"Lastchecked" toValue:[[NSDate date] dateDescription]];
-    if (aTitle)
-        [newBI setField:BDSKTitleString toValue:aTitle];
-    pubs = [NSArray arrayWithObject:newBI];
+    NSDictionary *pubFields = [NSDictionary dictionaryWithObjectsAndKeys:[[NSDate date] dateDescription], @"Lastchecked", aTitle, BDSKTitleString, nil];
+    NSArray *files = [NSArray arrayWithObjects:[BDSKLinkedFile linkedFileWithURL:aURL delegate:nil], nil];
+    BibItem *newBI = [[BibItem alloc] initWithType:@"webpage" citeKey:nil pubFields:pubFields files:files isNew:YES];
+    NSArray *pubs = [NSArray arrayWithObject:newBI];
     [newBI release];
     
 	return pubs;
