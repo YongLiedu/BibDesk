@@ -428,7 +428,6 @@
 		F90C64070AC62B7B008B2DDA /* BDSKShellCommandFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F90C64050AC62B7B008B2DDA /* BDSKShellCommandFormatter.m */; };
 		F911D7120CFE90050009C77B /* BDSKLinkedFile.m in Sources */ = {isa = PBXBuildFile; fileRef = F911D7110CFE90050009C77B /* BDSKLinkedFile.m */; };
 		F91B7F28092BEB5A00976F6F /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F91B7F27092BEB5A00976F6F /* AddressBook.framework */; };
-		F91F286A09A6684900419960 /* PDFMetadata.m in Sources */ = {isa = PBXBuildFile; fileRef = F91F284709A661A700419960 /* PDFMetadata.m */; };
 		F9201E020B72504C007E45BB /* BDSKMacro.m in Sources */ = {isa = PBXBuildFile; fileRef = F9201E000B72504C007E45BB /* BDSKMacro.m */; };
 		F923501A089A813E00EFEB06 /* NSDate_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9235018089A813E00EFEB06 /* NSDate_BDSKExtensions.m */; };
 		F92405030BC5856900672839 /* BDSKLevelIndicatorCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F92405010BC5856900672839 /* BDSKLevelIndicatorCell.m */; };
@@ -1545,8 +1544,6 @@
 		F91B5CC7076579830011ED22 /* previewtemplate.tex */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = previewtemplate.tex; sourceTree = "<group>"; };
 		F91B5CE407657A200011ED22 /* template.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = template.txt; sourceTree = "<group>"; };
 		F91B7F27092BEB5A00976F6F /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = /System/Library/Frameworks/AddressBook.framework; sourceTree = "<absolute>"; };
-		F91F284609A661A700419960 /* PDFMetadata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDFMetadata.h; sourceTree = "<group>"; };
-		F91F284709A661A700419960 /* PDFMetadata.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PDFMetadata.m; sourceTree = "<group>"; };
 		F9201DFF0B72504C007E45BB /* BDSKMacro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKMacro.h; sourceTree = "<group>"; };
 		F9201E000B72504C007E45BB /* BDSKMacro.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKMacro.m; sourceTree = "<group>"; };
 		F920DAFA075C2B69000C5FCA /* BDSKAppController+Scripting.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = "BDSKAppController+Scripting.h"; sourceTree = "<group>"; };
@@ -2236,7 +2233,6 @@
 				F9022C60075802E300C3F701 /* BibAuthor.m */,
 				F9022C6E075802E300C3F701 /* BibItem.m */,
 				F9B3405C0BBC16720072C2B0 /* BibItem_PubMedLookup.m */,
-				F91F284709A661A700419960 /* PDFMetadata.m */,
 				F97C9DBB0C44866F0002EE01 /* WSGeneratedObj.m */,
 			);
 			name = Data;
@@ -2854,7 +2850,6 @@
 				F97073AD0911592000526FC8 /* NSWorkspace_BDSKExtensions.h */,
 				45DB3E4B0CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.h */,
 				F947A01A09AA80E4004C27FF /* PDFDocument_BDSKExtensions.h */,
-				F91F284609A661A700419960 /* PDFMetadata.h */,
 				CE05CF5C0D7743940034C2A8 /* WebURLsWithTitles.h */,
 				F97C9DBA0C44866F0002EE01 /* WSGeneratedObj.h */,
 			);
@@ -3584,7 +3579,6 @@
 				F9025F310969D66F008A551C /* CFString_BDSKExtensions.m in Sources */,
 				CEAE613F097FF60A000B618C /* BDSKJSTORParser.m in Sources */,
 				F9E069B70981A03B00AEFBE7 /* BDSKWebOfScienceParser.m in Sources */,
-				F91F286A09A6684900419960 /* PDFMetadata.m in Sources */,
 				F941135509B549BF00EE8463 /* BDSKEditorTextView.m in Sources */,
 				F94DE74C09CB46FF00B5FD51 /* BDSKPersistentSearch.m in Sources */,
 				CEF7295709CC88AB00802D48 /* BDSKFieldSheetController.m in Sources */,

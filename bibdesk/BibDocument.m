@@ -90,7 +90,6 @@
 #import "NSTableView_BDSKExtensions.h"
 #import "NSDictionary_BDSKExtensions.h"
 #import "NSSet_BDSKExtensions.h"
-#import "PDFMetadata.h"
 #import "BDSKSharingServer.h"
 #import "BDSKSharingBrowser.h"
 #import "BDSKTemplate.h"
@@ -2371,7 +2370,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                     newBI = [BibItem itemByParsingPDFFile:fnStr];			
                 // fall back on the least reliable metadata source (hidden pref)
                 if(newBI == nil && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldUsePDFMetadataKey])
-                    newBI = [BibItem itemWithPDFMetadata:[PDFMetadata metadataForURL:url error:&xerror]];
+                    newBI = [BibItem itemWithPDFMetadataFromURL:url];
 			}
             if(newBI == nil)
                 newBI = [[[BibItem alloc] init] autorelease];

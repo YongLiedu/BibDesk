@@ -59,7 +59,6 @@
 #import "NSError_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKStringNode.h"
-#import "PDFMetadata.h"
 #import "BDSKField.h"
 #import "BDSKTemplate.h"
 #import "BDSKTemplateParser.h"
@@ -3224,54 +3223,45 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 
 @implementation BibItem (PDFMetadata)
 
-+ (BibItem *)itemWithPDFMetadata:(PDFMetadata *)metadata;
++ (BibItem *)itemWithPDFMetadataFromURL:(NSURL *)fileURL
 {
+    NSParameterAssert(fileURL != nil);
+
     BibItem *item = nil;
-    if(metadata != nil){
-        item = [[[self allocWithZone:[self zone]] init] autorelease];
-        
-        NSString *value = nil;
-        
-        // setting to nil can remove some fields (e.g. keywords), so check first
-        value = [metadata valueForKey:PDFDocumentAuthorAttribute];
-        if(value)
-            [item setField:BDSKAuthorString toValue:value];
-        
-        value = [metadata valueForKey:PDFDocumentTitleAttribute];
-        if(value)
-            [item setField:BDSKTitleString toValue:value];
-        
-        // @@ this seems to be set by the filesystem, not as metadata?
-        value = [[[metadata valueForKey:PDFDocumentCreationDateAttribute] dateWithCalendarFormat:@"%B %Y" timeZone:[NSTimeZone defaultTimeZone]] description];
-        if(value)
-            [item setField:BDSKDateString toValue:value];
-        
-        value = [[metadata valueForKey:PDFDocumentKeywordsAttribute] componentsJoinedByString:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey]];
-        if(value)
-            [item setField:BDSKKeywordsString toValue:value];
+    NSDictionary *metadata = nil;
+    PDFDocument *document = nil;
+    
+    if ((fileURL = [fileURL fileURLByResolvingAliases])) {
+        if ((document = [[PDFDocument alloc] initWithURL:fileURL])) {
+            metadata = [document documentAttributes];
+            if ([metadata count]){
+                item = [[[self allocWithZone:[self zone]] init] autorelease];
+                
+                NSString *value = nil;
+                
+                // setting to nil can remove some fields (e.g. keywords), so check first
+                value = [metadata valueForKey:PDFDocumentAuthorAttribute];
+                if(value)
+                    [item setField:BDSKAuthorString toValue:value];
+                
+                value = [metadata valueForKey:PDFDocumentTitleAttribute];
+                if(value)
+                    [item setField:BDSKTitleString toValue:value];
+                
+                // @@ this seems to be set by the filesystem, not as metadata?
+                value = [[[metadata valueForKey:PDFDocumentCreationDateAttribute] dateWithCalendarFormat:@"%B %Y" timeZone:[NSTimeZone defaultTimeZone]] description];
+                if(value)
+                    [item setField:BDSKDateString toValue:value];
+                
+                value = [[metadata valueForKey:PDFDocumentKeywordsAttribute] componentsJoinedByString:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey]];
+                if(value)
+                    [item setField:BDSKKeywordsString toValue:value];
+            }
+            [document release];
+        }
     }
     return item;
 }
-
-
-- (PDFMetadata *)PDFMetadata;
-{
-    return [PDFMetadata metadataWithBibItem:self];
-}
-
-- (void)addPDFMetadataToFileForLocalURLField:(NSString *)field;
-{
-    NSParameterAssert([field isLocalFileField]);
-    
-    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldUsePDFMetadataKey]){
-        NSError *error = nil;
-        if([[self PDFMetadata] addToURL:[self URLForField:field] error:&error] == NO && error != nil)
-            [NSApp presentError:error];
-    }
-}
-
-// convenience for metadata methods; the silly name is because the AS category implements -(NSString *)keywords
-- (NSArray *)keywordsArray { return [[self groupsForField:BDSKKeywordsString] allObjects]; }
 
 @end
 

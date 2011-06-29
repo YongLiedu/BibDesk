@@ -43,7 +43,6 @@
 #import <AGRegex/AGRegex.h>
 #import "NSURL_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
-#import "PDFMetadata.h"
 
 @interface BDSKPubMedLookupHelper : NSObject
 + (NSData *)xmlReferenceDataForSearchTerm:(NSString *)searchTerm;

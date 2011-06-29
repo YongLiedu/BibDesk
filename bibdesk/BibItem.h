@@ -824,12 +824,9 @@ enum {
 
 @end
 
-@class PDFMetadata;
 
 @interface BibItem (PDFMetadata)
-+ (BibItem *)itemWithPDFMetadata:(PDFMetadata *)metadata;
-- (PDFMetadata *)PDFMetadata;
-- (void)addPDFMetadataToFileForLocalURLField:(NSString *)field;
++ (BibItem *)itemWithPDFMetadataFromURL:(NSURL *)fileURL;
 @end
 
 extern const CFSetCallBacks kBDSKBibItemEqualitySetCallBacks;
