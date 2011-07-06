@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# This software is Copyright (c) 2008
+# This software is Copyright (c) 2008-2011
 # Adam Maxwell. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -105,10 +105,10 @@ def sendEmailAndRemoveTemporaryDirectory():
     try:
         s = smtplib.SMTP(SMTP_SERVER)
         s.sendmail(EMAIL_ADDRESS, [EMAIL_ADDRESS], msg.as_string())
+        s.quit()
     except Exception, e:
         print 'Failed to send mail:', e
     finally:
-        s.close
         removeTemporaryDirectory()
     
 # return dictionary with keys "username" and "password" from keychain
