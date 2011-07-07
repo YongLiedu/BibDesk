@@ -42,7 +42,6 @@
 @class BDSKPreferenceIconView, BDSKOverlayWindow;
 
 @interface BDSKPreferenceController : NSWindowController <NSToolbarDelegate, NSWindowDelegate, BDSKSpotlightViewDelegate> {
-    IBOutlet NSView *contentView;
     IBOutlet NSView *controlView;
     IBOutlet NSButton *revertButton;
     IBOutlet NSButton *revertAllButton;

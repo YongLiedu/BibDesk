@@ -139,6 +139,18 @@ static id sharedController = nil;
     NSRect frame = [[self window] frame];
     frame.size.width = width;
     [[self window] setFrame:frame display:NO];
+    frame = [iconView frame];
+    frame.size.width = width;
+    [iconView setFrame:frame];
+    frame = [controlView frame];
+    frame.size.width = width;
+    [controlView setFrame:frame];
+    CGFloat controlHeight = NSHeight([controlView frame]);
+    for (BDSKPreferencePane *pane in [panes objectEnumerator]) {
+        frame = [[pane view] frame];
+        frame.origin = NSMakePoint(floor(0.5 * (width - NSWidth(frame))), controlHeight);
+        [[pane view] setFrame:frame];
+    }
     
     [self changeContentView:iconView display:NO];
     
@@ -597,35 +609,23 @@ static id sharedController = nil;
 }
 
 - (void)changeContentView:(NSView *)view display:(BOOL)display {
-	NSRect viewFrame = [view frame];
-    CGFloat winHeight = fmax(NSHeight(viewFrame), 100.0);
-    NSRect contentRect = [[[self window] contentView] bounds];
+    NSWindow *window = [self window];
+    NSView *contentView = [window contentView];
     
-    if ([view isEqual:[self iconView]]) {
-        viewFrame.size.width = NSWidth(contentRect);
-        [controlView removeFromSuperview];
-        [view setAutoresizingMask:NSViewWidthSizable | NSViewMaxYMargin];
-    } else {
-        NSRect controlRect;
-        NSDivideRect(contentRect, &controlRect, &contentRect, NSHeight([controlView frame]), NSMinYEdge);
-        winHeight += NSHeight(controlRect);
-        [controlView setFrame:controlRect];
-        [[[self window] contentView] addSubview:controlView];
-        [view setAutoresizingMask:NSViewMaxXMargin | NSViewMaxYMargin];
+    [[contentView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    if ([view isEqual:[self iconView]] == NO) {
+        [contentView addSubview:controlView];
         [overlay remove];
     }
-    [[contentView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    [contentView setFrame:contentRect];
-    viewFrame.origin = NSMakePoint(floor(0.5 * (NSWidth(contentRect) - NSWidth(viewFrame))), 0.0);
-    [view setFrame:viewFrame];
     [contentView addSubview:view];
 	
-    contentRect = [[self window] contentRectForFrameRect:[[self window] frame]];
-    contentRect.origin.y = NSMaxY(contentRect) - winHeight;
-    contentRect.size.height = winHeight;
-    contentRect = [[self window] frameRectForContentRect:contentRect];
+    NSRect contentRect = [window contentRectForFrameRect:[[self window] frame]];
+    CGFloat contentHeight = NSMaxY([view frame]);
+    contentRect.origin.y = NSMaxY(contentRect) - contentHeight;
+    contentRect.size.height = contentHeight;
+    contentRect = [window frameRectForContentRect:contentRect];
     
-    NSRect screenRect = [([[self window] screen] ?: [NSScreen mainScreen]) visibleFrame];
+    NSRect screenRect = [([window screen] ?: [NSScreen mainScreen]) visibleFrame];
     if (NSMaxX(contentRect) > NSMaxX(screenRect))
         contentRect.origin.y = NSMaxX(screenRect) - NSWidth(contentRect);
     if (NSMinX(contentRect) < NSMinX(screenRect))
@@ -635,8 +635,8 @@ static id sharedController = nil;
     if (NSMaxY(contentRect) > NSMaxY(screenRect))
         contentRect.origin.y = NSMaxY(screenRect) - NSHeight(contentRect);
         
-	[[self window] setFrame:contentRect display:display animate:display];
-    [[self window] recalculateKeyViewLoop];
+	[window setFrame:contentRect display:display animate:display];
+    [window recalculateKeyViewLoop];
 }
 
 - (void)updateSearchAndShowAll:(BOOL)showAll {
