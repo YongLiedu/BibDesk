@@ -132,6 +132,14 @@ static id sharedController = nil;
     iconView = [[BDSKPreferenceIconView alloc] initWithPreferenceController:self];
     [iconView setAction:@selector(iconViewShowPane:)];
     [iconView setTarget:self];
+    
+    CGFloat width = NSWidth([iconView frame]);
+    for (BDSKPreferencePane *pane in [panes objectEnumerator])
+        width = fmax(width, NSWidth([[pane view] frame]));
+    NSRect frame = [[self window] frame];
+    frame.size.width = width;
+    [[self window] setFrame:frame display:NO];
+    
     [self changeContentView:iconView display:NO];
     
     overlay = [[BDSKOverlayWindow alloc] initWithContentRect:[[self window] contentRectForFrameRect:[[self window] frame]] styleMask:[[self window] styleMask] backing:[[self window] backingType] defer:YES];
@@ -590,31 +598,31 @@ static id sharedController = nil;
 
 - (void)changeContentView:(NSView *)view display:(BOOL)display {
 	NSRect viewFrame = [view frame];
-    NSSize winSize = NSMakeSize(fmax(NSWidth(viewFrame), 200.0), fmax(NSHeight(viewFrame), 100.0));
+    CGFloat winHeight = fmax(NSHeight(viewFrame), 100.0);
     NSRect contentRect = [[[self window] contentView] bounds];
     
     if ([view isEqual:[self iconView]]) {
         viewFrame.size.width = NSWidth(contentRect);
         [controlView removeFromSuperview];
-        [view setAutoresizingMask:NSViewWidthSizable | NSViewMinYMargin];
+        [view setAutoresizingMask:NSViewWidthSizable | NSViewMaxYMargin];
     } else {
         NSRect controlRect;
         NSDivideRect(contentRect, &controlRect, &contentRect, NSHeight([controlView frame]), NSMinYEdge);
-        winSize.height += NSHeight(controlRect);
+        winHeight += NSHeight(controlRect);
         [controlView setFrame:controlRect];
         [[[self window] contentView] addSubview:controlView];
-        [view setAutoresizingMask:NSViewMaxXMargin | NSViewMinYMargin];
+        [view setAutoresizingMask:NSViewMaxXMargin | NSViewMaxYMargin];
         [overlay remove];
     }
     [[contentView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
     [contentView setFrame:contentRect];
-    viewFrame.origin = NSMakePoint(0.0, NSHeight(contentRect) - NSHeight(viewFrame));
+    viewFrame.origin = NSMakePoint(floor(0.5 * (NSWidth(contentRect) - NSWidth(viewFrame))), 0.0);
     [view setFrame:viewFrame];
     [contentView addSubview:view];
 	
     contentRect = [[self window] contentRectForFrameRect:[[self window] frame]];
-    contentRect.origin.y = NSMaxY(contentRect) - winSize.height;
-    contentRect.size = winSize;
+    contentRect.origin.y = NSMaxY(contentRect) - winHeight;
+    contentRect.size.height = winHeight;
     contentRect = [[self window] frameRectForContentRect:contentRect];
     
     NSRect screenRect = [([[self window] screen] ?: [NSScreen mainScreen]) visibleFrame];
