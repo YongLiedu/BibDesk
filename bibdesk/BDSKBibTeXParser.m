@@ -147,7 +147,7 @@ static NSString *stringWithoutComments(NSString *string) {
     
     // AGRegex doesn't recognize \r as a $ (bug #1420791), but normalizing is slow; use \r\n in regex instead
     BOOL found = ([btRegex findInString:stringWithoutComments(string)] != nil);
-    [btRegex release];NSLog(@"%i",found);
+    [btRegex release];
     return found;
 }
 
