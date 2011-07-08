@@ -138,6 +138,7 @@ static id sharedController = nil;
         width = fmax(width, NSWidth([[pane view] frame]));
     NSRect frame = [[self window] frame];
     frame.size.width = width;
+    frame.size.height -= NSHeight([[[self window] contentView] frame]) - NSHeight([iconView frame]);
     [[self window] setFrame:frame display:NO];
     frame = [iconView frame];
     frame.size.width = width;
