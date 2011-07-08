@@ -125,7 +125,9 @@ static id sharedController = nil;
     
     [self setupToolbar];
     [[self window] setShowsToolbarButton:NO];
+    // we need to do this because we want to restore the top position, otherwise the bottom position will be restored
     [self setWindowFrameAutosaveName:BDSKPreferencesWindowFrameAutosaveName];
+    [[self window] setFrameUsingName:BDSKPreferencesWindowFrameAutosaveName force:YES];
     
     [[self window] setTitle:[self defaultWindowTitle]];
     
@@ -138,7 +140,6 @@ static id sharedController = nil;
         width = fmax(width, NSWidth([[pane view] frame]));
     NSRect frame = [[self window] frame];
     frame.size.width = width;
-    frame.size.height -= NSHeight([[[self window] contentView] frame]) - NSHeight([iconView frame]);
     [[self window] setFrame:frame display:NO];
     frame = [iconView frame];
     frame.size.width = width;
