@@ -753,7 +753,9 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     NSURL *theURL = nil;
     BibDocument *document = nil;
     NSError *error = nil;
-    
+    NSAppleEventDescriptor *errr = [event descriptorForKeyword:'errr'];
+    BOOL errorReporting = errr ? [errr booleanValue] : YES;
+
     if (theURLString) {
         if ([theURLString hasPrefix:@"<"] && [theURLString hasSuffix:@">"])
             theURLString = [theURLString substringWithRange:NSMakeRange(0, [theURLString length] - 2)];
@@ -797,7 +799,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         
     }
     
-    if (document == nil && error)
+    if (document == nil && error && errorReporting)
         [NSApp presentError:error];
 }
 
