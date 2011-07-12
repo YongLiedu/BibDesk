@@ -85,7 +85,8 @@
 
 #define WEB_URL @"http://bibdesk.sourceforge.net/"
 #define WIKI_URL @"http://sourceforge.net/apps/mediawiki/bibdesk/"
-#define TRACKER_URL @"http://sourceforge.net/tracker/?group_id=61487"
+#define BUG_TRACKER_URL @"http://sourceforge.net/tracker/?group_id=61487&atid=497423"
+#define RFE_TRACKER_URL @"http://sourceforge.net/tracker/?group_id=61487&atid=497426"
 
 #define BDSKUpdateCheckIntervalKey @"BDSKUpdateCheckIntervalKey"
 
@@ -693,11 +694,11 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 }
 
 - (IBAction)reportBug:(id)sender {
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:TRACKER_URL]];
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:BUG_TRACKER_URL]];
 }
 
 - (IBAction)requestFeature:(id)sender {
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:TRACKER_URL]];
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:RFE_TRACKER_URL]];
 }
 
 - (IBAction)toggleShowingErrorPanel:(id)sender{
