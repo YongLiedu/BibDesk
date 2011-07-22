@@ -59,11 +59,9 @@
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKMacroResolver.h"
 #import "BDSKMacroResolver+Scripting.h"
-#import "BDSKPreviewer.h"
 #import "BibAuthor.h"
 #import "BibAuthor+Scripting.h"
 #import "BDSKTypeManager.h"
-#import <Quartz/Quartz.h>
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKServerInfo.h"
 #import "BDSKBibTeXParser.h"
@@ -127,42 +125,6 @@
         return [super handleSaveScriptCommand:command];
     }
     return nil;
-}
-
-- (id)handlePrintScriptCommand:(NSScriptCommand *)command {
-    if (bottomPreviewDisplay == BDSKPreviewDisplayTeX) {
-        // we let the PDFView handle printing
-        
-        NSDictionary *args = [command evaluatedArguments];
-        id settings = [args objectForKey:@"PrintSettings"];
-        // PDFView does not allow printing without showing the dialog, so we just ignore that setting
-        
-        NSPrintInfo *printInfo = [self printInfo];
-        PDFView *pdfView = [previewer pdfView];
-        
-        if ([settings isKindOfClass:[NSDictionary class]]) {
-            settings = [[settings mutableCopy] autorelease];
-            id value;
-            if ((value = [settings objectForKey:NSPrintDetailedErrorReporting]))
-                [settings setObject:[NSNumber numberWithBool:[value unsignedIntValue] == 'lwdt'] forKey:NSPrintDetailedErrorReporting];
-            if ((value = [settings objectForKey:NSPrintPrinterName]) && (value = [NSPrinter printerWithName:value]))
-                [settings setObject:value forKey:NSPrintPrinter];
-            if ([settings objectForKey:NSPrintFirstPage] || [settings objectForKey:NSPrintLastPage]) {
-                [settings setObject:[NSNumber numberWithBool:NO] forKey:NSPrintAllPages];
-                if ([settings objectForKey:NSPrintFirstPage] == nil)
-                    [settings setObject:[NSNumber numberWithInteger:1] forKey:NSPrintLastPage];
-                if ([settings objectForKey:NSPrintLastPage] == nil)
-                    [settings setObject:[NSNumber numberWithInteger:[[pdfView document] pageCount]] forKey:NSPrintLastPage];
-            }
-            [[printInfo dictionary] addEntriesFromDictionary:settings];
-        }
-        
-        [pdfView printWithInfo:printInfo autoRotate:NO];
-        
-        return nil;
-    } else {
-        return [super handlePrintScriptCommand:command];
-    }
 }
 
 - (id)newScriptingObjectOfClass:(Class)class forValueForKey:(NSString *)key withContentsValue:(id)contentsValue properties:(NSDictionary *)properties {
