@@ -50,5 +50,6 @@
 - (void)showPubWithKey:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
 - (void)openDocumentFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
 - (void)addPublicationsFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
+- (void)openURLInWebGroup:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
 
 @end

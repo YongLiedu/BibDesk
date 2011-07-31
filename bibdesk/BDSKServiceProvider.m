@@ -41,10 +41,12 @@
 #import "BibDocument.h"
 #import "BibDocument_Search.h"
 #import "BibDocument_Actions.h"
+#import "BibDocument_Groups.h"
 #import "BDSKTemplate.h"
 #import "BDSKTemplateObjectProxy.h"
 #import "BDSKDocumentController.h"
 #import "NSSet_BDSKExtensions.h"
+#import "NSURL_BDSKExtensions.h"
 
 
 @implementation BDSKServiceProvider
@@ -350,6 +352,25 @@ static id sharedServiceProvider = nil;
         NSError *addError = nil;
         if([doc addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:NO error:&addError] == nil || addError != nil)
         if(error) *error = [addError localizedDescription];
+    }
+}
+
+- (void)openURLInWebGroup:(NSPasteboard *)pboard 
+                 userData:(NSString *)userData 
+                    error:(NSString **)error {
+	// open in the frontmost bibliography
+	BibDocument * doc = [[NSDocumentController sharedDocumentController] mainDocument];
+    if ([doc isKindOfClass:[BibDocument class]] == NO) {
+        for (doc in [NSApp orderedDocuments])
+            if ([doc isKindOfClass:[BibDocument class]]) break;
+    }
+    if (doc == nil) {
+        // create a new document if we don't have one, or else this method appears to fail mysteriosly (since the error isn't displayed)
+        doc = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:NULL];
+    }
+    NSURL *theURL = [NSURL URLFromPasteboardAnyType:pboard];
+    if (theURL) {
+        [doc openURL:theURL];
     }
 }
 

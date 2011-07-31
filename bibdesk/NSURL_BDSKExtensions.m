@@ -245,6 +245,31 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     return [selfUTI caseInsensitiveCompare:otherUTI];
 }
 
+// This routine copied from Skim.app NSURL_SKExtensions.h, originally written by Christiaan Hofman
++ (NSURL *)URLFromPasteboardAnyType:(NSPasteboard *)pasteboard {
+    NSString *pboardType = [pasteboard availableTypeFromArray:[NSArray arrayWithObjects:NSURLPboardType, NSStringPboardType, nil]];
+    NSURL *theURL = nil;
+    if ([pboardType isEqualToString:NSURLPboardType]) {
+        theURL = [NSURL URLFromPasteboard:pasteboard];
+    } else if ([pboardType isEqualToString:NSStringPboardType]) {
+        NSString *string = [[pasteboard stringForType:NSStringPboardType] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        if ([string rangeOfString:@"://"].length) {
+            if ([string hasPrefix:@"<"] && [string hasSuffix:@">"])
+                string = [string substringWithRange:NSMakeRange(1, [string length] - 2)];
+            theURL = [NSURL URLWithString:string];
+            if (theURL == nil)
+                theURL = [NSURL URLWithString:[string stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+        }
+        if (theURL == nil) {
+            if ([string hasPrefix:@"~"])
+                string = [string stringByExpandingTildeInPath];
+            if ([[NSFileManager defaultManager] fileExistsAtPath:string])
+                theURL = [NSURL fileURLWithPath:string];
+        }
+    }
+    return theURL;
+}
+
 #pragma mark Skim Notes
 
 - (NSArray *)SkimNotes {
