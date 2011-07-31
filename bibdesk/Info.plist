@@ -441,7 +441,7 @@
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>BibDesk/Open URL in BibDesk web group</string>
+				<string>BibDesk/Open URL in BibDesk Web Group</string>
 			</dict>
 			<key>NSMessage</key>
 			<string>openURLInWebGroup</string>
