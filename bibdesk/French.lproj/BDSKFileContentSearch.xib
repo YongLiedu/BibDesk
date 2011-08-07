@@ -349,45 +349,6 @@
 				<string key="NSClassName">BDSKEdgeView</string>
 				<string key="NSExtension">NSView</string>
 			</object>
-			<object class="NSMenu" id="33125457">
-				<string key="NSTitle"/>
-				<object class="NSMutableArray" key="NSMenuItems">
-					<bool key="EncodedWithXMLCoder">YES</bool>
-					<object class="NSMenuItem" id="156594994">
-						<reference key="NSMenu" ref="33125457"/>
-						<string key="NSTitle">Recherches récentes</string>
-						<string key="NSKeyEquiv"/>
-						<int key="NSMnemonicLoc">2147483647</int>
-						<object class="NSCustomResource" key="NSOnImage" id="691238964">
-							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">NSMenuCheckmark</string>
-						</object>
-						<object class="NSCustomResource" key="NSMixedImage" id="529294917">
-							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">NSMenuMixedState</string>
-						</object>
-						<int key="NSTag">1000</int>
-					</object>
-					<object class="NSMenuItem" id="619893333">
-						<reference key="NSMenu" ref="33125457"/>
-						<string key="NSTitle">Récents</string>
-						<string key="NSKeyEquiv"/>
-						<int key="NSMnemonicLoc">2147483647</int>
-						<reference key="NSOnImage" ref="691238964"/>
-						<reference key="NSMixedImage" ref="529294917"/>
-						<int key="NSTag">1001</int>
-					</object>
-					<object class="NSMenuItem" id="203503436">
-						<reference key="NSMenu" ref="33125457"/>
-						<string key="NSTitle">Réinitialiser</string>
-						<string key="NSKeyEquiv"/>
-						<int key="NSMnemonicLoc">2147483647</int>
-						<reference key="NSOnImage" ref="691238964"/>
-						<reference key="NSMixedImage" ref="529294917"/>
-						<int key="NSTag">1002</int>
-					</object>
-				</object>
-			</object>
 		</object>
 		<object class="IBObjectContainer" key="IBDocument.Objects">
 			<object class="NSMutableArray" key="connectionRecords">
@@ -541,14 +502,6 @@
 						<reference key="destination" ref="522719486"/>
 					</object>
 					<int key="connectionID">224</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">savedSearchMenuTemplate</string>
-						<reference key="source" ref="371656161"/>
-						<reference key="destination" ref="33125457"/>
-					</object>
-					<int key="connectionID">232</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -718,33 +671,6 @@
 						<reference key="object" ref="17031625"/>
 						<reference key="parent" ref="522719486"/>
 					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">225</int>
-						<reference key="object" ref="33125457"/>
-						<object class="NSMutableArray" key="children">
-							<bool key="EncodedWithXMLCoder">YES</bool>
-							<reference ref="203503436"/>
-							<reference ref="619893333"/>
-							<reference ref="156594994"/>
-						</object>
-						<reference key="parent" ref="0"/>
-						<string key="objectName">Search Menu</string>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">226</int>
-						<reference key="object" ref="203503436"/>
-						<reference key="parent" ref="33125457"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">227</int>
-						<reference key="object" ref="619893333"/>
-						<reference key="parent" ref="33125457"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">228</int>
-						<reference key="object" ref="156594994"/>
-						<reference key="parent" ref="33125457"/>
-					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -781,12 +707,6 @@
 					<string>221.IBShouldRemoveOnLegacySave</string>
 					<string>222.IBPluginDependency</string>
 					<string>222.IBShouldRemoveOnLegacySave</string>
-					<string>225.IBEditorWindowLastContentRect</string>
-					<string>225.IBPluginDependency</string>
-					<string>225.ImportedFromIB2</string>
-					<string>226.IBPluginDependency</string>
-					<string>227.IBPluginDependency</string>
-					<string>228.IBPluginDependency</string>
 					<string>5.IBEditorWindowLastContentRect</string>
 					<string>5.IBPluginDependency</string>
 					<string>5.IBWindowTemplateEditedContentRect</string>
@@ -836,12 +756,6 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{147, 610}, {191, 63}}</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>{{97, 475}, {480, 360}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>{{97, 475}, {480, 360}}</string>
@@ -984,7 +898,6 @@
 							<string>delegate</string>
 							<string>indexProgressBar</string>
 							<string>resultsArrayController</string>
-							<string>savedSearchMenuTemplate</string>
 							<string>statusField</string>
 							<string>tableView</string>
 						</object>
@@ -995,7 +908,6 @@
 							<string>id</string>
 							<string>NSProgressIndicator</string>
 							<string>BDSKSelectionPreservingArrayController</string>
-							<string>NSMenu</string>
 							<string>NSTextField</string>
 							<string>BDSKTableView</string>
 						</object>
@@ -1009,7 +921,6 @@
 							<string>delegate</string>
 							<string>indexProgressBar</string>
 							<string>resultsArrayController</string>
-							<string>savedSearchMenuTemplate</string>
 							<string>statusField</string>
 							<string>tableView</string>
 						</object>
@@ -1034,10 +945,6 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">resultsArrayController</string>
 								<string key="candidateClassName">BDSKSelectionPreservingArrayController</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">savedSearchMenuTemplate</string>
-								<string key="candidateClassName">NSMenu</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">statusField</string>
@@ -1327,7 +1234,7 @@
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSMenu</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="394569649">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">NSMenu_BDSKExtensions.h</string>
 					</object>
@@ -1339,10 +1246,6 @@
 						<string key="majorKey">IBUserSource</string>
 						<string key="minorKey"/>
 					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSMenuItem</string>
-					<reference key="sourceIdentifier" ref="394569649"/>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSObject</string>
@@ -1595,14 +1498,6 @@
 					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="921696330">
 						<string key="majorKey">IBFrameworkSource</string>
 						<string key="minorKey">AppKit.framework/Headers/NSMenu.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSMenuItem</string>
-					<string key="superclassName">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="410128899">
-						<string key="majorKey">IBFrameworkSource</string>
-						<string key="minorKey">AppKit.framework/Headers/NSMenuItem.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
@@ -2131,7 +2026,10 @@
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSView</string>
-					<reference key="sourceIdentifier" ref="410128899"/>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBFrameworkSource</string>
+						<string key="minorKey">AppKit.framework/Headers/NSMenuItem.h</string>
+					</object>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSView</string>
@@ -2205,18 +2103,5 @@
 		<bool key="IBDocument.PluginDeclaredDependenciesTrackSystemTargetVersion">YES</bool>
 		<string key="IBDocument.LastKnownRelativeProjectPath">../Bibdesk.xcodeproj</string>
 		<int key="IBDocument.defaultPropertyAccessControl">3</int>
-		<object class="NSMutableDictionary" key="IBDocument.LastKnownImageSizes">
-			<bool key="EncodedWithXMLCoder">YES</bool>
-			<object class="NSArray" key="dict.sortedKeys">
-				<bool key="EncodedWithXMLCoder">YES</bool>
-				<string>NSMenuCheckmark</string>
-				<string>NSMenuMixedState</string>
-			</object>
-			<object class="NSMutableArray" key="dict.values">
-				<bool key="EncodedWithXMLCoder">YES</bool>
-				<string>{9, 8}</string>
-				<string>{7, 2}</string>
-			</object>
-		</object>
 	</data>
 </archive>

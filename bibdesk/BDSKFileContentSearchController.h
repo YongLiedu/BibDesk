@@ -79,7 +79,6 @@
     BOOL searchFieldDidEndEditing;
     
     NSSearchField *searchField;
-    IBOutlet NSMenu *savedSearchMenuTemplate;
     NSArray *savedRecentSearches;
 }
 
@@ -94,8 +93,6 @@
 // Use this to connect a search field and initiate a search
 - (NSSearchField *)searchField;
 - (void)setSearchField:(NSSearchField *)aSearchField;
-- (NSMenu *)savedSearchMenuTemplate;
-- (void)setSavedSearchMenuTemplate:(NSMenu *)menu;
 - (NSArray *)savedRecentSearches;
 - (void)setSavedRecentSearches:(NSArray *)recents;
 - (BOOL)shouldShowControlView;

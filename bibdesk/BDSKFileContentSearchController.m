@@ -91,7 +91,6 @@
     BDSKDESTROY(filteredResults);
     BDSKDESTROY(filterURLs);
     BDSKDESTROY(searchField);
-    BDSKDESTROY(savedSearchMenuTemplate);
     BDSKDESTROY(savedRecentSearches);
     [super dealloc];
 }
@@ -203,13 +202,9 @@
     }
 }
 
-- (void)swapSearchMenuTemplate {
-    NSSearchFieldCell *cell = [searchField cell];
-    NSMenu *tmpMenu = [[[cell searchMenuTemplate] retain] autorelease];
-    NSArray *tmpRecents = [[[cell recentSearches] retain] autorelease];
-    [[searchField cell] setSearchMenuTemplate:savedSearchMenuTemplate];
+- (void)swapRecentSearches {
+    NSArray *tmpRecents = [[[[searchField cell] recentSearches] retain] autorelease];
     [[searchField cell] setRecentSearches:savedRecentSearches];
-    [self setSavedSearchMenuTemplate:tmpMenu];
     [self setSavedRecentSearches:tmpRecents];
 }
 
@@ -227,7 +222,7 @@
         // disconnect the current searchfield
         [searchField setTarget:nil];
         [searchField setDelegate:nil];  
-        [self swapSearchMenuTemplate];
+        [self swapRecentSearches];
     }
     
     [searchField release];
@@ -236,22 +231,9 @@
     if (nil != searchField) {
         [searchField setTarget:self];
         [searchField setDelegate:self];
-        [self swapSearchMenuTemplate];
+        [self swapRecentSearches];
         [self search:searchField];
     }     
-}
-
-- (NSMenu *)savedSearchMenuTemplate
-{
-    return savedSearchMenuTemplate;
-}
-
-- (void)setSavedSearchMenuTemplate:(NSMenu *)menu
-{
-    if (savedSearchMenuTemplate != menu) {
-        [savedSearchMenuTemplate release];
-        savedSearchMenuTemplate = [menu retain];
-    }
 }
 
 - (NSArray *)savedRecentSearches
