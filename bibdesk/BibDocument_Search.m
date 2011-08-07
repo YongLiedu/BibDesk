@@ -51,6 +51,7 @@
 #import "BDSKOverlayWindow.h"
 #import "BibDocument_Groups.h"
 #import "BibDocument_DataSource.h"
+#import "BibDocument_Toolbar.h"
 #import "BDSKMainTableView.h"
 #import "BDSKFindController.h"
 #import "BDSKItemSearchIndexes.h"
@@ -72,17 +73,6 @@
 - (IBAction)changeSearchType:(id)sender{
     [[NSUserDefaults standardUserDefaults] setInteger:[sender tag] forKey:BDSKSearchMenuTagKey];
     [self redoSearch];
-}
-
-- (IBAction)makeSearchFieldKey:(id)sender{
-
-    NSToolbar *tb = [documentWindow toolbar];
-    [tb setVisible:YES];
-    if([tb displayMode] == NSToolbarDisplayModeLabelOnly)
-        [tb setDisplayMode:NSToolbarDisplayModeIconAndLabel];
-    
-	[documentWindow makeFirstResponder:searchField];
-    [searchField selectText:sender];
 }
 
 - (NSString *)searchString {

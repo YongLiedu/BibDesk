@@ -39,4 +39,7 @@
 @interface BibDocument (Toolbar) <NSToolbarDelegate>
 
 - (void)setupToolbar;
+
+- (IBAction)makeSearchFieldKey:(id)sender;
+
 @end

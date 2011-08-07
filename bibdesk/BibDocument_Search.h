@@ -48,7 +48,6 @@ extern NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString);
 
 - (NSString *)fileContentSearchString;
 
-- (IBAction)makeSearchFieldKey:(id)sender;
 - (IBAction)changeSearchType:(id)sender;
 - (IBAction)search:(id)sender;
 

@@ -35,8 +35,6 @@
  */
 
 #import "BibDocument_Toolbar.h"
-#import "BibDocument_Menus.h"
-#import "BibDocument_Search.h"
 #import "BDSKAppController.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKToolbarItem.h"
@@ -269,5 +267,18 @@
     return enable;
 }
 
+
+- (IBAction)makeSearchFieldKey:(id)sender{
+    NSToolbar *toolbar = [documentWindow toolbar];
+    NSArray *items = [[toolbar items] valueForKey:@"itemIdentifier"];
+    if ([items containsObject:BibDocumentToolbarSearchItemIdentifier] == NO)
+        [toolbar insertItemWithItemIdentifier:BibDocumentToolbarSearchItemIdentifier atIndex:[[items lastObject] isEqualToString:BibDocumentToolbarCiteDrawerItemIdentifier] ? [items count] - 1 : [items count]];
+    if([toolbar displayMode] == NSToolbarDisplayModeLabelOnly)
+        [toolbar setDisplayMode:NSToolbarDisplayModeIconAndLabel];
+    [toolbar setVisible:YES];
+	
+    [documentWindow makeFirstResponder:searchField];
+    [searchField selectText:sender];
+}
 
 @end
