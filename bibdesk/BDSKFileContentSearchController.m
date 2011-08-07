@@ -209,26 +209,26 @@
     
     if (nil != searchField) {
         // disconnect the current searchfield
-        [savedSearchMenuTemplate release];
-        savedSearchMenuTemplate = [[[searchField cell] searchMenuTemplate] retain];
-        [savedRecentSearches release];
-        savedRecentSearches = [[[searchField cell] recentSearches] retain];
         [searchField setTarget:nil];
         [searchField setDelegate:nil];  
-        [[searchField cell] setSearchMenuTemplate:nil];
-        [[searchField cell] setRecentSearches:nil];
+        [[searchField cell] setSearchMenuTemplate:savedSearchMenuTemplate];
+        [[searchField cell] setRecentSearches:savedRecentSearches];
+        BDSKDESTROY(savedSearchMenuTemplate);
+        BDSKDESTROY(savedRecentSearches);
     }
     
     [searchField release];
     searchField = [aSearchField retain];
     
     if (nil != searchField) {
+        [savedSearchMenuTemplate release];
+        savedSearchMenuTemplate = [[[searchField cell] searchMenuTemplate] retain];
+        [savedRecentSearches release];
+        savedRecentSearches = [[[searchField cell] recentSearches] retain];
         [searchField setTarget:self];
         [searchField setDelegate:self];
-        [[searchField cell] setSearchMenuTemplate:savedSearchMenuTemplate];
-        [[searchField cell] setRecentSearches:savedRecentSearches];
-        BDSKDESTROY(savedSearchMenuTemplate);
-        BDSKDESTROY(savedRecentSearches);
+        [[searchField cell] setSearchMenuTemplate:[[[NSMenu alloc] init] autorelease]];
+        [[searchField cell] setRecentSearches:nil];
         [self search:searchField];
     }     
 }
