@@ -72,6 +72,7 @@
         searchIndex = [[BDSKFileSearchIndex alloc] initForOwner:owner];
         search = [[BDSKFileSearch alloc] initWithIndex:searchIndex delegate:self];
         searchFieldDidEndEditing = NO;
+        savedRecentSearches = [[NSArray alloc] init];
     }
     return self;
 }
@@ -202,6 +203,21 @@
     }
 }
 
+- (void)swapSearchMenuTemplate {
+    NSSearchFieldCell *cell = [searchField cell];
+    NSMenu *tmpMenu = [[[cell searchMenuTemplate] retain] autorelease];
+    NSArray *tmpRecents = [[[cell recentSearches] retain] autorelease];
+    [[searchField cell] setSearchMenuTemplate:savedSearchMenuTemplate];
+    [[searchField cell] setRecentSearches:savedRecentSearches];
+    [self setSavedSearchMenuTemplate:tmpMenu];
+    [self setSavedRecentSearches:tmpRecents];
+}
+
+- (NSSearchField *)searchField
+{
+    return searchField;
+}
+
 - (void)setSearchField:(NSSearchField *)aSearchField
 {
     if (searchField == aSearchField)
@@ -211,26 +227,44 @@
         // disconnect the current searchfield
         [searchField setTarget:nil];
         [searchField setDelegate:nil];  
-        [[searchField cell] setSearchMenuTemplate:savedSearchMenuTemplate];
-        [[searchField cell] setRecentSearches:savedRecentSearches];
-        BDSKDESTROY(savedSearchMenuTemplate);
-        BDSKDESTROY(savedRecentSearches);
+        [self swapSearchMenuTemplate];
     }
     
     [searchField release];
     searchField = [aSearchField retain];
     
     if (nil != searchField) {
-        [savedSearchMenuTemplate release];
-        savedSearchMenuTemplate = [[[searchField cell] searchMenuTemplate] retain];
-        [savedRecentSearches release];
-        savedRecentSearches = [[[searchField cell] recentSearches] retain];
         [searchField setTarget:self];
         [searchField setDelegate:self];
-        [[searchField cell] setSearchMenuTemplate:[[[NSMenu alloc] init] autorelease]];
-        [[searchField cell] setRecentSearches:nil];
+        [self swapSearchMenuTemplate];
         [self search:searchField];
     }     
+}
+
+- (NSMenu *)savedSearchMenuTemplate
+{
+    return savedSearchMenuTemplate;
+}
+
+- (void)setSavedSearchMenuTemplate:(NSMenu *)menu
+{
+    if (savedSearchMenuTemplate != menu) {
+        [savedSearchMenuTemplate release];
+        savedSearchMenuTemplate = [menu retain];
+    }
+}
+
+- (NSArray *)savedRecentSearches
+{
+    return savedRecentSearches;
+}
+
+- (void)setSavedRecentSearches:(NSArray *)recents
+{
+    if (savedRecentSearches != recents) {
+        [savedRecentSearches release];
+        savedRecentSearches = [recents retain];
+    }
 }
 
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification
