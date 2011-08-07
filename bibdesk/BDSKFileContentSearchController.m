@@ -89,6 +89,9 @@
     BDSKDESTROY(results);
     BDSKDESTROY(filteredResults);
     BDSKDESTROY(filterURLs);
+    BDSKDESTROY(searchField);
+    BDSKDESTROY(savedSearchMenuTemplate);
+    BDSKDESTROY(savedRecentSearches);
     [super dealloc];
 }
 
@@ -201,17 +204,31 @@
 
 - (void)setSearchField:(NSSearchField *)aSearchField
 {
+    if (searchField == aSearchField)
+        return;
+    
     if (nil != searchField) {
         // disconnect the current searchfield
+        [savedSearchMenuTemplate release];
+        savedSearchMenuTemplate = [[[searchField cell] searchMenuTemplate] retain];
+        [savedRecentSearches release];
+        savedRecentSearches = [[[searchField cell] recentSearches] retain];
         [searchField setTarget:nil];
         [searchField setDelegate:nil];  
+        [[searchField cell] setSearchMenuTemplate:nil];
+        [[searchField cell] setRecentSearches:nil];
     }
     
-    searchField = aSearchField;
+    [searchField release];
+    searchField = [aSearchField retain];
     
     if (nil != searchField) {
         [searchField setTarget:self];
         [searchField setDelegate:self];
+        [[searchField cell] setSearchMenuTemplate:savedSearchMenuTemplate];
+        [[searchField cell] setRecentSearches:savedRecentSearches];
+        BDSKDESTROY(savedSearchMenuTemplate);
+        BDSKDESTROY(savedRecentSearches);
         [self search:searchField];
     }     
 }

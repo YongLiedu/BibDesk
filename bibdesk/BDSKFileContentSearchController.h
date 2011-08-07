@@ -79,6 +79,8 @@
     BOOL searchFieldDidEndEditing;
     
     NSSearchField *searchField;
+    NSMenu *savedSearchMenuTemplate;
+    NSArray *savedRecentSearches;
 }
 
 // Use this method to instantiate a search controller for use within a document window
