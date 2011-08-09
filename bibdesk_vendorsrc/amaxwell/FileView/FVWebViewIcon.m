@@ -185,7 +185,8 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
         [_webView stopLoading:nil];
         FVAPIAssert([_webView downloadDelegate] == nil, @"downloadDelegate non-nil");
         FVAPIAssert([_webView UIDelegate] == nil, @"UIDelegate non-nil");
-        [_webView release];
+        // autorelease instead of release to workaround rdar://problem/9923439 (WebKit: crash when loading cancelled due to policy delegate callout)
+        [_webView autorelease];
         // may have frames if the load was cancelled?
         [_redirectedFrames removeAllObjects];
         _numberOfWebViews--;
