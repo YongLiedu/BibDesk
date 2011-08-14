@@ -198,6 +198,8 @@ extern NSString *BDSKSideFileViewDisplayModeKey;
 extern NSString *BDSKEditorFileViewIconScaleKey;
 extern NSString *BDSKEditorFileViewDisplayModeKey;
 
+extern NSString *BDSKDownloadsDirectoryKey;
+
 #pragma mark BibTeX types strings
 
 extern NSString *BDSKBibtexString;

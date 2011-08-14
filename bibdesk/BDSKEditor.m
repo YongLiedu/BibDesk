@@ -88,8 +88,6 @@
 
 #define WEAK_NULL NULL
 
-#define BDSKDownloadsDirectoryKey @"BDSKDownloadsDirectory"
-
 #define BDSKEditorFrameAutosaveName @"BDSKEditor window autosave name"
 #define BDSKEditorMainSplitViewAutosaveName @"BDSKEditorMainSplitView"
 #define BDSKEditorFileSplitViewAutosaveName @"BDSKEditorFileSplitView"
@@ -1748,7 +1746,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     BOOL isDir;
     
     if (downloadsDirectory == nil && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey] && [NSString isEmptyString:extension] == NO)
-        downloadsDirectory = [NSSearchPathForDirectoriesInDomains(NSDownloadsDirectory, NSUserDomainMask, YES) firstObject];
+        downloadsDirectory = [[[NSFileManager defaultManager] downloadFolderURL] path];
     
     if ([NSString isEmptyString:extension] == NO && [[NSFileManager defaultManager] fileExistsAtPath:downloadsDirectory isDirectory:&isDir] && isDir) {
         fileURL = [NSURL fileURLWithPath:[downloadsDirectory stringByAppendingPathComponent:filename]];

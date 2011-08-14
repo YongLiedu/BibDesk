@@ -446,7 +446,7 @@
 // This is a private WebUIDelegate method that is called by WebPDFView
 - (void)webView:(WebView *)sender saveFrameView:(WebFrameView *)frameView showingPanel:(BOOL)showingPanel {
     WebDataSource *dataSource = [[frameView webFrame] dataSource];
-    NSString *downloadsDir = [NSSearchPathForDirectoriesInDomains(NSDownloadsDirectory, NSUserDomainMask, YES) firstObject];
+    NSString *downloadsDir = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKDownloadsDirectoryKey] ?: [[[NSFileManager defaultManager] downloadFolderURL] path];
     NSString *filename = [[dataSource response] suggestedFilename];
     filename = [[NSFileManager defaultManager] uniqueFilePathWithName:filename atPath:downloadsDir];
     if (showingPanel) {
