@@ -90,13 +90,13 @@ static inline NSImage *createBadgedIcon(NSImage *icon, NSString *badgeName) {
 
 + (NSImage *)lockedIcon {
     if(lockedIcon == nil)
-        lockedIcon = createIconWithLock([self icon], NSImageNameLockLockedTemplate);
+        lockedIcon = createBadgedIcon([self icon], NSImageNameLockLockedTemplate);
     return lockedIcon;
 }
 
 + (NSImage *)unlockedIcon {
     if(unlockedIcon == nil)
-        unlockedIcon = createIconWithLock([self icon], NSImageNameLockUnlockedTemplate);
+        unlockedIcon = createBadgedIcon([self icon], NSImageNameLockUnlockedTemplate);
     return unlockedIcon;
 }
 
