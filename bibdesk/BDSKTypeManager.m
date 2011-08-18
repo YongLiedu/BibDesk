@@ -105,7 +105,7 @@ static BDSKTypeManager *sharedManager = nil;
 }
 
 static NSString *BDSKUserTypeInfoPath() {
-    return [[[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:TYPE_INFO_FILENAME] stringByAppendingPathExtension:@"plist"];
+    return [[[[NSFileManager defaultManager] applicationSupportDirectory] stringByAppendingPathComponent:TYPE_INFO_FILENAME] stringByAppendingPathExtension:@"plist"];
 }
 
 - (id)init{

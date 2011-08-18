@@ -194,7 +194,7 @@ static NSSet *standardStyles = nil;
 
 - (IBAction)openTeXPreviewFile:(id)sender{
     // Edit the TeX template in the Application Support folder
-    NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
+    NSString *applicationSupportPath = [[NSFileManager defaultManager] applicationSupportDirectory];
     
     // edit the previewtemplate.tex file, so the bibpreview.tex is only edited by PDFPreviewer
     NSString *path = [applicationSupportPath stringByAppendingPathComponent:@"previewtemplate.tex"];
@@ -222,7 +222,7 @@ static NSSet *standardStyles = nil;
     if (returnCode == NSAlertAlternateReturn)
         return;
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
+    NSString *applicationSupportPath = [[NSFileManager defaultManager] applicationSupportDirectory];
     NSString *previewTemplatePath = [applicationSupportPath stringByAppendingPathComponent:@"previewtemplate.tex"];
     if([fileManager fileExistsAtPath:previewTemplatePath])
         [fileManager removeItemAtPath:previewTemplatePath error:NULL];

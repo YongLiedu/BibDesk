@@ -156,7 +156,7 @@
     if (returnCode == NSAlertAlternateReturn)
         return;
     NSFileManager *fileManager = [NSFileManager defaultManager];
-	NSString *conversionsFilePath = [[fileManager currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
+	NSString *conversionsFilePath = [[fileManager applicationSupportDirectory] stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
     if([fileManager fileExistsAtPath:conversionsFilePath])
         [fileManager removeItemAtPath:conversionsFilePath error:NULL];
 	// tell the converter to reload its dictionaries

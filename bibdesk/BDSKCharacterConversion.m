@@ -86,7 +86,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 - (void)updateDicts {
 	// try to read the user file in the Application Support directory
 	NSFileManager *fm = [NSFileManager defaultManager];
-	NSString *applicationSupportPath = [fm currentApplicationSupportPathForCurrentUser];
+	NSString *applicationSupportPath = [fm applicationSupportDirectory];
 	NSString *charConvPath = [applicationSupportPath stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
 	NSDictionary *tmpDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME]];
 	
@@ -213,7 +213,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
             NSLog(@"Error writing: %@", error);
             [error release];
         } else {
-            NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
+            NSString *applicationSupportPath = [[NSFileManager defaultManager] applicationSupportDirectory]; 
             NSString *charConvPath = [applicationSupportPath stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
             [data writeToFile:charConvPath atomically:YES];
         }

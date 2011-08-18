@@ -69,7 +69,7 @@
 
 @interface NSFileManager (BDSKExtensions)
 
-- (NSString *)currentApplicationSupportPathForCurrentUser;
+- (NSString *)applicationSupportDirectory;
 - (NSString *)applicationsDirectory;
 - (NSString *)desktopDirectory;
 - (NSURL *)downloadFolderURL;

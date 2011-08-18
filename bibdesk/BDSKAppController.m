@@ -319,7 +319,7 @@ static void fixLegacyTableColumnIdentifiers()
     [fileManager copyFileFromSharedSupportToApplicationSupport:@"template.txt" overwrite:NO];   
     [fileManager copyFileFromSharedSupportToApplicationSupport:@"Bookmarks.plist" overwrite:NO];   
 
-    NSString *scriptsPath = [[fileManager currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"Scripts"];
+    NSString *scriptsPath = [[fileManager applicationSupportDirectory] stringByAppendingPathComponent:@"Scripts"];
     if ([fileManager fileExistsAtPath:scriptsPath] == NO)
         [fileManager createDirectoryAtPath:scriptsPath withIntermediateDirectories:NO attributes:nil error:NULL];
     
@@ -335,7 +335,7 @@ static void fixLegacyTableColumnIdentifiers()
     [[WebPreferences standardPreferences] setCacheModel:WebCacheModelDocumentBrowser];
     
     WebHistory *history = [[[WebHistory alloc] init] autorelease];
-    NSString *historyPath = [[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"History.plist"];
+    NSString *historyPath = [[[NSFileManager defaultManager] applicationSupportDirectory] stringByAppendingPathComponent:@"History.plist"];
     if ([[NSFileManager defaultManager] fileExistsAtPath:historyPath])
         [history loadFromURL:[NSURL fileURLWithPath:historyPath] error:NULL];
     [WebHistory setOptionalSharedHistory:history];
@@ -434,7 +434,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 }
 
 - (void)applicationWillTerminate:(NSNotification *)notification {
-    NSString *historyPath = [[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"History.plist"];
+    NSString *historyPath = [[[NSFileManager defaultManager] applicationSupportDirectory] stringByAppendingPathComponent:@"History.plist"];
     [[WebHistory optionalSharedHistory] saveToURL:[NSURL fileURLWithPath:historyPath] error:NULL];
 }
 

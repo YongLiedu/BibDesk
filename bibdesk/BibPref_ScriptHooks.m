@@ -83,7 +83,7 @@
         if([tableView selectedRow] == -1) 
             return;
         
-        NSString *directory = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
+        NSString *directory = [[NSFileManager defaultManager] applicationSupportDirectory];
         NSOpenPanel *openPanel = [NSOpenPanel openPanel];
         [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
         [openPanel setAllowsMultipleSelection:NO];

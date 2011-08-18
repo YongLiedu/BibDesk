@@ -175,7 +175,7 @@ static void destroyTemporaryDirectory()
     [pool release];
 }
 
-- (NSString *)currentApplicationSupportPathForCurrentUser{
+- (NSString *)applicationSupportDirectory{
     
     static NSString *path = nil;
     
@@ -268,7 +268,7 @@ static void destroyTemporaryDirectory()
 }
 
 - (BOOL)copyFileFromSharedSupportToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite{
-    NSString *targetPath = [[self currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:fileName];
+    NSString *targetPath = [[self applicationSupportDirectory] stringByAppendingPathComponent:fileName];
     NSString *sourcePath = [[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:fileName];
     if ([self fileExistsAtPath:targetPath]) {
         if (overwrite == NO)
@@ -279,7 +279,7 @@ static void destroyTemporaryDirectory()
 }
 
 - (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite{
-    NSString *applicationSupport = [self currentApplicationSupportPathForCurrentUser];
+    NSString *applicationSupport = [self applicationSupportDirectory];
     NSString *templates = @"Templates";
     NSString *templatesPath = [applicationSupport stringByAppendingPathComponent:templates];
     BOOL success = YES;

@@ -78,7 +78,7 @@ static BDSKConverter *sharedConverter = nil;
 	NSDictionary *userWholeDict = nil;
     // look for the user file
     NSFileManager *fm = [NSFileManager defaultManager];
-    NSString *charConvPath = [[fm currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
+    NSString *charConvPath = [[fm applicationSupportDirectory] stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
 	
 	if ([fm fileExistsAtPath:charConvPath]) {
 		userWholeDict = [NSDictionary dictionaryWithContentsOfFile:charConvPath];

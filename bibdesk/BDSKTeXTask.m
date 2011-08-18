@@ -97,7 +97,7 @@
 // modify the TeX template in application support
 static void upgradeTemplate()
 {
-    NSString *texTemplatePath = [[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"previewtemplate.tex"];
+    NSString *texTemplatePath = [[[NSFileManager defaultManager] applicationSupportDirectory] stringByAppendingPathComponent:@"previewtemplate.tex"];
     NSStringEncoding encoding = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey];
     
     NSMutableString *texFile = [[NSMutableString alloc] initWithContentsOfFile:texTemplatePath encoding:encoding error:NULL];
@@ -143,7 +143,7 @@ static double runLoopTimeout = 30;
 		NSFileManager *fm = [NSFileManager defaultManager];
         NSString *dirPath = [fm makeTemporaryDirectoryWithBasename:newFileName];
         NSParameterAssert([fm fileExistsAtPath:dirPath]);
-		texTemplatePath = [[[fm currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"previewtemplate.tex"] copy];
+		texTemplatePath = [[[fm applicationSupportDirectory] stringByAppendingPathComponent:@"previewtemplate.tex"] copy];
         
 		NSString *filePath = [dirPath stringByAppendingPathComponent:newFileName];
         texPath = [[BDSKTeXPath alloc] initWithBasePath:filePath];
@@ -442,7 +442,7 @@ static double runLoopTimeout = 30;
 @implementation BDSKTeXTask (Private)
 
 - (NSArray *)helperFilePaths{
-    UKDirectoryEnumerator *enumerator = [UKDirectoryEnumerator enumeratorWithPath:[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]];
+    UKDirectoryEnumerator *enumerator = [UKDirectoryEnumerator enumeratorWithPath:[[NSFileManager defaultManager] applicationSupportDirectory]];
     [enumerator setDesiredInfo:kFSCatInfoNodeFlags];
     
 	NSString *path = nil;

@@ -59,7 +59,7 @@ static BOOL isSearchFileAtPath(NSString *path) {
 }
 
 - (void)loadCustomServers {
-    NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
+    NSString *applicationSupportPath = [[NSFileManager defaultManager] applicationSupportDirectory]; 
     NSString *serversPath = [applicationSupportPath stringByAppendingPathComponent:SERVERS_DIRNAME];
     BOOL isDir = NO;
     if ([[NSFileManager defaultManager] fileExistsAtPath:serversPath isDirectory:&isDir] && isDir) {
@@ -129,7 +129,7 @@ static BOOL isSearchFileAtPath(NSString *path) {
         NSLog(@"Error writing: %@", error);
         [error release];
     } else {
-        NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
+        NSString *applicationSupportPath = [[NSFileManager defaultManager] applicationSupportDirectory];
         NSString *serversPath = [applicationSupportPath stringByAppendingPathComponent:SERVERS_DIRNAME];
         BOOL isDir = NO;
         if ([[NSFileManager defaultManager] fileExistsAtPath:serversPath isDirectory:&isDir] == NO) {

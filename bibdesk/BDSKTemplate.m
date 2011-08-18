@@ -151,7 +151,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 + (NSArray *)defaultExportTemplates
 {
     NSMutableArray *itemNodes = [[NSMutableArray alloc] initWithCapacity:4];
-    NSString *appSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
+    NSString *appSupportPath = [[NSFileManager defaultManager] applicationSupportDirectory];
     NSString *templatesPath = [appSupportPath stringByAppendingPathComponent:@"Templates"];
     BDSKTemplate *template = nil;
     NSURL *fileURL = nil;
@@ -192,7 +192,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 + (NSArray *)defaultServiceTemplates
 {
     NSMutableArray *itemNodes = [[NSMutableArray alloc] initWithCapacity:2];
-    NSString *appSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
+    NSString *appSupportPath = [[NSFileManager defaultManager] applicationSupportDirectory];
     BDSKTemplate *template = nil;
     NSURL *fileURL = nil;
     

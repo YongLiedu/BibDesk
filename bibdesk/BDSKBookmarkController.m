@@ -95,7 +95,7 @@ static id sharedBookmarkController = nil;
             undoManager = nil;
             
             NSMutableArray *bookmarks = [NSMutableArray array];
-            NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
+            NSString *applicationSupportPath = [[NSFileManager defaultManager] applicationSupportDirectory]; 
             NSString *bookmarksPath = [applicationSupportPath stringByAppendingPathComponent:@"Bookmarks.plist"];
             if ([[NSFileManager defaultManager] fileExistsAtPath:bookmarksPath]) {
                 for (NSDictionary *dict in [NSArray arrayWithContentsOfFile:bookmarksPath]) {
@@ -292,7 +292,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 		return;
 	}
 	
-	NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
+	NSString *applicationSupportPath = [[NSFileManager defaultManager] applicationSupportDirectory]; 
 	NSString *bookmarksPath = [applicationSupportPath stringByAppendingPathComponent:@"Bookmarks.plist"];
 	[data writeToFile:bookmarksPath atomically:YES];
 }
