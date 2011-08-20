@@ -454,6 +454,9 @@ static NSOperationQueue *metadataCacheQueue = nil;
     
     [aController setWindowFrameAutosaveNameOrCascade:@"Main Window Frame Autosave" setFrame:frameRect];
             
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6)
+        [documentWindow setCollectionBehavior:[documentWindow collectionBehavior] | (1 << 7)]; // NSWindowCollectionBehaviorFullScreenPrimary = 1 << 7
+    
     [documentWindow makeFirstResponder:tableView];	
     
     // set autosave names first
