@@ -146,6 +146,20 @@ static char _FVFileViewContentObservationContext;
 #endif
 @end
 
+#if !defined(MAC_OS_X_VERSION_10_6) || MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_6
+
+enum {
+   NSScrollerStyleLegacy,
+   NSScrollerStyleOverlay
+};
+typedef NSInteger NSScrollerStyle;
+
+@interface NSScroller (SKLionDeclarations)
+- (NSScrollerStyle)scrollerStyle;
+@end
+
+#endif
+
 #pragma mark -
 
 @interface FVFileView (Private)
@@ -1147,6 +1161,8 @@ static char _FVFileViewContentObservationContext;
 }
 
 static CGFloat _scrollerWidthForScroller(NSScroller *scroller) {
+    if ([scroller respondsToSelector:@selector(scrollerStyle)] && [scroller scrollerStyle] == NSScrollerStyleOverlay)
+        return 0.0;
     return [[scroller class] scrollerWidthForControlSize:[scroller controlSize]];
 }
 
