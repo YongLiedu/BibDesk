@@ -234,11 +234,15 @@ typedef NSInteger NSScrollerStyle;
     NSColor *color = nil;
     
     // Magic source list color: http://lists.apple.com/archives/cocoa-dev/2008/Jun/msg02138.html
-    if ([NSOutlineView instancesRespondToSelector:@selector(setSelectionHighlightStyle:)]) {
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6) {
+        CGFloat red = 0.863772, green = 0.892659, blue = 0.919963;
+        color = [NSColor colorWithDeviceRed:red green:green blue:blue alpha:1.0];
+    } else if ([NSOutlineView instancesRespondToSelector:@selector(setSelectionHighlightStyle:)]) {
         NSOutlineView *outlineView = [[NSOutlineView alloc] initWithFrame:NSMakeRect(0,0,1,1)];
         [outlineView setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
         color = [[[outlineView backgroundColor] retain] autorelease];
         [outlineView release];
+        NSLog(@"%@",[color colorUsingColorSpaceName:NSDeviceRGBColorSpace]);
     }
     else {
         // from Mail.app on 10.4

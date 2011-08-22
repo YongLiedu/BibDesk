@@ -39,6 +39,14 @@ typedef float CGFloat;
 #define NSAppKitVersionNumber10_4 824
 #endif
 
+#ifndef NSAppKitVersionNumber10_5
+#define NSAppKitVersionNumber10_5 949
+#endif
+
+#ifndef NSAppKitVersionNumber10_6
+#define NSAppKitVersionNumber10_6 1038
+#endif
+
 #ifndef DEBUG
 #if !defined(NS_BLOCK_ASSERTIONS)
 #define NS_BLOCK_ASSERTIONS 1
