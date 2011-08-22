@@ -131,6 +131,6 @@
 @end
 
 
-@implementation NSWindow (SKLionOverride)
+@implementation NSWindow (BDSKLionOverride)
 - (BOOL)isRestorable { return NO; }
 @end
