@@ -242,7 +242,6 @@ typedef NSInteger NSScrollerStyle;
         [outlineView setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
         color = [[[outlineView backgroundColor] retain] autorelease];
         [outlineView release];
-        NSLog(@"%@",[color colorUsingColorSpaceName:NSDeviceRGBColorSpace]);
     }
     else {
         // from Mail.app on 10.4
