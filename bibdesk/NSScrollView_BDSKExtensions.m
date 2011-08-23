@@ -65,6 +65,7 @@ typedef NSInteger NSScrollerStyle;
 
 static void (*original_setHasHorizontalScroller)(id, SEL, BOOL) = NULL;
 static void (*original_setAutohidesScrollers)(id, SEL, BOOL) = NULL;
+static void (*original_setScrollerStyle)(id, SEL, NSScrollerStyle) = NULL;
 static void (*original_dealloc)(id, SEL) = NULL;
 static void (*original_tile)(id, SEL) = NULL;
 
@@ -88,6 +89,12 @@ static NSMapTable *scrollViewPlacardViews = NULL;
         original_setAutohidesScrollers(self, _cmd, flag);
 }
 
+- (void)replacement_setScrollerStyle:(NSScrollerStyle)newScrollerStyle;
+{
+    if ([scrollViewPlacardViews objectForKey:self] == nil)
+        original_setScrollerStyle(self, _cmd, newScrollerStyle);
+}
+
 - (void)replacement_tile {
     original_tile(self, _cmd);
     
@@ -107,6 +114,7 @@ static NSMapTable *scrollViewPlacardViews = NULL;
 + (void)load{
     original_setHasHorizontalScroller = (void (*)(id, SEL, BOOL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(setHasHorizontalScroller:), @selector(replacement_setHasHorizontalScroller:));
     original_setAutohidesScrollers = (void (*)(id, SEL, BOOL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(setAutohidesScrollers:), @selector(replacement_setAutohidesScrollers:));
+    original_setScrollerStyle = (void (*)(id, SEL, NSScrollerStyle))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(setAutohidesScrollers:), @selector(replacement_setScrollerStyle:));
     original_dealloc = (void (*)(id, SEL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(dealloc), @selector(replacement_dealloc));
     original_tile = (void (*)(id, SEL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(tile), @selector(replacement_tile));
     
@@ -133,12 +141,12 @@ static NSMapTable *scrollViewPlacardViews = NULL;
     if ([newPlacards count] != 0) {
         original_setHasHorizontalScroller(self, @selector(setHasHorizontalScroller:), YES);
         original_setAutohidesScrollers(self, @selector(setAutohidesScrollers:), NO);
-        if ([NSScroller instancesRespondToSelector:@selector(setScrollerStyle:)])
-            [[self horizontalScroller] setScrollerStyle:NSScrollerStyleOverlay];
+        if (original_setScrollerStyle != NULL)
+            original_setScrollerStyle(self, @selector(setScrollerStyle:), NSScrollerStyleOverlay);
     } else if (placardView) {
         [scrollViewPlacardViews removeObjectForKey:self];
-        if ([NSScroller instancesRespondToSelector:@selector(setScrollerStyle:)] && [NSScroller respondsToSelector:@selector(preferredScrollerStyle)])
-            [[self horizontalScroller] setScrollerStyle:[NSScroller preferredScrollerStyle]];
+        if (original_setScrollerStyle != NULL && [NSScroller respondsToSelector:@selector(preferredScrollerStyle)])
+            original_setScrollerStyle(self, @selector(setScrollerStyle:), [NSScroller preferredScrollerStyle]);
     }
     [placardView release];
     
