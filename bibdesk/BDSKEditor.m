@@ -191,7 +191,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     // Insert the tabView in the main window
     NSView *view = [[mainSplitView subviews] objectAtIndex:0];
     [[tabView superview] setFrame:[view frame]];
-    [mainSplitView replaceSubview:view with:[tabView superview]];
+    [view addSubview:tabView];
     [(BDSKColoredView *)[mainSplitView superview] setBackgroundColor:[NSColor windowBackgroundColor]];
     
     BDSKEdgeView *edgeView = (BDSKEdgeView *)[[[matrix enclosingScrollView] superview] superview];
