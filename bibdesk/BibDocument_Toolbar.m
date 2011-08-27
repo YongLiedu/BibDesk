@@ -43,8 +43,8 @@
 #import "BDSKCustomCiteDrawerController.h"
 #import "NSEvent_BDSKExtensions.h"
 
-#define TOOLBAR_SEARCHFIELD_MIN_SIZE NSMakeSize(110.0, 22.0)
-#define TOOLBAR_SEARCHFIELD_MAX_SIZE NSMakeSize(500.0, 22.0)
+#define TOOLBAR_SEARCHFIELD_MIN_SIZE NSMakeSize(140.0, 22.0)
+#define TOOLBAR_SEARCHFIELD_MAX_SIZE NSMakeSize(240.0, 22.0)
 
 #define BibDocumentToolbarIdentifier @"BibDocumentToolbarIdentifier"
 #define BibDocumentToolbarNewItemIdentifier @"BibDocumentToolbarNewItemIdentifier"
