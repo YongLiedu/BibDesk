@@ -177,14 +177,14 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (IBAction)setPapersFolderPathFromTextField:(id)sender{
-    [sud setObject:[[sender stringValue] stringByStandardizingPath] forKey:BDSKPapersFolderPathKey];
+    [sud setObject:[[[sender stringValue] stringByStandardizingPath] stringByAbbreviatingWithTildeInPath] forKey:BDSKPapersFolderPathKey];
     [self updatePapersFolderUI];
 }
 
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
 	if (returnCode == NSFileHandlingPanelOKButton) {
 		NSString *path = [[sheet filenames] objectAtIndex: 0];
-		[sud setObject:path forKey:BDSKPapersFolderPathKey];
+		[sud setObject:[path stringByAbbreviatingWithTildeInPath] forKey:BDSKPapersFolderPathKey];
 	}
 	[self updatePapersFolderUI];
 }
@@ -211,12 +211,12 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
         if ([NSString isEmptyString:lastPapersFolderPath]) {
             [self choosePapersFolderLocationAction:sender];
         } else {
-            [sud setObject:lastPapersFolderPath forKey:BDSKPapersFolderPathKey];
+            [sud setObject:[lastPapersFolderPath stringByAbbreviatingWithTildeInPath] forKey:BDSKPapersFolderPathKey];
             [self updatePapersFolderUI];
         }
 	} else {
         [lastPapersFolderPath release];
-        lastPapersFolderPath = [[sud objectForKey:BDSKPapersFolderPathKey] retain];
+        lastPapersFolderPath = [[[sud objectForKey:BDSKPapersFolderPathKey] stringByExpandingTildeInPath] retain];
 		[sud setObject:@"" forKey:BDSKPapersFolderPathKey];
 		[self updatePapersFolderUI];
 	}
