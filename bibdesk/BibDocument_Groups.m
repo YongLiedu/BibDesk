@@ -905,7 +905,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 - (void)searchBookmarkSheetDidEnd:(BDSKBookmarkSheetController *)sheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSOKButton) {
         BDSKGroup *group = [[self selectedGroups] lastObject];
-        [[BDSKSearchBookmarkController sharedBookmarkController] addBookmarkWithInfo:[group dictionaryValue] label:[sheetController stringValue] toFolder:[sheetController selectedFolder]];
+        BDSKSearchBookmark *bookmark = [BDSKSearchBookmark searchBookmarkWithInfo:[group dictionaryValue] label:[sheetController stringValue]];
+        if (bookmark) {
+            BDSKSearchBookmark *folder = [sheetController selectedFolder] ?: [[BDSKSearchBookmarkController sharedBookmarkController] bookmarkRoot];
+            [folder insertObject:bookmark inChildrenAtIndex:[folder countOfChildren]];
+        }
     }
 }
 

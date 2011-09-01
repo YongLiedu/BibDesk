@@ -130,14 +130,6 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     return minimalCover;
 }
 
-- (void)addBookmarkWithInfo:(NSDictionary *)info label:(NSString *)label toFolder:(BDSKSearchBookmark *)folder {
-    BDSKSearchBookmark *bookmark = [BDSKSearchBookmark searchBookmarkWithInfo:info label:label];
-    if (bookmark) {
-        if (folder == nil) folder = bookmarkRoot;
-        [folder insertObject:bookmark inChildrenAtIndex:[folder countOfChildren]];
-    }
-}
-
 - (NSArray *)draggedBookmarks {
     return draggedBookmarks;
 }

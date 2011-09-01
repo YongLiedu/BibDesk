@@ -53,8 +53,6 @@
 
 - (BDSKSearchBookmark *)bookmarkRoot;
 
-- (void)addBookmarkWithInfo:(NSDictionary *)info label:(NSString *)label toFolder:(BDSKSearchBookmark *)folder;
-
 - (IBAction)insertBookmarkFolder:(id)sender;
 - (IBAction)insertBookmarkSeparator:(id)sender;
 - (IBAction)deleteBookmark:(id)sender;
