@@ -54,8 +54,6 @@
 
 - (BDSKBookmark *)bookmarkRoot;
 
-- (void)addBookmarkWithUrlString:(NSString *)urlString name:(NSString *)name;
-- (void)addBookmarkWithUrlString:(NSString *)urlString name:(NSString *)name toFolder:(BDSKBookmark *)folder;
 - (void)addBookmarkWithUrlString:(NSString *)urlString proposedName:(NSString *)name modalForWindow:(NSWindow *)window;
 
 - (IBAction)insertBookmark:(id)sender;

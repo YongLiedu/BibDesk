@@ -157,22 +157,14 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     }
 }
 
-- (void)addBookmarkWithUrlString:(NSString *)urlString name:(NSString *)name {
-    [self addBookmarkWithUrlString:urlString name:name toFolder:nil];
-}
-
-- (void)addBookmarkWithUrlString:(NSString *)urlString name:(NSString *)name toFolder:(BDSKBookmark *)folder {
-    BDSKBookmark *bookmark = [BDSKBookmark bookmarkWithUrlString:urlString name:name];
-    if (bookmark) {
-        if (folder == nil) folder = bookmarkRoot;
-        [folder insertObject:bookmark inChildrenAtIndex:[folder countOfChildren]];
-    }
-}
-
 - (void)addBookmarkSheetDidEnd:(BDSKBookmarkSheetController *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     NSString *urlString = (NSString *)contextInfo;
 	if (returnCode == NSOKButton) {
-        [self addBookmarkWithUrlString:urlString name:[sheet stringValue] toFolder:[sheet selectedFolder]];
+        BDSKBookmark *bookmark = [BDSKBookmark bookmarkWithUrlString:urlString name:[sheet stringValue]];
+        if (bookmark) {
+            BDSKBookmark *folder = [sheet selectedFolder] ?: bookmarkRoot;
+            [folder insertObject:bookmark inChildrenAtIndex:[folder countOfChildren]];
+        }
 	}
     [urlString release]; //the contextInfo was retained
 }
