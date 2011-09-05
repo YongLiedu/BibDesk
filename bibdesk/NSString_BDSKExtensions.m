@@ -304,11 +304,14 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     NSString *string = self;
     NSString *doubleHyphen = @"--";
     NSRange range = [self rangeOfString:doubleHyphen];
+    NSUInteger len = [self length];
     if (range.location != NSNotFound) {
         NSMutableString *mutString = [[self mutableCopy] autorelease];
         do {
-            [mutString replaceCharactersInRange:range withString:[NSString endashString]];
-            range = [mutString rangeOfString:doubleHyphen];
+            if ((range.location == 0 || [mutString characterAtIndex:range.location - 1] != '-') &&
+                (NSMaxRange(range) == len || [mutString characterAtIndex:NSMaxRange(range) + 1] != '-'))
+                [mutString replaceCharactersInRange:range withString:[NSString endashString]];
+            range = [mutString rangeOfString:doubleHyphen options:0 range:NSMakeRange(NSMaxRange(range), len - NSMaxRange(range))];
         } while (range.location != NSNotFound);
         string = mutString;
     }
@@ -319,11 +322,14 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     NSString *string = self;
     NSString *tripleHyphen = @"---";
     NSRange range = [self rangeOfString:tripleHyphen];
+    NSUInteger len = [self length];
     if (range.location != NSNotFound) {
         NSMutableString *mutString = [[self mutableCopy] autorelease];
         do {
-            [mutString replaceCharactersInRange:range withString:[NSString emdashString]];
-            range = [mutString rangeOfString:tripleHyphen];
+            if ((range.location == 0 || [mutString characterAtIndex:range.location - 1] != '-') &&
+                (NSMaxRange(range) == len || [mutString characterAtIndex:NSMaxRange(range) + 1] != '-'))
+                [mutString replaceCharactersInRange:range withString:[NSString emdashString]];
+            range = [mutString rangeOfString:tripleHyphen options:0 range:NSMakeRange(NSMaxRange(range), len - NSMaxRange(range))];
         } while (range.location != NSNotFound);
         string = mutString;
     }
