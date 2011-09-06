@@ -1449,6 +1449,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSData *pubData;
     NSError *error = nil;
     BOOL isOK = YES;
+    BOOL hasData = NO;
         
     BOOL shouldAppendFrontMatter = YES;
     NSStringEncoding encoding = [self encodingForSaving];
@@ -1493,6 +1494,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
     // only append this if it wasn't redundant (this assumes that the original frontmatter is either a subset of the necessary frontmatter, or that the user's preferences should override in case of a conflict)
     if(isOK && shouldAppendFrontMatter){
+        hasData = YES;
         isOK = [outputData appendDataFromString:frontMatter encoding:encoding error:&error];
         if(NO == isOK)
             [error setValue:NSLocalizedString(@"Unable to convert file header.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
@@ -1500,6 +1502,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
         
     if(isOK && [documentInfo count]){
+        hasData = YES;
         isOK = [outputData appendDataFromString:[self documentInfoString] encoding:encoding error:&error];
         if(NO == isOK)
             [error setValue:NSLocalizedString(@"Unable to convert document info.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
@@ -1507,26 +1510,35 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     // output the document's macros:
     if(isOK){
-        isOK = [outputData appendDataFromString:[[self macroResolver] bibTeXString] encoding:encoding error:&error];
-        if(NO == isOK)
-            [error setValue:NSLocalizedString(@"Unable to convert macros.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
+        NSString *macroString = [[self macroResolver] bibTeXString];
+        if ([macroString length] > 0) {
+            hasData = YES;
+            isOK = [outputData appendDataFromString:macroString encoding:encoding error:&error];
+            if(NO == isOK)
+                [error setValue:NSLocalizedString(@"Unable to convert macros.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
+        }
     }
     
     // output the bibs
     
-    for (BibItem *pub in [self publicationsForSaving]){
-        if (isOK == NO) break;
-        pubData = [pub bibTeXDataWithOptions:options relativeToPath:basePath encoding:encoding error:&error];
-        if(isOK = pubData != nil){
-            [outputData appendData:doubleNewlineData];
-            [outputData appendData:pubData];
-        }else if([error valueForKey:NSLocalizedRecoverySuggestionErrorKey] == nil)
-            [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert item with cite key %@.", @"string encoding error context"), [pub citeKey]] forKey:NSLocalizedRecoverySuggestionErrorKey];
+    NSArray *pubs = [self publicationsForSaving];
+    if ([pubs count] > 0) {
+        hasData = YES;
+        for (BibItem *pub in [self publicationsForSaving]){
+            if (isOK == NO) break;
+            pubData = [pub bibTeXDataWithOptions:options relativeToPath:basePath encoding:encoding error:&error];
+            if(isOK = pubData != nil){
+                [outputData appendData:doubleNewlineData];
+                [outputData appendData:pubData];
+            }else if([error valueForKey:NSLocalizedRecoverySuggestionErrorKey] == nil)
+                [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert item with cite key %@.", @"string encoding error context"), [pub citeKey]] forKey:NSLocalizedRecoverySuggestionErrorKey];
+        }
     }
     
     if (drop == NO) {
         // The data from groups is always UTF-8, and we shouldn't convert it unless we have an unparseable encoding; the comment key strings should be representable in any encoding
         if(isOK && ([[groups staticGroups] count] > 0)){
+            hasData = YES;
             isOK = [outputData appendDataFromString:@"\n\n@comment{BibDesk Static Groups{\n" encoding:encoding error:&error] &&
                    [outputData appendStringData:[groups serializedGroupsDataOfType:BDSKStaticGroupType] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
                    [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
@@ -1534,12 +1546,14 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                 [error setValue:NSLocalizedString(@"Unable to convert static groups.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
         if(isOK && ([[groups smartGroups] count] > 0)){
+            hasData = YES;
             isOK = [outputData appendDataFromString:@"\n\n@comment{BibDesk Smart Groups{\n" encoding:encoding error:&error] &&
                    [outputData appendStringData:[groups serializedGroupsDataOfType:BDSKSmartGroupType] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
                    [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
                 [error setValue:NSLocalizedString(@"Unable to convert smart groups.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
         if(isOK && ([[groups URLGroups] count] > 0)){
+            hasData = YES;
             isOK = [outputData appendDataFromString:@"\n\n@comment{BibDesk URL Groups{\n" encoding:encoding error:&error] &&
                    [outputData appendStringData:[groups serializedGroupsDataOfType:BDSKURLGroupType] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
                    [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
@@ -1547,6 +1561,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                 [error setValue:NSLocalizedString(@"Unable to convert external file groups.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
         if(isOK && ([[groups scriptGroups] count] > 0)){
+            hasData = YES;
             isOK = [outputData appendDataFromString:@"\n\n@comment{BibDesk Script Groups{\n" encoding:encoding error:&error] &&
                    [outputData appendStringData:[groups serializedGroupsDataOfType:BDSKScriptGroupType] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
                    [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
@@ -1555,7 +1570,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         }
     }
     
-    if(isOK)
+    if (hasData == NO)
+        [outputData setLength:0];
+    else if(isOK)
         [outputData appendDataFromString:@"\n" encoding:encoding error:&error];
         
     if (NO == isOK && outError != NULL) *outError = error;
