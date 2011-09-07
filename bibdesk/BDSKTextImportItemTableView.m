@@ -40,6 +40,7 @@
 #import "BDSKTypeManager.h"
 #import "NSEvent_BDSKExtensions.h"
 
+#define BDSKEscapeCharacter 0x001b
 
 @interface NSTableView (BDSKApplePrivate2)
 - (void)_dataSourceSetValue:(id)value forColumn:(NSTableColumn *)tableColumn row:(NSInteger)row;
@@ -100,7 +101,7 @@
         
         } else if (temporaryTypeSelectMode) {
         
-            if (c == NSTabCharacter || c == 0x001b) {
+            if (c == NSTabCharacter || c == BDSKEscapeCharacter) {
                 [self endTemporaryTypeSelectMode];
             } else if (c == NSCarriageReturnCharacter || c == NSEnterCharacter || c == NSNewlineCharacter) {
                 [self endTemporaryTypeSelectMode];
@@ -132,7 +133,7 @@
         fieldNameCharSet = [[[[BDSKTypeManager sharedManager] strictInvalidCharactersForField:BDSKCiteKeyString] invertedSet] copy];
     
     if (temporaryTypeSelectMode) {
-        if ((c == NSTabCharacter || c == 0x001b) && flags == 0) {
+        if ((c == NSTabCharacter || c == BDSKEscapeCharacter) && flags == 0) {
             [self endTemporaryTypeSelectMode];
             return;
         } else if ((c == NSCarriageReturnCharacter || c == NSEnterCharacter || c == NSNewlineCharacter) && flags == 0) {
