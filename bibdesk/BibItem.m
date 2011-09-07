@@ -1720,7 +1720,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     isOK = [data appendDataFromString:typeAndCiteKey encoding:encoding error:&error];
     
     if(isOK == NO) {
-        error = [[error mutableCopy] autorelease];
+        if ([error isMutable] == NO) error = [[error mutableCopy] autorelease];
         [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert cite key of item with cite key \"%@\".", @"string encoding error context"), [self citeKey]] forKey:NSLocalizedRecoverySuggestionErrorKey];
     }
     

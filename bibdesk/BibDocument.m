@@ -1484,8 +1484,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         }
         
         isOK = [outputData appendDataFromString:templateFile encoding:encoding error:&error];
-        if(NO == isOK)
+        if(NO == isOK){
+            if ([error isMutable] == NO) error = [[error mutableCopy] autorelease];
             [error setValue:NSLocalizedString(@"Unable to convert template string.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
+        }
     } else if ([NSString isEmptyString:frontMatter]) {
         shouldAppendFrontMatter = NO;
     }
@@ -1496,16 +1498,20 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if(isOK && shouldAppendFrontMatter){
         hasData = YES;
         isOK = [outputData appendDataFromString:frontMatter encoding:encoding error:&error];
-        if(NO == isOK)
+        if(NO == isOK){
+            if ([error isMutable] == NO) error = [[error mutableCopy] autorelease];
             [error setValue:NSLocalizedString(@"Unable to convert file header.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
+        }
         [outputData appendData:doubleNewlineData];
     }
         
     if(isOK && [documentInfo count]){
         hasData = YES;
         isOK = [outputData appendDataFromString:[self documentInfoString] encoding:encoding error:&error];
-        if(NO == isOK)
+        if(NO == isOK){
+            if ([error isMutable] == NO) error = [[error mutableCopy] autorelease];
             [error setValue:NSLocalizedString(@"Unable to convert document info.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
+        }
     }
     
     // output the document's macros:
@@ -1514,8 +1520,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         if ([NSString isEmptyString:macroString] == NO) {
             hasData = YES;
             isOK = [outputData appendDataFromString:macroString encoding:encoding error:&error];
-            if(NO == isOK)
+            if(NO == isOK){
+                if ([error isMutable] == NO) error = [[error mutableCopy] autorelease];
                 [error setValue:NSLocalizedString(@"Unable to convert macros.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
+            }
         }
     }
     
@@ -1530,8 +1538,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             if((isOK = (pubData != nil))){
                 [outputData appendData:doubleNewlineData];
                 [outputData appendData:pubData];
-            }else if([error valueForKey:NSLocalizedRecoverySuggestionErrorKey] == nil)
+            }else if([error valueForKey:NSLocalizedRecoverySuggestionErrorKey] == nil){
+                if ([error isMutable] == NO) error = [[error mutableCopy] autorelease];
                 [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert item with cite key %@.", @"string encoding error context"), [pub citeKey]] forKey:NSLocalizedRecoverySuggestionErrorKey];
+            }
         }
     }
     
@@ -1542,31 +1552,40 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             isOK = [outputData appendDataFromString:@"\n\n@comment{BibDesk Static Groups{\n" encoding:encoding error:&error] &&
                    [outputData appendStringData:[groups serializedGroupsDataOfType:BDSKStaticGroupType] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
                    [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
-            if(NO == isOK)
+            if(NO == isOK){
+                if ([error isMutable] == NO) error = [[error mutableCopy] autorelease];
                 [error setValue:NSLocalizedString(@"Unable to convert static groups.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
+            }
         }
         if(isOK && ([[groups smartGroups] count] > 0)){
             hasData = YES;
             isOK = [outputData appendDataFromString:@"\n\n@comment{BibDesk Smart Groups{\n" encoding:encoding error:&error] &&
                    [outputData appendStringData:[groups serializedGroupsDataOfType:BDSKSmartGroupType] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
                    [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
+            if(NO == isOK){
+                if ([error isMutable] == NO) error = [[error mutableCopy] autorelease];
                 [error setValue:NSLocalizedString(@"Unable to convert smart groups.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
+            }
         }
         if(isOK && ([[groups URLGroups] count] > 0)){
             hasData = YES;
             isOK = [outputData appendDataFromString:@"\n\n@comment{BibDesk URL Groups{\n" encoding:encoding error:&error] &&
                    [outputData appendStringData:[groups serializedGroupsDataOfType:BDSKURLGroupType] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
                    [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
-            if(NO == isOK)
+            if(NO == isOK){
+                if ([error isMutable] == NO) error = [[error mutableCopy] autorelease];
                 [error setValue:NSLocalizedString(@"Unable to convert external file groups.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
+            }
         }
         if(isOK && ([[groups scriptGroups] count] > 0)){
             hasData = YES;
             isOK = [outputData appendDataFromString:@"\n\n@comment{BibDesk Script Groups{\n" encoding:encoding error:&error] &&
                    [outputData appendStringData:[groups serializedGroupsDataOfType:BDSKScriptGroupType] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
                    [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
-            if(NO == isOK)
+            if(NO == isOK){
+                if ([error isMutable] == NO) error = [[error mutableCopy] autorelease];
                 [error setValue:NSLocalizedString(@"Unable to convert script groups.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
+            }
         }
     }
     

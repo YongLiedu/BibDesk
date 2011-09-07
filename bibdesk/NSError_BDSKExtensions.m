@@ -113,6 +113,11 @@ NSString *BDSKUnderlyingItemErrorKey = @"BDSKUnderlyingItemError";
     return [[self valueForKey:@"__BDSKErrorCode"] integerValue];
 }
 
+- (BOOL)isMutable;
+{
+    return YES;
+}
+
 @end
 
 @implementation NSError (BDSKExtensions)
@@ -171,6 +176,11 @@ NSString *BDSKUnderlyingItemErrorKey = @"BDSKUnderlyingItemError";
 - (id)valueForUndefinedKey:(NSString *)aKey
 {
     return [[self userInfo] valueForKey:aKey];
+}
+
+- (BOOL)isMutable;
+{
+    return NO;
 }
 
 @end

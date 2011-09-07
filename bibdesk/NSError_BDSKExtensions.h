@@ -83,6 +83,7 @@ extern NSString *BDSKUnderlyingItemErrorKey;
 
 // see if it has our local domain
 - (BOOL)isLocalError;
+- (BOOL)isMutable;
 
 // embed an underlying error; if this isn't a mutable subclass, raises an exception
 - (void)embedError:(NSError *)underlyingError;
