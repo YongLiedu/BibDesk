@@ -54,8 +54,7 @@ NSString *BDSKUnderlyingItemErrorKey = @"BDSKUnderlyingItemError";
 {
     self = [super initWithDomain:domain code:code userInfo:nil];
     if (self) {
-        mutableUserInfo = [[NSMutableDictionary alloc] init];
-        [mutableUserInfo addEntriesFromDictionary:dict];
+        mutableUserInfo = [[NSMutableDictionary alloc] initWithDictionary:dict];
         // we override code with our own storage so it can be set
         [self setCode:code];
     }
