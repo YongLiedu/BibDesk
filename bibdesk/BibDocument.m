@@ -1474,8 +1474,8 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [templateFile appendFormat:@"\n%%%% Saved with string encoding %@ \n\n", encodingName];
         
         // remove all whitespace so we can make a comparison; just collapsing isn't quite good enough, unfortunately
-        NSString *collapsedTemplate = [templateFile stringByRemovingWhitespace];
-        NSString *collapsedFrontMatter = [frontMatter stringByRemovingWhitespace];
+        NSString *collapsedTemplate = [[templateFile stringByRemovingWhitespace] stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+        NSString *collapsedFrontMatter = [[frontMatter stringByRemovingWhitespace] stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
         if([NSString isEmptyString:collapsedFrontMatter]){
             shouldAppendFrontMatter = NO;
         }else if([collapsedTemplate rangeOfString:collapsedFrontMatter].length){
