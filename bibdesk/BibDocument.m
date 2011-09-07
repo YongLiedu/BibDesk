@@ -1511,7 +1511,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     // output the document's macros:
     if(isOK){
         NSString *macroString = [[self macroResolver] bibTeXString];
-        if ([macroString length] > 0) {
+        if ([NSString isEmptyString:macroString] == NO) {
             hasData = YES;
             isOK = [outputData appendDataFromString:macroString encoding:encoding error:&error];
             if(NO == isOK)
@@ -1524,10 +1524,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSArray *pubs = [self publicationsForSaving];
     if ([pubs count] > 0) {
         hasData = YES;
-        for (BibItem *pub in [self publicationsForSaving]){
+        for (BibItem *pub in pubs){
             if (isOK == NO) break;
             pubData = [pub bibTeXDataWithOptions:options relativeToPath:basePath encoding:encoding error:&error];
-            if(isOK = pubData != nil){
+            if((isOK = (pubData != nil))){
                 [outputData appendData:doubleNewlineData];
                 [outputData appendData:pubData];
             }else if([error valueForKey:NSLocalizedRecoverySuggestionErrorKey] == nil)
