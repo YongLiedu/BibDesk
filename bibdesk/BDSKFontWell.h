@@ -60,5 +60,7 @@
 @end
 
 
-@interface BDSKFontWellCell : NSButtonCell
+@interface BDSKFontWellCell : NSButtonCell {
+    NSTextFieldCell *bgCell;
+}
 @end
