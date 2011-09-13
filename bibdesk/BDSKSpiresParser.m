@@ -152,8 +152,8 @@
 
 
 + (NSDictionary *)parserInfo {
-	NSString * parserDescription = NSLocalizedString(@"SPIRES database of literature on particle physics.", @"Description for SPIRES site");
-	return [BDSKWebParser parserInfoWithName:@"SPIRES" address:@"http://www.slac.stanford.edu/spires/"  description:parserDescription feature:BDSKParserFeaturePublic];
+	NSString * parserDescription = NSLocalizedString(@"INSPIRE database of literature on particle physics.", @"Description for INSPIRE site");
+	return [BDSKWebParser parserInfoWithName:@"INSPIRE" address:@"http://inspirebeta.net/"  description:parserDescription feature:BDSKParserFeaturePublic];
 }
 
 
