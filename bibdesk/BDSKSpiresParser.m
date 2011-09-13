@@ -52,7 +52,9 @@
     if (spiresHosts == nil)
         spiresHosts = [[NSArray alloc] initWithObjects:@"www.slac.stanford.edu", @"www-library.desy.de", @"www-spires.fnal.gov", @"usparc.ihep.su", @"www-spires.dur.ac.uk", @"www.yukawa.kyoto-u.ac.jp", @"www.spires.lipi.go.id", nil];
     
-    if ([spiresHosts containsObject:[[url host] lowercaseString]] == NO || [[[url path] lowercaseString] hasPrefix:@"/spires"] == NO)
+    NSString *host = [[url host] lowercaseString];
+    
+    if ([host isEqualToString:@"inspirebeta.net"] == NO && ([spiresHosts containsObject:host] == NO || [[url path] hasCaseInsensitivePrefix:@"/spires"] == NO))
         return NO;
     
     NSString *containsBibTexLinkNode = @"//a[contains(text(),'BibTeX')]"; 
@@ -103,8 +105,10 @@
         
         NSString *hrefValue = [btlinknode stringValueOfAttribute:@"href"];
         
+        if ([hrefValue hasCaseInsensitivePrefix:@"http://"] == NO && [hrefValue hasCaseInsensitivePrefix:@"https://"] == NO)
+            hrefValue = [NSString stringWithFormat:@"http://%@%@", [url host], hrefValue];
         
-        NSURL *btURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@%@", [url host], hrefValue]];
+        NSURL *btURL = [NSURL URLWithString:hrefValue];
         
         NSXMLDocument *btXMLDoc = [[NSXMLDocument alloc] initWithContentsOfURL:btURL options:NSXMLDocumentTidyHTML error:&error];
         
