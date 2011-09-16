@@ -40,6 +40,7 @@
 #import "BDSKToolbarItem.h"
 #import "BDSKImagePopUpButton.h"
 #import "BibDocument_Actions.h"
+#import "BibDocument_Search.h"
 #import "BDSKCustomCiteDrawerController.h"
 #import "NSEvent_BDSKExtensions.h"
 
