@@ -22,10 +22,11 @@ How To Release BibDesk
 
 - follow the sf.net release instructions
   *  log into sf.net
-  *  in the BibDesk project, follow the "File Manager" item in the "Project Admin" menu
-  *  click the BibDesk folder
-  *  click on the gear icon next to the BibDesk folder and choose "New folder", name it the same as the disk image (without the dmg part)
-  *  click on the gear icon next to the the new folder and choose "Upload here"
+  *  in the BibDesk project, follow the "Files" item in menu
+  *  expand the BibDesk folder
+  *  Add a folder, name it the same as the disk image (without the dmg part)
+  *  expand the new folder
+  *  click "Add File"
   *  Select the disk image in the file choosing dialogue box that appears next
   *  click the uploaded disk image file, and check the "Mac (OSX)" button, hit Save
   *  for more info see:  http://apps.sourceforge.net/trac/sourceforge/wiki/Release%20files%20for%20download
