@@ -159,9 +159,9 @@
     }
     
     [self removePromisedType:NSURLPboardType forPasteboard:pboard];
+    [firstURL writeToPasteboard:pboard];
     if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_5) {
         [self removePromisedType:NSStringPboardType forPasteboard:pboard];
-        [firstURL writeToPasteboard:pboard];
         [pboard setString:[firstURL absoluteString] forType:NSStringPboardType];
         
         NSData *data = [(NSData *)CFURLCreateData(nil, (CFURLRef)firstURL, kCFStringEncodingUTF8, true) autorelease];
