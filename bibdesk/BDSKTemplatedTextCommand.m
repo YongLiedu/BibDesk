@@ -43,7 +43,7 @@
 #import "BDSKPublicationsArray.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BibItem.h"
-#import "BDSKRichTextFormat.h"
+#import "NSAttributedString_BDSKExtensions.h"
 
 @implementation BDSKTemplatedTextCommand
 
@@ -254,8 +254,7 @@
             attrString = [[[NSAttributedString alloc] initWithString:string] autorelease];
     }
     
-    NSData *data = [attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil];
-    return data ? [BDSKRichTextFormat richTextSpecifierWithData:data] : nil;
+    return [attrString richTextSpecifier];
 }
 
 @end

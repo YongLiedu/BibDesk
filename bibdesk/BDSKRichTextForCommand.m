@@ -1,10 +1,10 @@
 //
-//  NSAttributedString_BDSKExtensions.h
+//  BDSKRichTextForCommand.m
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 6/5/06.
+//  Created by Christiaan Hofman on 1/19/09.
 /*
- This software is Copyright (c) 2006-2011
+ This software is Copyright (c) 2009-2011
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -36,41 +36,26 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
+#import "BDSKRichTextForCommand.h"
+#import "NSAttributedString_BDSKExtensions.h"
 
 
-@interface NSAttributedString (BDSKExtensions)
+@implementation BDSKRichTextForCommand
 
-- (id)initWithString:(NSString *)string attributeName:(NSString *)attributeName attributeValue:(id)attributeValue;
+- (id)performDefaultImplementation {
+    id data = [self directParameter];
+    
+    if ([data isKindOfClass:[NSData class]] == NO) {
+		[self setScriptErrorNumber:NSArgumentsWrongScriptError];
+        return nil;
+    } else {
+        NSAttributedString *attrString = [[[NSAttributedString alloc] initWithData:data options:[NSDictionary dictionary] documentAttributes:NULL error:NULL] autorelease];
+        if (attrString == nil) {
+            [self setScriptErrorNumber:NSArgumentsWrongScriptError];
+            return nil;
+        }
+        return [attrString richTextSpecifier];
+    }
+}
 
-- (id)initWithTeXString:(NSString *)string attributes:(NSDictionary *)attributes collapseWhitespace:(BOOL)collapse;
-
-- (NSComparisonResult)localizedCaseInsensitiveNonTeXNonArticleCompare:(NSAttributedString *)other;
-
-- (NSString *)scriptingName;
-- (NSTextStorage *)scriptingRichText;
-
-- (NSScriptObjectSpecifier *)objectSpecifier;
-- (NSScriptObjectSpecifier *)richTextSpecifier;
-
-@end
-
-
-@interface NSMutableAttributedString (BDSKExtensions)
-
-- (void)appendString:(NSString *)string attributes:(NSDictionary *)attributes;
-
-@end
-
-
-@interface NSTextStorage (BDSKExtensions)
-
-- (id)scriptingRTF;
-- (void)setScriptingRTF:(id)data;
-
-@end
-
-
-@interface NSApplication (BDSKRichTextFormat)
-- (NSAttributedString *)valueInRichTextFormatWithName:(NSString *)name;
 @end

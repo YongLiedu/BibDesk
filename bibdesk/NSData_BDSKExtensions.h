@@ -67,6 +67,9 @@ extern NSString *BDSKEncodingConversionException;
 
 - (FILE *)openReadStream;
 
++ (id)scriptingRtfWithDescriptor:(NSAppleEventDescriptor *)descriptor;
+- (id)scriptingRtfDescriptor;
+
 @end
 
 @interface NSMutableData (BDSKExtensions)

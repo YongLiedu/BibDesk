@@ -1,5 +1,5 @@
 //
-//  BDSKRichTextFormat.h
+//  BDSKRichTextForCommand.h
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 1/19/09.
@@ -37,26 +37,6 @@
  */
 
 #import <Cocoa/Cocoa.h>
-
-
-@interface BDSKRichTextFormat : NSObject {
-    NSData *data;
-}
-
-+ (id)richTextSpecifierWithData:(NSData *)aData;
-
-- (id)initWithData:(NSData *)aData;
-- (id)initWithName:(NSString *)aName;
-
-- (NSString *)name;
-- (NSTextStorage *)richText;
-
-@end
-
-
-@interface NSApplication (BDSKRichTextFormat)
-- (BDSKRichTextFormat *)valueInRichTextFormatWithName:(NSString *)name;
-@end
 
 
 @interface BDSKRichTextForCommand : NSScriptCommand

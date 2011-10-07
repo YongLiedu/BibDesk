@@ -377,6 +377,14 @@ static unsigned char base64DecodeTable[256] =
     return (-1 == fd) ? NULL : fdopen(fd, "r");
 }
 
++ (id)scriptingRtfWithDescriptor:(NSAppleEventDescriptor *)descriptor {
+    return [descriptor data];
+}
+
+- (id)scriptingRtfDescriptor {
+    return [NSAppleEventDescriptor descriptorWithDescriptorType:'RTF ' data:self];
+}
+
 @end
 
 
