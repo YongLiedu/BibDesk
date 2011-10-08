@@ -266,8 +266,11 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
 }
 
 - (void)setScriptingRTF:(id)data {
-    if (data)
-        [self readFromData:data options:[NSDictionary dictionary] documentAttributes:NULL error:NULL];
+    if (data) {
+        NSAttributedString *attrString = [[[NSAttributedString alloc] initWithData:data options:[NSDictionary dictionary] documentAttributes:NULL error:NULL] autorelease];
+        if (attrString)
+            [self setAttributedString:attrString];
+    }
 }
 
 @end
