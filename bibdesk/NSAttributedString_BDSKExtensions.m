@@ -228,7 +228,7 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
 #pragma mark Scripting support
 
 - (NSString *)scriptingName {
-    return [[self RTFFromRange:NSMakeRange(0, [self length]) documentAttributes:nil] base64String];
+    return [[self RTFFromRange:NSMakeRange(0, [self length]) documentAttributes:nil] hexString];
 }
 
 - (NSTextStorage *)scriptingRichText {
@@ -280,7 +280,7 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
 @implementation NSApplication (BDSKRichTextFormat)
 
 - (NSAttributedString *)valueInRichTextFormatWithName:(NSString *)name {
-    NSData *data = [[[NSData alloc] initWithBase64String:name] autorelease];
+    NSData *data = [[[NSData alloc] initWithHexString:name] autorelease];
     return data ? [[[NSAttributedString alloc] initWithData:data options:[NSDictionary dictionary] documentAttributes:NULL error:NULL] autorelease] : nil;
 }
 

@@ -61,6 +61,9 @@ extern NSString *BDSKEncodingConversionException;
 - (id)initWithBase64String:(NSString *)base64String;
 - (NSString *)base64String;
 
+- (id)initWithHexString:(NSString *)hexString;
+- (NSString *)hexString;
+
 - (BOOL)mightBeCompressed;
 - (NSData *)compressedData;
 - (NSData *)decompressedData;

@@ -133,8 +133,8 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
 // Mapping from 6 bit pattern to ASCII character.
 static unsigned char base64EncodeTable[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-// Definition for "masked-out" areas of the     base64DecodeTable mapping
-#define xx 65
+// Definition for "masked-out" areas of the base64DecodeTable and hexDecodeTable mapping
+#define xx 0xFF
 
 // Mapping from ASCII character to 6 bit pattern.
 static unsigned char base64DecodeTable[256] =
@@ -246,6 +246,86 @@ static unsigned char base64DecodeTable[256] =
 		outputBuffer[j++] = base64EncodeTable[(inputBuffer[i] & 0x03) << 4];
 		outputBuffer[j++] = '=';
 		outputBuffer[j++] = '=';
+    }
+    
+    NSString *result = [[[NSString alloc] initWithBytes:outputBuffer length:j encoding:NSASCIIStringEncoding] autorelease];
+    
+    free(outputBuffer);
+    
+    return result;
+}
+
+// Mapping from 4 bit pattern to ASCII character.
+static unsigned char hexEncodeTable[17] = "0123456789ABCDEF";
+
+// Mapping from ASCII character to 4 bit pattern.
+static unsigned char hexDecodeTable[256] =
+{
+    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, 
+    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, 
+    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, 
+     0,  1,  2,  3,  4,  5,  6,  7,  8,  9, xx, xx, xx, xx, xx, xx, 
+    xx, 10, 11, 12, 13, 14, 15, xx, xx, xx, xx, xx, xx, xx, xx, xx, 
+    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, 
+    xx, 10, 11, 12, 13, 14, 15, xx, xx, xx, xx, xx, xx, xx, xx, xx, 
+    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, 
+    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, 
+    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, 
+    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, 
+    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, 
+    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, 
+    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, 
+    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, 
+    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, 
+};
+
+- (id)initWithHexString:(NSString *)hexString {
+    NSData *data = [hexString dataUsingEncoding:NSASCIIStringEncoding];
+    size_t length = [data length];
+    const unsigned char *inputBuffer = (const unsigned char *)[data bytes];
+    size_t outputBufferSize = length / 2;
+    unsigned char *outputBuffer = (unsigned char *)malloc(outputBufferSize);
+    
+    size_t i = 0, j = 0;
+    while (i < length) {
+		// Accumulate 2 valid characters (ignore everything else)
+		unsigned char accumulated[2];
+		size_t accumulateIndex = 0;
+		while (i < length) {
+			unsigned char decode = hexDecodeTable[inputBuffer[i++]];
+			if (decode != xx) {
+				accumulated[accumulateIndex] = decode;
+				accumulateIndex++;
+				
+				if (accumulateIndex == 2)
+					break;
+			}
+		}
+		
+		// Store the 8 bits from each of the 2 characters as 1 byte
+		outputBuffer[j++] = (accumulated[0] << 4) | (accumulated[1]);
+    }
+    
+    NSData *result = [self initWithBytes:outputBuffer length:j];
+    
+    free(outputBuffer);
+    
+    return result;
+}
+
+- (NSString *)hexString {
+    size_t length = [self length];
+    const unsigned char *inputBuffer = (const unsigned char *)[self bytes];
+    char *outputBuffer = (char *)malloc(length * 2);
+    if (outputBuffer == NULL)
+		return nil;
+
+    size_t i = 0;
+    size_t j = 0;
+    
+    for (i = 0; i < length; i++) {
+		outputBuffer[j++] = hexEncodeTable[(inputBuffer[i] & 0xF0) >> 4];
+		outputBuffer[j++] = hexEncodeTable[(inputBuffer[i] & 0x0F)];
     }
     
     NSString *result = [[[NSString alloc] initWithBytes:outputBuffer length:j encoding:NSASCIIStringEncoding] autorelease];
