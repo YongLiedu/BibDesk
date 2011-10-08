@@ -209,9 +209,6 @@ static unsigned char base64DecodeTable[256] =
     // Byte accurate calculation of final buffer size
     size_t outputBufferSize = ((length / BINARY_UNIT_SIZE) + ((length % BINARY_UNIT_SIZE) ? 1 : 0)) * BASE64_UNIT_SIZE;
     
-    // Include space for a terminating zero
-    outputBufferSize += 1;
-
     // Allocate the output buffer
     char *outputBuffer = (char *)malloc(outputBufferSize);
     if (outputBuffer == NULL)
@@ -250,7 +247,6 @@ static unsigned char base64DecodeTable[256] =
 		outputBuffer[j++] = '=';
 		outputBuffer[j++] = '=';
     }
-    outputBuffer[j] = 0;
     
     NSString *result = [[[NSString alloc] initWithBytes:outputBuffer length:j encoding:NSASCIIStringEncoding] autorelease];
     
