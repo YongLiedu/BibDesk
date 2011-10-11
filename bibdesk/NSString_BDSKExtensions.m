@@ -309,8 +309,11 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
         NSMutableString *mutString = [[self mutableCopy] autorelease];
         do {
             if ((range.location == 0 || [mutString characterAtIndex:range.location - 1] != '-') &&
-                (NSMaxRange(range) == len || [mutString characterAtIndex:NSMaxRange(range) + 1] != '-'))
+                (NSMaxRange(range) == len || [mutString characterAtIndex:NSMaxRange(range)] != '-')) {
                 [mutString replaceCharactersInRange:range withString:[NSString endashString]];
+                len -= range.length - 1;
+                range.length = 1;
+            }
             range = [mutString rangeOfString:doubleHyphen options:0 range:NSMakeRange(NSMaxRange(range), len - NSMaxRange(range))];
         } while (range.location != NSNotFound);
         string = mutString;
@@ -327,8 +330,11 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
         NSMutableString *mutString = [[self mutableCopy] autorelease];
         do {
             if ((range.location == 0 || [mutString characterAtIndex:range.location - 1] != '-') &&
-                (NSMaxRange(range) == len || [mutString characterAtIndex:NSMaxRange(range) + 1] != '-'))
+                (NSMaxRange(range) == len || [mutString characterAtIndex:NSMaxRange(range)] != '-')) {
                 [mutString replaceCharactersInRange:range withString:[NSString emdashString]];
+                len -= range.length - 1;
+                range.length = 1;
+            }
             range = [mutString rangeOfString:tripleHyphen options:0 range:NSMakeRange(NSMaxRange(range), len - NSMaxRange(range))];
         } while (range.location != NSNotFound);
         string = mutString;
