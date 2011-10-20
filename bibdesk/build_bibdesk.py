@@ -60,7 +60,7 @@ SOURCE_DIR="/Volumes/Local/Users/amaxwell/build/bibdesk-clean"
 TEMP_DIR=tempfile.mkdtemp("build_bibdesk_py")
 OBJROOT = os.path.join(TEMP_DIR, "objroot")
 SYMROOT = os.path.join(TEMP_DIR, "symroot")
-XCODEBUILD = "/Developer/usr/bin/xcodebuild"
+XCODEBUILD = "/Xcode3/usr/bin/xcodebuild"
 
 # wherever the final app ends up
 BUILT_APP = os.path.join(SYMROOT, "Release", "BibDesk.app")
