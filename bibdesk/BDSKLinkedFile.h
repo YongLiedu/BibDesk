@@ -41,7 +41,6 @@
 @class BDSKLinkedFile;
 
 @protocol BDSKLinkedFileDelegate <NSObject>
-@optional
 - (NSString *)basePathForLinkedFile:(BDSKLinkedFile *)file;
 - (void)linkedFileURLChanged:(BDSKLinkedFile *)file;
 @end
