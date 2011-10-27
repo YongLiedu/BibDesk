@@ -50,7 +50,7 @@
 @end
 
 
-@interface NSTextStorage (BDSKExtensions)
+@interface NSTextStorage (BDSKScripting)
 
 - (id)scriptingRTF;
 - (void)setScriptingRTF:(id)data;
