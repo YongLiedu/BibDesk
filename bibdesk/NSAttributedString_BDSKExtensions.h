@@ -47,12 +47,6 @@
 
 - (NSComparisonResult)localizedCaseInsensitiveNonTeXNonArticleCompare:(NSAttributedString *)other;
 
-- (NSString *)scriptingName;
-- (NSTextStorage *)scriptingRichText;
-
-- (NSScriptObjectSpecifier *)objectSpecifier;
-- (NSScriptObjectSpecifier *)richTextSpecifier;
-
 @end
 
 
@@ -60,17 +54,4 @@
 
 - (void)appendString:(NSString *)string attributes:(NSDictionary *)attributes;
 
-@end
-
-
-@interface NSTextStorage (BDSKExtensions)
-
-- (id)scriptingRTF;
-- (void)setScriptingRTF:(id)data;
-
-@end
-
-
-@interface NSApplication (BDSKRichTextFormat)
-- (NSAttributedString *)valueInRichTextFormatWithName:(NSString *)name;
 @end

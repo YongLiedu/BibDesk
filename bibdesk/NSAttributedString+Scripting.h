@@ -1,10 +1,10 @@
 //
-//  BDSKRichTextForCommand.m
+//  NSAttributedString+Scripting.h
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 1/19/09.
+//  Created by Christiaan Hofman on 10/27/11.
 /*
- This software is Copyright (c) 2009-2011
+ This software is Copyright (c) 2008-2011
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -36,26 +36,28 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKRichTextForCommand.h"
-#import "NSAttributedString+SCripting.h"
+#import <Cocoa/Cocoa.h>
 
 
-@implementation BDSKRichTextForCommand
+@interface NSAttributedString (BDSKScripting)
 
-- (id)performDefaultImplementation {
-    id data = [self directParameter];
-    
-    if ([data isKindOfClass:[NSData class]] == NO) {
-		[self setScriptErrorNumber:NSArgumentsWrongScriptError];
-        return nil;
-    } else {
-        NSAttributedString *attrString = [[[NSAttributedString alloc] initWithData:data options:[NSDictionary dictionary] documentAttributes:NULL error:NULL] autorelease];
-        if (attrString == nil) {
-            [self setScriptErrorNumber:NSArgumentsWrongScriptError];
-            return nil;
-        }
-        return [attrString richTextSpecifier];
-    }
-}
+- (NSString *)scriptingName;
+- (NSTextStorage *)scriptingRichText;
 
+- (NSScriptObjectSpecifier *)objectSpecifier;
+- (NSScriptObjectSpecifier *)richTextSpecifier;
+
+@end
+
+
+@interface NSTextStorage (BDSKExtensions)
+
+- (id)scriptingRTF;
+- (void)setScriptingRTF:(id)data;
+
+@end
+
+
+@interface NSApplication (BDSKRichTextFormat)
+- (NSAttributedString *)valueInRichTextFormatWithName:(NSString *)name;
 @end

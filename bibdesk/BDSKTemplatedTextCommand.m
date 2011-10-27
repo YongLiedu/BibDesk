@@ -43,7 +43,7 @@
 #import "BDSKPublicationsArray.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BibItem.h"
-#import "NSAttributedString_BDSKExtensions.h"
+#import "NSAttributedString+Scripting.h"
 
 @implementation BDSKTemplatedTextCommand
 

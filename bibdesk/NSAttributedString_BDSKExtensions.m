@@ -40,7 +40,6 @@
 #import "BDSKComplexString.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSCharacterSet_BDSKExtensions.h"
-#import "NSData_BDSKExtensions.h"
 
 #define BDSKRangeKey @"__BDSKRange"
 
@@ -225,26 +224,6 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
     return [[[NSAttributedString alloc] initWithString:string attributes:[self attributesAtIndex:0 effectiveRange:NULL]] autorelease];
 }
 
-#pragma mark Scripting support
-
-- (NSString *)scriptingName {
-    return [[self RTFFromRange:NSMakeRange(0, [self length]) documentAttributes:nil] hexString];
-}
-
-- (NSTextStorage *)scriptingRichText {
-    return [[[NSTextStorage alloc] initWithAttributedString:self] autorelease];
-}
-
-- (NSScriptObjectSpecifier *)objectSpecifier {
-    NSScriptClassDescription *containerClassDescription = [NSScriptClassDescription classDescriptionForClass:[NSApp class]];
-    return [[[NSNameSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:containerClassDescription containerSpecifier:nil key:@"richTextFormat" name:[self scriptingName]] autorelease];
-}
-
-- (NSScriptObjectSpecifier *)richTextSpecifier {
-    NSScriptObjectSpecifier *rtfSpecifier = [self objectSpecifier];
-    return [[[NSPropertySpecifier alloc] initWithContainerClassDescription:[rtfSpecifier keyClassDescription] containerSpecifier:rtfSpecifier key:@"scriptingRichText"] autorelease];
-}
-
 @end
 
 
@@ -257,32 +236,3 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
 }
 
 @end
-
-
-@implementation NSTextStorage (BDSKExtensions)
-
-- (id)scriptingRTF {
-    return [self RTFFromRange:NSMakeRange(0, [self length]) documentAttributes:nil];
-}
-
-- (void)setScriptingRTF:(id)data {
-    if (data) {
-        NSAttributedString *attrString = [[NSAttributedString alloc] initWithData:data options:[NSDictionary dictionary] documentAttributes:NULL error:NULL];
-        if (attrString)
-            [self setAttributedString:attrString];
-        [attrString release];
-    }
-}
-
-@end
-
-
-@implementation NSApplication (BDSKRichTextFormat)
-
-- (NSAttributedString *)valueInRichTextFormatWithName:(NSString *)name {
-    NSData *data = [[[NSData alloc] initWithHexString:name] autorelease];
-    return data ? [[[NSAttributedString alloc] initWithData:data options:[NSDictionary dictionary] documentAttributes:NULL error:NULL] autorelease] : nil;
-}
-
-@end
-
