@@ -483,12 +483,12 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                     if ([matchString hasPrefix:@"$"])
                         matchString = [templateValueForKeyPath(object, [matchString substringFromIndex:1], anIndex) templateStringValue] ?: @"";
                     if (matchesCondition(keyValue, matchString, [tag matchType])) {
-                        subtemplate = [tag subtemplateAtIndex:i];
+                        subtemplate = [tag objectInSubtemplatesAtIndex:i];
                         break;
                     }
                 }
-                if (subtemplate == nil && [[tag subtemplates] count] > count)
-                    subtemplate = [tag subtemplateAtIndex:count];
+                if (subtemplate == nil && [tag countOfSubtemplates] > count)
+                    subtemplate = [tag objectInSubtemplatesAtIndex:count];
                 if (subtemplate != nil) {
                     if ((keyValue = [self stringFromTemplateArray:subtemplate usingObject:object atIndex:anIndex delegate:delegate]))
                         [result appendString:keyValue];
@@ -787,12 +787,12 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                     if ([matchString hasPrefix:@"$"])
                         matchString = [templateValueForKeyPath(object, [matchString substringFromIndex:1], anIndex) templateStringValue] ?: @"";
                     if (matchesCondition(keyValue, matchString, [tag matchType])) {
-                        subtemplate = [tag subtemplateAtIndex:i];
+                        subtemplate = [tag objectInSubtemplatesAtIndex:i];
                         break;
                     }
                 }
-                if (subtemplate == nil && [[tag subtemplates] count] > count) {
-                    subtemplate = [tag subtemplateAtIndex:count];
+                if (subtemplate == nil && [tag countOfSubtemplates] > count) {
+                    subtemplate = [tag objectInSubtemplatesAtIndex:count];
                 }
                 if (subtemplate != nil) {
                     NSAttributedString *tmpAttrStr = [self attributedStringFromTemplateArray:subtemplate usingObject:object atIndex:anIndex delegate:delegate];

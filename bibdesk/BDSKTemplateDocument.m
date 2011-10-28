@@ -1356,12 +1356,12 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
 }
 
 - (id)tokenForConditionTag:(BDSKConditionTemplateTag *)tag defaultFont:(NSFont *)defaultFont {
-    NSInteger count = [[tag subtemplates] count];
+    NSInteger count = [tag countOfSubtemplates];
     if ([(BDSKConditionTemplateTag *)tag matchType] != BDSKTemplateTagMatchOther || count > 2)
         return nil;
     
-    NSArray *nonemptyTemplate = [tag subtemplateAtIndex:0];
-    NSArray *emptyTemplate = count > 1 ? [tag subtemplateAtIndex:1] : nil;
+    NSArray *nonemptyTemplate = [tag objectInSubtemplatesAtIndex:0];
+    NSArray *emptyTemplate = count > 1 ? [tag objectInSubtemplatesAtIndex:1] : nil;
     id token = nil;
     
     if ([nonemptyTemplate count] == 1 && [(BDSKTemplateTag *)[nonemptyTemplate lastObject] type] == BDSKTextTemplateTagType) {
@@ -1448,10 +1448,10 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
             return nil;
         
         NSArray *matchStrings = [(BDSKConditionTemplateTag *)tag matchStrings];
-        NSUInteger i = 0, keyCount = [matchStrings count], count = [[(BDSKConditionTemplateTag *)tag subtemplates] count];
+        NSUInteger i = 0, keyCount = [matchStrings count], count = [(BDSKConditionTemplateTag *)tag countOfSubtemplates];
         
         for (i = 0; i < count; i++) {
-            if ((itemTemplate = [self convertItemTemplate:[(BDSKConditionTemplateTag *)tag subtemplateAtIndex:i] defaultFont:defaultFont]))
+            if ((itemTemplate = [self convertItemTemplate:[(BDSKConditionTemplateTag *)tag objectInSubtemplatesAtIndex:i] defaultFont:defaultFont]))
                 [result setObject:itemTemplate forKey:i < keyCount ? [(NSString *)[matchStrings objectAtIndex:i] entryType] : @""];
             else return nil;
         }

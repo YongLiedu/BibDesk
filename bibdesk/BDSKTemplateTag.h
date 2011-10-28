@@ -134,8 +134,8 @@ typedef NSInteger BDSKTemplateTagMatchType;
 
 - (BDSKTemplateTagMatchType)matchType;
 - (NSArray *)matchStrings;
-- (NSArray *)subtemplates;
-- (NSArray *)subtemplateAtIndex:(NSUInteger)anIndex;
+- (NSUInteger)countOfSubtemplates;
+- (NSArray *)objectInSubtemplatesAtIndex:(NSUInteger)anIndex;
 
 @end
 

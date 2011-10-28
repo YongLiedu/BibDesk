@@ -233,15 +233,15 @@ static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedStr
     return matchType;
 }
 
-- (NSArray *)subtemplates {
-    return subtemplates;
-}
-
 - (NSArray *)matchStrings {
     return matchStrings;
 }
 
-- (NSArray *)subtemplateAtIndex:(NSUInteger)anIndex {
+- (NSUInteger)countOfSubtemplates {
+    return [subtemplates count];
+}
+
+- (NSArray *)objectInSubtemplatesAtIndex:(NSUInteger)anIndex {
     id subtemplate = [subtemplates objectAtIndex:anIndex];
     if ([subtemplate isKindOfClass:[NSArray class]] == NO) {
         subtemplate = [BDSKTemplateParser arrayByParsingTemplateString:subtemplate isSubtemplate:YES];
@@ -256,7 +256,7 @@ static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedStr
 
 @implementation BDSKRichConditionTemplateTag
 
-- (NSArray *)subtemplateAtIndex:(NSUInteger)anIndex {
+- (NSArray *)objectInSubtemplatesAtIndex:(NSUInteger)anIndex {
     id subtemplate = [subtemplates objectAtIndex:anIndex];
     if ([subtemplate isKindOfClass:[NSArray class]] == NO) {
         subtemplate = [BDSKTemplateParser arrayByParsingTemplateAttributedString:subtemplate isSubtemplate:YES];
