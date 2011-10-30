@@ -44,11 +44,10 @@
 #define BDSKSpecialPipeServiceRunLoopMode @"BDSKSpecialPipeServiceRunLoopMode"
 
 @interface BDSKTaskRunner : NSObject {
-    NSTask *task;
     // data used to store stdOut from the filter
     NSData *stdoutData;
 }
-- (NSData *)outputDataFromTask:(NSTask *)aTask inputData:(NSData *)input;
+- (NSData *)outputDataFromTask:(NSTask *)task inputData:(NSData *)input;
 - (void)stdoutNowAvailable:(NSNotification *)notification;
 @end
 
@@ -97,7 +96,6 @@
 @implementation BDSKTaskRunner
 
 - (void)dealloc{
-    BDSKDESTROY(task);
     BDSKDESTROY(stdoutData);
     [super dealloc];
 }
@@ -108,15 +106,13 @@
 // - mmcc
 
 // was runWithInputString in TextExtras' TEPipeCommand class.
-- (NSData *)outputDataFromTask:(NSTask *)aTask inputData:(NSData *)input {
+- (NSData *)outputDataFromTask:(NSTask *)task inputData:(NSData *)input {
     NSFileManager *fm = [NSFileManager defaultManager];
     NSString *tmpDir;
     NSPipe *inputPipe;
     NSPipe *outputPipe;
     NSFileHandle *inputFileHandle;
     NSFileHandle *outputFileHandle;
-    
-    task = [aTask retain];
     
     // ---------- Execute the script ----------
     // MF:!!! The current working dir isn't too appropriate
@@ -172,8 +168,11 @@
     if (NO == [fm removeItemAtPath:tmpDir error:NULL]) {
         NSLog(@"Filter Pipes: Failed to delete temporary directory. (%@)", tmpDir);
     }
-
-    return [task terminationStatus] == 0 ? [[stdoutData retain] autorelease] : nil;
+    
+    if ([task terminationStatus] != 0)
+        BDSKDESTROY(stdoutData);
+    
+    return [[stdoutData retain] autorelease];
 }
 
 - (void)stdoutNowAvailable:(NSNotification *)notification {
