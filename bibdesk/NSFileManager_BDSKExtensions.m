@@ -79,53 +79,8 @@
 #import <CoreServices/CoreServices.h>
 
 #define OPEN_META_TAGS_KEY @"com.apple.metadata:kMDItemOMUserTags"
+#define OPEN_META_TAG_TIME_KEY @"com.apple.metadata:kMDItemOMUserTagTime"
 #define OPEN_META_RATING_KEY @"com.apple.metadata:kMDItemStarRating"
-
-/* 
-The WLDragMapHeaderStruct stuff was borrowed from CocoaTech Foundation, http://www.cocoatech.com (BSD licensed).  This is used for creating WebLoc files, which are a resource-only Finder clipping.  Apple provides no API for creating them, so apparently everyone just reverse-engineers the resource file format and creates them.  Since I have no desire to mess with ResEdit anymore, we're borrowing this code directly and using Omni's resource fork methods to create the file.  Note that you can check the contents of a resource fork in Terminal with `cat somefile/rsrc`, not that it's incredibly helpful. 
-*/
-
-#if !__LP64__
-#pragma options align=mac68k
-#endif
-
-typedef struct WLDragMapHeaderStruct
-{
-    long mapVersion;  // always 1
-    long unused1;     // always 0
-    long unused2;     // always 0
-    short unused;
-    short numEntries;   // number of repeating WLDragMapEntries
-} WLDragMapHeaderStruct;
-
-typedef struct WLDragMapEntryStruct
-{
-    OSType type;
-    short unused;  // always 0
-    ResID resID;   // always 128 or 256?
-    long unused1;   // always 0
-    long unused2;   // always 0
-} WLDragMapEntryStruct;
-
-#if !__LP64__
-#pragma options align=reset
-#endif
-
-@interface WLDragMapEntry : NSObject
-{
-    OSType _type;
-    ResID _resID;
-}
-
-+ (id)entryWithType:(OSType)type resID:(NSInteger)resID;
-+ (NSData*)dragDataWithEntries:(NSArray*)entries;
-
-- (OSType)type;
-- (ResID)resID;
-- (NSData*)entryData;
-
-@end
-
 
 @implementation NSFileManager (BDSKExtensions)
 
@@ -880,10 +835,13 @@ FSOpenIterator:
 }
 
 - (BOOL)setOpenMetaTags:(NSArray *)tags atPath:(NSString *)path error:(NSError **)error {
-   if (tags)
+    if (tags) {
+        [[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:OPEN_META_TAG_TIME_KEY toPropertyListValue:[NSDate date] atPath:path options:kSKNXattrNoCompress error:error];
         return [[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:OPEN_META_TAGS_KEY toPropertyListValue:tags atPath:path options:kSKNXattrNoCompress error:error];
-    else
+    } else {
+        [[SKNExtendedAttributeManager sharedNoSplitManager] removeExtendedAttributeNamed:OPEN_META_TAG_TIME_KEY atPath:path traverseLink:YES error:error];
         return [[SKNExtendedAttributeManager sharedNoSplitManager] removeExtendedAttributeNamed:OPEN_META_TAGS_KEY atPath:path traverseLink:YES error:error];
+    }
 }
 
 - (NSNumber *)openMetaRatingAtPath:(NSString *)path error:(NSError **)error {
@@ -895,69 +853,6 @@ FSOpenIterator:
         return [[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:OPEN_META_RATING_KEY toPropertyListValue:rating atPath:path options:kSKNXattrNoCompress error:error];
     else
         return [[SKNExtendedAttributeManager sharedNoSplitManager] removeExtendedAttributeNamed:OPEN_META_RATING_KEY atPath:path traverseLink:YES error:error];
-}
-
-@end
-
-@implementation WLDragMapEntry
-
-- (id)initWithType:(OSType)type resID:(NSInteger)resID;
-{
-    self = [super init];
-    
-    _type = type;
-    _resID = resID;
-    
-    return self;
-}
-
-+ (id)entryWithType:(OSType)type resID:(NSInteger)resID;
-{
-    WLDragMapEntry* result = [[WLDragMapEntry alloc] initWithType:type resID:resID];
-    
-    return [result autorelease];
-}
-
-- (OSType)type;
-{
-    return _type;
-}
-
-- (ResID)resID;
-{
-    return _resID;
-}
-
-- (NSData*)entryData;
-{
-    WLDragMapEntryStruct result;
-    
-    // zero the structure
-    memset(&result, 0, sizeof(result));
-    
-    result.type = _type;
-    result.resID = _resID;
-    
-    return [NSData dataWithBytes:&result length:sizeof(result)];
-}
-
-+ (NSData*)dragDataWithEntries:(NSArray*)entries;
-{
-    NSMutableData *result;
-    WLDragMapHeaderStruct header;
-    
-    // zero the structure
-    memset(&header, 0, sizeof(WLDragMapHeaderStruct));
-    
-    header.mapVersion = 1;
-    header.numEntries = [entries count];
-    
-    result = [NSMutableData dataWithBytes:&header length:sizeof(WLDragMapHeaderStruct)];
-    
-    for (WLDragMapEntry *entry in entries)
-        [result appendData:[entry entryData]];
-    
-    return result;
 }
 
 @end
