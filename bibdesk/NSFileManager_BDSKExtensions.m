@@ -78,8 +78,8 @@
 #import <SkimNotesBase/SkimNotesBase.h>
 #import <CoreServices/CoreServices.h>
 
-#define OPEN_META_TAGS_KEY @"com.apple.metadata:kOMUserTags"
-#define OPEN_META_RATING_KEY @"com.apple.metadata:kOMStarRating"
+#define OPEN_META_TAGS_KEY @"com.apple.metadata:kMDItemOMUserTags"
+#define OPEN_META_RATING_KEY @"com.apple.metadata:kMDItemStarRating"
 
 /* 
 The WLDragMapHeaderStruct stuff was borrowed from CocoaTech Foundation, http://www.cocoatech.com (BSD licensed).  This is used for creating WebLoc files, which are a resource-only Finder clipping.  Apple provides no API for creating them, so apparently everyone just reverse-engineers the resource file format and creates them.  Since I have no desire to mess with ResEdit anymore, we're borrowing this code directly and using Omni's resource fork methods to create the file.  Note that you can check the contents of a resource fork in Terminal with `cat somefile/rsrc`, not that it's incredibly helpful. 
