@@ -104,12 +104,6 @@
 - (NSStringEncoding)appleStringEncodingAtPath:(NSString *)path error:(NSError **)error;
 - (BOOL)setAppleStringEncoding:(NSStringEncoding)nsEncoding atPath:(NSString *)path error:(NSError **)error;
 
-// support for Open Meta tags and rating
-- (NSArray *)openMetaTagsAtPath:(NSString *)path error:(NSError **)error;
-- (BOOL)setOpenMetaTags:(NSArray *)tags atPath:(NSString *)path error:(NSError **)error;
-- (NSNumber *)openMetaRatingAtPath:(NSString *)path error:(NSError **)error;
-- (BOOL)setOpenMetaRating:(NSNumber *)rating atPath:(NSString *)path error:(NSError **)error;
-
 // uses createDirectoryAtPath:withIntermediateDirectories:attributes:error: for the containing directory if necessary
 - (BOOL)createPathToFile:(NSString *)path attributes:(NSDictionary *)attributes;
 

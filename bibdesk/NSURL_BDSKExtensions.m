@@ -47,6 +47,9 @@
 #import "NSAttributedString_BDSKExtensions.h"
 #import "BDSKRuntime.h"
 
+#define OPEN_META_TAGS_KEY @"com.apple.metadata:kMDItemOMUserTags"
+#define OPEN_META_RATING_KEY @"com.apple.metadata:kMDItemStarRating"
+
 @implementation NSURL (BDSKExtensions)
 
 + (NSURL *)fileURLWithAEDesc:(NSAppleEventDescriptor *)desc {
@@ -337,12 +340,18 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     [FVFinderLabel setFinderLabel:label forURL:self];
 }
 
+// Support for Open Meta tags and rating
+// These are just definitions for special EA names and the format of their values
+// They're saved as serialized property list values, which is the same as SKNExtendedAttributeManager does without splitting and compression
+// See http://code.google.com/p/openmeta/ for some documentation and sample code
+// Probably we should not write them, because really the com.apple.metadata domain is private to Apple, http://ironicsoftware.com/community/comments.php?DiscussionID=632&amp;page=1
+
 - (NSArray *)openMetaTags{
-    return [[NSFileManager defaultManager] openMetaTagsAtPath:[self path] error:NULL] ?: [NSArray array];
+    return [[SKNExtendedAttributeManager sharedNoSplitManager] propertyListFromExtendedAttributeNamed:OPEN_META_TAGS_KEY atPath:[self path] traverseLink:YES error:NULL] ?: [NSArray array];
 }
 
 - (double)openMetaRating{
-    return [[[NSFileManager defaultManager] openMetaRatingAtPath:[self path] error:NULL] doubleValue];
+    return [[[SKNExtendedAttributeManager sharedNoSplitManager] propertyListFromExtendedAttributeNamed:OPEN_META_RATING_KEY atPath:[self path] traverseLink:YES error:NULL] doubleValue];
 }
 
 #pragma mark Templating

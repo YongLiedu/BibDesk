@@ -822,37 +822,4 @@ FSOpenIterator:
     return nsEncoding;
 }
 
-#pragma mark Open Meta tags
-
-// Support for Open Meta tags and rating
-// These are just definitions for special EA names and the format of their values
-// They're saved as serialized property list values, which is the same as SKNExtendedAttributeManager does without splitting and compression
-// See http://code.google.com/p/openmeta/ for some documentation and sample code
-// Probably we should not write them, because really the com.apple.metadata domain is private to Apple, http://ironicsoftware.com/community/comments.php?DiscussionID=632&amp;page=1
-
-- (NSArray *)openMetaTagsAtPath:(NSString *)path error:(NSError **)error {
-    return [[SKNExtendedAttributeManager sharedNoSplitManager] propertyListFromExtendedAttributeNamed:OPEN_META_TAGS_KEY atPath:path traverseLink:YES error:error];
-}
-
-- (BOOL)setOpenMetaTags:(NSArray *)tags atPath:(NSString *)path error:(NSError **)error {
-    if (tags) {
-        [[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:OPEN_META_TAG_TIME_KEY toPropertyListValue:[NSDate date] atPath:path options:kSKNXattrNoCompress error:error];
-        return [[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:OPEN_META_TAGS_KEY toPropertyListValue:tags atPath:path options:kSKNXattrNoCompress error:error];
-    } else {
-        [[SKNExtendedAttributeManager sharedNoSplitManager] removeExtendedAttributeNamed:OPEN_META_TAG_TIME_KEY atPath:path traverseLink:YES error:error];
-        return [[SKNExtendedAttributeManager sharedNoSplitManager] removeExtendedAttributeNamed:OPEN_META_TAGS_KEY atPath:path traverseLink:YES error:error];
-    }
-}
-
-- (NSNumber *)openMetaRatingAtPath:(NSString *)path error:(NSError **)error {
-    return [[SKNExtendedAttributeManager sharedNoSplitManager] propertyListFromExtendedAttributeNamed:OPEN_META_RATING_KEY atPath:path traverseLink:YES error:error];
-}
-
-- (BOOL)setOpenMetaRating:(NSNumber *)rating atPath:(NSString *)path error:(NSError **)error {
-    if (rating)
-        return [[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:OPEN_META_RATING_KEY toPropertyListValue:rating atPath:path options:kSKNXattrNoCompress error:error];
-    else
-        return [[SKNExtendedAttributeManager sharedNoSplitManager] removeExtendedAttributeNamed:OPEN_META_RATING_KEY atPath:path traverseLink:YES error:error];
-}
-
 @end
