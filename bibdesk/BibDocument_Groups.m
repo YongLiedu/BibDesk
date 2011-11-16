@@ -1218,29 +1218,13 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [self mergeInPublications:[self clickedOrSelectedPublications]];
 }
 
-- (IBAction)refreshURLGroups:(id)sender{
-    [[groups URLGroups] setValue:nil forKey:@"publications"];
-    if ([self hasURLGroupsSelected])
-        [[[self selectedGroups] lastObject] publications];
-}
-
-- (IBAction)refreshScriptGroups:(id)sender{
-    [[groups scriptGroups] setValue:nil forKey:@"publications"];
-    if ([self hasScriptGroupsSelected])
-        [[[self selectedGroups] lastObject] publications];
-}
-
-- (IBAction)refreshSearchGroups:(id)sender{
-    [[groups searchGroups] setValue:nil forKey:@"publications"];
-    if ([self hasSearchGroupsSelected])
-        [[[self selectedGroups] lastObject] publications];
-}
-
 - (IBAction)refreshAllExternalGroups:(id)sender{
     [self refreshSharedBrowsing:sender];
-    [self refreshURLGroups:sender];
-    [self refreshScriptGroups:sender];
-    [self refreshSearchGroups:sender];
+    [[groups URLGroups] setValue:nil forKey:@"publications"];
+    [[groups scriptGroups] setValue:nil forKey:@"publications"];
+    [[groups searchGroups] setValue:nil forKey:@"publications"];
+    if ([self hasURLGroupsSelected] || [self hasScriptGroupsSelected] || [self hasSearchGroupsSelected])
+        [[[self selectedGroups] lastObject] publications];
 }
 
 - (IBAction)refreshSelectedGroups:(id)sender{

@@ -132,9 +132,6 @@
 - (IBAction)mergeInExternalGroup:(id)sender;
 - (IBAction)mergeInExternalPublications:(id)sender;
 - (NSArray *)mergeInPublications:(NSArray *)items;
-- (IBAction)refreshURLGroups:(id)sender;
-- (IBAction)refreshScriptGroups:(id)sender;
-- (IBAction)refreshSearchGroups:(id)sender;
 - (IBAction)refreshAllExternalGroups:(id)sender;
 - (IBAction)refreshSelectedGroups:(id)sender;
 - (IBAction)openBookmark:(id)sender;

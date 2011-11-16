@@ -522,18 +522,6 @@
     return [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldLookForSharedFilesKey];
 }
 
-- (BOOL)validateRefreshURLGroupsMenuItem:(NSMenuItem *)menuItem {
-    return [[groups URLGroups] count] > 0;
-}
-
-- (BOOL)validateRefreshScriptGroupsMenuItem:(NSMenuItem *)menuItem {
-    return [[groups scriptGroups] count] > 0;
-}
-
-- (BOOL)validateRefreshSearchGroupsMenuItem:(NSMenuItem *)menuItem {
-    return [[groups searchGroups] count] > 0;
-}
-
 - (BOOL)validateRefreshSelectedGroupsMenuItem:(NSMenuItem *)menuItem {
     if([self hasSharedGroupsClickedOrSelected]){
         [menuItem setTitle:NSLocalizedString(@"Refresh Shared Group", @"Menu item title")];
