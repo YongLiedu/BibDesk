@@ -1221,19 +1221,19 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 - (IBAction)refreshURLGroups:(id)sender{
     [[groups URLGroups] setValue:nil forKey:@"publications"];
     if ([self hasURLGroupsSelected])
-        [[[self selectedGroups] lastObject] retrievePublications];
+        [[[self selectedGroups] lastObject] publications];
 }
 
 - (IBAction)refreshScriptGroups:(id)sender{
     [[groups scriptGroups] setValue:nil forKey:@"publications"];
     if ([self hasScriptGroupsSelected])
-        [[[self selectedGroups] lastObject] retrievePublications];
+        [[[self selectedGroups] lastObject] publications];
 }
 
 - (IBAction)refreshSearchGroups:(id)sender{
     [[groups searchGroups] setValue:nil forKey:@"publications"];
     if ([self hasSearchGroupsSelected])
-        [[[self selectedGroups] lastObject] retrievePublications];
+        [[[self selectedGroups] lastObject] publications];
 }
 
 - (IBAction)refreshAllExternalGroups:(id)sender{
@@ -1248,7 +1248,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     if ([group isExternal]) {
         [group setPublications:nil];
         if ([[self selectedGroups] containsObject:group])
-            [group retrievePublications];
+            [group publications];
     } else NSBeep();
 }
 
