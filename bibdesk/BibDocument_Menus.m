@@ -474,7 +474,7 @@
     return tag != BDSKPreviewDisplayTeX || [[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey];
 }
 
-- (BOOL)validateChangeIntersectGroupsMenuItem:(NSMenuItem *)menuItem {
+- (BOOL)validateChangeIntersectGroupsActionMenuItem:(NSMenuItem *)menuItem {
     [menuItem setState: ((BOOL)[menuItem tag] == [[NSUserDefaults standardUserDefaults] integerForKey:BDSKIntersectGroupsKey]) ? NSOnState : NSOffState];
     return YES;
 }
