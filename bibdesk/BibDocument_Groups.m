@@ -1220,14 +1220,20 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 - (IBAction)refreshURLGroups:(id)sender{
     [[groups URLGroups] setValue:nil forKey:@"publications"];
+    if ([self hasURLGroupsSelected])
+        [self displaySelectedGroups];
 }
 
 - (IBAction)refreshScriptGroups:(id)sender{
     [[groups scriptGroups] setValue:nil forKey:@"publications"];
+    if ([self hasScriptGroupsSelected])
+        [self displaySelectedGroups];
 }
 
 - (IBAction)refreshSearchGroups:(id)sender{
     [[groups searchGroups] setValue:nil forKey:@"publications"];
+    if ([self hasSearchGroupsSelected])
+        [self displaySelectedGroups];
 }
 
 - (IBAction)refreshAllExternalGroups:(id)sender{
@@ -1239,9 +1245,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 - (IBAction)refreshSelectedGroups:(id)sender{
     id group = [[self clickedOrSelectedGroups] lastObject];
-    if ([group isExternal])
+    if ([group isExternal]) {
         [group setPublications:nil];
-    else NSBeep();
+        if ([[self selectedGroups] containsObject:group])
+            [self displaySelectedGroups];
+    } else NSBeep();
 }
 
 - (IBAction)openBookmark:(id)sender{
