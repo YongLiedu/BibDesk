@@ -1223,13 +1223,21 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [[groups URLGroups] setValue:nil forKey:@"publications"];
     [[groups scriptGroups] setValue:nil forKey:@"publications"];
     [[groups searchGroups] setValue:nil forKey:@"publications"];
+    for (BDSKWebGroup *group in [groups webGroups]) {
+        if ([group isWebViewLoaded])
+            [[group webView] reload:nil];
+    }
     if ([self hasURLGroupsSelected] || [self hasScriptGroupsSelected] || [self hasSearchGroupsSelected])
         [[[self selectedGroups] lastObject] publications];
 }
 
 - (IBAction)refreshSelectedGroups:(id)sender{
     id group = [[self clickedOrSelectedGroups] lastObject];
-    if ([group isExternal]) {
+    if ([group isWeb]) {
+        if ([group isWebViewLoaded])
+            [[group webView] reload:nil];
+        else NSBeep();
+    } else if ([group isExternal]) {
         [group setPublications:nil];
         if ([[self selectedGroups] containsObject:group])
             [group publications];

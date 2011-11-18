@@ -39,6 +39,7 @@
 #import "BibDocument_Menus.h"
 #import "BDSKGroupCell.h"
 #import "BDSKGroup.h"
+#import "BDSKWebGroup.h"
 #import "BibDocument_Groups.h"
 #import "BibDocument_UI.h"
 #import "BDSKMainTableView.h"
@@ -535,6 +536,9 @@
     }else if([self hasSearchGroupsClickedOrSelected]){
         [menuItem setTitle:NSLocalizedString(@"Refresh Search Group", @"Menu item title")];
         return YES;
+    }else if([self hasWebGroupsClickedOrSelected]){
+        [menuItem setTitle:NSLocalizedString(@"Refresh Web Group", @"Menu item title")];
+        return [[[self clickedOrSelectedGroups] lastObject] isWebViewLoaded];
     } else {
         [menuItem setTitle:NSLocalizedString(@"Refresh External Group", @"Menu item title")];
         return NO;
