@@ -359,7 +359,23 @@ static char BDSKConditionControllerObservationContext;
     return [objectController commitEditing];
 }
 
+- (void)editor:(id)editor didCommit:(BOOL)didCommit contextInfo:(void *)contextInfo {
+    NSInvocation *invocation = [(NSInvocation *)contextInfo autorelease];
+    if (invocation) {
+        [invocation setArgument:&didCommit atIndex:3];
+        [invocation invoke];
+    }
+}
+
 - (void)commitEditingWithDelegate:(id)delegate didCommitSelector:(SEL)didCommitSelector contextInfo:(void *)contextInfo {
+    if (delegate && didCommitSelector) {
+        NSInvocation *invocation = [[NSInvocation invocationWithMethodSignature:[delegate methodSignatureForSelector:didCommitSelector]] retain];
+        [invocation setTarget:delegate];
+        [invocation setSelector:didCommitSelector];
+        [invocation setArgument:&self atIndex:2];
+        [invocation setArgument:&contextInfo atIndex:4];
+        return [objectController commitEditingWithDelegate:self didCommitSelector:@selector(editor:didCommit:contextInfo:) contextInfo:invocation];
+    }
     return [objectController commitEditingWithDelegate:delegate didCommitSelector:didCommitSelector contextInfo:contextInfo];
 }
 
