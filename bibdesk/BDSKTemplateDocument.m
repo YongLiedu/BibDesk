@@ -1079,8 +1079,9 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
             [super canCloseDocumentWithDelegate:delegate shouldCloseSelector:shouldCloseSelector contextInfo:contextInfo];
         }
     } else if (delegate && shouldCloseSelector) {
-        NSInvocation *invocation = [NSInvocation invocationWithTarget:delegate selector:shouldCloseSelector argument:&self];
+        NSInvocation *invocation = [NSInvocation invocationWithTarget:delegate selector:shouldCloseSelector];
         BOOL no = NO;
+        [invocation setArgument:&self atIndex:2];
         [invocation setArgument:&no atIndex:3];
         [invocation setArgument:&contextInfo atIndex:4];
         [invocation invoke]; 

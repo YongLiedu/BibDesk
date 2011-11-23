@@ -371,7 +371,8 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     BOOL didCommit = [self commitEditing];
     if (delegate && didCommitSelector) {
         // - (void)editor:(id)editor didCommit:(BOOL)didCommit contextInfo:(void *)contextInfo
-        NSInvocation *invocation = [NSInvocation invocationWithTarget:delegate selector:didCommitSelector argument:&self];
+        NSInvocation *invocation = [NSInvocation invocationWithTarget:delegate selector:didCommitSelector];
+        [invocation setArgument:&self atIndex:2];
         [invocation setArgument:&didCommit atIndex:3];
         [invocation setArgument:&contextInfo atIndex:4];
         [invocation invoke];
