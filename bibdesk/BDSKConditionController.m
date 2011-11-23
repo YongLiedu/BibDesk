@@ -41,6 +41,7 @@
 #import "BibItem.h"
 #import "BDSKBooleanValueTransformer.h"
 #import "BDSKRatingButton.h"
+#import "NSInvocation_BDSKExtensions.h"
 
 #define BDSKBooleanValueTransformerName @"BDSKBooleanValueTransformer"
 #define BDSKTriStateValueTransformerName @"BDSKTriStateValueTransformer"
@@ -369,12 +370,9 @@ static char BDSKConditionControllerObservationContext;
 
 - (void)commitEditingWithDelegate:(id)delegate didCommitSelector:(SEL)didCommitSelector contextInfo:(void *)contextInfo {
     if (delegate && didCommitSelector) {
-        NSInvocation *invocation = [[NSInvocation invocationWithMethodSignature:[delegate methodSignatureForSelector:didCommitSelector]] retain];
-        [invocation setTarget:delegate];
-        [invocation setSelector:didCommitSelector];
-        [invocation setArgument:&self atIndex:2];
+        NSInvocation *invocation = [NSInvocation invocationWithTarget:delegate selector:didCommitSelector argument:&self];
         [invocation setArgument:&contextInfo atIndex:4];
-        return [objectController commitEditingWithDelegate:self didCommitSelector:@selector(editor:didCommit:contextInfo:) contextInfo:invocation];
+        return [objectController commitEditingWithDelegate:self didCommitSelector:@selector(editor:didCommit:contextInfo:) contextInfo:[invocation retain]];
     }
     return [objectController commitEditingWithDelegate:delegate didCommitSelector:didCommitSelector contextInfo:contextInfo];
 }

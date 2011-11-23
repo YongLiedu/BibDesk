@@ -85,6 +85,7 @@
 #import "BDSKTemplate.h"
 #import "BDSKGroupsArray.h"
 #import "NSTableView_BDSKExtensions.h"
+#import "NSInvocation_BDSKExtensions.h"
 
 #define WEAK_NULL NULL
 
@@ -370,10 +371,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     BOOL didCommit = [self commitEditing];
     if (delegate && didCommitSelector) {
         // - (void)editor:(id)editor didCommit:(BOOL)didCommit contextInfo:(void *)contextInfo
-        NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[delegate methodSignatureForSelector:didCommitSelector]];
-        [invocation setTarget:delegate];
-        [invocation setSelector:didCommitSelector];
-        [invocation setArgument:&self atIndex:2];
+        NSInvocation *invocation = [NSInvocation invocationWithTarget:delegate selector:didCommitSelector argument:&self];
         [invocation setArgument:&didCommit atIndex:3];
         [invocation setArgument:&contextInfo atIndex:4];
         [invocation invoke];

@@ -40,6 +40,7 @@
 #import "BDSKConditionController.h"
 #import "BDSKConditionsView.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "NSInvocation_BDSKExtensions.h"
 
 
 @implementation BDSKFilterController
@@ -218,10 +219,7 @@
     BOOL didCommit = [self commitEditing];
     if (delegate && didCommitSelector) {
         // - (void)editor:(id)editor didCommit:(BOOL)didCommit contextInfo:(void *)contextInfo
-        NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[delegate methodSignatureForSelector:didCommitSelector]];
-        [invocation setTarget:delegate];
-        [invocation setSelector:didCommitSelector];
-        [invocation setArgument:&self atIndex:2];
+        NSInvocation *invocation = [NSInvocation invocationWithTarget:delegate selector:didCommitSelector argument:&self];
         [invocation setArgument:&didCommit atIndex:3];
         [invocation setArgument:&contextInfo atIndex:4];
         [invocation invoke];
