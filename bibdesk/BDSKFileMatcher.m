@@ -610,7 +610,8 @@ static void normalizeScoresForItem(BDSKTreeNode *parent, CGFloat maxScore)
 
     // disable the stop button
     BOOL state = NO;
-    NSInvocation *invocation = [NSInvocation invocationWithTarget:abortButton selector:@selector(setEnabled:) argument:&state];
+    NSInvocation *invocation = [NSInvocation invocationWithTarget:abortButton selector:@selector(setEnabled:)];
+    [invocation setArgument:&state atIndex:2];
     [invocation performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
     
     [indexingLock unlock];

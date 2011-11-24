@@ -41,5 +41,4 @@
 
 @interface NSInvocation (BDSKExtensions)
 + (id)invocationWithTarget:(id)target selector:(SEL)selector;
-+ (id)invocationWithTarget:(id)target selector:(SEL)selector argument:(void *)argument;
 @end

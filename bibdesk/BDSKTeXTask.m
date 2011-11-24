@@ -206,7 +206,8 @@ static double runLoopTimeout = 30;
     taskShouldStartInvocation = nil;
     
     if ([delegate respondsToSelector:theSelector]) {
-        taskShouldStartInvocation = [[NSInvocation invocationWithTarget:delegate selector:theSelector argument:&self] retain];
+        taskShouldStartInvocation = [[NSInvocation invocationWithTarget:delegate selector:theSelector] retain];
+        [taskShouldStartInvocation setArgument:&self atIndex:2];
     }
     
     [taskFinishedInvocation autorelease];
@@ -214,7 +215,8 @@ static double runLoopTimeout = 30;
     theSelector = @selector(texTask:finishedWithResult:);
 
     if ([delegate respondsToSelector:theSelector]) {
-        taskFinishedInvocation = [[NSInvocation invocationWithTarget:delegate selector:theSelector argument:&self] retain];
+        taskFinishedInvocation = [[NSInvocation invocationWithTarget:delegate selector:theSelector] retain];
+        [taskFinishedInvocation setArgument:&self atIndex:2];
     }        
 }
 
