@@ -204,7 +204,7 @@
     if (anObject == urlField) {
         if (fieldEditor == nil) {
             fieldEditor = [[BDSKFieldEditor alloc] init];
-            // we could support dragging here as well, but NSTextView already handles URLs, and it's probably better not to commit when we're editing
+            [(BDSKFieldEditor *)fieldEditor registerForDelegatedDraggedTypes:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil]];
         }
         return fieldEditor;
 	}
