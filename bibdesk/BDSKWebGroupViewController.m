@@ -198,6 +198,7 @@
     [menu removeAllItems];
     for (WebHistoryItem *item in items) {
         NSMenuItem *menuItem = [menu addItemWithTitle:([item title] ?: @"") action:@selector(goBackForwardInHistory:) keyEquivalent:@""];
+        [menuItem setImageAndSize:[item icon]];
         [menuItem setTarget:self];
         [menuItem setRepresentedObject:item];
     }
