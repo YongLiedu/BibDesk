@@ -60,19 +60,20 @@
 	[[NSColor colorWithCalibratedWhite:1.0 alpha:0.394] set];
 	[[NSBezierPath bezierPathWithRoundedRect:outerShadowRect xRadius:3.6 yRadius:3.6] fill];
 	
-	if ([NSApp isActive])
+	if ([NSApp isActive] && ([[controlView window] isMainWindow] || [[controlView window] isKeyWindow]))
 		gradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.24 alpha:1.0] endingColor:[NSColor colorWithCalibratedWhite:0.374 alpha:1.0]];
 	else
 		gradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.55 alpha:1.0] endingColor:[NSColor colorWithCalibratedWhite:0.558 alpha:1.0]];
 	[gradient drawInBezierPath:[NSBezierPath bezierPathWithRoundedRect:outlineRect xRadius:3.6 yRadius:3.6] angle:90];
-	
+	[gradient release];
+    
 	[[NSColor colorWithCalibratedWhite:0.88 alpha:1.0] set];
 	[[NSBezierPath bezierPathWithRoundedRect:innerShadowRect xRadius:2.9 yRadius:2.9] fill];
 	
 	[[NSColor whiteColor] set];
 	[[NSBezierPath bezierPathWithRoundedRect:NSInsetRect(cellFrame, 1.0, 2.0) xRadius:2.6 yRadius:2.6] fill];
 	
-    [super drawInteriorWithFrame:outlineRect inView:controlView];
+    [self drawInteriorWithFrame:outlineRect inView:controlView];
     
 	if ([self showsFirstResponder]) {	
 		[NSGraphicsContext saveGraphicsState];
