@@ -64,7 +64,7 @@
 		gradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.24 alpha:1.0] endingColor:[NSColor colorWithCalibratedWhite:0.374 alpha:1.0]];
 	else
 		gradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.55 alpha:1.0] endingColor:[NSColor colorWithCalibratedWhite:0.558 alpha:1.0]];
-	[gradient drawInBezierPath:[NSBezierPath bezierPathWithRoundedRect:outlineRect xRadius:3.6 yRadius:3.6] angle:90];
+	[gradient drawInBezierPath:[NSBezierPath bezierPathWithRoundedRect:outlineRect xRadius:3.6 yRadius:3.6] angle:[controlView isFlipped] ? 90.0 : 270.0];
 	[gradient release];
     
 	[[NSColor colorWithCalibratedWhite:0.88 alpha:1.0] set];
