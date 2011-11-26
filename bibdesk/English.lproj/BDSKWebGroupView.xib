@@ -2,13 +2,13 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1050</int>
-		<string key="IBDocument.SystemVersion">10F569</string>
-		<string key="IBDocument.InterfaceBuilderVersion">804</string>
-		<string key="IBDocument.AppKitVersion">1038.29</string>
+		<string key="IBDocument.SystemVersion">10K549</string>
+		<string key="IBDocument.InterfaceBuilderVersion">851</string>
+		<string key="IBDocument.AppKitVersion">1038.36</string>
 		<string key="IBDocument.HIToolboxVersion">461.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
-			<string key="NS.object.0">804</string>
+			<string key="NS.object.0">851</string>
 		</object>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -391,7 +391,7 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>BDSKIconTextFieldCell</string>
+					<string>BDSKAddressTextFieldCell</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<integer value="1"/>
@@ -412,7 +412,7 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>BDSKDragTextField</string>
+					<string>BDSKAddressTextField</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -440,6 +440,22 @@
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
 				<bool key="EncodedWithXMLCoder">YES</bool>
+				<object class="IBPartialClassDescription">
+					<string key="className">BDSKAddressTextField</string>
+					<string key="superclassName">BDSKDragTextField</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKAddressTextField.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">BDSKAddressTextFieldCell</string>
+					<string key="superclassName">BDSKIconTextFieldCell</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">BDSKAddressTextFieldCell.h</string>
+					</object>
+				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">BDSKCollapsibleView</string>
 					<string key="superclassName">BDSKContainerView</string>
@@ -595,7 +611,7 @@
 							<string>NSSegmentedControl</string>
 							<string>BDSKCollapsibleView</string>
 							<string>NSButton</string>
-							<string>BDSKDragTextField</string>
+							<string>BDSKAddressTextField</string>
 						</object>
 					</object>
 					<object class="NSMutableDictionary" key="toOneOutletInfosByName">
@@ -623,7 +639,7 @@
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">urlField</string>
-								<string key="candidateClassName">BDSKDragTextField</string>
+								<string key="candidateClassName">BDSKAddressTextField</string>
 							</object>
 						</object>
 					</object>
@@ -674,14 +690,14 @@
 					<string key="className">NSApplication</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKRichTextFormat.h</string>
+						<string key="minorKey">BDSKScriptMenu.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSApplication</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">BDSKScriptMenu.h</string>
+						<string key="minorKey">NSAttributedString+Scripting.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">

@@ -40,11 +40,11 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 #import <Cocoa/Cocoa.h>
 #import "BDSKWebView.h"
 
-@class BDSKCollapsibleView, BDSKEdgeView, BDSKDragTextField, BDSKFieldEditor;
+@class BDSKCollapsibleView, BDSKEdgeView, BDSKAddressTextField, BDSKFieldEditor;
 
 @interface BDSKWebGroupViewController : NSViewController <NSMenuDelegate, BDSKWebViewNavigationDelegate> {
     IBOutlet BDSKCollapsibleView *collapsibleView;
-    IBOutlet BDSKDragTextField *urlField;
+    IBOutlet BDSKAddressTextField *urlField;
     IBOutlet NSSegmentedControl *backForwardButton;
     IBOutlet NSButton *stopOrReloadButton;
     BDSKFieldEditor *fieldEditor;

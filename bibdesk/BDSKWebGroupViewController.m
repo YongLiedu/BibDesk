@@ -41,7 +41,7 @@
 #import <WebKit/WebKit.h>
 #import "BDSKCollapsibleView.h"
 #import "BDSKEdgeView.h"
-#import "BDSKDragTextField.h"
+#import "BDSKAddressTextField.h"
 #import "BDSKIconTextFieldCell.h"
 #import "BDSKFieldEditor.h"
 #import "BibDocument.h"
@@ -88,6 +88,11 @@
     
     // update the buttons, we should not be retrieving at this point
     [self webView:nil setLoading:NO];
+    
+    NSRect rect = [urlField frame];
+    rect.origin.y -= 1.0;
+    rect.size.height += 1.0;
+    [urlField setFrame:rect];
     
     [urlField registerForDraggedTypes:[NSArray arrayWithObjects:NSURLPboardType, BDSKWeblocFilePboardType, nil]];
 }
