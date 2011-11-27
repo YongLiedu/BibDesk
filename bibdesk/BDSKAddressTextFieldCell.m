@@ -60,7 +60,7 @@
 	[[NSColor colorWithCalibratedWhite:1.0 alpha:0.394] set];
 	[[NSBezierPath bezierPathWithRoundedRect:outerShadowRect xRadius:3.6 yRadius:3.6] fill];
 	
-	if ([NSApp isActive] && ([[controlView window] isMainWindow] || [[controlView window] isKeyWindow]))
+	if ([[controlView window] isMainWindow] || [[controlView window] isKeyWindow])
 		gradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.24 alpha:1.0] endingColor:[NSColor colorWithCalibratedWhite:0.374 alpha:1.0]];
 	else
 		gradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.55 alpha:1.0] endingColor:[NSColor colorWithCalibratedWhite:0.558 alpha:1.0]];
