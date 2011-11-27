@@ -240,6 +240,8 @@
         urlString = [pboard stringForType:BDSKWeblocFilePboardType];
     if (urlString) {
         [textField setStringValue:urlString];
+        if ([textField currentEditor])
+            [[textField currentEditor] setSelectedRange:NSMakeRange([urlString length], 0)];
         [self changeURL:textField];
         return YES;
     }
