@@ -197,7 +197,12 @@
         return;
     [menu removeAllItems];
     for (WebHistoryItem *item in items) {
-        NSMenuItem *menuItem = [menu addItemWithTitle:([item title] ?: @"") action:@selector(goBackForwardInHistory:) keyEquivalent:@""];
+        NSString *title = [item title];
+        if ([NSString isEmptyString:title]) {
+            NSURL *url = [NSURL URLWithString:[item URLString]];
+            title = [url isFileURL] ? [[url path] lastPathComponent] : [[url absoluteString] stringByReplacingPercentEscapes];
+        }
+        NSMenuItem *menuItem = [menu addItemWithTitle:title action:@selector(goBackForwardInHistory:) keyEquivalent:@""];
         [menuItem setImageAndSize:[item icon]];
         [menuItem setTarget:self];
         [menuItem setRepresentedObject:item];
