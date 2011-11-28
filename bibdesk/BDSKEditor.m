@@ -867,7 +867,8 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         field = [tableView selectedRow] == -1 ? nil : [fields objectAtIndex:[tableView selectedRow]];
     
     BDSKASSERT(field == nil || [fields containsObject:field]);
-    [changeFieldController setField:field];
+    if (field)
+        [changeFieldController setField:field];
     
 	[changeFieldController beginSheetModalForWindow:[self window]
                                       modalDelegate:self
