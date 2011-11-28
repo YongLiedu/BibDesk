@@ -384,8 +384,6 @@
     NSInteger row = [fields count];
     
     [fields addObject:newField];
-    [item setField:newField toValue:[NSString stringWithFormat:@"%@ %@",NSLocalizedString(@"Add data for field:", @"Default value for new field"), newField]];
-    [[item undoManager] setActionName:NSLocalizedString(@"Add Field", @"Undo action name")];
     [itemTableView reloadData];
     [itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
     [itemTableView editColumn:2 row:row withEvent:nil select:YES];
