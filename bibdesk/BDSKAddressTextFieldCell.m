@@ -49,11 +49,17 @@
     return self;
 }
 
+static inline NSRect adjustedFrame(NSRect cellFrame, NSView *controlView) {
+	NSRect ignored;
+    NSDivideRect(cellFrame, &ignored, &cellFrame, 1.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
+    return cellFrame;
+}
+
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
-	NSRect outlineRect, outerShadowRect, innerShadowRect, ignored;
+	NSRect outlineRect = adjustedFrame(cellFrame, controlView);
+    NSRect outerShadowRect, innerShadowRect, ignored;
 	NSGradient *gradient = nil;
     
-    NSDivideRect(cellFrame, &ignored, &outlineRect, 1.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
     NSDivideRect(cellFrame, &outerShadowRect, &ignored, 10.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
     NSDivideRect(NSInsetRect(cellFrame, 1.0, 1.0), &innerShadowRect, &ignored, 10.0, [controlView isFlipped] ? NSMinYEdge : NSMaxYEdge);
     
@@ -84,21 +90,15 @@
 }
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
-	NSRect ignored;
-    NSDivideRect(cellFrame, &ignored, &cellFrame, 1.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
-    [super drawInteriorWithFrame:cellFrame inView:controlView];
+    [super drawInteriorWithFrame:adjustedFrame(cellFrame, controlView) inView:controlView];
 }
 
 - (void)editWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject event:(NSEvent *)theEvent {
-	NSRect ignored;
-    NSDivideRect(aRect, &ignored, &aRect, 1.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
-    [super editWithFrame:aRect inView:controlView editor:textObj delegate:anObject event:theEvent];
+    [super editWithFrame:adjustedFrame(aRect, controlView) inView:controlView editor:textObj delegate:anObject event:theEvent];
 }
 
 - (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(NSInteger)selStart length:(NSInteger)selLength {
-	NSRect ignored;
-    NSDivideRect(aRect, &ignored, &aRect, 1.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
-    [super selectWithFrame:aRect inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
+    [super selectWithFrame:adjustedFrame(aRect, controlView) inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
 }
 
 @end
