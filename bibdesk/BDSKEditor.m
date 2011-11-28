@@ -729,9 +729,8 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
             addedFields = [[NSMutableSet alloc] init];
         [addedFields addObject:newField];
 		[tabView selectFirstTabViewItem:nil];
-        [publication setField:newField toValue:[NSString stringWithFormat:@"%@ %@",NSLocalizedString(@"Add data for field:", @"Default value for new field"), newField]];
-		[[self undoManager] setActionName:NSLocalizedString(@"Add Field", @"Undo action name")];
-		[self setKeyField:newField];
+		[self resetFields];
+        [self setKeyField:newField];
     }
 }
 
@@ -770,9 +769,13 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         
         [addedFields removeObject:oldField];
         [tabView selectFirstTabViewItem:nil];
-        [publication setField:oldField toValue:nil];
-        [[self undoManager] setActionName:NSLocalizedString(@"Remove Field", @"Undo action name")];
-        [self userChangedField:oldField from:oldValue to:@""];
+        if ([NSString isEmptyString:oldValue]) {
+            [self resetFields];
+        } else {
+            [publication setField:oldField toValue:nil];
+            [[self undoManager] setActionName:NSLocalizedString(@"Remove Field", @"Undo action name")];
+            [self userChangedField:oldField from:oldValue to:@""];
+        }
     }
 }
 
