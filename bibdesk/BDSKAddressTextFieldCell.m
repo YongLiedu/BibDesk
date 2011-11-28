@@ -73,7 +73,7 @@
 	[[NSColor whiteColor] set];
 	[[NSBezierPath bezierPathWithRoundedRect:NSInsetRect(cellFrame, 1.0, 2.0) xRadius:2.6 yRadius:2.6] fill];
 	
-    [self drawInteriorWithFrame:outlineRect inView:controlView];
+    [self drawInteriorWithFrame:cellFrame inView:controlView];
     
 	if ([self showsFirstResponder]) {	
 		[NSGraphicsContext saveGraphicsState];
@@ -81,6 +81,12 @@
 		[[NSBezierPath bezierPathWithRoundedRect:outlineRect xRadius:3.6 yRadius:3.6] fill]; 
 		[NSGraphicsContext restoreGraphicsState];
 	}
+}
+
+- (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
+	NSRect ignored;
+    NSDivideRect(cellFrame, &ignored, &cellFrame, 1.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
+    [super drawInteriorWithFrame:cellFrame inView:controlView];
 }
 
 - (void)editWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject event:(NSEvent *)theEvent {
