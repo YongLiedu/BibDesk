@@ -1050,6 +1050,7 @@ typedef NSInteger NSScrollerStyle;
         [nc removeObserver:self name:NSWindowDidBecomeKeyNotification object:window];
         [nc removeObserver:self name:NSWindowDidResignKeyNotification object:window];
     }
+    [super viewWillMoveToWindow:newWindow];
 }
 
 - (void)viewDidMoveToWindow {
@@ -1062,6 +1063,7 @@ typedef NSInteger NSScrollerStyle;
         [nc addObserver:self selector:@selector(_handleKeyOrMainStateNotification:) name:NSWindowDidBecomeKeyNotification object:window];
         [nc addObserver:self selector:@selector(_handleKeyOrMainStateNotification:) name:NSWindowDidResignKeyNotification object:window];
     }
+    [super viewDidMoveToWindow];
 }
 
 #pragma mark Layout
