@@ -64,6 +64,7 @@
         [nc removeObserver:self name:NSWindowDidBecomeKeyNotification object:window];
         [nc removeObserver:self name:NSWindowDidResignKeyNotification object:window];
     }
+    [super viewWillMoveToWindow:newWindow];
 }
 
 - (void)viewDidMoveToWindow {
@@ -75,6 +76,7 @@
         [nc addObserver:self selector:@selector(handleKeyOrMainStateChangedNotification:) name:NSWindowDidBecomeKeyNotification object:window];
         [nc addObserver:self selector:@selector(handleKeyOrMainStateChangedNotification:) name:NSWindowDidResignKeyNotification object:window];
     }
+    [super viewDidMoveToWindow];
 }
 
 @end
