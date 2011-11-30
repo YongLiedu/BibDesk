@@ -40,5 +40,10 @@
 #import "BDSKDragTextField.h"
 
 
-@interface BDSKAddressTextField : BDSKDragTextField
+@interface BDSKAddressTextField : BDSKDragTextField {
+    NSButton *button;
+}
+
+- (NSButton *)button;
+
 @end

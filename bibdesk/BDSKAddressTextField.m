@@ -39,6 +39,8 @@
 #import "BDSKAddressTextField.h"
 #import "BDSKAddressTextFieldCell.h"
 
+#define BUTTON_SIZE 16.0
+#define BUTTON_MARGIN 3.0
 
 @implementation BDSKAddressTextField
 
@@ -46,9 +48,51 @@
     return [BDSKAddressTextFieldCell class];
 }
 
+- (void)makeButton {
+    NSRect rect, bounds = [self bounds];
+    rect.origin.x = NSMaxX(bounds) - BUTTON_SIZE - BUTTON_MARGIN;
+    rect.origin.y = [self isFlipped] ? NSMinY(bounds) + BUTTON_MARGIN : NSMaxY(bounds) - BUTTON_SIZE - BUTTON_MARGIN;
+    rect.size.width = rect.size.height = BUTTON_SIZE;
+    button = [[NSButton alloc] initWithFrame:rect];
+    [button setButtonType:NSMomentaryChangeButton];
+    [button setBordered:NO];
+    [button setImagePosition:NSImageOnly];
+    [[button cell] setImageScaling:NSImageScaleProportionallyDown];
+    [button setAutoresizingMask:NSViewMinXMargin | NSViewMaxYMargin];
+    [self addSubview:button];
+}
+
+- (id)initWithFrame:(NSRect)frameRect {
+    self = [super initWithFrame:frameRect];
+    if (self) {
+        [self makeButton];
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)aDecoder {
+    self = [super initWithCoder:aDecoder];
+    if (self) {
+        button = [[aDecoder decodeObjectForKey:@"button"] retain];
+        if (button == nil)
+            [self makeButton];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)aCoder {
+    [super encodeWithCoder:aCoder];
+    [aCoder encodeConditionalObject:button forKey:@"button"];
+}
+
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    BDSKDESTROY(button);
 	[super dealloc];
+}
+
+- (NSButton *)button {
+    return button;
 }
 
 - (void)handleKeyOrMainStateChangedNotification:(NSNotification *)note {

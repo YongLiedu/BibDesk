@@ -46,7 +46,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
     IBOutlet BDSKCollapsibleView *collapsibleView;
     IBOutlet BDSKAddressTextField *urlField;
     IBOutlet NSSegmentedControl *backForwardButton;
-    IBOutlet NSButton *stopOrReloadButton;
     BDSKFieldEditor *fieldEditor;
 }
 

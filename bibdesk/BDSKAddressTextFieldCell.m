@@ -89,6 +89,12 @@ static inline NSRect adjustedFrame(NSRect cellFrame, NSView *controlView) {
 	}
 }
 
+- (NSRect)textRectForBounds:(NSRect)aRect {
+    NSRect ignored, rect = [super textRectForBounds:aRect];
+    NSDivideRect(rect, &ignored, &rect, 17.0, NSMaxXEdge);
+    return rect;
+}
+
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
     [super drawInteriorWithFrame:adjustedFrame(cellFrame, controlView) inView:controlView];
 }

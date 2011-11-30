@@ -95,6 +95,10 @@
     [urlField setFrame:rect];
     
     [urlField registerForDraggedTypes:[NSArray arrayWithObjects:NSURLPboardType, BDSKWeblocFilePboardType, nil]];
+    
+    [[urlField button] setTarget:self];
+    [[urlField button] setAction:@selector(stopOrReloadAction:)];
+    [[urlField button] setKeyEquivalentModifierMask:NSCommandKeyMask];
 }
 
 #pragma mark Accessors
@@ -172,15 +176,15 @@
     WebView *webView = [self webView];
     [backForwardButton setEnabled:[webView canGoBack] forSegment:BACK_SEGMENT_INDEX];
     [backForwardButton setEnabled:[webView canGoForward] forSegment:FORWARD_SEGMENT_INDEX];
-    [stopOrReloadButton setEnabled:YES];
+    [[urlField button] setEnabled:YES];
     if (loading) {
-        [stopOrReloadButton setImage:[NSImage imageNamed:NSImageNameStopProgressTemplate]];
-        [stopOrReloadButton setToolTip:NSLocalizedString(@"Cancel download", @"Tool tip message")];
-        [stopOrReloadButton setKeyEquivalent:@"."];
+        [[urlField button] setImage:[NSImage imageNamed:NSImageNameStopProgressTemplate]];
+        [[urlField button] setToolTip:NSLocalizedString(@"Cancel download", @"Tool tip message")];
+        [[urlField button] setKeyEquivalent:@"."];
     } else {
-        [stopOrReloadButton setImage:[NSImage imageNamed:NSImageNameRefreshTemplate]];
-        [stopOrReloadButton setToolTip:NSLocalizedString(@"Reload page", @"Tool tip message")];
-        [stopOrReloadButton setKeyEquivalent:@"r"];
+        [[urlField button] setImage:[NSImage imageNamed:NSImageNameRefreshTemplate]];
+        [[urlField button] setToolTip:NSLocalizedString(@"Reload page", @"Tool tip message")];
+        [[urlField button] setKeyEquivalent:@"r"];
     }
 }
 
