@@ -42,6 +42,10 @@
 #define BUTTON_SIZE 16.0
 #define BUTTON_MARGIN 3.0
 
+@interface BDSKEmbeddedButton : NSButton
+@end
+
+
 @implementation BDSKAddressTextField
 
 + (Class)cellClass {
@@ -53,7 +57,7 @@
     rect.origin.x = NSMaxX(bounds) - BUTTON_SIZE - BUTTON_MARGIN;
     rect.origin.y = [self isFlipped] ? NSMinY(bounds) + BUTTON_MARGIN : NSMaxY(bounds) - BUTTON_SIZE - BUTTON_MARGIN;
     rect.size.width = rect.size.height = BUTTON_SIZE;
-    button = [[NSButton alloc] initWithFrame:rect];
+    button = [[BDSKEmbeddedButton alloc] initWithFrame:rect];
     [button setButtonType:NSMomentaryChangeButton];
     [button setBordered:NO];
     [button setImagePosition:NSImageOnly];
@@ -122,5 +126,12 @@
     }
     [super viewDidMoveToWindow];
 }
+
+@end
+
+
+@implementation BDSKEmbeddedButton
+
+- (BOOL)acceptsFirstResponder { return NO; }
 
 @end
