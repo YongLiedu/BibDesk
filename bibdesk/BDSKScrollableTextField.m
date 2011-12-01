@@ -51,6 +51,7 @@
     if (self) {
 		NSTextFieldCell *oldCell = [self cell];
         if ([oldCell isKindOfClass:[[self class] cellClass]] == NO) {
+            BDSKASSERT_NOT_REACHED("BDSKScrollableTextField has wrong cell");
             BDSKScrollableTextFieldCell *myCell = [[[[self class] cellClass] alloc] initTextCell:[oldCell stringValue]];
             
             [myCell setFont:[oldCell font]];

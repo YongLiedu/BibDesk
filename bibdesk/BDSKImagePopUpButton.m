@@ -52,6 +52,7 @@
     self = [super initWithCoder:coder];
     if (self) {
 		if ([[self cell] isKindOfClass:[[self class] cellClass]] == NO) {
+            BDSKASSERT_NOT_REACHED("BDSKImagePopUpButton has wrong cell");
 			id oldCell = [self cell];
 			id cell = [[[[[self class] cellClass] alloc] initTextCell:@"" pullsDown:YES] autorelease];
             

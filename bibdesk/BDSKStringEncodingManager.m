@@ -79,6 +79,7 @@ enum {
     self = [super initWithCoder:coder];
     if (self) {
 		if ([[self cell] isKindOfClass:[[self class] cellClass]] == NO) {
+            BDSKASSERT_NOT_REACHED("BDSKEncodingPopUpButton has wrong cell");
             BDSKEncodingPopUpButtonCell *newCell = [[[[self class] cellClass] alloc] init];
             [newCell setAction:[[self cell] action]];
             [newCell setTarget:[[self cell] target]];

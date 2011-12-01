@@ -88,6 +88,7 @@
     if (self) {
 		NSButtonCell *oldCell = [self cell];
 		if (NO == [oldCell isKindOfClass:[[self class] cellClass]]) {
+            BDSKASSERT_NOT_REACHED("BDSKFontWell has wrong cell");
 			BDSKFontWellCell *newCell = [[[[self class] cellClass] alloc] init];
 			[newCell setAlignment:[oldCell alignment]];
 			[newCell setEditable:[oldCell isEditable]];

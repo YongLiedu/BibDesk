@@ -59,6 +59,7 @@
     if (self) {
 		NSButtonCell *oldCell = [self cell];
 		if ([oldCell isKindOfClass:[[self class] cellClass]] == NO) {
+            BDSKASSERT_NOT_REACHED("BDSKRatingButton has wrong cell");
 			BDSKRatingButtonCell *newCell = [[[[self class] cellClass] alloc] init];
 			[newCell setBordered:[oldCell isBordered]];
 			[newCell setAlignment:[oldCell alignment]];
