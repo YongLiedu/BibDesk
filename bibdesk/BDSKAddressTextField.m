@@ -77,6 +77,25 @@
 - (id)initWithCoder:(NSCoder *)aDecoder {
     self = [super initWithCoder:aDecoder];
     if (self) {
+		NSTextFieldCell *oldCell = [self cell];
+        if ([oldCell isKindOfClass:[[self class] cellClass]] == NO) {
+            BDSKAddressTextFieldCell *myCell = [[[[self class] cellClass] alloc] initTextCell:[oldCell stringValue]];
+            
+            [myCell setFont:[oldCell font]];
+            [myCell setControlSize:[oldCell controlSize]];
+            [myCell setControlTint:[oldCell controlTint]];
+            [myCell setEnabled:[oldCell isEnabled]];
+            [myCell setAlignment:NSLeftTextAlignment];
+            [myCell setWraps:[oldCell wraps]];
+            [myCell setScrollable:[oldCell isScrollable]];
+            [myCell setSelectable:[oldCell isSelectable]];
+            [myCell setEditable:[oldCell isEditable]];
+            [myCell setBezeled:YES];
+            [myCell setBezelStyle:NSTextFieldSquareBezel];
+            
+            [self setCell:myCell];
+            [myCell release];
+        }
         button = [[aDecoder decodeObjectForKey:@"button"] retain];
         if (button == nil)
             [self makeButton];
