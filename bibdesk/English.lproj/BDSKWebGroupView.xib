@@ -33,7 +33,7 @@
 				<string key="NSClassName">NSApplication</string>
 			</object>
 			<object class="NSCustomView" id="13637997">
-				<nil key="NSNextResponder"/>
+				<reference key="NSNextResponder"/>
 				<int key="NSvFlags">266</int>
 				<object class="NSMutableArray" key="NSSubviews">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -52,6 +52,7 @@
 										<int key="NSvFlags">266</int>
 										<string key="NSFrame">{{75, 11}, {54, 22}}</string>
 										<reference key="NSSuperview" ref="735606656"/>
+										<reference key="NSWindow"/>
 										<bool key="NSEnabled">YES</bool>
 										<object class="NSTextFieldCell" key="NSCell" id="100059808">
 											<int key="NSCellFlags">-1804468671</int>
@@ -64,7 +65,6 @@
 											</object>
 											<string key="NSPlaceholderString">URL</string>
 											<reference key="NSControlView" ref="613952324"/>
-											<bool key="NSDrawsBackground">YES</bool>
 											<object class="NSColor" key="NSBackgroundColor">
 												<int key="NSColorSpace">6</int>
 												<string key="NSCatalogName">System</string>
@@ -90,6 +90,7 @@
 										<int key="NSvFlags">268</int>
 										<string key="NSFrame">{{10, 9}, {57, 25}}</string>
 										<reference key="NSSuperview" ref="735606656"/>
+										<reference key="NSWindow"/>
 										<bool key="NSEnabled">YES</bool>
 										<object class="NSSegmentedCell" key="NSCell" id="238264941">
 											<int key="NSCellFlags">67239424</int>
@@ -130,17 +131,21 @@
 								</object>
 								<string key="NSFrameSize">{140, 44}</string>
 								<reference key="NSSuperview" ref="590748185"/>
+								<reference key="NSWindow"/>
 								<string key="NSClassName">BDSKGradientView</string>
 								<string key="NSExtension">NSView</string>
 							</object>
 						</object>
 						<string key="NSFrameSize">{140, 44}</string>
 						<reference key="NSSuperview" ref="13637997"/>
+						<reference key="NSWindow"/>
 						<string key="NSClassName">BDSKCollapsibleView</string>
 						<string key="NSExtension">NSView</string>
 					</object>
 				</object>
 				<string key="NSFrameSize">{140, 44}</string>
+				<reference key="NSSuperview"/>
+				<reference key="NSWindow"/>
 				<string key="NSClassName">BDSKEdgeView</string>
 				<string key="NSExtension">NSView</string>
 			</object>
