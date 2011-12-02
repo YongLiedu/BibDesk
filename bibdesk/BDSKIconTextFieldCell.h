@@ -43,10 +43,17 @@
     NSImageCell *imageCell;
 }
 
++ (Class)formatterClass;
+
 - (NSImage *)icon;
 - (void)setIcon:(NSImage *)newIcon;
 
 - (NSRect)textRectForBounds:(NSRect)aRect;
 - (NSRect)iconRectForBounds:(NSRect)aRect;
 
+@end
+
+
+@interface NSFormatter (BDSKIconTextFieldCell)
+- (NSImage *)imageForObjectValue:(id)obj;
 @end

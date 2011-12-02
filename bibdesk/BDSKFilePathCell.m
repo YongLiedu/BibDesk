@@ -43,34 +43,17 @@
 
 @implementation BDSKFilePathCell
 
-static BDSKFilePathFormatter *filePathFormatter = nil;
-
-+ (void)initialize {
-    BDSKINITIALIZE;
-    
-    filePathFormatter = [[BDSKFilePathFormatter alloc] init];
++ (Class)formatterClass {
+    return [BDSKFilePathFormatter class];
 }
 
-- (id)initTextCell:(NSString *)aString {
-    self = [super initTextCell:aString];
-    if (self) {
-        [self setFormatter:filePathFormatter];
-    }
-    return self;
-}
+@end
 
-- (id)initWithCoder:(NSCoder *)coder {
-    self = [super initWithCoder:coder];
-    if (self) {
-        if ([self formatter] == nil)
-            [self setFormatter:filePathFormatter];
-    }
-    return self;
-}
+#pragma mark -
 
-- (void)setObjectValue:(id <NSCopying>)obj {
-    [super setObjectValue:obj];
-    
+@implementation BDSKFilePathFormatter
+
+- (NSImage *)imageForObjectValue:(id)obj {
     NSImage *image = nil;
     if ([(id)obj isKindOfClass:[NSString class]]) {
         NSString *path = [(NSString *)obj stringByStandardizingPath];
@@ -81,14 +64,8 @@ static BDSKFilePathFormatter *filePathFormatter = nil;
         if([[NSFileManager defaultManager] objectExistsAtFileURL:fileURL])
             image = [NSImage imageForURL:fileURL];
     }
-    [self setIcon:image];
+    return image;
 }
-
-@end
-
-#pragma mark -
-
-@implementation BDSKFilePathFormatter
 
 - (NSString *)stringForObjectValue:(id)obj {
     NSString *path = [obj isKindOfClass:[NSURL class]] ? [obj path] : [obj description];

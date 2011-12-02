@@ -41,52 +41,17 @@
 NSString *BDSKTextWithIconCellStringKey = @"string";
 NSString *BDSKTextWithIconCellImageKey = @"image";
 
-static id nonNullObjectValueForKey(id object, NSString *key) {
+static id nonNullObjectValueForKey(id object, id stringObject, NSString *key) {
+    if ([object isKindOfClass:[NSString class]])
+        return stringObject;
     id value = [object valueForKey:key];
     return [value isEqual:[NSNull null]] ? nil : value;
 }
 
 @implementation BDSKTextWithIconCell
 
-static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
-
-+ (void)initialize {
-    BDSKINITIALIZE;
-    textWithIconFormatter = [[BDSKTextWithIconFormatter alloc] init];
-}
-
-- (id)initTextCell:(NSString *)aString {
-    self = [super initTextCell:aString];
-    if (self) {
-        [self setFormatter:textWithIconFormatter];
-    }
-    return self;
-}
-
-- (id)initWithCoder:(NSCoder *)coder {
-    self = [super initWithCoder:coder];
-    if (self) {
-        if ([self formatter] == nil)
-            [self setFormatter:textWithIconFormatter];
-    }
-    return self;
-}
-
-- (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
-    return nil;
-}
-
-- (void)setObjectValue:(id <NSCopying>)obj {
-    // the objectValue should be an object that's KVC compliant for the "string" and "image" keys
-    
-    // this can happen initially from the init, as there's no initializer passing an objectValue
-    if ([(id)obj isKindOfClass:[NSString class]])
-        obj = [NSDictionary dictionaryWithObjectsAndKeys:obj, BDSKTextWithIconCellStringKey, nil];
-    
-    // we should not set a derived value such as the string here, otherwise NSTableView will call tableView:setObjectValue:forTableColumn:row: whenever a cell is selected
-    [super setObjectValue:obj];
-    
-    [self setIcon:nonNullObjectValueForKey(obj, BDSKTextWithIconCellImageKey)];
++ (Class)formatterClass {
+    return [BDSKTextWithIconFormatter class];
 }
 
 @end
@@ -95,8 +60,12 @@ static BDSKTextWithIconFormatter *textWithIconFormatter = nil;
 
 @implementation BDSKTextWithIconFormatter
 
+- (NSImage *)imageForObjectValue:(id)obj {
+    return nonNullObjectValueForKey(obj, nil, BDSKTextWithIconCellImageKey);
+}
+
 - (NSString *)stringForObjectValue:(id)obj {
-    return [obj isKindOfClass:[NSString class]] ? obj : nonNullObjectValueForKey(obj, BDSKTextWithIconCellStringKey);
+    return nonNullObjectValueForKey(obj, obj, BDSKTextWithIconCellStringKey);
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error {

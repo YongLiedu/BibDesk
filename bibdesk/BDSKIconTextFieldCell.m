@@ -51,11 +51,15 @@
 #define BORDER_BETWEEN_IMAGE_AND_TEXT_BEZELED (-2.0)
 #define IMAGE_OFFSET (1.0)
 
++ (Class)formatterClass { return Nil; }
+
 - (id)initTextCell:(NSString *)aString {
     self = [super initTextCell:aString];
     if (self) {
         imageCell = [[NSImageCell alloc] init];
         [imageCell setImageScaling:NSImageScaleProportionallyUpOrDown];
+        if ([[self class] formatterClass])
+            [self setFormatter:[[[[[self class] formatterClass] alloc] init] autorelease]];
     }
     return self;
 }
@@ -68,6 +72,8 @@
             imageCell = [[NSImageCell alloc] init];
             [imageCell setImageScaling:NSImageScaleProportionallyUpOrDown];
         }
+        if ([self formatter] == nil && [[self class] formatterClass])
+            [self setFormatter:[[[[[self class] formatterClass] alloc] init] autorelease]];
     }
     return self;
 }
@@ -168,6 +174,12 @@
     }
 }
 
+- (void)setObjectValue:(id <NSCopying>)obj {
+    [super setObjectValue:obj];
+    if ([[self formatter] respondsToSelector:@selector(imageForObjectValue:)])
+        [self setIcon:[[self formatter] imageForObjectValue:obj]];
+}
+
 - (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(NSInteger)selStart length:(NSInteger)selLength {
     [super selectWithFrame:[self textRectForBounds:aRect] inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
 }
@@ -181,6 +193,10 @@
     else if (NSMouseInRect(mouseLoc, [self iconRectForBounds:cellFrame], [controlView isFlipped]))
         hit = NSCellHitContentArea;
     return hit;
+}
+
+- (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
+    return nil;
 }
 
 @end
