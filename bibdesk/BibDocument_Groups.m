@@ -530,7 +530,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         BDSKGroup *group;
                 
         // now add the group names that we found from our BibItems, using a generic folder icon
-        // use BDSKTextWithIconCell keys
         for (id groupName in (NSSet *)(setAndBag.set)) {
             NSUInteger idx = [oldGroupNames indexOfObject:groupName];
             if (idx == NSNotFound)
