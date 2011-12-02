@@ -53,13 +53,19 @@
 
 + (Class)formatterClass { return Nil; }
 
+- (void)commonInit {
+    if (imageCell == nil) {
+        imageCell = [[NSImageCell alloc] init];
+        [imageCell setImageScaling:NSImageScaleProportionallyUpOrDown];
+    }
+    if ([self formatter] == nil && [[self class] formatterClass])
+        [self setFormatter:[[[[[self class] formatterClass] alloc] init] autorelease]];
+}
+
 - (id)initTextCell:(NSString *)aString {
     self = [super initTextCell:aString];
     if (self) {
-        imageCell = [[NSImageCell alloc] init];
-        [imageCell setImageScaling:NSImageScaleProportionallyUpOrDown];
-        if ([[self class] formatterClass])
-            [self setFormatter:[[[[[self class] formatterClass] alloc] init] autorelease]];
+        [self commonInit];
     }
     return self;
 }
@@ -68,12 +74,7 @@
     self = [super initWithCoder:decoder];
     if (self) {
         imageCell = [[decoder decodeObjectForKey:@"imageCell"] retain];
-        if (imageCell == nil) {
-            imageCell = [[NSImageCell alloc] init];
-            [imageCell setImageScaling:NSImageScaleProportionallyUpOrDown];
-        }
-        if ([self formatter] == nil && [[self class] formatterClass])
-            [self setFormatter:[[[[[self class] formatterClass] alloc] init] autorelease]];
+        [self commonInit];
     }
     return self;
 }
