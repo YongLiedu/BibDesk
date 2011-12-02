@@ -66,7 +66,7 @@
             [super initialize]; \
             if (hasBeenInitialized) return; \
             hasBeenInitialized = YES;\
-        } while (0);
+        } while (0)
 
     #define BDSKDESTROY(variable) do { [variable release]; variable = nil; } while (0)
     #define BDSKCFDESTROY(variable) do { if (variable) CFRelease(variable); variable = NULL; } while (0)
