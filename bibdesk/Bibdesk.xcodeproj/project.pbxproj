@@ -212,9 +212,7 @@
 		CE969E340931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE969E320931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.m */; };
 		CE96DB7210C7288800F085F3 /* BDSKButtonBar.m in Sources */ = {isa = PBXBuildFile; fileRef = CE96DB7010C7288800F085F3 /* BDSKButtonBar.m */; };
 		CE9F85410956A2C50073FCAD /* BDSKFieldEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = CE9F853F0956A2C50073FCAD /* BDSKFieldEditor.m */; };
-		CEA498A11481183600AB81C5 /* BDSKAddressTextField.h in Headers */ = {isa = PBXBuildFile; fileRef = CEA4989F1481183600AB81C5 /* BDSKAddressTextField.h */; };
 		CEA498A21481183600AB81C5 /* BDSKAddressTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = CEA498A01481183600AB81C5 /* BDSKAddressTextField.m */; };
-		CEA498A51481185100AB81C5 /* BDSKAddressTextFieldCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CEA498A31481185100AB81C5 /* BDSKAddressTextFieldCell.h */; };
 		CEA498A61481185100AB81C5 /* BDSKAddressTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CEA498A41481185100AB81C5 /* BDSKAddressTextFieldCell.m */; };
 		CEAB9F5A0B4FF20800673AC2 /* BDSKCitationFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = CEAB9F580B4FF20800673AC2 /* BDSKCitationFormatter.m */; };
 		CEAC48510A96589A00B8DF43 /* BDSKTemplatedTextCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CEAC484F0A96589A00B8DF43 /* BDSKTemplatedTextCommand.m */; };
@@ -2964,8 +2962,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				CEA498A11481183600AB81C5 /* BDSKAddressTextField.h in Headers */,
-				CEA498A51481185100AB81C5 /* BDSKAddressTextFieldCell.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
