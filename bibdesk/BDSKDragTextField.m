@@ -37,7 +37,6 @@
  */
 
 #import "BDSKDragTextField.h"
-#import "BDSKIconTextFieldCell.h"
 #import "NSBezierPath_BDSKExtensions.h"
 
 
