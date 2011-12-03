@@ -81,47 +81,6 @@
     return [super setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
 }
 
-- (void)mouseDown:(NSEvent *)theEvent {
-    if ([[self cell] respondsToSelector:@selector(iconRectForBounds:)] && [[self delegate] respondsToSelector:@selector(dragTextField:writeDataToPasteboard:)]) {
-        NSRect iconRect = [[self cell] iconRectForBounds:[self bounds]];
-        NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-        if (NSMouseInRect(mouseLoc, iconRect, [self isFlipped])) {
-            NSEvent *nextEvent = [[self window] nextEventMatchingMask: NSLeftMouseUpMask | NSLeftMouseDraggedMask];
-            
-            if (NSLeftMouseDragged == [nextEvent type]) {
-                NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
-                
-                if ([[self delegate] dragTextField:self writeDataToPasteboard:pboard]) {
-               
-                    NSImage *dragImage = nil;
-                    NSSize imageSize = NSZeroSize;
-                    NSImage *image = nil;
-                    NSRect drawRect = [self bounds];
-                    NSRect rect = [[self cell] iconRectForBounds:drawRect];
-                    NSPoint dragPoint = rect.origin;
-                    if ([self isFlipped])
-                        dragPoint.y += NSHeight(rect);
-                    drawRect.origin.x -= NSMinX(rect);
-                    drawRect.origin.y -= NSMinY(rect);
-                    image = [[NSImage alloc] initWithSize:rect.size];
-                    [image lockFocus];
-                    [[self cell] drawInteriorWithFrame:drawRect inView:nil];
-                    [image unlockFocus];
-                    imageSize = [image size];
-                    dragImage = [[[NSImage alloc] initWithSize:imageSize] autorelease];
-                    [dragImage lockFocus];
-                    [image drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeCopy fraction:0.7];
-                    [dragImage unlockFocus];
-                    [image release];
-                    [self dragImage:dragImage at:dragPoint offset:NSZeroSize event:theEvent pasteboard:pboard source:self slideBack:YES]; 
-                }
-            }
-            return;
-        }
-    }
-    [super mouseDown:theEvent];
-}
-
 // flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag
 - (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFlagsChangedNotification object:NSApp];

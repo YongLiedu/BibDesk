@@ -147,6 +147,47 @@
     [super viewDidMoveToWindow];
 }
 
+- (void)mouseDown:(NSEvent *)theEvent {
+    if ([[self delegate] respondsToSelector:@selector(dragTextField:writeDataToPasteboard:)]) {
+        NSRect iconRect = [[self cell] iconRectForBounds:[self bounds]];
+        NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+        if (NSMouseInRect(mouseLoc, iconRect, [self isFlipped])) {
+            NSEvent *nextEvent = [[self window] nextEventMatchingMask: NSLeftMouseUpMask | NSLeftMouseDraggedMask];
+            
+            if (NSLeftMouseDragged == [nextEvent type]) {
+                NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
+                
+                if ([[self delegate] dragTextField:self writeDataToPasteboard:pboard]) {
+               
+                    NSImage *dragImage = nil;
+                    NSSize imageSize = NSZeroSize;
+                    NSImage *image = nil;
+                    NSRect drawRect = [self bounds];
+                    NSRect rect = [[self cell] iconRectForBounds:drawRect];
+                    NSPoint dragPoint = rect.origin;
+                    if ([self isFlipped])
+                        dragPoint.y += NSHeight(rect);
+                    drawRect.origin.x -= NSMinX(rect);
+                    drawRect.origin.y -= NSMinY(rect);
+                    image = [[NSImage alloc] initWithSize:rect.size];
+                    [image lockFocus];
+                    [[self cell] drawInteriorWithFrame:drawRect inView:nil];
+                    [image unlockFocus];
+                    imageSize = [image size];
+                    dragImage = [[[NSImage alloc] initWithSize:imageSize] autorelease];
+                    [dragImage lockFocus];
+                    [image drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeCopy fraction:0.7];
+                    [dragImage unlockFocus];
+                    [image release];
+                    [self dragImage:dragImage at:dragPoint offset:NSZeroSize event:theEvent pasteboard:pboard source:self slideBack:YES]; 
+                }
+            }
+            return;
+        }
+    }
+    [super mouseDown:theEvent];
+}
+
 @end
 
 
