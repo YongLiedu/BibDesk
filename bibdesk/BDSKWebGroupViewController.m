@@ -252,7 +252,7 @@
     return NO;
 }
 
-- (BOOL)dragTextField:(BDSKDragTextField *)textField writeDataToPasteboard:(NSPasteboard *)pboard {
+- (BOOL)addressTextField:(BDSKAddressTextField *)textField writeDataToPasteboard:(NSPasteboard *)pboard {
     NSURL *url = [[self webView] URL];
     if (url) {
         [pboard declareTypes:[NSArray arrayWithObjects:NSURLPboardType, BDSKWeblocFilePboardType, nil] owner:nil];

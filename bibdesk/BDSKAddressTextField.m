@@ -148,7 +148,7 @@
 }
 
 - (void)mouseDown:(NSEvent *)theEvent {
-    if ([[self delegate] respondsToSelector:@selector(dragTextField:writeDataToPasteboard:)]) {
+    if ([[self delegate] respondsToSelector:@selector(addressTextField:writeDataToPasteboard:)]) {
         NSRect iconRect = [[self cell] iconRectForBounds:[self bounds]];
         NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
         if (NSMouseInRect(mouseLoc, iconRect, [self isFlipped])) {
@@ -157,7 +157,7 @@
             if (NSLeftMouseDragged == [nextEvent type]) {
                 NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
                 
-                if ([[self delegate] dragTextField:self writeDataToPasteboard:pboard]) {
+                if ([[self delegate] addressTextField:self writeDataToPasteboard:pboard]) {
                
                     NSImage *dragImage = nil;
                     NSSize imageSize = NSZeroSize;
@@ -187,6 +187,11 @@
     }
     [super mouseDown:theEvent];
 }
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKAddressTextFieldDelegate>)delegate { return (id <BDSKAddressTextFieldDelegate>)[super delegate]; }
+- (void)setDelegate:(id <BDSKAddressTextFieldDelegate>)newDelegate { [super setDelegate:newDelegate]; }
+#endif
 
 @end
 

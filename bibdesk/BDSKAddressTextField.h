@@ -39,6 +39,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKDragTextField.h"
 
+@protocol BDSKAddressTextFieldDelegate;
 
 @interface BDSKAddressTextField : BDSKDragTextField {
     NSButton *button;
@@ -46,4 +47,15 @@
 
 - (NSButton *)button;
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+- (id <BDSKAddressTextFieldDelegate>)delegate;
+- (void)setDelegate:(id <BDSKAddressTextFieldDelegate>)newDelegate;
+#endif
+
+@end
+
+
+@protocol BDSKAddressTextFieldDelegate <BDSKDragTextFieldDelegate>
+@optional
+- (BOOL)addressTextField:(BDSKAddressTextField *)textField writeDataToPasteboard:(NSPasteboard *)pasteboard;
 @end
