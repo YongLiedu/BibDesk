@@ -42,7 +42,7 @@
 #import "BDSKCollapsibleView.h"
 #import "BDSKEdgeView.h"
 #import "BDSKAddressTextField.h"
-#import "BDSKIconTextFieldCell.h"
+#import "BDSKAddressTextFieldCell.h"
 #import "BDSKFieldEditor.h"
 #import "BibDocument.h"
 #import "BDSKBookmarkController.h"
@@ -165,7 +165,7 @@
 #pragma mark BDSKWebViewNavigationDelegate protocol
 
 - (void)webView:(WebView *)sender setIcon:(NSImage *)icon {
-    [(BDSKIconTextFieldCell *)[urlField cell] setIcon:icon ?: [NSImage imageNamed:@"Bookmark"]];
+    [(BDSKAddressTextFieldCell *)[urlField cell] setIcon:icon ?: [NSImage imageNamed:@"Bookmark"]];
 }
 
 - (void)webView:(WebView *)sender setURL:(NSURL *)aURL {
