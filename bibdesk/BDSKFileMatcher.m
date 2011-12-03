@@ -124,16 +124,7 @@ static id sharedInstance = nil;
     [outlineView setAutosaveExpandedItems:YES];
     [outlineView setAutoresizesOutlineColumn:NO];
 
-    BDSKTextWithIconCell *titleCell = [[BDSKTextWithIconCell alloc] initTextCell:@""];
-    [[outlineView tableColumnWithIdentifier:@"title"] setDataCell:titleCell];
-    [titleCell release];
-    
-    BDSKLevelIndicatorCell *levelCell = [[BDSKLevelIndicatorCell alloc] initWithLevelIndicatorStyle:NSRelevancyLevelIndicatorStyle];
-    [levelCell setMaxValue:(double)1.0];
-    [levelCell setEnabled:NO];
-    [levelCell setMaxHeight:(LEAF_ROW_HEIGHT * 0.7)];
-    [[outlineView tableColumnWithIdentifier:@"score"] setDataCell:levelCell];
-    [levelCell release];
+    [[[outlineView tableColumnWithIdentifier:@"score"] dataCell] setMaxHeight:(LEAF_ROW_HEIGHT * 0.7)];
     
     [outlineView setDoubleAction:@selector(openAction:)];
     [outlineView setTarget:self];
