@@ -37,10 +37,10 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKIconTextFieldCell.h"
+#import "BDSKTextWithIconCell.h"
 
 
-@interface BDSKFilePathCell : BDSKIconTextFieldCell
+@interface BDSKFilePathCell : BDSKTextWithIconCell
 @end
 
 

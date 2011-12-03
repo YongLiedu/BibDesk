@@ -37,8 +37,8 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKIconTextFieldCell.h"
+#import "BDSKTextWithIconCell.h"
 
 
-@interface BDSKAddressTextFieldCell : BDSKIconTextFieldCell
+@interface BDSKAddressTextFieldCell : BDSKTextWithIconCell
 @end

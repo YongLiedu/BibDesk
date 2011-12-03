@@ -279,7 +279,6 @@
 		CEBC676F0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEBC676D0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m */; };
 		CEC1CEA80F51D2CE00D18921 /* BDSKReadWriteLock.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC1CEA60F51D2CE00D18921 /* BDSKReadWriteLock.m */; };
 		CEC7CDE10F6725890051794E /* BDSKFilePathCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC7CDDF0F6725890051794E /* BDSKFilePathCell.m */; };
-		CEC7D0260F680C970051794E /* BDSKIconTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC7D0240F680C970051794E /* BDSKIconTextFieldCell.m */; };
 		CED65AB70906BCC6003EED90 /* BDSKScriptHook.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */; };
 		CED65AB90906BCC6003EED90 /* BDSKScriptHookManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65AB50906BCC6003EED90 /* BDSKScriptHookManager.m */; };
 		CED65AC00906BE1F003EED90 /* BibPref_ScriptHooks.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65ABE0906BE1F003EED90 /* BibPref_ScriptHooks.m */; };
@@ -1315,8 +1314,6 @@
 		CEC3158B0F24D0B9008D2C75 /* BDSKRichTextForCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKRichTextForCommand.m; sourceTree = "<group>"; };
 		CEC7CDDE0F6725890051794E /* BDSKFilePathCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFilePathCell.h; sourceTree = "<group>"; };
 		CEC7CDDF0F6725890051794E /* BDSKFilePathCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFilePathCell.m; sourceTree = "<group>"; };
-		CEC7D0230F680C970051794E /* BDSKIconTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKIconTextFieldCell.h; sourceTree = "<group>"; };
-		CEC7D0240F680C970051794E /* BDSKIconTextFieldCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKIconTextFieldCell.m; sourceTree = "<group>"; };
 		CED65AB20906BCC6003EED90 /* BDSKScriptHook.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKScriptHook.h; sourceTree = "<group>"; };
 		CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptHook.m; sourceTree = "<group>"; };
 		CED65AB40906BCC6003EED90 /* BDSKScriptHookManager.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKScriptHookManager.h; sourceTree = "<group>"; };
@@ -2073,7 +2070,6 @@
 				CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */,
 				F97BE8F00907321F0063504B /* BDSKGroupOutlineView.m */,
 				CE80A8740FDAB27D0086A46C /* BDSKHighlightingPopUpButton.m */,
-				CEC7D0240F680C970051794E /* BDSKIconTextFieldCell.m */,
 				CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */,
 				CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */,
 				CE33D61A136AB8A700ACE924 /* BDSKImportTextView.m */,
@@ -2664,7 +2660,6 @@
 				CE80A8730FDAB27D0086A46C /* BDSKHighlightingPopUpButton.h */,
 				45DB3E8C0CAAFED5001EACDA /* BDSKHubmedParser.h */,
 				CD6295331140DE03002E4751 /* BDSKIACRParser.h */,
-				CEC7D0230F680C970051794E /* BDSKIconTextFieldCell.h */,
 				454AC23B1086E07B00F2890A /* BDSKIEEEXploreParser.h */,
 				CE3B682609D1B0190017D339 /* BDSKImagePopUpButton.h */,
 				CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */,
@@ -3759,7 +3754,6 @@
 				CEC1CEA80F51D2CE00D18921 /* BDSKReadWriteLock.m in Sources */,
 				CEF546100F56BDDB008A630F /* BDSKStringArrayFormatter.m in Sources */,
 				CEC7CDE10F6725890051794E /* BDSKFilePathCell.m in Sources */,
-				CEC7D0260F680C970051794E /* BDSKIconTextFieldCell.m in Sources */,
 				6C567DBA0F8189F500DE285D /* BDSKZentralblattParser.m in Sources */,
 				6C567DBF0F818A1600DE285D /* BDSKMathSciNetParser.m in Sources */,
 				CE1EF2940F8E0D54004E7AE8 /* BDSKParentGroup.m in Sources */,

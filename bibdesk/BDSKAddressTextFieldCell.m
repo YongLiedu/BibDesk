@@ -41,6 +41,8 @@
 
 @implementation BDSKAddressTextFieldCell
 
++ (Class)formatterClass { return Nil; }
+ 
 - (id)initWithCoder:(NSCoder *)coder {
     self = [super initWithCoder:coder];
     if (self) {

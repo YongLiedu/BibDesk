@@ -37,16 +37,32 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKIconTextFieldCell.h"
 
 extern NSString *BDSKTextWithIconCellStringKey;
 extern NSString *BDSKTextWithIconCellImageKey;
 
 
-@interface BDSKTextWithIconCell : BDSKIconTextFieldCell
+@interface BDSKTextWithIconCell : NSTextFieldCell {
+    NSImageCell *imageCell;
+}
+
++ (Class)formatterClass;
+
+- (NSImage *)icon;
+- (void)setIcon:(NSImage *)newIcon;
+
+- (NSRect)textRectForBounds:(NSRect)aRect;
+- (NSRect)iconRectForBounds:(NSRect)aRect;
+
 @end
 
 #pragma mark -
 
 @interface BDSKTextWithIconFormatter : NSFormatter
+@end
+
+#pragma mark -
+
+@interface NSFormatter (BDSKTextWithIconCell)
+- (NSImage *)imageForObjectValue:(id)obj;
 @end
