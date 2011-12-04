@@ -460,11 +460,8 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
     BOOL isDir;
     // we want to return the original value if it's valid, not the expanded path; the action method should expand it
     NSString *pathString = [string stringByStandardizingPath];
-    NS_DURING
-        pathString = [[NSFileManager defaultManager] resolveAliasesInPath:pathString];
-    NS_HANDLER
-        NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [localException name], pathString);
-    NS_ENDHANDLER
+    @try{ pathString = [[NSFileManager defaultManager] resolveAliasesInPath:pathString]; }
+    @catch (id e) { NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [e respondsToSelector:@selector(name)] ? [e name] : e, pathString); }
     if([[NSFileManager defaultManager] fileExistsAtPath:pathString isDirectory:&isDir] == NO){
         if(error)
             *error = [NSString stringWithFormat:NSLocalizedString(@"The directory \"%@\" does not exist.", @"Error description"), pathString];
