@@ -161,18 +161,18 @@ static id nonNullObjectValueForKey(id object, id stringObject, NSString *key) {
 }
 
 - (void)drawInteriorWithFrame:(NSRect)aRect inView:(NSView *)controlView {
+    // let super draw the text, but vertically center the text for tall cells, because NSTextFieldCell aligns at the top
+    NSRect textRect = [self textRectForBounds:aRect];
+    if (NSHeight(textRect) > [self cellSize].height + 2.0)
+        textRect = BDSKCenterRectVertically(textRect, [self cellSize].height + 2.0, [controlView isFlipped]);
+    [super drawInteriorWithFrame:textRect inView:controlView];
+    
     // Draw the image
     NSRect imageRect = [self iconRectForBounds:aRect];
     imageRect = BDSKCenterRectVertically(imageRect, NSWidth(imageRect), [controlView isFlipped]);
     if ([self isBordered] == NO && [self isBezeled] == NO)
         imageRect.origin.y += [controlView isFlipped] ? -IMAGE_OFFSET : IMAGE_OFFSET;
     [imageCell drawInteriorWithFrame:imageRect inView:controlView];
-    
-    // let super draw the text, but vertically center the text for tall cells, because NSTextFieldCell aligns at the top
-    NSRect textRect = [self textRectForBounds:aRect];
-    if (NSHeight(textRect) > [self cellSize].height + 2.0)
-        textRect = BDSKCenterRectVertically(textRect, [self cellSize].height + 2.0, [controlView isFlipped]);
-    [super drawInteriorWithFrame:textRect inView:controlView];
 }
 
 - (NSImage *)icon {
