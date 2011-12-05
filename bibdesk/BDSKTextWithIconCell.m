@@ -40,8 +40,8 @@
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 
-NSString *BDSKTextWithIconCellStringKey = @"string";
-NSString *BDSKTextWithIconCellImageKey = @"image";
+NSString *BDSKTextWithIconStringKey = @"string";
+NSString *BDSKTextWithIconImageKey = @"image";
 
 static id nonNullObjectValueForKey(id object, id stringObject, NSString *key) {
     if ([object isKindOfClass:[NSString class]])
@@ -222,17 +222,17 @@ static id nonNullObjectValueForKey(id object, id stringObject, NSString *key) {
 @implementation BDSKTextWithIconFormatter
 
 - (NSImage *)imageForObjectValue:(id)obj {
-    return nonNullObjectValueForKey(obj, nil, BDSKTextWithIconCellImageKey);
+    return nonNullObjectValueForKey(obj, nil, BDSKTextWithIconImageKey);
 }
 
 - (NSString *)stringForObjectValue:(id)obj {
-    return nonNullObjectValueForKey(obj, obj, BDSKTextWithIconCellStringKey);
+    return nonNullObjectValueForKey(obj, obj, BDSKTextWithIconStringKey);
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error {
     // even though 'string' is reported as immutable, it's actually changed after this method returns and before it's returned by the control!
     string = [[string copy] autorelease];
-    *obj = [NSDictionary dictionaryWithObjectsAndKeys:string, BDSKTextWithIconCellStringKey, nil];
+    *obj = [NSDictionary dictionaryWithObjectsAndKeys:string, BDSKTextWithIconStringKey, nil];
     return YES;
 }
 

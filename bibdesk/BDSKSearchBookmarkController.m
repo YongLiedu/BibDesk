@@ -321,7 +321,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 - (id)outlineView:(NSOutlineView *)ov objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item {
     NSString *tcID = [tableColumn identifier];
     if ([tcID isEqualToString:@"label"]) {
-        return [NSDictionary dictionaryWithObjectsAndKeys:[item label], BDSKTextWithIconCellStringKey, [item icon], BDSKTextWithIconCellImageKey, nil];
+        return [NSDictionary dictionaryWithObjectsAndKeys:[item label], BDSKTextWithIconStringKey, [item icon], BDSKTextWithIconImageKey, nil];
     } else if ([tcID isEqualToString:@"server"]) {
         if ([item bookmarkType] == BDSKSearchBookmarkTypeFolder) {
             NSInteger count = [[item children] count];
@@ -339,7 +339,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     NSString *tcID = [tableColumn identifier];
     if ([tcID isEqualToString:@"label"]) {
         // the editied object is always an NSDictionary, see BDSKTextWithIconFormatter
-        NSString *newLabel = [object valueForKey:BDSKTextWithIconCellStringKey] ?: @"";
+        NSString *newLabel = [object valueForKey:BDSKTextWithIconStringKey] ?: @"";
         if ([newLabel isEqualToString:[item label]] == NO)
             [item setLabel:newLabel];
     }

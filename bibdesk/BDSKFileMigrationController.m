@@ -272,7 +272,7 @@
 }
 
 - (id)transformedValue:(id)pub {
-    return [NSDictionary dictionaryWithObjectsAndKeys:[pub title], BDSKTextWithIconCellStringKey, [NSImage imageNamed:@"cacheDoc"], BDSKTextWithIconCellImageKey, nil];
+    return [NSDictionary dictionaryWithObjectsAndKeys:[pub title], BDSKTextWithIconStringKey, [NSImage imageNamed:@"cacheDoc"], BDSKTextWithIconImageKey, nil];
 }
 
 @end

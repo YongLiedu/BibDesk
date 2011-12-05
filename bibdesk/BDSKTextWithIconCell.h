@@ -38,8 +38,8 @@
 
 #import <Cocoa/Cocoa.h>
 
-extern NSString *BDSKTextWithIconCellStringKey;
-extern NSString *BDSKTextWithIconCellImageKey;
+extern NSString *BDSKTextWithIconStringKey;
+extern NSString *BDSKTextWithIconImageKey;
 
 
 @interface BDSKTextWithIconCell : NSTextFieldCell {

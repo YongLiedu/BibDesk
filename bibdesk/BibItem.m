@@ -1402,7 +1402,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         if (count > 0) {
             NSString *label = 1 == count ? NSLocalizedString(@"1 item", @"") : [NSString stringWithFormat:NSLocalizedString(@"%ld items", @""), (long)count];
             NSImage *image = hasMissingFile ? [NSImage redPaperclipImage] : [NSImage paperclipImage];
-            cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:image, BDSKTextWithIconCellImageKey, label, BDSKTextWithIconCellStringKey, nil];
+            cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:image, BDSKTextWithIconImageKey, label, BDSKTextWithIconStringKey, nil];
         }
         return cellDictionary;
     }else if([field isEqualToString:BDSKRemoteURLString]){
@@ -1410,7 +1410,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         NSDictionary *cellDictionary = nil;
         if (count > 0) {
             NSString *label = 1 == count ? NSLocalizedString(@"1 item", @"") : [NSString stringWithFormat:NSLocalizedString(@"%ld items", @""), (long)count];
-            cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericURLIcon)], BDSKTextWithIconCellImageKey, label, BDSKTextWithIconCellStringKey, nil];
+            cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericURLIcon)], BDSKTextWithIconImageKey, label, BDSKTextWithIconStringKey, nil];
         }
         return cellDictionary;
     }else if([field isEqualToString:BDSKColorString] || [field isEqualToString:BDSKColorLabelString]){
