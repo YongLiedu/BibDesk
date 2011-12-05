@@ -329,6 +329,12 @@
 	return self;
 }
 
+- (id)copyWithZone:(NSZone *)zone {
+    BDSKFontWellCell *copy = [super copyWithZone:zone];
+    copy->bgCell = [bgCell copyWithZone:zone];
+    return copy;
+}
+
 - (void)dealloc {
     BDSKDESTROY(bgCell);
     [super dealloc];
