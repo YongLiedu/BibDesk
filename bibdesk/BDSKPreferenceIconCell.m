@@ -45,7 +45,7 @@
     NSSize cellSize = [self cellSizeForBounds:cellFrame];
     if (cellSize.height < NSHeight(cellFrame)) {
         NSRect ignored;
-        NSDivideRect(cellFrame, &cellFrame, &ignored, cellSize.height, [controlView isFlipped] ? NSMinYEdge : NSMaxYEdge);
+        NSDivideRect(cellFrame, &cellFrame, &ignored, cellSize.height, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
     }
     [super drawWithFrame:cellFrame inView:controlView];
 }
@@ -70,7 +70,7 @@
             NSPoint point = cellFrame.origin;
             point.x += (NSWidth(cellFrame) - NSWidth(rect)) / 2.0;
             if ([controlView isFlipped])
-                point.y += NSHeight(rect);
+                point.y += NSHeight(cellFrame);
             
             NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
             [pboard declareTypes:[NSArray arrayWithObject:@"NSToolbarIndividualItemDragType"] owner:nil];
