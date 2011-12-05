@@ -306,8 +306,6 @@
 @implementation BDSKFontWellCell
 
 - (void)commonInit {
-    bgCell = [[NSTextFieldCell alloc] initTextCell:@""];
-    [bgCell setBezeled:YES];
     [self setBezelStyle:NSShadowlessSquareBezelStyle]; // this is mainly to make it selectable
     [self setButtonType:NSPushOnPushOffButton];
     [self setState:NSOffState];
@@ -329,19 +327,14 @@
 	return self;
 }
 
-- (id)copyWithZone:(NSZone *)zone {
-    BDSKFontWellCell *copy = [super copyWithZone:zone];
-    copy->bgCell = [bgCell copyWithZone:zone];
-    return copy;
-}
-
-- (void)dealloc {
-    BDSKDESTROY(bgCell);
-    [super dealloc];
-}
-
 - (void)drawBezelWithFrame:(NSRect)frame inView:(NSView *)controlView {
+    static NSTextFieldCell *bgCell = nil;
+    if (bgCell == nil) {
+        bgCell = [[NSTextFieldCell alloc] initTextCell:@""];
+        [bgCell setBezeled:YES];
+    }
     [bgCell drawWithFrame:frame inView:controlView];
+    [bgCell setControlView:nil];
     
     [NSGraphicsContext saveGraphicsState];
     if ([self state] == NSOnState) {
