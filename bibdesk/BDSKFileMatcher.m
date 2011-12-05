@@ -76,6 +76,7 @@ static CGFloat GROUP_ROW_HEIGHT = 24.0;
 
 // only use from main thread
 - (void)updateProgressIndicatorWithNumber:(NSNumber *)val;
+- (void)indexingFinished;
 
 // entry point to the searching/matching; acquire indexingLock first
 - (void)indexFiles:(NSArray *)absoluteURLs;
@@ -201,6 +202,7 @@ static id sharedInstance = nil;
     // for the progress indicator
     [[self window] makeKeyAndOrderFront:self];
     [abortButton setEnabled:YES];
+    [progressIndicator startAnimation:nil];
 
     OSAtomicCompareAndSwap32Barrier(0, 1, &_matchFlags.shouldAbortThread);
     
@@ -235,6 +237,7 @@ static id sharedInstance = nil;
     if (false == OSAtomicCompareAndSwap32Barrier(0, 1, &_matchFlags.shouldAbortThread))
         NSBeep();
     [abortButton setEnabled:NO];
+    [progressIndicator stopAnimation:nil];
 }
 
 - (void)configSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)code contextInfo:(void *)context;
@@ -556,6 +559,12 @@ static void normalizeScoresForItem(BDSKTreeNode *parent, CGFloat maxScore)
     [progressIndicator setDoubleValue:[val doubleValue]];
 }
 
+- (void)indexingFinished
+{
+    [abortButton setEnabled:NO];
+    [progressIndicator stopAnimation:nil];
+}
+
 - (void)indexFiles:(NSArray *)absoluteURLs;
 {    
     NSAutoreleasePool *threadPool = [NSAutoreleasePool new];
@@ -599,11 +608,8 @@ static void normalizeScoresForItem(BDSKTreeNode *parent, CGFloat maxScore)
         [statusField performSelectorOnMainThread:@selector(setStringValue:) withObject:NSLocalizedString(@"Indexing aborted.", @"") waitUntilDone:NO];
     }
 
-    // disable the stop button
-    BOOL state = NO;
-    NSInvocation *invocation = [NSInvocation invocationWithTarget:abortButton selector:@selector(setEnabled:)];
-    [invocation setArgument:&state atIndex:2];
-    [invocation performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
+    // disable the stop button and progress animation
+    [self performSelectorOnMainThread:@selector(indexingFinished) withObject:nil waitUntilDone:YES];
     
     [indexingLock unlock];
     [threadPool release];
