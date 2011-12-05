@@ -42,10 +42,6 @@
 #define BUTTON_SIZE 16.0
 #define BUTTON_MARGIN 3.0
 
-@interface BDSKEmbeddedButton : NSButton
-@end
-
-
 @implementation BDSKAddressTextField
 
 + (Class)cellClass {
@@ -57,12 +53,13 @@
     rect.origin.x = NSMaxX(bounds) - BUTTON_SIZE - BUTTON_MARGIN;
     rect.origin.y = [self isFlipped] ? NSMinY(bounds) + BUTTON_MARGIN : NSMaxY(bounds) - BUTTON_SIZE - BUTTON_MARGIN;
     rect.size.width = rect.size.height = BUTTON_SIZE;
-    button = [[BDSKEmbeddedButton alloc] initWithFrame:rect];
+    button = [[NSButton alloc] initWithFrame:rect];
     [button setButtonType:NSMomentaryChangeButton];
     [button setBordered:NO];
     [button setImagePosition:NSImageOnly];
     [[button cell] setImageScaling:NSImageScaleProportionallyDown];
     [button setAutoresizingMask:NSViewMinXMargin | NSViewMaxYMargin];
+    [button setRefusesFirstResponder:YES];
     [self addSubview:button];
 }
 
@@ -192,12 +189,5 @@
 - (id <BDSKAddressTextFieldDelegate>)delegate { return (id <BDSKAddressTextFieldDelegate>)[super delegate]; }
 - (void)setDelegate:(id <BDSKAddressTextFieldDelegate>)newDelegate { [super setDelegate:newDelegate]; }
 #endif
-
-@end
-
-
-@implementation BDSKEmbeddedButton
-
-- (BOOL)acceptsFirstResponder { return NO; }
 
 @end
