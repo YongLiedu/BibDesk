@@ -83,7 +83,6 @@
 - (void)setCanRemove:(BOOL)flag;
 
 - (NSArray *)keys;
-- (void)setKeys:(NSArray *)newKeys;
 
 - (void)discardEditing;
 - (BOOL)commitEditing;

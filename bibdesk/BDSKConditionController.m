@@ -188,14 +188,6 @@ static char BDSKConditionControllerObservationContext;
     return [[keys copy] autorelease];
 }
 
-- (void)setKeys:(NSArray *)newKeys {
-    if (keys != newKeys) {
-        [keys release];
-        keys = [newKeys mutableCopy];
-        [(BDSKFieldNameFormatter *)[keyComboBox formatter] setKnownFieldNames:keys];
-    }
-}
-
 - (void)layoutValueControls {
     NSArray *controls = nil;
     switch ([[[self condition] key] fieldType]) {
