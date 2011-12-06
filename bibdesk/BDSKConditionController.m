@@ -42,6 +42,7 @@
 #import "BDSKBooleanValueTransformer.h"
 #import "BDSKRatingButton.h"
 #import "NSInvocation_BDSKExtensions.h"
+#import "BDSKFieldNameFormatter.h"
 
 #define BDSKBooleanValueTransformerName @"BDSKBooleanValueTransformer"
 #define BDSKTriStateValueTransformerName @"BDSKTriStateValueTransformer"
@@ -134,8 +135,8 @@ static char BDSKConditionControllerObservationContext;
     [toDateTextField setFormatter:formatter];
 	
     BDSKFieldNameFormatter *fieldFormatter = [[[BDSKFieldNameFormatter alloc] init] autorelease];
+    [fieldFormatter setKnownFieldNames:keys];
 	[keyComboBox setFormatter:fieldFormatter];
-	[fieldFormatter setDelegate:self];
     
     [self layoutComparisonControls];
     [self layoutValueControls];
@@ -149,13 +150,6 @@ static char BDSKConditionControllerObservationContext;
     } else {
         [self startObserving];
     }
-}
-
-- (NSArray *)fieldNameFormatterKnownFieldNames:(BDSKFieldNameFormatter *)formatter {
-    if (formatter == [keyComboBox formatter])
-        return keys;
-    else
-        return nil;
 }
 
 - (IBAction)addNewCondition:(id)sender {
@@ -198,6 +192,7 @@ static char BDSKConditionControllerObservationContext;
     if (keys != newKeys) {
         [keys release];
         keys = [newKeys mutableCopy];
+        [(BDSKFieldNameFormatter *)[keyComboBox formatter] setKnownFieldNames:keys];
     }
 }
 

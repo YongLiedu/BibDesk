@@ -40,19 +40,12 @@
 #import "BDSKStringConstants.h"
 #import "BDSKTypeManager.h"
 
-@class BDSKFieldNameFormatter;
-
-@protocol BDSKFieldNameFormatterDelegate <NSObject>
-@optional
-- (NSArray *)fieldNameFormatterKnownFieldNames:(BDSKFieldNameFormatter *)formatter;
-@end
-
 
 @interface BDSKFieldNameFormatter : NSFormatter {
-    id<BDSKFieldNameFormatterDelegate> delegate;
+    NSArray *knownFieldNames;
 }
 
-- (id<BDSKFieldNameFormatterDelegate>)delegate;
-- (void)setDelegate:(id<BDSKFieldNameFormatterDelegate>)newDelegate;
+- (NSArray *)knownFieldNames;
+- (void)setKnownFieldNames:(NSArray *)array;
 
 @end

@@ -38,6 +38,7 @@
 
 #import "BDSKFieldSheetController.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "BDSKFieldNameFormatter.h"
 
 @implementation BDSKFieldSheetController
 
@@ -123,19 +124,17 @@
 
 - (void)awakeFromNib{
     BDSKFieldNameFormatter *formatter = [[[BDSKFieldNameFormatter alloc] init] autorelease];
-	[(NSTextField *)fieldsControl setFormatter:formatter];
-    [formatter setDelegate:self];
+    [formatter setKnownFieldNames:[self fieldsArray]];
+	[fieldsControl setFormatter:formatter];
 }
 
 - (NSString *)windowNibName{
     return @"AddFieldSheet";
 }
 
-- (NSArray *)fieldNameFormatterKnownFieldNames:(BDSKFieldNameFormatter *)formatter {
-    if (formatter == [(NSTextField *)fieldsControl formatter])
-        return [self fieldsArray];
-    else
-        return nil;
+- (void)setFieldsArray:(NSArray *)array{
+    [super setFieldsArray:array];
+    [[fieldsControl formatter] setKnownFieldNames:array];
 }
 
 @end
@@ -182,8 +181,8 @@
 
 - (void)awakeFromNib{
     BDSKFieldNameFormatter *formatter = [[[BDSKFieldNameFormatter alloc] init] autorelease];
+    [formatter setKnownFieldNames:[self replaceFieldsArray]];
 	[replaceFieldsComboBox setFormatter:formatter];
-    [formatter setDelegate:self];
 }
 
 - (NSString *)windowNibName{
@@ -209,6 +208,7 @@
     if (replaceFieldsArray != array) {
         [replaceFieldsArray release];
         replaceFieldsArray = [array retain];
+        [[replaceFieldsComboBox formatter] setKnownFieldNames:array];
     }
 }
 
@@ -250,13 +250,6 @@
     replaceFieldsFrame.origin.x += dw;
     [fieldsControl setFrame:fieldsFrame];
     [replaceFieldsComboBox setFrame:replaceFieldsFrame];
-}
-
-- (NSArray *)fieldNameFormatterKnownFieldNames:(BDSKFieldNameFormatter *)formatter {
-    if (formatter == [(NSTextField *)replaceFieldsComboBox formatter])
-        return [self replaceFieldsArray];
-    else
-        return nil;
 }
 
 @end

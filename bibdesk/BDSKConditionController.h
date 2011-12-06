@@ -38,12 +38,11 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKCondition.h"
-#import "BDSKFieldNameFormatter.h"
 
 @class BDSKFilterController, BDSKRatingButton;
 
 
-@interface BDSKConditionController : NSViewController <BDSKFieldNameFormatterDelegate> {
+@interface BDSKConditionController : NSViewController {
     IBOutlet NSObjectController *objectController;
 	IBOutlet NSComboBox *keyComboBox;
 	IBOutlet NSPopUpButton *comparisonPopUp;

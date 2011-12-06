@@ -39,11 +39,10 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKStatusBar.h"
-#import "BDSKFieldNameFormatter.h"
 
 @class BibDocument;
 
-@interface BDSKFindController : NSWindowController <BDSKFieldNameFormatterDelegate> {    
+@interface BDSKFindController : NSWindowController {    
     // outlets
     IBOutlet NSComboBox *fieldToSearchComboBox;
     IBOutlet NSPopUpButton *searchTypePopUpButton;

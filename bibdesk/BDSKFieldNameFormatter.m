@@ -49,13 +49,20 @@
 
 @implementation BDSKFieldNameFormatter
 
-- (id)delegate {
-    return delegate;
+- (void)dealloc {
+    BDSKDESTROY(knownFieldNames);
+    [super dealloc];
 }
 
-- (void)setDelegate:(id)newDelegate {
-    BDSKPRECONDITION(newDelegate == nil || [newDelegate respondsToSelector:@selector(fieldNameFormatterKnownFieldNames:)]);
-    delegate = newDelegate;
+- (NSArray *)knownFieldNames {
+    return knownFieldNames;
+}
+
+- (void)setKnownFieldNames:(NSArray *)array {
+    if (knownFieldNames != array) {
+        [knownFieldNames release];
+        knownFieldNames = [array copy];
+    }
 }
 
 - (NSString *)stringForObjectValue:(id)obj{
@@ -67,8 +74,8 @@
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
-    // first check the delegate for known field names, which may include special names containing spaces such as Cite Key, this is called on Leopard when auto-completing an item from the combobox
-    if ([[delegate fieldNameFormatterKnownFieldNames:self] containsObject:string]) {
+    // first check for known field names, which may include special names containing spaces such as Cite Key, this is called on Leopard when auto-completing an item from the combobox
+    if ([knownFieldNames containsObject:string]) {
         *obj = string;
         return YES;
     }
@@ -98,8 +105,8 @@
 
 - (BOOL)isPartialStringValid:(NSString **)partialStringPtr proposedSelectedRange:(NSRangePointer)proposedSelRangePtr originalString:(NSString *)origString originalSelectedRange:(NSRange)origSelRange errorDescription:(NSString **)error {
     NSString *partialString = *partialStringPtr;
-    // first check the delegate for known field names, which may include special names containing spaces such as Cite Key, this is called on Leopard when auto-completing an item from the combobox
-    if ([[delegate fieldNameFormatterKnownFieldNames:self] containsObject:partialString]) {
+    // first check for known field names, which may include special names containing spaces such as Cite Key, this is called on Leopard when auto-completing an item from the combobox
+    if ([knownFieldNames containsObject:partialString]) {
         return YES;
     }
     NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidFieldNameCharacterSet];

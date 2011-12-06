@@ -50,6 +50,7 @@
 #import "BDSKFindFieldEditor.h"
 #import "BDSKLinkedFile.h"
 #import "NSArray_BDSKExtensions.h"
+#import "BDSKFieldNameFormatter.h"
 
 #define MAX_HISTORY_COUNT	10
 
@@ -132,13 +133,14 @@ enum {
     BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
     NSMutableArray *extraFields = [NSMutableArray arrayWithObjects:BDSKCiteKeyString, BDSKPubTypeString, BDSKRemoteURLString, nil];
     [extraFields addObjectsFromArray:[[btm noteFieldsSet] allObjects]];
-	[fieldToSearchComboBox removeAllItems];
-	[fieldToSearchComboBox addItemsWithObjectValues:[btm allFieldNamesIncluding:extraFields excluding:nil]];
+	NSArray *fields = [btm allFieldNamesIncluding:extraFields excluding:nil];
+    [fieldToSearchComboBox removeAllItems];
+	[fieldToSearchComboBox addItemsWithObjectValues:fields];
 
     // make sure we enter valid field names
     BDSKFieldNameFormatter *formatter = [[BDSKFieldNameFormatter alloc] init];
+    [formatter setKnownFieldNames:fields];
     [fieldToSearchComboBox setFormatter:formatter];
-    [formatter setDelegate:self];
     [formatter release];
 	
     [[self window] setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
@@ -595,13 +597,6 @@ enum {
 		}
 	}
 	return YES;
-}
-
-- (NSArray *)fieldNameFormatterKnownFieldNames:(BDSKFieldNameFormatter *)formatter {
-    if (formatter == [fieldToSearchComboBox formatter])
-        return [fieldToSearchComboBox objectValues] ;
-    else
-        return nil;
 }
 
 #pragma mark Action methods
