@@ -44,7 +44,7 @@
 #import "BDSKWebView.h"
 
 @class BibDocument, BibItem, BDSKEdgeView, WebDownload, BDSKComplexStringEditor;
-@class BDSKCiteKeyFormatter, BDSKCrossrefFormatter;
+@class BDSKCiteKeyFormatter;
 
 @interface BDSKTextImportController : NSWindowController <BDSKOwner, BDSKTextImportItemTableViewDelegate, NSTableViewDataSource, NSTextViewDelegate, NSSplitViewDelegate, BDSKComplexStringFormatterDelegate, BDSKCitationFormatterDelegate, BDSKWebViewDelegate> {
     IBOutlet NSTextView* sourceTextView;
@@ -76,7 +76,7 @@
     NSUndoManager *undoManager;
     
 	BDSKComplexStringFormatter *tableCellFormatter;
-	BDSKCrossrefFormatter *crossrefFormatter;
+	BDSKCiteKeyFormatter *crossrefFormatter;
 	BDSKCiteKeyFormatter *citeKeyFormatter;
 	BDSKCitationFormatter *citationFormatter;
 	NSTextView *tableFieldEditor;

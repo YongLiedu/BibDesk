@@ -38,6 +38,14 @@
 
 @implementation BDSKCiteKeyFormatter 
 
+- (BOOL)allowsEmptyString {
+    return allowsEmptyString;
+}
+
+- (void)setAllowsEmptyString:(BOOL)flag {
+    allowsEmptyString = flag;
+}
+
 - (NSString *)stringForObjectValue:(id)obj{
     return obj;
 }
@@ -47,7 +55,7 @@
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
-    if([NSString isEmptyString:string]){
+    if(allowsEmptyString == NO && [NSString isEmptyString:string]){
         if(error) *error = NSLocalizedString(@"Empty cite keys are not allowed.", @"Error description");
         return NO;
     }

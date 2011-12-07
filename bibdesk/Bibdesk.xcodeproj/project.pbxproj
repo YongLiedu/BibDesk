@@ -274,7 +274,6 @@
 		CEB5D63F1072AE360001C135 /* SelectEncodingsPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEB5D6001072AE360001C135 /* SelectEncodingsPanel.xib */; };
 		CEB5D6401072AE360001C135 /* TemplateDocument.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEB5D6021072AE360001C135 /* TemplateDocument.xib */; };
 		CEB5D6411072AE360001C135 /* TextImport.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEB5D6041072AE360001C135 /* TextImport.xib */; };
-		CEBA63D80A7CA0B500588BB7 /* BDSKCrossrefFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = CEBA63D60A7CA0B400588BB7 /* BDSKCrossrefFormatter.m */; };
 		CEBB8D8809C8B0D90074C79E /* Font.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEBB8D8709C8B0D90074C79E /* Font.tiff */; };
 		CEBC676F0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEBC676D0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m */; };
 		CEC1CEA80F51D2CE00D18921 /* BDSKReadWriteLock.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC1CEA60F51D2CE00D18921 /* BDSKReadWriteLock.m */; };
@@ -1303,8 +1302,6 @@
 		CEB772E90A34529D00B8A299 /* NSAttributedString_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSAttributedString_BDSKExtensions.m; sourceTree = "<group>"; };
 		CEB9D5CD126CF0A000C1FADB /* French */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = French; path = French.lproj/WebGroupDownloads.html; sourceTree = "<group>"; };
 		CEB9D5CE126CF0A400C1FADB /* German */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = German; path = German.lproj/WebGroupDownloads.html; sourceTree = "<group>"; };
-		CEBA63D50A7CA0B400588BB7 /* BDSKCrossrefFormatter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCrossrefFormatter.h; sourceTree = "<group>"; };
-		CEBA63D60A7CA0B400588BB7 /* BDSKCrossrefFormatter.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKCrossrefFormatter.m; sourceTree = "<group>"; };
 		CEBB8D8709C8B0D90074C79E /* Font.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Font.tiff; sourceTree = "<group>"; };
 		CEBC676C0B4A845F00CE0B2D /* BDSKSearchGroupViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchGroupViewController.h; sourceTree = "<group>"; };
 		CEBC676D0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchGroupViewController.m; sourceTree = "<group>"; };
@@ -2257,7 +2254,6 @@
 				CEAB9F580B4FF20800673AC2 /* BDSKCitationFormatter.m */,
 				F9022C390758027800C3F701 /* BDSKCiteKeyFormatter.m */,
 				F9022C490758027800C3F701 /* BDSKComplexStringFormatter.m */,
-				CEBA63D60A7CA0B400588BB7 /* BDSKCrossrefFormatter.m */,
 				F9022C450758027800C3F701 /* BDSKFieldNameFormatter.m */,
 				CE6DA03011052C81001CD28E /* BDSKFormatStringFormatter.m */,
 				3D7406920849F5430081EC6F /* BDSKTypeNameFormatter.m */,
@@ -2600,7 +2596,6 @@
 				CE34E9770A03C16B00222942 /* BDSKConditionsView.h */,
 				CE7595FD0ADDB0E0009C1329 /* BDSKContainerView.h */,
 				F9022C3A0758027800C3F701 /* BDSKConverter.h */,
-				CEBA63D50A7CA0B400588BB7 /* BDSKCrossrefFormatter.h */,
 				CE7A4A8C0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.h */,
 				F97198BF0DADD32F00CA57AA /* BDSKDBLPGroupServer.h */,
 				F97198C10DADD32F00CA57AA /* BDSKDBLPWebServices.h */,
@@ -3623,7 +3618,6 @@
 				CE3A32D60A345C2400984DC2 /* NSAttributedString_BDSKExtensions.m in Sources */,
 				CE6DACC50A503ECF00123185 /* BDSKToolbarItem.m in Sources */,
 				F9FD63DD0A61B87800F9871B /* NSMenu_BDSKExtensions.m in Sources */,
-				CEBA63D80A7CA0B500588BB7 /* BDSKCrossrefFormatter.m in Sources */,
 				CE6775170A8506A7003CFC58 /* NSDictionary_BDSKExtensions.m in Sources */,
 				CE95A57C0A88883300334DFA /* BDSKReadMeController.m in Sources */,
 				CE22E1CE0A8CCF9D002CEFB8 /* BDSKOrphanedFilesFinder.m in Sources */,

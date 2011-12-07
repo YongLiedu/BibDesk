@@ -38,7 +38,10 @@
 
 
 @interface BDSKCiteKeyFormatter : NSFormatter {
-
+    BOOL allowsEmptyString;
 }
+
+- (BOOL)allowsEmptyString;
+- (void)setAllowsEmptyString:(BOOL)flag;
 
 @end

@@ -46,7 +46,7 @@
 #import <FileView/FileView.h>
 
 @class BDSKRatingButton, BDSKRatingButtonCell, BDSKStatusBar, BDSKZoomablePDFView, BDSKEditorTableView;
-@class BDSKCrossrefFormatter, BDSKComplexStringEditor;
+@class BDSKComplexStringEditor, BDSKCiteKeyFormatter;
 @class BibItem, BibAuthor;
 
 /*!
@@ -105,7 +105,7 @@
 	
 // form cell formatter
     BDSKComplexStringFormatter *tableCellFormatter;
-    BDSKCrossrefFormatter *crossrefFormatter;
+    BDSKCiteKeyFormatter *crossrefFormatter;
 	BDSKCitationFormatter *citationFormatter;
     
 // Author tableView

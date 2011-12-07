@@ -51,7 +51,6 @@
 #import "BDSKDragWindow.h"
 #import "BibItem.h"
 #import "BDSKCiteKeyFormatter.h"
-#import "BDSKCrossrefFormatter.h"
 #import "BDSKAppController.h"
 #import "BDSKRatingButton.h"
 #import "BDSKComplexStringEditor.h"
@@ -211,7 +210,8 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     }
     
     tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[publication macroResolver]];
-    crossrefFormatter = [[BDSKCrossrefFormatter alloc] init];
+    crossrefFormatter = [[BDSKCiteKeyFormatter alloc] init];
+    [crossrefFormatter setAllowsEmptyString:YES];
     citationFormatter = [[BDSKCitationFormatter alloc] initWithDelegate:self];
     
     [self resetFields];

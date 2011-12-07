@@ -43,7 +43,6 @@
 #import "BDSKComplexStringEditor.h"
 #import "BDSKTypeSelectHelper.h"
 #import <WebKit/WebKit.h>
-#import "BDSKCrossrefFormatter.h"
 #import "BDSKCiteKeyFormatter.h"
 #import "BDSKFieldNameFormatter.h"
 #import "BDSKEdgeView.h"
@@ -123,7 +122,8 @@
         itemsAdded = [[NSMutableArray alloc] init];
 		webSelection = nil;
 		tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[doc macroResolver]];
-		crossrefFormatter = [[BDSKCrossrefFormatter alloc] init];
+		crossrefFormatter = [[BDSKCiteKeyFormatter alloc] init];
+        [crossrefFormatter setAllowsEmptyString:YES];
 		citationFormatter = [[BDSKCitationFormatter alloc] initWithDelegate:self];
 		complexStringEditor = nil;
     }
