@@ -368,7 +368,6 @@
 		F9022C4A0758027800C3F701 /* BDSKCiteKeyFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C390758027800C3F701 /* BDSKCiteKeyFormatter.m */; };
 		F9022C4B0758027800C3F701 /* BDSKConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C3B0758027800C3F701 /* BDSKConverter.m */; };
 		F9022C4E0758027800C3F701 /* BDSKMainTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C410758027800C3F701 /* BDSKMainTableView.m */; };
-		F9022C4F0758027800C3F701 /* BDSKDragWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C430758027800C3F701 /* BDSKDragWindow.m */; };
 		F9022C500758027800C3F701 /* BDSKFieldNameFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C450758027800C3F701 /* BDSKFieldNameFormatter.m */; };
 		F9022C520758027800C3F701 /* BDSKComplexStringFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C490758027800C3F701 /* BDSKComplexStringFormatter.m */; };
 		F9022C79075802E300C3F701 /* BDSKPreviewer.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C58075802E300C3F701 /* BDSKPreviewer.m */; };
@@ -1438,8 +1437,6 @@
 		F9022C3B0758027800C3F701 /* BDSKConverter.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKConverter.m; sourceTree = "<group>"; };
 		F9022C400758027800C3F701 /* BDSKMainTableView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKMainTableView.h; sourceTree = "<group>"; };
 		F9022C410758027800C3F701 /* BDSKMainTableView.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKMainTableView.m; sourceTree = "<group>"; };
-		F9022C420758027800C3F701 /* BDSKDragWindow.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKDragWindow.h; sourceTree = "<group>"; };
-		F9022C430758027800C3F701 /* BDSKDragWindow.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKDragWindow.m; sourceTree = "<group>"; };
 		F9022C440758027800C3F701 /* BDSKFieldNameFormatter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKFieldNameFormatter.h; sourceTree = "<group>"; };
 		F9022C450758027800C3F701 /* BDSKFieldNameFormatter.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKFieldNameFormatter.m; sourceTree = "<group>"; };
 		F9022C480758027800C3F701 /* BDSKComplexStringFormatter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKComplexStringFormatter.h; sourceTree = "<group>"; };
@@ -2053,7 +2050,6 @@
 				CEEC70E0093B6EC200A64F54 /* BDSKDragImageView.m */,
 				CE26481B0B5AB4B700D4B5B8 /* BDSKDragTextField.m */,
 				F9022C410758027800C3F701 /* BDSKMainTableView.m */,
-				F9022C430758027800C3F701 /* BDSKDragWindow.m */,
 				CE2837400917D31D006B4C63 /* BDSKEdgeView.m */,
 				CE4241340D0EAE0B00F824E7 /* BDSKEditorTableView.m */,
 				CE4241430D0EAEFE00F824E7 /* BDSKEditorTextFieldCell.m */,
@@ -2607,7 +2603,6 @@
 				CEEC70DF093B6EC200A64F54 /* BDSKDragImageView.h */,
 				CE26481A0B5AB4B700D4B5B8 /* BDSKDragTextField.h */,
 				F9022C400758027800C3F701 /* BDSKMainTableView.h */,
-				F9022C420758027800C3F701 /* BDSKDragWindow.h */,
 				F990C5890D42D58D00B5425E /* BDSKDocumentSearch.h */,
 				CE28373F0917D31D006B4C63 /* BDSKEdgeView.h */,
 				CE4241330D0EAE0B00F824E7 /* BDSKEditorTableView.h */,
@@ -3491,7 +3486,6 @@
 				F9022C4A0758027800C3F701 /* BDSKCiteKeyFormatter.m in Sources */,
 				F9022C4B0758027800C3F701 /* BDSKConverter.m in Sources */,
 				F9022C4E0758027800C3F701 /* BDSKMainTableView.m in Sources */,
-				F9022C4F0758027800C3F701 /* BDSKDragWindow.m in Sources */,
 				F9022C500758027800C3F701 /* BDSKFieldNameFormatter.m in Sources */,
 				F9022C520758027800C3F701 /* BDSKComplexStringFormatter.m in Sources */,
 				F9022C79075802E300C3F701 /* BDSKPreviewer.m in Sources */,

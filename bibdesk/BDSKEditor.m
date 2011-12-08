@@ -2646,9 +2646,11 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	}
 }
 
-#pragma mark dragging destination delegate methods
+#pragma mark dragging destination methods
 
-- (NSDragOperation)dragWindow:(BDSKDragWindow *)window canReceiveDrag:(id <NSDraggingInfo>)sender{
+// NSWindow forwards these to its delegate, if implemented
+
+- (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender {
     NSPasteboard *pboard = [sender draggingPasteboard];
     // weblocs also put strings on the pboard, so check for that type first so we don't get a false positive on NSStringPboardType
 	NSString *pboardType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];
@@ -2674,7 +2676,11 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     }
 }
 
-- (BOOL)dragWindow:(BDSKDragWindow *)window receiveDrag:(id <NSDraggingInfo>)sender{
+- (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender {
+    return [self draggingUpdated:sender];
+}
+
+- (BOOL)performDragOperation:(id <NSDraggingInfo>)sender {
     
     NSPasteboard *pboard = [sender draggingPasteboard];
 	NSString *pboardType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];
@@ -2783,6 +2789,8 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         return YES;
     }
 }
+
+#pragma mark NSWindow delegate methods
 
 - (id)windowWillReturnFieldEditor:(NSWindow *)sender toObject:(id)anObject {
 	if (anObject != tableView)
