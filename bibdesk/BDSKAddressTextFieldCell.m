@@ -42,20 +42,6 @@
 @implementation BDSKAddressTextFieldCell
 
 + (Class)formatterClass { return Nil; }
- 
-- (id)initWithCoder:(NSCoder *)coder {
-    self = [super initWithCoder:coder];
-    if (self) {
-		[self setDrawsBackground:NO];
-    }
-    return self;
-}
-
-static inline NSRect adjustedFrame(NSRect cellFrame, NSView *controlView) {
-	NSRect ignored;
-    NSDivideRect(cellFrame, &ignored, &cellFrame, 1.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
-    return cellFrame;
-}
 
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
 	NSRect outlineRect = [self layoutRectForBounds:cellFrame inView:controlView];
