@@ -43,8 +43,20 @@
 
 + (Class)formatterClass { return Nil; }
 
+- (NSRect)textRectForBounds:(NSRect)aRect {
+    NSRect ignored, rect = [super textRectForBounds:aRect];
+    NSDivideRect(rect, &ignored, &rect, 17.0, NSMaxXEdge);
+    return rect;
+}
+
+- (NSRect)adjustedFrame:(NSRect)aRect inView:(NSView *)controlView {
+	NSRect ignored;
+    NSDivideRect(aRect, &ignored, &aRect, 1.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
+    return aRect;
+}
+
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
-	NSRect outlineRect = [self layoutRectForBounds:cellFrame inView:controlView];
+	NSRect outlineRect = [self adjustedFrame:cellFrame inView:controlView];
     NSRect outerShadowRect, innerShadowRect, ignored;
 	NSGradient *gradient = nil;
     
@@ -77,28 +89,16 @@
 	}
 }
 
-- (NSRect)textRectForBounds:(NSRect)aRect {
-    NSRect ignored, rect = [super textRectForBounds:aRect];
-    NSDivideRect(rect, &ignored, &rect, 17.0, NSMaxXEdge);
-    return rect;
-}
-
-- (NSRect)layoutRectForBounds:(NSRect)aRect inView:(NSView *)controlView {
-	NSRect ignored;
-    NSDivideRect(aRect, &ignored, &aRect, 1.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
-    return aRect;
-}
-
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
-    [super drawInteriorWithFrame:[self layoutRectForBounds:cellFrame inView:controlView] inView:controlView];
+    [super drawInteriorWithFrame:[self adjustedFrame:cellFrame inView:controlView] inView:controlView];
 }
 
 - (void)editWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject event:(NSEvent *)theEvent {
-    [super editWithFrame:[self layoutRectForBounds:aRect inView:controlView] inView:controlView editor:textObj delegate:anObject event:theEvent];
+    [super editWithFrame:[self adjustedFrame:aRect inView:controlView] inView:controlView editor:textObj delegate:anObject event:theEvent];
 }
 
 - (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(NSInteger)selStart length:(NSInteger)selLength {
-    [super selectWithFrame:[self layoutRectForBounds:aRect inView:controlView] inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
+    [super selectWithFrame:[self adjustedFrame:aRect inView:controlView] inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
 }
 
 @end

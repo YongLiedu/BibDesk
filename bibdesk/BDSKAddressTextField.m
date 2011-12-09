@@ -146,7 +146,7 @@
 
 - (void)mouseDown:(NSEvent *)theEvent {
     if ([[self delegate] respondsToSelector:@selector(addressTextField:writeDataToPasteboard:)]) {
-        NSRect iconRect = [[self cell] iconRectForBounds:[[self cell] layoutRectForBounds:[self bounds] inView:self]];
+        NSRect iconRect = [[self cell] iconRectForBounds:[[self cell] adjustedFrame:[self bounds] inView:self]];
         NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
         if (NSMouseInRect(mouseLoc, iconRect, [self isFlipped])) {
             NSEvent *nextEvent = [[self window] nextEventMatchingMask: NSLeftMouseUpMask | NSLeftMouseDraggedMask];
