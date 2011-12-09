@@ -158,17 +158,15 @@
                
                     NSImage *dragImage = nil;
                     NSImage *image = nil;
-                    NSRect drawRect = [self bounds];
+                    CGFloat boundsHeight = NSHeight([self bounds]);
                     NSPoint dragPoint = iconRect.origin;
                     if ([self isFlipped]) {
                         dragPoint.y += NSHeight(iconRect);
-                        iconRect.origin.y = NSMaxY(drawRect) - NSMaxY(iconRect);
+                        iconRect.origin.y = boundsHeight - NSHeight(iconRect);
                     }
-                    drawRect.origin.x -= NSMinX(iconRect);
-                    drawRect.origin.y -= NSMinY(iconRect);
                     image = [[NSImage alloc] initWithSize:iconRect.size];
                     [image lockFocus];
-                    [[self cell] drawInteriorWithFrame:drawRect inView:nil];
+                    [[self cell] drawInteriorWithFrame:NSMakeRect(-NSMinX(iconRect), -NSMinY(iconRect), NSMaxX(iconRect), boundsHeight) inView:nil];
                     [image unlockFocus];
                     dragImage = [[[NSImage alloc] initWithSize:iconRect.size] autorelease];
                     [dragImage lockFocus];
