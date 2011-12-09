@@ -41,4 +41,5 @@
 
 
 @interface BDSKAddressTextFieldCell : BDSKTextWithIconCell
+- (NSRect)layoutRectForBounds:(NSRect)aRect inView:(NSView *)controlView;
 @end

@@ -146,7 +146,7 @@
 
 - (void)mouseDown:(NSEvent *)theEvent {
     if ([[self delegate] respondsToSelector:@selector(addressTextField:writeDataToPasteboard:)]) {
-        NSRect iconRect = [[self cell] iconRectForBounds:[self bounds]];
+        NSRect iconRect = [[self cell] iconRectForBounds:[[self cell] layoutRectForBounds:[self bounds] inView:self]];
         NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
         if (NSMouseInRect(mouseLoc, iconRect, [self isFlipped])) {
             NSEvent *nextEvent = [[self window] nextEventMatchingMask: NSLeftMouseUpMask | NSLeftMouseDraggedMask];
@@ -157,21 +157,20 @@
                 if ([[self delegate] addressTextField:self writeDataToPasteboard:pboard]) {
                
                     NSImage *dragImage = nil;
-                    NSSize imageSize = NSZeroSize;
                     NSImage *image = nil;
                     NSRect drawRect = [self bounds];
-                    NSRect rect = [[self cell] iconRectForBounds:drawRect];
-                    NSPoint dragPoint = rect.origin;
-                    if ([self isFlipped])
-                        dragPoint.y += NSHeight(rect);
-                    drawRect.origin.x -= NSMinX(rect);
-                    drawRect.origin.y -= NSMinY(rect);
-                    image = [[NSImage alloc] initWithSize:rect.size];
+                    NSPoint dragPoint = iconRect.origin;
+                    if ([self isFlipped]) {
+                        dragPoint.y += NSHeight(iconRect);
+                        iconRect.origin.y = NSMaxY(drawRect) - NSMaxY(iconRect);
+                    }
+                    drawRect.origin.x -= NSMinX(iconRect);
+                    drawRect.origin.y -= NSMinY(iconRect);
+                    image = [[NSImage alloc] initWithSize:iconRect.size];
                     [image lockFocus];
                     [[self cell] drawInteriorWithFrame:drawRect inView:nil];
                     [image unlockFocus];
-                    imageSize = [image size];
-                    dragImage = [[[NSImage alloc] initWithSize:imageSize] autorelease];
+                    dragImage = [[[NSImage alloc] initWithSize:iconRect.size] autorelease];
                     [dragImage lockFocus];
                     [image drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeCopy fraction:0.7];
                     [dragImage unlockFocus];
