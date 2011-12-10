@@ -43,6 +43,12 @@
 
 + (Class)formatterClass { return Nil; }
 
+- (NSSize)cellSize {
+    NSSize cellSize = [super cellSize];
+    cellSize.height += 1.0;
+    return cellSize;
+}
+
 - (NSRect)textRectForBounds:(NSRect)aRect {
     NSRect ignored, rect = [super textRectForBounds:aRect];
     NSDivideRect(rect, &ignored, &rect, 17.0, NSMaxXEdge);
