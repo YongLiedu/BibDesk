@@ -48,7 +48,6 @@
 #import "NSString_BDSKExtensions.h"
 #import "BDSKFieldSheetController.h"
 #import "BDSKFiler.h"
-#import "BDSKDragWindow.h"
 #import "BibItem.h"
 #import "BDSKCiteKeyFormatter.h"
 #import "BDSKAppController.h"
