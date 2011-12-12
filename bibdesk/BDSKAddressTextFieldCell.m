@@ -43,8 +43,8 @@
 
 + (Class)formatterClass { return Nil; }
 
-- (NSSize)cellSize {
-    NSSize cellSize = [super cellSize];
+- (NSSize)cellSizeForBounds:(NSRect)aRect {
+    NSSize cellSize = [super cellSizeForBounds:aRect];
     cellSize.height += 1.0;
     return cellSize;
 }

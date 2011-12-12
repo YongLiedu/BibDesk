@@ -265,8 +265,8 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
     return [[labelCell font] defaultViewLineHeight];
 }
 
-- (NSSize)cellSize {
-    NSSize cellSize = [super cellSize];
+- (NSSize)cellSizeForBounds:(NSRect)aRect {
+    NSSize cellSize = [super cellSizeForBounds:aRect];
     NSSize countSize = NSZeroSize;
     CGFloat iconHeight = cellSize.height + IMAGE_SIZE_OFFSET;
     if ([self label]) {

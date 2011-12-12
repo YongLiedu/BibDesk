@@ -111,8 +111,8 @@ static id nonNullObjectValueForKey(id object, id stringObject, NSString *key) {
     [imageCell setBackgroundStyle:style];
 }
 
-- (NSSize)cellSize {
-    NSSize cellSize = [super cellSize];
+- (NSSize)cellSizeForBounds:(NSRect)aRect {
+    NSSize cellSize = [super cellSizeForBounds:aRect];
     if ([self isBordered])
         cellSize.width += cellSize.height - BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERED + BORDER_BETWEEN_IMAGE_AND_TEXT_BORDERED;
     else if ([self isBezeled])

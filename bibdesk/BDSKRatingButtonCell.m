@@ -224,7 +224,7 @@
 	return YES;
 }
 
-- (NSSize)cellSize {
+- (NSSize)cellSizeForBounds:(NSRect)aRect {
 	NSSize titleSize = [[self attributedTitle] size];
 	NSSize buttonSize = NSMakeSize(OUTER_SIZE * maxRating, OUTER_SIZE);
 	NSSize size = NSZeroSize;

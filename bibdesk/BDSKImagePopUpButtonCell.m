@@ -102,9 +102,9 @@
 
 #pragma mark Drawing and highlighting
 
-- (NSSize)cellSize {
+- (NSSize)cellSizeForBounds:(NSRect)aRect {
     [buttonCell setImage:[self numberOfItems] ? [[self itemAtIndex:0] image] : nil];
-	NSSize size = [buttonCell cellSize];
+	NSSize size = [buttonCell cellSizeForBounds:aRect];
 	if ([self controlSize] != NSRegularControlSize) {
         size = NSMakeSize(round(0.75 * size.width), round(0.75 * size.height));
         if ([self arrowPosition] != NSPopUpNoArrow)

@@ -220,9 +220,8 @@
 - (NSBackgroundStyle)backgroundStyle { return NSBackgroundStyleLight; }
 - (NSBackgroundStyle)interiorBackgroundStyle { return NSBackgroundStyleLight; }
 
-- (NSSize)cellSize
-{
-    NSSize cellSize = [super cellSize];
+- (NSSize)cellSizeForBounds:(NSRect)aRect {
+    NSSize cellSize = [super cellSizeForBounds:aRect];
     if ([self hasButton] || [self URL])
         cellSize.width += BUTTON_SIZE.width + BUTTON_MARGIN;
     return cellSize;

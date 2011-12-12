@@ -782,7 +782,7 @@ enum {
 
 @implementation BDSKColorCell
 
-- (NSSize)cellSize {
+- (NSSize)cellSizeForBounds:(NSRect)aRect {
     return NSMakeSize(16.0, 16.0);
 }
 
