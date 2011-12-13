@@ -45,7 +45,7 @@
 
 - (NSSize)cellSizeForBounds:(NSRect)aRect {
     NSSize cellSize = [super cellSizeForBounds:aRect];
-    cellSize.height += 1.0;
+    cellSize.height = fmin(cellSize.height + 1.0, NSHeight(aRect));
     return cellSize;
 }
 

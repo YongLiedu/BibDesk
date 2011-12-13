@@ -783,7 +783,7 @@ enum {
 @implementation BDSKColorCell
 
 - (NSSize)cellSizeForBounds:(NSRect)aRect {
-    return NSMakeSize(16.0, 16.0);
+    return NSMakeSize(fmin(16.0, NSWidth(aRect)), fmin(16.0, NSHeight(aRect)));
 }
 
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {

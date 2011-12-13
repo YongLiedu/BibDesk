@@ -112,6 +112,7 @@
 	} else if ([self arrowPosition] != NSPopUpNoArrow) {
         size.width += 7.0;
     }
+    size.width = fmin(size.width, NSWidth(aRect));
     return size;
 }
 

@@ -119,6 +119,8 @@ static id nonNullObjectValueForKey(id object, id stringObject, NSString *key) {
         cellSize.width += cellSize.height - BORDER_BETWEEN_EDGE_AND_IMAGE_BEZELED + BORDER_BETWEEN_IMAGE_AND_TEXT_BEZELED;
     else
         cellSize.width += cellSize.height - 1 + BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERLESS + BORDER_BETWEEN_IMAGE_AND_TEXT_BORDERLESS;
+    cellSize.width = fmin(cellSize.width, NSWidth(aRect));
+    cellSize.height = fmin(cellSize.height, NSHeight(aRect));
     return cellSize;
 }
 

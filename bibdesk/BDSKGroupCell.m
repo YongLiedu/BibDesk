@@ -287,6 +287,8 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
     cellSize.width += BORDER_BETWEEN_EDGE_AND_IMAGE + iconHeight + BORDER_BETWEEN_IMAGE_AND_TEXT;
     if (countSize.width > 0.0)
         cellSize.width += BORDER_BETWEEN_COUNT_AND_TEXT + countSize.width + BORDER_BETWEEN_EDGE_AND_COUNT;
+    cellSize.width = fmin(cellSize.width, NSWidth(aRect));
+    cellSize.height = fmin(cellSize.height, NSHeight(aRect));
     return cellSize;
 }
 

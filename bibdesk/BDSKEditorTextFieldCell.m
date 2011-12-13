@@ -223,7 +223,7 @@
 - (NSSize)cellSizeForBounds:(NSRect)aRect {
     NSSize cellSize = [super cellSizeForBounds:aRect];
     if ([self hasButton] || [self URL])
-        cellSize.width += BUTTON_SIZE.width + BUTTON_MARGIN;
+        cellSize.width = fmin(cellSize.width + BUTTON_SIZE.width + BUTTON_MARGIN, NSWidth(aRect));
     return cellSize;
 }
 

@@ -247,6 +247,10 @@
 				size.width -= EXTRA_BORDER_MARGIN;
 			break;
 	}
+    
+    size.width = fmin(size.width, NSWidth(aRect));
+    size.height = fmin(size.height, NSHeight(aRect));
+    
 	return size;
 }
 
