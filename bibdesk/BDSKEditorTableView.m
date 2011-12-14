@@ -37,7 +37,6 @@
  */
 
 #import "BDSKEditorTableView.h"
-#import "BDSKEditorTextFieldCell.h"
 
 
 @interface NSTableView (BDSKApplePrivate)
@@ -60,11 +59,11 @@
         BOOL isEditable = [tableColumn isEditable] && 
                 ([[self delegate] respondsToSelector:@selector(tableView:shouldEditTableColumn:row:)] == NO || 
                  [[self delegate] tableView:self shouldEditTableColumn:tableColumn row:clickedRow]);
-        if ([cell respondsToSelector:@selector(buttonRectForBounds:)] &&
-            NSMouseInRect(location, [cell buttonRectForBounds:cellFrame], [self isFlipped])) {
+        NSUInteger hit = [cell hitTestForEvent:theEvent inRect:cellFrame ofView:self];
+        if ((hit & NSCellHitTrackableArea)) {
             if ([theEvent clickCount] > 1)
                 theEvent = [NSEvent mouseEventWithType:[theEvent type] location:[theEvent locationInWindow] modifierFlags:[theEvent modifierFlags] timestamp:[theEvent timestamp] windowNumber:[theEvent windowNumber] context:[theEvent context] eventNumber:[theEvent eventNumber] clickCount:1 pressure:[theEvent pressure]];
-        } else if ([cell isKindOfClass:[NSTextFieldCell class]] && isEditable) {
+        } else if ((hit & NSCellHitEditableTextArea) && isEditable) {
             if ([[self window] makeFirstResponder:nil]) {
                 [self selectRowIndexes:[NSIndexSet indexSetWithIndex:clickedRow] byExtendingSelection:NO];
                 [self editColumn:clickedColumn row:clickedRow withEvent:theEvent select:NO];

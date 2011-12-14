@@ -96,6 +96,8 @@
     NSPoint mouseLoc = [controlView convertPoint:[event locationInWindow] fromView:nil];
     if (NSMouseInRect(mouseLoc, buttonRect, [controlView isFlipped]))
         hit = NSCellHitContentArea | NSCellHitTrackableArea;
+    else if ([self isEditable])
+        hit |= NSCellHitEditableTextArea;
     return hit;
 }
 
