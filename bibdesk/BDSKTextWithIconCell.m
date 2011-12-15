@@ -165,8 +165,9 @@ static id nonNullObjectValueForKey(id object, id stringObject, NSString *key) {
 - (void)drawInteriorWithFrame:(NSRect)aRect inView:(NSView *)controlView {
     // let super draw the text, but vertically center the text for tall cells, because NSTextFieldCell aligns at the top
     NSRect textRect = [self textRectForBounds:aRect];
-    if (NSHeight(textRect) > [super cellSize].height + 2.0)
-        textRect = BDSKCenterRectVertically(textRect, [super cellSize].height + 2.0, [controlView isFlipped]);
+    CGFloat minHeight = [super cellSizeForBounds:NSMakeRect(0.0, 0.0, 4000.0, 4000.0)].height + 2.0;
+    if (NSHeight(textRect) > minHeight)
+        textRect = BDSKCenterRectVertically(textRect, minHeight, [controlView isFlipped]);
     [super drawInteriorWithFrame:textRect inView:controlView];
     
     // Draw the image
