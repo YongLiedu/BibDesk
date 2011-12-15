@@ -41,3 +41,15 @@
 extern NSRect BDSKCenterRect(NSRect rect, NSSize size, BOOL flipped);
 extern NSRect BDSKCenterRectVertically(NSRect rect, CGFloat height, BOOL flipped);
 extern NSRect BDSKCenterRectHorizontally(NSRect rect, CGFloat width);
+
+static inline NSRect BDSKSliceRect(NSRect rect, CGFloat amount, NSRectEdge edge) {
+    NSRect ignored;
+    NSDivideRect(rect, &rect, &ignored, amount, edge);
+    return rect;
+}
+
+static inline NSRect BDSKShrinkRect(NSRect rect, CGFloat amount, NSRectEdge edge) {
+    NSRect ignored;
+    NSDivideRect(rect, &ignored, &rect, amount, edge);
+    return rect;
+}

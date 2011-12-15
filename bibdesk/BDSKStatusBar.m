@@ -86,13 +86,12 @@
 }
 
 - (void)drawRect:(NSRect)rect {
-	NSRect textRect, ignored;
+	NSRect textRect;
     CGFloat fullRightMargin = rightMargin;
 	
     if (progressIndicator)
         fullRightMargin += NSWidth([progressIndicator frame]) + MARGIN_BETWEEN_ITEMS;
-    NSDivideRect([self bounds], &ignored, &textRect, leftMargin, NSMinXEdge);
-    NSDivideRect(textRect, &ignored, &textRect, fullRightMargin, NSMaxXEdge);
+    textRect = BDSKShrinkRect(BDSKShrinkRect([self bounds], leftMargin, NSMinXEdge), fullRightMargin, NSMaxXEdge);
 	
 	NSImage *icon;
 	NSRect iconRect;    
@@ -102,7 +101,7 @@
 		icon = [dict objectForKey:@"icon"];
         size = [self cellSizeForIcon:icon];
         NSDivideRect(textRect, &iconRect, &textRect, size.width, NSMaxXEdge);
-        NSDivideRect(textRect, &ignored, &textRect, MARGIN_BETWEEN_ITEMS, NSMaxXEdge);
+        textRect = BDSKShrinkRect(textRect, MARGIN_BETWEEN_ITEMS, NSMaxXEdge);
         iconRect = BDSKCenterRectVertically(iconRect, size.height, NO);
         iconRect.origin.y += VERTICAL_OFFSET;
 		[iconCell setImage:icon];
@@ -278,13 +277,13 @@
 }
 
 - (void)rebuildToolTips {
-	NSRect ignored, rect;
+	NSRect rect;
     CGFloat fullRightMargin = rightMargin;
 	
 	if (progressIndicator != nil) 
 		fullRightMargin += NSMinX([progressIndicator frame]) + MARGIN_BETWEEN_ITEMS;
 	
-    NSDivideRect([self bounds], &ignored, &rect, fullRightMargin, NSMaxXEdge);
+    rect = BDSKShrinkRect([self bounds], fullRightMargin, NSMaxXEdge);
     
 	NSRect iconRect;
     NSSize size;
@@ -294,7 +293,7 @@
 	for (NSDictionary *dict in icons) {
         size = [self cellSizeForIcon:[dict objectForKey:@"icon"]];
         NSDivideRect(rect, &iconRect, &rect, size.width, NSMaxXEdge);
-        NSDivideRect(rect, &ignored, &rect, MARGIN_BETWEEN_ITEMS, NSMaxXEdge);
+        rect = BDSKShrinkRect(rect, MARGIN_BETWEEN_ITEMS, NSMaxXEdge);
         iconRect = BDSKCenterRectVertically(iconRect, size.height, NO);
         iconRect.origin.y += VERTICAL_OFFSET;
 		[self addToolTipRect:iconRect owner:self userData:[dict objectForKey:@"identifier"]];
@@ -349,11 +348,9 @@
 		[progressIndicator setDisplayedWhenStopped:NO];
 		[progressIndicator sizeToFit];
 		
-		NSRect rect, ignored;
+		NSRect rect;
 		NSSize size = [progressIndicator frame].size;
-        NSDivideRect([self bounds], &ignored, &rect, rightMargin, NSMaxXEdge);
-        NSDivideRect(rect, &rect, &ignored, size.width, NSMaxXEdge);
-        rect = BDSKCenterRect(rect, size, [self isFlipped]);
+        rect = BDSKCenterRect(BDSKSliceRect(BDSKShrinkRect([self bounds], rightMargin, NSMaxXEdge), size.width, NSMaxXEdge), size, [self isFlipped]);
         rect.origin.y += VERTICAL_OFFSET;
 		[progressIndicator setFrame:rect];
 		
@@ -390,15 +387,14 @@
 
 - (id)accessibilityHitTest:(NSPoint)point {
     NSPoint localPoint = [self convertPoint:[[self window] convertScreenToBase:point] fromView:nil];
-    NSRect rect, childRect, ignored;
+    NSRect rect, childRect;
     
-    NSDivideRect([self bounds], &ignored, &rect, leftMargin, NSMinXEdge);
-    NSDivideRect(rect, &ignored, &rect, rightMargin, NSMaxXEdge);
+    rect = BDSKShrinkRect(BDSKShrinkRect([self bounds], leftMargin, NSMinXEdge), rightMargin, NSMaxXEdge);
     if (progressIndicator) {
         NSDivideRect(rect, &childRect, &rect, NSWidth([progressIndicator frame]), NSMaxXEdge);
         if (NSMouseInRect(localPoint, childRect, [self isFlipped]))
             return NSAccessibilityUnignoredAncestor(progressIndicator);
-        NSDivideRect(rect, &ignored, &rect, MARGIN_BETWEEN_ITEMS, NSMaxXEdge);
+        rect = BDSKShrinkRect(rect, MARGIN_BETWEEN_ITEMS, NSMaxXEdge);
 	}
     return NSAccessibilityUnignoredAncestor(textCell);
 }

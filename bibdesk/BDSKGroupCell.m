@@ -221,10 +221,7 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
 
 - (NSRect)iconRectForBounds:(NSRect)aRect {
     NSSize imageSize = [self iconSizeForBounds:aRect];
-    NSRect imageRect, ignored;
-    NSDivideRect(aRect, &ignored, &imageRect, BORDER_BETWEEN_EDGE_AND_IMAGE, NSMinXEdge);
-    NSDivideRect(imageRect, &imageRect, &ignored, imageSize.width, NSMinXEdge);
-    return imageRect;
+    return BDSKSliceRect(BDSKShrinkRect(aRect, BORDER_BETWEEN_EDGE_AND_IMAGE, NSMinXEdge), imageSize.width, NSMinXEdge);
 }
 
 - (NSRect)countRectForBounds:(NSRect)aRect {
@@ -239,15 +236,12 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
         countSize = [countString boundingRectWithSize:aRect.size options:0].size;
         countSize.width += [self countPaddingForSize:countSize]; // add oval pading around count
     }
-    NSRect countRect, ignored;
-    if (countSize.width > 0.0) {
-        NSDivideRect(aRect, &ignored, &countRect, BORDER_BETWEEN_EDGE_AND_COUNT, NSMaxXEdge);
-        NSDivideRect(countRect, &countRect, &ignored, countSize.width, NSMaxXEdge);
+    NSRect countRect;
+    if (countSize.width > 0.0)
         // now set the size of it to the string size
-        countRect = BDSKCenterRect(countRect, countSize, YES);
-    } else {
-        NSDivideRect(aRect, &countRect, &ignored, 0.0, NSMaxXEdge);
-    }
+        countRect = BDSKCenterRect(BDSKSliceRect(BDSKShrinkRect(aRect, BORDER_BETWEEN_EDGE_AND_COUNT, NSMaxXEdge), countSize.width, NSMaxXEdge), countSize, YES);
+    else
+        countRect = BDSKSliceRect(aRect, 0.0, NSMaxXEdge);
     return countRect;
 }    
 
@@ -381,8 +375,7 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
     }
     
     if ([self label]) {
-        NSRect ignored;
-        NSDivideRect(textRect, &textRect, &ignored, [self labelHeight], [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
+        textRect = BDSKSliceRect(textRect, [self labelHeight], [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
         [labelCell drawInteriorWithFrame:textRect inView:controlView];
     }
     

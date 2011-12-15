@@ -37,16 +37,15 @@
  */
 
 #import "BDSKPreferenceIconCell.h"
+#import "NSGeometry_BDSKExtensions.h"
 
 
 @implementation BDSKPreferenceIconCell
 
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
     NSSize cellSize = [self cellSizeForBounds:cellFrame];
-    if (cellSize.height < NSHeight(cellFrame)) {
-        NSRect ignored;
-        NSDivideRect(cellFrame, &cellFrame, &ignored, cellSize.height, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
-    }
+    if (cellSize.height < NSHeight(cellFrame))
+        cellFrame = BDSKSliceRect(cellFrame, cellSize.height, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
     [super drawWithFrame:cellFrame inView:controlView];
 }
 

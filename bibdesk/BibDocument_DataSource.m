@@ -1064,11 +1064,9 @@
     
     if (spinner) {
         NSInteger column = [[outlineView tableColumns] indexOfObject:tableColumn];
-        NSRect ignored, rect = [outlineView frameOfCellAtColumn:column row:[outlineView rowForItem:item]];
+        NSRect rect = [outlineView frameOfCellAtColumn:column row:[outlineView rowForItem:item]];
         NSSize size = [spinner frame].size;
-        NSDivideRect(rect, &ignored, &rect, 2.0f, NSMaxXEdge);
-        NSDivideRect(rect, &rect, &ignored, size.width, NSMaxXEdge);
-        rect = BDSKCenterRectVertically(rect, size.height, [outlineView isFlipped]);
+        rect = BDSKCenterRectVertically(BDSKSliceRect(BDSKShrinkRect(rect, 2.0f, NSMaxXEdge), size.width, NSMaxXEdge), size.height, [outlineView isFlipped]);
         
         [spinner setFrame:rect];
         if ([spinner isDescendantOf:outlineView] == NO)

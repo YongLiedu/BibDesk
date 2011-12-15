@@ -54,6 +54,7 @@
 #import "NSMenu_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "NSGeometry_BDSKExtensions.h"
 
 enum {
     BDSKColumnTypeText,
@@ -238,12 +239,12 @@ enum {
         NSRange visibleRows = [self rowsInRect:clipRect];
         NSUInteger row;
         NSColor *color;
-        NSRect ignored, rect;
+        NSRect rect;
         for (row = visibleRows.location; row < NSMaxRange(visibleRows); row++) {
             if ((color = [[self delegate] tableView:self highlightColorForRow:row])) {
                 [NSGraphicsContext saveGraphicsState];
                 [color set];
-                NSDivideRect([self rectOfRow:row], &ignored, &rect, 1.0, NSMaxYEdge);
+                rect = BDSKShrinkRect([self rectOfRow:row], 1.0, NSMaxYEdge);
                 if ([self isRowSelected:row]) {
                     [NSBezierPath setDefaultLineWidth:2.0];
                     [NSBezierPath strokeHorizontalOvalInRect:NSInsetRect(rect, 2.0, 1.0)];
@@ -790,7 +791,7 @@ enum {
     NSColor *color = [self objectValue];
     if ([color respondsToSelector:@selector(drawSwatchInRect:)]) {
         NSRect rect, ignored;
-        NSDivideRect(cellFrame, &ignored, &rect, 1.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
+        rect = BDSKShrinkRect(cellFrame, 1.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
         [color drawSwatchInRect:rect];
     }
 }

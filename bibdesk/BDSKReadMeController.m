@@ -38,6 +38,7 @@
 
 #import "BDSKReadMeController.h"
 #import "NSWorkspace_BDSKExtensions.h"
+#import "NSGeometry_BDSKExtensions.h"
 #include <sys/utsname.h>
 
 #define BDSKReadMeWindowFrameAutosaveName @"BDSKReadMeWindow"
@@ -89,8 +90,8 @@ static BDSKRelNotesController *sharedRelNotesController = nil;
                                    withRTF:[NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"RelNotes" ofType:@"rtf"]]];
     } else {
         [[self window] setTitle:NSLocalizedString(@"Latest Release Notes", @"Window title")];
-        NSRect ignored, rect = [[textView enclosingScrollView] frame];
-        NSDivideRect(rect, &ignored, &rect, 61.0, NSMinYEdge);
+        NSRect rect = [[textView enclosingScrollView] frame];
+        rect = BDSKShrinkRect(rect, 61.0, NSMinYEdge);
         [[textView enclosingScrollView] setFrame:rect];
         [downloadButton setHidden:NO];
     }
@@ -155,8 +156,8 @@ static NSString *hostInfoString()
 - (void)windowDidLoad {
     @try {
         [[self window] setTitle:NSLocalizedString(@"Error Log", @"Window title")];
-        NSRect ignored, rect = [[textView enclosingScrollView] frame];
-        NSDivideRect(rect, &ignored, &rect, 61.0, NSMinYEdge);
+        NSRect rect = [[textView enclosingScrollView] frame];
+        rect = BDSKShrinkRect(rect, 61.0, NSMinYEdge);
         [[textView enclosingScrollView] setFrame:rect];
         [downloadButton setHidden:NO];
         [downloadButton setTitle:NSLocalizedString(@"Report Error", @"Button title")];

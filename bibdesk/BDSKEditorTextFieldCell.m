@@ -38,6 +38,7 @@
 
 #import "BDSKEditorTextFieldCell.h"
 #import "NSImage_BDSKExtensions.h"
+#import "NSGeometry_BDSKExtensions.h"
 
 #define BUTTON_MARGIN 2.0
 #define BUTTON_SIZE NSMakeSize(12.0, 12.0)
@@ -193,11 +194,8 @@
 }
 
 - (NSRect)drawingRectForBounds:(NSRect)theRect {
-	if ([self hasButton] || [self URL]) {
-        NSRect ignored;
-        NSSize size = BUTTON_SIZE;
-        NSDivideRect(theRect, &ignored, &theRect, size.width + BUTTON_MARGIN, NSMaxXEdge);
-    }
+	if ([self hasButton] || [self URL])
+        theRect = BDSKShrinkRect(theRect, BUTTON_SIZE.width + BUTTON_MARGIN, NSMaxXEdge);
     return [super drawingRectForBounds:theRect];
 }
 

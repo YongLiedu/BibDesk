@@ -37,6 +37,7 @@
  */
 
 #import "BDSKAddressTextFieldCell.h"
+#import "NSGeometry_BDSKExtensions.h"
 
 
 @implementation BDSKAddressTextFieldCell
@@ -50,24 +51,20 @@
 }
 
 - (NSRect)textRectForBounds:(NSRect)aRect {
-    NSRect ignored, rect = [super textRectForBounds:aRect];
-    NSDivideRect(rect, &ignored, &rect, 17.0, NSMaxXEdge);
-    return rect;
+    return BDSKShrinkRect([super textRectForBounds:aRect], 17.0, NSMaxXEdge);
 }
 
 - (NSRect)adjustedFrame:(NSRect)aRect inView:(NSView *)controlView {
-	NSRect ignored;
-    NSDivideRect(aRect, &ignored, &aRect, 1.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
-    return aRect;
+    return BDSKShrinkRect(aRect, 1.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
 }
 
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
 	NSRect outlineRect = [self adjustedFrame:cellFrame inView:controlView];
-    NSRect outerShadowRect, innerShadowRect, ignored;
+    NSRect outerShadowRect, innerShadowRect;
 	NSGradient *gradient = nil;
     
-    NSDivideRect(cellFrame, &outerShadowRect, &ignored, 10.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
-    NSDivideRect(NSInsetRect(cellFrame, 1.0, 1.0), &innerShadowRect, &ignored, 10.0, [controlView isFlipped] ? NSMinYEdge : NSMaxYEdge);
+    outerShadowRect = BDSKSliceRect(cellFrame, 10.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
+    innerShadowRect = BDSKSliceRect(NSInsetRect(cellFrame, 1.0, 1.0), 10.0, [controlView isFlipped] ? NSMinYEdge : NSMaxYEdge);
     
 	[[NSColor colorWithCalibratedWhite:1.0 alpha:0.394] set];
 	[[NSBezierPath bezierPathWithRoundedRect:outerShadowRect xRadius:3.6 yRadius:3.6] fill];

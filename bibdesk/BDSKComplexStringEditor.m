@@ -39,6 +39,7 @@
 #import "BDSKMacroResolver.h"
 #import "BDSKBackgroundView.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "NSGeometry_BDSKExtensions.h"
 
 @interface BDSKComplexStringEditor (Private)
 
@@ -200,13 +201,13 @@
 
 - (void)cellFrameDidChange:(NSNotification *)notification {
 	NSRectEdge lowerEdge = [tableView isFlipped] ? NSMaxYEdge : NSMinYEdge;
-	NSRect lowerEdgeRect, ignored;
+	NSRect lowerEdgeRect;
 	NSRect winFrame = [[self window] frame];
 	CGFloat margin = 4.0; // for the shadow and focus ring
 	CGFloat minWidth = 16.0; // minimal width of the window without margins, so subviews won't get shifted
 	NSView *contentView = (NSView *)[[tableView enclosingScrollView] contentView] ?: (NSView *)tableView;
 	
-	NSDivideRect([tableView frameOfCellAtColumn:column row:row], &lowerEdgeRect, &ignored, 1.0, lowerEdge);
+	lowerEdgeRect = BDSKSliceRect([tableView frameOfCellAtColumn:column row:row], 1.0, lowerEdge);
 	lowerEdgeRect = NSIntersectionRect(lowerEdgeRect, [contentView visibleRect]);
 	// see if the cell's lower edge is scrolled out of sight
 	if (NSIsEmptyRect(lowerEdgeRect)) {

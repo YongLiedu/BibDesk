@@ -125,7 +125,7 @@ static id nonNullObjectValueForKey(id object, id stringObject, NSString *key) {
 }
 
 - (NSRect)textRectForBounds:(NSRect)aRect {
-    NSRect ignored, textRect = aRect;
+    NSRect textRect = aRect;
     CGFloat border;
     
     if ([self isBordered])
@@ -135,14 +135,11 @@ static id nonNullObjectValueForKey(id object, id stringObject, NSString *key) {
     else
         border = NSHeight(aRect) - 1 + BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERLESS + BORDER_BETWEEN_IMAGE_AND_TEXT_BORDERLESS;
     
-    NSDivideRect(aRect, &ignored, &textRect, border, NSMinXEdge);
-    
-    return textRect;
+    return BDSKShrinkRect(aRect, border, NSMinXEdge);
 }
 
 - (NSRect)iconRectForBounds:(NSRect)aRect {
     CGFloat border, imageWidth;
-    NSRect ignored, imageRect = aRect;
     
     if ([self isBordered]) {
         border = BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERED;
@@ -156,10 +153,7 @@ static id nonNullObjectValueForKey(id object, id stringObject, NSString *key) {
         imageWidth = NSHeight(aRect) - 1;
     }
     
-    NSDivideRect(aRect, &ignored, &imageRect, border, NSMinXEdge);
-    NSDivideRect(imageRect, &imageRect, &ignored, imageWidth, NSMinXEdge);
-    
-    return imageRect;
+    return BDSKSliceRect(BDSKShrinkRect(aRect, border, NSMinXEdge), imageWidth, NSMinXEdge);
 }
 
 - (void)drawInteriorWithFrame:(NSRect)aRect inView:(NSView *)controlView {

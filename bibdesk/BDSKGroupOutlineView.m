@@ -47,6 +47,7 @@
 #import "BDSKGroupCell.h"
 #import "NSFont_BDSKExtensions.h"
 #import "NSColor_BDSKExtensions.h"
+#import "NSGeometry_BDSKExtensions.h"
 
 
 @interface BDSKParentGroupCell : NSTextFieldCell
@@ -245,9 +246,7 @@
 @implementation BDSKParentGroupCell
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
-    NSRect ignored;
-    NSDivideRect(cellFrame, &ignored, &cellFrame, 3.0, NSMinYEdge);
-    [super drawInteriorWithFrame:cellFrame inView:controlView];
+    [super drawInteriorWithFrame:BDSKShrinkRect(cellFrame, 3.0, NSMinYEdge) inView:controlView];
 }
 
 @end
