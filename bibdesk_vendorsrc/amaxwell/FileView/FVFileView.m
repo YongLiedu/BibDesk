@@ -201,6 +201,8 @@ typedef NSInteger NSScrollerStyle;
 
 + (void)initialize 
 {
+    FVINITIALIZE(FVFileView);
+    
     // binding an NSSlider in IB 3 results in a crash on 10.4
     [self exposeBinding:ICONSCALE_BINDING_NAME];
     [self exposeBinding:MINICONSCALE_BINDING_NAME];
@@ -215,8 +217,6 @@ typedef NSInteger NSScrollerStyle;
     [self exposeBinding:SUBTITLECOLOR_BINDING_NAME];
     [self exposeBinding:FONT_BINDING_NAME];
     [self exposeBinding:SUBTITLEFONT_BINDING_NAME];
-    
-    FVINITIALIZE(FVFileView);
     
     // even without loading the framework on 10.5, this returns a class
     QLPreviewPanelClass = Nil;
