@@ -395,7 +395,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 - (BOOL)isEqual:(NSString *)other { return [super isEqual:other]; }
 */
 
-#pragma mark overridden methods from the ComplexStringExtensions
+#pragma mark overridden methods from the BDSKComplexStringExtensions
 
 - (id)copyUninheritedWithZone:(NSZone *)zone{
 	
@@ -595,7 +595,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 
 #pragma mark -
 
-@implementation NSString (ComplexStringExtensions)
+@implementation NSString (BDSKComplexStringExtensions)
 
 + (BDSKMacroResolver *)macroResolverForUnarchiving{
     return macroResolverForUnarchiving;
