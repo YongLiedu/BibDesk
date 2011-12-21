@@ -395,8 +395,24 @@
 #pragma mark NSEditor
 
 - (BOOL)commitEditing {
+    id firstResponder = [[self window] firstResponder];
+    NSTextView *editor = nil;
+    NSRange selection;
+    
+    if ([firstResponder isKindOfClass:[NSTextView class]]) {
+        editor = firstResponder;
+        selection = [editor selectedRange];
+        if ([editor isFieldEditor])
+            firstResponder = [firstResponder delegate];
+    }
+    
     if ([objectController commitEditing] == NO)
         return NO;
+    
+    if (editor && [[self window] firstResponder] != editor && 
+        [[self window] makeFirstResponder:firstResponder] && 
+        [[editor string] length] >= NSMaxRange(selection))
+        [editor setSelectedRange:selection];
     
     NSString *message = nil;
     

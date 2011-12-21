@@ -225,6 +225,27 @@ enum {
     [view1 release];
 }
 
+- (BOOL)commitEditing {
+    id firstResponder = [[self window] firstResponder];
+    NSTextView *editor = nil;
+    NSRange selection;
+    if ([firstResponder isKindOfClass:[NSTextView class]]) {
+        editor = firstResponder;
+        selection = [editor selectedRange];
+        if ([editor isFieldEditor])
+            firstResponder = [firstResponder delegate];
+    }
+    if ([objectController commitEditing]) {
+        if (editor && [[self window] firstResponder] != editor && 
+            [[self window] makeFirstResponder:firstResponder] && 
+            [[editor string] length] >= NSMaxRange(selection))
+            [editor setSelectedRange:selection];
+        return YES;
+    } else {
+        return NO;
+    }
+}
+
 #pragma mark Accessors
 
 - (NSInteger)operation {
@@ -746,7 +767,7 @@ enum {
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"Cannot replace in external items", @"Status message")];
         return;
-    }else if([objectController commitEditing] == NO){
+    }else if([self commitEditing] == NO){
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"There were invalid values", @"Status message")];
         return;
@@ -812,7 +833,7 @@ enum {
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"Cannot replace in external items", @"Status message")];
         return;
-    }else if([objectController commitEditing] == NO){
+    }else if([self commitEditing] == NO){
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"There were invalid values", @"Status message")];
         return;
