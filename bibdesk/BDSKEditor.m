@@ -313,6 +313,14 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [self showWindow:self];
 }
 
+static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
+    for (NSValue *range in ranges) {
+        if (NSMaxRange([range rangeValue]) > max)
+            return NO;
+    }
+    return YES;
+}
+
 - (BOOL)validateCurrentEditedView
 {
     NSParameterAssert(currentEditedView);
@@ -391,7 +399,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         
         NSTextView *textView = (NSTextView *)firstResponder;
 		NSInteger editedRow = -1;
-		NSRange selection = [textView selectedRange];
+		NSArray *selection = [textView selectedRanges];
         if ([textView isFieldEditor]) {
             firstResponder = (NSResponder *)[textView delegate];
             if (firstResponder == tableView)
@@ -413,8 +421,8 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 		if ([[self window] makeFirstResponder:firstResponder] && editorFlags.didSetupFields == NO) {
             if (firstResponder == tableView && editedRow != -1)
                 [tableView editColumn:1 row:editedRow withEvent:nil select:NO];
-            if ([[textView string] length] >= NSMaxRange(selection)) // check range for safety
-                [textView setSelectedRange:selection];
+            if (validRanges(selection, [[textView string] length])) // check range for safety
+                [textView setSelectedRanges:selection];
         }
         return YES;
         
@@ -2191,7 +2199,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 	currentEditedView = [aNotification object];
     editorFlags.ignoreFieldChange = YES;
     // we need to preserve selection manually; otherwise you end up editing at the end of the string after the call to setField: below
-    NSRange selRange = [currentEditedView selectedRange];
+    NSArray *selRanges = [currentEditedView selectedRanges];
     if(currentEditedView == notesView){
         [publication setField:BDSKAnnoteString toValue:[[notesView textStorage] mutableString]];
         [[self undoManager] setActionName:NSLocalizedString(@"Edit Annotation",@"Undo action name")];
@@ -2202,8 +2210,8 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
         [publication setField:BDSKRssDescriptionString toValue:[[rssDescriptionView textStorage] mutableString]];
         [[self undoManager] setActionName:NSLocalizedString(@"Edit RSS Description",@"Undo action name")];
     }
-    if(selRange.location != NSNotFound && selRange.location < [[currentEditedView string] length])
-        [currentEditedView setSelectedRange:selRange];
+    if([selRanges count] > 0 && validRanges(selRanges, [[currentEditedView string] length]))
+        [currentEditedView setSelectedRanges:selRanges];
     editorFlags.ignoreFieldChange = NO;
     
     // save off the old value in case abortEditing gets called
@@ -3281,11 +3289,11 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (void)reloadTableWithFields:(NSArray *)newFields{
 	// if we were editing in the tableView, we will restore the selected cell and the selection
-	NSText *fieldEditor = [tableView currentEditor];
+	NSTextView *fieldEditor = (NSTextView *)[tableView currentEditor];
 	NSString *editedTitle = nil;
-	NSRange selection = NSMakeRange(0, 0);
+	NSArray *selection = nil;
 	if(fieldEditor){
-		selection = [fieldEditor selectedRange];
+		selection = [fieldEditor selectedRanges];
 		editedTitle = [[fields objectAtIndex:[tableView editedRow]] retain];
         if ([[self window] makeFirstResponder:[self window]] == NO) 	 
              [NSException raise:NSInternalInconsistencyException format:@"Failed to commit edits in %s, trouble ahead", __func__];
@@ -3329,9 +3337,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         if (editedRow != NSNotFound && [tableView editedRow] != (NSInteger)editedRow) {
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:editedRow] byExtendingSelection:NO];
             [tableView editColumn:1 row:editedRow withEvent:nil select:NO];
-            fieldEditor = [tableView currentEditor];
-            if ([[fieldEditor string] length] >= NSMaxRange(selection))
-                [fieldEditor setSelectedRange:selection];
+            fieldEditor = (NSTextView *)[tableView currentEditor];
+            if (validRanges(selection, [[fieldEditor string] length]))
+                [fieldEditor setSelectedRanges:selection];
         }
         [editedTitle release];
 	}
