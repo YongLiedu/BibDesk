@@ -615,12 +615,20 @@
     }
 }
 
+static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
+    for (NSValue *range in ranges) {
+        if (NSMaxRange([range rangeValue]) > max)
+            return NO;
+    }
+    return YES;
+}
+
 - (void)finalizeChangesPreservingSelection:(BOOL)shouldPreserveSelection{
     NSResponder *firstResponder = [[self window] firstResponder];
     
 	if([firstResponder isKindOfClass:[NSText class]]){
-		NSText *textView = (NSText *)firstResponder;
-		NSRange selection = [textView selectedRange];
+		NSTextView *textView = (NSTextView *)firstResponder;
+		NSArray *selection = [textView selectedRanges];
         NSInteger editedRow = -1;
 		id textDelegate = [textView delegate];
         if(textDelegate == itemTableView || textDelegate == citeKeyField){
@@ -635,9 +643,8 @@
             if(shouldPreserveSelection && [[self window] makeFirstResponder:firstResponder]){
                 if(editedRow != -1)
                     [itemTableView editColumn:2 row:editedRow withEvent:nil select:YES];
-                if([[textView string] length] < NSMaxRange(selection)) // check range for safety
-                    selection = NSMakeRange([[textView string] length], 0);
-                [textView setSelectedRange:selection];
+                if(validRanges(selection, [[textView string] length])) // check ranges for safety
+                    [textView setSelectedRanges:selection];
             }
         }
 	}
