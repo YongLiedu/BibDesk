@@ -426,8 +426,6 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         }
         return YES;
         
-	} else {
-        return [[self window] makeFirstResponder:nil];
     }
 }
 
