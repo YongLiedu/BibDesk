@@ -38,8 +38,14 @@
 
 
 @interface NSTextView (BDSKExtensions)
+
 - (void)selectLineNumber:(NSInteger)line;
+
 - (void)highlightComponentsOfSearchString:(NSString *)searchString;
 - (void)highlightOccurrencesOfString:(NSString *)substring;
+
+- (void)setSafeSelectedRanges:(NSArray *)ranges;
+
 - (NSPoint)locationForCompletionWindow;
+
 @end

@@ -84,6 +84,7 @@
 #import "BDSKGroupsArray.h"
 #import "NSTableView_BDSKExtensions.h"
 #import "NSInvocation_BDSKExtensions.h"
+#import "NSTextView_BDSKExtensions.h"
 
 #define WEAK_NULL NULL
 
@@ -421,12 +422,11 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 		if ([[self window] makeFirstResponder:firstResponder] && editorFlags.didSetupFields == NO) {
             if (firstResponder == tableView && editedRow != -1)
                 [tableView editColumn:1 row:editedRow withEvent:nil select:NO];
-            if (validRanges(selection, [[textView string] length])) // check range for safety
-                [textView setSelectedRanges:selection];
+            [textView setSafeSelectedRanges:selection];
         }
-        return YES;
         
     }
+    return YES;
 }
 
 #pragma mark Actions

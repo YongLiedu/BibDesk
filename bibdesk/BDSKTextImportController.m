@@ -65,6 +65,7 @@
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSEvent_BDSKExtensions.h"
 #import "BDSKURLSheetController.h"
+#import "NSTextView_BDSKExtensions.h"
 
 #define BDSKTextImportControllerFrameAutosaveName @"BDSKTextImportController Frame Autosave Name"
 
@@ -643,8 +644,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
             if(shouldPreserveSelection && [[self window] makeFirstResponder:firstResponder]){
                 if(editedRow != -1)
                     [itemTableView editColumn:2 row:editedRow withEvent:nil select:YES];
-                if(validRanges(selection, [[textView string] length])) // check ranges for safety
-                    [textView setSelectedRanges:selection];
+                [textView setSafeSelectedRanges:selection];
             }
         }
 	}

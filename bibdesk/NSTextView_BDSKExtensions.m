@@ -191,6 +191,23 @@
     [self setSelectedRanges:newRanges];
 }
 
+- (void)setSafeSelectedRanges:(NSArray *)ranges {
+    NSUInteger length = [[self string] length];
+    NSMutableArray *mutableRanges = [NSMutableArray array];
+    for (NSValue *value in ranges) {
+        NSRange range = [value rangeValue];
+        if (NSMaxRange(range) > length) {
+            if (range.location >= length)
+                continue;
+            value = [NSValue valueWithRange:NSMakeRange(range.location, length - range.location)];
+        }
+        [mutableRanges addObject:value];
+    }
+    if ([mutableRanges count] == 0)
+        [mutableRanges addObject:[NSValue valueWithRange:NSMakeRange(length, 0)]];
+    [self setSelectedRanges:mutableRanges];
+}
+
 - (NSPoint)locationForCompletionWindow;
 {
     NSPoint point = NSZeroPoint;
