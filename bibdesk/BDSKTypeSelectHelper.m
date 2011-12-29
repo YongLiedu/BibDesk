@@ -140,11 +140,6 @@
     }
 }
 
-- (BOOL)isProcessing;
-{
-    return processing;
-}
-
 #pragma mark API
 
 - (void)rebuildTypeSelectSearchCache;
@@ -231,7 +226,7 @@
     if (nonAlphanumericCharacterSet == nil)
         nonAlphanumericCharacterSet = [[[NSCharacterSet alphanumericCharacterSet] invertedSet] copy];
     
-    NSCharacterSet *invalidCharacters = [self isProcessing] ? [NSCharacterSet controlCharacterSet] : nonAlphanumericCharacterSet;
+    NSCharacterSet *invalidCharacters = processing ? [NSCharacterSet controlCharacterSet] : nonAlphanumericCharacterSet;
     
     return [[keyEvent characters] rangeOfCharacterFromSet:invalidCharacters].location == NSNotFound;
 }
@@ -247,7 +242,7 @@
 {
     if ([keyEvent type] != NSKeyDown)
         return NO;
-    if ([self isProcessing] == NO)
+    if (processing == NO)
         return NO;
     return [keyEvent deviceIndependentModifierFlags] == 0 && [keyEvent firstCharacter] == CANCEL_CHARACTER;
 }

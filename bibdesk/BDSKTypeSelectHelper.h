@@ -81,8 +81,6 @@
 - (NSString *)searchString;
 - (void)setSearchString:(NSString *)newSearchString;
     
-- (BOOL)isProcessing;
-
 - (void)rebuildTypeSelectSearchCache;
 
 - (BOOL)handleEvent:(NSEvent *)keyEvent;
