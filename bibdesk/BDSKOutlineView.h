@@ -44,7 +44,7 @@
 
 - (void)outlineViewInsertNewline:(NSOutlineView *)anOutlineView;
 
-- (NSArray *)outlineView:(NSOutlineView *)anOutlineView typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)aTypeSelectHelper;
+- (NSArray *)outlineView:(NSOutlineView *)anOutlineView typeSelectHelperSelectionStrings:(BDSKTypeSelectHelper *)aTypeSelectHelper;
 - (void)outlineView:(NSOutlineView *)anOutlineView typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString;
 - (void)outlineView:(NSOutlineView *)anOutlineView typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper updateSearchString:(NSString *)searchString;
 
@@ -70,7 +70,7 @@
 @end
 
 
-@interface BDSKOutlineView : NSOutlineView <BDSKTypeSelectDataSource> {
+@interface BDSKOutlineView : NSOutlineView <BDSKTypeSelectDelegate> {
     BDSKTypeSelectHelper *typeSelectHelper;
     NSString *fontNamePreferenceKey;
     NSString *fontSizePreferenceKey;

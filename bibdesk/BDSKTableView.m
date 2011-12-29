@@ -50,7 +50,7 @@ static char BDSKTableViewFontDefaultsObservationContext;
 - (void)dealloc {
     [self setFontNamePreferenceKey:nil]; // this will also stop observing
     [self setFontSizePreferenceKey:nil];
-    [typeSelectHelper setDataSource:nil];
+    [typeSelectHelper setDelegate:nil];
     BDSKDESTROY(typeSelectHelper);
     [super dealloc];
 }
@@ -63,14 +63,14 @@ static char BDSKTableViewFontDefaultsObservationContext;
 
 - (void)setTypeSelectHelper:(BDSKTypeSelectHelper *)newTypeSelectHelper {
     if (typeSelectHelper != newTypeSelectHelper) {
-        if ([typeSelectHelper dataSource] == self) {
+        if ([typeSelectHelper delegate] == self) {
             if ([[self class] shouldQueueTypeSelectHelper])
                 [[typeSelectHelper class] cancelPreviousPerformRequestsWithTarget:typeSelectHelper selector:@selector(rebuildTypeSelectSearchCache) object:nil];
-            [typeSelectHelper setDataSource:nil];
+            [typeSelectHelper setDelegate:nil];
         }
         [typeSelectHelper release];
         typeSelectHelper = [newTypeSelectHelper retain];
-        [typeSelectHelper setDataSource:self];
+        [typeSelectHelper setDelegate:self];
     }
 }
 
@@ -217,7 +217,7 @@ static char BDSKTableViewFontDefaultsObservationContext;
         [self scrollToBeginningOfDocument:self];
     } else if (eventChar == NSEndFunctionKey && (modifierFlags & ~NSFunctionKeyMask) == 0) {
         [self scrollToEndOfDocument:self];
-    } else if ([typeSelectHelper processKeyDownEvent:theEvent] == NO) {
+    } else if ([typeSelectHelper handleEvent:theEvent] == NO) {
         [super keyDown:theEvent];
     }
 }
@@ -524,9 +524,9 @@ static char BDSKTableViewFontDefaultsObservationContext;
 
 #pragma mark SKTypeSelectHelper datasource protocol
 
-- (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)aTypeSelectHelper {
-    if ([[self delegate] respondsToSelector:@selector(tableView:typeSelectHelperSelectionItems:)])
-        return [[self delegate] tableView:self typeSelectHelperSelectionItems:aTypeSelectHelper];
+- (NSArray *)typeSelectHelperSelectionStrings:(BDSKTypeSelectHelper *)aTypeSelectHelper {
+    if ([[self delegate] respondsToSelector:@selector(tableView:typeSelectHelperSelectionStrings:)])
+        return [[self delegate] tableView:self typeSelectHelperSelectionStrings:aTypeSelectHelper];
     return nil;
 }
 

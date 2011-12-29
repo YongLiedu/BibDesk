@@ -84,7 +84,7 @@
 - (void)dealloc;
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [self setDataSource:nil];
+    [self setDelegate:nil];
     [self stopTimer];
     BDSKDESTROY(searchString);
     BDSKDESTROY(searchCache);
@@ -93,17 +93,17 @@
 
 #pragma mark Accessors
 
-- (id)dataSource;
+- (id)delegate;
 {
-    return dataSource;
+    return delegate;
 }
 
-- (void)setDataSource:(id)newDataSource;
+- (void)setDelegate:(id)newDelegate;
 {
-    if (dataSource == newDataSource)
+    if (delegate == newDelegate)
         return;
     
-    dataSource = newDataSource;
+    delegate = newDelegate;
     [self rebuildTypeSelectSearchCache];
 }
 
@@ -153,7 +153,7 @@
     // this will be actually rebuild when we need it
 }
 
-- (BOOL)processKeyDownEvent:(NSEvent *)keyEvent;
+- (BOOL)handleEvent:(NSEvent *)keyEvent;
 {
     if ([self isSearchEvent:keyEvent]) {
         [self searchWithEvent:keyEvent];
@@ -186,8 +186,8 @@
     [fieldEditor interpretKeyEvents:[NSArray arrayWithObject:keyEvent]];
     [self setSearchString:[fieldEditor string]];
     
-    if ([dataSource respondsToSelector:@selector(typeSelectHelper:updateSearchString:)])
-        [dataSource typeSelectHelper:self updateSearchString:searchString];
+    if ([delegate respondsToSelector:@selector(typeSelectHelper:updateSearchString:)])
+        [delegate typeSelectHelper:self updateSearchString:searchString];
     
     // Reset the timer if it hasn't expired yet
     [self startTimer];
@@ -201,8 +201,8 @@
 {
     [self searchWithStickyMatch:NO];
     
-    if ([searchString length] && [dataSource respondsToSelector:@selector(typeSelectHelper:updateSearchString:)])
-        [dataSource typeSelectHelper:self updateSearchString:searchString];
+    if ([searchString length] && [delegate respondsToSelector:@selector(typeSelectHelper:updateSearchString:)])
+        [delegate typeSelectHelper:self updateSearchString:searchString];
     
     [self startTimer];
     
@@ -260,7 +260,7 @@
 - (NSArray *)searchCache;
 {
     if (searchCache == nil)
-        searchCache = [[dataSource typeSelectHelperSelectionItems:self] retain];
+        searchCache = [[delegate typeSelectHelperSelectionStrings:self] retain];
     return searchCache;
 }
 
@@ -279,8 +279,8 @@
 
 - (void)typeSelectSearchTimeout:(id)sender;
 {
-    if([dataSource respondsToSelector:@selector(typeSelectHelper:updateSearchString:)])
-        [dataSource typeSelectHelper:self updateSearchString:nil];
+    if([delegate respondsToSelector:@selector(typeSelectHelper:updateSearchString:)])
+        [delegate typeSelectHelper:self updateSearchString:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self stopTimer];
     processing = NO;
@@ -316,13 +316,13 @@
 
 - (void)searchWithStickyMatch:(BOOL)sticky;
 {
-    BDSKPRECONDITION(dataSource != nil);
+    BDSKPRECONDITION(delegate != nil);
     
     if ([searchString length]) {
         NSUInteger selectedIndex, startIndex, foundIndex;
         
         if (cycleResults) {
-            selectedIndex = [dataSource typeSelectHelperCurrentlySelectedIndex:self];
+            selectedIndex = [delegate typeSelectHelperCurrentlySelectedIndex:self];
             if (selectedIndex >= [[self searchCache] count])
                 selectedIndex = NSNotFound;
         } else {
@@ -336,11 +336,11 @@
         foundIndex = [self indexOfMatchedItemAfterIndex:startIndex];
         
         if (foundIndex == NSNotFound) {
-            if ([dataSource respondsToSelector:@selector(typeSelectHelper:didFailToFindMatchForSearchString:)])
-                [dataSource typeSelectHelper:self didFailToFindMatchForSearchString:searchString];
+            if ([delegate respondsToSelector:@selector(typeSelectHelper:didFailToFindMatchForSearchString:)])
+                [delegate typeSelectHelper:self didFailToFindMatchForSearchString:searchString];
         } else if (foundIndex != selectedIndex) {
             // Avoid flashing a selection all over the place while you're still typing the thing you have selected
-            [dataSource typeSelectHelper:self selectItemAtIndex:foundIndex];
+            [delegate typeSelectHelper:self selectItemAtIndex:foundIndex];
         }
     }
 }

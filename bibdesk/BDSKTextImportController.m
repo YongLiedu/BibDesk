@@ -1473,7 +1473,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     [statusLine setStringValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"No field:", @"Status message"), [searchString fieldName]]];
 }
 
-- (NSArray *)tableView:(NSTableView *)tv typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
+- (NSArray *)tableView:(NSTableView *)tv typeSelectHelperSelectionStrings:(BDSKTypeSelectHelper *)typeSelectHelper{
     return fields;
 }
 

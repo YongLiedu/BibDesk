@@ -46,7 +46,7 @@
 - (void)tableViewInsertSpace:(NSTableView *)aTableView;
 - (void)tableViewInsertShiftSpace:(NSTableView *)aTableView;
 
-- (NSArray *)tableView:(NSTableView *)aTableView typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)aTypeSelectHelper;
+- (NSArray *)tableView:(NSTableView *)aTableView typeSelectHelperSelectionStrings:(BDSKTypeSelectHelper *)aTypeSelectHelper;
 - (void)tableView:(NSTableView *)aTableView typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString;
 - (void)tableView:(NSTableView *)aTableView typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper updateSearchString:(NSString *)searchString;
 
@@ -72,7 +72,7 @@
 @end
 
 
-@interface BDSKTableView : NSTableView <BDSKTypeSelectDataSource> {
+@interface BDSKTableView : NSTableView <BDSKTypeSelectDelegate> {
     BDSKTypeSelectHelper *typeSelectHelper;
     NSString *fontNamePreferenceKey;
     NSString *fontSizePreferenceKey;

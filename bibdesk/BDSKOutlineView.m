@@ -48,7 +48,7 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
 - (void)dealloc {
     [self setFontNamePreferenceKey:nil]; // this will also stop observing
     [self setFontSizePreferenceKey:nil];
-    [typeSelectHelper setDataSource:nil];
+    [typeSelectHelper setDelegate:nil];
     BDSKDESTROY(typeSelectHelper);
     [super dealloc];
 }
@@ -76,11 +76,11 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
 
 - (void)setTypeSelectHelper:(BDSKTypeSelectHelper *)newTypeSelectHelper {
     if (typeSelectHelper != newTypeSelectHelper) {
-        if ([typeSelectHelper dataSource] == self)
-            [typeSelectHelper setDataSource:nil];
+        if ([typeSelectHelper delegate] == self)
+            [typeSelectHelper setDelegate:nil];
         [typeSelectHelper release];
         typeSelectHelper = [newTypeSelectHelper retain];
-        [typeSelectHelper setDataSource:self];
+        [typeSelectHelper setDelegate:self];
     }
 }
 
@@ -226,7 +226,7 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
         [self scrollToBeginningOfDocument:self];
     } else if (eventChar == NSEndFunctionKey && (modifierFlags & ~NSFunctionKeyMask) == 0) {
         [self scrollToEndOfDocument:self];
-    } else if ([typeSelectHelper processKeyDownEvent:theEvent] == NO) {
+    } else if ([typeSelectHelper handleEvent:theEvent] == NO) {
         [super keyDown:theEvent];
     }
 }
@@ -510,9 +510,9 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
 
 #pragma mark SKTypeSelectHelper datasource protocol
 
-- (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)aTypeSelectHelper {
-    if ([[self delegate] respondsToSelector:@selector(outlineView:typeSelectHelperSelectionItems:)])
-        return [[self delegate] outlineView:self typeSelectHelperSelectionItems:aTypeSelectHelper];
+- (NSArray *)typeSelectHelperSelectionStrings:(BDSKTypeSelectHelper *)aTypeSelectHelper {
+    if ([[self delegate] respondsToSelector:@selector(outlineView:typeSelectHelperSelectionStrings:)])
+        return [[self delegate] outlineView:self typeSelectHelperSelectionStrings:aTypeSelectHelper];
     return nil;
 }
 

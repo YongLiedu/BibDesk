@@ -44,9 +44,9 @@
 
 @class BDSKTypeSelectHelper;
 
-@protocol BDSKTypeSelectDataSource <NSObject>
+@protocol BDSKTypeSelectDelegate <NSObject>
 
-- (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper;
+- (NSArray *)typeSelectHelperSelectionStrings:(BDSKTypeSelectHelper *)typeSelectHelper;
 - (NSUInteger)typeSelectHelperCurrentlySelectedIndex:(BDSKTypeSelectHelper *)typeSelectHelper;
 - (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper selectItemAtIndex:(NSUInteger)itemIndex;
 
@@ -59,7 +59,7 @@
 
 
 @interface BDSKTypeSelectHelper : NSObject <NSTextDelegate> {
-    id<BDSKTypeSelectDataSource> dataSource;
+    id<BDSKTypeSelectDelegate> delegate;
     BOOL cycleResults;
     BOOL matchPrefix;
     
@@ -69,8 +69,8 @@
     BOOL processing;
 }
 
-- (id<BDSKTypeSelectDataSource>)dataSource;
-- (void)setDataSource:(id<BDSKTypeSelectDataSource>)anObject;
+- (id<BDSKTypeSelectDelegate>)delegate;
+- (void)setDelegate:(id<BDSKTypeSelectDelegate>)anObject;
 
 - (BOOL)cyclesSimilarResults;
 - (void)setCyclesSimilarResults:(BOOL)newValue;
@@ -85,7 +85,7 @@
 
 - (void)rebuildTypeSelectSearchCache;
 
-- (BOOL)processKeyDownEvent:(NSEvent *)keyEvent;
+- (BOOL)handleEvent:(NSEvent *)keyEvent;
 - (void)searchWithEvent:(NSEvent *)keyEvent;
 - (void)repeatSearch;
 - (void)cancelSearch;

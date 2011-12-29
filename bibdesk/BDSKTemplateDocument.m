@@ -1229,7 +1229,7 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
     return NO;
 }
 
-- (NSArray *)tableView:(NSTableView *)tv typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)aTypeSelectHelper {
+- (NSArray *)tableView:(NSTableView *)tv typeSelectHelperSelectionStrings:(BDSKTypeSelectHelper *)aTypeSelectHelper {
     return [[self typeTemplates] valueForKey:@"pubType"];
 }
 

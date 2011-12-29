@@ -609,7 +609,7 @@
     [tableView reloadData];
 }
 
-- (NSArray *)tableView:(NSTableView *)tv typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)aTypeSelectHelper {
+- (NSArray *)tableView:(NSTableView *)tv typeSelectHelperSelectionStrings:(BDSKTypeSelectHelper *)aTypeSelectHelper {
     return [arrayController arrangedObjects];
 }
 
@@ -736,7 +736,7 @@
 }
 
 - (void)keyDown:(NSEvent *)event{
-    if ([typeSelectHelper processKeyDownEvent:event] == NO)
+    if ([typeSelectHelper handleEvent:event] == NO)
         [super keyDown:event];
 }
 

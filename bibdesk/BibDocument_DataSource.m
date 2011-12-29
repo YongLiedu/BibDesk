@@ -820,7 +820,7 @@
 }
 
 // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
-- (NSArray *)tableView:(NSTableView *)tv typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
+- (NSArray *)tableView:(NSTableView *)tv typeSelectHelperSelectionStrings:(BDSKTypeSelectHelper *)typeSelectHelper{
     if([tv isEqual:tableView]){    
         
         // Some users seem to expect that the currently sorted table column is used for typeahead;
@@ -1428,7 +1428,7 @@
 }
 
 // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
-- (NSArray *)outlineView:(NSOutlineView *)ov typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
+- (NSArray *)outlineView:(NSOutlineView *)ov typeSelectHelperSelectionStrings:(BDSKTypeSelectHelper *)typeSelectHelper{
     if ([ov isEqual:groupOutlineView]) {
         
         NSInteger i;
