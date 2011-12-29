@@ -127,19 +127,6 @@
     matchPrefix = newValue;
 }
 
-- (NSString *)searchString;
-{
-    return searchString;
-}
-
-- (void)setSearchString:(NSString *)newSearchString;
-{
-    if (searchString != newSearchString) {
-        [searchString release];
-        searchString = [newSearchString retain];
-    }
-}
-
 #pragma mark API
 
 - (void)rebuildTypeSelectSearchCache;
@@ -179,7 +166,8 @@
     
     // Append the new character to the search string
     [fieldEditor interpretKeyEvents:[NSArray arrayWithObject:keyEvent]];
-    [self setSearchString:[fieldEditor string]];
+    [searchString release];
+    searchString = [[fieldEditor string] retain];
     
     if ([delegate respondsToSelector:@selector(typeSelectHelper:updateSearchString:)])
         [delegate typeSelectHelper:self updateSearchString:searchString];

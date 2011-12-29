@@ -78,9 +78,6 @@
 - (BOOL)matchesPrefix;
 - (void)setMatchesPrefix:(BOOL)newValue;
     
-- (NSString *)searchString;
-- (void)setSearchString:(NSString *)newSearchString;
-    
 - (void)rebuildTypeSelectSearchCache;
 
 - (BOOL)handleEvent:(NSEvent *)keyEvent;
