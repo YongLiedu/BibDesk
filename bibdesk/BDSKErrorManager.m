@@ -221,9 +221,4 @@ static char BDSKErrorManagerObservationContext;
     }
 }
 
-- (BOOL)managesError:(BDSKErrorObject *)errObj;
-{
-    return [[errObj editor] manager] == self;
-}
-
 @end

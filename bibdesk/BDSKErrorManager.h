@@ -76,6 +76,4 @@
 - (void)removeEditor:(BDSKErrorEditor *)editor;
 - (void)removeClosedEditors;
 
-- (BOOL)managesError:(BDSKErrorObject *)errObj;
-
 @end
