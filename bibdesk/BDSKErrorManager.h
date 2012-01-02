@@ -54,8 +54,6 @@
 
 - (id)initWithDocument:(BibDocument *)aDocument;
 
-- (BOOL)isAllItems;
-
 - (BDSKErrorObjectController *)errorController;
 - (void)setErrorController:(BDSKErrorObjectController *)newController;
 

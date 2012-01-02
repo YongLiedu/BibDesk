@@ -258,7 +258,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
             [manager setSourceDocument:nil];
             if(shouldEdit)
                 [[manager mainEditor] showWindow:self];
-        }else if([manager sourceDocument] == nil && [manager isAllItems] == NO){
+        }else if([manager sourceDocument] == nil && manager != [BDSKErrorManager allItemsErrorManager]){
             [manager removeClosedEditors];
         }
     }
@@ -437,11 +437,12 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 @implementation BDSKFilteringArrayController
 
 - (NSArray *)arrangeObjects:(NSArray *)objects {
-    if(hideWarnings || filterManager){
+    BDSKErrorManager *manager = filterManager == [BDSKErrorManager allItemsErrorManager] ? nil : filterManager;
+    if(hideWarnings || manager){
         NSMutableArray *matchedObjects = [NSMutableArray arrayWithCapacity:[objects count]];
         
         for (id item in objects) {
-            if(filterManager && [filterManager managesError:item] == NO)
+            if(manager && manager != [[item editor] manager])
                 continue;
             if(hideWarnings && [item isIgnorableWarning])
                 continue;

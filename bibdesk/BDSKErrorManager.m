@@ -46,17 +46,15 @@
 
 static char BDSKErrorManagerObservationContext;
 
-@interface BDSKAllItemsErrorManager : BDSKErrorManager @end
-
-static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
-
-
 @implementation BDSKErrorManager 
 
 + (id)allItemsErrorManager;
 {
-    if(allItemsErrorManager == nil)
-        allItemsErrorManager = [[BDSKAllItemsErrorManager alloc] init];
+    static BDSKErrorManager *allItemsErrorManager = nil;
+    if(allItemsErrorManager == nil) {
+        allItemsErrorManager = [[BDSKErrorManager alloc] init];
+        [allItemsErrorManager setDocumentDisplayName:NSLocalizedString(@"All", @"Popup menu item for error window")];
+    }
     return allItemsErrorManager;
 }
 
@@ -71,6 +69,11 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
     return self;
 }
 
+- (id)init;
+{
+    return [self initWithDocument:nil];
+}
+
 - (void)dealloc;
 {
     [document removeObserver:self forKeyPath:@"fileURL"];
@@ -80,8 +83,6 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
     BDSKDESTROY(documentDisplayName);
     [super dealloc];
 }
-
-- (BOOL)isAllItems { return NO; }
 
 - (BDSKErrorObjectController *)errorController;
 {
@@ -224,22 +225,5 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
 {
     return [[errObj editor] manager] == self;
 }
-
-@end
-
-
-@implementation BDSKAllItemsErrorManager
-
-- (id)init;
-{
-    if(self = [super initWithDocument:nil]){
-        documentDisplayName = [NSLocalizedString(@"All", @"Popup menu item for error window") retain];
-    }
-    return self;
-}
-
-- (BOOL)isAllItems{ return YES; }
-
-- (BOOL)managesError:(BDSKErrorObject *)errObj{ return YES; }
 
 @end
