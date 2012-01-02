@@ -69,9 +69,6 @@
 - (void)addManager:(BDSKErrorManager *)manager;
 - (void)removeManager:(BDSKErrorManager *)manager;
 
-- (BDSKErrorEditor *)editorForDocument:(BibDocument *)document;
-- (BDSKErrorEditor *)editorForPasteDragData:(NSData *)data document:(BibDocument *)document;
-
 // called from the tableView doubleclick
 - (void)showEditorForErrorObject:(BDSKErrorObject *)errObj;
 // called to edit a failed paste/drag

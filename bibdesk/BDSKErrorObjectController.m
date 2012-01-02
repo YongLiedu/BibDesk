@@ -177,10 +177,14 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     [self removeObjectFromManagersAtIndex:[managers indexOfObject:manager]];
 }
 
-#pragma mark Getting managers and editors
+#pragma mark Getting editors
 
-- (BDSKErrorManager *)managerForDocument:(BibDocument *)document{
+- (BDSKErrorEditor *)editorForDocument:(BibDocument *)document pasteDragData:(NSData *)data{
+    BDSKASSERT(document != nil);
+    
+    BDSKErrorEditor *editor = nil;
     BDSKErrorManager *manager = nil;
+    
     for (manager in managers) {
         if(document == [manager sourceDocument])
             break;
@@ -192,30 +196,18 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
         [manager release];
     }
     
-    return manager;
-}
-
-- (BDSKErrorEditor *)editorForDocument:(BibDocument *)document{
-    BDSKErrorManager *manager = [self managerForDocument:document];
-    BDSKErrorEditor *editor = [manager mainEditor];
-    
-    if (editor == nil) {
-        editor = [(BDSKErrorEditor *)[BDSKErrorEditor alloc] initWithFileName:[[document fileURL] path]];
+    if (data) {
+        editor = [[BDSKErrorEditor alloc] initWithPasteDragData:data];
         [manager addEditor:editor];
         [editor release];
+    } else {
+        editor = [manager mainEditor];
+        if (editor == nil) {
+            editor = [(BDSKErrorEditor *)[BDSKErrorEditor alloc] initWithFileName:[[document fileURL] path]];
+            [manager addEditor:editor];
+            [editor release];
+        }
     }
-    
-    return editor;
-}
-
-- (BDSKErrorEditor *)editorForPasteDragData:(NSData *)data document:(BibDocument *)document{
-    BDSKASSERT(document != nil);
-    
-    BDSKErrorManager *manager = [self managerForDocument:document];
-    
-    BDSKErrorEditor *editor = [[BDSKErrorEditor alloc] initWithPasteDragData:data];
-    [manager addEditor:editor];
-    [editor release];
     
     return editor;
 }
@@ -367,8 +359,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 - (void)endObservingErrorsForDocument:(BibDocument *)document pasteDragData:(NSData *)data {
     if([currentErrors count]){
         if(document != nil){ // this should happen only for temporary author objects, which we ignore as they don't belong to any document
-            id editor = data ? [self editorForPasteDragData:data document:document] : [self editorForDocument:document];
-            [currentErrors setValue:editor forKey:@"editor"];
+            [currentErrors setValue:[self editorForDocument:document pasteDragData:data] forKey:@"editor"];
             [[self mutableArrayValueForKey:@"errors"] addObjectsFromArray:currentErrors];
             if([self isWindowVisible] == NO && (handledNonIgnorableError || [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShowWarningsKey]))
                 [self showWindow:self];
