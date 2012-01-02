@@ -189,11 +189,11 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
     return editors;
 }
 
-- (void)addEditor:(BDSKErrorEditor *)editor isMain:(BOOL)isMain;
+- (void)addEditor:(BDSKErrorEditor *)editor;
 {
     [editor setManager:self];
     [editors addObject:editor];
-    if(isMain)
+    if([editor isPasteDrag] == NO)
         mainEditor = editor;
 }
 

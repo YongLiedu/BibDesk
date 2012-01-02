@@ -74,7 +74,7 @@
 
 - (NSArray *)editors;
 
-- (void)addEditor:(BDSKErrorEditor *)editor isMain:(BOOL)isMain;
+- (void)addEditor:(BDSKErrorEditor *)editor;
 - (void)removeEditor:(BDSKErrorEditor *)editor;
 - (void)removeClosedEditors;
 
