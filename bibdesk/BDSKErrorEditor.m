@@ -195,7 +195,7 @@ static char BDSKErrorEditorObservationContext;
         if(object == manager && [keyPath isEqualToString:@"displayName"]){
             [self updateDisplayName];
             
-            NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Edit Paste/Drag", @"Partial window title") : NSLocalizedString(@"Edit Source", @"Partial window title");
+            NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Paste/Drag Data", @"Partial window title") : NSLocalizedString(@"Source Data", @"Partial window title");
             [[self window] setTitle:[NSString stringWithFormat:@"%@: %@", prefix, [manager displayName]]];
         }
     } else {
