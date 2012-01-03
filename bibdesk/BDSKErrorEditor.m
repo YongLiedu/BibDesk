@@ -112,7 +112,7 @@ static char BDSKErrorEditorObservationContext;
 
     [self loadFile:self];
     
-    NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Edit Paste/Drag", @"Partial window title") : NSLocalizedString(@"Edit Source", @"Partial window title");
+    NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Paste/Drag Data", @"Partial window title") : NSLocalizedString(@"Source Data", @"Partial window title");
     
     BDSKASSERT(fileName);
     [[self window] setRepresentedFilename:fileName];
