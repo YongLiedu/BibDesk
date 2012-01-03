@@ -385,33 +385,34 @@ typedef struct _BDSKSharingClientFlags {
 // this can be called from any thread
 - (NSData *)authenticationDataForComponents:(NSArray *)components;
 {
-    OSMemoryBarrier();
-    if(flags.needsAuthentication == 0)
-        return [[NSData data] sha1Signature];
-    
     NSData *password = nil;
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.canceledAuthentication);
     
     OSMemoryBarrier();
-    if(flags.authenticationFailed == 0)
-        password = [[BDSKPasswordController passwordForKeychainServiceName:[[self class] keychainServiceNameWithComputerName:[service name]]] sha1Signature];
-    
-    if(password == nil && [self shouldKeepRunning]){   
+    if(flags.needsAuthentication == 0) {
+        password = [NSData data];
+    } else {
+        OSAtomicCompareAndSwap32Barrier(1, 0, &flags.canceledAuthentication);
         
-        // run the prompt on the main thread
-        password = [([NSThread isMainThread] ? self : [self serverOnMainThread]) runPasswordPrompt];
+        OSMemoryBarrier();
+        if(flags.authenticationFailed == 0)
+            password = [BDSKPasswordController passwordForKeychainServiceName:[[self class] keychainServiceNameWithComputerName:[service name]]];
         
-        // retry from the keychain
-        if (password){
-            // assume we succeeded; the exception handler for the connection will change it back if we fail again
-            OSAtomicCompareAndSwap32Barrier(1, 0, &flags.authenticationFailed);
-        }else{
-            OSAtomicCompareAndSwap32Barrier(0, 1, &flags.canceledAuthentication);
+        if(password == nil && [self shouldKeepRunning]){   
+            
+            // run the prompt on the main thread
+            password = [([NSThread isMainThread] ? self : [self serverOnMainThread]) runPasswordPrompt];
+            
+            // retry from the keychain
+            if (password){
+                // assume we succeeded; the exception handler for the connection will change it back if we fail again
+                OSAtomicCompareAndSwap32Barrier(1, 0, &flags.authenticationFailed);
+            }else{
+                OSAtomicCompareAndSwap32Barrier(0, 1, &flags.canceledAuthentication);
+            }
         }
     }
-    
     // doc says we're required to return empty NSData instead of nil
-    return password ?: [NSData data];
+    return [password sha1Signature] ?: [NSData data];
 }
 
 // monitor the TXT record in case the server changes password requirements

@@ -40,7 +40,6 @@
 
 #import "BDSKPasswordController.h"
 #import <Security/Security.h>
-#import "NSData_BDSKExtensions.h"
 
 
 @implementation BDSKPasswordController
@@ -110,7 +109,7 @@
     
     if (password == nil)
         return nil;
-    return [[password dataUsingEncoding:NSUTF8StringEncoding] sha1Signature];
+    return [password dataUsingEncoding:NSUTF8StringEncoding];
 }
 
 + (NSData *)runModalPanelForKeychainServiceName:(NSString *)name message:(NSString *)status {
