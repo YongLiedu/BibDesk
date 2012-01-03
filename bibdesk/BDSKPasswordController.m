@@ -61,7 +61,7 @@
     return pwData;
 }
 
-+ (BOOL)addOrModifyPassword:(NSString *)password name:(NSString *)name {
++ (BOOL)addOrModifyPassword:(NSString *)password forKeychainServiceName:(NSString *)name {
     // default is to use current user's username
     const char *userNameCString = [NSUserName() UTF8String];
     
@@ -103,7 +103,7 @@
         NSAssert(name != nil, @"name is nil");
         password = [[[passwordField stringValue] retain] autorelease];
         NSParameterAssert(password != nil);
-        [[self class] addOrModifyPassword:password name:name];
+        [[self class] addOrModifyPassword:password forKeychainServiceName:name];
     }
     [[self window] orderOut:self];    
     

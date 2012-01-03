@@ -48,7 +48,7 @@
 
 + (NSData *)passwordForKeychainServiceName:(NSString *)name;
 
-+ (BOOL)addOrModifyPassword:(NSString *)password name:(NSString *)name;
++ (BOOL)addOrModifyPassword:(NSString *)password forKeychainServiceName:(NSString *)name;
 
 + (NSData *)runModalPanelForKeychainServiceName:(NSString *)aName message:(NSString *)status;
 
