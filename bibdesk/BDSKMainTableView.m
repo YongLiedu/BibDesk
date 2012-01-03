@@ -789,11 +789,8 @@ enum {
 
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
     NSColor *color = [self objectValue];
-    if ([color respondsToSelector:@selector(drawSwatchInRect:)]) {
-        NSRect rect, ignored;
-        rect = BDSKShrinkRect(cellFrame, 1.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
-        [color drawSwatchInRect:rect];
-    }
+    if ([color respondsToSelector:@selector(drawSwatchInRect:)])
+        [color drawSwatchInRect:BDSKShrinkRect(cellFrame, 1.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge)];
 }
 
 @end

@@ -125,7 +125,6 @@ static id nonNullObjectValueForKey(id object, id stringObject, NSString *key) {
 }
 
 - (NSRect)textRectForBounds:(NSRect)aRect {
-    NSRect textRect = aRect;
     CGFloat border;
     
     if ([self isBordered])
