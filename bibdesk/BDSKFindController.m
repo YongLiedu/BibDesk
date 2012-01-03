@@ -228,7 +228,7 @@ enum {
 - (BOOL)commitEditing {
     id firstResponder = [[self window] firstResponder];
     NSTextView *editor = nil;
-    NSRange selection;
+    NSRange selection = {0, 0};
     if ([firstResponder isKindOfClass:[NSTextView class]]) {
         editor = firstResponder;
         selection = [editor selectedRange];
