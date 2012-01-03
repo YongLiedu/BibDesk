@@ -394,7 +394,7 @@ typedef struct _BDSKSharingClientFlags {
     
     OSMemoryBarrier();
     if(flags.authenticationFailed == 0)
-        password = [BDSKPasswordController passwordHashedForKeychainServiceName:[[self class] keychainServiceNameWithComputerName:[service name]]];
+        password = [[BDSKPasswordController passwordForKeychainServiceName:[[self class] keychainServiceNameWithComputerName:[service name]]] sha1Signature];
     
     if(password == nil && [self shouldKeepRunning]){   
         

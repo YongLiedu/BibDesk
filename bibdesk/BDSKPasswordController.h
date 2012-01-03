@@ -47,7 +47,6 @@
 }
 
 + (NSData *)passwordForKeychainServiceName:(NSString *)name;
-+ (NSData *)passwordHashedForKeychainServiceName:(NSString *)name;
 
 + (BOOL)addOrModifyPassword:(NSString *)password name:(NSString *)name userName:(NSString *)userName;
 

@@ -681,7 +681,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 {
     BOOL status = YES;
     if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKSharingRequiresPasswordKey]){
-        NSData *myPasswordHashed = [BDSKPasswordController passwordHashedForKeychainServiceName:BDSKServiceNameForKeychain];
+        NSData *myPasswordHashed = [[BDSKPasswordController passwordForKeychainServiceName:BDSKServiceNameForKeychain] sha1Signature];
         status = [authenticationData isEqual:myPasswordHashed];
     }
     return status;

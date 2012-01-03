@@ -62,11 +62,6 @@
     return pwData;
 }
 
-// hash it for comparison, since we hash before putting it in the TXT
-+ (NSData *)passwordHashedForKeychainServiceName:(NSString *)name {
-    return [[self passwordForKeychainServiceName:name] sha1Signature];
-}
-
 + (BOOL)addOrModifyPassword:(NSString *)password name:(NSString *)name userName:(NSString *)userName {
     // default is to use current user's username
     const char *userNameCString = userName == nil ? [NSUserName() UTF8String] : [userName UTF8String];
