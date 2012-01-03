@@ -100,7 +100,7 @@
 
 - (void)defaultsDidRevert {
     // always clear the password, as that's not set in our prefs, and always send the notifications
-    [BDSKPasswordController addOrModifyPassword:@"" name:BDSKServiceNameForKeychain userName:nil];
+    [BDSKPasswordController addOrModifyPassword:@"" name:BDSKServiceNameForKeychain];
     if ([sud boolForKey:BDSKShouldLookForSharedFilesKey])
         [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
     else
@@ -188,7 +188,7 @@
 
 - (IBAction)changePassword:(id)sender
 {
-    if ([BDSKPasswordController addOrModifyPassword:[sender stringValue] name:BDSKServiceNameForKeychain userName:nil])
+    if ([BDSKPasswordController addOrModifyPassword:[sender stringValue] name:BDSKServiceNameForKeychain])
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingPasswordChangedNotification object:nil];
 }
 

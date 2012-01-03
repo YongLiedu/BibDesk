@@ -61,9 +61,9 @@
     return pwData;
 }
 
-+ (BOOL)addOrModifyPassword:(NSString *)password name:(NSString *)name userName:(NSString *)userName {
++ (BOOL)addOrModifyPassword:(NSString *)password name:(NSString *)name {
     // default is to use current user's username
-    const char *userNameCString = userName == nil ? [NSUserName() UTF8String] : [userName UTF8String];
+    const char *userNameCString = [NSUserName() UTF8String];
     
     NSParameterAssert(name != nil);
     const char *nameCString = [name UTF8String];
@@ -103,7 +103,7 @@
         NSAssert(name != nil, @"name is nil");
         password = [[[passwordField stringValue] retain] autorelease];
         NSParameterAssert(password != nil);
-        [[self class] addOrModifyPassword:password name:name userName:nil];
+        [[self class] addOrModifyPassword:password name:name];
     }
     [[self window] orderOut:self];    
     
