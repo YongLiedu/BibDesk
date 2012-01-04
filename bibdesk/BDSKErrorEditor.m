@@ -424,7 +424,8 @@ static inline Boolean isCommentOrQuotedColor(NSColor *color) { return [color isE
     UniChar ch;
     CFIndex lbmark, atmark, percmark;
     
-    NSColor *braceColor = [NSColor blueColor];
+    NSColor *quoteColor = [NSColor blueColor];
+    NSColor *delimColor = [NSColor redColor];
     NSColor *typeColor = [NSColor purpleColor];
     NSColor *quotedColor = [NSColor brownColor];
     NSColor *commentColor = [NSColor grayColor];
@@ -442,7 +443,7 @@ static inline Boolean isCommentOrQuotedColor(NSColor *color) { return [color isE
             while(++cnt < length){
                 ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
                 if(isLeftBrace(ch)){
-                    SetColor(braceColor, cnt, 1);
+                    SetColor(delimColor, cnt, 1);
                     break;
                 }
             }
@@ -450,7 +451,7 @@ static inline Boolean isCommentOrQuotedColor(NSColor *color) { return [color isE
             // in fact whitespace is allowed at the end of "comment", but harder to check
             if(cnt - atmark == 8 && CFStringCompareWithOptions(string, commentString, CFRangeMake(editedRange.location + atmark + 1, 7), kCFCompareCaseInsensitive) == kCFCompareEqualTo){
                 braceDepth = 1;
-                SetColor(braceColor, cnt, 1)
+                SetColor(delimColor, cnt, 1)
                 lbmark = cnt + 1;
                 while(++cnt < length){
                     if(isBackslash(ch)){ // ignore escaped braces
@@ -461,7 +462,7 @@ static inline Boolean isCommentOrQuotedColor(NSColor *color) { return [color isE
                     if(isRightBrace(ch)){
                         braceDepth--;
                         if(braceDepth == 0){
-                            SetColor(braceColor, cnt, 1);
+                            SetColor(delimColor, cnt, 1);
                             break;
                         }
                     } else if(isLeftBrace(ch)){
@@ -482,7 +483,7 @@ static inline Boolean isCommentOrQuotedColor(NSColor *color) { return [color isE
             SetColor(commentColor, percmark, cnt - percmark);
         }else if(isLeftBrace(ch)){
             braceDepth = 1;
-            SetColor(braceColor, cnt, 1)
+            SetColor(quoteColor, cnt, 1)
             lbmark = cnt + 1;
             while(++cnt < length){
                 if(isBackslash(ch)){ // ignore escaped braces
@@ -493,7 +494,7 @@ static inline Boolean isCommentOrQuotedColor(NSColor *color) { return [color isE
                 if(isRightBrace(ch)){
                     braceDepth--;
                     if(braceDepth == 0){
-                        SetColor(braceColor, cnt, 1);
+                        SetColor(quoteColor, cnt, 1);
                         break;
                     }
                 } else if(isLeftBrace(ch)){
@@ -503,7 +504,7 @@ static inline Boolean isCommentOrQuotedColor(NSColor *color) { return [color isE
             SetColor(quotedColor, lbmark, cnt - lbmark);
         }else if(isDoubleQuote(ch)){
             braceDepth = 1;
-            SetColor(braceColor, cnt, 1)
+            SetColor(quoteColor, cnt, 1)
             lbmark = cnt + 1;
             while(++cnt < length){
                 if(isBackslash(ch)){ // ignore escaped braces
@@ -513,13 +514,13 @@ static inline Boolean isCommentOrQuotedColor(NSColor *color) { return [color isE
                 ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
                 if(isDoubleQuote(ch)){
                     braceDepth--;
-                    SetColor(braceColor, cnt, 1);
+                    SetColor(quoteColor, cnt, 1);
                     break;
                 }
             }
             SetColor(quotedColor, lbmark, cnt - lbmark);
         }else if(isRightBrace(ch)){
-            SetColor(braceColor, cnt, 1);
+            SetColor(delimColor, cnt, 1);
         }else if(isHash(ch)){
             SetColor(hashColor, cnt, 1);
         }
