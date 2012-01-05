@@ -94,6 +94,7 @@
 		CE11B0060AE8FD53008C47AC /* scriptGroup.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE11B0050AE8FD53008C47AC /* scriptGroup.tiff */; };
 		CE129A180B44088900416D19 /* BDSKEntrezGroupServer.m in Sources */ = {isa = PBXBuildFile; fileRef = CE129A160B44088900416D19 /* BDSKEntrezGroupServer.m */; };
 		CE12A1700B44AED200416D19 /* SearchGroupServers.plist in Resources */ = {isa = PBXBuildFile; fileRef = CE12A16F0B44AED100416D19 /* SearchGroupServers.plist */; };
+		CE15198214B62E47003AE698 /* BDSKLineNumberView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE15198014B62E47003AE698 /* BDSKLineNumberView.m */; };
 		CE15C0D80AA5B9A3002C555F /* BDSKErrorManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE15C0D60AA5B9A3002C555F /* BDSKErrorManager.m */; };
 		CE15E6230FCC28B1009FCBF1 /* BibDocument_UI.m in Sources */ = {isa = PBXBuildFile; fileRef = CE15E6210FCC28B1009FCBF1 /* BibDocument_UI.m */; };
 		CE1782FC1158EFCB00B2EBDF /* BookmarkSheet.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE1782FB1158EFCB00B2EBDF /* BookmarkSheet.xib */; };
@@ -890,6 +891,8 @@
 		CE129A150B44088900416D19 /* BDSKEntrezGroupServer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKEntrezGroupServer.h; sourceTree = "<group>"; };
 		CE129A160B44088900416D19 /* BDSKEntrezGroupServer.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKEntrezGroupServer.m; sourceTree = "<group>"; };
 		CE12A16F0B44AED100416D19 /* SearchGroupServers.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = SearchGroupServers.plist; sourceTree = "<group>"; };
+		CE15197F14B62E47003AE698 /* BDSKLineNumberView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKLineNumberView.h; sourceTree = "<group>"; };
+		CE15198014B62E47003AE698 /* BDSKLineNumberView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKLineNumberView.m; sourceTree = "<group>"; };
 		CE15C0D50AA5B9A3002C555F /* BDSKErrorManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKErrorManager.h; sourceTree = "<group>"; };
 		CE15C0D60AA5B9A3002C555F /* BDSKErrorManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKErrorManager.m; sourceTree = "<group>"; };
 		CE15E6200FCC28B1009FCBF1 /* BibDocument_UI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BibDocument_UI.h; sourceTree = "<group>"; };
@@ -2067,6 +2070,7 @@
 				CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */,
 				CE33D61A136AB8A700ACE924 /* BDSKImportTextView.m */,
 				F92405010BC5856900672839 /* BDSKLevelIndicatorCell.m */,
+				CE15198014B62E47003AE698 /* BDSKLineNumberView.m */,
 				CEF536691192EFE400027C3C /* BDSKNotesOutlineView.m */,
 				CE62E0BE0F4C4A5500BDF01E /* BDSKOutlineView.m */,
 				F941B7E908AA574200F04ECD /* BDSKOverlayWindow.m */,
@@ -2664,6 +2668,7 @@
 				CE24B35210C3E9E100818EDF /* BDSKLastImportGroup.h */,
 				F92405000BC5856900672839 /* BDSKLevelIndicatorCell.h */,
 				CE24B33210C3E13900818EDF /* BDSKLibraryGroup.h */,
+				CE15197F14B62E47003AE698 /* BDSKLineNumberView.h */,
 				F911D7100CFE90050009C77B /* BDSKLinkedFile.h */,
 				F9201DFF0B72504C007E45BB /* BDSKMacro.h */,
 				CE3B5E7A09CEDE470017D339 /* BDSKMacroResolver.h */,
@@ -3789,6 +3794,7 @@
 				CE0CD73C1459812300488DE1 /* NSAttributedString+Scripting.m in Sources */,
 				CEA498A21481183600AB81C5 /* BDSKAddressTextField.m in Sources */,
 				CEA498A61481185100AB81C5 /* BDSKAddressTextFieldCell.m in Sources */,
+				CE15198214B62E47003AE698 /* BDSKLineNumberView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

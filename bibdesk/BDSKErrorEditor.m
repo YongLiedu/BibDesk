@@ -45,6 +45,7 @@
 #import "BDSKAppController.h"
 #import "BDSKStringEncodingManager.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "BDSKLineNumberView.h"
 
 static char BDSKErrorEditorObservationContext;
 
@@ -108,8 +109,15 @@ static char BDSKErrorEditorObservationContext;
     [syntaxHighlightCheckbox setState:NSOnState];
     
     // faster layout if it's not antialiased, and fixed pitch makes pretty-printed files look right
-    [textView setFont:[NSFont userFixedPitchFontOfSize:10.0]];
-
+    [textView setFont:[NSFont userFixedPitchFontOfSize:0.0]];
+    
+    NSScrollView *scrollView = [textView enclosingScrollView];
+    BDSKLineNumberView *lineNumberView = [[[BDSKLineNumberView alloc] initWithScrollView:scrollView orientation:NSVerticalRuler] autorelease];
+    [lineNumberView setClientView:textView];
+    [scrollView setVerticalRulerView:lineNumberView];
+    [scrollView setHasVerticalRuler:YES];
+    [scrollView setRulersVisible:YES];
+    
     [self loadFile:self];
     
     NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Paste/Drag Data", @"Partial window title") : NSLocalizedString(@"Source Data", @"Partial window title");
