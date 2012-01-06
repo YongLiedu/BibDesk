@@ -40,7 +40,7 @@
 
 @class BDSKErrorEditor, BibItem;
 
-@interface BDSKErrorObject : NSObject {
+@interface BDSKErrorObject : NSObject <NSCopying> {
 	BDSKErrorEditor *editor;
 	BibItem *publication;
     

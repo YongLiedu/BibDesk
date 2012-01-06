@@ -54,6 +54,16 @@
     return self;
 }
 
+- (id)copyWithZone:(NSZone *)zone {
+    id error = [[[self class] alloc] init];
+    [error setErrorClassName:errorClassName];
+    [error setFileName:fileName];
+    [error setLineNumber:lineNumber];
+    [error setErrorMessage:errorMessage];
+    [error setIgnorableWarning:isIgnorableWarning];
+    return error;
+}
+
 - (void)dealloc {
     [fileName release];
     [editor release];

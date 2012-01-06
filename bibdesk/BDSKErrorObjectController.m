@@ -359,7 +359,9 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 - (void)endObservingErrorsForDocument:(BibDocument *)document pasteDragData:(NSData *)data {
     if([currentErrors count]){
         if(document != nil){ // this should happen only for temporary author objects, which we ignore as they don't belong to any document
-            [currentErrors setValue:[self editorForDocument:document pasteDragData:data] forKey:@"editor"];
+            BDSKErrorEditor *editor = [self editorForDocument:document pasteDragData:data];
+            [editor setErrors:currentErrors];
+            [currentErrors setValue:editor forKey:@"editor"];
             [[self mutableArrayValueForKey:@"errors"] addObjectsFromArray:currentErrors];
             if([self isWindowVisible] == NO && (handledNonIgnorableError || [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShowWarningsKey]))
                 [self showWindow:self];

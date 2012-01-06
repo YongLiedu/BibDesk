@@ -38,8 +38,11 @@
 
 #import "BDSKLineNumberView.h"
 #import "NSInvocation_BDSKExtensions.h"
+#import "NSImage_BDSKExtensions.h"
+#import "BDSKErrorObject.h"
 
 #define DEFAULT_THICKNESS   22.0
+#define MARKER_THICKNESS    12.0
 #define RULER_MARGIN        4.0
 
 @implementation BDSKLineNumberView
@@ -57,6 +60,8 @@ static NSDictionary *lineNumberAttributes = nil;
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     BDSKDESTROY(lineCharacterIndexes);
+    if (errorMarkers) NSFreeMapTable(errorMarkers);
+    errorMarkers = nil;
     [super dealloc];
 }
 
@@ -87,11 +92,50 @@ static NSDictionary *lineNumberAttributes = nil;
     BDSKDESTROY(lineCharacterIndexes);
 }
 
+- (void)setMarkers:(NSArray *)markers {
+    [super setMarkers:markers];
+    if (errorMarkers)
+        NSResetMapTable(errorMarkers);
+    else
+        errorMarkers = NSCreateMapTable(NSIntegerMapKeyCallBacks, NSObjectMapValueCallBacks, 0);
+    for (NSRulerMarker *marker in markers) {
+        id object = [marker representedObject];
+        if ([object isKindOfClass:[BDSKErrorObject class]]) {
+            NSInteger line = [object lineNumber];
+            if (line > 0)
+                NSMapInsert(errorMarkers, (const void *)(line - 1), marker);
+        }
+    }
+}
+
+- (void)addMarker:(NSRulerMarker *)marker {
+    [super addMarker:marker];
+    id object = [marker representedObject];
+    if ([object isKindOfClass:[BDSKErrorObject class]]) {
+        NSInteger line = [object lineNumber];
+        if (line > 0) {
+            if (errorMarkers == nil)
+                errorMarkers = NSCreateMapTable(NSIntegerMapKeyCallBacks, NSObjectMapValueCallBacks, 0);
+            NSMapInsert(errorMarkers, (const void *)(line - 1), marker);
+        }
+    }
+}
+
+- (void)removeMarker:(NSRulerMarker *)marker {
+    [super removeMarker:marker];
+    id object = [marker representedObject];
+    if (errorMarkers && [object isKindOfClass:[BDSKErrorObject class]]) {
+        NSInteger line = [object lineNumber];
+        if (line > 0)
+            NSMapRemove(errorMarkers, (const void *)(line - 1));
+    }
+}
+
 static inline CGFloat ruleThicknessForLineCount(NSUInteger count) {
     NSUInteger i = (NSUInteger)log10(count) + 1;
     NSMutableString *string = [NSMutableString string];
     while (i-- > 0) [string appendString:@"0"];
-    return ceilf(fmax(DEFAULT_THICKNESS, [string sizeWithAttributes:lineNumberAttributes].width + RULER_MARGIN * 2));
+    return ceilf(fmax(DEFAULT_THICKNESS, [string sizeWithAttributes:lineNumberAttributes].width + RULER_MARGIN + MARKER_THICKNESS));
 }
 
 static NSPointerArray *createLineCharacterIndexesForString(NSString *string) {
@@ -148,7 +192,6 @@ static NSPointerArray *createLineCharacterIndexesForString(NSString *string) {
 
 - (void)drawHashMarksAndLabelsInRect:(NSRect)aRect {
     id view = [self clientView];
-	NSRect bounds = NSInsetRect([self bounds], RULER_MARGIN, 0.0);
 	
     if ([view isKindOfClass:[NSTextView class]]) {
         NSLayoutManager *lm = [view layoutManager];
@@ -158,13 +201,18 @@ static NSPointerArray *createLineCharacterIndexesForString(NSString *string) {
         NSRange nullRange = NSMakeRange(NSNotFound, 0);
         NSString *label;
         NSRectArray rects;
-        CGFloat offset = [view textContainerInset].height - NSMinY(visibleRect);
+        CGFloat offsetX = NSMaxX([self bounds]) - RULER_MARGIN;
+        CGFloat offsetY = [view textContainerInset].height - NSMinY(visibleRect);
         NSSize labelSize;
 		NSPointerArray *lines = [self lineCharacterIndexes];
         NSUInteger rectCount, i, line, count = [lines count];
+        NSRulerMarker *marker;
+        NSRect rect;
         
         // one extra for any newline at the end, which doesn't have a glyph
         range.length++;
+        
+        [self removeAllToolTips];
         
         for (line = [self lineForCharacterIndex:range.location]; line < count; line++) {
             i = (NSUInteger)[lines pointerAtIndex:line];
@@ -172,9 +220,15 @@ static NSPointerArray *createLineCharacterIndexesForString(NSString *string) {
             if (NSLocationInRange(i, range)) {
                 rects = [lm rectArrayForCharacterRange:NSMakeRange(i, 0) withinSelectedCharacterRange:nullRange inTextContainer:container rectCount:&rectCount];
                 if (rectCount > 0) {
+                    if (errorMarkers && (marker = NSMapGet(errorMarkers, (const void *)line))) {
+                        rect = NSMakeRect(1.0, offsetY + NSMidY(rects[0]) - 0.5 * MARKER_THICKNESS, MARKER_THICKNESS, MARKER_THICKNESS);
+                        [[marker image] drawFlipped:[self isFlipped] inRect:rect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+                        [self addToolTipRect:rect owner:[(BDSKErrorObject *)[marker representedObject] errorMessage] userData:NULL];
+                    }
                     label = [NSString stringWithFormat:@"%lu", (unsigned long)(line + 1)];
                     labelSize = [label sizeWithAttributes:lineNumberAttributes];
-                    [label drawInRect:NSMakeRect(NSMaxX(bounds) - labelSize.width, offset + NSMidY(rects[0]) - 0.5 * labelSize.height, NSWidth(bounds), NSHeight(rects[0])) withAttributes:lineNumberAttributes];
+                    rect = NSMakeRect(offsetX - labelSize.width, offsetY + NSMidY(rects[0]) - 0.5 * labelSize.height, labelSize.width, labelSize.height);
+                    [label drawInRect:rect withAttributes:lineNumberAttributes];
                 }
             }
 			if (i > NSMaxRange(range))
@@ -182,5 +236,9 @@ static NSPointerArray *createLineCharacterIndexesForString(NSString *string) {
         }
     }
 }
+
+- (void)drawMarkersInRect:(NSRect)aRect {}
+
+- (void)mouseDown:(NSEvent *)theEvent {}
 
 @end

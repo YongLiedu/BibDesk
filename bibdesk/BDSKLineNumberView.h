@@ -41,5 +41,6 @@
 
 @interface BDSKLineNumberView : NSRulerView {
     NSPointerArray *lineCharacterIndexes;
+    NSMapTable *errorMarkers;
 }
 @end

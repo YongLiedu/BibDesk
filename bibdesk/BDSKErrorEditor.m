@@ -46,6 +46,7 @@
 #import "BDSKStringEncodingManager.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKLineNumberView.h"
+#import "BDSKErrorObject.h"
 
 static char BDSKErrorEditorObservationContext;
 
@@ -59,6 +60,7 @@ static char BDSKErrorEditorObservationContext;
 {
     if(self = [super init]){
         manager = nil;
+        errors = nil;
         fileName = [aFileName retain];
         displayName = [[fileName lastPathComponent] retain];
         data = [aData copy];
@@ -87,6 +89,7 @@ static char BDSKErrorEditorObservationContext;
 - (void)dealloc;
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    BDSKDESTROY(errors);
     BDSKDESTROY(fileName);
     BDSKDESTROY(displayName);
     BDSKDESTROY(data);
@@ -119,6 +122,8 @@ static char BDSKErrorEditorObservationContext;
     [scrollView setRulersVisible:YES];
     
     [self loadFile:self];
+    
+    [self updateErrorMarkers];
     
     NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Paste/Drag Data", @"Partial window title") : NSLocalizedString(@"Source Data", @"Partial window title");
     
@@ -165,6 +170,20 @@ static char BDSKErrorEditorObservationContext;
         [self updateDisplayName];
         if(manager)
             [manager addObserver:self forKeyPath:@"displayName" options:0 context:&BDSKErrorEditorObservationContext];
+    }
+}
+
+- (NSArray *)errors;
+{
+    return errors;
+}
+
+- (void)setErrors:(NSArray *)newErrors;
+{
+    if (errors != newErrors) {
+        [errors release];
+        errors = [[NSArray alloc] initWithArray:newErrors copyItems:YES];
+        [self updateErrorMarkers];
     }
 }
 
@@ -219,6 +238,22 @@ static char BDSKErrorEditorObservationContext;
 - (BOOL)isPasteDrag;
 {
     return isPasteDrag;
+}
+
+- (void)updateErrorMarkers;
+{
+    NSRulerView *ruler = [[textView enclosingScrollView] verticalRulerView];
+    if (ruler) {
+        NSMutableArray *markers = [NSMutableArray arrayWithCapacity:[errors count]];
+        for (BDSKErrorObject *error in errors) {
+            NSImage *image = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode([error isIgnorableWarning] ? kAlertCautionIcon : kAlertStopIcon)];
+            NSRulerMarker *marker = [[NSRulerMarker alloc] initWithRulerView:ruler markerLocation:0.0 image:image imageOrigin:NSZeroPoint];
+            [marker setRepresentedObject:error];
+            [markers addObject:marker];
+            [marker release];
+        }
+        [ruler setMarkers:markers];
+    }
 }
 
 #pragma mark Editing

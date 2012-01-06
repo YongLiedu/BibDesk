@@ -47,6 +47,7 @@
     IBOutlet NSButton *reloadButton;
     IBOutlet NSTextField *lineNumberField;
     BDSKErrorManager *manager;
+    NSArray *errors;
     NSString *fileName;
     NSString *displayName;
     NSData *data;
@@ -66,6 +67,9 @@
 - (BDSKErrorManager *)manager;
 - (void)setManager:(BDSKErrorManager *)newManager;
 
+- (NSArray *)errors;
+- (void)setErrors:(NSArray *)newErrors;
+
 - (NSString *)fileName;
 - (void)setFileName:(NSString *)newFileName;
 - (NSString *)displayName;
@@ -73,6 +77,8 @@
 - (BOOL)isPasteDrag;
 
 - (void)updateDisplayName;
+
+- (void)updateErrorMarkers;
 
 - (IBAction)loadFile:(id)sender;
 - (IBAction)reopenDocument:(id)sender;
