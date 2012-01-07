@@ -33,11 +33,8 @@
 			<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 		</object>
 		<object class="NSMutableDictionary" key="IBDocument.Metadata">
-			<bool key="EncodedWithXMLCoder">YES</bool>
-			<object class="NSArray" key="dict.sortedKeys" id="0">
-				<bool key="EncodedWithXMLCoder">YES</bool>
-			</object>
-			<reference key="dict.values" ref="0"/>
+			<string key="NS.key.0">PluginDependencyRecalculationVersion</string>
+			<integer value="1" key="NS.object.0"/>
 		</object>
 		<object class="NSMutableArray" key="IBDocument.RootObjects" id="893040680">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -267,7 +264,7 @@
 						<object class="NSButtonCell" key="NSCell" id="515188478">
 							<int key="NSCellFlags">67239424</int>
 							<int key="NSCellFlags2">0</int>
-							<string key="NSContents">Felder für Anmerkung und Abstract am Ende der Einträge speichern</string>
+							<string key="NSContents">Felder für Anmerkung und Zusammenfassung am Ende der Einträge speichern</string>
 							<reference key="NSSupport" ref="1013637940"/>
 							<reference key="NSControlView" ref="842864264"/>
 							<int key="NSButtonFlags">1211912703</int>
@@ -371,7 +368,7 @@
 						<object class="NSButtonCell" key="NSCell" id="75214774">
 							<int key="NSCellFlags">67239424</int>
 							<int key="NSCellFlags2">134217728</int>
-							<string key="NSContents">Bearbeiten…</string>
+							<string key="NSContents">Bearbeiten …</string>
 							<reference key="NSSupport" ref="1013637940"/>
 							<reference key="NSControlView" ref="130209376"/>
 							<int key="NSButtonFlags">-2038284033</int>
@@ -426,7 +423,7 @@
 						<object class="NSButtonCell" key="NSCell" id="410765019">
 							<int key="NSCellFlags">67239424</int>
 							<int key="NSCellFlags2">134217728</int>
-							<string key="NSContents">Bearbeiten…</string>
+							<string key="NSContents">Bearbeiten …</string>
 							<reference key="NSSupport" ref="1013637940"/>
 							<reference key="NSControlView" ref="645087240"/>
 							<int key="NSButtonFlags">-2038284033</int>
@@ -465,7 +462,7 @@
 						<object class="NSButtonCell" key="NSCell" id="559034191">
 							<int key="NSCellFlags">67239424</int>
 							<int key="NSCellFlags2">0</int>
-							<string key="NSContents">Automatische Backupdatei alle</string>
+							<string key="NSContents">Erstelle Automatische Backup-Datei alle</string>
 							<reference key="NSSupport" ref="1013637940"/>
 							<reference key="NSControlView" ref="60927565"/>
 							<int key="NSButtonFlags">1211912703</int>
@@ -526,9 +523,11 @@
 										<boolean value="YES"/>
 										<object class="NSAttributedString" id="831039513">
 											<string key="NSString">0</string>
-											<object class="NSDictionary" key="NSAttributes" id="431572791">
+											<object class="NSDictionary" key="NSAttributes" id="278951950">
 												<bool key="EncodedWithXMLCoder">YES</bool>
-												<reference key="dict.sortedKeys" ref="0"/>
+												<object class="NSArray" key="dict.sortedKeys" id="0">
+													<bool key="EncodedWithXMLCoder">YES</bool>
+												</object>
 												<reference key="dict.values" ref="0"/>
 											</object>
 										</object>
@@ -558,7 +557,7 @@
 								</object>
 								<object class="NSAttributedString" key="NS.nan">
 									<string key="NSString">NaN</string>
-									<reference key="NSAttributes" ref="431572791"/>
+									<reference key="NSAttributes" ref="278951950"/>
 								</object>
 								<reference key="NS.min" ref="938571073"/>
 								<object class="NSDecimalNumberPlaceholder" key="NS.max">
@@ -612,7 +611,7 @@
 						<object class="NSButtonCell" key="NSCell" id="619076472">
 							<int key="NSCellFlags">67239424</int>
 							<int key="NSCellFlags2">134217728</int>
-							<string key="NSContents">Zurücksetzen…</string>
+							<string key="NSContents">Zurücksetzen …</string>
 							<reference key="NSSupport" ref="1013637940"/>
 							<reference key="NSControlView" ref="211429725"/>
 							<int key="NSButtonFlags">-2038284033</int>
@@ -635,7 +634,7 @@
 						<object class="NSButtonCell" key="NSCell" id="299117357">
 							<int key="NSCellFlags">67239424</int>
 							<int key="NSCellFlags2">134217728</int>
-							<string key="NSContents">Zurücksetzen…</string>
+							<string key="NSContents">Zurücksetzen …</string>
 							<reference key="NSSupport" ref="1013637940"/>
 							<reference key="NSControlView" ref="1027300989"/>
 							<int key="NSButtonFlags">-2038284033</int>
@@ -1409,8 +1408,6 @@
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<object class="NSArray" key="dict.sortedKeys">
 					<bool key="EncodedWithXMLCoder">YES</bool>
-					<string>-1.IBPluginDependency</string>
-					<string>-2.IBPluginDependency</string>
 					<string>-3.IBPluginDependency</string>
 					<string>-3.ImportedFromIB2</string>
 					<string>101.IBAttributePlaceholdersKey</string>
@@ -1446,6 +1443,7 @@
 					<string>21.ImportedFromIB2</string>
 					<string>223.IBPluginDependency</string>
 					<string>224.IBPluginDependency</string>
+					<string>225.CustomClassName</string>
 					<string>225.IBPluginDependency</string>
 					<string>226.IBPluginDependency</string>
 					<string>227.IBPluginDependency</string>
@@ -1472,6 +1470,7 @@
 					<string>30.IBPluginDependency</string>
 					<string>30.ImportedFromIB2</string>
 					<string>5.IBAttributePlaceholdersKey</string>
+					<string>5.IBEditorWindowLastContentRect</string>
 					<string>5.IBPluginDependency</string>
 					<string>5.ImportedFromIB2</string>
 					<string>57.IBPluginDependency</string>
@@ -1506,8 +1505,6 @@
 				</object>
 				<object class="NSMutableArray" key="dict.values">
 					<bool key="EncodedWithXMLCoder">YES</bool>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<object class="NSMutableDictionary">
@@ -1571,6 +1568,7 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>BDSKEncodingPopUpButtonCell</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -1604,6 +1602,7 @@
 							<string key="toolTip">Zeige den Fehler-Dialog wenn eine Datei geöffnet wird</string>
 						</object>
 					</object>
+					<string>{{84, 334}, {551, 419}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -1625,7 +1624,7 @@
 						<object class="IBToolTipAttribute" key="NS.object.0">
 							<string key="name">ToolTip</string>
 							<reference key="object" ref="842864264"/>
-							<string key="toolTip">Schreibe die Anmerkung und Abstract Felder als letzte Felder eines BibTeX Eintrags</string>
+							<string key="toolTip">Schreibe die Felder Anmerkung und Zusammenfassung als letzte Felder eines BibTeX Eintrags</string>
 						</object>
 					</object>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -1695,6 +1694,14 @@
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">./Classes/BDSKEncodingPopUpButton.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">BDSKEncodingPopUpButtonCell</string>
+					<string key="superclassName">NSPopUpButtonCell</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">./Classes/BDSKEncodingPopUpButtonCell.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">

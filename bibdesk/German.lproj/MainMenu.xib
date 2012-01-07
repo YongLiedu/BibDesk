@@ -1668,7 +1668,7 @@
 								</object>
 								<object class="NSMenuItem" id="352145215">
 									<reference key="NSMenu" ref="192358750"/>
-									<string key="NSTitle">AutoAblage verknüpfter Dateien …</string>
+									<string key="NSTitle">AutoAblage verknüpfter Dateien…</string>
 									<string key="NSKeyEquiv">K</string>
 									<int key="NSKeyEquivModMask">1048576</int>
 									<int key="NSMnemonicLoc">2147483647</int>
