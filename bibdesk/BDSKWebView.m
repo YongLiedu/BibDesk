@@ -250,9 +250,12 @@
     // !!! logs are here to help diagnose problems that users are reporting
     NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
     
-    NSURL *url = [[[frame provisionalDataSource] request] URL];
-    NSString *errorHTML = [NSString stringWithFormat:@"<html><title>%@</title><body><h1>%@</h1></body></html>", NSLocalizedString(@"Error", @"Placeholder web group label"), [error localizedDescription]];
-    [frame loadAlternateHTMLString:errorHTML baseURL:nil forUnreachableURL:url];
+    // "plug-in handled load" is reported as a failure with code 204
+    if ([[error domain] isEqualToString:WebKitErrorDomain] == NO || [error code] != 204) {
+        NSURL *url = [[[frame provisionalDataSource] request] URL];
+        NSString *errorHTML = [NSString stringWithFormat:@"<html><title>%@</title><body><h1>%@</h1></body></html>", NSLocalizedString(@"Error", @"Placeholder web group label"), [error localizedDescription]];
+        [frame loadAlternateHTMLString:errorHTML baseURL:nil forUnreachableURL:url];
+    }
 }
 
 - (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
