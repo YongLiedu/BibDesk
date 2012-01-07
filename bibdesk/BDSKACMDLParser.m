@@ -48,7 +48,7 @@
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
-    if (nil == [url host] || NO == [[url host] isCaseInsensitiveEqual:@"portal.acm.org"]){
+    if (nil == [url host] || NO == [[url host] isCaseInsensitiveEqual:@"dl.acm.org"]){
         return NO;
     }
     
@@ -57,7 +57,7 @@
     if ([nodes count] == 0) return NO;
     NSString *node = [[nodes objectAtIndex:0] stringValue];
     
-    AGRegex *doiRegex = [AGRegex regexWithPattern:@"^http://portal.acm.org/citation.cfm.id=[0-9]*\\.[0-9]*$"];
+    AGRegex *doiRegex = [AGRegex regexWithPattern:@"^http://dl\\.acm\\.org/citation\\.cfm\\?id=[0-9]*\\.[0-9]*$"];
 	return ([doiRegex findInString:node] != nil);
 	
 }
@@ -74,7 +74,7 @@
     if ([nodes count] == 0) return items;
     NSString *node = [[nodes objectAtIndex:0] stringValue];
 
-    AGRegex *doiRegex = [AGRegex regexWithPattern:@"^http://portal.acm.org/citation.cfm.id=([0-9]*)\\.([0-9]*)$"];
+    AGRegex *doiRegex = [AGRegex regexWithPattern:@"^http://dl\\.acm\\.org/citation\\.cfm\\?id=([0-9]*)\\.([0-9]*)$"];
 	AGRegexMatch *match = [doiRegex findInString:node];
 	if ([match count] != 3) {
 		return items;
@@ -83,7 +83,7 @@
 	NSString *articleNumber = [match groupAtIndex:2];
 	
 	// download BibTeX data
-	NSString *bibtexURLString = [NSString stringWithFormat:@"http://portal.acm.org/downformats.cfm?id=%@&parent_id=%@&expformat=bibtex", articleNumber, parentNumber];
+	NSString *bibtexURLString = [NSString stringWithFormat:@"http://dl.acm.org/downformats.cfm?id=%@&parent_id=%@&expformat=bibtex", articleNumber, parentNumber];
 	NSURL *bibtexURL = [NSURL URLWithString:bibtexURLString];
 	NSString *bibtexData = [NSString stringWithContentsOfURL:bibtexURL usedEncoding:&encoding error:&error];
 	if (bibtexData == nil) {
@@ -118,7 +118,7 @@
 }
 
 + (NSDictionary *)parserInfo {
-	return [BDSKWebParser parserInfoWithName:@"ACM" address:@"http://portal.acm.org/" description:nil feature:BDSKParserFeaturePublic];
+	return [BDSKWebParser parserInfoWithName:@"ACM" address:@"http://dl.acm.org/" description:nil feature:BDSKParserFeaturePublic];
 }
 
 @end
