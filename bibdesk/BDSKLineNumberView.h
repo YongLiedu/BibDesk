@@ -43,4 +43,5 @@
     NSPointerArray *lineCharacterIndexes;
     NSMapTable *errorMarkers;
 }
+- (CGFloat)requiredRuleThickness;
 @end

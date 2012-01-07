@@ -125,6 +125,8 @@ static char BDSKErrorEditorObservationContext;
     
     [self updateErrorMarkers];
     
+    [lineNumberView setRuleThickness:[lineNumberView requiredRuleThickness]];
+    
     NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Paste/Drag Data", @"Partial window title") : NSLocalizedString(@"Source Data", @"Partial window title");
     
     BDSKASSERT(fileName);

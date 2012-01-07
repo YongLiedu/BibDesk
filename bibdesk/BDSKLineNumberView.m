@@ -131,13 +131,6 @@ static NSDictionary *lineNumberAttributes = nil;
     }
 }
 
-static inline CGFloat ruleThicknessForLineCount(NSUInteger count) {
-    NSUInteger i = (NSUInteger)log10(count) + 1;
-    NSMutableString *string = [NSMutableString string];
-    while (i-- > 0) [string appendString:@"0"];
-    return ceilf(fmax(DEFAULT_THICKNESS, [string sizeWithAttributes:lineNumberAttributes].width + RULER_MARGIN + MARKER_THICKNESS));
-}
-
 static NSPointerArray *createLineCharacterIndexesForString(NSString *string) {
     NSUInteger idx = 0, stringLength = [string length], lineEnd, contentsEnd;
     NSPointerArray *lineCharacterIndexes = [[NSPointerArray alloc] initWithOptions:NSPointerFunctionsOpaqueMemory | NSPointerFunctionsIntegerPersonality];
@@ -162,7 +155,7 @@ static NSPointerArray *createLineCharacterIndexesForString(NSString *string) {
             lineCharacterIndexes = createLineCharacterIndexesForString([view string]);
             
             CGFloat oldThickness = [self ruleThickness];
-            CGFloat newThickness = ruleThicknessForLineCount([lineCharacterIndexes count]);
+            CGFloat newThickness = [self requiredRuleThickness];
             if (fabs(oldThickness - newThickness) >= 1.0) {
                 NSInvocation *invocation = [NSInvocation invocationWithTarget:self selector:@selector(setRuleThickness:)];
                 [invocation setArgument:&newThickness atIndex:2];
@@ -188,6 +181,13 @@ static NSPointerArray *createLineCharacterIndexesForString(NSString *string) {
             return mid;
     }
     return left;
+}
+
+- (CGFloat)requiredRuleThickness {
+    NSUInteger i = (NSUInteger)log10([[self lineCharacterIndexes] count]) + 1;
+    NSMutableString *string = [NSMutableString string];
+    while (i-- > 0) [string appendString:@"0"];
+    return ceilf(fmax(DEFAULT_THICKNESS, [string sizeWithAttributes:lineNumberAttributes].width + RULER_MARGIN + MARKER_THICKNESS));
 }
 
 - (void)drawHashMarksAndLabelsInRect:(NSRect)aRect {
