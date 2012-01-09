@@ -53,6 +53,7 @@
 #import "BDSKMathSiteParser.h"
 #import "BDSKCOinSParser.h"
 #import "BDSKIEEEXploreParser.h"
+#import "BDSKMASParser.h"
 #import "NSError_BDSKExtensions.h"
 #import "BDSKRuntime.h"
 
@@ -82,6 +83,7 @@ static NSArray *webParserClasses() {
                         [BDSKCOinSParser class], 
                         [BDSKHCiteParser class], 
                         [BDSKIEEEXploreParser class], 
+                        [BDSKMASParser class], 
 					    [BDSKBibTeXWebParser class], nil];
     }
     return webParsers;
