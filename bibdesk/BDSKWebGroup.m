@@ -208,7 +208,7 @@ static NSString *BDSKWebLocalizedString = nil;
             if (type == BDSKBibTeXStringType)
                 newPubs = [BDSKBibTeXParser itemsFromString:string owner:nil isPartialData:&isPartialData error:&error];
             else if (type == BDSKNoKeyBibTeXStringType)
-                newPubs = [BDSKBibTeXParser itemsFromString:[string stringWithPhoneyCiteKeys:@"cite-key"] owner:nil isPartialData:&isPartialData error:&error];
+                newPubs = [BDSKBibTeXParser itemsFromString:[string stringWithPhoneyCiteKeys:[BibItem defaultCiteKey]] owner:nil isPartialData:&isPartialData error:&error];
             else if (type != BDSKUnknownStringType)
                 newPubs = [BDSKStringParser itemsFromString:string ofType:type error:&error];
         }

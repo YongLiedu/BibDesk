@@ -101,6 +101,8 @@ enum {
     NSUInteger colorLabel;
 }
 
++ (NSString *)defaultCiteKey;
+
 - (NSArray *)files;
 - (NSUInteger)countOfFiles;
 - (BDSKLinkedFile *)objectInFilesAtIndex:(NSUInteger)idx;

@@ -95,7 +95,7 @@
         if (bibtexString == nil)
             continue;
         
-        NSArray *parsedItems = [BDSKBibTeXParser itemsFromString:[bibtexString stringWithPhoneyCiteKeys:@"cite-key"] owner:nil isPartialData:NULL error:&error];
+        NSArray *parsedItems = [BDSKBibTeXParser itemsFromString:[bibtexString stringWithPhoneyCiteKeys:[BibItem defaultCiteKey]] owner:nil isPartialData:NULL error:&error];
         if ([parsedItems count] > 0)
             [items addObjectsFromArray:parsedItems];
     }

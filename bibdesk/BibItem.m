@@ -83,8 +83,6 @@ NSString *BDSKBibItemNewValueKey = @"newValue";
 
 NSString *BDSKBibItemURLScheme = @"x-bdsk";
 
-#define DEFAULT_CITEKEY @"cite-key"
-
 #define BDSKFieldsToWriteIfEmptyKey @"BDSKFieldsToWriteIfEmpty"
 
 static NSSet *fieldsToWriteIfEmpty = nil;
@@ -170,6 +168,8 @@ static NSURL *createUniqueURL(void)
     return identifierURL;
 }    
 
+static NSString *defaultCiteKey = nil;
+
 /* Paragraph styles cached for efficiency. */
 static NSParagraphStyle* keyParagraphStyle = nil;
 static NSParagraphStyle* bodyParagraphStyle = nil;
@@ -183,6 +183,8 @@ static NSMapTable *selectorTable = NULL;
 + (void)initialize
 {
     BDSKINITIALIZE;
+    
+    defaultCiteKey = @"cite-key";
     
     NSMutableParagraphStyle *defaultStyle = [[NSMutableParagraphStyle alloc] init];
     [defaultStyle setParagraphStyle:[NSParagraphStyle defaultParagraphStyle]];
@@ -222,7 +224,7 @@ static NSMapTable *selectorTable = NULL;
 - (id)init
 {
 	self = [self initWithType:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKPubTypeStringKey] 
-                      citeKey:DEFAULT_CITEKEY 
+                      citeKey:defaultCiteKey 
                     pubFields:nil 
                         files:nil 
                         isNew:YES];
@@ -278,7 +280,7 @@ static NSMapTable *selectorTable = NULL;
         [self updateMetadataForKey:nil];
         
         if (key == nil) {
-            [self setCiteKeyString: DEFAULT_CITEKEY];
+            [self setCiteKeyString: defaultCiteKey];
         } else {
             [self setCiteKeyString: key];
         }
@@ -289,6 +291,10 @@ static NSMapTable *selectorTable = NULL;
     }
 
     return self;
+}
+
++ (NSString *)defaultCiteKey {
+    return defaultCiteKey;
 }
 
 // Never copy between different documents, as this messes up the macroResolver for complex string values, unfortunately we don't always control that
@@ -1046,7 +1052,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 - (BOOL)hasEmptyOrDefaultCiteKey{
     NSString *key = [self citeKey];
-    return [NSString isEmptyString:key] || [key isEqualToString:DEFAULT_CITEKEY];
+    return [NSString isEmptyString:key] || [key isEqualToString:defaultCiteKey];
 }
 
 - (BOOL)canGenerateAndSetCiteKey
@@ -3306,7 +3312,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     if(newCiteKey != citeKey){
         [citeKey autorelease];
         citeKey = [newCiteKey copy];
-        if ([newCiteKey isEqualToString:DEFAULT_CITEKEY] == NO)
+        if ([newCiteKey isEqualToString:defaultCiteKey] == NO)
             [[BDSKCompletionManager sharedManager] addString:newCiteKey forCompletionEntry:BDSKCrossrefString];
     }
 }
