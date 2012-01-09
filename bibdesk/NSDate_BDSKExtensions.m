@@ -121,7 +121,7 @@
             }
             if (node == nil)
                 monthString = [(BDSKStringNode *)[nodes objectAtIndex:0] value];
-        } else if (monthString) {
+        } else if ([NSString isEmptyString:monthString] == NO) {
             NSRange r = [monthString rangeOfCharacterFromSet:[NSCharacterSet letterCharacterSet]];
             NSUInteger start = 0, end = [monthString length];
             if (r.location != NSNotFound) {
@@ -140,9 +140,9 @@
             }
             if (start > 0 || end < [monthString length])
                 monthString = [monthString substringWithRange:NSMakeRange(start, end - start)];
-        } else {
-            monthString = @"";
         }
+        if ([NSString isEmptyString:monthString])
+            monthString = @"1";
         return [self initWithMonthDayYearString:[NSString stringWithFormat:@"%@-15-%@", monthString, yearString]];
     }
 }
