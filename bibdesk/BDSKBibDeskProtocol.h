@@ -5,7 +5,7 @@
 //  Created by Sven-S. Porst on 12.04.09.
 
 /*
- This software is Copyright (c) 2009-2011
+ This software is Copyright (c) 2009-2012
  Sven-S. Porst. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without

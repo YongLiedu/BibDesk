@@ -4,7 +4,7 @@
 //
 //  Created by Michael McCracken on Sun Nov 16 2003.
 /*
- This software is Copyright (c) 2003-2011
+ This software is Copyright (c) 2003-2012
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without

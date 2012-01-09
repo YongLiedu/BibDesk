@@ -5,7 +5,7 @@
 // lost record of.
 
 /*
- This software is Copyright (c) 2005-2011
+ This software is Copyright (c) 2005-2012
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
