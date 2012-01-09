@@ -84,7 +84,6 @@
 		CE0928D813FFC1DC008A6A69 /* Scroller_Background_Lion.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE0928D713FFC1DC008A6A69 /* Scroller_Background_Lion.tiff */; };
 		CE095D52135C52B5000E4396 /* BDSKSelectCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE095D50135C52B5000E4396 /* BDSKSelectCommand.m */; };
 		CE09CEA70DDEF65E00F3F2FE /* BDSKCompletionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE09CEA50DDEF65E00F3F2FE /* BDSKCompletionManager.m */; };
-		CE0AB70014BB019400638C8F /* BDSKMASParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CE0AB6FE14BB019400638C8F /* BDSKMASParser.h */; };
 		CE0AB70114BB019400638C8F /* BDSKMASParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE0AB6FF14BB019400638C8F /* BDSKMASParser.m */; };
 		CE0B3B3C1292E1A500BA05EB /* BDSKErrorObject.m in Sources */ = {isa = PBXBuildFile; fileRef = CE0B3B3A1292E1A500BA05EB /* BDSKErrorObject.m */; };
 		CE0CD73C1459812300488DE1 /* NSAttributedString+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CE0CD73A1459812300488DE1 /* NSAttributedString+Scripting.m */; };
@@ -2958,7 +2957,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				CE0AB70014BB019400638C8F /* BDSKMASParser.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
