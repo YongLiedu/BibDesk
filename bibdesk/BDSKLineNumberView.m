@@ -223,7 +223,7 @@ static NSPointerArray *createLineCharacterIndexesForString(NSString *string) {
                     if (errorMarkers && (marker = NSMapGet(errorMarkers, (const void *)line))) {
                         rect = NSMakeRect(1.0, offsetY + NSMidY(rects[0]) - 0.5 * MARKER_THICKNESS, MARKER_THICKNESS, MARKER_THICKNESS);
                         [[marker image] drawFlipped:[self isFlipped] inRect:rect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-                        [self addToolTipRect:rect owner:[(BDSKErrorObject *)[marker representedObject] errorMessage] userData:NULL];
+                        [self addToolTipRect:rect owner:self userData:(void *)line];
                     }
                     label = [NSString stringWithFormat:@"%lu", (unsigned long)(line + 1)];
                     labelSize = [label sizeWithAttributes:lineNumberAttributes];
@@ -240,5 +240,11 @@ static NSPointerArray *createLineCharacterIndexesForString(NSString *string) {
 - (void)drawMarkersInRect:(NSRect)aRect {}
 
 - (void)mouseDown:(NSEvent *)theEvent {}
+
+- (NSString *)view:(NSView *)view stringForToolTip:(NSToolTipTag)tag point:(NSPoint)point userData:(void *)userData {
+    NSRulerMarker *marker = NSMapGet(errorMarkers, userData);
+    BDSKErrorObject *error = (BDSKErrorObject *)[marker representedObject];
+    return [NSString stringWithFormat:@"%@: %@", [error errorClassName], [error errorMessage]];
+}
 
 @end
