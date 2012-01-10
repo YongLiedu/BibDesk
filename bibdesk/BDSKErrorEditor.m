@@ -101,7 +101,7 @@ static char BDSKErrorEditorObservationContext;
     return @"BDSKErrorEditWindow";
 }
 
-- (void)awakeFromNib;
+- (void)windowDidLoad;
 {
     [self setWindowFrameAutosaveNameOrCascade:@"Edit Source Window"];
 
@@ -133,22 +133,23 @@ static char BDSKErrorEditorObservationContext;
     [[self window] setRepresentedFilename:fileName];
 	[[self window] setTitle:[NSString stringWithFormat:@"%@: %@", prefix, [manager displayName]]];
     
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(handleSelectionDidChangeNotification:)
-												 name:NSTextViewDidChangeSelectionNotification
-											   object:textView];
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(handleUndoManagerChangeUndoneNotification:)
-												 name:NSUndoManagerDidUndoChangeNotification
-											   object:[[self window] undoManager]];
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(handleUndoManagerChangeDoneNotification:)
-												 name:NSUndoManagerDidRedoChangeNotification
-											   object:[[self window] undoManager]];
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(handleUndoManagerChangeDoneNotification:)
-												 name:NSUndoManagerWillCloseUndoGroupNotification
-											   object:[[self window] undoManager]];
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    [nc addObserver:self
+           selector:@selector(handleSelectionDidChangeNotification:)
+               name:NSTextViewDidChangeSelectionNotification
+             object:textView];
+    [nc addObserver:self
+           selector:@selector(handleUndoManagerChangeUndoneNotification:)
+               name:NSUndoManagerDidUndoChangeNotification
+             object:[[self window] undoManager]];
+    [nc addObserver:self
+           selector:@selector(handleUndoManagerChangeDoneNotification:)
+               name:NSUndoManagerDidRedoChangeNotification
+             object:[[self window] undoManager]];
+    [nc addObserver:self
+           selector:@selector(handleUndoManagerChangeDoneNotification:)
+               name:NSUndoManagerWillCloseUndoGroupNotification
+             object:[[self window] undoManager]];
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
@@ -224,8 +225,10 @@ static char BDSKErrorEditorObservationContext;
         if(object == manager && [keyPath isEqualToString:@"displayName"]){
             [self updateDisplayName];
             
-            NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Paste/Drag Data", @"Partial window title") : NSLocalizedString(@"Source Data", @"Partial window title");
-            [[self window] setTitle:[NSString stringWithFormat:@"%@: %@", prefix, [manager displayName]]];
+            if ([self isWindowLoaded]) {
+                NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Paste/Drag Data", @"Partial window title") : NSLocalizedString(@"Source Data", @"Partial window title");
+                [[self window] setTitle:[NSString stringWithFormat:@"%@: %@", prefix, [manager displayName]]];
+            }
         }
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
