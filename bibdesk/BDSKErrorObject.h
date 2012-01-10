@@ -55,25 +55,22 @@
 + (void)reportError:(NSString *)className message:(NSString *)msg forFile:(NSString *)filePath line:(NSInteger)line isWarning:(BOOL)flag;
 + (void)reportErrorMessage:(NSString *)msg forFile:(NSString *)filePath line:(NSInteger)line;
 
+- (id)initWithClassName:(NSString *)className message:(NSString *)msg forFile:(NSString *)filePath line:(NSInteger)line isWarning:(BOOL)flag;
+
 - (NSString *)fileName;
-- (void)setFileName:(NSString *)newFileName;
+
+- (NSInteger)lineNumber;
+
+- (NSString *)errorClassName;
+
+- (NSString *)errorMessage;
+
+- (BOOL)isIgnorableWarning;
 
 - (BDSKErrorEditor *)editor;
 - (void)setEditor:(BDSKErrorEditor *)newEditor;
 
 - (BibItem *)publication;
 - (void)setPublication:(BibItem *)newPublication;
-
-- (NSInteger)lineNumber;
-- (void)setLineNumber:(NSInteger)newLineNumber;
-
-- (NSString *)errorClassName;
-- (void)setErrorClassName:(NSString *)newErrorClassName;
-
-- (NSString *)errorMessage;
-- (void)setErrorMessage:(NSString *)newErrorMessage;
-
-- (void)setIgnorableWarning:(BOOL)flag;
-- (BOOL)isIgnorableWarning;
 
 @end

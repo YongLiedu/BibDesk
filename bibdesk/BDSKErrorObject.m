@@ -45,41 +45,37 @@
 
 @implementation BDSKErrorObject
 
-- (id)init {
+- (id)initWithClassName:(NSString *)className message:(NSString *)msg forFile:(NSString *)filePath line:(NSInteger)line isWarning:(BOOL)flag{
     self = [super init];
     if (self) {
-        isIgnorableWarning = NO;
-        lineNumber = -1;
+        errorClassName = [className copy];
+        errorMessage = [msg copy];
+        fileName = [filePath copy];
+        lineNumber = line;
+        isIgnorableWarning = flag;
     }
     return self;
 }
 
+- (id)init {
+    return [self initWithClassName:nil message:nil forFile:nil line:-1 isWarning:NO];
+}
+
 - (id)copyWithZone:(NSZone *)zone {
-    id error = [[[self class] alloc] init];
-    [error setErrorClassName:errorClassName];
-    [error setFileName:fileName];
-    [error setLineNumber:lineNumber];
-    [error setErrorMessage:errorMessage];
-    [error setIgnorableWarning:isIgnorableWarning];
-    return error;
+    return [[[self class] alloc] initWithClassName:errorClassName message:errorMessage forFile:fileName line:lineNumber isWarning:isIgnorableWarning];
 }
 
 - (void)dealloc {
-    [fileName release];
-    [editor release];
-    [publication release];
-    [errorClassName release];
-    [errorMessage release];
+    BDSKDESTROY(fileName);
+    BDSKDESTROY(errorClassName);
+    BDSKDESTROY(errorMessage);
+    BDSKDESTROY(editor);
+    BDSKDESTROY(publication);
     [super dealloc];
 }
 
 + (void)reportError:(NSString *)className message:(NSString *)msg forFile:(NSString *)filePath line:(NSInteger)line isWarning:(BOOL)flag{
-    id error = [[self alloc] init];
-    [error setErrorClassName:className];
-    [error setFileName:filePath];
-    [error setLineNumber:line];
-    [error setErrorMessage:msg];
-    [error setIgnorableWarning:flag];
+    id error = [[self alloc] initWithClassName:className message:msg forFile:filePath line:line isWarning:flag];
     [[BDSKErrorObjectController sharedErrorObjectController] reportError:error];
     [error release];
 }
@@ -96,11 +92,20 @@
     return fileName;
 }
 
-- (void)setFileName:(NSString *)newFileName {
-    if (fileName != newFileName) {
-        [fileName release];
-        fileName = [newFileName copy];
-    }
+- (NSInteger)lineNumber {
+    return lineNumber;
+}
+
+- (NSString *)errorClassName {
+    return errorClassName;
+}
+
+- (NSString *)errorMessage {
+    return errorMessage;
+}
+
+- (BOOL)isIgnorableWarning {
+    return isIgnorableWarning;
 }
 
 - (BDSKErrorEditor *)editor {
@@ -123,44 +128,6 @@
         [publication release];
         publication = [newPublication retain];
     }
-}
-
-- (NSInteger)lineNumber {
-    return lineNumber;
-}
-
-- (void)setLineNumber:(NSInteger)newLineNumber {
-    lineNumber = newLineNumber;
-}
-
-- (NSString *)errorClassName {
-    return errorClassName;
-}
-
-- (void)setErrorClassName:(NSString *)newErrorClassName {
-    if (errorClassName != newErrorClassName) {
-        [errorClassName release];
-        errorClassName = [newErrorClassName copy];
-    }
-}
-
-- (NSString *)errorMessage {
-    return errorMessage;
-}
-
-- (void)setErrorMessage:(NSString *)newErrorMessage {
-    if (errorMessage != newErrorMessage) {
-        [errorMessage release];
-        errorMessage = [newErrorMessage copy];
-    }
-}
-
-- (void)setIgnorableWarning:(BOOL)flag {
-    isIgnorableWarning = flag;
-}
-
-- (BOOL)isIgnorableWarning {
-    return isIgnorableWarning;
 }
 
 @end
