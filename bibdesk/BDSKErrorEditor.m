@@ -185,6 +185,7 @@ static char BDSKErrorEditorObservationContext;
 {
     if (errors != newErrors) {
         [errors release];
+        // deep copy the errors because the original errors retain us
         errors = [[NSArray alloc] initWithArray:newErrors copyItems:YES];
         [self updateErrorMarkers];
     }
