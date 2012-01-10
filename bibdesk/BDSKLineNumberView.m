@@ -207,7 +207,7 @@ static NSPointerArray *createLineCharacterIndexesForString(NSString *string) {
 		NSPointerArray *lines = [self lineCharacterIndexes];
         NSUInteger rectCount, i, line, count = [lines count];
         NSRulerMarker *marker;
-        NSRect rect;
+        NSRect rect, markerRect = NSMakeRect(1.0, 0.0, MARKER_THICKNESS, MARKER_THICKNESS);
         
         // one extra for any newline at the end, which doesn't have a glyph
         range.length++;
@@ -221,9 +221,9 @@ static NSPointerArray *createLineCharacterIndexesForString(NSString *string) {
                 rects = [lm rectArrayForCharacterRange:NSMakeRange(i, 0) withinSelectedCharacterRange:nullRange inTextContainer:container rectCount:&rectCount];
                 if (rectCount > 0) {
                     if (errorMarkers && (marker = NSMapGet(errorMarkers, (const void *)line))) {
-                        rect = NSMakeRect(1.0, offsetY + NSMidY(rects[0]) - 0.5 * MARKER_THICKNESS, MARKER_THICKNESS, MARKER_THICKNESS);
-                        [[marker image] drawFlipped:[self isFlipped] inRect:rect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-                        [self addToolTipRect:rect owner:self userData:(void *)line];
+                        markerRect.origin.y = offsetY + NSMidY(rects[0]) - 0.5 * MARKER_THICKNESS;
+                        [[marker image] drawFlipped:[self isFlipped] inRect:markerRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+                        [self addToolTipRect:markerRect owner:self userData:(void *)line];
                     }
                     label = [NSString stringWithFormat:@"%lu", (unsigned long)(line + 1)];
                     labelSize = [label sizeWithAttributes:lineNumberAttributes];
