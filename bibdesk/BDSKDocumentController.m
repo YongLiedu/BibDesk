@@ -152,11 +152,9 @@ enum {
 
 - (IBAction)openDocumentUsingFilter:(id)sender {
     openType = BDSKOpenUsingFilter;
-    [lastSelectedFilterCommand release];
-    lastSelectedFilterCommand = nil;
+    BDSKDESTROY(lastSelectedFilterCommand);
     [self openDocument:sender];
-    [lastSelectedFilterCommand release];
-    lastSelectedFilterCommand = nil;
+    BDSKDESTROY(lastSelectedFilterCommand);
     openType = BDSKOpenDefault;
 }
 
