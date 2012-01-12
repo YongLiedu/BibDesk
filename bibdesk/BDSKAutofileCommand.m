@@ -89,12 +89,12 @@
             [papersFolderPath stringByAppendingPathComponent:location]; 
         }
         NSArray *paperInfos = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:[localFiles objectAtIndex:i], BDSKFilerFileKey, pub, BDSKFilerPublicationKey, location, BDSKFilerNewPathKey, nil]];
-        [[BDSKFiler sharedFiler] movePapers:paperInfos forField:BDSKLocalFileString fromDocument:doc options:mask];
-        [[pub undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+        if ([[BDSKFiler sharedFiler] movePapers:paperInfos forField:BDSKLocalFileString fromDocument:doc options:mask])
+            [[pub undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else {
         NSArray *files = indexNumber ? [NSArray arrayWithObject:[localFiles objectAtIndex:i]] : [pub localFiles];
-        [[BDSKFiler sharedFiler] autoFileLinkedFiles:files fromDocument:doc check:check];
-        [[pub undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+        if ([[BDSKFiler sharedFiler] autoFileLinkedFiles:files fromDocument:doc check:check])
+            [[pub undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     }
     
     return nil;

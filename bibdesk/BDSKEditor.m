@@ -1005,11 +1005,10 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     if ([files count] == 0)
         return;
     
-	[[BDSKFiler sharedFiler] autoFileLinkedFiles:files fromDocument:[self document] check:NO];
+	if ([[BDSKFiler sharedFiler] autoFileLinkedFiles:files fromDocument:[self document] check:NO])
+        [[self undoManager] setActionName:NSLocalizedString(@"Move File", @"Undo action name")];
     
 	[tabView selectFirstTabViewItem:self];
-	
-	[[self undoManager] setActionName:NSLocalizedString(@"Move File", @"Undo action name")];
 }
 
 - (IBAction)consolidateLinkedFiles:(id)sender{

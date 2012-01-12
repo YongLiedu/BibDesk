@@ -1490,9 +1490,8 @@ static BOOL changingColors = NO;
         // first we make sure all edits are committed
         if ([self commitPendingEdits]) {
             NSArray *selectedFiles = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"];
-            [[BDSKFiler sharedFiler] autoFileLinkedFiles:selectedFiles fromDocument:self check:(rv == NSAlertDefaultReturn)];
-            
-            [[self undoManager] setActionName:NSLocalizedString(@"AutoFile Files", @"Undo action name")];
+            if ([[BDSKFiler sharedFiler] autoFileLinkedFiles:selectedFiles fromDocument:self check:(rv == NSAlertDefaultReturn)])
+                [[self undoManager] setActionName:NSLocalizedString(@"AutoFile Files", @"Undo action name")];
         } else {
             NSBeep();
         }

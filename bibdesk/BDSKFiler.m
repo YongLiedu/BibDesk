@@ -74,7 +74,7 @@ static BDSKFiler *sharedFiler = nil;
 
 #pragma mark Auto file methods
 
-- (void)autoFileLinkedFiles:(NSArray *)papers fromDocument:(BibDocument *)doc check:(BOOL)check{
+- (BOOL)checkPapersFolder {
 	NSString *papersFolderPath = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKPapersFolderPathKey];
 
 	if (NO == [NSString isEmptyString:papersFolderPath]) {
@@ -97,10 +97,16 @@ static BDSKFiler *sharedFiler = nil;
                 [[BDSKPreferenceController sharedPreferenceController] showWindow:self];
                 [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.autofile"];
             }
-            return;
+            return NO;
         }
 	}
-	
+    return YES;
+}
+
+- (BOOL)autoFileLinkedFiles:(NSArray *)papers fromDocument:(BibDocument *)doc check:(BOOL)check{
+	if ([self checkPapersFolder] == NO)
+        return NO;
+    
     BDSKFilerOptions mask = BDSKInitialAutoFileOptionMask;
     if (check) mask |= BDSKCheckCompleteAutoFileOptionMask;
     
@@ -108,10 +114,10 @@ static BDSKFiler *sharedFiler = nil;
     for (BDSKLinkedFile *file in papers)
         [paperInfos addObject:[NSDictionary dictionaryWithObjectsAndKeys:file, BDSKFilerFileKey, [file delegate], BDSKFilerPublicationKey, nil]];
     
-	[self movePapers:paperInfos forField:BDSKLocalFileString fromDocument:doc options:mask];
+	return [self movePapers:paperInfos forField:BDSKLocalFileString fromDocument:doc options:mask];
 }
 
-- (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(BDSKFilerOptions)mask{
+- (BOOL)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(BDSKFilerOptions)mask{
 	NSFileManager *fm = [NSFileManager defaultManager];
     NSInteger numberOfPapers = [paperInfos count];
 	BibItem *pub = nil;
@@ -128,7 +134,7 @@ static BDSKFiler *sharedFiler = nil;
     BOOL check = (initial) && (force == NO) && (mask & BDSKCheckCompleteAutoFileOptionMask);
     
 	if (numberOfPapers == 0)
-		return;
+		return NO;
 	
 	if (initial && [field isEqualToString:BDSKLocalFileString] == NO)
         [NSException raise:BDSKUnimplementedException format:@"%@ is only implemented for local files for initial moves.",NSStringFromSelector(_cmd)];
@@ -221,6 +227,8 @@ static BDSKFiler *sharedFiler = nil;
 		BDSKFilerErrorController *errorController = [[[BDSKFilerErrorController alloc] initWithErrors:errorInfoDicts forField:field fromDocument:doc options:mask] autorelease];
         [[errorController window] makeKeyAndOrderFront:nil];
     }
+    
+    return [fileInfoDicts count] > 0;
 }
 
 @end

@@ -451,9 +451,8 @@
     if ([files count] == 0)
         return;
     
-    [[BDSKFiler sharedFiler] autoFileLinkedFiles:files fromDocument:document check:NO];
-	
-	[[self undoManager] setActionName:NSLocalizedString(@"Move File", @"Undo action name")];
+    if ([[BDSKFiler sharedFiler] autoFileLinkedFiles:files fromDocument:document check:NO])
+        [[self undoManager] setActionName:NSLocalizedString(@"Move File", @"Undo action name")];
 }
 
 - (IBAction)consolidateLinkedFiles:(id)sender{

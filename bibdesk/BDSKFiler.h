@@ -81,7 +81,7 @@ typedef NSUInteger BDSKFilerOptions;
 	@discussion	This is the main method that should be used to autofile papers.
 It calls the necessary methods to do the move and generates the new locations for the papers. 
 */
-- (void)autoFileLinkedFiles:(NSArray *)papers fromDocument:(BibDocument *)doc check:(BOOL)check;
+- (BOOL)autoFileLinkedFiles:(NSArray *)papers fromDocument:(BibDocument *)doc check:(BOOL)check;
 
 /*!
 	@method		movePapers:forField:fromDocument:options:
@@ -98,7 +98,7 @@ BDSKInitialAutoFileOptionMask should be used for initial autofile moves, the new
 BDSKCheckCompleteAutoFileOptionMask indicates that for initial moves a check will be done whether all required fields are set. 
 BDSKForceAutoFileOptionMask forces AutoFiling, even if there may be problems moving the file. 
 */
-- (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(BDSKFilerOptions)masks;
+- (BOOL)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(BDSKFilerOptions)masks;
 
 @end
 
