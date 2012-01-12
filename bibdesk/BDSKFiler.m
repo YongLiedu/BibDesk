@@ -214,9 +214,8 @@ static BDSKFiler *sharedFiler = nil;
 	if (numberOfPapers > 1)
 		[[self window] orderOut:nil];
 	
-	NSUndoManager *undoManager = [doc undoManager];
-	[[undoManager prepareWithInvocationTarget:self] 
-		movePapers:fileInfoDicts forField:field fromDocument:doc options:0];
+    if ([fileInfoDicts count])
+        [[[doc undoManager] prepareWithInvocationTarget:self] movePapers:fileInfoDicts forField:field fromDocument:doc options:0];
 	
 	if ([errorInfoDicts count] > 0) {
 		BDSKFilerErrorController *errorController = [[[BDSKFilerErrorController alloc] initWithErrors:errorInfoDicts forField:field fromDocument:doc options:mask] autorelease];
