@@ -295,13 +295,12 @@ static BDSKFiler *sharedFiler = nil;
         statusFlag = BDSKCannotMoveFileErrorMask;
     }
     if(statusFlag == BDSKNoError && ignoreMove == NO){
-        NSString *fileType = [[self attributesOfItemAtPath:resolvedPath error:NULL] fileType];
-
         // create parent directories if necessary (OmniFoundation)
         if (NO == [self createPathToFile:resolvedNewPath attributes:nil]) {
             status = NSLocalizedString(@"Unable to create parent directory.", @"AutoFile error message");
             statusFlag = BDSKCannotCreateParentErrorMask;
         }else{
+            NSString *fileType = [[self attributesOfItemAtPath:resolvedPath error:NULL] fileType];
             if([fileType isEqualToString:NSFileTypeDirectory] && [[NSWorkspace sharedWorkspace] isFilePackageAtPath:resolvedPath] == NO && force == NO && 
                [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnMoveFolderKey]){
                 NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Really Move Folder?", @"Message in alert dialog when trying to auto file a folder")
