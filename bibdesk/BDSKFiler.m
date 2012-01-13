@@ -250,14 +250,9 @@ static BDSKFiler *sharedFiler = nil;
     // so we resolve aliases in the path to the containing folder
     resolvedNewPath = [[self resolveAliasesInPath:[newPath stringByDeletingLastPathComponent]] 
                         stringByAppendingPathComponent:[newPath lastPathComponent]];
-    if (resolvedNewPath == nil) {
-        status = NSLocalizedString(@"Unable to resolve aliases in path.", @"AutoFile error message");
-        statusFlag =  BDSKCannotResolveAliasErrorMask;
-    }
-    
     resolvedPath = [[self resolveAliasesInPath:[path stringByDeletingLastPathComponent]] 
                     stringByAppendingPathComponent:[path lastPathComponent]];
-    if (resolvedPath == nil) {
+    if (resolvedNewPath == nil || resolvedPath == nil) {
         status = NSLocalizedString(@"Unable to resolve aliases in path.", @"AutoFile error message");
         statusFlag = BDSKCannotResolveAliasErrorMask;
     }
