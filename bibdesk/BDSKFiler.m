@@ -243,7 +243,6 @@ static BDSKFiler *sharedFiler = nil;
     NSString *fix = nil;
     NSInteger statusFlag = BDSKNoError;
     BOOL ignoreMove = NO;
-    BOOL isDir;
     
     // filemanager needs aliases resolved for moving and existence checks
     // ...however we want to move aliases, not their targets
@@ -256,7 +255,7 @@ static BDSKFiler *sharedFiler = nil;
         status = NSLocalizedString(@"Unable to resolve aliases in path.", @"AutoFile error message");
         statusFlag = BDSKCannotResolveAliasErrorMask;
     }else if([self fileExistsAtPath:resolvedNewPath]){
-        if([self fileExistsAtPath:resolvedPath isDirectory:&isDir]){
+        if([self fileExistsAtPath:resolvedPath]){
             if(force){
                 NSString *backupPath = [[self desktopDirectory] stringByAppendingPathComponent:[resolvedNewPath lastPathComponent]];
                 backupPath = [self uniqueFilePathWithName:[resolvedNewPath lastPathComponent] atPath:[self desktopDirectory]];
