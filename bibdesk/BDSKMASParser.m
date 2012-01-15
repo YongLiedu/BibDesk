@@ -52,10 +52,12 @@
         return NO;
     
     NSError *error;
-    NSArray *nodes = [xmlDocument nodesForXPath:@".//a[starts-with(@href,'Publication/')]" error:&error];
-    
-    if ([nodes count] == 0)
-        nodes = [xmlDocument nodesForXPath:@".//a[starts-with(@href,'/Publication/')]" error:&error];
+    NSArray *nodes = [xmlDocument nodesForXPath:@".//a[starts-with(@href,'../../UserInput/EditPublication?id=')]" error:&error];
+    if ([nodes count] == 0) {
+        nodes = [xmlDocument nodesForXPath:@".//a[starts-with(@href,'Publication/')]" error:&error];
+        if ([nodes count] == 0)
+            nodes = [xmlDocument nodesForXPath:@".//a[starts-with(@href,'/Publication/')]" error:&error];
+    }
     
     return [nodes count] > 0;
 }
@@ -66,23 +68,30 @@
 	
 	NSError *error = nil;
 
-    NSArray *nodes = [xmlDocument nodesForXPath:@".//a[starts-with(@href,'Publication/')]" error:&error];
+    NSArray *nodes = [xmlDocument nodesForXPath:@".//a[starts-with(@href,'../../UserInput/EditPublication?id=')]" error:&error];
     
     if ([nodes count] == 0) {
         nodes = [xmlDocument nodesForXPath:@".//a[starts-with(@href,'/Publication/')]" error:&error];
         if ([nodes count] == 0) {
-            if (outError) *outError = error;
-            return nil;
+            nodes = [xmlDocument nodesForXPath:@".//a[starts-with(@href,'/Publication/')]" error:&error];
+            if ([nodes count] == 0) {
+                if (outError) *outError = error;
+                return nil;
+            }
         }
     }
     
     for (NSXMLNode *node in nodes) {
         NSString *href = [node stringValueOfAttribute:@"href"];
         
-        AGRegex *idRegex = [AGRegex regexWithPattern:@"^/?Publication/([0-9]*)/"];
+        AGRegex *idRegex = [AGRegex regexWithPattern:@"^\\.\\./\\.\\./UserInput/EditPublication\\?id\\=([0-9]*)$"];
         AGRegexMatch *match = [idRegex findInString:href];
-        if ([match count] != 2)
-            continue;
+        if ([match count] != 2) {
+            idRegex = [AGRegex regexWithPattern:@"^/?Publication/([0-9]*)/"];
+            match = [idRegex findInString:href];
+            if ([match count] != 2)
+                continue;
+        }
         
         NSString *publicationID = [match groupAtIndex:1];
         
