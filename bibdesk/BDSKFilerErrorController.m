@@ -96,12 +96,16 @@
 	
     [tv setDoubleAction:@selector(showFile:)];
 	[tv setTarget:self];
+    
+    // we have to stay around until the window closes, also see the two actions below
+    [self retain];
 }
 
 #pragma mark Actions
 
 - (IBAction)done:(id)sender{
-    [[self window] performClose:sender];
+    [self close];
+    [self autorelease];
 }
 
 - (IBAction)tryAgain:(id)sender{
@@ -125,9 +129,11 @@
     BDSKFilerOptions mask = (options & BDSKInitialAutoFileOptionMask);
     mask |= ([forceCheckButton state]) ? BDSKForceAutoFileOptionMask : (options & BDSKCheckCompleteAutoFileOptionMask);
     
-    [[self window] performClose:sender];
+    [self close];
     
     [[BDSKFiler sharedFiler] movePapers:fileInfoDicts forField:field fromDocument:doc options:mask];
+    
+    [self autorelease];
 }
 
 - (IBAction)dump:(id)sender{
