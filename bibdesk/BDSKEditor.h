@@ -139,13 +139,6 @@
 
 - (BibItem *)publication;
 
-/*!
-    @method     show
-    @abstract   Shows the window.
-    @discussion (comprehensive description)
-*/
-- (void)show;
-
 - (IBAction)chooseLocalFile:(id)sender;
 
 - (IBAction)chooseRemoteURL:(id)sender;

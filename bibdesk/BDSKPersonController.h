@@ -83,7 +83,6 @@
 #pragma mark actions
 - (IBAction)edit:(id)sender;
 - (IBAction)dismissEditSheet:(id)sender;
-- (void)show;
 - (void)updateUI;
 - (void)updatePublicationItems;
 - (void)updateFilter;

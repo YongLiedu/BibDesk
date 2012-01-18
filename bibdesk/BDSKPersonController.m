@@ -327,10 +327,6 @@
     [editSheet orderOut:self];
 }
 
-- (void)show{
-    [self showWindow:self];
-}
-
 - (void)updateUI{
 	[nameTextField setStringValue:[person name]];
 	[publicationTableView reloadData];

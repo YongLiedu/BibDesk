@@ -328,7 +328,7 @@ static BOOL changingColors = NO;
 
 - (BDSKEditor *)editPub:(BibItem *)pub{
     BDSKEditor *editor = [self editorForPublication:pub create:YES];
-    [editor show];
+    [editor showWindow:nil];
     return editor;
 }
 
@@ -453,7 +453,7 @@ static BOOL changingColors = NO;
         [self addWindowController:pc];
         [pc release];
     }
-    [pc show];
+    [pc showWindow:nil];
 }
 
 - (IBAction)emailPubCmd:(id)sender{

@@ -310,10 +310,6 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [super dealloc];
 }
 
-- (void)show{
-    [self showWindow:self];
-}
-
 static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     for (NSValue *range in ranges) {
         if (NSMaxRange([range rangeValue]) > max)
