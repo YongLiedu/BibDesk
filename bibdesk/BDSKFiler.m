@@ -225,7 +225,7 @@ static BDSKFiler *sharedFiler = nil;
 	
 	if ([errorInfoDicts count] > 0) {
 		BDSKFilerErrorController *errorController = [[[BDSKFilerErrorController alloc] initWithErrors:errorInfoDicts forField:field fromDocument:doc options:mask] autorelease];
-        [[errorController window] makeKeyAndOrderFront:nil];
+        [errorController showWindow:nil];
     }
     
     return [fileInfoDicts count] > 0;

@@ -77,7 +77,7 @@
     return self;
 }
 
-- (void)dealloc {
+- (void)dealloc {log_method();
     [tv setDelegate:nil];
     [tv setDataSource:nil];
     BDSKDESTROY(errorInfoDicts);
@@ -96,16 +96,22 @@
 	
     [tv setDoubleAction:@selector(showFile:)];
 	[tv setTarget:self];
-    
-    // we have to stay around until the window closes, also see the two actions below
-    [self retain];
+}
+
+- (void)windowWillClose:(NSNotification *)notification {
+    [self autorelease];
 }
 
 #pragma mark Actions
 
+- (IBAction)showWindow:(id)sender {
+    // we have to stay around until the window closes, this is balanced in windowWillClose:
+    [self retain];
+    [super showWindow:sender];
+}
+
 - (IBAction)done:(id)sender{
     [self close];
-    [self autorelease];
 }
 
 - (IBAction)tryAgain:(id)sender{
@@ -132,8 +138,6 @@
     [self close];
     
     [[BDSKFiler sharedFiler] movePapers:fileInfoDicts forField:field fromDocument:doc options:mask];
-    
-    [self autorelease];
 }
 
 - (IBAction)dump:(id)sender{
