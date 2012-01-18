@@ -207,7 +207,6 @@ extern NSString *BDSKDocumentPublicationsKey;
     BDSKMacroWindowController *macroWC;
 	
     NSDictionary *documentInfo;
-    BDSKDocumentInfoWindowController *infoWC;
     
 	NSString *frontMatter;    // for preambles, and stuff
 	

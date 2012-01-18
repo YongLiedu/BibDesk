@@ -1387,9 +1387,7 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)showDocumentInfoWindow:(id)sender{
-    if (!infoWC) {
-        infoWC = [(BDSKDocumentInfoWindowController *)[BDSKDocumentInfoWindowController alloc] initWithDocument:self];
-    }
+    BDSKDocumentInfoWindowController *infoWC = [[(BDSKDocumentInfoWindowController *)[BDSKDocumentInfoWindowController alloc] initWithDocument:self] autorelease];
     [infoWC beginSheetModalForWindow:documentWindow];
 }
 
