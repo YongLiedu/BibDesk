@@ -77,7 +77,7 @@
     return self;
 }
 
-- (void)dealloc {log_method();
+- (void)dealloc {
     [tv setDelegate:nil];
     [tv setDataSource:nil];
     BDSKDESTROY(errorInfoDicts);
