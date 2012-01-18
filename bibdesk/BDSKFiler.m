@@ -161,7 +161,7 @@ static BDSKFiler *sharedFiler = nil;
 			[progressIndicator displayIfNeeded];
 		}
 			
-		if ([NSString isEmptyString:oldPath] || [NSString isEmptyString:newPath] || [oldPath isEqualToString:newPath]) {
+		if ([NSString isEmptyString:oldPath]) {
             [pub removeFileToBeFiled:file];
 			continue;
         }
@@ -179,6 +179,10 @@ static BDSKFiler *sharedFiler = nil;
             [info setValue:NSLocalizedString(@"Move anyway.",@"") forKey:BDSKFilerFixKey];
             [info setValue:newPath forKey:BDSKFilerNewPathKey];
             [errorInfoDicts addObject:info];
+            
+        } else if ([NSString isEmptyString:newPath] || [oldPath isEqualToString:newPath]) {
+            
+            [pub removeFileToBeFiled:file];
             
         } else {
             
