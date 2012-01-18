@@ -204,7 +204,6 @@ extern NSString *BDSKDocumentPublicationsKey;
 #pragma mark Macros, Document Info and Front Matter variables
 
     BDSKMacroResolver *macroResolver;
-    BDSKMacroWindowController *macroWC;
 	
     NSDictionary *documentInfo;
     

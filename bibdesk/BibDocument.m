@@ -236,7 +236,6 @@ static NSOperationQueue *metadataCacheQueue = nil;
         // these are created lazily when needed
         fileSearchController = nil;
         drawerController = nil;
-        macroWC = nil;
         previewer = nil;
         toolbarItems = nil;
         docState.lastPreviewHeight = 0.0;
@@ -308,7 +307,6 @@ static NSOperationQueue *metadataCacheQueue = nil;
     BDSKDESTROY(previewer);
     BDSKDESTROY(bottomPreviewDisplayTemplate);
     BDSKDESTROY(sidePreviewDisplayTemplate);
-    BDSKDESTROY(macroWC);
     BDSKDESTROY(tableColumnWidths);
     BDSKDESTROY(sortKey);
     BDSKDESTROY(previousSortKey);

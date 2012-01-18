@@ -1403,31 +1403,21 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)showMacrosWindow:(id)sender{
-    if ([self hasExternalGroupsSelected]) {
-        BDSKMacroResolver *resolver = [[[self selectedGroups] lastObject] macroResolver];
-        BDSKMacroWindowController *controller = nil;
-        NSWindowController *wc = nil;
-        for (wc in [self windowControllers]) {
-            if([wc isKindOfClass:[BDSKMacroWindowController class]] && [(BDSKMacroWindowController*)wc macroResolver] == resolver)
-                break;
-        }
-        if(wc){
-            controller = (BDSKMacroWindowController *)wc;
-        }else{
-            controller = [[BDSKMacroWindowController alloc] initWithMacroResolver:resolver];
-            [self addWindowController:controller];
-            [controller release];
-        }
-        [controller showWindow:self];
-    } else {
-        if (!macroWC) {
-            macroWC = [[BDSKMacroWindowController alloc] initWithMacroResolver:[self macroResolver]];
-        }
-        if ([[self windowControllers] containsObject:macroWC] == NO) {
-            [self addWindowController:macroWC];
-        }
-        [macroWC showWindow:self];
+    BDSKMacroResolver *resolver = [self hasExternalGroupsSelected] ? [[[self selectedGroups] lastObject] macroResolver] : [self macroResolver];
+    BDSKMacroWindowController *controller = nil;
+    NSWindowController *wc = nil;
+    for (wc in [self windowControllers]) {
+        if([wc isKindOfClass:[BDSKMacroWindowController class]] && [(BDSKMacroWindowController*)wc macroResolver] == resolver)
+            break;
     }
+    if(wc){
+        controller = (BDSKMacroWindowController *)wc;
+    }else{
+        controller = [[BDSKMacroWindowController alloc] initWithMacroResolver:resolver];
+        [self addWindowController:controller];
+        [controller release];
+    }
+    [controller showWindow:self];
 }
 
 #pragma mark Sharing Actions
