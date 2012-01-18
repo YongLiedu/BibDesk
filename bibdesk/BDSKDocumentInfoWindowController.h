@@ -38,18 +38,18 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BibDocument;
 
 @interface BDSKDocumentInfoWindowController : NSWindowController <NSTableViewDelegate, NSTableViewDataSource> {
     IBOutlet NSTableView *tableView;
     IBOutlet NSSegmentedControl *addRemoveButton;
     NSMutableDictionary *info;
     NSMutableArray *keys;
-    BibDocument *document;
     BOOL ignoreEdit;
 }
 
-- (id)initWithDocument:(BibDocument *)aDocument;
 - (IBAction)addRemoveKey:(id)sender;
+
+- (void)setInfo:(NSDictionary *)newInfo;
+- (NSDictionary *)info;
 
 @end

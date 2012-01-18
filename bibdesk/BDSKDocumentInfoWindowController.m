@@ -37,7 +37,6 @@
  */
 
 #import "BDSKDocumentInfoWindowController.h"
-#import "BibDocument.h"
 #import "NSDictionary_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
@@ -46,16 +45,9 @@
 @implementation BDSKDocumentInfoWindowController
 
 - (id)init {
-    self = [self initWithDocument:nil];
-    return self;
-}
-
-// designated initializer
-- (id)initWithDocument:(BibDocument *)aDocument {
     self = [super initWithWindowNibName:@"DocumentInfoWindow"];
     if (self) {
-        document = aDocument;
-        info = nil;
+        info = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
         keys = nil;
         ignoreEdit = NO;
     }
@@ -78,19 +70,12 @@
     [keys sortUsingSelector:@selector(compare:)];
 }
 
-- (void)resetInfo{
-    if (info == nil)
-        info = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
-    [info setDictionary:[document documentInfo]];
-    [self refreshKeys];
-}
-
 - (void)updateButtons{
 	[addRemoveButton setEnabled:[tableView numberOfSelectedRows] > 0 forSegment:1];
 }
 
 - (void)awakeFromNib{
-    [self resetInfo];
+    [tableView reloadData];
     [self updateButtons];
 }
 
@@ -105,13 +90,13 @@
     [self finalizeChangesIgnoringEdit:YES];
 }
 
-#pragma mark Showing the window
+- (void)setInfo:(NSDictionary *)newInfo {
+    [info setDictionary:newInfo];
+    [self refreshKeys];
+}
 
-- (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo {
-    [self window]; // make sure the nib is loaded
-    [self resetInfo];
-    [tableView reloadData];
-    [super beginSheetModalForWindow:window modalDelegate:delegate didEndSelector:didEndSelector contextInfo:contextInfo];
+- (NSDictionary *)info {
+    return info;
 }
 
 #pragma mark Button actions
@@ -119,16 +104,10 @@
 - (IBAction)dismiss:(id)sender{
     [self finalizeChangesIgnoringEdit:[sender tag] == NSCancelButton]; // commit edit before reloading
     
-    if ([sender tag] == NSOKButton) {
-        if ([tableView editedRow] != -1) {
-            NSBeep();
-            return;
-        }
-        [document setDocumentInfo:info];
-		[[document undoManager] setActionName:NSLocalizedString(@"Change Document Info", @"Undo action name")];
-    }
-    
-    [super dismiss:sender];
+    if ([sender tag] == NSOKButton && [tableView editedRow] != -1)
+        NSBeep();
+    else
+        [super dismiss:sender];
 }
 
 - (IBAction)addRemoveKey:(id)sender{

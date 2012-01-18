@@ -1386,9 +1386,20 @@ static BOOL changingColors = NO;
     return;
 }
 
+- (void)documentInfoSheetDidEnd:(BDSKDocumentInfoWindowController *)infoController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+    if (returnCode == NSOKButton) {
+        NSDictionary *info = [infoController info];
+        if ([info isEqualToDictionary:[self documentInfo]] == NO) {
+            [self setDocumentInfo:info];
+            [[self undoManager] setActionName:NSLocalizedString(@"Change Document Info", @"Undo action name")];
+        }
+    }
+}
+
 - (IBAction)showDocumentInfoWindow:(id)sender{
-    BDSKDocumentInfoWindowController *infoWC = [[(BDSKDocumentInfoWindowController *)[BDSKDocumentInfoWindowController alloc] initWithDocument:self] autorelease];
-    [infoWC beginSheetModalForWindow:documentWindow];
+    BDSKDocumentInfoWindowController *infoWC = [[[BDSKDocumentInfoWindowController alloc] init] autorelease];
+    [infoWC setInfo:[self documentInfo]];
+    [infoWC beginSheetModalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(documentInfoSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 }
 
 - (IBAction)showMacrosWindow:(id)sender{
