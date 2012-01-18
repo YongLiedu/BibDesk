@@ -150,7 +150,7 @@ static BDSKFiler *sharedFiler = nil;
 		
         file = [paperInfo valueForKey:BDSKFilerFileKey];
         pub = [paperInfo valueForKey:BDSKFilerPublicationKey];
-        oldPath = [[file URL] path];
+        oldPath = [file path];
 		if (initial) // autofile action: an array of BDSKLinkedFiles
 			newPath = [[pub suggestedURLForLinkedFile:file] path];
 		else // an explicit move, possibly from undo: a list of info dictionaries
