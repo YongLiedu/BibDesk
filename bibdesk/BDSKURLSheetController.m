@@ -38,6 +38,8 @@
 
 #import "BDSKURLSheetController.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "NSURL_BDSKExtensions.h"
+#import "NSString_BDSKExtensions.h"
 
 
 @implementation BDSKURLSheetController
@@ -56,6 +58,11 @@
     if (urlField == nil)
         [self window];
     [urlField setStringValue:newUrlString ?: @""];
+}
+
+- (NSURL *)url {
+    NSString *urlString = [self urlString];
+   return [NSString isEmptyString:urlString] ? nil : [NSURL URLWithStringByNormalizingPercentEscapes:urlString];
 }
 
 - (void)openBookmark:(id)sender {

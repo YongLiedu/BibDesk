@@ -46,6 +46,8 @@
 - (NSString *)urlString;
 - (void)setUrlString:(NSString *)newUrlString;
 
+- (NSURL *)url;
+
 - (void)openBookmark:(id)sender;
 
 @end

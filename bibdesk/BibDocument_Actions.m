@@ -1151,10 +1151,7 @@ static BOOL changingColors = NO;
             return;
         }
         
-        NSString *aURLString = [urlController urlString];
-        if ([NSString isEmptyString:aURLString])
-            return;
-        NSURL *aURL = [NSURL URLWithStringByNormalizingPercentEscapes:aURLString];
+        NSURL *aURL = [urlController url];
         if (aURL == nil)
             return;
         NSUInteger anIndex = (NSUInteger)contextInfo;
