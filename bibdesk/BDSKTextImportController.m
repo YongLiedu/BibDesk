@@ -206,9 +206,6 @@
 
 - (void)beginSheetForWebModalForWindow:(NSWindow *)docWindow {
 	// we start with a webview, so we first ask for the URL to load
-    // make sure we loaded the nib;
-    [self window];
-	[self setShowingWebView:YES];
 	
 	[self retain]; // make sure we stay around till we are done
 	
@@ -223,8 +220,6 @@
 		
 - (void)beginSheetForFileModalForWindow:(NSWindow *)docWindow {
 	// we start with a file, so we first ask for the file to load
-    // make sure we loaded the nib
-    [self window];
 	
 	[self retain]; // make sure we stay around till we are done
 	
@@ -289,8 +284,16 @@
     [self finalizeChangesPreservingSelection:NO];
     [[self undoManager] removeAllActions];
     [item setOwner:nil];
-    [item release];
-    item = nil;
+    BDSKDESTROY(item);
+    
+    // cleanup
+    [self cancelDownload];
+    [webView setDelegate:nil];
+	// select the items we just added
+    if ([itemsAdded count] > 0)
+        [document selectPublications:itemsAdded];
+	[itemsAdded removeAllObjects];
+    
     [super dismiss:sender];
 }
 
@@ -770,17 +773,6 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 
 #pragma mark Sheet callbacks
 
-- (void)didEndSheet:(NSPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-    // cleanup
-    [self cancelDownload];
-    [webView setDelegate:nil];
-	// select the items we just added
-	[document selectPublications:itemsAdded];
-	[itemsAdded removeAllObjects];
-    
-    [super didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];
-}
-
 - (void)initialOpenPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     // this is the initial file load, the main window is not yet there
     NSWindow *docWindow = [(NSWindow *)contextInfo autorelease];
@@ -794,7 +786,6 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         if ([newPubs count]) {
             [document addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:[[error userInfo] valueForKey:@"temporaryCiteKey"] selectLibrary:YES edit:shouldEdit];
             // succeeded to parse the file, we return immediately
-            [self didEndSheet:sheet returnCode:returnCode contextInfo:NULL];
         } else {
             [sheet orderOut:nil];
             
@@ -804,9 +795,6 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
             // then load the data from the file
             [self openPanelDidEnd:sheet returnCode:returnCode contextInfo:NULL];
         }
-    } else {
-        // the user cancelled. As we don't end the main sheet we have to call our didEndSelector ourselves
-        [self didEndSheet:sheet returnCode:returnCode contextInfo:NULL];
     }
     [self autorelease];
 }
@@ -841,15 +829,16 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     if (returnCode == NSOKButton) {
         [[urlSheetController window] orderOut:nil];
         
+        // make sure we loaded the nib before calling setShowingWebView:
+        [self window];
+        [self setShowingWebView:YES];
+        
         // show the main window
         [super beginSheetModalForWindow:docWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         
         // then load the data from the file
         [self urlSheetDidEnd:urlSheetController returnCode:returnCode contextInfo:NULL];
         
-    } else {
-        // the user cancelled. As we don't end the main sheet we have to call our didEndSelector ourselves
-        [self didEndSheet:nil returnCode:returnCode contextInfo:NULL];
     }
     [self autorelease];
 }
