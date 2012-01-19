@@ -194,21 +194,18 @@
 
 #pragma mark Calling the main sheet
 
-- (void)beginSheetModalForWindow:(NSWindow *)aWindow forURL:(NSURL *)aURL {
+- (void)beginSheetForURL:(NSURL *)aURL modalForWindow:(NSWindow *)aWindow {
     // make sure we loaded the nib
     [self window];
-    if (aURL == nil)
+    if (aURL == nil) {
         [self loadPasteboardData];
-	else if ([aURL isFileURL])
+	} else if ([aURL isFileURL]) {
 		[self loadFromFileURL:aURL];
-	else
+	} else {
 		[self setShowingWebView:YES];
-    
-    [self beginSheetModalForWindow:aWindow];
-    
-    // not sure if this could be done safely before showing the sheet
-    if (aURL && [aURL isFileURL] == NO)
         [webView setURL:aURL];
+    }
+    [self beginSheetModalForWindow:aWindow];
 }
 
 #pragma mark Actions

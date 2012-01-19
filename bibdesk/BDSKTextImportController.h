@@ -100,7 +100,7 @@
 
 - (id)initWithDocument:(BibDocument *)doc;
 
-- (void)beginSheetModalForWindow:(NSWindow *)aWindow forURL:(NSURL *)aURL;
+- (void)beginSheetForURL:(NSURL *)aURL modalForWindow:(NSWindow *)aWindow;
 
 - (IBAction)addItemAction:(id)sender;
 - (IBAction)closeAction:(id)sender;

@@ -1448,7 +1448,7 @@ static BOOL changingColors = NO;
     }
     
     BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self] autorelease];
-    [tic beginSheetModalForWindow:documentWindow forURL:nil];
+    [tic beginSheetForURL:nil modalForWindow:documentWindow];
 }
 
 - (void)importOpenPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
@@ -1465,7 +1465,7 @@ static BOOL changingColors = NO;
             [sheet orderOut:nil];
             
             BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self] autorelease];
-            [tic beginSheetModalForWindow:documentWindow forURL:[NSURL fileURLWithPath:fileName]];
+            [tic beginSheetForURL:[NSURL fileURLWithPath:fileName] modalForWindow:documentWindow];
         }
     }
 }
@@ -1489,7 +1489,7 @@ static BOOL changingColors = NO;
         [[urlSheetController window] orderOut:nil];
         
         BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self] autorelease];
-        [tic beginSheetModalForWindow:documentWindow forURL:[urlSheetController URL]];
+        [tic beginSheetForURL:[urlSheetController URL] modalForWindow:documentWindow];
     }
 }
 
