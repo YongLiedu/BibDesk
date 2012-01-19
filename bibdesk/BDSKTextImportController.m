@@ -829,10 +829,6 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     if (returnCode == NSOKButton) {
         [[urlSheetController window] orderOut:nil];
         
-        // make sure we loaded the nib before calling setShowingWebView:
-        [self window];
-        [self setShowingWebView:YES];
-        
         // show the main window
         [super beginSheetModalForWindow:docWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         
