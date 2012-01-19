@@ -800,7 +800,6 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
             
             // show the main window
             [super beginSheetModalForWindow:docWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-            [self release];
             
             // then load the data from the file
             [self openPanelDidEnd:sheet returnCode:returnCode contextInfo:NULL];
@@ -809,6 +808,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         // the user cancelled. As we don't end the main sheet we have to call our didEndSelector ourselves
         [self didEndSheet:sheet returnCode:returnCode contextInfo:NULL];
     }
+    [self autorelease];
 }
 	
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
@@ -843,7 +843,6 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         
         // show the main window
         [super beginSheetModalForWindow:docWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-        [self release];
         
         // then load the data from the file
         [self urlSheetDidEnd:urlSheetController returnCode:returnCode contextInfo:NULL];
@@ -852,6 +851,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         // the user cancelled. As we don't end the main sheet we have to call our didEndSelector ourselves
         [self didEndSheet:nil returnCode:returnCode contextInfo:NULL];
     }
+    [self autorelease];
 }
 
 - (void)urlSheetDidEnd:(BDSKURLSheetController *)urlSheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
