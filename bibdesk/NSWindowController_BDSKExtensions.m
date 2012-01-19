@@ -93,6 +93,14 @@
 
 #pragma mark Sheet methods
 
+- (void)didEndSheet:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+	NSInvocation *invocation = [(NSInvocation *)contextInfo autorelease];
+    if (invocation) {
+		[invocation setArgument:&returnCode atIndex:3];
+		[invocation invoke];
+	}
+}
+
 - (void)beginSheetModalForWindow:(NSWindow *)window {
 	[self beginSheetModalForWindow:window modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 }
@@ -118,14 +126,6 @@
     [NSApp endSheet:[self window] returnCode:[sender tag]];
     [[self window] orderOut:self];
     [self autorelease];
-}
-
-- (void)didEndSheet:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-	NSInvocation *invocation = [(NSInvocation *)contextInfo autorelease];
-    if (invocation) {
-		[invocation setArgument:&returnCode atIndex:3];
-		[invocation invoke];
-	}
 }
 
 @end
