@@ -1447,24 +1447,59 @@ static BOOL changingColors = NO;
             return; // it worked, so we're done here
     }
     
-    BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self];
+    BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self] autorelease];
+    [tic beginSheetModalForWindow:documentWindow forURL:nil];
+}
 
-    [tic beginSheetForPasteboardModalForWindow:documentWindow];
-	[tic release];
+- (void)importOpenPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+    if (returnCode == NSFileHandlingPanelOKButton) {
+        NSString *fileName = [sheet filename];
+        // first try to parse the file
+        NSError *error = nil;
+        NSArray *newPubs = [self extractPublicationsFromFiles:[NSArray arrayWithObject:fileName] unparseableFiles:NULL verbose:NO error:&error];
+        BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
+        if ([newPubs count]) {
+            [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:[[error userInfo] valueForKey:@"temporaryCiteKey"] selectLibrary:YES edit:shouldEdit];
+            // succeeded to parse the file, we return immediately
+        } else {
+            [sheet orderOut:nil];
+            
+            BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self] autorelease];
+            [tic beginSheetModalForWindow:documentWindow forURL:[NSURL fileURLWithPath:fileName]];
+        }
+    }
 }
 
 - (IBAction)importFromFileAction:(id)sender{
-    BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self];
+	NSOpenPanel *oPanel = [NSOpenPanel openPanel];
+	[oPanel setAllowsMultipleSelection:NO];
+	[oPanel setCanChooseDirectories:NO];
 
-    [tic beginSheetForFileModalForWindow:documentWindow];
-	[tic release];
+	[oPanel beginSheetForDirectory:nil 
+							  file:nil 
+							 types:nil
+					modalForWindow:documentWindow
+					 modalDelegate:self 
+					didEndSelector:@selector(importOpenPanelDidEnd:returnCode:contextInfo:) 
+					   contextInfo:NULL];
+}
+
+- (void)importFromWebSheetDidEnd:(BDSKURLSheetController *)urlSheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+    if (returnCode == NSOKButton) {
+        [[urlSheetController window] orderOut:nil];
+        
+        BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self] autorelease];
+        [tic beginSheetModalForWindow:documentWindow forURL:[urlSheetController URL]];
+    }
 }
 
 - (IBAction)importFromWebAction:(id)sender{
-    BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self];
-
-    [tic beginSheetForWebModalForWindow:documentWindow];
-	[tic release];
+    BDSKURLSheetController *urlSheetController = [[[BDSKURLSheetController alloc] init] autorelease];
+    
+	[urlSheetController beginSheetModalForWindow:documentWindow
+                                   modalDelegate:self
+                                  didEndSelector:@selector(importFromWebSheetDidEnd:returnCode:contextInfo:)
+                                     contextInfo:NULL];
 }
 
 #pragma mark AutoFile stuff

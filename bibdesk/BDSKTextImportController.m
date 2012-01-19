@@ -79,13 +79,12 @@
 
 - (void)loadPasteboardData;
 - (void)showWebViewWithURLString:(NSString *)urlString;
+- (void)loadFromFileURL:(NSURL *)url;
 - (void)setShowingWebView:(BOOL)showWebView;
 - (void)setupTypeUI;
 - (void)setType:(NSString *)type;
 
-- (void)initialOpenPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
-- (void)initialUrlSheetDidEnd:(BDSKURLSheetController *)urlSheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)urlSheetDidEnd:(BDSKURLSheetController *)urlSheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)autoDiscoverFromFrameAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
@@ -195,45 +194,21 @@
 
 #pragma mark Calling the main sheet
 
-- (void)beginSheetForPasteboardModalForWindow:(NSWindow *)docWindow {
-	// we start with the pasteboard data, so we can directly show the main sheet 
+- (void)beginSheetModalForWindow:(NSWindow *)aWindow forURL:(NSURL *)aURL {
     // make sure we loaded the nib
     [self window];
-	[self loadPasteboardData];
-	
-    [super beginSheetModalForWindow:docWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-}
-
-- (void)beginSheetForWebModalForWindow:(NSWindow *)docWindow {
-	// we start with a webview, so we first ask for the URL to load
-	
-	[self retain]; // make sure we stay around till we are done
-	
-    BDSKURLSheetController *urlSheetController = [[[BDSKURLSheetController alloc] init] autorelease];
+    if (aURL == nil)
+        [self loadPasteboardData];
+	else if ([aURL isFileURL])
+		[self loadFromFileURL:aURL];
+	else
+		[self setShowingWebView:YES];
     
-	// now show the URL sheet. We will show the main sheet when that is done.
-	[urlSheetController beginSheetModalForWindow:docWindow
-                                   modalDelegate:self
-                                  didEndSelector:@selector(initialUrlSheetDidEnd:returnCode:contextInfo:)
-                                     contextInfo:[docWindow retain]];
-}
-		
-- (void)beginSheetForFileModalForWindow:(NSWindow *)docWindow {
-	// we start with a file, so we first ask for the file to load
-	
-	[self retain]; // make sure we stay around till we are done
-	
-	NSOpenPanel *oPanel = [NSOpenPanel openPanel];
-	[oPanel setAllowsMultipleSelection:NO];
-	[oPanel setCanChooseDirectories:NO];
-
-	[oPanel beginSheetForDirectory:nil 
-							  file:nil 
-							 types:nil
-					modalForWindow:docWindow
-					 modalDelegate:self 
-					didEndSelector:@selector(initialOpenPanelDidEnd:returnCode:contextInfo:) 
-					   contextInfo:[docWindow retain]];
+    [self beginSheetModalForWindow:aWindow];
+    
+    // not sure if this could be done safely before showing the sheet
+    if (aURL && [aURL isFileURL] == NO)
+        [webView setURL:aURL];
 }
 
 #pragma mark Actions
@@ -729,6 +704,25 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         
 }
 
+- (void)loadFromFileURL:(NSURL *)url {
+    NSTextStorage *text = [sourceTextView textStorage];
+    NSLayoutManager *layoutManager = [[text layoutManagers] objectAtIndex:0];
+
+    [[text mutableString] setString:@""];	// Empty the document
+    
+    [self setShowingWebView:NO];
+    
+    [layoutManager retain];			// Temporarily remove layout manager so it doesn't do any work while loading
+    [text removeLayoutManager:layoutManager];
+    [text beginEditing];			// Bracket with begin/end editing for efficiency
+    [text readFromURL:url options:nil documentAttributes:NULL];	// Read!
+    [text endEditing];
+    [text addLayoutManager:layoutManager];	// Hook layout manager back up
+    [layoutManager release];
+    
+    [self autoDiscoverDataFromString:[text string]];
+}
+
 - (void)setShowingWebView:(BOOL)showWebView{
 	if (showWebView != showingWebView) {
 		showingWebView = showWebView;
@@ -772,74 +766,10 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 }
 
 #pragma mark Sheet callbacks
-
-- (void)initialOpenPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    // this is the initial file load, the main window is not yet there
-    NSWindow *docWindow = [(NSWindow *)contextInfo autorelease];
-    
-    if (returnCode == NSFileHandlingPanelOKButton) {
-        NSString *fileName = [sheet filename];
-        // first try to parse the file
-        NSError *error = nil;
-        NSArray *newPubs = [document extractPublicationsFromFiles:[NSArray arrayWithObject:fileName] unparseableFiles:NULL verbose:NO error:&error];
-        BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
-        if ([newPubs count]) {
-            [document addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:[[error userInfo] valueForKey:@"temporaryCiteKey"] selectLibrary:YES edit:shouldEdit];
-            // succeeded to parse the file, we return immediately
-        } else {
-            [sheet orderOut:nil];
-            
-            // show the main window
-            [super beginSheetModalForWindow:docWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-            
-            // then load the data from the file
-            [self openPanelDidEnd:sheet returnCode:returnCode contextInfo:NULL];
-        }
-    }
-    [self autorelease];
-}
 	
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if(returnCode == NSFileHandlingPanelOKButton){
-        NSURL *url = [[sheet URLs] lastObject];
-		NSTextStorage *text = [sourceTextView textStorage];
-		NSLayoutManager *layoutManager = [[text layoutManagers] objectAtIndex:0];
-
-		[[text mutableString] setString:@""];	// Empty the document
-		
-		[self setShowingWebView:NO];
-		
-		[layoutManager retain];			// Temporarily remove layout manager so it doesn't do any work while loading
-		[text removeLayoutManager:layoutManager];
-		[text beginEditing];			// Bracket with begin/end editing for efficiency
-		[text readFromURL:url options:nil documentAttributes:NULL];	// Read!
-		[text endEditing];
-		[text addLayoutManager:layoutManager];	// Hook layout manager back up
-		[layoutManager release];
-        
-        [self autoDiscoverDataFromString:[text string]];
-
-    }        
-}
-
-- (void)initialUrlSheetDidEnd:(BDSKURLSheetController *)urlSheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    // this is the initial web load, the main window is not yet there
-    NSWindow *docWindow = [(NSWindow *)contextInfo autorelease];
-    
-    if (returnCode == NSOKButton) {
-        [[urlSheetController window] orderOut:nil];
-        
-        [self window];
-		[self setShowingWebView:YES];
-        
-        // show the main window
-        [super beginSheetModalForWindow:docWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-        
-        // then load the data from the file
-        [self urlSheetDidEnd:urlSheetController returnCode:returnCode contextInfo:NULL];
-        
-    }
-    [self autorelease];
+    if(returnCode == NSFileHandlingPanelOKButton)
+        [self loadFromFileURL:[[sheet URLs] lastObject]];
 }
 
 - (void)urlSheetDidEnd:(BDSKURLSheetController *)urlSheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{

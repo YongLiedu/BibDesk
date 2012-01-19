@@ -100,9 +100,7 @@
 
 - (id)initWithDocument:(BibDocument *)doc;
 
-- (void)beginSheetForPasteboardModalForWindow:(NSWindow *)docWindow;
-- (void)beginSheetForFileModalForWindow:(NSWindow *)docWindow;
-- (void)beginSheetForWebModalForWindow:(NSWindow *)docWindow;
+- (void)beginSheetModalForWindow:(NSWindow *)aWindow forURL:(NSURL *)aURL;
 
 - (IBAction)addItemAction:(id)sender;
 - (IBAction)closeAction:(id)sender;
