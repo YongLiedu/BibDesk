@@ -60,7 +60,7 @@
     [urlField setStringValue:newUrlString ?: @""];
 }
 
-- (NSURL *)url {
+- (NSURL *)URL {
     NSString *urlString = [self urlString];
    return [NSString isEmptyString:urlString] ? nil : [NSURL URLWithStringByNormalizingPercentEscapes:urlString];
 }

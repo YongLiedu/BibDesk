@@ -660,7 +660,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         // remove the sheet in case we get an alert
         [[urlController window] orderOut:nil];
         
-        NSURL *aURL = [urlController url];
+        NSURL *aURL = [urlController URL];
         if (aURL == nil)
             return;
         NSUInteger anIndex = (NSUInteger)contextInfo;

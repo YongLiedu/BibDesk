@@ -848,7 +848,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         
 		[self setShowingWebView:YES];
         
-        NSURL *url = [urlSheetController url];
+        NSURL *url = [urlSheetController URL];
         
         if(url == nil){
             [[urlSheetController window] orderOut:nil];
