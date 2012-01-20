@@ -1488,8 +1488,14 @@ static BOOL changingColors = NO;
     if (returnCode == NSOKButton) {
         [[urlSheetController window] orderOut:nil];
         
+        NSURL *url = [urlSheetController URL];
+        if (url == nil) {
+            NSBeep();
+            return;
+        }
+        
         BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self] autorelease];
-        [tic beginSheetForURL:[urlSheetController URL] modalForWindow:documentWindow];
+        [tic beginSheetForURL:url modalForWindow:documentWindow];
     }
 }
 
