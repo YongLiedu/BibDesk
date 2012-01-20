@@ -1477,7 +1477,7 @@ static BOOL changingColors = NO;
 
 	[oPanel beginSheetForDirectory:nil 
 							  file:nil 
-							 types:nil
+							 types:[NSAttributedString textTypes]
 					modalForWindow:documentWindow
 					 modalDelegate:self 
 					didEndSelector:@selector(importOpenPanelDidEnd:returnCode:contextInfo:) 

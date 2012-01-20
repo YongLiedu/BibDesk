@@ -327,7 +327,7 @@
 
     [oPanel beginSheetForDirectory:nil 
                               file:nil 
-							 types:nil
+							 types:[NSAttributedString textTypes]
                     modalForWindow:[self window]
                      modalDelegate:self 
                     didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
