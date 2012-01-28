@@ -61,10 +61,9 @@
 									forName:BDSKNewPathColorTransformerName];
 }
 
-- (id)initWithErrors:(NSArray *)infoDicts forField:(NSString *)field fromDocument:(BibDocument *)doc options:(NSInteger)mask {
+- (id)initWithErrors:(NSArray *)infoDicts forField:(NSString *)field options:(NSInteger)mask {
     self = [super initWithWindowNibName:@"AutoFile"];
     if (self) {
-        document = [doc retain];
         fieldName = [field retain];
         options = mask;
         
@@ -81,7 +80,6 @@
     [tv setDelegate:nil];
     [tv setDataSource:nil];
     BDSKDESTROY(errorInfoDicts);
-    BDSKDESTROY(document);
     BDSKDESTROY(fieldName);
     [super dealloc];
 }
@@ -120,14 +118,13 @@
         return;
     }
     
-    BibDocument *doc = [[document retain] autorelease];
     NSString *field = [[fieldName retain] autorelease];
     BDSKFilerOptions mask = (options & BDSKInitialAutoFileOptionMask);
     mask |= ([forceCheckButton state]) ? BDSKForceAutoFileOptionMask : (options & BDSKCheckCompleteAutoFileOptionMask);
     
     [self close];
     
-    [[BDSKFiler sharedFiler] movePapers:fileInfoDicts forField:field fromDocument:doc options:mask];
+    [[BDSKFiler sharedFiler] movePapers:fileInfoDicts forField:field fromDocument:[self document] options:mask];
 }
 
 - (IBAction)dump:(id)sender{
@@ -201,16 +198,12 @@
         case 2:
             pub = [dict objectForKey:BDSKFilerPublicationKey];
             // at this moment we have the document set
-            [document editPub:pub];
+            [[self document] editPub:pub];
             break;
 	}
 }
 
 #pragma mark Accessors
-
-- (BibDocument *)sourceDocument {
-    return document;
-}
 
 - (NSArray *)errorInfoDicts {
     return errorInfoDicts;

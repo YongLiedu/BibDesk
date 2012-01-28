@@ -38,7 +38,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BibDocument;
 
 @interface BDSKFilerErrorController : NSWindowController <NSTableViewDelegate, NSTableViewDataSource> {
 	IBOutlet NSTableView *tv;
@@ -47,22 +46,19 @@
 	IBOutlet NSButton *forceCheckButton;
 	IBOutlet NSMenu *contextMenu;
     
-    BibDocument *document;
     NSString *fieldName;
     NSInteger options;
     
 	NSArray *errorInfoDicts;
 }
 
-- (id)initWithErrors:(NSArray *)infoDicts forField:(NSString *)field fromDocument:(BibDocument *)doc options:(NSInteger)masks;
+- (id)initWithErrors:(NSArray *)infoDicts forField:(NSString *)field options:(NSInteger)masks;
 
 - (IBAction)done:(id)sender;
 - (IBAction)tryAgain:(id)sender;
 - (IBAction)dump:(id)sender;
 - (IBAction)selectAll:(id)sender;
 - (IBAction)showFile:(id)sender;
-
-- (BibDocument *)sourceDocument;
 
 - (NSArray *)errorInfoDicts;
 - (NSUInteger)countOfErrorInfoDicts;

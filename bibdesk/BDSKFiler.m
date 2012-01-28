@@ -69,32 +69,7 @@ static BDSKFiler *sharedFiler = nil;
 
 - (id)init{
     BDSKPRECONDITION(sharedFiler == nil);
-	self = [super initWithWindowNibName:@"AutoFileProgress"];
-    if (self) {
-        errorControllers = [[NSMutableArray alloc] init];
-    }
-    return self;
-}
-
-- (void)dealloc {
-    BDSKDESTROY(errorControllers);
-    [super dealloc];
-}
-
-- (void)handleErrorWindowWillCloseNotification:(NSNotification *)notification {
-    NSWindow *window = [notification object];
-    BDSKFilerErrorController *errorController = [[[window windowController] retain] autorelease];
-    [errorControllers removeObject:errorController];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:window];
-}
-
-- (void)closeErrorControllersForDocument:(BibDocument *)document {
-    NSUInteger i = [errorControllers count];
-    while (i-- > 0) {
-        BDSKFilerErrorController *errorController = [errorControllers objectAtIndex:i];
-        if ([errorController document] == document)
-            [errorController close];
-    }
+	return [super initWithWindowNibName:@"AutoFileProgress"];
 }
 
 #pragma mark Auto file methods
@@ -253,10 +228,9 @@ static BDSKFiler *sharedFiler = nil;
         [[[doc undoManager] prepareWithInvocationTarget:self] movePapers:fileInfoDicts forField:field fromDocument:doc options:0];
 	
 	if ([errorInfoDicts count] > 0) {
-		BDSKFilerErrorController *errorController = [[[BDSKFilerErrorController alloc] initWithErrors:errorInfoDicts forField:field fromDocument:doc options:mask] autorelease];
-        [errorControllers addObject:errorController];
+		BDSKFilerErrorController *errorController = [[[BDSKFilerErrorController alloc] initWithErrors:errorInfoDicts forField:field options:mask] autorelease];
+        [doc addWindowController:errorController];
         [errorController showWindow:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleErrorWindowWillCloseNotification:) name:NSWindowWillCloseNotification object:[errorController window]];
     }
     
     return [fileInfoDicts count] > 0;

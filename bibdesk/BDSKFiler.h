@@ -68,7 +68,6 @@ typedef NSUInteger BDSKFilerOptions;
 
 @interface BDSKFiler : NSWindowController {
 	IBOutlet NSProgressIndicator *progressIndicator;
-    NSMutableArray *errorControllers;
 }
 
 + (BDSKFiler *)sharedFiler;
@@ -100,8 +99,6 @@ BDSKCheckCompleteAutoFileOptionMask indicates that for initial moves a check wil
 BDSKForceAutoFileOptionMask forces AutoFiling, even if there may be problems moving the file. 
 */
 - (BOOL)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(BDSKFilerOptions)masks;
-
-- (void)closeErrorControllersForDocument:(BibDocument *)document;
 
 @end
 
