@@ -658,6 +658,8 @@ static NSOperationQueue *metadataCacheQueue = nil;
        [self numberOfSelectedPubs] != 0)
         [[BDSKPreviewer sharedPreviewer] updateWithBibTeXString:nil];    
 	
+    [[BDSKFiler sharedFiler] closeErrorControllersForDocument:self];
+    
 	[pboardHelper setDelegate:nil];
     [pboardHelper release];
     pboardHelper = nil;

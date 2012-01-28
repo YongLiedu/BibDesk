@@ -62,6 +62,8 @@
 - (IBAction)selectAll:(id)sender;
 - (IBAction)showFile:(id)sender;
 
+- (BibDocument *)sourceDocument;
+
 - (NSArray *)errorInfoDicts;
 - (NSUInteger)countOfErrorInfoDicts;
 - (id)objectInErrorInfoDictsAtIndex:(NSUInteger)index;

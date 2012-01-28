@@ -98,17 +98,7 @@
 	[tv setTarget:self];
 }
 
-- (void)windowWillClose:(NSNotification *)notification {
-    [self autorelease];
-}
-
 #pragma mark Actions
-
-- (IBAction)showWindow:(id)sender {
-    // we have to stay around until the window closes, this is balanced in windowWillClose:
-    [self retain];
-    [super showWindow:sender];
-}
 
 - (IBAction)done:(id)sender{
     [self close];
@@ -217,6 +207,10 @@
 }
 
 #pragma mark Accessors
+
+- (BibDocument *)sourceDocument {
+    return document;
+}
 
 - (NSArray *)errorInfoDicts {
     return errorInfoDicts;
