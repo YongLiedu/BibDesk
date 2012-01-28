@@ -118,7 +118,6 @@
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender;
 - (IBAction)generateCiteKey:(id)sender;
 - (IBAction)showCiteKeyWarning:(id)sender;
-- (IBAction)consolidateLinkedFiles:(id)sender;
 
 - (void)copyLocationAsRemoteUrl:(id)sender;
 - (void)copyLinkedLocationAsRemoteUrl:(id)sender;
