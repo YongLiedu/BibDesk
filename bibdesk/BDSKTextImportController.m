@@ -47,13 +47,13 @@
 #import "BDSKFieldNameFormatter.h"
 #import "BDSKEdgeView.h"
 #import "BibDocument.h"
+#import "BibDocument_Groups.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKAppController.h"
 #import "BDSKFieldEditor.h"
 #import "BDSKFieldSheetController.h"
 #import "BDSKMacroResolver.h"
 #import "NSImage_BDSKExtensions.h"
-#import "BDSKFiler.h"
 #import "BDSKStringParser.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
@@ -212,6 +212,7 @@
 - (IBAction)addItemAction:(id)sender{
     NSInteger optKey = [NSEvent standardModifierFlags] & NSAlternateKeyMask;
     BibItem *newItem = (optKey) ? [item copy] : [[BibItem alloc] init];
+    NSArray *itemsToAdd = [NSArray arrayWithObjects:item, nil];
     
     // make the tableview stop editing:
     [self finalizeChangesPreservingSelection:NO];
@@ -219,24 +220,9 @@
 	[itemsAdded addObject:item];
     [[self undoManager] removeAllActions];
     [item setOwner:nil];
-    [document addPublication:item];
-    
-    if ([item hasEmptyOrDefaultCiteKey])
-        [item setCiteKey:[item suggestedCiteKey]];
-    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey] && [[item filesToBeFiled] count]){
-        NSMutableArray *files = [NSMutableArray array];
-        
-        for (BDSKLinkedFile *file in [item filesToBeFiled]) {
-            if([item canSetURLForLinkedFile:file] == NO)
-                continue;
-            [files addObject:file];
-        }
-        if ([files count])
-            [[BDSKFiler sharedFiler] autoFileLinkedFiles:files fromDocument:document check:NO];
-    }
+    [document addPublications:itemsToAdd publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:NO edit:NO];
     
     [item release];
-    
     item = newItem;
     [item setOwner:self];
 	
@@ -261,8 +247,10 @@
     [self cancelDownload];
     [webView setDelegate:nil];
 	// select the items we just added
-    if ([itemsAdded count] > 0)
+    if ([itemsAdded count] > 0) {
+        [document selectLibraryGroup:nil];
         [document selectPublications:itemsAdded];
+    }
 	[itemsAdded removeAllObjects];
     
     [super dismiss:sender];
