@@ -193,7 +193,7 @@
 
 #pragma mark Calling the main sheet
 
-- (void)beginSheetForURL:(NSURL *)aURL modalForWindow:(NSWindow *)aWindow {
+- (void)beginSheetForURL:(NSURL *)aURL modalForWindow:(NSWindow *)aWindow modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo {
     // make sure we loaded the nib
     [self window];
     if (aURL == nil) {
@@ -204,7 +204,7 @@
 		[self setShowingWebView:YES];
         [webView setURL:aURL];
     }
-    [self beginSheetModalForWindow:aWindow];
+    [self beginSheetModalForWindow:aWindow modalDelegate:delegate didEndSelector:didEndSelector contextInfo:contextInfo];
 }
 
 #pragma mark Actions

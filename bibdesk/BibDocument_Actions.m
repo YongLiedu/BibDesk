@@ -1429,6 +1429,10 @@ static BOOL changingColors = NO;
 
 #pragma mark Text import sheet support
 
+- (void)importSheetDidEnd:(BDSKTextImportController *)controller returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
+    docFlags.didImport = NO;
+}
+
 - (IBAction)importFromPasteboardAction:(id)sender{
     
     NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
@@ -1447,8 +1451,14 @@ static BOOL changingColors = NO;
             return; // it worked, so we're done here
     }
     
+    docFlags.didImport = NO;
+    
     BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self] autorelease];
-    [tic beginSheetForURL:nil modalForWindow:documentWindow];
+    [tic beginSheetForURL:nil
+           modalForWindow:documentWindow 
+            modalDelegate:self 
+           didEndSelector:@selector(importSheetDidEnd:returnCode:contextInfo:) 
+              contextInfo:NULL];
 }
 
 - (void)importOpenPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
@@ -1464,8 +1474,14 @@ static BOOL changingColors = NO;
         } else {
             [sheet orderOut:nil];
             
+            docFlags.didImport = NO;
+            
             BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self] autorelease];
-            [tic beginSheetForURL:[NSURL fileURLWithPath:fileName] modalForWindow:documentWindow];
+            [tic beginSheetForURL:[NSURL fileURLWithPath:fileName] 
+                   modalForWindow:documentWindow 
+                    modalDelegate:self 
+                   didEndSelector:@selector(importSheetDidEnd:returnCode:contextInfo:) 
+                      contextInfo:NULL];
         }
     }
 }
@@ -1494,8 +1510,14 @@ static BOOL changingColors = NO;
             return;
         }
         
+        docFlags.didImport = NO;
+        
         BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self] autorelease];
-        [tic beginSheetForURL:url modalForWindow:documentWindow];
+        [tic beginSheetForURL:url 
+               modalForWindow:documentWindow 
+                modalDelegate:self 
+               didEndSelector:@selector(importSheetDidEnd:returnCode:contextInfo:) 
+                  contextInfo:NULL];
     }
 }
 
