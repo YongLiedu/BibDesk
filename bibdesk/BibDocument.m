@@ -2274,12 +2274,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             if ([parseError code] == kBDSKParserIgnoredFrontMatter) {
                 // the partial data alert only applies to BibTeX; we could show the editor window for non-BibTeX data (I think...), but we also have to deal with alerts being shown twice if NSError is involved
                 // here we want to display an alert, but don't propagate a nil/error back up, since it's not a failure
-                NSAlert * alert = [NSAlert alertWithMessageText:[parseError localizedDescription]
-                                                  defaultButton:nil
-                                                alternateButton:nil
-                                                    otherButton:nil
-                                      informativeTextWithFormat:[parseError localizedRecoverySuggestion]];
-                [alert runModal];
+                [NSApp presentError:parseError];
                 // @@ fixme: NSError
                 parseError = nil;
             } else {
