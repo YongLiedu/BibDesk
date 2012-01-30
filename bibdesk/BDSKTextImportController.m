@@ -66,6 +66,7 @@
 #import "NSEvent_BDSKExtensions.h"
 #import "BDSKURLSheetController.h"
 #import "NSTextView_BDSKExtensions.h"
+#import "NSError_BDSKExtensions.h"
 
 #define BDSKTextImportControllerFrameAutosaveName @"BDSKTextImportController Frame Autosave Name"
 
@@ -1497,7 +1498,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     NSArray *pubs = [document publicationsForString:string type:type verbose:NO error:&error];
     
     // ignore warnings for parsing with temporary citekeys, as we're not interested in the cite key
-    if ([[error userInfo] valueForKey:@"temporaryCiteKey"] != nil)
+    if ([error isLocalError] && [error code] == kBDSKHadMissingCiteKeys)
         error = nil;
     
     if(error || [pubs count] == 0)

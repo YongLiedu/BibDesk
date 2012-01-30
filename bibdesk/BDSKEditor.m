@@ -85,6 +85,7 @@
 #import "NSTableView_BDSKExtensions.h"
 #import "NSInvocation_BDSKExtensions.h"
 #import "NSTextView_BDSKExtensions.h"
+#import "NSError_BDSKExtensions.h"
 
 #define WEAK_NULL NULL
 
@@ -1027,7 +1028,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     }
     
 	if (canSet == NO){
-		NSString *message = NSLocalizedString(@"Not all fields needed for generating the file location are set.  Do you want me to file the paper now using the available fields, or cancel autofile for this paper?",@"");
+		NSString *message = NSLocalizedString(@"Not all fields needed for generating the file location are set.  Do you want me to file the paper now using the available fields, or cancel autofile for this paper?",@"Informative text in alert dialog");
 		NSString *otherButton = nil;
 		if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]){
 			message = NSLocalizedString(@"Not all fields needed for generating the file location are set. Do you want me to file the paper now using the available fields, cancel autofile for this paper, or wait until the necessary fields are set?", @"Informative text in alert dialog"),
@@ -2690,7 +2691,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         // this returns nil when there was a parser error and the user didn't decide to proceed anyway
         draggedPubs = [[self document] publicationsForString:pbString type:[pbString contentStringType] verbose:NO error:&error];
         // we ignore warnings for parsing with temporary keys, but we want to ignore the cite key in that case
-        if([[error userInfo] objectForKey:@"temporaryCiteKey"] != nil){
+        if([error isLocalError] && [error code] == kBDSKHadMissingCiteKeys) {
             hasTemporaryCiteKey = YES;
             error = nil;
         }

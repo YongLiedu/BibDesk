@@ -2214,8 +2214,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         newPubs = newPubs ? [newPubs arrayByAddingObjectsFromArray:newFilePubs]: newFilePubs;
     }
     
-    if(temporaryCiteKey = [[error userInfo] objectForKey:@"temporaryCiteKey"])
+    if([error isLocalError] && [error code] == kBDSKHadMissingCiteKeys) {
+        temporaryCiteKey = [[error userInfo] objectForKey:@"temporaryCiteKey"];
         error = nil; // accept temporary cite keys, but show a warning later
+    }
     
     if ([newPubs count] > 0) 
 		[self addPublications:newPubs publicationsToAutoFile:newFilePubs temporaryCiteKey:temporaryCiteKey selectLibrary:shouldSelect edit:shouldEdit];
@@ -2306,7 +2308,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         
         // return an error when we inserted temporary keys, let the caller decide what to do with it
         // don't override a parseError though, as that is probably more relevant
-        parseError = [NSError mutableLocalErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Temporary Cite Keys", @"Error description")];
+        parseError = [NSError mutableLocalErrorWithCode:kBDSKHadMissingCiteKeys localizedDescription:NSLocalizedString(@"Temporary Cite Keys", @"Error description")];
         [parseError setValue:@"FixMe" forKey:@"temporaryCiteKey"];
     }
     

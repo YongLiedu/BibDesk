@@ -63,6 +63,7 @@ enum {
     kBDSKCannotFindTemporaryDirectoryError,       /* Cannot find temporary directory         */
     kBDSKCannotCreateTemporaryFileError,          /* Cannot create a temporary file          */
     kBDSKDocumentOpenError,                       /* umbrella error type for document open   */
+    kBDSKHadMissingCiteKeys,                      /* BibTeX data had missing cite keys       */
 };
 
 extern NSString *BDSKUnderlyingItemErrorKey;
