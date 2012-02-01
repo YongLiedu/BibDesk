@@ -326,7 +326,6 @@
 		CEF181BD0CEB711700716E85 /* Bookmarks.plist in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = CEF1817E0CEB701F00716E85 /* Bookmarks.plist */; };
 		CEF1D6B2117F015A0069E249 /* BibDeskHelp in Resources */ = {isa = PBXBuildFile; fileRef = CEF1D682117F015A0069E249 /* BibDeskHelp */; };
 		CEF1D6B5117F018C0069E249 /* bibdesk.texi in Resources */ = {isa = PBXBuildFile; fileRef = CEF1D6B3117F018C0069E249 /* bibdesk.texi */; };
-		CEF1D6B6117F018C0069E249 /* version.texi in Resources */ = {isa = PBXBuildFile; fileRef = CEF1D6B4117F018C0069E249 /* version.texi */; };
 		CEF1D6BC117F01C60069E249 /* applehelp.init in Resources */ = {isa = PBXBuildFile; fileRef = CEF1D6BA117F01C60069E249 /* applehelp.init */; };
 		CEF1D6BD117F01C60069E249 /* postprocess-nontitle.py in Resources */ = {isa = PBXBuildFile; fileRef = CEF1D6BB117F01C60069E249 /* postprocess-nontitle.py */; };
 		CEF2EEE70F3462A900A7989E /* NSColor_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */; };
@@ -509,6 +508,7 @@
 		F9F5ECD20AE5E7C8007EBB31 /* BDSKURLGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F5ECD00AE5E7C8007EBB31 /* BDSKURLGroup.m */; };
 		F9F78CD507D5320D004B68AF /* BDSKStringEncodingManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F78CD307D5320D004B68AF /* BDSKStringEncodingManager.m */; };
 		F9FD63DD0A61B87800F9871B /* NSMenu_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9FD63DB0A61B87800F9871B /* NSMenu_BDSKExtensions.m */; };
+		FEF508F214D9D8740063BD3F /* version.texi in Resources */ = {isa = PBXBuildFile; fileRef = CEF1D6B4117F018C0069E249 /* version.texi */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -3335,13 +3335,13 @@
 				CE1782FC1158EFCB00B2EBDF /* BookmarkSheet.xib in Resources */,
 				CEF1D6B2117F015A0069E249 /* BibDeskHelp in Resources */,
 				CEF1D6B5117F018C0069E249 /* bibdesk.texi in Resources */,
-				CEF1D6B6117F018C0069E249 /* version.texi in Resources */,
 				CEF1D6BC117F01C60069E249 /* applehelp.init in Resources */,
 				CEF1D6BD117F01C60069E249 /* postprocess-nontitle.py in Resources */,
 				CE2F057211B51FA7001B0AE0 /* BDSKOpenAccessoryView.xib in Resources */,
 				CEF52DD8126C7869006E904B /* WebGroupDownloads.html in Resources */,
 				CE0928D613FFC1D7008A6A69 /* Scroller_Divider_Lion.tiff in Resources */,
 				CE0928D813FFC1DC008A6A69 /* Scroller_Background_Lion.tiff in Resources */,
+				FEF508F214D9D8740063BD3F /* version.texi in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4607,7 +4607,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 2455;
+				CURRENT_PROJECT_VERSION = 2456;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -4616,7 +4616,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 2455;
+				CURRENT_PROJECT_VERSION = 2456;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
