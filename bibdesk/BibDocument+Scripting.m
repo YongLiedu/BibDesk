@@ -224,9 +224,7 @@
 
 - (id)copyScriptingValue:(id)value forKey:(NSString *)key withProperties:(NSDictionary *)properties {
     if ([key isEqualToString:@"scriptingPublications"]) {
-        [NSString setMacroResolverForUnarchiving:[self macroResolver]];
-        id copiedValue = [[NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:value]] retain];
-        [NSString setMacroResolverForUnarchiving:nil];
+        id copiedValue = [[BibItem publicationsFromArchivedData:[BibItem archivedPublications:value] macroResolver:[self macroResolver]] retain];
         [copiedValue setValue:[self macroResolver] forKey:@"macroResolver"];
         if ([properties count]) {
             for (id item in copiedValue) {
