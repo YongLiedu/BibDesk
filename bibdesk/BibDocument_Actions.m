@@ -1430,7 +1430,9 @@ static BOOL changingColors = NO;
 #pragma mark Text import sheet support
 
 - (void)importSheetDidEnd:(BDSKTextImportController *)controller returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    docFlags.didImport = NO;
+    NSArray *addedPubs = [controller addedPublications];
+    if ([addedPubs count] > 0)
+        [self addPublications:addedPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:YES edit:NO];
 }
 
 - (IBAction)importFromPasteboardAction:(id)sender{
@@ -1447,13 +1449,12 @@ static BOOL changingColors = NO;
 			isKnownFormat = ([pboardString contentStringType] != BDSKUnknownStringType);
 		}
 		
-        if(isKnownFormat && nil != [self addPublicationsFromPasteboard:pasteboard selectLibrary:YES verbose:NO error:&error])
+        NSArray *newPubs = isKnownFormat ? [self addPublicationsFromPasteboard:pasteboard selectLibrary:YES verbose:NO error:&error] : nil;
+        if([newPubs count] > 0)
             return; // it worked, so we're done here
     }
     
-    docFlags.didImport = NO;
-    
-    BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self] autorelease];
+    BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initForOwner:self] autorelease];
     [tic beginSheetForURL:nil
            modalForWindow:documentWindow 
             modalDelegate:self 
@@ -1474,9 +1475,7 @@ static BOOL changingColors = NO;
         } else {
             [sheet orderOut:nil];
             
-            docFlags.didImport = NO;
-            
-            BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self] autorelease];
+            BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initForOwner:self] autorelease];
             [tic beginSheetForURL:[NSURL fileURLWithPath:fileName] 
                    modalForWindow:documentWindow 
                     modalDelegate:self 
@@ -1510,9 +1509,7 @@ static BOOL changingColors = NO;
             return;
         }
         
-        docFlags.didImport = NO;
-        
-        BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self] autorelease];
+        BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initForOwner:self] autorelease];
         [tic beginSheetForURL:url 
                modalForWindow:documentWindow 
                 modalDelegate:self 

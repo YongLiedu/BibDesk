@@ -67,8 +67,8 @@
     IBOutlet NSButton *stopOrReloadButton;
     IBOutlet NSButton *citeKeyWarningButton;
     
-	BibDocument* document;
-    BibItem* item;
+	id <BDSKOwner> owner;
+    BDSKPublicationsArray *publications;
 	NSMutableArray *itemsAdded;
     NSMutableArray *fields;
 	NSString *webSelection;
@@ -98,7 +98,10 @@
     NSResponder *savedFirstResponder;
 }
 
-- (id)initWithDocument:(BibDocument *)doc;
+- (id)initForOwner:(id <BDSKOwner>)anOwner;
+
+- (BibItem *)publication;
+- (NSArray *)addedPublications;
 
 - (void)beginSheetForURL:(NSURL *)aURL modalForWindow:(NSWindow *)aWindow modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
 

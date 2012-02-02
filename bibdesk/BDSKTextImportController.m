@@ -109,19 +109,21 @@
 
 @implementation BDSKTextImportController
 
-- (id)initWithDocument:(BibDocument *)doc{
+- (id)initForOwner:(id <BDSKOwner>)anOwner {
     self = [super initWithWindowNibName:[self windowNibName]];
     if(self){
-        document = doc;
-        item = [[BibItem alloc] init];
+        owner = anOwner;
+        publications = [[BDSKPublicationsArray alloc] initWithArray:[owner publications]];
+        BibItem *item = [[[BibItem alloc] init] autorelease];
         [item setOwner:self];
+        [publications addObject:item];
         fields = [[NSMutableArray alloc] init];
         webView = [[BDSKWebView alloc] init];
         [webView setDelegate:self];
         showingWebView = NO;
         itemsAdded = [[NSMutableArray alloc] init];
 		webSelection = nil;
-		tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[doc macroResolver]];
+		tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[owner macroResolver]];
 		crossrefFormatter = [[BDSKCiteKeyFormatter alloc] init];
         [crossrefFormatter setAllowsEmptyString:YES];
 		citationFormatter = [[BDSKCitationFormatter alloc] initWithDelegate:self];
@@ -140,7 +142,6 @@
     [splitView setDelegate:nil];
     [citeKeyField setDelegate:nil];
     BDSKDESTROY(webView);
-    BDSKDESTROY(item);
     BDSKDESTROY(fields);
     BDSKDESTROY(itemsAdded);
     BDSKDESTROY(tableCellFormatter);
@@ -160,7 +161,7 @@
 
 - (void)windowDidLoad{
     [citeKeyField setFormatter:[[[BDSKCiteKeyFormatter alloc] init] autorelease]];
-    [citeKeyField setStringValue:[item citeKey]];
+    [citeKeyField setStringValue:[[self publication] citeKey]];
     
     [statusLine setStringValue:@""];
 	
@@ -192,6 +193,16 @@
                                                object:webView];
 }
 
+#pragma mark Accessors
+
+- (BibItem *)publication {
+    return [publications lastObject];
+}
+
+- (NSArray *)addedPublications {
+    return itemsAdded;
+}
+
 #pragma mark Calling the main sheet
 
 - (void)beginSheetForURL:(NSURL *)aURL modalForWindow:(NSWindow *)aWindow modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo {
@@ -211,29 +222,25 @@
 #pragma mark Actions
 
 - (IBAction)addItemAction:(id)sender{
-    NSInteger optKey = [NSEvent standardModifierFlags] & NSAlternateKeyMask;
-    BibItem *newItem = (optKey) ? [item copy] : [[BibItem alloc] init];
-    NSArray *itemsToAdd = [NSArray arrayWithObjects:item, nil];
-    
     // make the tableview stop editing:
     [self finalizeChangesPreservingSelection:NO];
-    
-	[itemsAdded addObject:item];
     [[self undoManager] removeAllActions];
-    [item setOwner:nil];
-    [document addPublications:itemsToAdd publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:NO edit:NO];
     
-    [item release];
-    item = newItem;
-    [item setOwner:self];
+    BibItem *lastItem = [self publication];
+	[itemsAdded addObject:lastItem];
+    [lastItem setOwner:nil];
+    
+    BibItem *newItem = ([NSEvent standardModifierFlags] & NSAlternateKeyMask) ? [[lastItem copy] autorelease] : [[[BibItem alloc] init] autorelease];
+    [newItem setOwner:self];
+    [publications addObject:newItem];
 	
 	NSInteger numItems = [itemsAdded count];
 	NSString *pubSingularPlural = (numItems == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message");
     [statusLine setStringValue:[NSString stringWithFormat:NSLocalizedString(@"%ld %@ added.", @"format string for pubs added. args: one NSInteger for number added, then one string for singular or plural of publication(s)."), (long)numItems, pubSingularPlural]];
     
-    [itemTypeButton selectItemWithTitle:[item pubType]];
-    [citeKeyField setStringValue:[item citeKey]];
-    [self setCiteKeyDuplicateWarning:[item isValidCiteKey:[item citeKey]] == NO];
+    [itemTypeButton selectItemWithTitle:[newItem pubType]];
+    [citeKeyField setStringValue:[newItem citeKey]];
+    [self setCiteKeyDuplicateWarning:[newItem isValidCiteKey:[newItem citeKey]] == NO];
     [itemTableView reloadData];
 }
 
@@ -241,18 +248,10 @@
     // make the tableview stop editing:
     [self finalizeChangesPreservingSelection:NO];
     [[self undoManager] removeAllActions];
-    [item setOwner:nil];
-    BDSKDESTROY(item);
     
     // cleanup
     [self cancelDownload];
     [webView setDelegate:nil];
-	// select the items we just added
-    if ([itemsAdded count] > 0) {
-        [document selectLibraryGroup:nil];
-        [document selectPublications:itemsAdded];
-    }
-	[itemsAdded removeAllObjects];
     
     [super dismiss:sender];
 }
@@ -264,14 +263,18 @@
 
 - (IBAction)clearAction:(id)sender{
     [[self undoManager] removeAllActions];
-    [item setOwner:nil];
-    [item release];
-    item = [[BibItem alloc] init];
-    [item setOwner:self];
     
-    [itemTypeButton selectItemWithTitle:[item pubType]];
-    [citeKeyField setStringValue:[item citeKey]];
-    [self setCiteKeyDuplicateWarning:[item isValidCiteKey:[item citeKey]] == NO];
+    BibItem *lastItem = [self publication];
+    [lastItem setOwner:nil];
+    [publications removeObject:lastItem];
+    
+    BibItem *newItem = [[[BibItem alloc] init] autorelease];
+    [newItem setOwner:self];
+    [publications addObject:newItem];
+    
+    [itemTypeButton selectItemWithTitle:[newItem pubType]];
+    [citeKeyField setStringValue:[newItem citeKey]];
+    [self setCiteKeyDuplicateWarning:[newItem isValidCiteKey:[newItem citeKey]] == NO];
     [itemTableView reloadData];
 }
 
@@ -289,10 +292,9 @@
 - (IBAction)changeTypeOfBibAction:(id)sender{
     NSString *type = [[sender selectedItem] title];
     [self setType:type];
-    [[NSUserDefaults standardUserDefaults] setObject:type
-                                                      forKey:BDSKPubTypeStringKey];
+    [[NSUserDefaults standardUserDefaults] setObject:type forKey:BDSKPubTypeStringKey];
 
-	[[item undoManager] setActionName:NSLocalizedString(@"Change Type", @"Undo action name")];
+	[[self undoManager] setActionName:NSLocalizedString(@"Change Type", @"Undo action name")];
     [itemTableView reloadData];
 }
 
@@ -355,7 +357,7 @@
 
 - (IBAction)addField:(id)sender{
     BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
-    NSArray *currentFields = [item allFieldNames];
+    NSArray *currentFields = [[self publication] allFieldNames];
     NSArray *fieldNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObject:BDSKCrossrefString] excluding:currentFields];
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:",@"Label for adding field")
@@ -380,8 +382,9 @@
     // make the tableview stop editing:
     [self finalizeChangesPreservingSelection:YES];
 	
+    BibItem *item = [self publication];
     [item setCiteKey:[item suggestedCiteKey]];
-    [[item undoManager] setActionName:NSLocalizedString(@"Generate Cite Key", @"Undo action name")];
+    [[self undoManager] setActionName:NSLocalizedString(@"Generate Cite Key", @"Undo action name")];
 }
 
 - (IBAction)showCiteKeyWarning:(id)sender{
@@ -399,7 +402,7 @@
 	NSURL *aURL = [webView URL];
 	
 	if (aURL) {
-        [item addFileForURL:aURL autoFile:YES runScriptHook:NO];
+        [[self publication] addFileForURL:aURL autoFile:YES runScriptHook:NO];
         [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 	}
 }
@@ -408,7 +411,7 @@
 	NSURL *aURL = (NSURL *)[sender representedObject];
 	
 	if (aURL) {
-        [item addFileForURL:aURL autoFile:YES runScriptHook:NO];
+        [[self publication] addFileForURL:aURL autoFile:YES runScriptHook:NO];
         [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 	}
 }
@@ -466,19 +469,19 @@
 #pragma mark BDSKOwner protocol
 
 - (BDSKPublicationsArray *)publications {
-    return [document publications];
+    return publications;
 }
 
 - (BDSKMacroResolver *)macroResolver {
-    return [document macroResolver];
+    return [owner macroResolver];
 }
 
 - (NSURL *)fileURL {
-    return [document fileURL];
+    return [owner fileURL];
 }
 
 - (NSString *)documentInfoForKey:(NSString *)key {
-    return [document documentInfoForKey:key];
+    return [owner documentInfoForKey:key];
 }
 
 - (BOOL)isDocument { return NO; }
@@ -507,7 +510,9 @@
 }
 
 - (void)handleBibItemChangedNotification:(NSNotification *)notification{
-    if ([notification object] != item)
+    BibItem *item = [self publication];
+    
+    if ([notification object] != [self publication])
         return;
 	
 	NSString *changeKey = [[notification userInfo] objectForKey:BDSKBibItemKeyKey];
@@ -678,7 +683,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 - (void)setType:(NSString *)type{
     
     [itemTypeButton selectItemWithTitle:type];
-    [item setPubType:type];
+    [[self publication] setPubType:type];
 
     BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
 
@@ -727,7 +732,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 		if ([[[[webView mainFrame] dataSource] data] writeToFile:[sheet filename] atomically:YES]) {
 			NSURL *fileURL = [NSURL fileURLWithPath:[sheet filename]];
 			
-            [item addFileForURL:fileURL autoFile:YES runScriptHook:NO];
+            [[self publication] addFileForURL:fileURL autoFile:YES runScriptHook:NO];
             [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 		} else {
 			NSLog(@"Could not write downloaded file.");
@@ -773,7 +778,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 - (void)setLocalUrlFromDownload{
 	NSURL *fileURL = [NSURL fileURLWithPath:downloadFileName];
 	
-    [item addFileForURL:fileURL autoFile:YES runScriptHook:NO];
+    [[self publication] addFileForURL:fileURL autoFile:YES runScriptHook:NO];
     [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 
@@ -1003,7 +1008,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 	if ([NSString isEmptyString:selString])
 		return NO;
 	
-    NSString *oldValue = [item valueOfField:selKey];
+    NSString *oldValue = [[self publication] valueOfField:selKey];
     
     if(([NSEvent standardModifierFlags] & NSControlKeyMask) != 0 && 
        [NSString isEmptyString:oldValue] == NO && 
@@ -1045,7 +1050,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     if (control != itemTableView) {
 		return words;
 	} else if ([complexStringEditor isAttached]) {
-		return [[BDSKCompletionManager sharedManager] possibleMatches:[[document macroResolver] allMacroDefinitions] 
+		return [[BDSKCompletionManager sharedManager] possibleMatches:[[self macroResolver] allMacroDefinitions] 
 						   forBibTeXString:[textView string] 
 								partialWordRange:charRange 
 								indexOfBestMatch:idx];
@@ -1082,7 +1087,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 		return NO;
 	if (complexStringEditor == nil)
     	complexStringEditor = [[BDSKComplexStringEditor alloc] initWithMacroResolver:[self macroResolver] enabled:YES];
-    NSString *value = [item valueOfField:[fields objectAtIndex:row]];
+    NSString *value = [[self publication] valueOfField:[fields objectAtIndex:row]];
 	NSText *fieldEditor = [itemTableView currentEditor];
 	[tableCellFormatter setEditAsComplexString:YES];
 	if (fieldEditor) {
@@ -1127,8 +1132,9 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 	if([[aNotification object] isEqual:itemTableView]){
 		[tableCellFormatter setEditAsComplexString:NO];
 	}else if([[aNotification object] isEqual:citeKeyField]){
+        BibItem *item = [self publication];
         [item setCiteKey:[citeKeyField stringValue]];
-        [[item undoManager] setActionName:NSLocalizedString(@"Edit Cite Key", @"Undo action name")];
+        [[self undoManager] setActionName:NSLocalizedString(@"Edit Cite Key", @"Undo action name")];
         [self setCiteKeyDuplicateWarning:[item isValidCiteKey:[item citeKey]] == NO];
     }
 }
@@ -1136,6 +1142,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 #pragma mark Setting a field
 
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value{
+    BibItem *item = [self publication];
     [item setField:fieldName toValue:value];
 	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKCiteKeyAutogenerateKey] &&
@@ -1174,7 +1181,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
             return [NSString stringWithFormat:@"%@%@%ld", [NSString alternateKeyIndicatorString], [NSString commandKeyIndicatorString], (long)((row + 1) % 10)];
         else return @"";
     }else{
-        return [item valueOfField:key];
+        return [[self publication] valueOfField:key];
     }
 }
 
@@ -1186,7 +1193,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     }
     
     NSString *key = [fields objectAtIndex:row];
-	if ([object isEqualAsComplexString:[item valueOfField:key]])
+	if ([object isEqualAsComplexString:[[self publication] valueOfField:key]])
 		return;
 	
 	[self recordChangingField:key toValue:object];
@@ -1207,7 +1214,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 
         NSString *value = [pb stringForType:NSStringPboardType];
         NSString *key = [fields objectAtIndex:row];
-        NSString *oldValue = [item valueOfField:key];
+        NSString *oldValue = [[self publication] valueOfField:key];
         
         if(([NSEvent standardModifierFlags] & NSControlKeyMask) != 0 && 
            [NSString isEmptyString:oldValue] == NO && 
@@ -1233,7 +1240,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 	if (type && idx != -1) {
         NSString *selKey = [fields objectAtIndex:idx];
         NSString *string = [pboard stringForType:NSStringPboardType];
-        NSString *oldValue = [item valueOfField:selKey];
+        NSString *oldValue = [[self publication] valueOfField:selKey];
         
         if(([NSEvent standardModifierFlags] & NSControlKeyMask) != 0 && 
            [NSString isEmptyString:oldValue] == NO && 
@@ -1418,7 +1425,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         }// for child of HEAD
         
         if([metaTagDict count]){
-            if([item hasBeenEdited]){
+            if([[self publication] hasBeenEdited]){
                 NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Autofill bibliography information", @"Message in alert dialog when trying to auto-fill information in text import") 
                                                  defaultButton:NSLocalizedString(@"Yes", @"Button title")
                                                alternateButton:NSLocalizedString(@"No", @"Button title")
@@ -1448,6 +1455,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         NSString *fieldName = [typeMan fieldNameForDublinCoreTerm:metaName];
         fieldName = (fieldName ?: [metaName fieldName]);
         NSString *fieldValue = [metaTagDict objectForKey:metaName];
+        BibItem *item = [self publication];
         
         // Special-case DC.date to get month and year, but still insert "DC.date"
         //  to capture the day, which may be useful.
@@ -1495,7 +1503,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         return;
 		
     NSError *error = nil;
-    NSArray *pubs = [document publicationsForString:string type:type verbose:NO error:&error];
+    NSArray *pubs = [(BibDocument *)owner publicationsForString:string type:type verbose:NO error:&error];
     
     // ignore warnings for parsing with temporary citekeys, as we're not interested in the cite key
     if ([error isLocalError] && [error code] == kBDSKHadMissingCiteKeys)
@@ -1504,7 +1512,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     if(error || [pubs count] == 0)
         return;
     
-    if([item hasBeenEdited]){
+    if([[self publication] hasBeenEdited]){
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Autofill bibliography information", @"Message in alert dialog when trying to auto-fill information in text import") 
                                          defaultButton:NSLocalizedString(@"Yes", @"Button title")
                                        alternateButton:NSLocalizedString(@"No", @"Button title")
@@ -1520,9 +1528,10 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 }
 
 - (void)autoDiscoverFromStringAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    BibItem *pub = [(BibItem *)contextInfo autorelease];
-    
     if(returnCode == NSAlertDefaultReturn){
+        BibItem *pub = [(BibItem *)contextInfo autorelease];
+        BibItem *item = [self publication];
+        
         [item setPubType:[pub pubType]];
         [item setFields:[pub pubFields]];
         
