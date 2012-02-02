@@ -46,8 +46,6 @@
 #import "BDSKCiteKeyFormatter.h"
 #import "BDSKFieldNameFormatter.h"
 #import "BDSKEdgeView.h"
-#import "BibDocument.h"
-#import "BibDocument_Groups.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKAppController.h"
 #import "BDSKFieldEditor.h"
@@ -1503,7 +1501,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         return;
 		
     NSError *error = nil;
-    NSArray *pubs = [(BibDocument *)owner publicationsForString:string type:type verbose:NO error:&error];
+    NSArray *pubs = [BDSKStringParser itemsFromString:string ofType:type owner:owner error:&error];
     
     // ignore warnings for parsing with temporary citekeys, as we're not interested in the cite key
     if ([error isLocalError] && [error code] == kBDSKHadMissingCiteKeys)

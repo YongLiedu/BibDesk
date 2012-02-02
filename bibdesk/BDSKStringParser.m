@@ -94,6 +94,34 @@ static Class classForType(BDSKStringType stringType)
     return [parserClass itemsFromString:string error:outError];
 }
 
++ (NSArray *)itemsFromString:(NSString *)string ofType:(BDSKStringType)type owner:(id <BDSKOwner>)owner error:(NSError **)outError {
+    NSArray *newPubs = nil;
+    NSError *parseError = nil;
+    BOOL isPartialData = NO;
+    
+    // @@ BDSKStringParser doesn't handle any BibTeX types, so it's not really useful as a funnel point for any string type, since each usage requires special casing for BibTeX.
+    if(BDSKUnknownStringType == type)
+        type = [string contentStringType];
+    
+    if(type == BDSKBibTeXStringType)
+        newPubs = [BDSKBibTeXParser itemsFromString:string owner:owner isPartialData:&isPartialData error:&parseError];
+    else if(type == BDSKNoKeyBibTeXStringType)
+        newPubs = [BDSKBibTeXParser itemsFromString:[string stringWithPhoneyCiteKeys:@"FixMe"] owner:owner isPartialData:&isPartialData error:&parseError];
+	else
+        // this will create the NSError if the type is unrecognized
+        newPubs = [self itemsFromString:string ofType:type error:&parseError];
+    
+	if(type == BDSKNoKeyBibTeXStringType && parseError == nil){
+        // return an error when we inserted temporary keys, let the caller decide what to do with it
+        // don't override a parseError though, as that is probably more relevant
+        parseError = [NSError mutableLocalErrorWithCode:kBDSKHadMissingCiteKeys localizedDescription:NSLocalizedString(@"Temporary Cite Keys", @"Error description")];
+        [parseError setValue:@"FixMe" forKey:@"temporaryCiteKey"];
+    }
+    
+	if(outError) *outError = parseError;
+    return newPubs;
+}
+
 @end
 
 

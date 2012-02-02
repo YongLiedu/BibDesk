@@ -118,7 +118,7 @@
             [self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
             return nil;
         }
-        pubs = [document publicationsForString:string type:BDSKUnknownStringType verbose:NO error:NULL];
+        pubs = [BDSKStringParser itemsFromString:string ofType:BDSKUnknownStringType owner:document error:NULL];
     } else if (searchTerm) {
         pubs = [NSArray arrayWithObjects:[BibItem itemWithPubMedSearchTerm:searchTerm], nil];
     } else {

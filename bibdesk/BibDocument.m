@@ -2214,9 +2214,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         newPubs = newPubs ? [newPubs arrayByAddingObjectsFromArray:newFilePubs]: newFilePubs;
     }
     
-    if([error isLocalError] && [error code] == kBDSKHadMissingCiteKeys) {
-        temporaryCiteKey = [[error userInfo] objectForKey:@"temporaryCiteKey"];
-        error = nil; // accept temporary cite keys, but show a warning later
+    if([error isLocalError]){
+        if([error code] == kBDSKHadMissingCiteKeys) {
+            temporaryCiteKey = [[error userInfo] objectForKey:@"temporaryCiteKey"];
+            error = nil; // accept temporary cite keys, but show a warning later
+        }
     }
     
     if ([newPubs count] > 0) 
@@ -2247,67 +2249,47 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 // pass BDSKUnkownStringType to allow BDSKStringParser to sniff the text and determine the format
 - (NSArray *)publicationsForString:(NSString *)string type:(BDSKStringType)type verbose:(BOOL)verbose error:(NSError **)outError {
     NSArray *newPubs = nil;
-    NSError *parseError = nil;
-    BOOL isPartialData = NO;
+    NSError *error = nil;
     
-    // @@ BDSKStringParser doesn't handle any BibTeX types, so it's not really useful as a funnel point for any string type, since each usage requires special casing for BibTeX.
-    if(BDSKUnknownStringType == type)
-        type = [string contentStringType];
+    newPubs = [BDSKStringParser itemsFromString:string ofType:type owner:self error:&error];
     
-    if(type == BDSKBibTeXStringType)
-        newPubs = [BDSKBibTeXParser itemsFromString:string owner:self isPartialData:&isPartialData error:&parseError];
-    else if(type == BDSKNoKeyBibTeXStringType)
-        newPubs = [BDSKBibTeXParser itemsFromString:[string stringWithPhoneyCiteKeys:@"FixMe"] owner:self isPartialData:&isPartialData error:&parseError];
-	else
-        // this will create the NSError if the type is unrecognized
-        newPubs = [BDSKStringParser itemsFromString:string ofType:type error:&parseError];
-    
-	if(nil == newPubs || isPartialData) {
+	if([error isLocalError]) {
         
-        if(verbose == NO){
+        if (verbose == NO) {
             // if not BibTeX, it's an unknown type or failed due to parser error; in either case, we must have a valid NSError since the parser returned nil
             // no partial data here since that only applies to BibTeX parsing; all we can do is just return nil and propagate the error back up, although I suppose we could display the error editor...
-            newPubs = nil;
-		} else if(type == BDSKBibTeXStringType || type == BDSKNoKeyBibTeXStringType){
-            
-            // run a modal dialog asking if we want to use partial data or give up
-            if ([parseError code] == kBDSKParserIgnoredFrontMatter) {
+            if ([error code] == kBDSKBibTeXParserFailed)
+                newPubs = nil;
+            else if ([error code] == kBDSKParserIgnoredFrontMatter)
+                error = nil;
+		} else if ([error code] == kBDSKParserIgnoredFrontMatter) {
                 // the partial data alert only applies to BibTeX; we could show the editor window for non-BibTeX data (I think...), but we also have to deal with alerts being shown twice if NSError is involved
                 // here we want to display an alert, but don't propagate a nil/error back up, since it's not a failure
-                [NSApp presentError:parseError];
+                [self presentError:error];
                 // @@ fixme: NSError
-                parseError = nil;
-            } else {
-                // this was BibTeX, but the user may want to try going with partial data
-                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error Reading String", @"Message in alert dialog when failing to parse dropped or copied string")
-                                                 defaultButton:NSLocalizedString(@"Cancel", @"Button title")
-                                               alternateButton:NSLocalizedString(@"Edit data", @"Button title")
-                                                   otherButton:NSLocalizedString(@"Keep going", @"Button title")
-                                     informativeTextWithFormat:NSLocalizedString(@"There was a problem inserting the data. Do you want to ignore this data, open a window containing the data to edit it and remove the errors, or keep going and use everything that BibDesk could parse?\n(It's likely that choosing \"Keep Going\" will lose some data.)", @"Informative text in alert dialog")];
-                NSInteger rv = [alert runModal];
-            
-                if(rv == NSAlertDefaultReturn){
-                    // the user said to give up
-                    newPubs = nil;
-                }else if(rv == NSAlertAlternateReturn){
-                    // they said to edit the file.
-                    [[BDSKErrorObjectController sharedErrorObjectController] showEditorForLastPasteDragError];
-                    newPubs = nil;	
-                }
+                error = nil;
+        } else if ([error code] == kBDSKBibTeXParserFailed) {
+            // this was BibTeX, but the user may want to try going with partial data
+            // run a modal dialog asking if we want to use partial data or give up
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error Reading String", @"Message in alert dialog when failing to parse dropped or copied string")
+                                             defaultButton:NSLocalizedString(@"Cancel", @"Button title")
+                                           alternateButton:NSLocalizedString(@"Edit data", @"Button title")
+                                               otherButton:NSLocalizedString(@"Keep going", @"Button title")
+                                 informativeTextWithFormat:NSLocalizedString(@"There was a problem inserting the data. Do you want to ignore this data, open a window containing the data to edit it and remove the errors, or keep going and use everything that BibDesk could parse?\n(It's likely that choosing \"Keep Going\" will lose some data.)", @"Informative text in alert dialog")];
+            NSInteger rv = [alert runModal];
+        
+            if(rv == NSAlertDefaultReturn){
+                // the user said to give up
+                newPubs = nil;
+            }else if(rv == NSAlertAlternateReturn){
+                // they said to edit the file.
+                [[BDSKErrorObjectController sharedErrorObjectController] showEditorForLastPasteDragError];
+                newPubs = nil;	
             }
         }
-        
-	}else if(type == BDSKNoKeyBibTeXStringType){
-        
-        BDSKASSERT(parseError == nil);
-        
-        // return an error when we inserted temporary keys, let the caller decide what to do with it
-        // don't override a parseError though, as that is probably more relevant
-        parseError = [NSError mutableLocalErrorWithCode:kBDSKHadMissingCiteKeys localizedDescription:NSLocalizedString(@"Temporary Cite Keys", @"Error description")];
-        [parseError setValue:@"FixMe" forKey:@"temporaryCiteKey"];
     }
     
-	if(outError) *outError = parseError;
+	if(outError) *outError = error;
     return newPubs;
 }
 

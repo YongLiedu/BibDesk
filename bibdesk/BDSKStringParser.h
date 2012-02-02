@@ -56,10 +56,13 @@ enum {
 };
 typedef NSInteger BDSKStringType;
 
+@protocol BDSKOwner;
+
 @interface BDSKStringParser : NSObject
 // passing BDSKUnknownStringType will ise the appropriate -contentStringType
 + (BOOL)canParseString:(NSString *)string ofType:(BDSKStringType)stringType;
 + (NSArray *)itemsFromString:(NSString *)string ofType:(BDSKStringType)stringType error:(NSError **)outError;
++ (NSArray *)itemsFromString:(NSString *)string ofType:(BDSKStringType)type owner:(id <BDSKOwner>)owner error:(NSError **)outError;
 @end
 
 
