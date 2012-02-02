@@ -186,9 +186,9 @@ static NSInteger MAX_RATING = 5;
 	return boolValue ? @"1" : @"0";
 }
 
-+ (NSString *)stringWithContentsOfFile:(NSString *)path encoding:(NSStringEncoding)encoding guessEncoding:(BOOL)try;
++ (NSString *)stringWithContentsOfFile:(NSString *)path guessedEncoding:(NSStringEncoding)encoding;
 {
-    return [[[self alloc] initWithContentsOfFile:path encoding:encoding guessEncoding:try] autorelease];
+    return [[[self alloc] initWithContentsOfFile:path guessedEncoding:encoding] autorelease];
 }
 
 + (NSString *)stringWithFileSystemRepresentation:(const char *)cstring;
@@ -259,7 +259,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     return rv;
 }
 
-- (NSString *)initWithContentsOfFile:(NSString *)path encoding:(NSStringEncoding)encoding guessEncoding:(BOOL)try;
+- (NSString *)initWithContentsOfFile:(NSString *)path guessedEncoding:(NSStringEncoding)encoding;
 {
     NSData *data = [[NSData allocWithZone:[self zone]] initWithContentsOfFile:path options:NSMappedRead error:NULL];
     

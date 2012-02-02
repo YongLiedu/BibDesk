@@ -540,7 +540,7 @@
             if ([fm fileExistsAtPath:file] == NO ||
                 ([extension isCaseInsensitiveEqual:@"bib"] == NO && [extension isCaseInsensitiveEqual:@"bst"] == NO))
                 continue;
-            NSString *fileStr = [NSString stringWithContentsOfFile:file encoding:0 guessEncoding:YES];
+            NSString *fileStr = [NSString stringWithContentsOfFile:file guessedEncoding:0];
             if (fileStr != nil)
                 success = success || [self addMacrosFromBibTeXString:fileStr];
         }

@@ -710,7 +710,7 @@
 }
 
 - (BOOL)selectItemsInAuxFileAtPath:(NSString *)auxPath {
-    NSString *auxString = [NSString stringWithContentsOfFile:auxPath encoding:[self documentStringEncoding] guessEncoding:YES];
+    NSString *auxString = [NSString stringWithContentsOfFile:auxPath guessedEncoding:[self documentStringEncoding]];
     NSString *command = @"\\bibcite{"; // we used to get the command by looking at the line after \bibdata, but that's unreliable as there can be other stuff in between the \bibcite commands
 
     if (auxString == nil)
@@ -1779,7 +1779,7 @@
     if([readableTypes containsObject:[fileName pathExtension]])
         return NO;
     
-    NSString *contentString = [[NSString alloc] initWithContentsOfFile:fileName encoding:NSUTF8StringEncoding guessEncoding:YES];
+    NSString *contentString = [[NSString alloc] initWithContentsOfFile:fileName guessedEncoding:NSUTF8StringEncoding];
     
     if(contentString == nil)
         return YES;

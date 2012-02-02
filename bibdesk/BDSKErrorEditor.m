@@ -281,7 +281,7 @@ static char BDSKErrorEditorObservationContext;
     NSStringEncoding encoding = [manager documentStringEncoding];
         
     if ([dfm fileExistsAtPath:fileName]) {
-        NSString *fileStr = [[NSString alloc] initWithContentsOfFile:fileName encoding:encoding guessEncoding:YES];
+        NSString *fileStr = [[NSString alloc] initWithContentsOfFile:fileName guessedEncoding:encoding];
         if(!fileStr)
             fileStr = [[NSString alloc] initWithString:NSLocalizedString(@"Unable to determine the correct character encoding.", @"Message when unable to determine encoding for error editor")];
         [textView setString:fileStr];

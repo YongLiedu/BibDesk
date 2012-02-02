@@ -2217,7 +2217,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             if ([unreadableTypes containsObject:[fileName pathExtension]] == NO) {
         
                 // try to create a string
-                NSString *contentString = [[NSString alloc] initWithContentsOfFile:fileName encoding:[self documentStringEncoding] guessEncoding:YES];
+                NSString *contentString = [[NSString alloc] initWithContentsOfFile:fileName guessedEncoding:[self documentStringEncoding]];
                 
                 if (contentString != nil) {
                     if ([theUTI isEqualToUTI:@"org.tug.tex.bibtex"])

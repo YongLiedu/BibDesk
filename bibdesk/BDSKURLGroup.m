@@ -191,7 +191,7 @@
     }
 
     // tried using -[NSString stringWithContentsOfFile:usedEncoding:error:] but it fails too often
-    NSString *contentString = [NSString stringWithContentsOfFile:filePath encoding:0 guessEncoding:YES];
+    NSString *contentString = [NSString stringWithContentsOfFile:filePath guessedEncoding:0];
     NSArray *pubs = nil;
     NSDictionary *macros = nil;
     if (nil == contentString) {

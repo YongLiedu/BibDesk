@@ -112,7 +112,7 @@
 	if (string) {
         // make sure we get the right thing
         if ([string isKindOfClass:[NSURL class]]) {
-            string = [NSString stringWithContentsOfFile:[string path] encoding:0 guessEncoding:YES];
+            string = [NSString stringWithContentsOfFile:[string path] guessedEncoding:0];
         }
         if ([string isKindOfClass:[NSString class]] == NO) {
             [self setScriptErrorNumber:NSArgumentsWrongScriptError]; 

@@ -122,15 +122,14 @@
 + (NSString *)stringWithTriStateValue:(NSCellStateValue)triStateValue;
 
 /*!
-    @method     stringWithContentsOfFile:encoding:guessEncoding:
-    @abstract   Tries to load a file with the specified encoding; if guessEncoding is set to YES, it will employ some heuristics to guess the encoding if the specified encoding fails or is set to 0.
+    @method     stringWithContentsOfFile:guessedEncoding:
+    @abstract   Tries to load a file with the specified encoding, it will employ some heuristics to guess the encoding if the specified encoding fails or is set to 0.
     @discussion (comprehensive description)
     @param      path (description)
     @param      encoding (description)
-    @param      try (description)
     @result     (description)
 */
-+ (NSString *)stringWithContentsOfFile:(NSString *)path encoding:(NSStringEncoding)encoding guessEncoding:(BOOL)try;
++ (NSString *)stringWithContentsOfFile:(NSString *)path guessedEncoding:(NSStringEncoding)encoding;
 
     /*!
     @method     unicodeNameOfCharacter:
@@ -159,15 +158,14 @@
 + (NSStringEncoding)encodingForIANACharSetName:(NSString *)name;
     
 /*!
-    @method     initWithContentsOfFile:encoding:guessEncoding:
-    @abstract   Tries to load a file with the specified encoding; if guessEncoding is set to YES, it will employ some heuristics to guess the encoding if the specified encoding fails or is set to 0.
+    @method     initWithContentsOfFile:guessedEncoding:
+    @abstract   Tries to load a file with the specified encoding, it will employ some heuristics to guess the encoding if the specified encoding fails or is set to 0.
     @discussion (comprehensive description)
     @param      path (description)
     @param      encoding (description)
-    @param      try (description)
     @result     (description)
 */
-- (NSString *)initWithContentsOfFile:(NSString *)path encoding:(NSStringEncoding)encoding guessEncoding:(BOOL)try;
+- (NSString *)initWithContentsOfFile:(NSString *)path guessedEncoding:(NSStringEncoding)encoding;
 
 #pragma mark TeX cleaning
 
