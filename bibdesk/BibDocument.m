@@ -2250,8 +2250,8 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             [[BDSKErrorObjectController sharedErrorObjectController] showEditorForLastPasteDragError];
         if (rv != NSAlertOtherReturn)
             newPubs = nil;
-    }else if(error){
-        if (verbose)
+	}else if(error){
+        if (verbose && ([error isLocalError] == NO || [error code] != kBDSKHadMissingCiteKeys))
             [self presentError:error];
         // here we want to display an alert, but don't propagate a nil/error back up, since it's not a failure
         if ([error isLocalError] && [error code] == kBDSKParserIgnoredFrontMatter)
