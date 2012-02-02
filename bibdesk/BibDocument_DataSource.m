@@ -908,9 +908,7 @@
 
 - (void)tableView:(NSTableView *)tv pasteFromPasteboard:(NSPasteboard *)pboard{
 	if (tv == tableView) {
-        NSError *error = nil;
-        if ([self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:&error] == nil)
-            [tv presentError:error];
+        [self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL];
     } else {
 		NSBeep();
 	}
