@@ -2231,27 +2231,12 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 // pass BDSKUnkownStringType to allow BDSKStringParser to sniff the text and determine the format
 - (NSArray *)publicationsForString:(NSString *)string type:(BDSKStringType)type verbose:(BOOL)verbose error:(NSError **)outError {
-    NSArray *newPubs = nil;
     NSError *error = nil;
+    NSArray *newPubs = [BDSKStringParser itemsFromString:string ofType:type owner:self error:&error];
     
-    newPubs = [BDSKStringParser itemsFromString:string ofType:type owner:self error:&error];
-    
-	if([error isLocalError]) {
-        
-        if (verbose == NO) {
-            // if not BibTeX, it's an unknown type or failed due to parser error; in either case, we must have a valid NSError since the parser returned nil
-            // no partial data here since that only applies to BibTeX parsing; all we can do is just return nil and propagate the error back up, although I suppose we could display the error editor...
-            if ([error code] == kBDSKBibTeXParserFailed)
-                newPubs = nil;
-            else if ([error code] == kBDSKParserIgnoredFrontMatter)
-                error = nil;
-		} else if ([error code] == kBDSKParserIgnoredFrontMatter) {
-                // the partial data alert only applies to BibTeX; we could show the editor window for non-BibTeX data (I think...), but we also have to deal with alerts being shown twice if NSError is involved
-                // here we want to display an alert, but don't propagate a nil/error back up, since it's not a failure
-                [self presentError:error];
-                // @@ fixme: NSError
-                error = nil;
-        } else if ([error code] == kBDSKBibTeXParserFailed) {
+	if([error isLocalError] && [error code] == kBDSKBibTeXParserFailed) {
+        NSInteger rv = NSAlertDefaultReturn;
+        if (verbose) {
             // this was BibTeX, but the user may want to try going with partial data
             // run a modal dialog asking if we want to use partial data or give up
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error Reading String", @"Message in alert dialog when failing to parse dropped or copied string")
@@ -2259,17 +2244,18 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                                            alternateButton:NSLocalizedString(@"Edit data", @"Button title")
                                                otherButton:NSLocalizedString(@"Keep going", @"Button title")
                                  informativeTextWithFormat:NSLocalizedString(@"There was a problem inserting the data. Do you want to ignore this data, open a window containing the data to edit it and remove the errors, or keep going and use everything that BibDesk could parse?\n(It's likely that choosing \"Keep Going\" will lose some data.)", @"Informative text in alert dialog")];
-            NSInteger rv = [alert runModal];
-        
-            if(rv == NSAlertDefaultReturn){
-                // the user said to give up
-                newPubs = nil;
-            }else if(rv == NSAlertAlternateReturn){
-                // they said to edit the file.
-                [[BDSKErrorObjectController sharedErrorObjectController] showEditorForLastPasteDragError];
-                newPubs = nil;	
-            }
+            rv = [alert runModal];
         }
+        if(rv == NSAlertAlternateReturn)
+            [[BDSKErrorObjectController sharedErrorObjectController] showEditorForLastPasteDragError];
+        if (rv != NSAlertOtherReturn)
+            newPubs = nil;
+    }else if(error){
+        if (verbose)
+            [self presentError:error];
+        // here we want to display an alert, but don't propagate a nil/error back up, since it's not a failure
+        if ([error isLocalError] && [error code] == kBDSKParserIgnoredFrontMatter)
+            error = nil;
     }
     
 	if(outError) *outError = error;
