@@ -37,6 +37,7 @@
 
 #import "BDSKItemPasteboardHelper.h"
 #import "BibDocument.h"
+#import "BibItem.h"
 #import "NSArray_BDSKExtensions.h"
 #import "WebURLsWithTitles.h"
 
@@ -183,14 +184,11 @@
 	NSArray *items = [self promisedItemsForPasteboard:pboard];
     
     if([type isEqualToString:BDSKBibItemPboardType]){
-        NSMutableData *data = [NSMutableData data];
+        NSData *data = nil;
         
-        if(items != nil){
-            NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
-            [archiver encodeObject:items forKey:@"publications"];
-            [archiver finishEncoding];
-            [archiver release];
-        }else NSBeep();
+        if(items != nil)
+            data = [BibItem archivedPublications:items];
+        else NSBeep();
         
         [pboard setData:data forType:BDSKBibItemPboardType];
     }else{

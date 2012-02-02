@@ -1276,15 +1276,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         return [NSArray array];
     
     // archive and unarchive mainly to get complex strings with the correct macroResolver
-    NSMutableData *data = [NSMutableData data];
-    NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
-    NSArray *newPubs;
-    
-    [archiver encodeObject:array forKey:@"publications"];
-    [archiver finishEncoding];
-    [archiver release];
-    
-    newPubs = [self publicationsFromArchivedData:data];
+    NSArray *newPubs = [BibItem publicationsFromArchivedData:[BibItem archivedPublications:array] macroResolver:[self macroResolver]];
     
     [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:YES edit:NO];
 	
@@ -1596,7 +1588,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [archiver finishEncoding];
     [archiver release];
     
-    newPubs = [self publicationsFromArchivedData:data];
+    newPubs = [BibItem publicationsFromArchivedData:data macroResolver:[self macroResolver]];
 	
     [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:NO edit:NO];
     

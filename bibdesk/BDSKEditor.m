@@ -2701,7 +2701,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	}else if([pboardType isEqualToString:BDSKBibItemPboardType]){
 		NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
         // we can't just unarchive, as this gives complex strings with the wrong macroResolver
-		draggedPubs = [[self document] publicationsFromArchivedData:pbData];
+		draggedPubs = [BibItem publicationsFromArchivedData:pbData macroResolver:[publication macroResolver]];
 	}
     
     // this happens when we didn't find a valid pboardType or parsing failed
@@ -3018,7 +3018,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]]) {
                 
                 NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
-                NSArray *draggedPubs = [[self document] publicationsFromArchivedData:pbData];
+                NSArray *draggedPubs = [BibItem publicationsFromArchivedData:pbData macroResolver:[publication macroResolver]];
                 NSString *crossref = [[draggedPubs firstObject] citeKey];
                 
                 if ([NSString isEmptyString:crossref])
@@ -3053,7 +3053,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]]) {
                 
                 NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
-                NSArray *draggedPubs = [[self document] publicationsFromArchivedData:pbData];
+                NSArray *draggedPubs = [BibItem publicationsFromArchivedData:pbData macroResolver:[publication macroResolver]];
                 
                 if ([draggedPubs count]) {
                     

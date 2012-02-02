@@ -103,6 +103,9 @@ enum {
 
 + (NSString *)defaultCiteKey;
 
++ (NSData *)archivedPublications:(NSArray *)array;
++ (NSArray *)publicationsFromArchivedData:(NSData *)data macroResolver:(BDSKMacroResolver *)aMacroResolver;
+
 - (NSArray *)files;
 - (NSUInteger)countOfFiles;
 - (BDSKLinkedFile *)objectInFilesAtIndex:(NSUInteger)idx;

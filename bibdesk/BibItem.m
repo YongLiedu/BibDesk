@@ -527,6 +527,36 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 }
 #endif
 
+#pragma mark Archiving
+
++ (NSData *)archivedPublications:(NSArray *)array {
+    NSMutableData *data = [NSMutableData data];
+    NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
+    
+    [archiver encodeObject:array forKey:@"publications"];
+    [archiver finishEncoding];
+    [archiver release];
+    
+    return data;
+}
+
++ (NSArray *)publicationsFromArchivedData:(NSData *)data macroResolver:(BDSKMacroResolver *)aMacroResolver {
+    NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
+    
+    [NSString setMacroResolverForUnarchiving:aMacroResolver];
+    
+    NSArray *pubs = [unarchiver decodeObjectForKey:@"publications"];
+    [unarchiver finishDecoding];
+    [unarchiver release];
+    
+    [NSString setMacroResolverForUnarchiving:nil];
+    
+    // we set the macroResolver so we know the fields of this item may refer to it, so we can prevent scripting from adding this to the wrong document
+    [pubs setValue:aMacroResolver forKey:@"macroResolver"];
+    
+    return pubs;
+}
+
 #pragma mark -
 
 - (void)customFieldsDidChange:(NSNotification *)aNotification{

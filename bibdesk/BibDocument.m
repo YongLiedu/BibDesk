@@ -2181,7 +2181,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     if([type isEqualToString:BDSKBibItemPboardType]){
         NSData *pbData = [pb dataForType:BDSKBibItemPboardType];
-		newPubs = [self publicationsFromArchivedData:pbData];
+		newPubs = [BibItem publicationsFromArchivedData:pbData macroResolver:[self macroResolver]];
     } else if([type isEqualToString:BDSKReferenceMinerStringPboardType]){ // pasteboard type from Reference Miner, determined using Pasteboard Peeker
         NSString *pbString = [pb stringForType:BDSKReferenceMinerStringPboardType]; 	
         // sniffing the string for RIS is broken because RefMiner puts junk at the beginning
@@ -2225,23 +2225,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 		[self addPublications:newPubs publicationsToAutoFile:newFilePubs temporaryCiteKey:temporaryCiteKey selectLibrary:shouldSelect edit:shouldEdit];
     else if (newPubs == nil && outError)
         *outError = error;
-    
-    return newPubs;
-}
-
-- (NSArray *)publicationsFromArchivedData:(NSData *)data{
-    NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
-    
-    [NSString setMacroResolverForUnarchiving:macroResolver];
-    
-    NSArray *newPubs = [unarchiver decodeObjectForKey:@"publications"];
-    [unarchiver finishDecoding];
-    [unarchiver release];
-    
-    [NSString setMacroResolverForUnarchiving:nil];
-    
-    // we set the macroResolver so we know the fields of this item may refer to it, so we can prevent scripting from adding this to the wrong document
-    [newPubs setValue:macroResolver forKey:@"macroResolver"];
     
     return newPubs;
 }
