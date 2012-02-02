@@ -267,13 +267,13 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     Class stringClass = [self isKindOfClass:[NSMutableString class]] ? [NSMutableString class] : [NSString class];
     
     // if we're guessing, try the reliable encodings first
-    if(try && dataHasUnicodeByteOrderMark(data) && encoding != NSUnicodeStringEncoding)
+    if(dataHasUnicodeByteOrderMark(data) && encoding != NSUnicodeStringEncoding)
         string = [[stringClass allocWithZone:[self zone]] initWithData:data encoding:NSUnicodeStringEncoding];
-    if(try && nil == string && encoding != NSUTF8StringEncoding)
+    if(nil == string && encoding != NSUTF8StringEncoding)
         string = [[stringClass allocWithZone:[self zone]] initWithData:data encoding:NSUTF8StringEncoding];
     
     // read com.apple.TextEncoding on Leopard, or when reading a Tiger file saved on Leopard
-    if(try && nil == string) {
+    if(nil == string) {
         // don't clobber the encoding parameter in case this fails...
         NSStringEncoding xattrEncoding = [[NSFileManager defaultManager] appleStringEncodingAtPath:path error:NULL];
         if (xattrEncoding > 0)
@@ -285,12 +285,12 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
         string = [[stringClass allocWithZone:[self zone]] initWithData:data encoding:encoding];
     
     // now we just try a few wild guesses
-    if(nil == string && try && encoding != [NSString defaultCStringEncoding])
+    if(nil == string && encoding != [NSString defaultCStringEncoding])
         string = [[stringClass allocWithZone:[self zone]] initWithData:data encoding:[NSString defaultCStringEncoding]];
-    if(nil == string && try && encoding != [BDSKStringEncodingManager defaultEncoding])
+    if(nil == string && encoding != [BDSKStringEncodingManager defaultEncoding])
         string = [[stringClass allocWithZone:[self zone]] initWithData:data encoding:[BDSKStringEncodingManager defaultEncoding]];
     // final fallback is Mac Roman (gapless)
-    if(nil == string && try && encoding != NSMacOSRomanStringEncoding)
+    if(nil == string && encoding != NSMacOSRomanStringEncoding)
         string = [[stringClass allocWithZone:[self zone]] initWithData:data encoding:NSMacOSRomanStringEncoding];
     
     [data release];
