@@ -53,6 +53,7 @@ enum {
     kBDSKFileNotFound,                            /* File not found (should have URL/path)   */
     kBDSKAppleScriptError,                        /* AppleScript failed                      */
     kBDSKParserIgnoredFrontMatter,                /* BDSKBibTeXParser ignored front matter   */
+    kBDSKBibTeXParserFailed,                      /* BDSKBibTeXParser failed for some reason */
     kBDSKParserFailed,                            /* Some parser failed for some reason      */
     kBDSKParserUnsupported,                       /* No valid parser for string              */
     kBDSKWebParserFailed,                         /* Some web parser failed for some reason  */
