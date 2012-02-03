@@ -1441,7 +1441,6 @@ static BOOL changingColors = NO;
     NSString *type = [pasteboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKReferenceMinerStringPboardType, BDSKBibItemPboardType, NSStringPboardType, nil]];
     
     if(type != nil){
-        NSError *error = nil;
         BOOL isKnownFormat = YES;
 		if([type isEqualToString:NSStringPboardType]){
 			// sniff the string to see if we should add it directly
@@ -1449,7 +1448,7 @@ static BOOL changingColors = NO;
 			isKnownFormat = ([pboardString contentStringType] != BDSKUnknownStringType);
 		}
 		
-        NSArray *newPubs = isKnownFormat ? [self addPublicationsFromPasteboard:pasteboard selectLibrary:YES verbose:NO error:&error] : nil;
+        NSArray *newPubs = isKnownFormat ? [self addPublicationsFromPasteboard:pasteboard selectLibrary:YES verbose:NO error:NULL] : nil;
         if([newPubs count] > 0)
             return; // it worked, so we're done here
     }
