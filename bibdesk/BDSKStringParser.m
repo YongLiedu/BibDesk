@@ -95,22 +95,24 @@ static Class classForType(BDSKStringType stringType)
     return [parserClass itemsFromString:string error:outError];
 }
 
-+ (NSArray *)itemsFromString:(NSString *)string ofType:(BDSKStringType)type owner:(id <BDSKOwner>)owner error:(NSError **)outError {
++ (NSArray *)itemsFromString:(NSString *)string ofType:(BDSKStringType)type owner:(id <BDSKOwner>)owner isPartialData:(BOOL *)isPartialData error:(NSError **)outError {
     NSArray *newPubs = nil;
     NSError *parseError = nil;
-    BOOL isPartialData = NO;
     
     // @@ BDSKStringParser doesn't handle any BibTeX types, so it's not really useful as a funnel point for any string type, since each usage requires special casing for BibTeX.
     if(BDSKUnknownStringType == type)
         type = [string contentStringType];
     
-    if(type == BDSKBibTeXStringType)
-        newPubs = [BDSKBibTeXParser itemsFromString:string owner:owner isPartialData:&isPartialData error:&parseError];
-    else if(type == BDSKNoKeyBibTeXStringType)
-        newPubs = [BDSKBibTeXParser itemsFromString:[string stringWithPhoneyCiteKeys:@"FixMe"] owner:owner isPartialData:&isPartialData error:&parseError];
-	else
+    if(type == BDSKBibTeXStringType){
+        newPubs = [BDSKBibTeXParser itemsFromString:string owner:owner isPartialData:isPartialData error:&parseError];
+    }else if(type == BDSKNoKeyBibTeXStringType){
+        newPubs = [BDSKBibTeXParser itemsFromString:[string stringWithPhoneyCiteKeys:@"FixMe"] owner:owner isPartialData:isPartialData error:&parseError];
+	}else{
         // this will create the NSError if the type is unrecognized
         newPubs = [self itemsFromString:string ofType:type error:&parseError];
+        if(isPartialData)
+            *isPartialData = newPubs != nil;
+    }
     
     if([parseError isLocalError] && [parseError code] == kBDSKBibTeXParserFailed){
         NSError *error = [NSError mutableLocalErrorWithCode:kBDSKBibTeXParserFailed localizedDescription:NSLocalizedString(@"Error Reading String", @"Message in alert dialog when failing to parse dropped or copied string")];

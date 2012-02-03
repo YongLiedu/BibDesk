@@ -2179,6 +2179,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                 [groups addSearchGroup:group];
         } else {
             NSError *parseError = nil;
+            BOOL isPartialData = NO;
             NSArray *contentArray = nil;
             
             if ([unreadableTypes containsObject:[fileName pathExtension]] == NO) {
@@ -2195,9 +2196,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                         type = [contentString contentStringType];
                     
                     if (type != BDSKUnknownStringType) {
-                        contentArray = [BDSKStringParser itemsFromString:contentString ofType:type owner:self error:&parseError];
+                        contentArray = [BDSKStringParser itemsFromString:contentString ofType:type owner:self isPartialData:&isPartialData error:&parseError];
                         
-                        if ([parseError isLocalError]) {
+                        if (isPartialData && [parseError isLocalError]) {
                             if ([parseError code] == kBDSKParserIgnoredFrontMatter) {
                                 if (verbose) [self presentError:parseError];
                                 parseError = nil;
@@ -2301,6 +2302,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSArray *newFiles = nil;
     NSURL *newURL = nil;
 	NSError *error = nil;
+    BOOL isPartialData = NO;
     NSString *temporaryCiteKey = nil;
     BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
     
@@ -2310,11 +2312,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }else if([type isEqualToString:BDSKReferenceMinerStringPboardType]){
         NSString *pbString = [pb stringForType:NSStringPboardType]; 	
         // sniffing the string for RIS is broken because RefMiner puts junk at the beginning
-		newPubs = [BDSKStringParser itemsFromString:pbString ofType:BDSKReferenceMinerStringType owner:self error:&error];
+		newPubs = [BDSKStringParser itemsFromString:pbString ofType:BDSKReferenceMinerStringType owner:self isPartialData:&isPartialData error:&error];
     }else if([type isEqualToString:NSStringPboardType]){
         NSString *pbString = [pb stringForType:NSStringPboardType]; 	
         // sniff the string to see what its type is
-		newPubs = [BDSKStringParser itemsFromString:pbString ofType:BDSKUnknownStringType owner:self error:&error];
+		newPubs = [BDSKStringParser itemsFromString:pbString ofType:BDSKUnknownStringType owner:self isPartialData:&isPartialData error:&error];
     }else if([type isEqualToString:NSFilenamesPboardType]){
 		NSArray *pbArray = [pb propertyListForType:NSFilenamesPboardType]; // we will get an array
         // try this first, in case these files are a type we can open
@@ -2349,7 +2351,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         error = nil;
     }else if([error isLocalError] && [error code] == kBDSKBibTeXParserFailed){
         // this asks whether to ignore partially failed bibtex when verbose, otherwise just ignore, for NSFilenamesPboardType this was already handled
-        if([type isEqualToString:NSFilenamesPboardType] == NO && (verbose == NO || [self presentError:error] == NO))
+        if(isPartialData && (verbose == NO || [self presentError:error] == NO))
             newPubs = nil;
     }else if(error && verbose){
         // display error for non-bibtex string parsers when verbose
