@@ -116,7 +116,7 @@ static Class classForType(BDSKStringType stringType)
         NSError *error = [NSError mutableLocalErrorWithCode:kBDSKBibTeXParserFailed localizedDescription:NSLocalizedString(@"Error Reading String", @"Message in alert dialog when failing to parse dropped or copied string")];
         [error setValue:NSLocalizedString(@"There was a problem inserting the data. Do you want to ignore this data, open a window containing the data to edit it and remove the errors, or keep going and use everything that BibDesk could parse?\n(It's likely that choosing \"Keep Going\" will lose some data.)", @"Informative text in alert dialog") forKey:NSLocalizedRecoverySuggestionErrorKey];
         [error setValue:self forKey:NSRecoveryAttempterErrorKey];
-        [error setValue:[NSArray arrayWithObjects:NSLocalizedString(@"Cancel", @"Button title"), NSLocalizedString(@"Edit data", @"Button title"), NSLocalizedString(@"Keep going", @"Button title"), nil] forKey:NSLocalizedRecoveryOptionsErrorKey];
+        [error setValue:[NSArray arrayWithObjects:NSLocalizedString(@"Cancel", @"Button title"), NSLocalizedString(@"Keep going", @"Button title"), NSLocalizedString(@"Edit data", @"Button title"), nil] forKey:NSLocalizedRecoveryOptionsErrorKey];
         [error setValue:parseError forKey:NSUnderlyingErrorKey];
         parseError = error;
     }
@@ -133,9 +133,9 @@ static Class classForType(BDSKStringType stringType)
 }
 
 + (BOOL)attemptRecoveryFromError:(NSError *)error optionIndex:(NSUInteger)recoveryOptionIndex {
-    if (recoveryOptionIndex == 1)
+    if (recoveryOptionIndex == 2)
         [[BDSKErrorObjectController sharedErrorObjectController] showEditorForLastPasteDragError];
-    return recoveryOptionIndex == 2;
+    return recoveryOptionIndex == 1;
 }
 
 @end
