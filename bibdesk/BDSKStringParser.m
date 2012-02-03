@@ -51,6 +51,7 @@
 #import "BDSKSciFinderParser.h"
 #import "BDSKPubMedXMLParser.h"
 #import "BDSKRuntime.h"
+#import "BDSKErrorObjectController.h"
 
 @implementation BDSKStringParser
 
@@ -111,6 +112,15 @@ static Class classForType(BDSKStringType stringType)
         // this will create the NSError if the type is unrecognized
         newPubs = [self itemsFromString:string ofType:type error:&parseError];
     
+    if([parseError isLocalError] && [parseError code] == kBDSKBibTeXParserFailed){
+        NSError *error = [NSError mutableLocalErrorWithCode:kBDSKBibTeXParserFailed localizedDescription:NSLocalizedString(@"Error Reading String", @"Message in alert dialog when failing to parse dropped or copied string")];
+        [error setValue:NSLocalizedString(@"There was a problem inserting the data. Do you want to ignore this data, open a window containing the data to edit it and remove the errors, or keep going and use everything that BibDesk could parse?\n(It's likely that choosing \"Keep Going\" will lose some data.)", @"Informative text in alert dialog") forKey:NSLocalizedRecoverySuggestionErrorKey];
+        [error setValue:self forKey:NSRecoveryAttempterErrorKey];
+        [error setValue:[NSArray arrayWithObjects:NSLocalizedString(@"Cancel", @"Button title"), NSLocalizedString(@"Edit data", @"Button title"), NSLocalizedString(@"Keep going", @"Button title"), nil] forKey:NSLocalizedRecoveryOptionsErrorKey];
+        [error setValue:parseError forKey:NSUnderlyingErrorKey];
+        parseError = error;
+    }
+    
 	if(type == BDSKNoKeyBibTeXStringType && parseError == nil){
         // return an error when we inserted temporary keys, let the caller decide what to do with it
         // don't override a parseError though, as that is probably more relevant
@@ -120,6 +130,12 @@ static Class classForType(BDSKStringType stringType)
     
 	if(outError) *outError = parseError;
     return newPubs;
+}
+
++ (BOOL)attemptRecoveryFromError:(NSError *)error optionIndex:(NSUInteger)recoveryOptionIndex {
+    if (recoveryOptionIndex == 1)
+        [[BDSKErrorObjectController sharedErrorObjectController] showEditorForLastPasteDragError];
+    return recoveryOptionIndex == 2;
 }
 
 @end

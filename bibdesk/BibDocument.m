@@ -2105,40 +2105,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 #pragma mark -
 #pragma mark New publications from pasteboard
 
-// pass BDSKUnkownStringType to allow BDSKStringParser to sniff the text and determine the format
-- (NSArray *)publicationsForString:(NSString *)string type:(BDSKStringType)type verbose:(BOOL)verbose error:(NSError **)outError {
-    NSError *error = nil;
-    NSArray *newPubs = [BDSKStringParser itemsFromString:string ofType:type owner:self error:&error];
-    
-	if ([error isLocalError]) {
-        if ([error code] == kBDSKBibTeXParserFailed) {
-            NSInteger rv = NSAlertDefaultReturn;
-            if (verbose) {
-                // this was BibTeX, but the user may want to try going with partial data
-                // run a modal dialog asking if we want to use partial data or give up
-                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error Reading String", @"Message in alert dialog when failing to parse dropped or copied string")
-                                                 defaultButton:NSLocalizedString(@"Cancel", @"Button title")
-                                               alternateButton:NSLocalizedString(@"Edit data", @"Button title")
-                                                   otherButton:NSLocalizedString(@"Keep going", @"Button title")
-                                     informativeTextWithFormat:NSLocalizedString(@"There was a problem inserting the data. Do you want to ignore this data, open a window containing the data to edit it and remove the errors, or keep going and use everything that BibDesk could parse?\n(It's likely that choosing \"Keep Going\" will lose some data.)", @"Informative text in alert dialog")];
-                rv = [alert runModal];
-            }
-            if(rv == NSAlertAlternateReturn)
-                [[BDSKErrorObjectController sharedErrorObjectController] showEditorForLastPasteDragError];
-            if (rv != NSAlertOtherReturn)
-                newPubs = nil;
-        } else if ([error code] == kBDSKParserIgnoredFrontMatter) {
-            // here we want to display an alert, but don't propagate a nil/error back up, since it's not a failure
-            if (verbose)
-                [self presentError:error];
-            error = nil;
-        }
-    }
-    
-	if(outError) *outError = error;
-    return newPubs;
-}
-
 - (NSArray *)publicationsForFiles:(NSArray *)filenames {
     NSMutableArray *newPubs = [NSMutableArray arrayWithCapacity:[filenames count]];
 	NSURL *url = nil;
@@ -2228,8 +2194,19 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                     else
                         type = [contentString contentStringType];
                     
-                    if (type != BDSKUnknownStringType)
-                        contentArray = [self publicationsForString:contentString type:type verbose:verbose error:&parseError];
+                    if (type != BDSKUnknownStringType) {
+                        contentArray = [BDSKStringParser itemsFromString:contentString ofType:type owner:self error:&parseError];
+                        
+                        if ([parseError isLocalError]) {
+                            if ([parseError code] == kBDSKParserIgnoredFrontMatter) {
+                                if (verbose) [self presentError:parseError];
+                                parseError = nil;
+                            } else if([parseError code] == kBDSKBibTeXParserFailed) {
+                                if (verbose == NO || [self presentError:parseError] == NO)
+                                    contentArray = nil;
+                            }
+                        }
+                    }
                     
                     [contentString release];
                 }
@@ -2330,14 +2307,21 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if([type isEqualToString:BDSKBibItemPboardType]){
         NSData *pbData = [pb dataForType:BDSKBibItemPboardType];
 		newPubs = [BibItem publicationsFromArchivedData:pbData macroResolver:[self macroResolver]];
-    } else if([type isEqualToString:BDSKReferenceMinerStringPboardType]){ // pasteboard type from Reference Miner, determined using Pasteboard Peeker
-        NSString *pbString = [pb stringForType:BDSKReferenceMinerStringPboardType]; 	
-        // sniffing the string for RIS is broken because RefMiner puts junk at the beginning
-		newPubs = [self publicationsForString:pbString type:BDSKReferenceMinerStringType verbose:verbose error:&error];
-    }else if([type isEqualToString:NSStringPboardType]){
+    }else if([type isEqualToString:NSStringPboardType] || [type isEqualToString:BDSKReferenceMinerStringPboardType]){
         NSString *pbString = [pb stringForType:NSStringPboardType]; 	
-		// sniff the string to see what its type is
-		newPubs = [self publicationsForString:pbString type:BDSKUnknownStringType verbose:verbose error:&error];
+		NSInteger stringType = [type isEqualToString:BDSKReferenceMinerStringPboardType] ? BDSKReferenceMinerStringType : BDSKUnknownStringType;
+        // sniff the string to see what its type is
+        // sniffing the string for RIS is broken because RefMiner puts junk at the beginning
+		newPubs = [BDSKStringParser itemsFromString:pbString ofType:stringType owner:self error:&error];
+        if([error isLocalError]){
+            if ([error code] == kBDSKParserIgnoredFrontMatter){
+                if (verbose) [self presentError:error];
+                error = nil;
+            }else if([error code] == kBDSKBibTeXParserFailed){
+                if(verbose == NO || [self presentError:error] == NO)
+                    newPubs = nil;
+            }
+        }
     }else if([type isEqualToString:NSFilenamesPboardType]){
 		NSArray *pbArray = [pb propertyListForType:NSFilenamesPboardType]; // we will get an array
         // try this first, in case these files are a type we can open
