@@ -91,7 +91,7 @@
 	bibtexData = [bibtexData substringFromIndex:range.location];
 
 	// parse BibTeX data
-	NSArray *parsedItems = [BDSKBibTeXParser itemsFromString:bibtexData owner:nil isPartialData:NO error:outError];
+	NSArray *parsedItems = [BDSKBibTeXParser itemsFromString:bibtexData owner:nil isPartialData:NULL error:outError];
 	if (parsedItems) {
 		[items addObjectsFromArray:parsedItems];
 	}

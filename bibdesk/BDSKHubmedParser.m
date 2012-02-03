@@ -84,11 +84,9 @@
         return nil;
     }
     
-    BOOL isPartialData = NO;
-    
     NSArray* bibtexItems = [BDSKBibTeXParser itemsFromString:bibTeXString
                                                        owner:nil
-                                               isPartialData:&isPartialData
+                                               isPartialData:NULL
                                                        error:&error];
     if (bibtexItems == nil){
         if(outError) *outError = error;

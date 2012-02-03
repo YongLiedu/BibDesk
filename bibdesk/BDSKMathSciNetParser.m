@@ -160,9 +160,8 @@
 			NSString * cleanedRecord = 	[preContent stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 			cleanedRecord = [umlautFixer replaceWithString:@"{$1}" inString:cleanedRecord];
 			
-			BOOL isPartialData;
 			NSError * parseError;
-			NSArray * newPubs = [BDSKBibTeXParser itemsFromString:cleanedRecord owner:nil isPartialData:&isPartialData error: &parseError];
+			NSArray * newPubs = [BDSKBibTeXParser itemsFromString:cleanedRecord owner:nil isPartialData:NULL error: &parseError];
 			
 			if (newPubs != nil) {
 				[results addObjectsFromArray:newPubs];

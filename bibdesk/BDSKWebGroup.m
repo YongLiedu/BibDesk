@@ -204,11 +204,10 @@ static NSString *BDSKWebLocalizedString = nil;
                 string = [[[NSString alloc] initWithData:[dataSource data] encoding:nsEncoding] autorelease];
             }
             BDSKStringType type = [string contentStringType];
-            BOOL isPartialData = NO;
             if (type == BDSKBibTeXStringType)
-                newPubs = [BDSKBibTeXParser itemsFromString:string owner:nil isPartialData:&isPartialData error:&error];
+                newPubs = [BDSKBibTeXParser itemsFromString:string owner:nil isPartialData:NULL error:&error];
             else if (type == BDSKNoKeyBibTeXStringType)
-                newPubs = [BDSKBibTeXParser itemsFromString:[string stringWithPhoneyCiteKeys:[BibItem defaultCiteKey]] owner:nil isPartialData:&isPartialData error:&error];
+                newPubs = [BDSKBibTeXParser itemsFromString:[string stringWithPhoneyCiteKeys:[BibItem defaultCiteKey]] owner:nil isPartialData:NULL error:&error];
             else if (type != BDSKUnknownStringType)
                 newPubs = [BDSKStringParser itemsFromString:string ofType:type error:&error];
         }

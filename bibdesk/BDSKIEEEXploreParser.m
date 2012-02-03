@@ -281,10 +281,9 @@ static NSMutableArray *_finishedDownloads = nil;
         }
         [scanner release];
         
-        BOOL isPartialData;
         NSArray *newPubs = nil;
         if ([NSString isEmptyString:bibTeXString] == NO)
-            newPubs = [BDSKBibTeXParser itemsFromString:bibTeXString owner:nil isPartialData:&isPartialData error: &error];
+            newPubs = [BDSKBibTeXParser itemsFromString:bibTeXString owner:nil isPartialData:NULL error: &error];
         else
             error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"No data returned from server", @"")];
         

@@ -149,9 +149,8 @@
 		NSString * bibTeXString = [[[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding] autorelease];
 		bibTeXString = [bibTeXString stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 		bibTeXString = [umlautFixer replaceWithString:@"{$1}" inString:bibTeXString];
-		BOOL isPartialData;
 		NSError * ignoreError;
-		NSArray * newPubs = [BDSKBibTeXParser itemsFromString:bibTeXString owner:nil isPartialData:&isPartialData error: &ignoreError];
+		NSArray * newPubs = [BDSKBibTeXParser itemsFromString:bibTeXString owner:nil isPartialData:NULL error: &ignoreError];
 		
 		if (newPubs != nil) {
 			[results addObjectsFromArray:newPubs];

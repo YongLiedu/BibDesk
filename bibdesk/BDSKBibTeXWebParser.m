@@ -85,7 +85,7 @@
         sourceItem = [inputString substringWithRange:r];
 		// parse this string as BibTeX, if we can
 		if ([BDSKBibTeXParser canParseString:sourceItem])
-			[items addObjectsFromArray:[BDSKBibTeXParser itemsFromString:sourceItem owner:nil isPartialData:NO error:outError]];
+			[items addObjectsFromArray:[BDSKBibTeXParser itemsFromString:sourceItem owner:nil isPartialData:NULL error:outError]];
 	}
 	
 	return items;  
