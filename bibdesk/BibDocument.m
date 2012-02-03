@@ -2307,21 +2307,14 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if([type isEqualToString:BDSKBibItemPboardType]){
         NSData *pbData = [pb dataForType:BDSKBibItemPboardType];
 		newPubs = [BibItem publicationsFromArchivedData:pbData macroResolver:[self macroResolver]];
-    }else if([type isEqualToString:NSStringPboardType] || [type isEqualToString:BDSKReferenceMinerStringPboardType]){
+    }else if([type isEqualToString:BDSKReferenceMinerStringPboardType]){
         NSString *pbString = [pb stringForType:NSStringPboardType]; 	
-		NSInteger stringType = [type isEqualToString:BDSKReferenceMinerStringPboardType] ? BDSKReferenceMinerStringType : BDSKUnknownStringType;
-        // sniff the string to see what its type is
         // sniffing the string for RIS is broken because RefMiner puts junk at the beginning
-		newPubs = [BDSKStringParser itemsFromString:pbString ofType:stringType owner:self error:&error];
-        if([error isLocalError]){
-            if ([error code] == kBDSKParserIgnoredFrontMatter){
-                if (verbose) [self presentError:error];
-                error = nil;
-            }else if([error code] == kBDSKBibTeXParserFailed){
-                if(verbose == NO || [self presentError:error] == NO)
-                    newPubs = nil;
-            }
-        }
+		newPubs = [BDSKStringParser itemsFromString:pbString ofType:BDSKReferenceMinerStringType owner:self error:&error];
+    }else if([type isEqualToString:NSStringPboardType]){
+        NSString *pbString = [pb stringForType:NSStringPboardType]; 	
+        // sniff the string to see what its type is
+		newPubs = [BDSKStringParser itemsFromString:pbString ofType:BDSKUnknownStringType owner:self error:&error];
     }else if([type isEqualToString:NSFilenamesPboardType]){
 		NSArray *pbArray = [pb propertyListForType:NSFilenamesPboardType]; // we will get an array
         // try this first, in case these files are a type we can open
@@ -2346,14 +2339,24 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         newPubs = newPubs ? [newPubs arrayByAddingObjectsFromArray:newFilePubs]: newFilePubs;
     }
     
-    if([error isLocalError]){
-        if([error code] == kBDSKHadMissingCiteKeys) {
-            temporaryCiteKey = [[error userInfo] objectForKey:@"temporaryCiteKey"];
-            error = nil; // accept temporary cite keys, but show a warning later
-        }
+    if([error isLocalError] && [error code] == kBDSKHadMissingCiteKeys) {
+        temporaryCiteKey = [[error userInfo] objectForKey:@"temporaryCiteKey"];
+        error = nil; // accept temporary cite keys, but show a warning later
+    }else if([error isLocalError] && [error code] == kBDSKParserIgnoredFrontMatter){
+        // just warn about this error when verbose, don't treat this as an error further
+        if (verbose)
+            [self presentError:error];
+        error = nil;
+    }else if([error isLocalError] && [error code] == kBDSKBibTeXParserFailed){
+        // this asks whether to ignore partially failed bibtex when verbose, otherwise just ignore, for NSFilenamesPboardType this was already handled
+        if([type isEqualToString:NSFilenamesPboardType] == NO && (verbose == NO || [self presentError:error] == NO))
+            newPubs = nil;
+    }else if(error && verbose){
+        // display error for non-bibtex string parsers when verbose
+        [self presentError:error];
     }
     
-    if ([newPubs count] > 0) 
+    if([newPubs count] > 0)
 		[self addPublications:newPubs publicationsToAutoFile:newFilePubs temporaryCiteKey:temporaryCiteKey selectLibrary:shouldSelect edit:shouldEdit];
     else if (newPubs == nil && outError)
         *outError = error;
