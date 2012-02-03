@@ -331,7 +331,6 @@ static id sharedServiceProvider = nil;
     if([doc addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:NO error:&nsError] == nil){
         if(error)
             *error = [nsError localizedDescription];
-        [doc presentError:nsError];
     }
 }
 
