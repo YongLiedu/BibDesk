@@ -389,6 +389,25 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     
 }
 
+#pragma mark NSErrorRecoveryAttempting protocol
+
+// Error recovery for bibtex parser errors, see BibDocument and BDSKStringParser for the errors
+// The options are (cancel, keep going, edit)
+- (BOOL)attemptRecoveryFromError:(NSError *)error optionIndex:(NSUInteger)recoveryOptionIndex {
+    // this is set when the document failed to load
+    BibDocument *doc = [[error userInfo] objectForKey:@"failedDocument"];
+    BOOL shouldKeepGoing = recoveryOptionIndex == 1;
+    BOOL shouldEdit = recoveryOptionIndex == 2;
+    if (doc && shouldKeepGoing == NO)
+        // the document failed to load, the user chose not to keep going, register failure
+        [self documentFailedLoad:doc shouldEdit:shouldEdit];
+    else if (doc == nil && shouldEdit)
+        // paste/drag failed, the user chose to edit
+        [self showEditorForLastPasteDragError];
+    // return YES to accept for Keep Going, otherwise return NO
+    return shouldKeepGoing;
+}
+
 #pragma mark TableView delegate
 
 - (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation{

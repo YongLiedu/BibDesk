@@ -1878,33 +1878,20 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     // @@ move this to NSDocumentController; need to figure out where to add it, though
     if (isPartialData) {
-        if (outError) *outError = error;
+        NSError *recoveryError = [NSError mutableLocalErrorWithCode:[error code] localizedDescription:[error localizedDescription] ?: NSLocalizedString(@"Error reading file!", @"Message in alert dialog when unable to read file")];
+        [recoveryError setValue:NSLocalizedString(@"There was a problem reading the file.  Do you want to give up, edit the file to correct the errors, or keep going with everything that could be analyzed?\n\nIf you choose \"Keep Going\" and then save the file, you will probably lose data.", @"Informative text in alert dialog") forKey:NSLocalizedRecoverySuggestionErrorKey];
+        [recoveryError setValue:[BDSKErrorObjectController sharedErrorObjectController] forKey:NSRecoveryAttempterErrorKey];
+        [recoveryError setValue:[NSArray arrayWithObjects:NSLocalizedString(@"Give Up", @"Button title"), NSLocalizedString(@"Keep Going", @"Button title"), NSLocalizedString(@"Edit File", @"Button title"), nil] forKey:NSLocalizedRecoveryOptionsErrorKey];
+        [recoveryError setValue:self forKey:@"failedDocument"];
+        [recoveryError setValue:error forKey:NSUnderlyingErrorKey];
         
-        // run a modal dialog asking if we want to use partial data or give up
-        NSAlert *alert = [NSAlert alertWithMessageText:[error localizedDescription] ?: NSLocalizedString(@"Error reading file!", @"Message in alert dialog when unable to read file")
-                                         defaultButton:NSLocalizedString(@"Give Up", @"Button title")
-                                       alternateButton:NSLocalizedString(@"Edit File", @"Button title")
-                                           otherButton:NSLocalizedString(@"Keep Going", @"Button title")
-                             informativeTextWithFormat:NSLocalizedString(@"There was a problem reading the file.  Do you want to give up, edit the file to correct the errors, or keep going with everything that could be analyzed?\n\nIf you choose \"Keep Going\" and then save the file, you will probably lose data.", @"Informative text in alert dialog")];
-        [alert setAlertStyle:NSCriticalAlertStyle];
-        NSInteger rv = [alert runModal];
-        if (rv == NSAlertDefaultReturn) {
-            // the user said to give up
-            [[BDSKErrorObjectController sharedErrorObjectController] documentFailedLoad:self shouldEdit:NO]; // this hands the errors to a new error editor and sets that as the documentForErrors
-            // return NSUserCancelledError so NSDocumentController won't show another alert
-            if (outError)
-                *outError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSUserCancelledError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:error, NSUnderlyingErrorKey, nil]];
-        }else if (rv == NSAlertAlternateReturn){
-            // the user said to edit the file.
-            [[BDSKErrorObjectController sharedErrorObjectController] documentFailedLoad:self shouldEdit:YES]; // this hands the errors to a new error editor and sets that as the documentForErrors
-            // return NSUserCancelledError so NSDocumentController won't show another alert
-            if (outError)
-                *outError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSUserCancelledError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:error, NSUnderlyingErrorKey, nil]];
-        }else if(rv == NSAlertOtherReturn){
+        if ([self presentError:recoveryError])
             // the user said to keep going, so if they save, they might clobber data...
             // if we don't return YES, NSDocumentController puts up its lame alert saying the document could not be opened, and we get no partial data
             isPartialData = NO;
-        }
+        else if (outError)
+            // return NSUserCancelledError so NSDocumentController won't show another alert
+            *outError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSUserCancelledError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:error, NSUnderlyingErrorKey, nil]];
     }
     
     if (isPartialData == NO) {
