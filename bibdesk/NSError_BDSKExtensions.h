@@ -67,7 +67,8 @@ enum {
     kBDSKHadMissingCiteKeys,                      /* BibTeX data had missing cite keys       */
 };
 
-extern NSString *BDSKUnderlyingItemErrorKey;
+extern NSString *BDSKFailedDocumentErrorKey;
+extern NSString *BDSKTemporaryCiteKeyErrorKey;
 
 @interface NSError (BDSKExtensions) <NSMutableCopying>
 

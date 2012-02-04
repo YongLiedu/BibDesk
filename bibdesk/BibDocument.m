@@ -1882,7 +1882,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [recoveryError setValue:NSLocalizedString(@"There was a problem reading the file.  Do you want to give up, edit the file to correct the errors, or keep going with everything that could be analyzed?\n\nIf you choose \"Keep Going\" and then save the file, you will probably lose data.", @"Informative text in alert dialog") forKey:NSLocalizedRecoverySuggestionErrorKey];
         [recoveryError setValue:[BDSKErrorObjectController sharedErrorObjectController] forKey:NSRecoveryAttempterErrorKey];
         [recoveryError setValue:[NSArray arrayWithObjects:NSLocalizedString(@"Give Up", @"Button title"), NSLocalizedString(@"Keep Going", @"Button title"), NSLocalizedString(@"Edit File", @"Button title"), nil] forKey:NSLocalizedRecoveryOptionsErrorKey];
-        [recoveryError setValue:self forKey:@"failedDocument"];
+        [recoveryError setValue:self forKey:BDSKFailedDocumentErrorKey];
         [recoveryError setValue:error forKey:NSUnderlyingErrorKey];
         
         if ([self presentError:recoveryError])
@@ -2329,7 +2329,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
     
     if([error isLocalErrorWithCode:kBDSKHadMissingCiteKeys]) {
-        temporaryCiteKey = [[error userInfo] objectForKey:@"temporaryCiteKey"];
+        temporaryCiteKey = [[error userInfo] objectForKey:BDSKTemporaryCiteKeyErrorKey];
         error = nil; // accept temporary cite keys, but show a warning later
     }else if([error isLocalErrorWithCode:kBDSKParserIgnoredFrontMatter]){
         // just warn about this error when verbose, don't treat this as an error further

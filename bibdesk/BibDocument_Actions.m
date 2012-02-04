@@ -67,6 +67,7 @@
 #import "NSViewAnimation_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
 #import "NSPrintOperation_BDSKExtensions.h"
+#import "NSError_BDSKExtensions.h"
 
 #import "BDSKTypeManager.h"
 #import "BDSKScriptHookManager.h"
@@ -1469,7 +1470,7 @@ static BOOL changingColors = NO;
         NSArray *newPubs = [self extractPublicationsFromFiles:[NSArray arrayWithObject:fileName] unparseableFiles:NULL verbose:NO error:&error];
         BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
         if ([newPubs count]) {
-            [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:[[error userInfo] valueForKey:@"temporaryCiteKey"] selectLibrary:YES edit:shouldEdit];
+            [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:[[error userInfo] valueForKey:BDSKTemporaryCiteKeyErrorKey] selectLibrary:YES edit:shouldEdit];
             // succeeded to parse the file, we return immediately
         } else {
             [sheet orderOut:nil];

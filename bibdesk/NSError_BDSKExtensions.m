@@ -39,7 +39,9 @@
 #import "NSError_BDSKExtensions.h"
 
 #define BDSKErrorDomain @"net.sourceforge.bibdesk.errors"
-NSString *BDSKUnderlyingItemErrorKey = @"BDSKUnderlyingItemError";
+
+NSString *BDSKFailedDocumentErrorKey = @"BDSKFailedDocument";
+NSString *BDSKTemporaryCiteKeyErrorKey = @"BDSKTemporaryCiteKey";
 
 @interface BDSKMutableError : NSError
 {

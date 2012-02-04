@@ -127,7 +127,7 @@ static Class classForType(BDSKStringType stringType)
         // return an error when we inserted temporary keys, let the caller decide what to do with it
         // don't override a parseError though, as that is probably more relevant
         parseError = [NSError mutableLocalErrorWithCode:kBDSKHadMissingCiteKeys localizedDescription:NSLocalizedString(@"Temporary Cite Keys", @"Error description")];
-        [parseError setValue:@"FixMe" forKey:@"temporaryCiteKey"];
+        [parseError setValue:@"FixMe" forKey:BDSKTemporaryCiteKeyErrorKey];
     }
     
 	if(outError) *outError = parseError;

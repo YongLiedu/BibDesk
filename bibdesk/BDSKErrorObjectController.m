@@ -49,6 +49,7 @@
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKTableView.h"
+#import "NSError_BDSKExtensions.h"
 
 #define BDSKLineNumberTransformerName @"BDSKLineNumberTransformer"
 
@@ -395,7 +396,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 // The options are (cancel, keep going, edit)
 - (BOOL)attemptRecoveryFromError:(NSError *)error optionIndex:(NSUInteger)recoveryOptionIndex {
     // this is set when the document failed to load
-    BibDocument *doc = [[error userInfo] objectForKey:@"failedDocument"];
+    BibDocument *doc = [[error userInfo] objectForKey:BDSKFailedDocumentErrorKey];
     BOOL shouldKeepGoing = recoveryOptionIndex == 1;
     BOOL shouldEdit = recoveryOptionIndex == 2;
     if (doc && shouldKeepGoing == NO)
