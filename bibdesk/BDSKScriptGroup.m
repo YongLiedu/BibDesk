@@ -284,7 +284,7 @@
     
     if (type == BDSKBibTeXStringType) {
         pubs = [BDSKBibTeXParser itemsFromData:[outputString dataUsingEncoding:NSUTF8StringEncoding] macros:&macros filePath:@"" owner:self encoding:NSUTF8StringEncoding isPartialData:&isPartialData error:&error];
-        if (isPartialData && [error isLocalError] && [error code] == kBDSKParserIgnoredFrontMatter)
+        if (isPartialData && [error isLocalErrorWithCode:kBDSKParserIgnoredFrontMatter])
             isPartialData = NO;
     } else if (type != BDSKUnknownStringType){
         pubs = [BDSKStringParser itemsFromString:outputString ofType:type error:&error];

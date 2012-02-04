@@ -129,6 +129,11 @@ NSString *BDSKUnderlyingItemErrorKey = @"BDSKUnderlyingItemError";
     return [[self domain] isEqualToString:[NSError localErrorDomain]];
 }
 
+- (BOOL)isLocalErrorWithCode:(NSInteger)code;
+{
+    return [self isLocalError] && [self code] == code;
+}
+
 + (id)localErrorWithCode:(NSInteger)code localizedDescription:(NSString *)description;
 {
     NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, nil];

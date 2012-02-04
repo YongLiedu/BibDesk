@@ -114,7 +114,7 @@ static Class classForType(BDSKStringType stringType)
             *isPartialData = newPubs != nil;
     }
     
-    if([parseError isLocalError] && [parseError code] == kBDSKBibTeXParserFailed){
+    if([parseError isLocalErrorWithCode:kBDSKBibTeXParserFailed]){
         NSError *error = [NSError mutableLocalErrorWithCode:kBDSKBibTeXParserFailed localizedDescription:NSLocalizedString(@"Error Reading String", @"Message in alert dialog when failing to parse dropped or copied string")];
         [error setValue:NSLocalizedString(@"There was a problem inserting the data. Do you want to ignore this data, open a window containing the data to edit it and remove the errors, or keep going and use everything that BibDesk could parse?\n(It's likely that choosing \"Keep Going\" will lose some data.)", @"Informative text in alert dialog") forKey:NSLocalizedRecoverySuggestionErrorKey];
         [error setValue:self forKey:NSRecoveryAttempterErrorKey];

@@ -1406,7 +1406,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if(nil == data && outError){
         // see if this was an encoding failure; if so, we can suggest how to fix it
         // NSLocalizedRecoverySuggestion is appropriate for display as error message in alert
-        if(kBDSKStringEncodingError == [error code]){
+        if([error isLocalErrorWithCode:kBDSKStringEncodingError]){
             // encoding conversion failure (string to data)
             NSStringEncoding usedEncoding = [[error valueForKey:NSStringEncodingErrorKey] integerValue];
             NSMutableString *message = [NSMutableString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.", @"Error informative text"), [NSString localizedNameOfStringEncoding:usedEncoding]];
@@ -2198,11 +2198,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                     if (type != BDSKUnknownStringType) {
                         contentArray = [BDSKStringParser itemsFromString:contentString ofType:type owner:self isPartialData:&isPartialData error:&parseError];
                         
-                        if (isPartialData && [parseError isLocalError]) {
-                            if ([parseError code] == kBDSKParserIgnoredFrontMatter) {
+                        if (isPartialData) {
+                            if ([parseError isLocalErrorWithCode:kBDSKParserIgnoredFrontMatter]) {
                                 if (verbose) [self presentError:parseError];
                                 parseError = nil;
-                            } else if([parseError code] == kBDSKBibTeXParserFailed) {
+                            } else if([parseError isLocalErrorWithCode:kBDSKBibTeXParserFailed]) {
                                 if (verbose == NO || [self presentError:parseError] == NO)
                                     contentArray = nil;
                             }
@@ -2341,15 +2341,15 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         newPubs = newPubs ? [newPubs arrayByAddingObjectsFromArray:newFilePubs]: newFilePubs;
     }
     
-    if([error isLocalError] && [error code] == kBDSKHadMissingCiteKeys) {
+    if([error isLocalErrorWithCode:kBDSKHadMissingCiteKeys]) {
         temporaryCiteKey = [[error userInfo] objectForKey:@"temporaryCiteKey"];
         error = nil; // accept temporary cite keys, but show a warning later
-    }else if([error isLocalError] && [error code] == kBDSKParserIgnoredFrontMatter){
+    }else if([error isLocalErrorWithCode:kBDSKParserIgnoredFrontMatter]){
         // just warn about this error when verbose, don't treat this as an error further
         if (verbose)
             [self presentError:error];
         error = nil;
-    }else if([error isLocalError] && [error code] == kBDSKBibTeXParserFailed){
+    }else if([error isLocalErrorWithCode:kBDSKBibTeXParserFailed]){
         // this asks whether to ignore partially failed bibtex when verbose, otherwise just ignore, for NSFilenamesPboardType this was already handled
         if(isPartialData && (verbose == NO || [self presentError:error] == NO))
             newPubs = nil;

@@ -2692,11 +2692,11 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         // this returns nil when there was a parser error and the user didn't decide to proceed anyway
         draggedPubs = [BDSKStringParser itemsFromString:pbString ofType:[pbString contentStringType] owner:[self document] isPartialData:&isPartialData error:&error];
         // we ignore warnings for parsing with temporary keys, but we want to ignore the cite key in that case
-        if (isPartialData && [error isLocalError]) {
-            if ([error code] == kBDSKHadMissingCiteKeys) {
+        if (isPartialData) {
+            if ([error isLocalErrorWithCode:kBDSKHadMissingCiteKeys]) {
                 hasTemporaryCiteKey = YES;
                 error = nil;
-            } else if ([error code] == kBDSKBibTeXParserFailed) {
+            } else if ([error isLocalErrorWithCode:kBDSKBibTeXParserFailed]) {
                 // should we accept partially parsed bibtex?
                 draggedPubs = nil;
             }

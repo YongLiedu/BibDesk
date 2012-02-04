@@ -1505,7 +1505,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     NSArray *pubs = [BDSKStringParser itemsFromString:string ofType:type owner:owner isPartialData:&isPartialData error:&error];
     
     // ignore warnings for parsing with temporary citekeys, as we're not interested in the cite key
-    if ([error isLocalError] && [error code] == kBDSKHadMissingCiteKeys) {
+    if ([error isLocalErrorWithCode:kBDSKHadMissingCiteKeys]) {
         isPartialData = NO;
         error = nil;
     }

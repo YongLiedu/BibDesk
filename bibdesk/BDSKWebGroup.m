@@ -214,7 +214,7 @@ static NSString *BDSKWebLocalizedString = nil;
         else if (nil == newPubs && [MIMEType hasPrefix:@"text/"]) {
             // !!! logs are here to help diagnose problems that users are reporting
             // but unsupported web pages are far too common, we don't want to flood the console
-            if ([[error domain] isEqualToString:[NSError localErrorDomain]] == NO || [error code] != kBDSKWebParserUnsupported)
+            if ([error isLocalErrorWithCode:kBDSKWebParserUnsupported] == NO)
                 NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
             //NSLog(@"loaded MIME type %@", [[dataSource mainResource] MIMEType]);
             // !!! what to do here? if user clicks on a PDF, we're loading application/pdf, which is clearly not an error from the user perspective...so should the error only be presented for text/plain?
