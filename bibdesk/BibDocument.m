@@ -1713,6 +1713,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 #pragma mark -
 #pragma mark Opening and Loading Files
 
+- (BOOL)revertToContentsOfURL:(NSURL *)absoluteURL ofType:(NSString *)typeName error:(NSError **)outError{
+    docFlags.isReverting = YES;
+    BOOL success = [super revertToContentsOfURL:absoluteURL ofType:typeName error:outError];
+    docFlags.isReverting = NO;
+    return success;
+}
+
 - (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)aType error:(NSError **)outError
 {
     BOOL success = NO;
@@ -1882,8 +1889,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [recoveryError setValue:NSLocalizedString(@"There was a problem reading the file.  Do you want to give up, edit the file to correct the errors, or keep going with everything that could be analyzed?\n\nIf you choose \"Keep Going\" and then save the file, you will probably lose data.", @"Informative text in alert dialog") forKey:NSLocalizedRecoverySuggestionErrorKey];
         [recoveryError setValue:[BDSKErrorObjectController sharedErrorObjectController] forKey:NSRecoveryAttempterErrorKey];
         [recoveryError setValue:[NSArray arrayWithObjects:NSLocalizedString(@"Give Up", @"Button title"), NSLocalizedString(@"Keep Going", @"Button title"), NSLocalizedString(@"Edit File", @"Button title"), nil] forKey:NSLocalizedRecoveryOptionsErrorKey];
-        [recoveryError setValue:self forKey:BDSKFailedDocumentErrorKey];
         [recoveryError setValue:error forKey:NSUnderlyingErrorKey];
+        if (docFlags.isReverting == NO)
+            [recoveryError setValue:self forKey:BDSKFailedDocumentErrorKey];
         
         if ([self presentError:recoveryError])
             // the user said to keep going, so if they save, they might clobber data...

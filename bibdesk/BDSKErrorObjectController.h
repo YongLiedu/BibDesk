@@ -71,8 +71,8 @@
 
 // called from the tableView doubleclick
 - (void)showEditorForErrorObject:(BDSKErrorObject *)errObj;
-// called to edit a failed paste/drag
-- (void)showEditorForLastPasteDragError;
+// called to edit a failed paste/drag or revert
+- (void)showEditorForLastErrors;
 
 - (void)documentFailedLoad:(BibDocument *)document shouldEdit:(BOOL)shouldEdit;
 - (void)handleRemoveDocumentNotification:(NSNotification *)notification;

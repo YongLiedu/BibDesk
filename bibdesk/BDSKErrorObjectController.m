@@ -230,11 +230,11 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     } else NSBeep();
 }
 
-// edit paste/drag error; sent via document error panel displayed when paste fails
-- (void)showEditorForLastPasteDragError{
+// edit paste/drag error or error on revert; sent via document error panel displayed when paste fails or revert fails
+- (void)showEditorForLastErrors{
     if(lastIndex < [self countOfErrors]){
         BDSKErrorObject *errObj = [self objectInErrorsAtIndex:lastIndex];
-        BDSKASSERT([[errObj editor] isPasteDrag]);
+        //BDSKASSERT([[errObj editor] isPasteDrag]);
         [self showWindow:self];
         [self showEditorForErrorObject:errObj];
         NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(lastIndex, [self countOfErrors] - lastIndex)];
@@ -403,8 +403,8 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
         // the document failed to load, the user chose not to keep going, register failure
         [self documentFailedLoad:doc shouldEdit:shouldEdit];
     else if (doc == nil && shouldEdit)
-        // paste/drag failed, the user chose to edit
-        [self showEditorForLastPasteDragError];
+        // paste/drag or revert failed, the user chose to edit
+        [self showEditorForLastErrors];
     // return YES to accept for Keep Going, otherwise return NO
     return shouldKeepGoing;
 }
