@@ -337,21 +337,22 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 
 - (void)discardEditing
 {
+    id firstResponder = [[self window] firstResponder];
     // check textviews first
-    if (currentEditedView == [[self window] firstResponder]) {
+    if (currentEditedView == firstResponder) {
         // need some reasonable state for annote et al. textviews
         NSParameterAssert(nil != previousValueForCurrentEditedView);
         [currentEditedView setString:previousValueForCurrentEditedView];
     }
     // now handle any field editor(s)
-    else if ([[[self window] firstResponder] isKindOfClass:[NSText class]]) {
+    else if ([firstResponder isKindOfClass:[NSText class]]) {
      
         /*
          Omit the standard check for [[self window] fieldEditor:NO forObject:nil],
          since that returns nil for the tableview's field editor.
          */
         
-        NSControl *control = (NSControl *)[(NSText *)[[self window] firstResponder] delegate];
+        NSControl *control = (NSControl *)[(NSText *)firstResponder delegate];
         
         // may be self, if a textview was being edited (but we should have taken the first branch in that case)
         if ([control respondsToSelector:@selector(abortEditing)]) {
@@ -360,10 +361,6 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         else {
             fprintf(stderr, "%s, control does not respond to abortEditing\n", __func__);
         }
-    }
-    else {
-        // should never happen
-        fprintf(stderr, "%s, unhandled firstResponder = %s\n", __func__, [[[[[self window] firstResponder] class] description] UTF8String]);
     }
     if (editorFlags.isEditing) {
         [[self document] objectDidEndEditing:self];
