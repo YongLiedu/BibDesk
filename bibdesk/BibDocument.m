@@ -1733,6 +1733,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     // when using the Open panel this should be initialized to the selected encoding, otherwise the default encoding from the prefs, or for revert whatever it was
     NSStringEncoding encoding = [self documentStringEncoding];
     
+    // make sure we reread the setup from extended attributes from the file, in particular on revert
+    BDSKDESTROY(mainWindowSetupDictionary);
+    
     // This is only a sanity check; an encoding of 0 is not valid, so is a signal we should ignore xattrs; could only check for public.text UTIs, but it will be zero if it was never written (and we don't warn in that case).  The user can do many things to make the attribute incorrect, so this isn't very robust.
     NSStringEncoding encodingFromFile = [[self mainWindowSetupDictionaryFromExtendedAttributes] unsignedIntegerForKey:BDSKDocumentStringEncodingKey defaultValue:BDSKNoStringEncoding];
     if (encodingFromFile != BDSKNoStringEncoding && encodingFromFile != encoding) {
