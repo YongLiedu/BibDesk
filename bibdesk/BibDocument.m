@@ -1713,13 +1713,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 #pragma mark -
 #pragma mark Opening and Loading Files
 
-- (BOOL)revertToContentsOfURL:(NSURL *)absoluteURL ofType:(NSString *)typeName error:(NSError **)outError{
-    docFlags.isReverting = YES;
-    BOOL success = [super revertToContentsOfURL:absoluteURL ofType:typeName error:outError];
-    docFlags.isReverting = NO;
-    return success;
-}
-
 - (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)aType error:(NSError **)outError
 {
     BOOL success = NO;
@@ -1893,7 +1886,8 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [recoveryError setValue:[BDSKErrorObjectController sharedErrorObjectController] forKey:NSRecoveryAttempterErrorKey];
         [recoveryError setValue:[NSArray arrayWithObjects:NSLocalizedString(@"Give Up", @"Button title"), NSLocalizedString(@"Keep Going", @"Button title"), NSLocalizedString(@"Edit File", @"Button title"), nil] forKey:NSLocalizedRecoveryOptionsErrorKey];
         [recoveryError setValue:error forKey:NSUnderlyingErrorKey];
-        if (docFlags.isReverting == NO)
+        // initial read is before makeWindowControllers, tell the recoveryAttempter to remove this document when accepting the error
+        if ([[self windowControllers] count] == 0)
             [recoveryError setValue:self forKey:BDSKFailedDocumentErrorKey];
         
         if ([self presentError:recoveryError])

@@ -243,7 +243,6 @@ extern NSString *BDSKDocumentPublicationsKey;
         unsigned int        tmpSortDescending:1;
         unsigned int        sortGroupsDescending:1;
         unsigned int        dragFromExternalGroups:1;
-        unsigned int        isReverting:1;
         unsigned int        isDocumentClosed:1;
         unsigned int        didImport:1;
         unsigned int        displayMigrationAlert:1;
