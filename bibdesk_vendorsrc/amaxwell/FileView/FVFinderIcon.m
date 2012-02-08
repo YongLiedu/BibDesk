@@ -319,12 +319,21 @@ static CGImageRef __FVCreateFullImageWithIcon(IconRef icon)
         rect = CGRectInset(rect, rect.size.width/4, rect.size.height/4);
         if (questionIcon) PlotIconRefInContext(context, &rect, kAlignCenterBottom, kTransformNone, NULL, kIconServicesNoBadgeFlag, questionIcon);          
         
-        _thumbnail = CGBitmapContextCreateImage(context);        
+        _thumbnail = CGBitmapContextCreateImage(context);       
         
-        context = [[FVBitmapContext bitmapContextWithSize:NSMakeSize(FVMaxImageDimension, FVMaxImageDimension)] graphicsPort];
+        size_t dim = FVMaxImageDimension;
+        /*
+         Crash under _ISGetCGImageRefForISImageRef as of 10.7.3.  This seems to avoid the crash,
+         but I've no idea if it's a truly good workaround.  Apply to all 10.7.x systems for now.
+         rdar://problem/10809538 
+         */
+        if (floor(NSAppKitVersionNumber) >= 1138)
+            dim = 200; 
+        
+        context = [[FVBitmapContext bitmapContextWithSize:NSMakeSize(dim, dim)] graphicsPort];
         rect = CGRectZero;
         
-        rect.size = CGSizeMake(FVMaxImageDimension, FVMaxImageDimension);
+        rect.size = CGSizeMake(dim, dim);
         CGContextClearRect(context, rect);
         if (docIcon) PlotIconRefInContext(context, &rect, kAlignAbsoluteCenter, kTransformNone, NULL, kIconServicesNoBadgeFlag, docIcon);
         
