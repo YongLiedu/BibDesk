@@ -510,13 +510,6 @@ static Class BDSKLinkedFileClass = Nil;
     return relativePath;
 }
 
-- (void)setRelativePath:(NSString *)newRelativePath {
-    if (relativePath != newRelativePath) {
-        [relativePath release];
-        relativePath = [newRelativePath retain];
-    }
-}
-
 - (void)setFileRef:(const FSRef *)newFileRef;
 {
     if (fileRef != NULL) {
