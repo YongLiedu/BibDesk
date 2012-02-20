@@ -148,7 +148,7 @@ static id sharedController = nil;
     frame.size.width = width;
     [controlView setFrame:frame];
     CGFloat controlHeight = NSHeight([controlView frame]);
-    for (BDSKPreferencePane *pane in panes) {
+    for (BDSKPreferencePane *pane in [panes objectEnumerator]) {
         frame = [[pane view] frame];
         frame.origin = NSMakePoint(floor(0.5 * (width - NSWidth(frame))), controlHeight);
         [[pane view] setFrame:frame];
