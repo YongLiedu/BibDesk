@@ -166,6 +166,10 @@ NSString *BDSKDocumentPublicationsKey = @"publications";
 - (void)changeSaveType:(id)sender;
 @end
 
+@interface NSURL (BDSKSnowLeopardDeclarations)
+- (NSURL *)filePathURL;
+@end
+
 @implementation BibDocument
 
 static NSOperationQueue *metadataCacheQueue = nil;
@@ -1121,7 +1125,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 - (void)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo {
     // Override so we can determine if this is an autosave in writeToURL:ofType:error:.
     docState.currentSaveOperationType = saveOperation;
-    saveTargetURL = [absoluteURL copy];
+    saveTargetURL = [([absoluteURL respondsToSelector:@selector(filePathURL)] ? [absoluteURL filePathURL] : absoluteURL) copy];
     
     NSInvocation *invocation = nil;
     if (delegate && didSaveSelector) {
