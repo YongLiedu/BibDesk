@@ -1121,7 +1121,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 - (void)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo {
     // Override so we can determine if this is an autosave in writeToURL:ofType:error:.
     docState.currentSaveOperationType = saveOperation;
-    saveTargetURL = [([absoluteURL respondsToSelector:@selector(filePathURL)] ? [absoluteURL filePathURL] : absoluteURL) copy];
+    saveTargetURL = [[absoluteURL filePathURL] copy];
     
     NSInvocation *invocation = nil;
     if (delegate && didSaveSelector) {

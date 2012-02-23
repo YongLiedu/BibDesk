@@ -586,11 +586,17 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     return [(id)CFURLCreateCopyDeletingPathExtension(CFGetAllocator((CFURLRef)self), (CFURLRef)self) autorelease];
 }
 
+- (NSURL *)Leopard_filePathURL;
+{
+    return [self isFileURL] ? self : nil;
+}
+
 + (void)load {
     BDSKAddInstanceMethodImplementationFromSelector(self, @selector(lastPathComponent), @selector(Leopard_lastPathComponent));
     BDSKAddInstanceMethodImplementationFromSelector(self, @selector(pathExtension), @selector(Leopard_pathExtension));
     BDSKAddInstanceMethodImplementationFromSelector(self, @selector(URLByDeletingLastPathComponent), @selector(Leopard_URLByDeletingLastPathComponent));
     BDSKAddInstanceMethodImplementationFromSelector(self, @selector(URLByDeletingPathExtension), @selector(Leopard_URLByDeletingPathExtension));
+    BDSKAddInstanceMethodImplementationFromSelector(self, @selector(filePathURL), @selector(Leopard_filePathURL));
 }
 
 @end

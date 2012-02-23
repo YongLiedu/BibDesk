@@ -243,9 +243,7 @@ enum {
             }
         }
     } else {
-        if ([absoluteURL isFileURL] && [absoluteURL respondsToSelector:@selector(filePathURL)])
-            absoluteURL = [absoluteURL filePathURL];
-        doc = [super makeDocumentWithContentsOfURL:absoluteURL ofType:typeName error:outError];
+        doc = [super makeDocumentWithContentsOfURL:[absoluteURL filePathURL] ofType:typeName error:outError];
     }
     return doc;
 }
