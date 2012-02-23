@@ -51,6 +51,7 @@
 #import "BDSKTemplateDocument.h"
 #import "BDSKTask.h"
 #import "BDSKOpenAccessoryViewController.h"
+#import "NSURL_BDSKExtensions.h"
 
 enum {
     BDSKOpenDefault,
@@ -303,6 +304,9 @@ enum {
         }
         
     } else {
+        
+        if ([absoluteURL isFileURL] && [absoluteURL respondsToSelector:@selector(filePathURL)])
+            absoluteURL = [absoluteURL filePathURL];
         
         document = [super openDocumentWithContentsOfURL:absoluteURL display:displayDocument error:outError];
         

@@ -79,6 +79,7 @@
 - (NSString *)pathExtension;
 - (NSURL *)URLByDeletingLastPathComponent;
 - (NSURL *)URLByDeletingPathExtension;
+- (NSURL *)filePathURL;
 @end
 #endif
 

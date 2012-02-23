@@ -166,10 +166,6 @@ NSString *BDSKDocumentPublicationsKey = @"publications";
 - (void)changeSaveType:(id)sender;
 @end
 
-@interface NSURL (BDSKSnowLeopardDeclarations)
-- (NSURL *)filePathURL;
-@end
-
 @implementation BibDocument
 
 static NSOperationQueue *metadataCacheQueue = nil;
