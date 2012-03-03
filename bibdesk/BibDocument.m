@@ -1301,15 +1301,17 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSString *targetName = [[saveTargetURL lastPathComponent] stringByDeletingPathExtension];
     NSString *folderPath = [dirPath stringByAppendingPathComponent:targetName];
     NSFileManager *fm = [NSFileManager defaultManager];
+    NSWorkspace *ws = [NSWorkspace sharedWorkspace];
     NSString *filePath;
     NSString *commonParent = nil;
     BOOL success = YES;
+    BOOL isDir;
     NSMutableSet *localFiles = [NSMutableSet set];
     
     if ((success = [fm createDirectoryAtPath:folderPath withIntermediateDirectories:NO attributes:nil error:NULL])) {
         for (BibItem *item in [self publicationsForSaving]) {
             for (BDSKLinkedFile *file in [item localFiles]) {
-                if ((filePath = [file path])) {
+                if ((filePath = [file path]) && [fm fileExistsAtPath:filePath] && [ws isFolderAtPath:filePath] == NO) {
                     [localFiles addObject:filePath];
                     if (commonParent)
                         commonParent = [[filePath stringByDeletingLastPathComponent] commonRootPathOfFile:commonParent];
@@ -1326,16 +1328,14 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         
         for (filePath in localFiles) {
             if (success == NO) break;
-            if ([fm fileExistsAtPath:filePath]) {
-                NSString *relativePath = commonParent ? [filePath relativePathFromPath:commonParent] : [filePath lastPathComponent];
-                NSString *targetPath = [folderPath stringByAppendingPathComponent:relativePath];
-                
-                if ([fm fileExistsAtPath:targetPath])
-                    targetPath = [fm uniqueFilePathWithName:[targetPath stringByDeletingLastPathComponent] atPath:[targetPath lastPathComponent]];
-                success = [fm createPathToFile:targetPath attributes:nil];
-                if (success)
+            NSString *relativePath = commonParent ? [filePath relativePathFromPath:commonParent] : [filePath lastPathComponent];
+            NSString *targetPath = [folderPath stringByAppendingPathComponent:relativePath];
+            
+            if ([fm fileExistsAtPath:targetPath])
+                targetPath = [fm uniqueFilePathWithName:[targetPath stringByDeletingLastPathComponent] atPath:[targetPath lastPathComponent]];
+            success = [fm createPathToFile:targetPath attributes:nil];
+            if (success)
                 success = [fm copyItemAtPath:filePath toPath:targetPath error:NULL];
-            }
         }
         
         if (success) {
