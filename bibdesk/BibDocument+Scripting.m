@@ -267,8 +267,8 @@
                 [copiedValue addObject:copiedGroup];
                 [copiedGroup release];
             }
-            return copiedValue;
         }
+        return copiedValue;
     } else if ([[NSSet setWithObjects:@"libraryGroups", @"lastImportGroups", @"fieldGroups", @"sharedGroups", nil] containsObject:key]) {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
