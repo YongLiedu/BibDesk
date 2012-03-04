@@ -356,7 +356,7 @@
 } 
 
 - (BOOL) validateCopyGroupURLActionMenuItem:(NSMenuItem *)menuItem{
-	if ([self hasSearchGroupsClickedOrSelected] || [self hasURLGroupsClickedOrSelected] || [self hasScriptGroupsClickedOrSelected]) {
+	if ([self hasSearchGroupsClickedOrSelected] || [self hasURLGroupsClickedOrSelected] || [self hasScriptGroupsClickedOrSelected] || [self hasWebGroupsClickedOrSelected]) {
 		return YES;
 	} else {
 		return NO;

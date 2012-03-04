@@ -1101,6 +1101,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         url = [(BDSKURLGroup *)group URL];
     } else if ([group isScript] && [(BDSKScriptGroup *)group scriptPath]) {
         url = [NSURL fileURLWithPath:[(BDSKScriptGroup *)group scriptPath]];
+    } else if ([group isWeb]) {
+        url = [(BDSKWebGroup *)group URL];
     }
     if (url == nil) {
 		NSBeep();
