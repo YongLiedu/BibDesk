@@ -1103,6 +1103,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         url = [NSURL fileURLWithPath:[(BDSKScriptGroup *)group scriptPath]];
     } else if ([group isWeb]) {
         url = [(BDSKWebGroup *)group URL];
+        title = [group label];
     }
     if (url == nil) {
 		NSBeep();
