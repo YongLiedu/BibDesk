@@ -185,10 +185,7 @@
     
     NSError *error = nil;
     
-    if (URLDownload) {
-        [URLDownload release];
-        URLDownload = nil;
-    }
+    BDSKDESTROY(URLDownload);
 
     // tried using -[NSString stringWithContentsOfFile:usedEncoding:error:] but it fails too often
     NSString *contentString = [NSString stringWithContentsOfFile:filePath guessedEncoding:0];
@@ -222,10 +219,7 @@
     failedDownload = YES;
     [self setErrorMessage:[error localizedDescription]];
     
-    if (URLDownload) {
-        [URLDownload release];
-        URLDownload = nil;
-    }
+    BDSKDESTROY(URLDownload);
     
     // redraw 
     [self setPublications:nil];
