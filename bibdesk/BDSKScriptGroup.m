@@ -208,8 +208,7 @@
         [scriptArguments release];
         scriptArguments = [newArguments retain];
         
-        [argsArray release];
-        argsArray = nil;
+        BDSKDESTROY(argsArray);
         
         [self setPublications:nil];
     }
@@ -226,8 +225,7 @@
 		[(BDSKScriptGroup *)[[self undoManager] prepareWithInvocationTarget:self] setScriptType:scriptType];
         scriptType = newType;
         
-        [argsArray release];
-        argsArray = nil;
+        BDSKDESTROY(argsArray);
         
         [self setPublications:nil];
     }
