@@ -61,12 +61,6 @@ static NSString *BDSKLibraryLocalizedString = nil;
     return [[item owner] isEqual:[self document]];
 }
 
-- (BOOL)isEqual:(id)other { return self == other; }
-
-- (NSUInteger)hash {
-    return BDSKHash(self);
-}
-
 - (BOOL)isValidDropTarget { return YES; }
 
 @end

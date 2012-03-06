@@ -111,8 +111,12 @@
 }
 
 - (BOOL)isEqual:(id)other {
-	if ([super isEqual:other] == NO) 
+	if (self == other)
+		return YES;
+	if (NO == [other isMemberOfClass:[self class]]) 
 		return NO;
+	if (NO == [[self name] isEqual:[(BDSKGroup *)other name]])
+        return NO;
 	return [[self key] isEqualToString:[other key]] || ([self key] == nil && [other key] == nil);
 }
 

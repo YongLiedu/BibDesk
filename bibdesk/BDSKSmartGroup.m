@@ -111,10 +111,16 @@
     [super dealloc];
 }
 
+- (NSUInteger)hash {
+    return [[self name] hash];
+}
+
 - (BOOL)isEqual:(id)other {
-	if ([super isEqual:other])
-		return [[self filter] isEqual:[(BDSKSmartGroup *)other filter]];
-	else return NO;
+	if (self == other)
+		return YES;
+	if (NO == [other isMemberOfClass:[self class]]) 
+		return NO;
+	return [[self name] isEqual:[(BDSKGroup *)other name]] && [[self filter] isEqual:[(BDSKSmartGroup *)other filter]];
 }
 
 - (NSString *)description {

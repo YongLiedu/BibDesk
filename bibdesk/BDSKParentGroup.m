@@ -81,10 +81,6 @@
 	return [[[self class] allocWithZone:aZone] initWithName:name];
 }
 
-- (NSUInteger)hash { return BDSKHash(self); }
-
-- (BOOL)isEqual:(id)other { return self == other; }
-
 - (void)dealloc {
     [children setValue:nil forKey:@"parent"];
     [children setValue:nil forKey:@"document"];

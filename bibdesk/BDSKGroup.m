@@ -115,19 +115,6 @@ static NSArray *noCountCellValueKeys = nil;
     [super dealloc];
 }
 
-- (NSUInteger)hash {
-    return [name hash];
-}
-
-- (BOOL)isEqual:(id)other {
-	if (self == other)
-		return YES;
-	if (![other isMemberOfClass:[self class]]) 
-		return NO;
-	// we don't care about the count for identification
-	return [[self name] isEqual:[(BDSKGroup *)other name]];
-}
-
 - (NSString *)description {
     return [NSString stringWithFormat:@"%@<%p>: name=\"%@\",count=%ld", [self class], self, name, (long)count];
 }

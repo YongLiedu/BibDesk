@@ -99,6 +99,18 @@
     [super dealloc];
 }
 
+- (NSUInteger)hash {
+    return [[self name] hash];
+}
+
+- (BOOL)isEqual:(id)other {
+	if (self == other)
+		return YES;
+	if (NO == [other isMemberOfClass:[self class]]) 
+		return NO;
+	return [[self name] isEqual:[(BDSKGroup *)other name]];
+}
+
 - (NSImage *)icon {
 	return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)];
 }

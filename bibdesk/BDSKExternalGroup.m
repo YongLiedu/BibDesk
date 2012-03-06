@@ -85,10 +85,6 @@ NSString *BDSKExternalGroupSucceededKey = @"succeeded";
     [super dealloc];
 }
 
-- (BOOL)isEqual:(id)other { return self == other; }
-
-- (NSUInteger)hash { return BDSKHash(self); }
-
 #pragma mark BDSKGroup overrides
 
 - (BOOL)isExternal { return YES; }
