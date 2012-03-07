@@ -103,8 +103,13 @@
 
 - (NSUInteger)numberOfChildren { return [children count]; }
 
+- (void)resortInRange:(NSRange)range {
+    if (sortDescriptors && range.length > 1)
+        [children replaceObjectsInRange:range withObjectsFromArray:[[children subarrayWithRange:range] sortedArrayUsingDescriptors:sortDescriptors]];
+}
+
 - (void)resort {
-    if (sortDescriptors)
+    if (sortDescriptors && [self numberOfChildren] > 1)
         [children sortUsingDescriptors:sortDescriptors];
 }
 
@@ -204,6 +209,12 @@
 
 @implementation BDSKExternalParentGroup
 
+#define webGroupLocation    0
+#define searchGroupLocation webGroupCount
+#define sharedGroupLocation webGroupCount + searchGroupCount
+#define URLGroupLocation    webGroupCount + searchGroupCount + sharedGroupCount
+#define scriptGroupLocation webGroupCount + searchGroupCount + sharedGroupCount + URLGroupCount
+
 - (id)init {
     self = [self initWithName:NSLocalizedString(@"EXTERNAL", @"source list group row title")];
     if (self) {
@@ -223,27 +234,27 @@
 }
 
 - (NSArray *)webGroups {
-    return [self childrenInRange:NSMakeRange(0, webGroupCount)];
+    return [self childrenInRange:NSMakeRange(webGroupLocation, webGroupCount)];
 }
 
 - (NSArray *)searchGroups {
-    return [self childrenInRange:NSMakeRange(webGroupCount, searchGroupCount)];
+    return [self childrenInRange:NSMakeRange(searchGroupLocation, searchGroupCount)];
 }
 
 - (NSArray *)sharedGroups {
-    return [self childrenInRange:NSMakeRange(webGroupCount + searchGroupCount, sharedGroupCount)];
+    return [self childrenInRange:NSMakeRange(sharedGroupLocation, sharedGroupCount)];
 }
 
 - (NSArray *)URLGroups {
-    return [self childrenInRange:NSMakeRange((webGroupCount + searchGroupCount + sharedGroupCount), URLGroupCount)];
+    return [self childrenInRange:NSMakeRange(URLGroupLocation, URLGroupCount)];
 }
 
 - (NSArray *)scriptGroups {
-    return [self childrenInRange:NSMakeRange((webGroupCount + searchGroupCount + sharedGroupCount + URLGroupCount), scriptGroupCount)];
+    return [self childrenInRange:NSMakeRange(scriptGroupLocation, scriptGroupCount)];
 }
 
 - (void)addWebGroup:(BDSKWebGroup *)group {
-    NSUInteger idx = webGroupCount;
+    NSUInteger idx = webGroupLocation + webGroupCount;
     webGroupCount += 1;    
     [self insertChild:group atIndex:idx];
 }
@@ -255,7 +266,7 @@
 }
 
 - (void)addSearchGroup:(BDSKSearchGroup *)group {
-    NSUInteger idx = webGroupCount + searchGroupCount;
+    NSUInteger idx = searchGroupLocation + searchGroupCount;
     searchGroupCount += 1;    
     [self insertChild:group atIndex:idx];
 }
@@ -267,13 +278,13 @@
 }
 
 - (void)setSharedGroups:(NSArray *)array {
-    NSRange range = NSMakeRange(webGroupCount + searchGroupCount, sharedGroupCount);
+    NSRange range = NSMakeRange(sharedGroupLocation, sharedGroupCount);
     sharedGroupCount = [array count];
     [self replaceChildrenInRange:range withChildren:array];
 }
 
 - (void)addURLGroup:(BDSKURLGroup *)group {
-    NSUInteger idx = webGroupCount + searchGroupCount + sharedGroupCount + URLGroupCount;
+    NSUInteger idx = URLGroupLocation + URLGroupCount;
     URLGroupCount += 1;
     [self insertChild:group atIndex:idx];
 }
@@ -285,7 +296,7 @@
 }
 
 - (void)addScriptGroup:(BDSKScriptGroup *)group {
-    NSUInteger idx = webGroupCount + searchGroupCount + sharedGroupCount + URLGroupCount + scriptGroupCount;
+    NSUInteger idx = scriptGroupLocation + scriptGroupCount;
     scriptGroupCount += 1;
     [self insertChild:group atIndex:idx];
 }
@@ -297,33 +308,15 @@
 }
 
 - (void)resort {
-    if (sortDescriptors) {
-        NSRange range;
-        if (webGroupCount > 1) {
-            range = NSMakeRange(0, webGroupCount);
-            [children replaceObjectsInRange:range withObjectsFromArray:[[children subarrayWithRange:range] sortedArrayUsingDescriptors:sortDescriptors]];
-        }
-        if (searchGroupCount > 1) {
-            range = NSMakeRange(webGroupCount, searchGroupCount);
-            [children replaceObjectsInRange:range withObjectsFromArray:[[children subarrayWithRange:range] sortedArrayUsingDescriptors:sortDescriptors]];
-        }
-        if (sharedGroupCount > 1) {
-            range = NSMakeRange(webGroupCount + searchGroupCount, sharedGroupCount);
-            [children replaceObjectsInRange:range withObjectsFromArray:[[children subarrayWithRange:range] sortedArrayUsingDescriptors:sortDescriptors]];
-        }
-        if (URLGroupCount > 1) {
-            range = NSMakeRange((webGroupCount + searchGroupCount + sharedGroupCount), URLGroupCount);
-            [children replaceObjectsInRange:range withObjectsFromArray:[[children subarrayWithRange:range] sortedArrayUsingDescriptors:sortDescriptors]];
-        }
-        if (scriptGroupCount > 1) {
-            range = NSMakeRange((webGroupCount + searchGroupCount + sharedGroupCount + URLGroupCount), scriptGroupCount);
-            [children replaceObjectsInRange:range withObjectsFromArray:[[children subarrayWithRange:range] sortedArrayUsingDescriptors:sortDescriptors]];
-        }
-    }
+    [self resortInRange:NSMakeRange(webGroupLocation, webGroupCount)];
+    [self resortInRange:NSMakeRange(searchGroupLocation, searchGroupCount)];
+    [self resortInRange:NSMakeRange(sharedGroupLocation, sharedGroupCount)];
+    [self resortInRange:NSMakeRange(URLGroupLocation, URLGroupCount)];
+    [self resortInRange:NSMakeRange(scriptGroupLocation, scriptGroupCount)];
 }
 
 - (void)removeAllUndoableChildren {
-    NSRange range = NSMakeRange((webGroupCount + searchGroupCount + sharedGroupCount), (URLGroupCount + scriptGroupCount));
+    NSRange range = NSMakeRange(URLGroupLocation, URLGroupCount + scriptGroupCount);
     URLGroupCount = 0;
     scriptGroupCount = 0;
     [self replaceChildrenInRange:range withChildren:[NSArray array]];
@@ -348,17 +341,11 @@
 }
 
 - (void)resort {
-    if (sortDescriptors && [self numberOfChildren]) {
-        BDSKCategoryGroup *first = [self childAtIndex:0];
-        if ([first isEmpty]) {
-            [first retain];
-            [children removeObjectAtIndex:0];
+    if (sortDescriptors && [self numberOfChildren] > 1) {
+        if ([[self childAtIndex:0] isEmpty])
+            [self resortInRange:NSMakeRange(1, [self numberOfChildren] - 1)];
+        else
             [super resort];
-            [children insertObject:first atIndex:0];
-            [first release];
-        } else {
-            [super resort];
-        }
     }
 }
 
@@ -445,15 +432,10 @@
 }
 
 - (void)resort {
-    if (hasLastImportGroup == NO) {
+    if (hasLastImportGroup == NO)
         [super resort];
-    } else if (sortDescriptors && [self numberOfChildren] > 2) {
-        BDSKGroup *lastImport = [[self childAtIndex:0] retain];
-        [children removeObjectAtIndex:0];
-        [super resort];
-        [children insertObject:lastImport atIndex:0];
-        [lastImport release];
-    }
+    else if ([self numberOfChildren] > 2)
+        [self resortInRange:NSMakeRange(1, [self numberOfChildren] - 1)];
 }
 
 - (void)removeAllUndoableChildren {
