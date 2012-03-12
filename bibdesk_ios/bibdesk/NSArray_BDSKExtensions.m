@@ -293,6 +293,7 @@
     return array;
 }
 
+#if BDSK_OS_X
 - (NSArray *)objectsAtIndexSpecifiers:(NSArray *)indexes;
 {
     NSMutableArray *array = [NSMutableArray array];
@@ -300,6 +301,7 @@
         [array addObject:[self objectAtIndex:[is index]]];
     return array;
 }
+#endif
 
 /* theSelector should be either indexOfObject:inRange: or indexOfObjectIdenticalTo:inRange */
 static inline 

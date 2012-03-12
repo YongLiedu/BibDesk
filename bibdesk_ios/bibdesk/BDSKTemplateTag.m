@@ -52,6 +52,7 @@ static inline BDSKAttributeTemplate *copyTemplateForLink(id aLink, NSRange range
     return linkTemplate;
 }
 
+#if BDSK_OS_X
 static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedString *attrString) {
     NSRange range = NSMakeRange(0, 0);
     NSUInteger len = [attrString length];
@@ -69,6 +70,7 @@ static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedStr
         BDSKDESTROY(templates);
     return templates;
 }
+#endif
 
 
 @implementation BDSKTemplateTag
@@ -121,11 +123,13 @@ static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedStr
     return attributes;
 }
 
+#if BDSK_OS_X
 - (BDSKAttributeTemplate *)linkTemplate {
     if (linkTemplate == nil)
         linkTemplate = copyTemplateForLink([attributes objectForKey:NSLinkAttributeName], NSMakeRange(0, 0)) ?: [[BDSKAttributeTemplate alloc] init];
     return [linkTemplate template] ? linkTemplate : nil;
 }
+#endif
 
 @end
 
@@ -337,16 +341,20 @@ static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedStr
 - (void)appendAttributedText:(NSAttributedString *)newAttributedText {
     NSMutableAttributedString *newAttrText = [attributedText mutableCopy];
     [newAttrText appendAttributedString:newAttributedText];
+#if BDSK_OS_X
     [newAttrText fixAttributesInRange:NSMakeRange(0, [newAttrText length])];
+#endif
     [self setAttributedText:newAttrText];
     [newAttrText release];
 }
 
+#if BDSK_OS_X
 - (NSArray *)linkTemplates; {
     if (linkTemplates == nil)
         linkTemplates = copyTemplatesForLinksFromAttributedString(attributedText) ?: [[NSArray alloc] init];
     return [linkTemplates count] ? linkTemplates : nil;
 }
+#endif
 
 @end
 

@@ -39,7 +39,9 @@
 #import "BDSKTableSortDescriptor.h"
 #import "BDSKTypeManager.h"
 #import "BDSKStringConstants.h"
-#import "NSColor_BDSKExtensions.h"
+#if BDSK_OS_X
+    #import "NSColor_BDSKExtensions.h"
+#endif
 #import "BibAuthor.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"

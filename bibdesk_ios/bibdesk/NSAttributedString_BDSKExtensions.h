@@ -36,14 +36,16 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 
 @interface NSAttributedString (BDSKExtensions)
 
 - (id)initWithString:(NSString *)string attributeName:(NSString *)attributeName attributeValue:(id)attributeValue;
 
+#if BDSK_OS_X
 - (id)initWithTeXString:(NSString *)string attributes:(NSDictionary *)attributes collapseWhitespace:(BOOL)collapse;
+#endif
 
 - (NSComparisonResult)localizedCaseInsensitiveNonTeXNonArticleCompare:(NSAttributedString *)other;
 

@@ -42,7 +42,9 @@
 #import "NSDate_BDSKExtensions.h"
 #import "BDSKTypeManager.h"
 #import "BDSKSmartGroup.h"
-#import "BDSKCondition+Scripting.h"
+#if BDSK_OS_X
+    #import "BDSKCondition+Scripting.h"
+#endif
 
 static char BDSKConditionObservationContext;
 
@@ -123,12 +125,14 @@ static char BDSKConditionObservationContext;
 		
         if (([[dictionary objectForKey:@"version"] integerValue] < [[[self class] dictionaryVersion] integerValue]) &&
             [self isDateCondition] && didWarn == NO) {
+#if BDSK_OS_X
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Smart Groups Need Updating", @"Message in alert dialog when smart groups with obsolete date format are detected") 
                                              defaultButton:nil
                                            alternateButton:nil
                                                otherButton:nil
                                  informativeTextWithFormat:NSLocalizedString(@"The format for date conditions in smart groups has been changed. You should manually fix smart groups conditioning on Date-Added or Date-Modified.", @"Informative text in alert dialog")];
             [alert runModal];
+#endif
             didWarn = YES;
         }
         

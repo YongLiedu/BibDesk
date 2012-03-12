@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 @class BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes;
 
@@ -49,6 +49,8 @@
 - (NSUndoManager *)undoManager;
 - (NSURL *)fileURL;
 - (NSString *)documentInfoForKey:(NSString *)key;
+#if BDSK_OS_X
 - (BDSKItemSearchIndexes *)searchIndexes;
+#endif
 
 @end

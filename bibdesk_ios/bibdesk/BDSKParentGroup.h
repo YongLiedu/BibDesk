@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 #import "BDSKGroup.h"
 
 
@@ -98,9 +98,11 @@
     BOOL hasLastImportGroup;
 }
 
+#if BDSK_OS_X
 - (BDSKLastImportGroup *)lastImportGroup;
-- (NSArray *)smartGroups;
 - (void)setLastImportedPublications:(NSArray *)pubs;
+#endif
+- (NSArray *)smartGroups;
 - (void)addSmartGroup:(BDSKSmartGroup *)group;
 - (void)removeSmartGroup:(BDSKSmartGroup *)group;
 

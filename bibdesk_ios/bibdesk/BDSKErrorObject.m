@@ -38,8 +38,10 @@
 //
 
 #import "BDSKErrorObject.h"
-#import "BDSKErrorObjectController.h"
-#import "BDSKErrorEditor.h"
+#if BDSK_OS_X
+    #import "BDSKErrorObjectController.h"
+    #import "BDSKErrorEditor.h"
+#endif
 #import "BibItem.h"
 
 
@@ -76,7 +78,10 @@
 
 + (void)reportError:(NSString *)className message:(NSString *)msg forFile:(NSString *)filePath line:(NSInteger)line isWarning:(BOOL)flag{
     id error = [[self alloc] initWithClassName:className message:msg forFile:filePath line:line isWarning:flag];
+// iOS TODO: Need to report errors some other way
+#if BDSK_OS_X
     [[BDSKErrorObjectController sharedErrorObjectController] reportError:error];
+#endif
     [error release];
 }
 

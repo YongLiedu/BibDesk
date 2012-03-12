@@ -38,7 +38,9 @@
 
 #import "BDSKSmartGroup.h"
 #import "BDSKFilter.h"
-#import "NSImage_BDSKExtensions.h"
+#if BDSK_OS_X
+	#import "NSImage_BDSKExtensions.h"
+#endif
 #import "BibItem.h"
 
 
@@ -133,9 +135,11 @@
 
 - (BOOL)isEditable { return YES; }
 
+#if BDSK_OS_X
 - (NSImage *)icon {
 	return [NSImage imageNamed:NSImageNameFolderSmart];
 }
+#endif
 
 // accessors
 

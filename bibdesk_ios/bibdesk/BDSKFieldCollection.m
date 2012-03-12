@@ -38,7 +38,9 @@
 
 #import "BDSKFieldCollection.h"
 #import "BibItem.h"
-#import "BDSKField.h"
+#if BDSK_OS_X
+    #import "BDSKField.h"
+#endif
 #import "BDSKTypeManager.h"
 #import "BDSKConverter.h"
 #import "NSString_BDSKExtensions.h"
@@ -98,11 +100,13 @@
     return [NSString isEmptyString:[item stringValueOfField:name]];
 }
 
+#if BDSK_OS_X
 - (id)fieldForName:(NSString *)name{
     name = [name fieldName];
     [usedFields addObject:name];
     return [[[BDSKField alloc] initWithName:name bibItem:item] autorelease];
 }
+#endif
 
 - (id)fieldsWithNames:(NSArray *)names{
     return [[[BDSKFieldArray alloc] initWithFieldCollection:self fieldNames:names] autorelease];

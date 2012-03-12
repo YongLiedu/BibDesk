@@ -36,7 +36,9 @@
 #import "BDSKConverter.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKComplexString.h"
-#import "BDSKAppController.h"
+#if BDSK_OS_X
+    #import "BDSKAppController.h"
+#endif
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKStringNode.h"
 #import "NSError_BDSKExtensions.h"
@@ -77,12 +79,14 @@ static BDSKConverter *sharedConverter = nil;
     NSDictionary *wholeDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME]];
 	NSDictionary *userWholeDict = nil;
     // look for the user file
+#if BDSK_OS_X
     NSFileManager *fm = [NSFileManager defaultManager];
     NSString *charConvPath = [[fm applicationSupportDirectory] stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
 	
 	if ([fm fileExistsAtPath:charConvPath]) {
 		userWholeDict = [NSDictionary dictionaryWithContentsOfFile:charConvPath];
     }
+#endif
     
     // set up the dictionaries
     NSMutableDictionary *tmpDetexifyDict = [NSMutableDictionary dictionary];

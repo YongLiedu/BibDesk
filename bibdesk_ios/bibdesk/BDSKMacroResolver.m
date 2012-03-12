@@ -44,7 +44,11 @@
 #import "BDSKConverter.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKOwnerProtocol.h"
-#import "BibDocument.h"
+#if BDSK_OS_X
+    #import "BibDocument.h"
+#else
+    #import "../BibDocument.h"
+#endif
 #import "NSError_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
 
@@ -308,17 +312,22 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
         // these need to be loaded lazily, because loading them can use ourselves, but we aren't yet initialized
         fileMacroDefinitions = nil; 
 		
-        
+
+// iOS TODO: Because NSUserDefaultsController doesn't exist in iOS, we need to register for NSUserDefaultsDidChangeNotification and manually check to see if any of the values changed, then do the actions in observeValueForKeyPath below
+#if BDSK_OS_X        
         [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self
             forKeyPath:[@"values." stringByAppendingString:BDSKGlobalMacroFilesKey]
                options:0
                context:&BDSKMacroResolverDefaultsObservationContext];
+#endif
     }
     return self;
 }
 
 - (void)dealloc {
+#if BDSK_OS_X        
     [[NSUserDefaultsController sharedUserDefaultsController] removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKGlobalMacroFilesKey]];
+#endif
     BDSKDESTROY(standardMacroDefinitions);
     BDSKDESTROY(fileMacroDefinitions);
     [super dealloc];

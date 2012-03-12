@@ -48,7 +48,7 @@
 //  appreciated but not required.
 //
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 extern NSString *BDSKEncodingConversionException;
 
@@ -70,8 +70,10 @@ extern NSString *BDSKEncodingConversionException;
 
 - (FILE *)openReadStream;
 
+#if BDSK_OS_X
 + (id)scriptingRtfWithDescriptor:(NSAppleEventDescriptor *)descriptor;
 - (id)scriptingRtfDescriptor;
+#endif
 
 @end
 

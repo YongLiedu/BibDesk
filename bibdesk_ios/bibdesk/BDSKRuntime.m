@@ -37,7 +37,11 @@
  */
 
 #import "BDSKRuntime.h"
-#import <objc/objc-runtime.h>
+#if BDSK_OS_X
+    #import <objc/objc-runtime.h>
+#else
+    #import <objc/runtime.h>
+#endif
 
 #define BDSKAbstractImplementationException @"BDSKAbstractImplementation"
 

@@ -64,6 +64,7 @@
     return searchStringSeparatorCharacterSet;
 }
 
+#if BDSK_OS_X
 + (id)upAndDownArrowCharacterSet;
 {
     static NSCharacterSet *upAndDownArrowCharacterSet = nil;
@@ -74,6 +75,7 @@
     }
     return upAndDownArrowCharacterSet;
 }
+#endif
 
 + (id)nonWhitespaceCharacterSet;
 {

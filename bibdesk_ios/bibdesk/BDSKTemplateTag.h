@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 enum {
     BDSKValueTemplateTagType,
@@ -86,7 +86,9 @@ typedef NSInteger BDSKTemplateTagMatchType;
 
 - (NSDictionary *)attributes;
 
+#if BDSK_OS_X
 - (BDSKAttributeTemplate *)linkTemplate;
+#endif
 
 @end
 
@@ -171,7 +173,9 @@ typedef NSInteger BDSKTemplateTagMatchType;
 - (NSAttributedString *)attributedText;
 - (void)setAttributedText:(NSAttributedString *)newAttributedText;
 
+#if BDSK_OS_X
 - (NSArray *)linkTemplates;
+#endif
 
 - (void)appendAttributedText:(NSAttributedString *)newAttributedText;
 

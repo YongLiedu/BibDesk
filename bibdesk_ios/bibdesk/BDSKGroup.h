@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 @class BibItem, BibDocument, BDSKMacroResolver, BDSKParentGroup;
 
@@ -88,12 +88,14 @@
 */
 - (void)setCount:(NSInteger)newCount;
 
+#if BDSK_OS_X
 /*!
 	@method count
 	@abstract Returns the icon for the group.
 	@discussion -
 */
 - (NSImage *)icon;
+#endif
 
 /*!
 	@method isParent

@@ -47,7 +47,9 @@
 #import "NSScanner_BDSKExtensions.h"
 #import "BDSKStringNode.h"
 #import "BDSKLinkedFile.h"
-#import "BDSKAppController.h"
+#if BDSK_OS_X
+    #import "BDSKAppController.h"
+#endif
 
 
 @implementation BDSKFormatParser
@@ -85,6 +87,7 @@ static NSDictionary *errorAttr = nil;
     validOptArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPTkfwsuUn"] retain];
     validAuthorSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApP"] retain];
     
+#if BDSK_OS_X
     NSFont *font = [NSFont systemFontOfSize:0];
     NSFont *boldFont = [NSFont boldSystemFontOfSize:0];
     specAttr = [[NSDictionary alloc] initWithObjectsAndKeys:boldFont, NSFontAttributeName, [NSColor blueColor], NSForegroundColorAttributeName, nil];
@@ -92,6 +95,14 @@ static NSDictionary *errorAttr = nil;
     argAttr = [[NSDictionary alloc] initWithObjectsAndKeys:font, NSFontAttributeName, [NSColor controlTextColor], NSForegroundColorAttributeName, nil];
     textAttr = [[NSDictionary alloc] initWithObjectsAndKeys:boldFont, NSFontAttributeName, [NSColor controlTextColor], NSForegroundColorAttributeName, nil];
     errorAttr = [[NSDictionary alloc] initWithObjectsAndKeys:font, NSFontAttributeName, [NSColor redColor], NSForegroundColorAttributeName, nil];
+#else
+    // iOS TODO: Replace these with Core Text equivalents?
+    specAttr = [[NSDictionary alloc] init];
+		paramAttr = [[NSDictionary alloc] init];
+		argAttr = [[NSDictionary alloc] init];
+		textAttr = [[NSDictionary alloc] init];
+		errorAttr = [[NSDictionary alloc] init];
+#endif
 }
 
 + (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub
@@ -365,7 +376,14 @@ static NSDictionary *errorAttr = nil;
                     NSString *yearString = [pub stringValueOfField:BDSKYearString];
                     if ([NSString isEmptyString:yearString] == NO) {
                         NSDate *date = [[NSDate alloc] initWithMonthString:@"6" yearString:yearString];
+#if BDSK_OS_X
 						yearString = [date descriptionWithCalendarFormat:@"%y" timeZone:nil locale:nil];
+#else
+            NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+            [dateFormatter setDateFormat:@"yy"];
+            yearString = [dateFormatter stringFromDate:date];
+            [dateFormatter release];
+#endif
 						[parsedStr appendString:yearString];
                         [date release];
 					}
@@ -377,7 +395,14 @@ static NSDictionary *errorAttr = nil;
                     NSString *yearString = [pub stringValueOfField:BDSKYearString];
                     if ([NSString isEmptyString:yearString] == NO) {
                         NSDate *date = [[NSDate alloc] initWithMonthString:@"6" yearString:yearString];
+#if BDSK_OS_X
 						yearString = [date descriptionWithCalendarFormat:@"%Y" timeZone:nil locale:nil];
+#else
+            NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+            [dateFormatter setDateFormat:@"yyyy"];
+            yearString = [dateFormatter stringFromDate:date];
+            [dateFormatter release];
+#endif
 						[parsedStr appendString:yearString];
                         [date release];
 					}
@@ -398,7 +423,15 @@ static NSDictionary *errorAttr = nil;
                                 monthString = [(BDSKStringNode *)[nodes objectAtIndex:0] value];
                         }
                         NSDate *date = [[NSDate alloc] initWithMonthString:monthString yearString:@"2000"];
+#if BDSK_OS_X
 						monthString = [date descriptionWithCalendarFormat:@"%m" timeZone:nil locale:nil];
+#else
+            NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+            // iOS TOOD: is this the same month format as above?
+            [dateFormatter setDateFormat:@"MMM"];
+            monthString = [dateFormatter stringFromDate:date];
+            [dateFormatter release];
+#endif
 						[parsedStr appendString:monthString];
                         [date release];
 					}

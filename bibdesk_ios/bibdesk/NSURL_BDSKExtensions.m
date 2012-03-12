@@ -38,11 +38,13 @@
 
 #import "NSURL_BDSKExtensions.h"
 #import "CFString_BDSKExtensions.h"
-#import "NSImage_BDSKExtensions.h"
-#import "NSAppleEventDescriptor_BDSKExtensions.h"
-#import <FileView/FileView.h>
-#import "NSWorkspace_BDSKExtensions.h"
-#import <SkimNotesBase/SkimNotesBase.h>
+#if BDSK_OS_X
+    #import "NSImage_BDSKExtensions.h"
+    #import "NSAppleEventDescriptor_BDSKExtensions.h"
+    #import <FileView/FileView.h>
+    #import "NSWorkspace_BDSKExtensions.h"
+    #import <SkimNotesBase/SkimNotesBase.h>
+#endif
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
 #import "BDSKRuntime.h"
@@ -52,6 +54,7 @@
 
 @implementation NSURL (BDSKExtensions)
 
+#if BDSK_OS_X
 + (NSURL *)fileURLWithAEDesc:(NSAppleEventDescriptor *)desc {
     return [desc fileURLValue];
 }
@@ -66,9 +69,11 @@
     
     return resultDesc;
 }
+#endif
 
 /* This could as easily have been implemented in the NSFileManager category, but it mainly uses CFURL (and Carbon File Manager) functionality.  Omni has a method in their NSFileManager category that does the same thing, but it assumes PATH_MAX*4 for a max path length, uses malloc instead of NSZoneMalloc, uses path buffers instead of string/URL objects, uses some unnecessary autoreleases, and will resolve aliases on remote volumes.  Of course, it's also been debugged more thoroughly than my version. */
 
+#if BDSK_OS_X
 CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
 {
     NSCParameterAssert([(NSURL *)fileURL isFileURL]);
@@ -190,6 +195,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     
     return [(id)newURL autorelease];
 }
+#endif
 
 + (NSURL *)URLWithStringByNormalizingPercentEscapes:(NSString *)string;
 {
@@ -238,6 +244,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     return [[self path] precomposedStringWithCanonicalMapping];
 }
 
+#if BDSK_OS_X
 - (NSComparisonResult)UTICompare:(NSURL *)other {
     NSString *otherUTI = [[NSWorkspace sharedWorkspace] typeOfFile:[other path] error:NULL];
     NSString *selfUTI = [[NSWorkspace sharedWorkspace] typeOfFile:[self path] error:NULL];
@@ -563,6 +570,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     }
     return notes;
 }
+#endif
 
 #pragma mark Leopard definitions
 

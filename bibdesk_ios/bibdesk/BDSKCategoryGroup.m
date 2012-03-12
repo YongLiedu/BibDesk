@@ -136,6 +136,7 @@
     return [[key retain] autorelease];
 }
 
+#if BDSK_OS_X
 - (NSImage *)icon {
     static NSImage *categoryGroupImage = nil;
     if (categoryGroupImage == nil) {
@@ -171,6 +172,7 @@
     }
     return categoryGroupImage;
 }
+#endif
 
 - (void)setName:(id)newName {
     if (name != newName) {
@@ -201,6 +203,7 @@
 
 @implementation BDSKEmptyGroup
 
+#if BDSK_OS_X
 - (NSImage *)icon {
     static NSImage *image = nil;
     if(image == nil){
@@ -226,6 +229,7 @@
     }
     return image;
 }
+#endif
 
 - (NSString *)stringValue {
     return [NSString stringWithFormat:NSLocalizedString(@"Empty %@", @""), key];

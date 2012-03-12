@@ -100,7 +100,11 @@
     
     // Now fall back to natural language parsing, which is fairly memory-intensive.
     // We should be able to use NSDateFormatter with the natural language option, but it doesn't seem to work as well as +dateWithNaturalLanguageString
+#if BDSK_OS_X
     return [[NSDate dateWithNaturalLanguageString:dateString locale:locale] retain];
+#else
+    return nil;
+#endif
 }
 
 - (id)initWithMonthString:(NSString *)monthString yearString:(NSString *)yearString {

@@ -35,7 +35,7 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 
 @interface NSCharacterSet (BDSKExtensions)
@@ -43,7 +43,9 @@
 + (id)curlyBraceCharacterSet;
 + (id)commaCharacterSet;
 + (id)searchStringSeparatorCharacterSet;
+#if BDSK_OS_X
 + (id)upAndDownArrowCharacterSet;
+#endif
 + (id)nonWhitespaceCharacterSet;
 + (id)nonLetterCharacterSet;
 + (id)nonDecimalDigitCharacterSet;

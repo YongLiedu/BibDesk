@@ -37,17 +37,23 @@
  */
 
 #import "BDSKParentGroup.h"
-#import "BDSKSharedGroup.h"
-#import "BDSKURLGroup.h"
-#import "BDSKScriptGroup.h"
-#import "BDSKSearchGroup.h"
+#if BDSK_OS_X
+    #import "BDSKSharedGroup.h"
+	#import "BDSKURLGroup.h"
+	#import "BDSKScriptGroup.h"
+	#import "BDSKSearchGroup.h"
+#endif
 #import "BDSKSmartGroup.h"
 #import "BDSKStaticGroup.h"
 #import "BDSKCategoryGroup.h"
 #import "BDSKLibraryGroup.h"
-#import "BDSKLastImportGroup.h"
-#import "BDSKWebGroup.h"
-#import "BibDocument.h"
+#if BDSK_OS_X
+	#import "BDSKLastImportGroup.h"
+	#import "BDSKWebGroup.h"
+	#import "BibDocument.h"
+#else
+	#import "../BibDocument.h"
+#endif
 #import "BibAuthor.h"
 
 #define BDSKNoInitialWebGroupKey @"BDSKNoInitialWebGroup"
@@ -225,9 +231,11 @@
         searchGroupCount = 0;
         if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKNoInitialWebGroupKey] == NO) {
             webGroupCount = 1;
+#if BDSK_OS_X
             BDSKWebGroup *webGroup = [[BDSKWebGroup alloc] init];
             [self insertChild:webGroup atIndex:0];
             [webGroup release];
+#endif
         }
     }
     return self;
@@ -407,6 +415,7 @@
     return [self childrenInRange:range];
 }
 
+#if BDSK_OS_X
 - (void)setLastImportedPublications:(NSArray *)pubs {
     if ([pubs count]) {
         if (hasLastImportGroup == NO) {
@@ -422,6 +431,7 @@
         [self removeChild:[self childAtIndex:0]];
     }
 }
+#endif
 
 - (void)addSmartGroup:(BDSKSmartGroup *)group {
     [self insertChild:group atIndex:[self numberOfChildren]];

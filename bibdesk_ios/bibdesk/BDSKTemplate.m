@@ -37,7 +37,9 @@
  */
 
 #import "BDSKTemplate.h"
-#import "BDAlias.h"
+#if BDSK_OS_X
+    #import "BDAlias.h"
+#endif
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSCharacterSet_BDSKExtensions.h"
@@ -68,7 +70,11 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
         if (nonwsLoc != NSNotFound) {
             unichar firstChar = [templateString characterAtIndex:nonwsLoc];
             if ([[NSCharacterSet newlineCharacterSet] characterIsMember:firstChar]) {
+#if BDSK_OS_X
                 if (firstChar == NSCarriageReturnCharacter && (NSInteger)nonwsLoc + 1 < length && [templateString characterAtIndex:nonwsLoc + 1] == NSNewlineCharacter)
+#else
+                if (firstChar == '\r' && (NSInteger)nonwsLoc + 1 < length && [templateString characterAtIndex:nonwsLoc + 1] == '\n')
+#endif
                     start = nonwsLoc + 2;
                 else 
                     start = nonwsLoc + 1;
@@ -148,6 +154,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 #pragma mark Class methods
 
+#if BDSK_OS_X
 + (NSArray *)defaultExportTemplates
 {
     NSMutableArray *itemNodes = [[NSMutableArray alloc] initWithCapacity:4];
@@ -218,14 +225,17 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
             
     return [itemNodes autorelease];
 }
+#endif
 
 + (NSArray *)exportTemplates{
     NSArray *templates = nil;
     NSData *prefData = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKExportTemplateTree];
     if ([prefData length])
         templates = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
+#if BDSK_OS_X
     if ([templates count] == 0)
         templates = [BDSKTemplate defaultExportTemplates];
+#endif
     return templates;
 }
 
@@ -234,8 +244,10 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     NSData *prefData = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKServiceTemplateTree];
     if ([prefData length])
         templates = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
+#if BDSK_OS_X
     if ([templates count] == 0)
         templates = [BDSKTemplate defaultServiceTemplates];
+#endif
     return templates;
 }
 
@@ -375,6 +387,8 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (NSString *)documentType {
     NSString *docType = nil;
+// iOS TODO: Figure out what to do with this method that's probably important
+#if BDSK_OS_X
     BDSKTemplateFormat templateFormat = [self templateFormat];
     if(templateFormat == BDSKRichHTMLTemplateFormat)
         docType = NSHTMLTextDocumentType;
@@ -392,6 +406,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
         docType = NSWebArchiveTextDocumentType;
     else if(templateFormat & BDSKPlainTextTemplateFormat)
         docType = NSPlainTextDocumentType;
+#endif
     return docType;
 }
 
@@ -417,7 +432,13 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     BDSKASSERT([self parent] == nil);
     NSURL *mainPageURL = [self mainPageTemplateURL];
     if (mainPageURL) {
+        // iOS TOTO: This method doesn't exist and needs replacement
+#if BDSK_OS_X
         return [[[NSAttributedString alloc] initWithURL:[self mainPageTemplateURL] documentAttributes:docAttributes] autorelease];
+#else
+        NSStringEncoding stringEncoding;
+				return [[NSAttributedString alloc] initWithString:[NSString stringWithContentsOfURL:[self mainPageTemplateURL] usedEncoding:&stringEncoding error:nil]];
+#endif
     } else {
         if (docAttributes) *docAttributes = nil;        
         return [self valueForKey:BDSKTemplateAttributedStringString];
@@ -450,7 +471,12 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     // return default template string if no type or no type-specific template
     if(nil == theURL)
         theURL = [self defaultItemTemplateURL];
+#if BDSK_OS_X
     return [[[NSAttributedString alloc] initWithURL:theURL documentAttributes:NULL] autorelease];
+#else
+    NSStringEncoding stringEncoding;
+    return [[NSAttributedString alloc] initWithString:[NSString stringWithContentsOfURL:theURL usedEncoding:&stringEncoding error:nil]];
+#endif
 }
 
 - (NSString *)scriptPath;
@@ -502,7 +528,11 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 - (BOOL)addChildWithURL:(NSURL *)fileURL role:(NSString *)role;
 {
     BOOL retVal;
+#if BDSK_OS_X
     retVal = [[NSFileManager defaultManager] objectExistsAtFileURL:fileURL];
+#else
+    retVal = [[NSFileManager defaultManager] fileExistsAtPath:[fileURL path]];
+#endif
     BDSKTemplate *newChild = [[BDSKTemplate alloc] init];
     
     [newChild setValue:fileURL forKey:BDSKTemplateFileURLString];
@@ -530,6 +560,8 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (void)setRepresentedFileURL:(NSURL *)aURL;
 {
+// iOS TODO: Make new implementations that dont require aliases
+#if BDSK_OS_X
     BDSKASSERT([self isLeaf]);
     BDAlias *alias = nil;
     alias = [[BDAlias alloc] initWithURL:aURL];
@@ -557,11 +589,13 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
         }
     }
     [alias release];
+#endif
 }
 
 - (NSURL *)representedFileURL;
 {
     BDSKASSERT([self isLeaf]);
+#if BDSK_OS_X
     BDAlias *alias = [[BDAlias alloc] initWithData:[self valueForKey:BDSKTemplateAliasString]];
     NSURL *theURL = [alias fileURLNoUI];
     [alias release];
@@ -571,6 +605,9 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
             theURL = [NSURL fileURLWithPath:path];
     }
     return theURL;
+#else
+    return nil;
+#endif
 }
 
 @end

@@ -75,6 +75,7 @@ static CFCharacterSetRef dashSet = NULL;
     return [[[BibAuthor alloc] initWithName:newName publication:nil forField:nil] autorelease];
 }
 
+#if BDSK_OS_X
 + (BibAuthor *)authorWithVCardRepresentation:(NSData *)vCard{
     ABPerson *person = [[ABPerson alloc] initWithVCardRepresentation:vCard];
     NSMutableString *name = [[NSMutableString alloc] initWithCapacity:10];
@@ -91,6 +92,7 @@ static CFCharacterSetRef dashSet = NULL;
     
     return author;
 }
+#endif
     
     
 
@@ -165,10 +167,12 @@ static CFCharacterSetRef dashSet = NULL;
     }  
 }
 
+#if BDSK_OS_X
 - (id)replacementObjectForPortCoder:(NSPortCoder *)encoder
 {
     return [encoder isByref] ? (id)[NSDistantObject proxyWithLocal:self connection:[encoder connection]] : self;
 }
+#endif
 
 - (BOOL)isEqual:(id)obj{
     if (![obj isKindOfClass:[self class]])
@@ -378,6 +382,7 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
     return field;
 }
 
+#if BDSK_OS_X
 - (ABPerson *)personFromAddressBook{
     ABSearchElement *lastNameSearch = [ABPerson searchElementForProperty:kABLastNameProperty label:nil key:nil value:lastName comparison:kABEqualCaseInsensitive];
     ABSearchElement *firstNameSearch = [ABPerson searchElementForProperty:kABFirstNameProperty label:nil key:nil value:([firstNames count] ? [firstNames objectAtIndex:0] : @"") comparison:kABPrefixMatch];
@@ -400,6 +405,7 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
     }
     return [person vCardRepresentation];
 }
+#endif
 
 @end
 

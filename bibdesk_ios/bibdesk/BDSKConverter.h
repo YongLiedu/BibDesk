@@ -38,7 +38,7 @@
     @discussion Declares a class that has a shared instance and just does the TeX encoding conversions.
 */
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 #import "BDSKTypeManager.h"
 
 // The filename and keys used in the plist

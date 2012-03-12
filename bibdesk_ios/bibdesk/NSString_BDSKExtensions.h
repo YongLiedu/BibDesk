@@ -63,6 +63,9 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreFoundation/CoreFoundation.h>
+#if BDSK_IOS
+    #import "NSCellStateValue.h"
+#endif
 
 @interface NSString (BDSKExtensions)
 
@@ -490,6 +493,7 @@ An inline buffer is used for speed in accessing each character.
 #pragma mark Some convenience keys for templates
 
 - (NSURL *)url;
+#if BDSK_OS_X
 - (NSAttributedString *)linkedText;
 - (NSAttributedString *)icon;
 - (NSAttributedString *)smallIcon;
@@ -498,6 +502,7 @@ An inline buffer is used for speed in accessing each character.
 - (NSArray *)SkimNotes;
 - (NSString *)textSkimNotes;
 - (NSAttributedString *)richTextSkimNotes;
+#endif
 
 - (NSString *)titleCapitalizedString;
 

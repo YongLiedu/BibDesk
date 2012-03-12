@@ -37,9 +37,15 @@
  */
 
 #import "BDSKStaticGroup.h"
-#import "NSImage_BDSKExtensions.h"
+#if BDSK_OS_X
+	#import "NSImage_BDSKExtensions.h"
+#endif
 #import "BibItem.h"
-#import "BibDocument.h"
+#if BDSK_OS_X
+	#import "BibDocument.h"
+#else
+	#import "../BibDocument.h"
+#endif
 #import "BDSKOwnerProtocol.h"
 #import "BDSKPublicationsArray.h"
 #import "NSSet_BDSKExtensions.h"
@@ -111,9 +117,11 @@
 	return [[self name] isEqual:[(BDSKGroup *)other name]];
 }
 
+#if BDSK_OS_X
 - (NSImage *)icon {
 	return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)];
 }
+#endif
 
 - (BOOL)isStatic { return YES; }
 

@@ -42,7 +42,11 @@
 #import "NSString_BDSKExtensions.h"
 #import "CFString_BDSKExtensions.h"
 #import "BDSKOwnerProtocol.h"
-#import "BibDocument.h"
+#if BDSK_OS_X
+	#import "BibDocument.h"
+#else
+	#import "../BibDocument.h"
+#endif
 #import "BDSKMacroResolver.h"
 #import "BDSKRuntime.h"
 
@@ -143,10 +147,12 @@ static NSArray *noCountCellValueKeys = nil;
 
 // "static" accessors
 
+#if BDSK_OS_X
 - (NSImage *)icon {
     BDSKRequestConcreteImplementation(self, _cmd);
 	return nil;
 }
+#endif
 
 - (BOOL)isParent { return NO; }
 

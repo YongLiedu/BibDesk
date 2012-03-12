@@ -37,8 +37,10 @@
 /*! @header BibAuthor.h
     @discussion declares an interface to author model objects
 */
-#import <Cocoa/Cocoa.h>
-#import <AddressBook/AddressBook.h>
+#import <Foundation/Foundation.h>
+#if BDSK_OS_X
+    #import <AddressBook/AddressBook.h>
+#endif
 
 @class BDSKPersonController;
 @class BibItem;
@@ -78,7 +80,9 @@ enum {
 
 + (BibAuthor *)authorWithName:(NSString *)name;
 + (id)emptyAuthor;
+#if BDSK_OS_X
 + (BibAuthor *)authorWithVCardRepresentation:(NSData *)vCard;
+#endif
 
 - (id)initWithName:(NSString *)aName publication:(BibItem *)aPub forField:(NSString *)aField;
 
@@ -129,8 +133,10 @@ enum {
 
 - (NSString *)field;
 
+#if BDSK_OS_X
 - (ABPerson *)personFromAddressBook;
 - (NSData *)vCardRepresentation;
+#endif
 
 @end
 

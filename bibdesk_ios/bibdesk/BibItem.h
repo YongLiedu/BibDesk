@@ -38,9 +38,13 @@
  @discussion This file defines the BibItem model class.
  */
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 #import "BDSKFormatParser.h"
 #import "BDSKLinkedFile.h"
+#if BDSK_IOS
+    #import <CoreGraphics/CoreGraphics.h>
+    #import "NSCellStateValue.h"
+#endif
 
 extern NSString *BDSKBibItemKeyKey;
 extern NSString *BDSKBibItemOldValueKey;
@@ -113,7 +117,9 @@ enum {
 - (void)removeObjectFromFilesAtIndex:(NSUInteger)idx;
 - (void)moveFilesAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)idx;
 
+#if BDSK_OS_X
 - (BOOL)addFileForURL:(NSURL *)aURL autoFile:(BOOL)shouldAutoFile runScriptHook:(BOOL)runScriptHook;
+#endif
 
 - (void)noteFilesChanged:(BOOL)isFile;
 
@@ -125,6 +131,7 @@ enum {
 - (NSArray *)existingLocalFiles;
 - (NSArray *)remoteURLs;
 
+#if BDSK_OS_X
 - (NSArray *)usedMacros;
 - (NSArray *)usedLocalMacros;
 
@@ -134,6 +141,7 @@ enum {
 - (NSSet *)filesToBeFiled;
 - (void)addFileToBeFiled:(BDSKLinkedFile *)file;
 - (void)removeFileToBeFiled:(BDSKLinkedFile *)file;
+#endif
 
 /*!
      @method init
@@ -479,8 +487,10 @@ enum {
 */
 - (void)setRating:(NSUInteger)rating;
 
+#if BDSK_OS_X
 - (NSColor *)color;
 - (void)setColor:(NSColor *)label;
+#endif
 
 /*!
     @method     setField:toRatingValue:
@@ -689,10 +699,12 @@ enum {
     @param      substring The string to search for, which may be a string representation of a boolean or date    @param      field The BibItem field
     @result     (description)
 */
+#if BDSK_OS_X
 - (BOOL)matchesSubstring:(NSString *)substring inField:(NSString *)field;
 
 - (NSDictionary *)searchIndexInfo;
 - (NSDictionary *)metadataCacheInfoForUpdate:(BOOL)update;
+#endif
 - (id)completionObject;
 - (BOOL)matchesString:(NSString *)searchterm;
 
@@ -741,9 +753,11 @@ enum {
 - (NSInteger)itemIndex;
 - (void)setItemIndex:(NSInteger)index;
 - (NSDate *)currentDate;
+#if BDSK_OS_X
 - (NSString *)textSkimNotes;
 - (NSAttributedString *)richTextSkimNotes;
 - (NSAttributedString *)linkedText;
+#endif
 
 /*!
     @method     URLForField:
@@ -795,7 +809,9 @@ enum {
     @param      field Needs to be a local or remote URL field.
     @result     Returns nil if the item has an empty field, and returns a question mark image if a file could not be found.
 */
+#if BDSK_OS_X
 - (NSImage *)imageForURLField:(NSString *)field;
+#endif
 
 // NSURL equivalents of the localFilePath... methods
 - (NSURL *)localFileURLForField:(NSString *)field;
@@ -821,7 +837,9 @@ enum {
 - (NSURL *)identifierURL;
 - (void)setSearchScore:(CGFloat)val;
 - (CGFloat)searchScore;
+#if BDSK_OS_X
 - (NSString *)skimNotesForLocalURL;
+#endif
 
 - (NSURL *)bdskURL;
 
@@ -831,7 +849,9 @@ enum {
 
 
 @interface BibItem (PDFMetadata)
+#if BDSK_OS_X
 + (BibItem *)itemWithPDFMetadataFromURL:(NSURL *)fileURL;
+#endif
 @end
 
 extern const CFSetCallBacks kBDSKBibItemEqualitySetCallBacks;

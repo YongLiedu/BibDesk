@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 
 enum {
@@ -55,7 +55,9 @@ enum {
 
 - (id)initWithItem:(BibItem *)anItem;
 - (void)setType:(NSInteger)type;
+#if BDSK_OS_X
 - (id)fieldForName:(NSString *)name;
+#endif
 - (BOOL)isUsedField:(NSString *)name;
 - (BOOL)isEmptyField:(NSString *)name;
 - (id)fieldsWithNames:(NSArray *)names;

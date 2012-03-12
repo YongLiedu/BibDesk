@@ -64,25 +64,31 @@
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 
 @interface NSFileManager (BDSKExtensions)
 
+#if BDSK_OS_X
 - (NSString *)applicationSupportDirectory;
+#endif
 - (NSString *)applicationsDirectory;
 - (NSString *)desktopDirectory;
 - (NSURL *)downloadFolderURL;
 - (NSString *)latestLyXPipePath;
 
+#if BDSK_OS_X
 - (BOOL)copyFileFromSharedSupportToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite;
 
 - (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite;
 
 - (NSString *)temporaryPathForWritingToPath:(NSString *)path error:(NSError **)outError;
+#endif
 
 // creates a temporary directory with default attributes in a system temp location; this is thread safe
+#if BDSK_OS_X
 - (NSString *)makeTemporaryDirectoryWithBasename:(NSString *)fileName;
+#endif
 
 // !!! The next two methods are not thread safe, since they return a name without creating a file, and other threads/processes may return the same value
 
@@ -92,6 +98,7 @@
 - (NSString *)temporaryFileWithBasename:(NSString *)fileName;
 
 // for spotlight stuff; thread safe
+#if BDSK_OS_X
 - (BOOL)spotlightCacheFolderExists;
 - (BOOL)removeSpotlightCacheFolder;
 - (NSString *)spotlightCacheFolderPathByCreating:(NSError **)anError;
@@ -103,10 +110,12 @@
 // apparently only used by NSString methods with the usedEncoding: parameter
 - (NSStringEncoding)appleStringEncodingAtPath:(NSString *)path error:(NSError **)error;
 - (BOOL)setAppleStringEncoding:(NSStringEncoding)nsEncoding atPath:(NSString *)path error:(NSError **)error;
+#endif
 
 // uses createDirectoryAtPath:withIntermediateDirectories:attributes:error: for the containing directory if necessary
 - (BOOL)createPathToFile:(NSString *)path attributes:(NSDictionary *)attributes;
 
+#if BDSK_OS_X
 - (NSString *)resolveAliasesInPath:(NSString *)path;
 
 //
@@ -117,5 +126,6 @@
 - (BOOL)objectExistsAtFileURL:(NSURL *)fileURL;
 - (BOOL)deleteObjectAtFileURL:(NSURL *)fileURL error:(NSError **)error;
 - (BOOL)copyObjectAtURL:(NSURL *)srcURL toDirectoryAtURL:(NSURL *)dstURL error:(NSError **)error;
+#endif
 
 @end

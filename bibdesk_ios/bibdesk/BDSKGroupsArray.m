@@ -39,16 +39,20 @@
 #import "BDSKGroupsArray.h"
 #import "BDSKGroup.h"
 #import "BDSKParentGroup.h"
-#import "BDSKSharedGroup.h"
-#import "BDSKURLGroup.h"
-#import "BDSKScriptGroup.h"
-#import "BDSKSearchGroup.h"
+#if BDSK_OS_X
+    #import "BDSKSharedGroup.h"
+    #import "BDSKURLGroup.h"
+    #import "BDSKScriptGroup.h"
+    #import "BDSKSearchGroup.h"
+#endif
 #import "BDSKSmartGroup.h"
 #import "BDSKStaticGroup.h"
 #import "BDSKCategoryGroup.h"
 #import "BDSKLibraryGroup.h"
-#import "BDSKLastImportGroup.h"
-#import "BDSKWebGroup.h"
+#if BDSK_OS_X
+    #import "BDSKLastImportGroup.h"
+    #import "BDSKWebGroup.h"
+#endif
 #import "BDSKPublicationsArray.h"
 #import "BibAuthor.h"
 #import "BDSKFilter.h"
@@ -142,6 +146,7 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
     return [[self libraryParent] childAtIndex:0];
 }
 
+#if BDSK_OS_X
 - (NSArray *)webGroups{
     return [[self externalParent] webGroups];
 }
@@ -165,6 +170,7 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
 - (BDSKLastImportGroup *)lastImportGroup{
     return [[self smartParent] lastImportGroup];
 }
+#endif
 
 - (NSArray *)smartGroups{
     return [[self smartParent] smartGroups];
@@ -197,6 +203,7 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
 
 #pragma mark Mutable accessors
 
+#if BDSK_OS_X
 - (void)setLastImportedPublications:(NSArray *)pubs{
     [[self smartParent] setLastImportedPublications:pubs];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
@@ -263,6 +270,7 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
 	[[self externalParent] removeWebGroup:group];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
+#endif
 
 - (void)addSmartGroup:(BDSKSmartGroup *)group {
 	[[[self undoManager] prepareWithInvocationTarget:self] removeSmartGroup:group];
@@ -343,10 +351,12 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
         groupClass = [BDSKSmartGroup class];
     else if (groupType == BDSKStaticGroupType)
         groupClass = [BDSKStaticGroup class];
+#if BDSK_OS_X
 	else if (groupType == BDSKURLGroupType)
         groupClass = [BDSKURLGroup class];
 	else if (groupType == BDSKScriptGroupType)
         groupClass = [BDSKScriptGroup class];
+#endif
     
     if (groupClass) {
         id group = nil;
@@ -384,12 +394,14 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
 	} else if (groupType == BDSKStaticGroupType) {
         groupClass = [BDSKStaticGroup class];
         groupArray = [self staticGroups];
+#if BDSK_OS_X
 	} else if (groupType == BDSKURLGroupType) {
         groupClass = [BDSKURLGroup class];
         groupArray = [self URLGroups];
 	} else if (groupType == BDSKScriptGroupType) {
         groupClass = [BDSKScriptGroup class];
         groupArray = [self scriptGroups];
+#endif
     }
     
     NSData *data = nil;

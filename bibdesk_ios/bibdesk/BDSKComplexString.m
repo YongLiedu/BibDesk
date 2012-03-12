@@ -364,10 +364,12 @@ Rather than relying on the same call sequence to be used, I think we should igno
     }
 }
 
+#if BDSK_OS_X
 - (id)replacementObjectForPortCoder:(NSPortCoder *)encoder
 {
     return [encoder isByref] ? (id)[NSDistantObject proxyWithLocal:self connection:[encoder connection]] : self;
 }
+#endif
 
 #pragma mark overridden NSString Methods
 

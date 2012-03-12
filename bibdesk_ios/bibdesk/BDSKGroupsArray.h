@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 extern NSString *BDSKGroupsArrayGroupsKey;
 
@@ -66,12 +66,14 @@ enum {
 - (BDSKCategoryParentGroup *)categoryParent;
 
 - (BDSKLibraryGroup *)libraryGroup;
+#if BDSK_OS_X
 - (BDSKLastImportGroup *)lastImportGroup;
 - (NSArray *)sharedGroups;
 - (NSArray *)URLGroups;
 - (NSArray *)scriptGroups;
 - (NSArray *)searchGroups;
 - (NSArray *)webGroups;
+#endif
 - (NSArray *)smartGroups;
 - (NSArray *)staticGroups;
 - (NSArray *)categoryGroups;
@@ -80,6 +82,7 @@ enum {
 
 - (BOOL)containsGroup:(id)group;
 
+#if BDSK_OS_X
 - (void)setLastImportedPublications:(NSArray *)pubs;
 - (void)setSharedGroups:(NSArray *)array;
 - (void)addWebGroup:(BDSKWebGroup *)group;
@@ -90,6 +93,7 @@ enum {
 - (void)removeURLGroup:(BDSKURLGroup *)group;
 - (void)addScriptGroup:(BDSKScriptGroup *)group;
 - (void)removeScriptGroup:(BDSKScriptGroup *)group;
+#endif
 - (void)addSmartGroup:(BDSKSmartGroup *)group;
 - (void)removeSmartGroup:(BDSKSmartGroup *)group;
 - (void)addStaticGroup:(BDSKStaticGroup *)group;

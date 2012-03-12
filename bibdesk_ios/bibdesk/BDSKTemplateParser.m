@@ -236,7 +236,11 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
             unichar firstChar = [string characterAtIndex:firstCharRange.location];
             NSUInteger rangeEnd = NSMaxRange(firstCharRange);
             if([[NSCharacterSet newlineCharacterSet] characterIsMember:firstChar]) {
+#if BDSK_OS_X
                 if (firstChar == NSCarriageReturnCharacter && rangeEnd < NSMaxRange(range) && [string characterAtIndex:rangeEnd] == NSNewlineCharacter)
+#else
+                if (firstChar == '\r' && rangeEnd < NSMaxRange(range) && [string characterAtIndex:rangeEnd] == '\n')
+#endif
                     range = NSMakeRange(rangeEnd + 1, NSMaxRange(range) - rangeEnd - 1);
                 else 
                     range = NSMakeRange(rangeEnd, NSMaxRange(range) - rangeEnd);
@@ -701,6 +705,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
         if (type == BDSKTextTemplateTagType) {
             
             NSAttributedString *tmpAttrStr = [(BDSKRichTextTemplateTag *)tag attributedText];
+#if BDSK_OS_X
             NSArray *linkTemplates = [(BDSKRichTextTemplateTag *)tag linkTemplates];
             
             if (linkTemplates) {
@@ -715,8 +720,11 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 [result appendAttributedString:tmpMutAttrStr];
                 [tmpMutAttrStr release];
             } else {
+#endif
                 [result appendAttributedString:tmpAttrStr];
+#if BDSK_OS_X
             }
+#endif
             
         } else {
             
@@ -728,6 +736,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 if (keyValue) {
                     NSAttributedString *tmpAttrStr;
                     NSDictionary *attrs = [(BDSKRichValueTemplateTag *)tag attributes];
+#if BDSK_OS_X
                     BDSKAttributeTemplate *linkTemplate = [(BDSKRichValueTemplateTag *)tag linkTemplate];
                     if (linkTemplate) {
                         NSMutableDictionary *tmpAttrs = [attrs mutableCopy];
@@ -738,8 +747,11 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                         tmpAttrStr = [keyValue templateAttributedStringValueWithAttributes:tmpAttrs];
                         [tmpAttrs release];
                     } else {
+#endif
                         tmpAttrStr = [keyValue templateAttributedStringValueWithAttributes:attrs];
+#if BDSK_OS_X
                     }
+#endif
                     if (tmpAttrStr != nil)
                         [result appendAttributedString:tmpAttrStr];
                 }
@@ -805,7 +817,9 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
         }
     } // while
     
+#if BDSK_OS_X
     [result fixAttributesInRange:NSMakeRange(0, [result length])];
+#endif
     
     return [result autorelease];    
 }
@@ -873,7 +887,9 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
             idx = NSMaxRange(range);
         } else idx++;
     }
+#if BDSK_OS_X
     [attributedString fixAttributesInRange:NSMakeRange(0, length)];
+#endif
     return [attributedString autorelease];
 }
 

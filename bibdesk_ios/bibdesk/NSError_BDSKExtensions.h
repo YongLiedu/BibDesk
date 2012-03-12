@@ -36,7 +36,8 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
+#import <CoreFoundation/CoreFoundation.h>
 
 // If we declare all the errors in one place, we can be sure the codes don't overlap.
 // This is the recommended way to check an NSError to see if it's a type we can handle.
@@ -44,7 +45,11 @@
 // Omni's OFError is handy, but makes it difficult to check an error code or domain.
 
 enum {
+#if BDSK_OS_X
     kBDSKUnknownError = coreFoundationUnknownErr, /* -4960 */
+#else
+    kBDSKUnknownError = -4960,
+#endif
     kBDSKDocumentSaveError = 1,                   /* umbrella error type for document saving */
     kBDSKStringEncodingError,                     /* unable to convert to desired encoding   */
     kBDSKPropertyListDeserializationFailed,       /* NSPropertyListSerialization failed      */

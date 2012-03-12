@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 
 @interface NSArray (BDSKExtensions)
@@ -92,7 +92,9 @@
 
 - (NSIndexSet *)indexesOfObjects:(NSArray *)objects;
 - (NSIndexSet *)indexesOfObjectsIdenticalTo:(NSArray *)objects;
+#if BDSK_OS_X
 - (NSArray *)objectsAtIndexSpecifiers:(NSArray *)indexes;
+#endif
 
 - (id)sortedArrayUsingMergesortWithDescriptors:(NSArray *)sortDescriptors;
 

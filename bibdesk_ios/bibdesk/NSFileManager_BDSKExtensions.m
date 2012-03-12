@@ -75,8 +75,10 @@
 #import "NSError_BDSKExtensions.h"
 #import "CFString_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
-#import <SkimNotesBase/SkimNotesBase.h>
-#import <CoreServices/CoreServices.h>
+#if BDSK_OS_X
+    #import <SkimNotesBase/SkimNotesBase.h>
+    #import <CoreServices/CoreServices.h>
+#endif
 
 #define OPEN_META_TAGS_KEY @"com.apple.metadata:kMDItemOMUserTags"
 #define OPEN_META_TAG_TIME_KEY @"com.apple.metadata:kMDItemOMUserTagTime"
@@ -130,6 +132,7 @@ static void destroyTemporaryDirectory()
     [pool release];
 }
 
+#if BDSK_OS_X
 - (NSString *)applicationSupportDirectory{
     
     static NSString *path = nil;
@@ -158,6 +161,7 @@ static void destroyTemporaryDirectory()
     
     return path;
 }
+#endif
 
 - (NSString *)applicationsDirectory{
     NSString *path = [NSSearchPathForDirectoriesInDomains(NSApplicationDirectory, NSLocalDomainMask, YES) firstObject];
@@ -222,6 +226,7 @@ static void destroyTemporaryDirectory()
     return lyxPipePath;
 }
 
+#if BDSK_OS_X
 - (BOOL)copyFileFromSharedSupportToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite{
     NSString *targetPath = [[self applicationSupportDirectory] stringByAppendingPathComponent:fileName];
     NSString *sourcePath = [[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:fileName];
@@ -249,11 +254,13 @@ static void destroyTemporaryDirectory()
         }
     }
 }
+#endif
 
 #pragma mark Temporary files and directories
 
 // This method is copied and modified from NSFileManager-OFExtensions.m
 // Note that due to the permissions behavior of FSFindFolder, this shouldn't have the security problems that raw calls to -uniqueFilenameFromName: may have.
+#if BDSK_OS_X
 - (NSString *)temporaryPathForWritingToPath:(NSString *)path error:(NSError **)outError
 /*" Returns a unique filename in the -temporaryDirectoryForFileSystemContainingPath: for the filesystem containing the given path.  The returned path is suitable for writing to and then replacing the input path using -replaceFileAtPath:withFileAtPath:handler:.  This means that the result should never be equal to the input path.  If no suitable temporary items folder is found and allowOriginalDirectory is NO, this will raise.  If allowOriginalDirectory is YES, on the other hand, this will return a file name in the same folder.  Note that passing YES for allowOriginalDirectory could potentially result in security implications of the form noted with -uniqueFilenameFromName:. "*/
 {
@@ -328,11 +335,13 @@ static void destroyTemporaryDirectory()
     
     return tempFileName;
 }
+#endif
 
 - (NSString *)temporaryFileWithBasename:(NSString *)fileName {
 	return [self uniqueFilePathWithName:fileName atPath:temporaryBaseDirectory];
 }
 
+#if BDSK_OS_X
 // This method is subject to a race condition in our temporary directory if we pass the same baseName to this method and temporaryFileWithBasename: simultaneously; hence the lock in uniqueFilePathWithName:atPath:, even though it and temporaryFileWithBasename: are not thread safe or secure.
 - (NSString *)makeTemporaryDirectoryWithBasename:(NSString *)baseName {
     NSString *finalPath = nil;
@@ -354,6 +363,7 @@ static void destroyTemporaryDirectory()
     }
     return finalPath;
 }
+#endif
 
 - (NSString *)uniqueFilePathWithName:(NSString *)fileName atPath:(NSString *)directory {
     // could expand this path?
@@ -399,6 +409,7 @@ static void destroyTemporaryDirectory()
 #pragma mark Resoving aliases
 
 // This method is copied and modified from NSFileManager-OFExtensions.m
+#if BDSK_OS_X
 - (NSString *)resolveAliasesInPath:(NSString *)originalPath
 {
     FSRef ref, originalRefOfPath;
@@ -696,6 +707,7 @@ FSOpenIterator:
     
     return success;
 }
+#endif
 
 #pragma mark Spotlight support
 
@@ -704,6 +716,7 @@ FSOpenIterator:
     return [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingPathComponent:@"Metadata"];
 }
     
+#if BDSK_OS_X
 - (NSString *)spotlightCacheFolderPathByCreating:(NSError **)anError{
 
     NSString *cachePath = nil;
@@ -821,5 +834,6 @@ FSOpenIterator:
     
     return nsEncoding;
 }
+#endif
 
 @end

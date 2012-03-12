@@ -43,6 +43,7 @@
 
 #define BDSKRangeKey @"__BDSKRange"
 
+#if BDSK_OS_X
 static void BDSKGetAttributeDictionariesAndFixString(NSMutableArray *attributeDictionaries, NSMutableString *mutableString, NSDictionary *attributes, NSRange *rangePtr)
 {
     BDSKASSERT(nil != mutableString);
@@ -133,6 +134,7 @@ static void BDSKGetAttributeDictionariesAndFixString(NSMutableArray *attributeDi
     
     *rangePtr = range;
 }
+#endif
 
 static void BDSKApplyAttributesToString(const void *value, void *context)
 {
@@ -151,6 +153,7 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
     return self;
 }
 
+#if BDSK_OS_X
 - (id)initWithTeXString:(NSString *)string attributes:(NSDictionary *)attributes collapseWhitespace:(BOOL)collapse{
 
     NSMutableAttributedString *mas;
@@ -196,6 +199,7 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
     
     return self;
 }
+#endif
 
 - (NSComparisonResult)localizedCaseInsensitiveNonTeXNonArticleCompare:(NSAttributedString *)other;
 {

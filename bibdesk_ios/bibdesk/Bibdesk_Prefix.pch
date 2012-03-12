@@ -2,6 +2,18 @@
 // Prefix header for all source files of the 'BibDesk' target in the 'BibDesk' project
 //
 
+#import <Availability.h>
+
+#if __MAC_OS_X_VERSION_MIN_REQUIRED
+    #define BDSK_OS_X 1
+    #define BDSK_IOS 0
+#elif __IPHONE_OS_VERSION_MIN_REQUIRED
+    #define BDSK_IOS 1
+    #define BDSK_OS_X 0
+#else
+   #error unknown platform
+#endif
+
 #if defined(__MACH__)
 
 #ifdef __cplusplus
@@ -20,9 +32,16 @@
 #endif
 
 #ifdef __OBJC__
-    #import <Cocoa/Cocoa.h>
+    #if BDSK_OS_X
+        #import <Cocoa/Cocoa.h>
+    #else
+        #import <UIKit/UIKit.h>
+        #import <Foundation/Foundation.h>
+    #endif
     #import <tgmath.h>
-    #import "BDSKCompatibility.h"
+    #if BDSK_OS_X
+        #import "BDSKCompatibility.h"
+    #endif
     #import "NSString_BDSKExtensions.h"
     #import "BDSKComplexString.h"
     #import "BDSKStringConstants.h"
@@ -60,8 +79,7 @@
 
     #endif
 
-    #define BDSKINITIALIZE \
-        do { \
+    #define BDSKINITIALIZE do { \
             static BOOL hasBeenInitialized = NO; \
             [super initialize]; \
             if (hasBeenInitialized) return; \

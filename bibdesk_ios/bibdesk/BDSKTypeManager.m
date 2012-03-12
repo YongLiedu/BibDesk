@@ -105,7 +105,12 @@ static BDSKTypeManager *sharedManager = nil;
 }
 
 static NSString *BDSKUserTypeInfoPath() {
+    // iOS TODO: update to allow users to have their own TypeInfo.plist file?
+#if BDSK_OS_X
     return [[[[NSFileManager defaultManager] applicationSupportDirectory] stringByAppendingPathComponent:TYPE_INFO_FILENAME] stringByAppendingPathExtension:@"plist"];
+#else
+    return nil;
+#endif
 }
 
 - (id)init{

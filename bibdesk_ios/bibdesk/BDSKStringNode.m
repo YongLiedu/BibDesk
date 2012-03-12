@@ -114,10 +114,12 @@
     }
 }
 
+#if BDSK_OS_X
 - (id)replacementObjectForPortCoder:(NSPortCoder *)encoder
 {
     return [encoder isByref] ? (id)[NSDistantObject proxyWithLocal:self connection:[encoder connection]] : self;
 }
+#endif
 
 - (BOOL)isEqual:(BDSKStringNode *)other{
     return (type == [other type] && [value isEqualToString:[other value]]);

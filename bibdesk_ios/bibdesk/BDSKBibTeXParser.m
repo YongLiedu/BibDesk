@@ -40,21 +40,29 @@
 #import <BTParse/btparse.h>
 #import "BDSKErrorObject.h"
 #import <AGRegex/AGRegex.h>
-#import "BDSKAppController.h"
+#if BDSK_OS_X
+    #import "BDSKAppController.h"
+#endif
 #include <stdio.h>
 #import "BibItem.h"
 #import "BDSKConverter.h"
 #import "BDSKComplexString.h"
 #import "BDSKStringConstants.h"
-#import "BibDocument_Groups.h"
+#if BDSK_OS_X
+    #import "BibDocument_Groups.h"
+#endif
 #import "NSString_BDSKExtensions.h"
 #import "BibAuthor.h"
-#import "BDSKErrorObjectController.h"
+#if BDSK_OS_X
+    #import "BDSKErrorObjectController.h"
+#endif
 #import "BDSKStringNode.h"
 #import "BDSKMacroResolver.h"
 #import "BDSKOwnerProtocol.h"
 #import "BDSKGroupsArray.h"
-#import "BDSKStringEncodingManager.h"
+#if BDSK_OS_X
+    #import "BDSKStringEncodingManager.h"
+#endif
 #import "NSScanner_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "BDSKCompletionManager.h"
@@ -203,7 +211,9 @@ static NSString *stringWithoutComments(NSString *string) {
     if([parserLock tryLock] == NO)
         [NSException raise:NSInternalInconsistencyException format:@"Attempt to reenter the parser.  Please report this error."];
 
+#if BDSK_OS_X
     [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
+#endif
     
     bt_initialize();
     bt_set_stringopts(BTE_PREAMBLE, BTO_EXPAND);
@@ -262,7 +272,9 @@ static NSString *stringWithoutComments(NSString *string) {
     bt_cleanup();
     fclose(infile);
 	
+#if BDSK_OS_X
     [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:([anOwner isDocument] ? (BibDocument *)anOwner : nil) pasteDragData:(filePath == BDSKParserPasteDragString ? inData : nil)];
+#endif
     
     [parserLock unlock];
         
@@ -551,9 +563,11 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
     
     // shouldn't ever see this case as far as I know, as long as we're using btparse
     if(names == NULL){
+#if BDSK_OS_X
         [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
         [BDSKErrorObject reportErrorMessage:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unbalanced braces in author names:", @"Error description"), [(id)array description]] forFile:nil line:-1];
         [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForPublication:pub];
+#endif
         CFRelease(array);
 
         // @@ return the empty array or nil?
@@ -640,10 +654,14 @@ static NSString *createNameStringForComponent(CFAllocatorRef alloc, bt_name *the
     
     bt_name *theName;
     
+#if BDSK_OS_X
     [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
+#endif
     // pass the name as a C string; note that btparse will not work with unichars
     theName = bt_split_name((char *)name_cstring, NULL, 0, 0);
+#if BDSK_OS_X
     [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForPublication:pub];
+#endif
 
     [aName release];
     if(shouldFree)
@@ -913,8 +931,13 @@ static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
     size_t scriptGroupStrLength = strlen(scriptGroupStr);
     NSInteger groupType = -1;
     Boolean firstValue = (groups != nil);
-    
+
+// iOS TODO: Do proper check for unparsable encoding    
+#if BDSK_OS_X
     NSStringEncoding groupsEncoding = [[BDSKStringEncodingManager sharedEncodingManager] isUnparseableEncoding:encoding] ? encoding : NSUTF8StringEncoding;
+#else
+    NSStringEncoding groupsEncoding = encoding;
+#endif
     BOOL success = YES;
     
     while(field = bt_next_value(entry, field, NULL, &text)){

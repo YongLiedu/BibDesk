@@ -35,22 +35,25 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 
 @interface NSURL (BDSKExtensions)
 
+#if BDSK_OS_X
 + (NSURL *)fileURLWithAEDesc:(NSAppleEventDescriptor *)desc;
 - (NSAppleEventDescriptor *)aeDescriptorValue;
 
 - (NSURL *)fileURLByResolvingAliases;
 - (NSURL *)fileURLByResolvingAliasesBeforeLastPathComponent;
+#endif
 
 + (NSURL *)URLWithStringByNormalizingPercentEscapes:(NSString *)string;
 + (NSURL *)URLWithStringByNormalizingPercentEscapes:(NSString *)string baseURL:(NSURL *)baseURL;
 + (NSCharacterSet *)illegalURLCharacterSet;
 - (NSString *)precomposedPath;
 
+#if BDSK_OS_X
 - (NSComparisonResult)UTICompare:(NSURL *)other;
 
 + (NSURL *)URLFromPasteboardAnyType:(NSPasteboard *)pasteboard;
@@ -70,6 +73,7 @@
 - (NSAttributedString *)smallIcon;
 - (NSAttributedString *)linkedIcon;
 - (NSAttributedString *)linkedSmallIcon;
+#endif
 
 @end
 

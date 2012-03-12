@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 #import "BDSKTreeNode.h"
 
 enum {
@@ -79,8 +79,10 @@ extern NSString *BDSKTemplateScriptString;
 + (NSString *)unlocalizedRoleString:(NSString *)string; 
 
 // default templates
+#if BDSK_OS_X
 + (NSArray *)defaultExportTemplates;
 + (NSArray *)defaultServiceTemplates;
+#endif
 
 // all templates
 + (NSArray *)exportTemplates;
@@ -126,8 +128,10 @@ extern NSString *BDSKTemplateScriptString;
 - (NSURL *)scriptURL;
 
 // child template accessors
+#if BDSK_OS_X
 - (NSURL *)representedFileURL;
 - (void)setRepresentedFileURL:(NSURL *)aURL;
+#endif
 
 // other methods
 - (BOOL)addChildWithURL:(NSURL *)fileURL role:(NSString *)role;

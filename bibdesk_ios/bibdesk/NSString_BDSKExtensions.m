@@ -66,7 +66,7 @@
  */
 
 #import "NSString_BDSKExtensions.h"
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 #import "NSCharacterSet_BDSKExtensions.h"
 #import "CFString_BDSKExtensions.h"
 #import <AGRegex/AGRegex.h>
@@ -76,8 +76,10 @@
 #import "NSScanner_BDSKExtensions.h"
 #import "html2tex.h"
 #import "NSDictionary_BDSKExtensions.h"
-#import "NSWorkspace_BDSKExtensions.h"
-#import "BDSKStringEncodingManager.h"
+#if BDSK_OS_X
+    #import "NSWorkspace_BDSKExtensions.h"
+    #import "BDSKStringEncodingManager.h"
+#endif
 #import "BDSKTypeManager.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
@@ -271,14 +273,16 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
         string = [[stringClass allocWithZone:[self zone]] initWithData:data encoding:NSUnicodeStringEncoding];
     if(nil == string && encoding != NSUTF8StringEncoding)
         string = [[stringClass allocWithZone:[self zone]] initWithData:data encoding:NSUTF8StringEncoding];
-    
+
     // read com.apple.TextEncoding on Leopard, or when reading a Tiger file saved on Leopard
+#if BDSK_OS_X    
     if(nil == string) {
         // don't clobber the encoding parameter in case this fails...
         NSStringEncoding xattrEncoding = [[NSFileManager defaultManager] appleStringEncodingAtPath:path error:NULL];
         if (xattrEncoding > 0)
             string = [[stringClass allocWithZone:[self zone]] initWithData:data encoding:xattrEncoding];
     }
+#endif
     
     // try the encoding passed as a parameter, if non-zero (zero encoding is never valid)
     if(nil == string && encoding > 0)
@@ -287,8 +291,10 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     // now we just try a few wild guesses
     if(nil == string && encoding != [NSString defaultCStringEncoding])
         string = [[stringClass allocWithZone:[self zone]] initWithData:data encoding:[NSString defaultCStringEncoding]];
+#if BDSK_OS_X
     if(nil == string && encoding != [BDSKStringEncodingManager defaultEncoding])
         string = [[stringClass allocWithZone:[self zone]] initWithData:data encoding:[BDSKStringEncodingManager defaultEncoding]];
+#endif
     // final fallback is Mac Roman (gapless)
     if(nil == string && encoding != NSMacOSRomanStringEncoding)
         string = [[stringClass allocWithZone:[self zone]] initWithData:data encoding:NSMacOSRomanStringEncoding];
@@ -1769,6 +1775,7 @@ http://home.planet.nl/~faase009/GNU.txt
     return url;
 }
 
+#if BDSK_OS_X
 - (NSAttributedString *)linkedText {
     return [[[NSAttributedString alloc] initWithString:self attributeName:NSLinkAttributeName attributeValue:[self url]] autorelease];
 }
@@ -1800,6 +1807,7 @@ http://home.planet.nl/~faase009/GNU.txt
 - (NSAttributedString *)richTextSkimNotes {
     return [[self url] richTextSkimNotes];
 }
+#endif
 
 - (NSString *)titleCapitalizedString {
     NSScanner *scanner = [[NSScanner alloc] initWithString:self];

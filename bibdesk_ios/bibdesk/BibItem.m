@@ -39,43 +39,61 @@
 #import "NSDate_BDSKExtensions.h"
 #import "BDSKGroup.h"
 #import "BDSKCategoryGroup.h"
-#import "BDSKEditor.h"
+#if BDSK_OS_X
+    #import "BDSKEditor.h"
+#endif
 #import "BDSKTypeManager.h"
 #import "BibAuthor.h"
 #import "BDSKStringConstants.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKConverter.h"
-#import "BDAlias.h"
+#if BDSK_OS_X
+    #import "BDAlias.h"
+#endif
 #import "BDSKFormatParser.h"
 #import "BDSKBibTeXParser.h"
-#import "BDSKFiler.h"
-#import "BibDocument.h"
-#import "BDSKAppController.h"
+#if BDSK_OS_X
+    #import "BDSKFiler.h"
+    #import "BibDocument.h"
+    #import "BDSKAppController.h"
+#else
+    #import "../BibDocument.h"
+#endif
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
 #import "NSSet_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
-#import "NSImage_BDSKExtensions.h"
+#if BDSK_OS_X
+    #import "NSImage_BDSKExtensions.h"
+#endif
 #import "BDSKStringNode.h"
-#import "BDSKField.h"
+#if BDSK_OS_X
+    #import "BDSKField.h"
+#endif
 #import "BDSKTemplate.h"
 #import "BDSKTemplateParser.h"
 #import "BDSKFieldCollection.h"
 #import "BDSKPublicationsArray.h"
 #import "NSData_BDSKExtensions.h"
-#import "BDSKScriptHook.h"
-#import "BDSKScriptHookManager.h"
+#if BDSK_OS_X
+    #import "BDSKScriptHook.h"
+    #import "BDSKScriptHookManager.h"
+#endif
 #import "BDSKCompletionManager.h"
 #import "BDSKMacroResolver.h"
-#import "BDSKMacro.h"
-#import "NSColor_BDSKExtensions.h"
-#import "BDSKTextWithIconCell.h"
+#if BDSK_OS_X
+    #import "BDSKMacro.h"
+    #import "NSColor_BDSKExtensions.h"
+    #import "BDSKTextWithIconCell.h"
+#endif
 #import "CFString_BDSKExtensions.h"
 #import "BDSKCFCallBacks.h"
 #import "NSCharacterSet_BDSKExtensions.h"
-#import <Quartz/Quartz.h>
+#if BDSK_OS_X
+    #import <Quartz/Quartz.h>
+#endif
 
 NSString *BDSKBibItemKeyKey = @"key";
 NSString *BDSKBibItemOldValueKey = @"oldValue";
@@ -171,10 +189,12 @@ static NSURL *createUniqueURL(void)
 static NSString *defaultCiteKey = nil;
 
 /* Paragraph styles cached for efficiency. */
+#if BDSK_OS_X
 static NSParagraphStyle* keyParagraphStyle = nil;
 static NSParagraphStyle* bodyParagraphStyle = nil;
 
 static NSMapTable *selectorTable = NULL;
+#endif
 
 #pragma mark -
 
@@ -186,6 +206,7 @@ static NSMapTable *selectorTable = NULL;
     
     defaultCiteKey = @"cite-key";
     
+#if BDSK_OS_X
     NSMutableParagraphStyle *defaultStyle = [[NSMutableParagraphStyle alloc] init];
     [defaultStyle setParagraphStyle:[NSParagraphStyle defaultParagraphStyle]];
     keyParagraphStyle = [defaultStyle copy];
@@ -212,6 +233,7 @@ static NSMapTable *selectorTable = NULL;
     
     selectorTable = NSCopyMapTableWithZone(mapTable, NULL);
     NSFreeMapTable(mapTable);
+#endif
     
     // hidden pref as support for RFE #1690155 https://sourceforge.net/tracker/index.php?func=detail&aid=1690155&group_id=61487&atid=497426
     // partially implemented; view will represent this as inherited unless it goes through -[BibItem valueOfField:inherit:], which fields like "Key" certainly will
@@ -310,12 +332,14 @@ static NSMapTable *selectorTable = NULL;
 
 // Legacy: we need to encode deprecated NSCalendarDate objects, because we might be sharing with someone who uses an older version of BibDesk
 
+#if BDSK_OS_X
 static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     if (date == nil || [date isKindOfClass:[NSCalendarDate class]])
         return (NSCalendarDate *)date;
     else
         return [[[NSCalendarDate alloc] initWithTimeInterval:0.0 sinceDate:date] autorelease];
 }
+#endif
 
 - (id)initWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
@@ -360,19 +384,23 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         [coder encodeObject:files forKey:@"files"];
         // Legacy, these are necessary for sharing with older versions of BibDesk
         [coder encodeObject:BDSKBibtexString forKey:@"fileType"];
+#if BDSK_OS_X
         [coder encodeObject:ensureCalendarDate(pubDate) forKey:@"pubDate"];
         [coder encodeObject:ensureCalendarDate(dateAdded) forKey:@"dateAdded"];
         [coder encodeObject:ensureCalendarDate(dateModified) forKey:@"dateModified"];
+#endif
         [coder encodeBool:hasBeenEdited forKey:@"hasBeenEdited"];
     } else {
         [coder encodeDataObject:[NSKeyedArchiver archivedDataWithRootObject:self]];
     }        
 }
 
+#if BDSK_OS_X
 - (id)replacementObjectForPortCoder:(NSPortCoder *)encoder
 {
     return [encoder isByref] ? (id)[NSDistantObject proxyWithLocal:self connection:[encoder connection]] : self;
 }
+#endif
 
 - (void)dealloc{
     BDSKDESTROY(pubFields);
@@ -1013,6 +1041,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         [self setField:field toRatingValue:rating];
 }
 
+#if BDSK_OS_X
 - (NSColor *)color {
     return [NSColor colorWithFourByteString:[self valueOfField:BDSKColorString inherit:NO]];
 }
@@ -1023,6 +1052,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     else
         [self setField:BDSKColorString toValue:[aColor fourByteStringValue]];
 }
+#endif
 
 - (void)setHasBeenEdited:(BOOL)flag{
     hasBeenEdited = flag;
@@ -1054,7 +1084,9 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 		
     NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKCiteKeyString, BDSKBibItemKeyKey, newCiteKey, BDSKBibItemNewValueKey, oldCiteKey, BDSKBibItemOldValueKey, nil];
 
+#if BDSK_OS_X
     [[NSFileManager defaultManager] removeSpotlightCacheFileForCiteKey:oldCiteKey];
+#endif
     [oldCiteKey release];
     
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
@@ -1414,8 +1446,10 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         return [self peopleStringForDisplayFromField:field];
     } else if([field isEqualToString:BDSKAuthorEditorString]){
         return [self pubAuthorsOrEditorsForDisplay];
+#if BDSK_OS_X
     }else if([field isURLField]){
         return [self imageForURLField:field];
+#endif
     }else if([field isRatingField]){
         return [NSNumber numberWithInteger:[self ratingValueOfField:field]];
     }else if([field isBooleanField]){
@@ -1430,6 +1464,8 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         return nil;
     }else if([field isEqualToString:BDSKRelevanceString]){
         return [NSNumber numberWithDouble:[self searchScore]];
+// iOS TODO: Need to handle these better
+#if BDSK_OS_X
     }else if([field isEqualToString:BDSKLocalFileString]){
         NSArray *localFiles = [self localFiles];
         NSUInteger count = [localFiles count];
@@ -1451,6 +1487,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         return cellDictionary;
     }else if([field isEqualToString:BDSKColorString] || [field isEqualToString:BDSKColorLabelString]){
         return [self color];
+#endif
     }else{
         // the tableColumn isn't something we handle in a custom way.
         return [self valueOfField:field];
@@ -1462,6 +1499,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 - (void)setSearchScore:(CGFloat)val { searchScore = val; }
 - (CGFloat)searchScore { return searchScore; }
 
+#if BDSK_OS_X
 - (NSString *)skimNotesForLocalURL{
     NSMutableString *string = [NSMutableString string];
     NSURL *fileURL;
@@ -1608,6 +1646,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     
     return info;
 }
+#endif
 
 // return a KVC-compliant object; may not be a dictionary in future
 - (id)completionObject{
@@ -2366,6 +2405,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 - (NSDate *)currentDate{ return [NSDate date]; }
 
+#if BDSK_OS_X
 - (NSString *)textSkimNotes {
     NSMutableString *string = [NSMutableString string];
     NSURL *url;
@@ -2403,6 +2443,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     }
     return attrString;
 }
+#endif
 
 typedef struct _fileContext {
     CFMutableArrayRef array;
@@ -2439,6 +2480,7 @@ static void addFilesToArray(const void *value, void *context)
     return remoteURLs;
 }
 
+#if BDSK_OS_X
 - (NSArray *)usedMacros {
     NSMutableSet *macros = [NSMutableSet set];
     for (NSString *value in [pubFields objectEnumerator]) {
@@ -2471,6 +2513,7 @@ static void addFilesToArray(const void *value, void *context)
 - (NSAttributedString *)linkedText {
     return [[[NSAttributedString alloc] initWithString:[self citeKey] attributeName:NSLinkAttributeName attributeValue:[self bdskURL]] autorelease];
 }
+#endif
 
 #pragma mark -
 #pragma mark URL handling
@@ -2517,7 +2560,9 @@ static void addFilesToArray(const void *value, void *context)
     BOOL isFile = [file isFile];
     [[[self undoManager] prepareWithInvocationTarget:self] insertObject:file inFilesAtIndex:idx];
     [file setDelegate:nil];
+#if BDSK_OS_X
     [self removeFileToBeFiled:file];
+#endif
     [files removeObjectAtIndex:idx];
     
     [self noteFilesChanged:isFile];
@@ -2545,10 +2590,12 @@ static void addFilesToArray(const void *value, void *context)
             idx = 1 + [files indexOfObject:[localFiles lastObject]];
     }
     [self insertObject:aFile inFilesAtIndex:idx];
+#if BDSK_OS_X
     if (runScriptHook && [[self owner] isDocument])
         [(BibDocument *)[self owner] userAddedURL:aURL forPublication:self];
     if (shouldAutoFile && [aFile isFile])
         [self autoFileLinkedFile:aFile];
+#endif
     return YES;
 }
 
@@ -2564,6 +2611,7 @@ static void addFilesToArray(const void *value, void *context)
                                                       userInfo:notifInfo];
 }
 
+#if BDSK_OS_X
 - (NSImage *)imageForURLField:(NSString *)field{
     
     NSURL *url = [self URLForField:field];
@@ -2575,6 +2623,7 @@ static void addFilesToArray(const void *value, void *context)
     
     return [NSImage imageForURL:url];
 }
+#endif
 
 - (NSURL *)URLForField:(NSString *)field{
     return ([field isLocalFileField] ? [self localFileURLForField:field] : [self remoteURLForField:field]);
@@ -2649,8 +2698,10 @@ static void addFilesToArray(const void *value, void *context)
     // resolve aliases in the containing dir, as most NSFileManager methods do not follow them, and NSWorkspace can't open aliases
 	// we don't resolve the last path component if it's an alias, as this is used in auto file, which should move the alias rather than the target file 
     // if the path to the file does not exist resolvedURL is nil, so we return the unresolved path
+#if BDSK_OS_X
     if ((resolvedURL = [localURL fileURLByResolvingAliasesBeforeLastPathComponent]))
         localURL = resolvedURL;
+#endif
     
     return localURL;
 }
@@ -2774,6 +2825,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 #pragma mark AutoFile support
 
 - (BOOL)isValidLocalFilePath:(NSString *)proposedPath{
+#if BDSK_OS_X
     if ([NSString isEmptyString:proposedPath])
         return NO;
     NSString *papersFolderPath = [BDSKFormatParser folderPathForFilingPapersFromDocumentAtPath:[[owner fileURL] path]];
@@ -2782,8 +2834,13 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKLocalFileLowercaseKey])
         proposedPath = [proposedPath lowercaseString];
     return ([[NSFileManager defaultManager] fileExistsAtPath:[papersFolderPath stringByAppendingPathComponent:proposedPath]] == NO);
+#else
+// iOS TODO: Handle this better. Maybe it never gets called?
+    return NO;
+#endif
 }
 
+#if BDSK_OS_X
 - (NSURL *)suggestedURLForLinkedFile:(BDSKLinkedFile *)file
 {
     NSString *papersFolderPath = [BDSKFormatParser folderPathForFilingPapersFromDocumentAtPath:[[owner fileURL] path]];
@@ -2867,6 +2924,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 	}
 	return NO;
 }
+#endif
 
 #pragma mark -
 #pragma mark Groups
@@ -3259,6 +3317,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 
 @implementation BibItem (PDFMetadata)
 
+#if BDSK_OS_X
 + (BibItem *)itemWithPDFMetadataFromURL:(NSURL *)fileURL
 {
     NSParameterAssert(fileURL != nil);
@@ -3298,6 +3357,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     }
     return item;
 }
+#endif
 
 @end
 
@@ -3348,6 +3408,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 }
 
 - (void)updateMetadataForKey:(NSString *)key{
+#if BDSK_OS_X
     
 	[self setHasBeenEdited:YES];
     spotlightMetadataChanged = YES;   
@@ -3418,6 +3479,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
                                                             object:(BibDocument *)owner
                                                           userInfo:notifInfo];
     }
+#endif
 }
 
 - (void)createFilesArray

@@ -55,6 +55,8 @@
 #import <sys/mman.h>
 #import <sys/stat.h>
 #import <zlib.h>
+#import <fcntl.h>
+#import <mach/mach_init.h>
 
 NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
 
@@ -453,6 +455,7 @@ static unsigned char hexDecodeTable[256] =
     return (-1 == fd) ? NULL : fdopen(fd, "r");
 }
 
+#if BDSK_OS_X
 + (id)scriptingRtfWithDescriptor:(NSAppleEventDescriptor *)descriptor {
     return [descriptor data];
 }
@@ -460,6 +463,7 @@ static unsigned char hexDecodeTable[256] =
 - (id)scriptingRtfDescriptor {
     return [NSAppleEventDescriptor descriptorWithDescriptorType:'RTF ' data:self];
 }
+#endif
 
 @end
 

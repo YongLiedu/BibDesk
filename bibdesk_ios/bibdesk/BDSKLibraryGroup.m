@@ -53,9 +53,11 @@ static NSString *BDSKLibraryLocalizedString = nil;
     return self;
 }
 
+#if BDSK_OS_X
 - (NSImage *)icon {
 	return [NSImage imageNamed:@"libraryGroup"];
 }
+#endif
 
 - (BOOL)containsItem:(BibItem *)item {
     return [[item owner] isEqual:[self document]];
