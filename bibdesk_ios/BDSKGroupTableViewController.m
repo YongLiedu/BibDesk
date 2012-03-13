@@ -41,8 +41,13 @@
 #import "BDSKPubTableViewController.h"
 #import "BibDocument.h"
 #import "BDSKPublicationsArray.h"
+#import "BDSKGroupsArray.h"
+#import "BDSKSmartGroup.h"
+#import "BDSKStaticGroup.h"
 
 @interface BDSKGroupTableViewController ()
+
+- (void)updateActivityIndicator;
 
 @end
 
@@ -69,6 +74,7 @@
  
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    [self updateActivityIndicator];
 }
 
 - (void)viewDidUnload
@@ -91,16 +97,28 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    // Return the number of sections.
-    return 1;
+    if (self.document) return 3;
+    
+    return 0;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    // Return the number of rows in the section.
     if (section == 0) return 1;
+    if (section == 1) return [[[self.document groups] smartGroups] count];
+    if (section == 2) return [[[self.document groups] staticGroups] count];
+    if (section == 3) return [[[self.document groups] categoryGroups] count];
     
     return 0;
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+    if (section == 1 && [[[self.document groups] smartGroups] count]) return @"Smart";
+    if (section == 2 && [[[self.document groups] staticGroups] count]) return @"Static";
+    if (section == 3 && [[[self.document groups] categoryGroups] count]) return @"Keywords";
+    
+    return nil;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -117,6 +135,24 @@
         } else {
             cell.detailTextLabel.text = nil;
         }
+    
+    } else if (indexPath.section == 1) {
+    
+        BDSKSmartGroup *group = [[[document groups] smartGroups] objectAtIndex:indexPath.row];
+        cell.textLabel.text = [group name];
+        cell.detailTextLabel.text = [NSString stringWithFormat:@"%i", [group count]];
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    
+    } else if (indexPath.section == 2) {
+    
+        BDSKStaticGroup *group = [[[document groups] staticGroups] objectAtIndex:indexPath.row];
+        cell.textLabel.text = [group name];
+        cell.detailTextLabel.text = [NSString stringWithFormat:@"%i", [group count]];
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    
+    } else if (indexPath.section == 3) {
+    
+    
     }
     
     return cell;
@@ -165,9 +201,7 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.section == 0) {
-        [self performSegueWithIdentifier:@"publications" sender:self];
-    }
+    [self performSegueWithIdentifier:@"publications" sender:self];
 }
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
@@ -180,6 +214,17 @@
         if (indexPath.section == 0 && indexPath.row == 0) {
             viewController.navigationItem.title = @"Library";
             viewController.bibItems = [NSArray arrayWithArray:self.document.publications];
+        } else if (indexPath.section == 1) {
+            BDSKSmartGroup *group = [[[document groups] smartGroups] objectAtIndex:indexPath.row];
+            viewController.navigationItem.title = [group name];
+            viewController.bibItems = [group filterItems:document.publications];
+        } else if (indexPath.section == 2) {
+            BDSKStaticGroup *group = [[[document groups] staticGroups] objectAtIndex:indexPath.row];
+            viewController.navigationItem.title = [group name];
+            viewController.bibItems = [group publications];
+        } else if (indexPath.section == 3) {
+            
+        
         }
     }
 }
@@ -189,13 +234,31 @@
     if (document != newDocument) {
         [document release];
         document = [newDocument retain];
+        NSArray *smartGroups = [[document groups] smartGroups];
+        for (BDSKSmartGroup *group in smartGroups) {
+            [group filterItems:document.publications];
+        }
         [self.tableView reloadData];
+        [self updateActivityIndicator];
     }
-    
-    if (document) {
-        self.tableView.allowsSelection = YES;
+}
+
+- (void)updateActivityIndicator
+{
+    if (self.document) {
+        self.navigationItem.rightBarButtonItem = nil;
     } else {
-        self.tableView.allowsSelection = NO;
+
+        UIActivityIndicatorViewStyle activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
+        
+        // barStyle is 3 (undocumented) when in a popover controller
+        if (self.navigationController.navigationBar.barStyle > 2) activityIndicatorViewStyle = UIActivityIndicatorViewStyleWhite;
+        UIActivityIndicatorView *activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:activityIndicatorViewStyle];
+        UIBarButtonItem *refreshButton = [[UIBarButtonItem alloc] initWithCustomView:activityIndicator];
+        self.navigationItem.rightBarButtonItem = refreshButton;
+        [activityIndicator startAnimating];
+        [refreshButton release];
+        [activityIndicator release];
     }
 }
 

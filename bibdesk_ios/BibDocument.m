@@ -50,6 +50,7 @@
     if ((self = [super initWithFileURL:url])) {
     
         publications = [[BDSKPublicationsArray alloc] init];
+        groups = [[BDSKGroupsArray alloc] initWithDocument:self];
         macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         documentInfo = nil;
         wasLoaded = NO;
