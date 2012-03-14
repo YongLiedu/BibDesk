@@ -43,6 +43,7 @@
 #import "BDSKLocalFile.h"
 #import "BibItem.h"
 #import "BDSKLinkedFile.h"
+#import "NSString_BDSKExtensions.h"
 
 @interface BDSKPubTableViewController () {
 
@@ -125,16 +126,17 @@
     BibItem *bibItem = [bibItems objectAtIndex:indexPath.row];
     
     cell.textLabel.text = bibItem.title;
-    NSString *subtitle = [NSString stringWithFormat:@"%@ - %@.", [bibItem stringValueOfField:@"Year"], [bibItem container]];
+    
+    NSString *year = [bibItem stringValueOfField:@"Year"];
+    NSString *container = [bibItem container];
     NSString *volume = [bibItem stringValueOfField:@"Volume"];
-    if (volume.length) {
-        subtitle = [subtitle stringByAppendingFormat:@" %@", volume];
-        NSString *number = [bibItem stringValueOfField:@"Number"];
-        if (number.length) subtitle = [subtitle stringByAppendingFormat:@"(%@)", number];
-        NSString *pages = [bibItem stringValueOfField:@"Pages"];
-        if (pages.length) subtitle = [subtitle stringByAppendingFormat:@":%@", pages];
-    }
-    cell.detailTextLabel.text = subtitle;
+    NSString *pages = [bibItem stringValueOfField:@"Pages"];
+    
+    NSString *volpages = [volume stringByAppendingString:pages withDelimiter:@":"];
+    
+    NSString *contvolpages = [container stringByAppendingString:volpages withDelimiter:@" "];
+    
+    cell.detailTextLabel.text = [year stringByAppendingString:contvolpages withDelimiter:@" - "];
     
     //NSLog(@"File Count: %i", bibItem.files.count);
     
