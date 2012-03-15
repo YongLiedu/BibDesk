@@ -3408,7 +3408,6 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 }
 
 - (void)updateMetadataForKey:(NSString *)key{
-#if BDSK_OS_X
     
 	[self setHasBeenEdited:YES];
     spotlightMetadataChanged = YES;   
@@ -3445,6 +3444,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         [theDate release];
 	}
 	
+#if BDSK_OS_X
     // setDateAdded: is only called here; it is derived based on pubFields value of BDSKDateAddedString
     if (key == nil || allFieldsChanged || [BDSKDateAddedString isEqualToString:key]) {
 		NSString *dateAddedValue = [pubFields objectForKey:BDSKDateAddedString];

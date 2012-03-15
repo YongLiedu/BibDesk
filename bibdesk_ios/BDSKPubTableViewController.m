@@ -43,7 +43,10 @@
 #import "BDSKLocalFile.h"
 #import "BibItem.h"
 #import "BDSKLinkedFile.h"
+#import "BDSKTableSortDescriptor.h"
+#import "BDSKStringConstants.h"
 #import "NSString_BDSKExtensions.h"
+#import "NSArray_BDSKExtensions.h"
 
 @interface BDSKPubTableViewController () {
 
@@ -231,7 +234,8 @@
 
     if (bibItems != newBibItems) {
         [bibItems release];
-        bibItems = [newBibItems retain];
+        BDSKTableSortDescriptor *sortDescriptor = [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:BDSKPubDateString ascending:NO];
+        bibItems = [[newBibItems sortedArrayUsingMergesortWithDescriptors:[NSArray arrayWithObject:sortDescriptor]] retain];
         
         [_pdfFiles release];
         _pdfFiles = [[NSMutableArray alloc] init];
