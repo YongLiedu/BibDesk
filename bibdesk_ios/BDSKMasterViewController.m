@@ -234,11 +234,14 @@
         
         [document openWithCompletionHandler:^(BOOL success) {            
             if (success) {
-                [viewController setDocument:document];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    viewController.document = document;
+                    [document release];
+                });
             } else {
                 NSLog(@"Couldn't Open Document: %@", file.fullPath);
+                [document release];
             }
-            [document release];
         }];
         
     } else if ([[segue identifier] isEqualToString:@"allPDFFiles"]) {

@@ -40,7 +40,7 @@
 
 @class BibItem;
 
-@interface BDSKPubTableViewController : UITableViewController
+@interface BDSKPubTableViewController : UITableViewController <UISearchDisplayDelegate, UISearchBarDelegate>
 
 @property (nonatomic, retain) NSArray *bibItems;
 

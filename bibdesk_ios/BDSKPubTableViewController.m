@@ -48,9 +48,24 @@
 #import "NSString_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
 
+BDSKLocalFile *LocalFileForBibItem(BibItem *bibItem) {
+
+    BDSKDropboxStore *dropboxStore = [BDSKDropboxStore sharedStore];
+    
+    BDSKLocalFile *localFile = nil;
+    for (BDSKLinkedFile *file in bibItem.localFiles) {
+        if ((localFile = [dropboxStore.pdfFilePaths objectForKey:file.relativePath])) {
+            break;
+        }
+    }
+    
+    return localFile;
+}
+
 @interface BDSKPubTableViewController () {
 
-    NSMutableArray *_pdfFiles;
+    NSMutableArray *_filteredBibItems;
+    BOOL _firstAppearance;
 }
 
 @end
@@ -71,12 +86,13 @@
 - (void)awakeFromNib
 {
     self.bibItems = [NSArray array];
-    _pdfFiles = nil;
+    _filteredBibItems = [[NSMutableArray alloc] init];
+    _firstAppearance = YES;
 }
 
 - (void)dealloc {
 
-    [_pdfFiles release];
+    [_filteredBibItems release];
     [super dealloc];
 }
 
@@ -98,6 +114,16 @@
     // e.g. self.myOutlet = nil;
 }
 
+- (void)viewWillAppear:(BOOL)animated {
+
+    [super viewWillAppear:animated];
+
+    if (_firstAppearance) {
+        self.tableView.contentOffset = CGPointMake(0, self.searchDisplayController.searchBar.bounds.size.height);
+        _firstAppearance = NO;
+    }
+}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
@@ -109,6 +135,15 @@
 
 #pragma mark - Table view data source
 
+- (BibItem *)tableView:(UITableView *)tableView bibItemForRowAtIndexPath:(NSIndexPath *)indexPath {
+
+    if (tableView == self.searchDisplayController.searchResultsTableView) {
+        return [_filteredBibItems objectAtIndex:indexPath.row];
+    }
+    
+   return [bibItems objectAtIndex:indexPath.row];
+}
+
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     // Return the number of sections.
@@ -117,6 +152,10 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
+    if (tableView == self.searchDisplayController.searchResultsTableView) {
+        return [_filteredBibItems count];
+    }
+    
     // Return the number of rows in the section.
     return self.bibItems.count;
 }
@@ -124,9 +163,9 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     static NSString *CellIdentifier = @"Cell";
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    UITableViewCell *cell = [self.tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     
-    BibItem *bibItem = [bibItems objectAtIndex:indexPath.row];
+    BibItem *bibItem = [self tableView:tableView bibItemForRowAtIndexPath:indexPath];
     
     cell.textLabel.text = bibItem.title;
     
@@ -143,7 +182,7 @@
     
     //NSLog(@"File Count: %i", bibItem.files.count);
     
-    if (((BDSKLocalFile *)[_pdfFiles objectAtIndex:indexPath.row]).path) {
+    if (LocalFileForBibItem(bibItem)) {
         //cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         cell.accessoryView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"pdf.png"]] autorelease];
         cell.selectionStyle = UITableViewCellSelectionStyleBlue;
@@ -199,18 +238,20 @@
 
 - (NSIndexPath *)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
-    BDSKLocalFile *pdfFile = [_pdfFiles objectAtIndex:indexPath.row];
+    BibItem *bibItem = [self tableView:tableView bibItemForRowAtIndexPath:indexPath];
 
-    if (pdfFile.path) return indexPath;
+    if (LocalFileForBibItem(bibItem)) return indexPath;
     
     return nil;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    BDSKLocalFile *pdfFile = [_pdfFiles objectAtIndex:indexPath.row];
+    BibItem *bibItem = [self tableView:tableView bibItemForRowAtIndexPath:indexPath];
 
-    if (pdfFile.path) {
+    BDSKLocalFile *pdfFile = LocalFileForBibItem(bibItem);
+
+    if (pdfFile) {
         if (self.splitViewController) {
             UINavigationController *navigationController = [self.splitViewController.viewControllers objectAtIndex:1];
             BDSKDetailViewController *viewController = (BDSKDetailViewController *)[navigationController.viewControllers objectAtIndex:0];
@@ -224,8 +265,15 @@
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     if ([[segue identifier] isEqualToString:@"showPDF"]) {
-        NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
-        BDSKLocalFile *pdfFile = [_pdfFiles objectAtIndex:indexPath.row];
+        UITableView *tableView;
+        if (self.searchDisplayController.active) {
+            tableView = self.searchDisplayController.searchResultsTableView;
+        } else {
+            tableView = self.tableView;
+        }
+        NSIndexPath *indexPath = [tableView indexPathForSelectedRow];
+        BibItem *bibItem = [self tableView:tableView bibItemForRowAtIndexPath:indexPath];
+        BDSKLocalFile *pdfFile = LocalFileForBibItem(bibItem);
         [[segue destinationViewController] setDisplayedFile:pdfFile];
     }
 }
@@ -237,26 +285,66 @@
         BDSKTableSortDescriptor *sortDescriptor = [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:BDSKPubDateString ascending:NO];
         bibItems = [[newBibItems sortedArrayUsingMergesortWithDescriptors:[NSArray arrayWithObject:sortDescriptor]] retain];
         
-        [_pdfFiles release];
-        _pdfFiles = [[NSMutableArray alloc] init];
-        
-        BDSKDropboxStore *dropboxStore = [BDSKDropboxStore sharedStore];
-        for (BibItem *bibItem in newBibItems) {
-            BDSKLocalFile *localFile = nil;
-            for (BDSKLinkedFile *file in bibItem.files) {
-                //NSLog(@"Relative Path: %@", file.relativePath);
-                if ((localFile = [dropboxStore.pdfFilePaths objectForKey:file.relativePath])) {
-                    break;
-                }
-            }
-            if (localFile) {
-                [_pdfFiles addObject:localFile];
-            } else {
-                [_pdfFiles addObject:[[[BDSKLocalFile alloc] initWithDropboxPath:nil lastModifiedDate:nil totalByets:0] autorelease]];
-            }
-        }
-        
         [self.tableView reloadData];
+    }
+}
+
+#pragma mark -
+#pragma mark Content Filtering
+
+- (void)filterContentForSearchText:(NSString*)searchText scope:(NSString*)scope
+{
+	/*
+	 Update the filtered array based on the search text and scope.
+	 */
+	
+	[_filteredBibItems removeAllObjects]; // First clear the filtered array.
+	
+	/*
+	 Search the main list for products whose type matches the scope (if selected) and whose name matches searchText; add items that match to the filtered array.
+	 */
+	for (BibItem *bibItem in bibItems) {
+		NSString *bibString = [bibItem allFieldsString];
+        if ([bibString rangeOfString:searchText options:NSCaseInsensitiveSearch].location != NSNotFound) {
+            [_filteredBibItems addObject:bibItem];
+        }
+	}
+}
+
+#pragma mark -
+#pragma mark UISearchDisplayController Delegate Methods
+
+- (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
+{
+    [self filterContentForSearchText:searchString scope:
+			[[self.searchDisplayController.searchBar scopeButtonTitles] objectAtIndex:[self.searchDisplayController.searchBar selectedScopeButtonIndex]]];
+    
+    // Return YES to cause the search result table view to be reloaded.
+    return YES;
+}
+
+- (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchScope:(NSInteger)searchOption
+{
+    [self filterContentForSearchText:[self.searchDisplayController.searchBar text] scope:
+			[[self.searchDisplayController.searchBar scopeButtonTitles] objectAtIndex:searchOption]];
+    
+    // Return YES to cause the search result table view to be reloaded.
+    return YES;
+}
+
+- (void)searchDisplayController:(UISearchDisplayController *)controller didLoadSearchResultsTableView:(UITableView *)tableView {
+
+    tableView.rowHeight = self.tableView.rowHeight;
+}
+
+- (void)searchDisplayController:(UISearchDisplayController *)controller willHideSearchResultsTableView:(UITableView *)tableView {
+
+    NSIndexPath *indexPath = tableView.indexPathForSelectedRow;
+    if (indexPath) {
+        BibItem *bibItem = [_filteredBibItems objectAtIndex:indexPath.row];
+        NSUInteger row = [self.bibItems indexOfObject:bibItem];
+        NSIndexPath *indexPathToSelect = [NSIndexPath indexPathForRow:row inSection:0];
+        [self.tableView selectRowAtIndexPath:indexPathToSelect animated:NO scrollPosition:UITableViewScrollPositionMiddle];
     }
 }
 
