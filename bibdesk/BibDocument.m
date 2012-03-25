@@ -1305,7 +1305,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSString *filePath;
     NSString *commonParent = nil;
     BOOL success = YES;
-    BOOL isDir;
     NSMutableSet *localFiles = [NSMutableSet set];
     
     if ((success = [fm createDirectoryAtPath:folderPath withIntermediateDirectories:NO attributes:nil error:NULL])) {
