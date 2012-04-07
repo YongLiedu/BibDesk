@@ -144,7 +144,8 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
 
 + (BOOL)canParseString:(NSString *)string{
     // remove leading newlines in case this originates from copy/paste
-    return [[string stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]] hasPrefix:@"FN ISI Export Format"];
+    string = [string stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+    return [string hasPrefix:@"FN ISI Export Format"] || [string hasPrefix:@"FN Thomson Reuters Web of Knowledge"];
 }
 
 + (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError{
