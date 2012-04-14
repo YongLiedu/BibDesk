@@ -1,0 +1,107 @@
+//
+// Prefix header for all source files of the 'FileView' target in the 'FileView' project.
+//
+
+#ifdef __OBJC__
+#import <Cocoa/Cocoa.h>
+#import <tgmath.h>
+
+// docs say not to send [super initialize], but that's a bug
+#if !defined(FVINITIALIZE)
+#define FVINITIALIZE(aClass) \
+    do { \
+        [super initialize]; \
+        if ([aClass self] != self) return; \
+    } while (0);
+#endif /* FVINITIALIZE */
+
+// From NSObjCRuntime.h
+#ifndef NSINTEGER_DEFINED
+typedef int NSInteger;
+typedef unsigned int NSUInteger;
+#define NSIntegerMax    LONG_MAX
+#define NSIntegerMin    LONG_MIN
+#define NSUIntegerMax   ULONG_MAX
+#define NSINTEGER_DEFINED 1
+#endif /* NSINTEGER_DEFINED */
+
+// From CGBase.h
+#ifndef	CGFLOAT_DEFINED
+typedef float CGFloat;
+#define CGFLOAT_MIN FLT_MIN
+#define CGFLOAT_MAX FLT_MAX
+#define CGFLOAT_IS_DOUBLE 0
+#define CGFLOAT_DEFINED 1
+#endif /* CGFLOAT_DEFINED */
+
+// from 10.5 header
+#ifndef NSAppKitVersionNumber10_4
+#define NSAppKitVersionNumber10_4 824
+#endif
+
+#ifndef NSAppKitVersionNumber10_5
+#define NSAppKitVersionNumber10_5 949
+#endif
+
+#ifndef NSAppKitVersionNumber10_6
+#define NSAppKitVersionNumber10_6 1038
+#endif
+
+#ifndef DEBUG
+#if !defined(NS_BLOCK_ASSERTIONS)
+#define NS_BLOCK_ASSERTIONS 1
+#endif /* NS_BLOCK_ASSERTIONS */
+#endif /* DEBUG */
+
+#if !defined(_FVAPIAssertBody)
+#define _FVAPIAssertBody(condition, desc, arg1, arg2, arg3) \
+do { if(!(condition)) { [NSException raise:NSInvalidArgumentException format:(desc), (arg1), (arg2), (arg3)]; } } while(0)
+#endif /* _FVAPIAssertBody */
+
+// use NSAssert internally for debugging; these asserts are to enforce public API usage for framework clients
+#define FVAPIAssert(condition, desc) \
+_FVAPIAssertBody((condition), desc, 0, 0, 0)
+
+#define FVAPIAssert1(condition, desc, arg1) \
+_FVAPIAssertBody((condition), (desc), (arg1), 0, 0)
+
+#define FVAPIAssert2(condition, desc, arg1, arg2) \
+_FVAPIAssertBody((condition), (desc), (arg1), (arg2), 0)
+
+#define FVAPIAssert3(condition, desc, arg1, arg2, arg3) \
+_FVAPIAssertBody((condition), (desc), (arg1), (arg2), (arg3))
+
+#define FVAPIParameterAssert(condition)			\
+_FVAPIAssertBody((condition), @"Invalid parameter not satisfying: %s", #condition, 0, 0)
+
+/* workaround for gcc warning about CFSTR usage when using strict aliasing */
+#define FVSTR(cStr) ((CFStringRef)@cStr)
+
+#endif /* __OBJC__ */
+
+#if defined(__ppc__) || defined(__ppc64__)
+    #define HALT __asm__ __volatile__("trap")
+#elif defined(__i386__) || defined(__x86_64__)
+    #if defined(__GNUC__)
+        #define HALT __asm__ __volatile__("int3")
+    #elif defined(_MSC_VER)
+        #define HALT __asm int 3;
+    #else
+        #error Compiler not supported
+    #endif
+#endif
+
+// copied from AppKit
+#if defined(__MACH__)
+
+#ifdef __cplusplus
+#define FV_EXTERN		extern "C"
+#define FV_PRIVATE_EXTERN	__private_extern__ "C"
+#else
+#define FV_EXTERN		extern
+#define FV_PRIVATE_EXTERN	__private_extern__
+#endif
+
+#else
+#error Unsupported kernel
+#endif

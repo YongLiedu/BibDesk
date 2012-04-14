@@ -1,0 +1,128 @@
+body {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+p,ul,ol,td,dt,dd {
+    font-family: Lucida Grande,Helvetica,Geneva;
+    font-size: 11px;
+}
+
+h1, h2, h3, h4, h5 {
+    font-family: Lucida Grande,Helvetica,Geneva;
+    color: #3333cc;
+}
+
+h1.chapter, h1.appendix, h1 {
+    font-size: 20px;
+}
+
+h2.section {
+    font-size: 18px;
+}
+
+h2.subsection, h2.heading, h2 {
+    font-size: 16px;
+}
+
+h3.subheading, h3, h4, h5 {
+    font-size: 14px;
+}
+
+a {
+	font-weight: bold;
+    color: #3333cc;
+}
+
+a:link, a:visited {
+	text-decoration: none;
+}
+
+a:hover, a:active {
+	text-decoration: underline;
+}
+
+code,tt,pre { 
+    font-family: Monaco, Courier, Mono, sans-serif;
+    font-size: 1em;
+}
+
+.spec {
+    font-family: Lucida Grande,Helvetica,Geneva;
+    font-size: 1em;
+    font-weight:bold;
+    color:blue
+}
+
+.param {
+    font-family: Lucida Grande,Helvetica,Geneva;
+    font-size: 1em;
+    font-weight:bold;
+    color: green
+}
+
+.aslangkeyword {
+    font-family: Verdana,Regular;
+    font-size: 1em;
+    font-weight:bold;
+    color: black
+}
+
+.asappkeyword {
+    font-family: Verdana,Regular;
+    font-size: 1em;
+    color: blue
+}
+
+.asclass {
+    font-family: Verdana,Italic;
+    font-size: 1em;
+    font-style: italic;
+    color: blue
+}
+
+.ascommand {
+    font-family: Verdana,Regular;
+    font-size: 1em;
+    font-weight:bold;
+    color: blue
+}
+
+.asproperty {
+    font-family: Verdana,Regular;
+    font-size: 1em;
+    color: darkorchid
+}
+
+.asenum {
+    font-family: Verdana,Regular;
+    font-size: 1em;
+    color: indigo
+}
+
+.asvariable {
+    font-family: Verdana,Regular;
+    font-size: 1em;
+    color: green
+}
+
+.asvalue {
+    font-family: Verdana,Regular;
+    font-size: 1em;
+    color: black
+}
+
+.asoperator {
+    font-family: Verdana,Regular;
+    font-size: 1em;
+    color: black
+}
+
+.ascomment {
+    font-family: Verdana,Italic;
+    font-size: 1em;
+    color: dimgray
+}
+
