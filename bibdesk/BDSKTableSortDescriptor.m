@@ -58,11 +58,11 @@
         
 	}else if([tcID isEqualToString:BDSKTitleString]){
 		
-		sortDescriptor = [[self alloc] initWithKey:@"title.stringByRemovingTeXAndStopWords" ascending:ascend selector:@selector(localizedCaseInsensitiveCompare:)];
+		sortDescriptor = [[self alloc] initWithKey:@"title.stringByRemovingTeXAndStopWords" ascending:ascend selector:@selector(localizedCaseInsensitiveNumericCompare:)];
 		
 	}else if([tcID isEqualToString:BDSKContainerString]){
 		
-        sortDescriptor = [[self alloc] initWithKey:@"container.stringByRemovingTeXAndStopWords" ascending:ascend selector:@selector(localizedCaseInsensitiveCompare:)];
+        sortDescriptor = [[self alloc] initWithKey:@"container.stringByRemovingTeXAndStopWords" ascending:ascend selector:@selector(localizedCaseInsensitiveNumericCompare:)];
         
 	}else if([tcID isEqualToString:BDSKPubDateString]){
 		
@@ -130,7 +130,7 @@
         
     }else if([tcID isEqualToString:BDSKBooktitleString]){
         
-        sortDescriptor = [[self alloc] initWithKey:@"Booktitle.stringByRemovingTeXAndStopWords" ascending:ascend selector:@selector(localizedCaseInsensitiveCompare:)];
+        sortDescriptor = [[self alloc] initWithKey:@"Booktitle.stringByRemovingTeXAndStopWords" ascending:ascend selector:@selector(localizedCaseInsensitiveNumericCompare:)];
         
     }else if([tcID isBooleanField] || [tcID isTriStateField]){
         
