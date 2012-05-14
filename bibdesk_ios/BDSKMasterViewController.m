@@ -232,8 +232,11 @@
         BDSKGroupTableViewController *viewController = segue.destinationViewController;
         viewController.navigationItem.title = file.nameNoExtension;
         
+        NSDate *startOpenDate = [NSDate date];
         [document openWithCompletionHandler:^(BOOL success) {            
             if (success) {
+                NSTimeInterval openingTime = -[startOpenDate timeIntervalSinceNow];
+                NSLog(@"Opened %@ in %f seconds", file.name, openingTime);
                 dispatch_async(dispatch_get_main_queue(), ^{
                     viewController.document = document;
                     [document release];
