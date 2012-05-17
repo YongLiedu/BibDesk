@@ -82,7 +82,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
         _maxWebViews = 5;
     }
     else if ([maxViews integerValue] > 50) {
-        FVLog(@"Limiting number of webviews to 50 (FVWebIconMaximumNumberOfWebViews = %ld)", (long)maxViews);
+        FVLog(@"Limiting number of webviews to 50 (FVWebIconMaximumNumberOfWebViews = %@)", maxViews);
         _maxWebViews = 50;
     }
     else if ([maxViews integerValue] >= 0) {
