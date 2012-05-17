@@ -137,8 +137,6 @@ static NSInteger FVCacheLogLevel = 0;
 
             // Unlink the file immediately so we don't leave turds when the program crashes.
             unlink(tempName);
-            free(tempName);
-            tempName = NULL;
 
             if (FVCacheLogLevel > 0)
                 _eventTable = [NSMutableDictionary new];     
@@ -153,6 +151,8 @@ static NSInteger FVCacheLogLevel = 0;
             [super dealloc];
             self = nil;
         }
+        free(tempName);
+        tempName = NULL;
         
     }
     return self;
