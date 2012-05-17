@@ -223,7 +223,7 @@ static void __FVLinearColorReleaseFunction(void *info)
 
 + (NSString *)localizedNameForLabel:(NSInteger)label
 {
-    FVAPIAssert1(label <= 7, @"Invalid Finder label %d (must be in the range 0--7)", label);
+    FVAPIAssert1(label <= 7, @"Invalid Finder label %ld (must be in the range 0--7)", (long)label);
     NSString *name = [self _preferenceNameForLabel:label];
     NSBundle *bundle = [NSBundle bundleForClass:[FVFinderLabel self]];
     if (nil == name) {
@@ -364,7 +364,7 @@ static void ClipContextToCircleCappedPathInRect(CGContextRef context, CGRect rec
 
 + (void)drawFinderLabel:(NSUInteger)label inRect:(CGRect)rect ofContext:(CGContextRef)context flipped:(BOOL)isFlipped roundEnds:(BOOL)flag;
 {
-    FVAPIAssert1(label <= 7, @"Invalid Finder label %d (must be in the range 0--7)", label);
+    FVAPIAssert1(label <= 7, @"Invalid Finder label %ld (must be in the range 0--7)", (long)label);
     
     CGLayerRef layerToDraw = NULL;
     
@@ -434,7 +434,7 @@ static void ClipContextToCircleCappedPathInRect(CGContextRef context, CGRect rec
 {
     FSRef fileRef;
     
-    FVAPIAssert1(label <= 7, @"Invalid Finder label %d (must be in the range 0--7)", label);
+    FVAPIAssert1(label <= 7, @"Invalid Finder label %ld (must be in the range 0--7)", (long)label);
         
     if ([aURL isFileURL] && CFURLGetFSRef((CFURLRef)aURL, &fileRef)) {
 
