@@ -273,7 +273,7 @@ static NSArray *publicationsFromData(NSData *data);
         NSDictionary *resultInfo = nil;
         NSString *resultString = nil;
         
-        NSString *fields = @"doctype authors bib_vol pub_url source_title item_title bib_issue bib_pages keywords abstract source_series article_nos bib_date publisher pub_address issue_ed times_cited get_parent ut refs ";
+        NSString *fields = @"doctype authors bib_vol pub_url source_title source_abbrev item_title bib_issue bib_pages keywords abstract source_series article_nos bib_date publisher pub_address issue_ed times_cited get_parent ut refs ";
         if (sourceXMLTagPriority)
             fields = [fields stringByAppendingString:[sourceXMLTagPriority componentsJoinedByString:@" "]];
         
@@ -527,6 +527,8 @@ static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
             addStringValueOfNodeForField(child, BDSKTitleString, pubFields);
         else if ([name isEqualToString:@"source_title"])
             addStringToDictionaryIfNotNil((useTitlecase ? [[child stringValue] titlecaseString] : [child stringValue]), sourceField, pubFields);
+        else if ([name isEqualToString:@"source_abbrev"])
+            addStringToDictionaryIfNotNil((useTitlecase ? [[child stringValue] titlecaseString] : [child stringValue]), @"Iso-Source-Abbreviation", pubFields);
         else if ([name isEqualToString:@"authors"])
             addAuthorsFromXMLNode(child, pubFields);
         else if ([name isEqualToString:@"abstract"])
