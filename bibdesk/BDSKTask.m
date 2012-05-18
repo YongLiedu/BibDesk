@@ -56,11 +56,20 @@
 
 @end
 
+#ifndef MAC_OS_X_VERSION_10_6
+enum {
+    NSTaskTerminationReasonExit = 1,
+    NSTaskTerminationReasonUncaughtSignal = 2
+};
+typedef NSInteger NSTaskTerminationReason;
+#endif
+
 struct BDSKTaskInternal {
     int32_t            _terminationStatus;
+    NSTaskTerminationReason _terminationReason;
     int32_t            _running;
     int32_t            _launched;
-    int32_t            _canNotify;
+    volatile int32_t        _canNotify;
     struct kevent      _event;
     CFRunLoopRef       _rl;
     CFRunLoopSourceRef _rlsource;
@@ -105,17 +114,6 @@ static int _kqueue = -1;
 
 - (void)dealloc
 {
-    /*
-     Set _canNotify in case kevent unblocks before we can remove it from the queue,
-     since the event's task pointer is about to become invalid (and it mustn't access
-     the lock after this flag is set).  Lock before entering _disableNotification, so 
-     we can shrink our race window even smaller.
-     */
-    OSAtomicCompareAndSwap32Barrier(1, 0, &_internal->_canNotify);
-    pthread_mutex_lock(&_internal->_lock);
-    [self _disableNotification];
-    pthread_mutex_unlock(&_internal->_lock);
-    pthread_mutex_destroy(&_internal->_lock);
     BDSKDESTROY(_launchPath);
     BDSKDESTROY(_arguments);
     BDSKDESTROY(_environment);
@@ -123,11 +121,13 @@ static int _kqueue = -1;
     BDSKDESTROY(_standardInput);
     BDSKDESTROY(_standardOutput);
     BDSKDESTROY(_standardError);
-    // runloop and source are freed in __BDSKTaskNotify or _disableNotification
-    NSParameterAssert(NULL == _internal->_rl);
-    NSParameterAssert(NULL == _internal->_rlsource);
-    BDSKZONEDESTROY(_internal);
     [super dealloc];
+}
+
+- (void)finalize
+{
+    [self _disableNotification];
+    [super finalize];
 }
 
 - (void)setLaunchPath:(NSString *)path;
@@ -215,17 +215,44 @@ static void __BDSKTaskNotify(void *info)
     [task release];
 }
 
+/*
+ Undocumented behavior of -[NSFileManager fileSystemRepresentationWithPath:]
+ is to raise an exception when passed an empty string.  Since this is called by
+ -[NSString fileSystemRepresentation], use CF.  rdar://problem/9565599
+ 
+ https://bitbucket.org/jfh/machg/issue/244/p1d3-crash-during-view-differences
+ 
+ Have to copy all -[NSString fileSystemRepresentation] pointers to avoid garbage collection
+ issues with -fileSystemRepresentation, anyway.  How tedious compared to -autorelease...
+ 
+ http://lists.apple.com/archives/objc-language/2011/Mar/msg00122.html
+ */
+static char *__BDSKCopyFileSystemRepresentation(NSString *str)
+{
+    if (nil == str) return NULL;
+    
+    CFIndex len = CFStringGetMaximumSizeOfFileSystemRepresentation((CFStringRef)str);
+    char *cstr = NSZoneCalloc(NSDefaultMallocZone(), len, sizeof(char));
+    if (CFStringGetFileSystemRepresentation((CFStringRef)str, cstr, len) == FALSE) {
+        NSZoneFree(NSDefaultMallocZone(), cstr);
+        cstr = NULL;
+    }
+    return cstr;
+}
+
 - (void)launch;
 {
     ASSERT_NOTLAUNCHED;
     
-    NSUInteger argCount = [_arguments count];
-    const char *workingDir = [_currentDirectoryPath fileSystemRepresentation];
+    const NSUInteger argCount = [_arguments count];
+    char *workingDir = __BDSKCopyFileSystemRepresentation(_currentDirectoryPath);
+    
+    // fill with pointers to copied C strings
     char **args = NSZoneCalloc([self zone], (argCount + 2), sizeof(char *));
-    NSUInteger i, iMax = argCount;
-    args[0] = (char *)[_launchPath fileSystemRepresentation];
-    for (i = 0; i < iMax; i++) {
-        args[i + 1] = (char *)[[_arguments objectAtIndex:i] fileSystemRepresentation];
+    NSUInteger i;
+    args[0] = __BDSKCopyFileSystemRepresentation(_launchPath);
+    for (i = 0; i < argCount; i++) {
+        args[i + 1] = __BDSKCopyFileSystemRepresentation([_arguments objectAtIndex:i]);
     }
     args[argCount + 1] = NULL;
     
@@ -234,12 +261,12 @@ static void __BDSKTaskNotify(void *info)
     
     NSDictionary *environment = [self environment];
     if (environment) {
-        // fill with pointers to autoreleased C strings
+        // fill with pointers to copied C strings
         env = NSZoneCalloc([self zone], [environment count] + 1, sizeof(char *));
         NSString *key;
         NSUInteger envIndex = 0;
         for (key in environment) {
-            env[envIndex++] = (char *)[[NSString stringWithFormat:@"%@=%@", key, [environment objectForKey:key]] UTF8String];        
+            env[envIndex++] = __BDSKCopyFileSystemRepresentation([NSString stringWithFormat:@"%@=%@", key, [environment objectForKey:key]]);        
         }
         env[envIndex] = NULL;
     }
@@ -249,7 +276,7 @@ static void __BDSKTaskNotify(void *info)
     id fh = nil;
     
     // the end of a pipe passed to the child needs to be closed in the parent process
-    NSMutableSet *handlesToClose = [NSMutableSet new];
+    NSMutableSet *handlesToClose = [NSMutableSet set];
     
     fh = [self standardInput];
     if ([fh isKindOfClass:[NSPipe class]]) {
@@ -316,12 +343,12 @@ static void __BDSKTaskNotify(void *info)
          them.  This was a very confusing race to debug, and it resulted in a bunch of orphaned child
          processes.
          
-         Using a class-scope lock is one possible solution, but NSTask doesn't use that log, and subclasses
+         Using a class-scope lock is one possible solution, but NSTask couldn't use that lock, and subclasses
          that override -launch would also not benefit from locking (e.g., TLMTask).  Since TLMTask sets up
          NSPipes in -launch before calling -[super launch], those pipes and any created by Cocoa would not
-         be protected by that lock.  Closing all remaining file descriptors doesn't break any documented 
-         behavior of NSTask, and it should take care of that problem.  It's not a great solution, since 
-         inheriting other descriptors could possibly be useful, but I don't need to share arbitrary file 
+         be protected by that lock.  Closing all remaining file descriptors in the child doesn't break any 
+         documented behavior of NSTask, and it should take care of that problem.  It's not a great solution,
+         since inheriting other descriptors could possibly be useful, but I don't need to share arbitrary file 
          descriptors, whereas I do need subclassing and threads to work properly.
          */
         rlim_t j;
@@ -334,7 +361,7 @@ static void __BDSKTaskNotify(void *info)
         
         char ignored;
         // block until the parent has setup complete
-        read(blockpipe[0], &ignored, 1);
+        (void) HANDLE_EINTR(read(blockpipe[0], &ignored, 1));
         close(blockpipe[0]);
         
         int ret = execve(args[0], args, env);
@@ -342,7 +369,8 @@ static void __BDSKTaskNotify(void *info)
     }
     else if (-1 == _processIdentifier) {
         // parent: error
-        perror("fork() failed");
+        int forkError = errno;
+        NSLog(@"fork() failed in task %@: %s", self, strerror(forkError));
         _internal->_terminationStatus = 2;
     }
     else {        
@@ -355,7 +383,7 @@ static void __BDSKTaskNotify(void *info)
         // NSTask docs say that these descriptors are closed in the parent task; required to make pipes work properly
         [handlesToClose makeObjectsPerformSelector:@selector(closeFile)];
         
-        if (-1 != fd_null) close(fd_null);
+        if (-1 != fd_null) (void) close(fd_null);
         
         /*
          The kevent will have a weak reference to this task, so -dealloc can occur without waiting for notification.
@@ -363,7 +391,7 @@ static void __BDSKTaskNotify(void *info)
          around after the exec.
          */
         EV_SET(&_internal->_event, _processIdentifier, EVFILT_PROC, EV_ADD, NOTE_EXIT | NOTE_SIGNAL, 0, self);
-        kevent(_kqueue, &_internal->_event, 1, NULL, 0, NULL);      
+        (void) HANDLE_EINTR(kevent(_kqueue, &_internal->_event, 1, NULL, 0, NULL));      
         
         // use a runloop source to ensure that the notification is posted on the correct thread
         _internal->_rl = (CFRunLoopRef)CFRetain(CFRunLoopGetCurrent());
@@ -380,9 +408,26 @@ static void __BDSKTaskNotify(void *info)
     }
     
     // executed by child and parent
-    [handlesToClose release];
+    
+    /*
+     Free all the copied C strings.  Don't modify the base pointer of args or env, since we have to
+     free those too!
+     */
+    free(workingDir);
+    char **freePtr = args;
+    while (NULL != *freePtr) { 
+        free(*freePtr++);
+    }
+    
     NSZoneFree(NSZoneFromPointer(args), args);
-    if (*nsEnvironment != env) NSZoneFree(NSZoneFromPointer(env), env);
+    if (*nsEnvironment != env) {
+        freePtr = env;
+        while (NULL != *freePtr) { 
+            free(*freePtr++);
+}
+        NSZoneFree(NSZoneFromPointer(env), env);
+    }
+
 }
 
 - (void)interrupt;
@@ -424,6 +469,13 @@ static void __BDSKTaskNotify(void *info)
     return _internal->_terminationStatus; 
 }
 
+- (NSTaskTerminationReason)terminationReason; 
+{ 
+    ASSERT_LAUNCH;
+    if ([self isRunning]) [NSException raise:NSInternalInconsistencyException format:@"Task is still running"];
+    return _internal->_terminationReason; 
+}
+
 - (void)waitUntilExit;
 {
     ASSERT_LAUNCH;
@@ -445,31 +497,35 @@ static void __BDSKTaskNotify(void *info)
         NSAutoreleasePool *pool = [NSAutoreleasePool new];
         struct kevent evt;
         
-        if (kevent(_kqueue, NULL, 0, &evt, 1, NULL)) {
+        if (HANDLE_EINTR(kevent(_kqueue, NULL, 0, &evt, 1, NULL))) {
             
-            BDSKTask *task = evt.udata;
-            OSMemoryBarrier();
-            
-            // can only fail if _disableNotification is called immediately after kevent unblocks
-            if (task->_internal->_canNotify && pthread_mutex_trylock(&task->_internal->_lock) == 0) {
-                
                 /* 
                  Retain to make sure we hold a reference to the task long enough to handle these calls,
                  so we're guaranteed that _disableNotification will not be called during another callout.
                  */
-                task = [task retain];
-                pthread_mutex_unlock(&task->_internal->_lock);
+            BDSKTask *task = [(id)evt.udata retain];
                 
-                if ((evt.fflags & NOTE_EXIT) == NOTE_EXIT)
-                    [task _taskExited];
-                else if ((evt.fflags & NOTE_SIGNAL) == NOTE_SIGNAL)
+            // for task->_internal->_canNotify
+            OSMemoryBarrier();
+            
+            // can only fail if _disableNotification is called immediately after kevent unblocks
+            if (task->_internal->_canNotify) {
+                
+                if (evt.fflags & NOTE_SIGNAL)
                     [task _taskSignaled];
                 
-                [task release];
+                if (evt.fflags & NOTE_EXIT)
+                    [task _taskExited];
+                
+            }
+            else {
+                NSLog(@"Ignoring kqueue event for deallocated task %p", task);
             }
             
+            [task release];
+            
         }
-        [pool release];
+        [pool drain];
         
     } while (1);
 }
@@ -478,7 +534,7 @@ static void __BDSKTaskNotify(void *info)
 - (void)_taskSignaled
 {
     int status;
-    if (waitpid(_processIdentifier, &status, WNOHANG)) {
+    if (HANDLE_EINTR(waitpid(_processIdentifier, &status, WNOHANG))) {
         if (WIFSIGNALED(status))
             NSLog(@"task terminated with signal %d", WTERMSIG(status));
         else if (WIFSTOPPED(status))
@@ -493,12 +549,24 @@ static void __BDSKTaskNotify(void *info)
  */
 - (void)_disableNotification
 {        
+    // should only be called once
+    NSParameterAssert(NULL != _internal);
+    
+    /*
+     Set _canNotify in case kevent unblocks before we can remove it from the queue,
+     since the event's task pointer is about to become invalid (and it mustn't access
+     the lock after this flag is set).  Lock before entering _disableNotification, so 
+     we can shrink our race window even smaller.
+     */
+    OSAtomicCompareAndSwap32Barrier(1, 0, &_internal->_canNotify);
+    pthread_mutex_lock(&_internal->_lock);
+    
     // called unconditionally from -dealloc, so we may have already notified and freed this source
     if (_internal->_rlsource) {
         
         // after this point, _taskExited and __BDSKTaskNotify will never be called, so account for their teardown
         _internal->_event.flags = EV_DELETE;
-        kevent(_kqueue, &_internal->_event, 1, NULL, 0, NULL);
+        (void) HANDLE_EINTR(kevent(_kqueue, &_internal->_event, 1, NULL, 0, NULL));
         
         CFRunLoopSourceInvalidate(_internal->_rlsource);
         _internal->_rlsource = NULL;
@@ -510,6 +578,15 @@ static void __BDSKTaskNotify(void *info)
             _internal->_rl = NULL;
         } 
     }
+    
+    pthread_mutex_unlock(&_internal->_lock);
+    pthread_mutex_destroy(&_internal->_lock);
+    
+    // runloop and source are freed in __BDSKTaskNotify or _disableNotification
+    NSParameterAssert(NULL == _internal->_rl);
+    NSParameterAssert(NULL == _internal->_rlsource);
+    NSZoneFree(NSZoneFromPointer(_internal), _internal);
+    _internal = NULL;
 }
 
 // kevent thread has a retain, so no contention with _disableNotification since we can't dealloc
@@ -527,18 +604,20 @@ static void __BDSKTaskNotify(void *info)
      a race condition between kqueue and wait.  Since we know the child has exited, we can allow waitpid
      to block without fear that it will block indefinitely.
      */
-    int wait_flags = 0;
     int ret, status;
     
-    // keep trying in case of EINTR
-    ret = waitpid(_processIdentifier, &status, wait_flags);
-    while (-1 == ret && EINTR == errno)
-        ret = waitpid(_processIdentifier, &status, wait_flags);
+    ret = HANDLE_EINTR(waitpid(_processIdentifier, &status, 0));
+    
+    // happens if you call waitpid() on the child process elsewhere; don't do that
+    if (-1 == ret)
+        perror(__func__);
     
     if (0 == ret)
         NSLog(@"*** ERROR *** task %@ (child pid = %d) still running", self, _processIdentifier);
     
     _processIdentifier = -1;
+    
+    _internal->_terminationReason = WIFSIGNALED(status) ? NSTaskTerminationReasonUncaughtSignal : NSTaskTerminationReasonExit;
     
     ret = WIFEXITED(status) ? WEXITSTATUS(status) : 1;
     bool swap;
