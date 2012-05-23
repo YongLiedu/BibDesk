@@ -450,8 +450,8 @@ static NSOperationQueue *metadataCacheQueue = nil;
     
     [aController setWindowFrameAutosaveNameOrCascade:@"Main Window Frame Autosave" setFrame:frameRect];
             
-    //if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6)
-    //    [documentWindow setCollectionBehavior:[documentWindow collectionBehavior] | (1 << 7)]; // NSWindowCollectionBehaviorFullScreenPrimary = 1 << 7
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6)
+        [documentWindow setCollectionBehavior:[documentWindow collectionBehavior] | (1 << 7)]; // NSWindowCollectionBehaviorFullScreenPrimary = 1 << 7
     
     [documentWindow makeFirstResponder:tableView];	
     
@@ -633,6 +633,13 @@ static NSOperationQueue *metadataCacheQueue = nil;
         if ([editor respondsToSelector:@selector(commitEditing)] && [editor commitEditing] == NO)
             return NO;
     }
+    return YES;
+}
+
+- (BOOL)windowShouldClose:(id)sender {
+    // closing the main window during Lion FullScreen mode leads to a crash https://sourceforge.net/tracker/?func=detail&aid=3529044&group_id=61487&atid=497423
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6 && ([documentWindow styleMask] & (1 << 14))) // NSFullScreenWindowMask = 1 << 14
+        return NO;
     return YES;
 }
 
