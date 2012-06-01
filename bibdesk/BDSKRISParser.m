@@ -217,16 +217,21 @@
     NSString *start = [pubDict objectForKey:RISStartPageString];
     NSString *end = [pubDict objectForKey:RISEndPageString];
     
-    if(start != nil && end != nil){
-       NSMutableString *merge = [start mutableCopy];
-       [merge appendString:@"--"];
-       [merge appendString:end];
-       [pubDict setObject:merge forKey:BDSKPagesString];
-       [merge release];
-       
-       [pubDict removeObjectForKey:RISStartPageString];
-       [pubDict removeObjectForKey:RISEndPageString];
-	}
+    if(start != nil){
+        if(end != nil){
+            NSMutableString *merge = [start mutableCopy];
+            [merge appendString:@"--"];
+            [merge appendString:end];
+            [pubDict setObject:merge forKey:BDSKPagesString];
+            [merge release];
+
+            [pubDict removeObjectForKey:RISStartPageString];
+            [pubDict removeObjectForKey:RISEndPageString];
+        }else{
+            [pubDict setObject:start forKey:BDSKPagesString];
+            [pubDict removeObjectForKey:RISStartPageString];
+        }
+    }
     
     // the PY field should have the format YYYY/MM/DD/part, but may only contain the year
     NSString *date = [[[pubDict objectForKey:BDSKYearString] retain] autorelease];
