@@ -38,7 +38,6 @@ import glob
 import shutil
 
 import datetime
-import paramiko
 
 import smtplib
 from email.mime.text import MIMEText
@@ -320,10 +319,19 @@ if len(d["username"]) == 0 or len(d["password"]) == 0:
     exit(1)
 
 # create the ftp object and log in...
-t = paramiko.Transport((HOST_NAME, 22))
-t.connect(username=d["username"], password=d["password"])
-sftp = paramiko.SFTPClient.from_transport(t)
-
+sftp = None
+try:
+    import paramiko
+    t = paramiko.Transport((HOST_NAME, 22))
+    t.connect(username=d["username"], password=d["password"])
+    sftp = paramiko.SFTPClient.from_transport(t)
+except Exception, e:
+    # truncate the log file
+    logFile = open(LOG_PATH, "w")
+    logFile.write("Failed sftp connection with exception " + str(e) + "\n")
+    logFile.close()
+    sendEmailAndRemoveTemporaryDirectory()
+    exit(1)
 
 # remove old files before uploading
 removeOldFiles(sftp)
