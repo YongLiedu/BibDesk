@@ -163,7 +163,7 @@ static BDSKDropboxStore *sharedDropboxStore = nil;
     
     for (NSString *filename in contents) {
         NSString *fullPath = [[BDSKLocalFile documentsRoot] stringByAppendingPathComponent:filename];
-        NSLog(@"Adding Local File: %@", fullPath);
+        //NSLog(@"Adding Local File: %@", fullPath);
         [fileManager fileExistsAtPath:fullPath isDirectory:(BOOL *)&isDirectory];
         NSString* extension = [[filename pathExtension] lowercaseString];
         if (!isDirectory && [_bibExtensions indexOfObject:extension] != NSNotFound) {
@@ -172,7 +172,7 @@ static BDSKDropboxStore *sharedDropboxStore = nil;
             [newFile release];
         } else if (!isDirectory && [_pdfExtensions indexOfObject:extension] != NSNotFound) {
             BDSKLocalFile *newFile = [[BDSKLocalFile alloc] initWithFullPath:fullPath];
-            NSLog(@"Adding Path: %@", newFile.path);
+            //NSLog(@"Adding Path: %@", newFile.path);
             [_pdfFilePaths setObject:newFile forKey:newFile.pathWithoutLeadingSlash];
             [pdfsProxy addObject:newFile];
             [newFile release];
@@ -183,7 +183,8 @@ static BDSKDropboxStore *sharedDropboxStore = nil;
 - (void)startSync {
 
     if (!_syncing) {
-        [self.restClient loadMetadata:@"/" withHash:_rootHash];
+        NSString *rootPath = [[BDSKLocalFile dropboxRoot] length] ? [BDSKLocalFile dropboxRoot] : @"/";
+        [self.restClient loadMetadata:rootPath withHash:_rootHash];
         [self setSyncing:YES];
     }
 }
@@ -192,7 +193,8 @@ static BDSKDropboxStore *sharedDropboxStore = nil;
 
 - (void)restClient:(DBRestClient*)client loadedMetadata:(DBMetadata*)metadata {
 
-    if ([metadata.path isEqualToString: @"/"]) {
+    NSString *rootPath = [[BDSKLocalFile dropboxRoot] length] ? [BDSKLocalFile dropboxRoot] : @"/";
+    if ([metadata.path compare:rootPath] == NSOrderedSame) {
         
         [_rootHash release];
         _rootHash = [metadata.hash retain];
@@ -210,7 +212,7 @@ static BDSKDropboxStore *sharedDropboxStore = nil;
                 BDSKLocalFile *newFile = [[BDSKLocalFile alloc] initWithDropboxPath:child.path lastModifiedDate:child.lastModifiedDate totalByets:child.totalBytes];
                 
                 NSUInteger existingIndex = [_bibliographies indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-                    return [((BDSKLocalFile *)obj).path isEqualToString:newFile.path];
+                    return [((BDSKLocalFile *)obj).path compare:newFile.path] == NSOrderedSame;
                 }];
                 
                 if (existingIndex == NSNotFound) {
@@ -230,7 +232,7 @@ static BDSKDropboxStore *sharedDropboxStore = nil;
                 BDSKLocalFile *newFile = [[BDSKLocalFile alloc] initWithDropboxPath:child.path lastModifiedDate:child.lastModifiedDate totalByets:child.totalBytes];
                 
                 NSUInteger existingIndex = [_pdfs indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-                    return [((BDSKLocalFile *)obj).path isEqualToString:newFile.path];
+                    return ![((BDSKLocalFile *)obj).path compare:newFile.path];
                 }];
                 
                 if (existingIndex == NSNotFound) {
@@ -286,7 +288,8 @@ static BDSKDropboxStore *sharedDropboxStore = nil;
 
 - (void)restClient:(DBRestClient*)client metadataUnchangedAtPath:(NSString*)path {
 
-    if ([path isEqualToString: @"/"]) {
+    NSString *rootPath = [[BDSKLocalFile dropboxRoot] length] ? [BDSKLocalFile dropboxRoot] : @"/";
+    if ([path compare:rootPath] == NSOrderedSame) {
         [self setSyncing:NO];
     }
 }
@@ -320,7 +323,7 @@ static BDSKDropboxStore *sharedDropboxStore = nil;
     }
     
     NSUInteger existingIndex = [arrayProxy indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-        return [((BDSKLocalFile *)obj).path isEqualToString:loadedFile.path];
+        return [((BDSKLocalFile *)obj).path compare:loadedFile.path] == NSOrderedSame;
     }];
     
     if (existingIndex == NSNotFound) {

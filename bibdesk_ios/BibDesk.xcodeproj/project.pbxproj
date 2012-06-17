@@ -22,6 +22,8 @@
 		3B1976461507B015005E3B0A /* NSAttributedString_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B1976451507B015005E3B0A /* NSAttributedString_BDSKExtensions.m */; };
 		3B19764A1507B09D005E3B0A /* NSArray_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B1976491507B09D005E3B0A /* NSArray_BDSKExtensions.m */; };
 		3B19764D1507B56D005E3B0A /* NSURL_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B19764C1507B56D005E3B0A /* NSURL_BDSKExtensions.m */; };
+		3B2847CC158C937F0009CAEF /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B2847CB158C937F0009CAEF /* QuartzCore.framework */; };
+		3B2847FD158CDEE70009CAEF /* DBSessionInit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B2847FC158CDEE70009CAEF /* DBSessionInit.framework */; };
 		3B2A554B150A67B2008A5F35 /* BibDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B97CE05150A5C7A00B82077 /* BibDocument.m */; };
 		3B2A554F150B3C8E008A5F35 /* BDSKGroupTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B2A554E150B3C8E008A5F35 /* BDSKGroupTableViewController.m */; };
 		3B2A5552150B88F1008A5F35 /* BDSKPubTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B2A5551150B88F1008A5F35 /* BDSKPubTableViewController.m */; };
@@ -134,6 +136,8 @@
 		3B19764B1507B153005E3B0A /* BDSKTemplateParser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BDSKTemplateParser.h; sourceTree = "<group>"; };
 		3B19764C1507B56D005E3B0A /* NSURL_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSURL_BDSKExtensions.m; sourceTree = "<group>"; };
 		3B19764E1507B591005E3B0A /* NSURL_BDSKExtensions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NSURL_BDSKExtensions.h; sourceTree = "<group>"; };
+		3B2847CB158C937F0009CAEF /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		3B2847FC158CDEE70009CAEF /* DBSessionInit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DBSessionInit.framework; sourceTree = "<group>"; };
 		3B2A554D150B3C8E008A5F35 /* BDSKGroupTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKGroupTableViewController.h; sourceTree = "<group>"; };
 		3B2A554E150B3C8E008A5F35 /* BDSKGroupTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKGroupTableViewController.m; sourceTree = "<group>"; };
 		3B2A5550150B88F0008A5F35 /* BDSKPubTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPubTableViewController.h; sourceTree = "<group>"; };
@@ -236,9 +240,11 @@
 				3BBB1339150245A700F61870 /* UIKit.framework in Frameworks */,
 				3BBB133B150245A700F61870 /* Foundation.framework in Frameworks */,
 				3BBB133D150245A700F61870 /* CoreGraphics.framework in Frameworks */,
+				3B2847CC158C937F0009CAEF /* QuartzCore.framework in Frameworks */,
 				3B79CF32150A19CC00E9C5F5 /* CoreImage.framework in Frameworks */,
 				3BBB135E15024A7C00F61870 /* Security.framework in Frameworks */,
 				3BBB135C150249E200F61870 /* DropboxSDK.framework in Frameworks */,
+				3B2847FD158CDEE70009CAEF /* DBSessionInit.framework in Frameworks */,
 				3BDF396E150E98F70023EC36 /* BTParse.framework in Frameworks */,
 				3BDF3970150E98FC0023EC36 /* AGRegex.framework in Frameworks */,
 				3B79CF0C1509192A00E9C5F5 /* libz.dylib in Frameworks */,
@@ -559,9 +565,11 @@
 				3BBB1338150245A700F61870 /* UIKit.framework */,
 				3BBB133A150245A700F61870 /* Foundation.framework */,
 				3BBB133C150245A700F61870 /* CoreGraphics.framework */,
+				3B2847CB158C937F0009CAEF /* QuartzCore.framework */,
 				3B79CF31150A19CB00E9C5F5 /* CoreImage.framework */,
 				3BBB135D15024A7C00F61870 /* Security.framework */,
 				3BBB135B150249E200F61870 /* DropboxSDK.framework */,
+				3B2847FC158CDEE70009CAEF /* DBSessionInit.framework */,
 				3BDF396D150E98F70023EC36 /* BTParse.framework */,
 				3BDF396F150E98FC0023EC36 /* AGRegex.framework */,
 				3B3C59341508E71B00961DA4 /* libz.dylib */,
@@ -810,6 +818,11 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = bibdesk/Bibdesk_Prefix.pch;
 				INFOPLIST_FILE = "BibDesk-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -826,6 +839,11 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = bibdesk/Bibdesk_Prefix.pch;
 				INFOPLIST_FILE = "BibDesk-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};

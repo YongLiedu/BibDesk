@@ -52,6 +52,8 @@
 + (void)initialize;
 + (NSString *)documentsRoot;
 + (void)setDocumentsRoot:(NSString *)root;
++ (NSString *)dropboxRoot;
++ (void)setDropboxRoot:(NSString *)root;
 
 - (id)initWithFullPath:(NSString *)fullPath;
 - (id)initWithDropboxPath:(NSString *)dropboxPath lastModifiedDate:(NSDate *)date totalByets:(long long)bytes;

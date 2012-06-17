@@ -38,7 +38,9 @@
 
 #import "BDSKAppDelegate.h"
 
+#import <DBSessionInit/DBSessionInit.h>
 #import "BDSKDropboxStore.h"
+#import "BDSKLocalFile.h"
 
 @interface BDSKAppDelegate () {
     NSString *relinkUserId;
@@ -64,23 +66,28 @@
     // Override point for customization after application launch.
 
     // Set these variables before launching the app
-    NSString* appKey = @"eq4q5w8c3389t6u";
-    NSString* appSecret = @"ezbmorda4ycilxx";
-    NSString *root = kDBRootAppFolder; // Should be set to either kDBRootAppFolder or kDBRootDropbox
-    
-    DBSession* session = 
-        [[DBSession alloc] initWithAppKey:appKey appSecret:appSecret root:root];
+    //NSString* appKey = @"";
+    //NSString* appSecret = @"";
+    //NSString *root = kDBRootDropbox; // Should be set to either kDBRootAppFolder or kDBRootDropbox
+    //DBSession* session = [[DBSession alloc] initWithAppKey:appKey appSecret:appSecret root:root];
+    DBSession* session = NewDBSessionWithBibDeskMobile();
     session.delegate = self; // DBSessionDelegate methods allow you to handle re-authenticating
     [DBSession setSharedSession:session];
     [session release];
     
+#if TARGET_IPHONE_SIMULATOR
+    [BDSKLocalFile setDropboxRoot:@"/PapersSimulator"];
+#else
+    [BDSKLocalFile setDropboxRoot:@"/Papers"];
+#endif
+
     [[BDSKDropboxStore sharedStore] addLocalFiles];
     
     _dropboxLinked = [[DBSession sharedSession] isLinked];
     
-    if (self.dropboxLinked) {
-        [[BDSKDropboxStore sharedStore] startSync];
-    }
+    //if (self.dropboxLinked) {
+    //    [[BDSKDropboxStore sharedStore] startSync];
+    //}
     
     NSDictionary *defaults = [NSDictionary dictionaryWithObjectsAndKeys:@",:;", @"BDSKGroupFieldSeparatorCharactersKey", nil];
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
@@ -134,7 +141,7 @@
 - (void)toggleDropboxLink {
 
     if (!self.dropboxLinked) {
-        [[DBSession sharedSession] link];
+        [[DBSession sharedSession] linkFromController:self.window.rootViewController];
     } else {
             [[DBSession sharedSession] unlinkAll];
             [[[[UIAlertView alloc] 
@@ -194,7 +201,7 @@
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)index {
     if (index != alertView.cancelButtonIndex) {
-        [[DBSession sharedSession] linkUserId:relinkUserId];
+        [[DBSession sharedSession] linkUserId:relinkUserId fromController:self.window.rootViewController];
     }
     [relinkUserId release];
     relinkUserId = nil;

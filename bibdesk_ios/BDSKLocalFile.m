@@ -40,6 +40,7 @@
 
 
 static NSString *documentsRoot = nil;
+static NSString *dropboxRoot = nil;
 
 @interface BDSKLocalFile ()
 
@@ -53,10 +54,31 @@ static NSString *documentsRoot = nil;
 
 + (void)initialize {
 
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    [BDSKLocalFile setDocumentsRoot:[paths objectAtIndex:0]];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSError *error = nil;
+    BOOL success;
     
-    NSLog(@"Documents Root: %@", [paths objectAtIndex:0]);
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
+    NSString *documentsPath = [paths objectAtIndex:0];
+    
+    documentsPath = [documentsPath stringByAppendingPathComponent:@"Application Support/Dropbox"];
+    success = [fileManager createDirectoryAtPath:documentsPath withIntermediateDirectories:YES attributes:nil error:&error];
+    if (!success) {
+        NSLog(@"Error Creating Dropbox Sync Directory: %@", [error localizedDescription]);
+    }
+    
+    NSURL *documentsURL = [NSURL fileURLWithPath:documentsPath];
+    success = [documentsURL setResourceValue:[NSNumber numberWithBool:YES]
+                                  forKey:NSURLIsExcludedFromBackupKey error:&error];
+    if(!success){
+        NSLog(@"Error excluding %@ from backup %@", documentsURL, error);
+    }
+    
+    [BDSKLocalFile setDocumentsRoot:documentsPath];
+    
+    NSLog(@"Documents Root: %@", documentsPath);
+    
+    [BDSKLocalFile setDropboxRoot:@""];
 }
 
 + (NSString *)documentsRoot {
@@ -69,6 +91,18 @@ static NSString *documentsRoot = nil;
     [root retain];
     [documentsRoot release];
     documentsRoot = root;    
+}
+
++ (NSString *)dropboxRoot {
+
+    return dropboxRoot;
+}
+
++ (void)setDropboxRoot:(NSString *)root {
+
+    [root retain];
+    [dropboxRoot release];
+    dropboxRoot = root;    
 }
 
 - (id)initWithFullPath:(NSString *)fullPath {
@@ -97,7 +131,8 @@ static NSString *documentsRoot = nil;
 
     if (self = [super init]) {
     
-        self.path = dropboxPath;
+        NSUInteger dropboxLength = dropboxRoot ? [dropboxRoot length] : 0;
+        self.path = [dropboxPath substringFromIndex:dropboxLength];
         self.lastModifiedDate = date;
         self.totalBytes = bytes;
     }
@@ -119,6 +154,8 @@ static NSString *documentsRoot = nil;
 }
 
 - (NSString *)dropboxPath {
+
+    if (dropboxRoot) return [dropboxRoot stringByAppendingString:path];
 
     return path;
 }
