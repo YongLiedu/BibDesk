@@ -104,7 +104,7 @@
             return;
         
         if ([tableView editedRow] != -1)
-            [[drawer parentWindow] makeFirstResponder:tableView];
+            [[tableView window] makeFirstResponder:tableView];
         [customStringArray removeObjectAtIndex:[tableView selectedRow]];
         [tableView reloadData];
         
