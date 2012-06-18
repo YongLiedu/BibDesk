@@ -671,9 +671,10 @@
         return NSDragOperationNone;
     
     NSPasteboard *pboard = [info draggingPasteboard];
-    BOOL isDragFromMainTable = [[info draggingSource] isEqual:tableView];
-    BOOL isDragFromGroupTable = [[info draggingSource] isEqual:groupOutlineView];
-    BOOL isDragFromDrawer = [[info draggingSource] isEqual:[drawerController tableView]];
+    id source = [info draggingSource];
+    BOOL isDragFromMainTable = [source isEqual:tableView];
+    BOOL isDragFromGroupTable = [source isEqual:groupOutlineView];
+    BOOL isDragFromDrawer = [source isEqual:[drawerController tableView]];
     
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSColorPboardType, nil]];
     
@@ -1209,9 +1210,10 @@
     if (nil == type)
         return NSDragOperationNone;
     
-    BOOL isDragFromMainTable = [[info draggingSource] isEqual:tableView];
-    BOOL isDragFromGroupTable = [[info draggingSource] isEqual:groupOutlineView];
-    BOOL isDragFromDrawer = [[info draggingSource] isEqual:[drawerController tableView]];
+    id source = [info draggingSource];
+    BOOL isDragFromMainTable = [source isEqual:tableView];
+    BOOL isDragFromGroupTable = [source isEqual:groupOutlineView];
+    BOOL isDragFromDrawer = [source isEqual:[drawerController tableView]];
     
     // we don't allow local drags unless they're targeted on a specific group
     if (isDragFromDrawer || isDragFromGroupTable)
@@ -1263,9 +1265,10 @@
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSStringPboardType, nil]];
     NSArray *pubs = nil;
-    BOOL isDragFromMainTable = [[info draggingSource] isEqual:tableView];
-    BOOL isDragFromGroupTable = [[info draggingSource] isEqual:groupOutlineView];
-    BOOL isDragFromDrawer = [[info draggingSource] isEqual:[drawerController tableView]];
+    id source = [info draggingSource];
+    BOOL isDragFromMainTable = [source isEqual:tableView];
+    BOOL isDragFromGroupTable = [source isEqual:groupOutlineView];
+    BOOL isDragFromDrawer = [source isEqual:[drawerController tableView]];
     
     if (idx == NSOutlineViewDropOnItemIndex && [item isWeb] && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil] containsObject:type]) {
         
