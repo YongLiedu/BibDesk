@@ -60,7 +60,7 @@
     [super dealloc];
 }
 
-- (NSString *)windowNibName{
+- (NSString *)nibName{
     return @"BDSKCustomCiteDrawer";
 }
 
@@ -85,7 +85,7 @@
 #pragma mark Actions
 
 - (IBAction)toggle:(id)sender{
-    [self window];
+    [self view];
     [drawer toggle:sender];
 }
 
