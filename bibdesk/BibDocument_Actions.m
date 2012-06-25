@@ -1381,7 +1381,6 @@ static BOOL changingColors = NO;
     if(drawerController == nil)
         drawerController = [[BDSKCustomCiteDrawerController alloc] initForDocument:self];
     [drawerController toggle:sender];
-    return;
 }
 
 - (void)documentInfoSheetDidEnd:(BDSKDocumentInfoWindowController *)infoController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
