@@ -461,9 +461,9 @@
         "Local-Url" = L1; 
         Month = Y2; 
         Number = IS; 
-        Pages = PG; 
+        Pages = SP; 
         Title = T1; 
-        Publisher = SP; 
+        Publisher = PB; 
         Status = RP; 
         Url = UR; 
         Volume = VL; 
