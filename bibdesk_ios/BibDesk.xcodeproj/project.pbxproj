@@ -62,6 +62,7 @@
 		3B79CF2E1509F1C600E9C5F5 /* BDSKGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B79CF2D1509F1C600E9C5F5 /* BDSKGroup.m */; };
 		3B79CF301509F1FB00E9C5F5 /* BDSKCategoryGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B79CF2F1509F1FB00E9C5F5 /* BDSKCategoryGroup.m */; };
 		3B79CF32150A19CC00E9C5F5 /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B79CF31150A19CB00E9C5F5 /* CoreImage.framework */; };
+		3B8AC067159B20EB006C7E61 /* BDSKTemplateObjectProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B8AC066159B20EB006C7E61 /* BDSKTemplateObjectProxy.m */; };
 		3B97CDF8150A56EE00B82077 /* BDSKParentGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B97CDF7150A56EE00B82077 /* BDSKParentGroup.m */; };
 		3B97CDFC150A5A6D00B82077 /* BDSKLibraryGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B97CDFB150A5A6D00B82077 /* BDSKLibraryGroup.m */; };
 		3B97CDFE150A5A7800B82077 /* BDSKSmartGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B97CDFD150A5A7800B82077 /* BDSKSmartGroup.m */; };
@@ -192,6 +193,8 @@
 		3B79CF2D1509F1C600E9C5F5 /* BDSKGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = BDSKGroup.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		3B79CF2F1509F1FB00E9C5F5 /* BDSKCategoryGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = BDSKCategoryGroup.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		3B79CF31150A19CB00E9C5F5 /* CoreImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
+		3B8AC066159B20EB006C7E61 /* BDSKTemplateObjectProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTemplateObjectProxy.m; sourceTree = "<group>"; };
+		3B8AC069159B2131006C7E61 /* BDSKTemplateObjectProxy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BDSKTemplateObjectProxy.h; sourceTree = "<group>"; };
 		3B97CDF7150A56EE00B82077 /* BDSKParentGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKParentGroup.m; sourceTree = "<group>"; };
 		3B97CDFA150A571A00B82077 /* BDSKParentGroup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BDSKParentGroup.h; sourceTree = "<group>"; };
 		3B97CDFB150A5A6D00B82077 /* BDSKLibraryGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKLibraryGroup.m; sourceTree = "<group>"; };
@@ -297,6 +300,7 @@
 				3B79CF1F15097BA700E9C5F5 /* BDSKPublicationsArray.m */,
 				3B13606F15069D28001DBBA5 /* BDSKStringNode.m */,
 				3B3C593C1508EBE100961DA4 /* BDSKTemplate.m */,
+				3B8AC066159B20EB006C7E61 /* BDSKTemplateObjectProxy.m */,
 				3B3C59361508E92100961DA4 /* BDSKTemplateTag.m */,
 				3B79CF0D15091A7A00E9C5F5 /* BDSKTreeNode.m */,
 				3B79CF0F15091B0200E9C5F5 /* BDSKVersionNumber.m */,
@@ -336,6 +340,7 @@
 				3B13606E15069D08001DBBA5 /* BDSKStringNode.h */,
 				3B3C593B1508EB7F00961DA4 /* BDSKTableSortDescriptor.h */,
 				3B3C59291508C69700961DA4 /* BDSKTemplate.h */,
+				3B8AC069159B2131006C7E61 /* BDSKTemplateObjectProxy.h */,
 				3B19764B1507B153005E3B0A /* BDSKTemplateParser.h */,
 				3B3C59331508E0D400961DA4 /* BDSKTemplateTag.h */,
 				3B3C592A1508C6AB00961DA4 /* BDSKTreeNode.h */,
@@ -728,6 +733,7 @@
 				3B97CE0B150A5E0E00B82077 /* BDSKCondition.m in Sources */,
 				3B2A554F150B3C8E008A5F35 /* BDSKGroupTableViewController.m in Sources */,
 				3B2A5552150B88F1008A5F35 /* BDSKPubTableViewController.m in Sources */,
+				3B8AC067159B20EB006C7E61 /* BDSKTemplateObjectProxy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

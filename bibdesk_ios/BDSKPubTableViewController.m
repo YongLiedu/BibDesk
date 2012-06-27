@@ -47,6 +47,8 @@
 #import "BDSKStringConstants.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
+#import "BDSKTemplate.h"
+#import "BDSKTemplateObjectProxy.h"
 
 BDSKLocalFile *LocalFileForBibItem(BibItem *bibItem) {
 
@@ -286,6 +288,18 @@ BDSKLocalFile *LocalFileForBibItem(BibItem *bibItem) {
         bibItems = [[newBibItems sortedArrayUsingMergesortWithDescriptors:[NSArray arrayWithObject:sortDescriptor]] retain];
         
         [self.tableView reloadData];
+        
+        // Template Testing Code
+        if ([bibItems count] && NO) {
+        
+            BDSKTemplate *testTemplate = [BDSKTemplate templateWithString:@"<$publications><$authors.abbreviatedNormalizedName.stringByRemovingTeX.@componentsJoinedByCommaAndAnd/> (<$fields.Year/>). <$fields.Title.stringByRemovingTeX/>, <$fields.Journal.stringByRemovingTeX/>, <$fields.Volume/>(<$fields.Number/>), <$fields.Pages/>\n</$publications>" fileType:@"txt"];
+            
+            BibItem *firstBibItem = [bibItems objectAtIndex:0];
+            
+            NSString *templateString = [BDSKTemplateObjectProxy stringByParsingTemplate:testTemplate withObject:[firstBibItem owner] publications:bibItems];
+                
+            NSLog(@"Template Text:\n%@", templateString);
+        }
     }
 }
 

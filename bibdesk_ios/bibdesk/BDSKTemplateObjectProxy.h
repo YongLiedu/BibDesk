@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 #import "BDSKTemplateParser.h"
 
 @class BDSKTemplate;
@@ -53,7 +53,9 @@
 + (NSAttributedString *)attributedStringByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items documentAttributes:(NSDictionary **)docAttributes;
 + (NSAttributedString *)attributedStringByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items publicationsContext:(NSArray *)itemsContext documentAttributes:(NSDictionary **)docAttributes;
 + (NSData *)dataByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items;
+#if BDSK_OS_X
 + (NSData *)dataByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items publicationsContext:(NSArray *)itemsContext;
+#endif
 
 - (id)initWithObject:(id)anObject publications:(NSArray *)items publicationsContext:(NSArray *)itemsContext template:(BDSKTemplate *)aTemplate;
 

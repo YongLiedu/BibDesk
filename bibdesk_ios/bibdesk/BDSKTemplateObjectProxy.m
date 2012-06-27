@@ -39,8 +39,10 @@
 #import "BDSKTemplateObjectProxy.h"
 #import "BDSKTemplate.h"
 #import "BibItem.h"
-#import "NSTask_BDSKExtensions.h"
-#import "BDSKTask.h"
+#if BDSK_OS_X
+    #import "NSTask_BDSKExtensions.h"
+    #import "BDSKTask.h"
+#endif
 
 
 @implementation BDSKTemplateObjectProxy
@@ -55,8 +57,10 @@
     BDSKTemplateObjectProxy *objectProxy = [[self alloc] initWithObject:anObject publications:items publicationsContext:itemsContext template:template];
     string = [BDSKTemplateParser stringByParsingTemplateString:string usingObject:objectProxy delegate:objectProxy];
     [objectProxy release];
+#if BDSK_OS_X
     if(scriptPath)
         string = [BDSKTask outputStringFromTaskWithLaunchPath:scriptPath arguments:nil inputString:string];
+#endif
     return string;
 }
 
@@ -73,9 +77,11 @@
         attrString = [BDSKTemplateParser attributedStringByParsingTemplateAttributedString:attrString usingObject:objectProxy delegate:objectProxy];
         [objectProxy release];
     }else{
+#if BDSK_OS_X
         NSData *data = [self dataByParsingTemplate:template withObject:anObject publications:items publicationsContext:itemsContext];
         NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:[template documentType], NSDocumentTypeDocumentOption, nil];
         attrString = [[[NSAttributedString alloc] initWithData:data options:options documentAttributes:NULL error:NULL] autorelease];
+#endif
     }
     return attrString;
 }
@@ -84,6 +90,7 @@
     return [self dataByParsingTemplate:template withObject:anObject publications:items publicationsContext:nil];
 }
 
+#if BDSK_OS_X
 + (NSData *)dataByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items publicationsContext:(NSArray *)itemsContext {
     NSString *string = [template mainPageString];
     NSString *scriptPath = [template scriptPath];
@@ -92,6 +99,7 @@
     [objectProxy release];
     return [BDSKTask outputDataFromTaskWithLaunchPath:scriptPath arguments:nil inputString:string];
 }
+#endif
 
 - (id)initWithObject:(id)anObject publications:(NSArray *)items publicationsContext:(NSArray *)itemsContext template:(BDSKTemplate *)aTemplate {
     self = [super init];

@@ -41,6 +41,7 @@
 #import <DBSessionInit/DBSessionInit.h>
 #import "BDSKDropboxStore.h"
 #import "BDSKLocalFile.h"
+#import "BDSKTypeManager.h"
 
 @interface BDSKAppDelegate () {
     NSString *relinkUserId;
@@ -89,9 +90,25 @@
     //    [[BDSKDropboxStore sharedStore] startSync];
     //}
     
-    NSDictionary *defaults = [NSDictionary dictionaryWithObjectsAndKeys:@",:;", @"BDSKGroupFieldSeparatorCharactersKey", nil];
-    [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
-        
+    NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
+    
+    NSDictionary *defaults = [NSDictionary dictionaryWithObjectsAndKeys:@",:;", BDSKGroupFieldSeparatorCharactersKey, nil];
+    [sud registerDefaults:defaults];
+    
+    // enforce Author and Editor as person fields
+    NSArray *personFields = [sud stringArrayForKey:BDSKPersonFieldsKey];
+    NSInteger idx = 0;
+    if ([personFields containsObject:BDSKAuthorString] == NO || [personFields containsObject:BDSKEditorString] == NO) {
+        personFields  = [personFields mutableCopy];
+        if (!personFields) personFields = [NSMutableArray arrayWithCapacity:2];
+        if ([personFields containsObject:BDSKAuthorString] == NO)
+            [(NSMutableArray *)personFields insertObject:BDSKAuthorString atIndex:idx++];
+        if ([personFields containsObject:BDSKEditorString] == NO)
+            [(NSMutableArray *)personFields insertObject:BDSKEditorString atIndex:idx];
+        [sud setObject:personFields forKey:BDSKPersonFieldsKey];
+        [[BDSKTypeManager sharedManager] updateCustomFields];
+    }
+    
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         UISplitViewController *splitViewController = (UISplitViewController *)self.window.rootViewController;
         UINavigationController *navigationController = [splitViewController.viewControllers lastObject];
