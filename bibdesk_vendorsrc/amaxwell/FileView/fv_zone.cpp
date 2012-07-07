@@ -47,6 +47,7 @@
 #import <sys/time.h>
 #import <math.h>
 #import <errno.h>
+#import <dispatch/dispatch.h>
 
 #import <set>
 #import <map>
@@ -67,7 +68,8 @@ using namespace std;
 
 #if DEBUG
 #define ENABLE_STATS 0
-#define fv_zone_assert(condition) do { if(false == (condition)) { HALT; } } while(0)
+static void fv_zone_assert(bool x) CLANG_ANALYZER_NORETURN;
+static void fv_zone_assert(bool condition) { if(false == (condition)) { HALT; } }
 #else
 #define ENABLE_STATS 0
 #define fv_zone_assert(condition)
@@ -110,6 +112,17 @@ typedef struct _fv_allocation_t {
     const void      *guard;     /* pointer to a check variable   */
 } fv_allocation_t;
 
+typedef struct _fv_list {
+	struct _fv_list_item *first;
+	struct _fv_list_item *last;
+} fv_list;
+
+typedef struct _fv_list_item {
+    struct _fv_list_item *previous;
+    struct _fv_list_item *next;
+    void                 *payload;
+} fv_list_item;
+
 #define LOCK_INIT(z) (pthread_mutex_init(&(z)->_lock, NULL))
 #define LOCK(z) (pthread_mutex_lock(&(z)->_lock))
 #define UNLOCK(z) (pthread_mutex_unlock(&(z)->_lock))
@@ -120,8 +133,8 @@ static char _malloc_guard;  /* indicates underlying allocator is malloc_default_
 static char _vm_guard;      /* indicates vm_allocate was used for this block           */
 
 // track all zones allocated by fv_create_zone_named()
-static set<fv_zone_t *> *_allZones = NULL;
-static pthread_mutex_t   _allZonesLock = PTHREAD_MUTEX_INITIALIZER;
+static fv_list           _zone_list = { NULL, NULL };
+static pthread_mutex_t   _zone_list_lock = PTHREAD_MUTEX_INITIALIZER;
 
 // used to explicitly signal collection
 static pthread_cond_t    _collectorCond = PTHREAD_COND_INITIALIZER;
@@ -135,10 +148,59 @@ static bool              _scribble = false;
 #define FV_COLLECT_THRESHOLD 104857600UL
 
 #if ENABLE_STATS
-#define FV_COLLECT_TIMEINTERVAL 60
+#define FV_COLLECT_TIMEINTERVAL 60ULL
 #else
-#define FV_COLLECT_TIMEINTERVAL 10
+#define FV_COLLECT_TIMEINTERVAL 10ULL
 #endif
+
+static void __fv_list_append_item(fv_list *list, fv_list_item *item)
+{
+    // list must be non-NULL
+    fv_zone_assert(NULL != list);
+	fv_zone_assert(NULL != item);
+    item->next = NULL;
+	if (NULL == list->last) {
+		list->first = item;
+		item->previous = NULL;
+	}
+	else {
+		item->previous = list->last;
+		list->last->next = item;
+	}
+	list->last = item;
+}
+
+static void __fv_list_remove_item(fv_list *list, fv_list_item *item)
+{
+    // item must be non-NULL
+    fv_zone_assert(NULL != item);
+	if (list->first == item)
+		list->first = item->next;
+	if (list->last == item)
+		list->last = item->previous;
+    if (item->previous)
+        item->previous->next = item->next;
+    if (item->next)
+        item->next->previous = item->previous;
+}
+
+static fv_list_item * __fv_list_allocate_item()
+{
+    return (fv_list_item *) malloc_zone_calloc(malloc_default_zone(), 1, sizeof(fv_list_item));
+}
+
+static void __fv_list_deallocate_item(fv_list_item *item)
+{
+    malloc_zone_free(malloc_default_zone(), item);
+}
+
+static fv_list_item * __fv_list_find_item(fv_list *list, const void *payload)
+{
+	fv_list_item *item = list->first;
+    while (item && item->payload != payload)
+        item = item->next;
+	return item;
+}
 
 #define FV_ALLOC_FROM_POINTER(ptr) ((fv_allocation_t *)((uintptr_t)(ptr) - sizeof(fv_allocation_t)))
 
@@ -398,8 +460,8 @@ static void *fv_zone_malloc(malloc_zone_t *fvzone, size_t size)
 #endif
         alloc->free = false;
         ret = alloc->ptr;
+        if (_scribble) memset(ret, 0xaa, alloc->ptrSize);
     }
-    if (_scribble) memset(ret, 0xaa, alloc->ptrSize);
     return ret;    
 }
 
@@ -424,6 +486,8 @@ static void *fv_zone_valloc(malloc_zone_t *zone, size_t size)
     return ret;
 }
 
+static void __fv_zone_collect_all(void *scheduled);
+
 static void __fv_zone_free_allocation_locked(fv_zone_t *zone, fv_allocation_t *alloc)
 {
     if (_scribble) memset(alloc->ptr, 0x55, alloc->ptrSize);
@@ -444,8 +508,15 @@ static void __fv_zone_free_allocation_locked(fv_zone_t *zone, fv_allocation_t *a
     zone->_freeSize += alloc->allocSize;
     
     // signal for collection if needed (lock not required, no effect if not blocking on the condition)
-    if (zone->_freeSize > FV_COLLECT_THRESHOLD)
-        pthread_cond_signal(&_collectorCond);    
+    if (zone->_freeSize > FV_COLLECT_THRESHOLD) {
+        if (NULL == dispatch_async_f) {
+            pthread_cond_signal(&_collectorCond);
+        }
+        else {
+            dispatch_queue_t dq = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
+            dispatch_async_f(dq, NULL, __fv_zone_collect_all);
+        }
+    }
 }
 
 static void fv_zone_free(malloc_zone_t *fvzone, void *ptr)
@@ -551,13 +622,15 @@ static void fv_zone_destroy(malloc_zone_t *fvzone)
     fv_zone_t *zone = reinterpret_cast<fv_zone_t *>(fvzone);
     
     // remove from timed processing
-    pthread_mutex_lock(&_allZonesLock);
-    if (NULL == _allZones || _allZones->count(zone) == 0) {
+    pthread_mutex_lock(&_zone_list_lock);
+    fv_list_item *item = __fv_list_find_item(&_zone_list, zone);
+    if (NULL == item) {
         malloc_printf("attempt to destroy invalid fvzone %s\n", malloc_get_zone_name(&zone->_basic_zone));
         HALT;
     }
-    _allZones->erase(zone);
-    pthread_mutex_unlock(&_allZonesLock);
+    __fv_list_remove_item(&_zone_list, item);
+    __fv_list_deallocate_item(item);
+    pthread_mutex_unlock(&_zone_list_lock);
     
     // remove all the free buffers
     LOCK(zone);
@@ -806,65 +879,6 @@ static const struct malloc_introspection_t __fv_zone_introspect = {
 
 static bool __fv_alloc_size_compare(fv_allocation_t *val1, fv_allocation_t *val2) { return (val1->ptrSize < val2->ptrSize); }
 
-#pragma mark API
-
-malloc_zone_t *fv_create_zone_named(const char *name)
-{
-    // can't rely on initializers to do this early enough, since FVAllocator creates a zone in a __constructor__
-    pthread_mutex_lock(&_allZonesLock);
-    // TODO: is using new okay?
-    if (NULL == _allZones) _allZones = new set<fv_zone_t *>;
-    if (getenv("MallocScribble") != NULL) {
-        malloc_printf("will scribble memory allocations in zone %s\n", name);
-        _scribble = true;
-    }
-    pthread_mutex_unlock(&_allZonesLock);
-
-    // let calloc zero all fields
-    fv_zone_t *zone = (fv_zone_t *)malloc_zone_calloc(malloc_default_zone(), 1, sizeof(fv_zone_t));
-    
-    zone->_basic_zone.size = fv_zone_size;
-    zone->_basic_zone.malloc = fv_zone_malloc;
-    zone->_basic_zone.calloc = fv_zone_calloc;
-    zone->_basic_zone.valloc = fv_zone_valloc;
-    zone->_basic_zone.free = fv_zone_free;
-    zone->_basic_zone.realloc = fv_zone_realloc;
-    zone->_basic_zone.destroy = fv_zone_destroy;
-    zone->_basic_zone.batch_malloc = NULL;
-    zone->_basic_zone.batch_free = NULL;
-    zone->_basic_zone.introspect = (struct malloc_introspection_t *)&__fv_zone_introspect;
-    zone->_basic_zone.version = 0;  /* from scalable_malloc.c in Libc-498.1.1 */
-    
-#if defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
-    zone->_basic_zone.memalign = NULL;
-    zone->_basic_zone.free_definite_size = fv_zone_free_definite;
-#endif
-    
-    // explicitly initialize padding to NULL
-    zone->_reserved[0] = NULL;
-    zone->_reserved[1] = NULL;
-        
-    // http://www.cplusplus.com/reference/stl/set/set.html
-    // proof that C++ programmers have to be insane
-    bool (*compare_ptr)(ALLOC, ALLOC) = __fv_alloc_size_compare;
-    zone->_availableAllocations = new multiset<MSALLOC>(compare_ptr);
-    zone->_allocations = new vector<ALLOC>;
-    LOCK_INIT(zone);
-    
-    // register so the system handles lookups correctly, or malloc_zone_from_ptr() breaks (along with free())
-    malloc_zone_register((malloc_zone_t *)zone);
-    
-    // malloc_set_zone_name calls out to this zone, so call it after setup is complete
-    malloc_set_zone_name(&zone->_basic_zone, name);
-    
-    // register for timer
-    pthread_mutex_lock(&_allZonesLock);
-    _allZones->insert(zone);
-    pthread_mutex_unlock(&_allZonesLock);
-    
-    return (malloc_zone_t *)zone;
-}
-
 #pragma mark Setup and cleanup
 
 #if ENABLE_STATS
@@ -913,9 +927,37 @@ static void __fv_zone_collect_zone(fv_zone_t *zone)
 }
 
 // periodically check all zones against the per-zone high water mark for unused memory
+static void __fv_zone_collect_all(void *scheduled)
+{ 
+    (void) pthread_mutex_lock(&_zone_list_lock);
+    fv_list_item *item = _zone_list.first;
+    while (item) {
+        __fv_zone_collect_zone((fv_zone_t *)item->payload);
+        item = item->next;
+    }
+    (void) pthread_mutex_unlock(&_zone_list_lock);
+    
+#if ENABLE_STATS
+    struct timeval tv;
+    struct timespec ts;
+    
+    (void)gettimeofday(&tv, NULL);
+    TIMEVAL_TO_TIMESPEC(&tv, &ts);
+    
+    static double lastCollectSeconds = tv.tv_sec + double(tv.tv_usec) / 1000000;
+    static unsigned int collectionCount = 0;
+    
+    collectionCount++;
+    const double currentCollectSeconds = tv.tv_sec + double(tv.tv_usec) / 1000000;
+    fprintf(stderr, "%s collection %u, %.2f seconds since previous\n", NULL == scheduled ? "TIMED" : "FORCED", collectionCount, currentCollectSeconds - lastCollectSeconds);
+    lastCollectSeconds = currentCollectSeconds;
+#endif
+}
+
+// periodically check all zones against the per-zone high water mark for unused memory
 static void *__fv_zone_collector_thread(void *unused)
 {        
-    int ret = pthread_mutex_lock(&_allZonesLock);
+    int ret = pthread_mutex_lock(&_zone_list_lock);
     while (0 == ret || ETIMEDOUT == ret) {
         
         struct timeval tv;
@@ -926,9 +968,11 @@ static void *__fv_zone_collector_thread(void *unused)
         ts.tv_sec += FV_COLLECT_TIMEINTERVAL;
         
         // see http://www.opengroup.org/onlinepubs/009695399/functions/pthread_cond_timedwait.html for notes on timed wait    
-        ret = pthread_cond_timedwait(&_collectorCond, &_allZonesLock, &ts);
-        if (NULL != _allZones) {
-            for_each(_allZones->begin(), _allZones->end(), __fv_zone_collect_zone);
+        ret = pthread_cond_timedwait(&_collectorCond, &_zone_list_lock, &ts);
+        fv_list_item *item = _zone_list.first;
+        while (item) {
+            __fv_zone_collect_zone((fv_zone_t *)item->payload);
+            item = item->next;
         }
 
 #if ENABLE_STATS
@@ -944,23 +988,95 @@ static void *__fv_zone_collector_thread(void *unused)
         lastCollectSeconds = currentCollectSeconds;
 #endif
     }
-    (void)pthread_mutex_unlock(&_allZonesLock);
+    (void)pthread_mutex_unlock(&_zone_list_lock);
     
     return NULL;
 }
 
-__attribute__ ((constructor))
 static void __initialize_collector_thread()
 {    
-    // create a thread to do periodic cleanup so memory usage doesn't get out of hand
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    if (NULL == dispatch_source_create) {
+        // create a thread to do periodic cleanup so memory usage doesn't get out of hand
+        pthread_attr_t attr;
+        pthread_attr_init(&attr);
+        pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+        
+        // not required as an ivar at present
+        pthread_t thread;
+        (void)pthread_create(&thread, &attr, __fv_zone_collector_thread, NULL);
+        pthread_attr_destroy(&attr);    
+    }
+    else {
+        dispatch_queue_t dq = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
+        dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dq);
+        dispatch_source_set_event_handler_f(timer, __fv_zone_collect_all);
+        dispatch_time_t start = dispatch_time(DISPATCH_TIME_NOW, FV_COLLECT_TIMEINTERVAL * NSEC_PER_SEC);
+        dispatch_source_set_timer(timer, start, FV_COLLECT_TIMEINTERVAL * NSEC_PER_SEC, NSEC_PER_SEC);
+        dispatch_resume(timer);
+    }
+}
+
+#pragma mark API
+
+malloc_zone_t *fv_create_zone_named(const char *name)
+{
+    // can't rely on initializers to do this early enough, since FVAllocator creates a zone in a __constructor__
+    pthread_mutex_lock(&_zone_list_lock);
+    if (getenv("MallocScribble") != NULL) {
+        malloc_printf("will scribble memory allocations in zone %s\n", name);
+        _scribble = true;
+    }
+    pthread_mutex_unlock(&_zone_list_lock);
     
-    // not required as an ivar at present
-    pthread_t thread;
-    (void)pthread_create(&thread, &attr, __fv_zone_collector_thread, NULL);
-    pthread_attr_destroy(&attr);    
+    // let calloc zero all fields
+    fv_zone_t *zone = (fv_zone_t *)malloc_zone_calloc(malloc_default_zone(), 1, sizeof(fv_zone_t));
+    
+    zone->_basic_zone.size = fv_zone_size;
+    zone->_basic_zone.malloc = fv_zone_malloc;
+    zone->_basic_zone.calloc = fv_zone_calloc;
+    zone->_basic_zone.valloc = fv_zone_valloc;
+    zone->_basic_zone.free = fv_zone_free;
+    zone->_basic_zone.realloc = fv_zone_realloc;
+    zone->_basic_zone.destroy = fv_zone_destroy;
+    zone->_basic_zone.batch_malloc = NULL;
+    zone->_basic_zone.batch_free = NULL;
+    zone->_basic_zone.introspect = (struct malloc_introspection_t *)&__fv_zone_introspect;
+    zone->_basic_zone.version = 0;  /* from scalable_malloc.c in Libc-498.1.1 */
+    
+#if defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
+    zone->_basic_zone.memalign = NULL;
+    zone->_basic_zone.free_definite_size = fv_zone_free_definite;
+#endif
+    
+    // explicitly initialize padding to NULL
+    zone->_reserved[0] = NULL;
+    zone->_reserved[1] = NULL;
+    
+    // http://www.cplusplus.com/reference/stl/set/set.html
+    // proof that C++ programmers have to be insane
+    bool (*compare_ptr)(ALLOC, ALLOC) = __fv_alloc_size_compare;
+    zone->_availableAllocations = new multiset<MSALLOC>(compare_ptr);
+    zone->_allocations = new vector<ALLOC>;
+    LOCK_INIT(zone);
+    
+    // register so the system handles lookups correctly, or malloc_zone_from_ptr() breaks (along with free())
+    malloc_zone_register((malloc_zone_t *)zone);
+    
+    // malloc_set_zone_name calls out to this zone, so call it after setup is complete
+    malloc_set_zone_name(&zone->_basic_zone, name);
+    
+    // register for timer
+    pthread_mutex_lock(&_zone_list_lock);
+    fv_list_item *item = __fv_list_allocate_item();
+    item->payload = zone;
+    __fv_list_append_item(&_zone_list, item);
+    pthread_mutex_unlock(&_zone_list_lock);
+    
+    // now that we have at least one zone fully set up, start the collector
+    static pthread_once_t once = PTHREAD_ONCE_INIT;
+    (void) pthread_once(&once, __initialize_collector_thread);
+    
+    return (malloc_zone_t *)zone;
 }
 
 #pragma mark statistics
