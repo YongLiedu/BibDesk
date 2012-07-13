@@ -28,7 +28,7 @@ How To Release BibDesk
   *  expand the new folder
   *  click "Add File"
   *  Select the disk image in the file choosing dialogue box that appears next
-  *  click the uploaded disk image file, and check the "Mac (OSX)" button, hit Save
+  *  click the "i" for the uploaded disk image file, and set it as default for Mac OSX, hit Save
   *  for more info see:  http://apps.sourceforge.net/trac/sourceforge/wiki/Release%20files%20for%20download
 
 - edit the release notes at relnotes.html on the web server

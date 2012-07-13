@@ -60,7 +60,7 @@
     [super dealloc];
 }
 
-- (NSString *)windowNibName{
+- (NSString *)nibName{
     return @"BDSKCustomCiteDrawer";
 }
 
@@ -85,7 +85,7 @@
 #pragma mark Actions
 
 - (IBAction)toggle:(id)sender{
-    [self window];
+    [self view];
     [drawer toggle:sender];
 }
 
@@ -104,7 +104,7 @@
             return;
         
         if ([tableView editedRow] != -1)
-            [[drawer parentWindow] makeFirstResponder:tableView];
+            [[tableView window] makeFirstResponder:tableView];
         [customStringArray removeObjectAtIndex:[tableView selectedRow]];
         [tableView reloadData];
         

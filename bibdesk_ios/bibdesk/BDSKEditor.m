@@ -997,7 +997,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         return;
     
 	if ([[BDSKFiler sharedFiler] autoFileLinkedFiles:files fromDocument:[self document] check:NO])
-        [[self undoManager] setActionName:NSLocalizedString(@"Move File", @"Undo action name")];
+        [[[self document] undoManager] setActionName:NSLocalizedString(@"Move File", @"Undo action name")];
     
 	[tabView selectFirstTabViewItem:self];
 }

@@ -39,7 +39,7 @@
 
 @class BibDocument;
 
-@interface BDSKCustomCiteDrawerController : NSWindowController <NSTableViewDelegate, NSTableViewDataSource> {
+@interface BDSKCustomCiteDrawerController : NSViewController <NSTableViewDelegate, NSTableViewDataSource> {
     IBOutlet NSTableView *tableView;
     IBOutlet NSDrawer *drawer;
     IBOutlet NSSegmentedControl *addRemoveButton;
