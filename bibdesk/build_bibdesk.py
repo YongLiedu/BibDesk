@@ -36,6 +36,7 @@ import subprocess
 import tempfile
 import glob
 import shutil
+from getpass import getuser
 
 import datetime
 
@@ -56,7 +57,12 @@ from email.mime.text import MIMEText
 SOURCE_DIR="/Volumes/Local/Users/amaxwell/build/bibdesk-clean"
 
 # create a private temporary directory
-TEMP_DIR=tempfile.mkdtemp("build_bibdesk_py")
+TEMP_DIR = os.path.join("/var/tmp", "BibDesk-%s" % (getuser()))
+try:
+    # should already exist after the first run
+    os.mkdir(TEMP_DIR)
+except Exception, e:
+    assert os.path.isdir(TEMP_DIR), "%s does not exist" % (TEMP_DIR)
 OBJROOT = os.path.join(TEMP_DIR, "objroot")
 SYMROOT = os.path.join(TEMP_DIR, "symroot")
 XCODEBUILD = "/Xcode3/usr/bin/xcodebuild"
@@ -90,7 +96,8 @@ for configLine in buildConfigFile:
     buildConfig[key] = value
 
 def removeTemporaryDirectory():
-    shutil.rmtree(TEMP_DIR)
+    pass
+    #shutil.rmtree(TEMP_DIR)
 
 def sendEmailAndRemoveTemporaryDirectory():
     print 'sending e-mail notification that build_bibdesk.py failed'
