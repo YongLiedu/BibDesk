@@ -214,6 +214,8 @@ def disableLocalizations(pathToApplicationBundle):
 def createDiskImage(imageName):
             
     # create an image from the app folder
+    if os.path.exists(TEMP_DMG):
+        os.unlink(TEMP_DMG)
     cmd = ["/usr/bin/hdiutil", "create", "-srcfolder", BUILT_APP, TEMP_DMG]
     try:
         logFile = open(LOG_PATH, "a", -1)
@@ -286,6 +288,8 @@ if int(buildConfig["disableLocalizations"]) != 0:
 # create a name for the disk image based on today's date
 imageName = datetime.date.today().strftime("%Y%m%d")
 imageName = os.path.join(TEMP_DIR, "BibDesk-" + imageName + ".dmg")
+if os.path.exists(imageName):
+    os.unlink(imageName)
 createDiskImage(imageName)
 
 # takes a string of the form "20081102" (year month day) and returns a date object
