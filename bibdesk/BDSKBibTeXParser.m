@@ -625,17 +625,34 @@ static NSString *createNameStringForComponent(CFAllocatorRef alloc, bt_name *the
     if(NULL == name_cstring){
         shouldFree = YES;
         
-        // this length is probably excessive, but it's returned quickly
-        CFIndex requiredLength = CFStringGetMaximumSizeForEncoding(fullLength, encoding);
+		/*
+        This length is probably excessive, but it's returned quickly; on Lion and later, we have to
+        add 1 to the length before passing it to CFStringGetCString, or the conversion fails.
+		Either this used to overestimate the length consistently or CFStringGetCString used to
+		accept the shorter length.
+		*/
+        CFIndex requiredLength = CFStringGetMaximumSizeForEncoding(fullLength, encoding) + 1;
         
-        // malloc a buffer, then set our const pointer to it if the conversion succeeds; this may be slightly more efficient than -[NSString UTF8String] because it's not adding an NSData to the autorelease pool
-        char *buffer = (char *)CFAllocatorAllocate(alloc, (requiredLength + 1) * sizeof(char), 0);
-        if(FALSE == CFStringGetCString((CFStringRef)aName, buffer, requiredLength, encoding)){
-            CFAllocatorDeallocate(alloc, buffer);
-            shouldFree = NO;
-        } else {
-            name_cstring = buffer;
-        }
+        /*
+		 malloc a buffer, then set our const pointer to it if the conversion succeeds; 
+		 this may be slightly more efficient than -[NSString UTF8String] because it's not 
+		 adding an NSData to the autorelease pool
+		 
+		 NB: since this has been moved to a method that returns an autoreleased NSMutableDictionary,
+		 instead of setting BibAuthor, this optimization is probably completely meaningless
+		 relative to that overhead.
+		 */
+         char *buffer = (char *)CFAllocatorAllocate(alloc, requiredLength, 0);
+         if(CFStringGetCString((CFStringRef)newName, buffer, requiredLength, encoding)){
+             name_cstring = buffer;
+         } else {
+             [NSException raise:NSInternalInconsistencyException format:@"Unable to convert string %@ to encoding %@", newName, CFStringGetNameOfEncoding(encoding)];
+             // this would work, but we shouldn't need a fallback to a fallback...
+             CFAllocatorDeallocate(alloc, buffer);
+             shouldFree = NO;
+             name_cstring = [newName UTF8String];
+             encoding = kCFStringEncodingUTF8;
+         }
     }
     
     bt_name *theName;
