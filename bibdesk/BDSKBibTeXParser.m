@@ -643,14 +643,14 @@ static NSString *createNameStringForComponent(CFAllocatorRef alloc, bt_name *the
 		 relative to that overhead.
 		 */
          char *buffer = (char *)CFAllocatorAllocate(alloc, requiredLength, 0);
-         if(CFStringGetCString((CFStringRef)newName, buffer, requiredLength, encoding)){
+         if(CFStringGetCString((CFStringRef)aName, buffer, requiredLength, encoding)){
              name_cstring = buffer;
          } else {
-             [NSException raise:NSInternalInconsistencyException format:@"Unable to convert string %@ to encoding %@", newName, CFStringGetNameOfEncoding(encoding)];
+             [NSException raise:NSInternalInconsistencyException format:@"Unable to convert string %@ to encoding %@", aName, CFStringGetNameOfEncoding(encoding)];
              // this would work, but we shouldn't need a fallback to a fallback...
              CFAllocatorDeallocate(alloc, buffer);
              shouldFree = NO;
-             name_cstring = [newName UTF8String];
+             name_cstring = [aName UTF8String];
              encoding = kCFStringEncodingUTF8;
          }
     }
