@@ -268,7 +268,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CEB10D610D7446E50053B916 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
-				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Debug;
@@ -277,7 +276,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CEB10D620D7446E50053B916 /* BibDesk-Release.xcconfig */;
 			buildSettings = {
-				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
 				WARNING_CFLAGS = (
 					"-Wall",
