@@ -426,7 +426,7 @@
                                          defaultButton:nil
                                        alternateButton:nil
                                            otherButton:nil
-                             informativeTextWithFormat:message];
+                             informativeTextWithFormat:@"%@", message];
         [alert beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:NULL contextInfo:NULL];
         return NO;
     }

@@ -267,7 +267,7 @@
         NSDictionary *macroDefinitions = [macroResolver macroDefinitions];
         // find a unique new macro key
         NSInteger i = 0;
-        NSString *newKey = [NSString stringWithString:@"macro"];
+        NSString *newKey = @"macro";
         while([macroDefinitions objectForKey:newKey] != nil)
             newKey = [NSString stringWithFormat:@"macro%ld", (long)++i];
         

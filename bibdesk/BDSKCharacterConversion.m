@@ -240,8 +240,8 @@ static BDSKCharacterConversion *sharedConversionEditor;
         
         [self finalizeChangesIgnoringEdit:NO]; // make sure we are not editing
         
-        NSString *newRoman = [NSString stringWithFormat:@"%C",0x00E4];
-        NSString *newTex = [NSString stringWithString:@"{\\\"a}"];
+        NSString *newRoman = [NSString stringWithFormat:@"%C", (unichar)0x00E4];
+        NSString *newTex = @"{\\\"a}";
         
         [currentArray addObject:newRoman];
         [currentDict setObject:newTex forKey:newRoman];

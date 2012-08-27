@@ -183,7 +183,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 - (IBAction)addRemoveType:(id)sender {
     if ([sender selectedSegment] == 0) { // add
         
-        NSString *newType = [NSString stringWithString:@"new-type"];
+        NSString *newType = @"new-type";
         NSInteger i = 0;
         while ([types containsObject:newType]) {
             newType = [NSString stringWithFormat:@"new-type-%ld", (long)++i];
@@ -219,7 +219,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 - (IBAction)addRemoveRequired:(id)sender {
     if ([sender selectedSegment] == 0) { // add
         
-        NSString *newField = [NSString stringWithString:@"New-Field"];
+        NSString *newField = @"New-Field";
         NSInteger i = 0;
         while ([currentRequiredFields containsObject:newField]) {
             newField = [NSString stringWithFormat:@"New-Field-%ld", (long)++i];
@@ -253,7 +253,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 - (IBAction)addRemoveOptional:(id)sender {
     if ([sender selectedSegment] == 0) { // add
         
-        NSString *newField = [NSString stringWithString:@"New-Field"];
+        NSString *newField = @"New-Field";
         NSInteger i = 0;
         while ([currentOptionalFields containsObject:newField]) {
             newField = [NSString stringWithFormat:@"New-Field-%ld", (long)++i];

@@ -187,7 +187,7 @@ static Class BDSKSearchBookmarkClass = Nil;
 }
 
 - (id)initFolderWithChildren:(NSArray *)aChildren label:(NSString *)aLabel {
-    return [[BDSKFolderSearchBookmark alloc] initFolderWithChildren:aChildren label:aLabel];
+    return [(id)[BDSKFolderSearchBookmark alloc] initFolderWithChildren:aChildren label:aLabel];
 }
 
 - (id)initFolderWithLabel:(NSString *)aLabel {
@@ -195,15 +195,15 @@ static Class BDSKSearchBookmarkClass = Nil;
 }
 
 - (id)initRootWithChildren:(NSArray *)aChildren {
-    return [[BDSKRootSearchBookmark alloc] initFolderWithChildren:aChildren label:NSLocalizedString(@"Searches Menu", @"Menu item title")];
+    return (id)[[BDSKRootSearchBookmark alloc] initFolderWithChildren:aChildren label:NSLocalizedString(@"Searches Menu", @"Menu item title")];
 }
 
 - (id)initSeparator {
-    return [[BDSKSeparatorSearchBookmark alloc] init];
+    return (id)[[BDSKSeparatorSearchBookmark alloc] init];
 }
 
 - (id)initWithInfo:(NSDictionary *)aDictionary label:(NSString *)aLabel {
-    return [[BDSKServerSearchBookmark alloc] initWithInfo:aDictionary label:aLabel];
+    return (id)[[BDSKServerSearchBookmark alloc] initWithInfo:aDictionary label:aLabel];
 }
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
@@ -232,7 +232,7 @@ static Class BDSKSearchBookmarkClass = Nil;
 
 - (id)autorelease { return self; }
 
-- (void)release {}
+- (oneway void)release {}
 
 - (NSUInteger)retainCount { return NSUIntegerMax; }
 

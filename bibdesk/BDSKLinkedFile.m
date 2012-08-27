@@ -320,28 +320,28 @@ static Class BDSKLinkedFileClass = Nil;
 - (id)initWithURL:(NSURL *)aURL delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 {
     if([aURL isFileURL])
-        return [[BDSKLinkedAliasFile alloc] initWithURL:aURL delegate:aDelegate];
+        return (id)[[BDSKLinkedAliasFile alloc] initWithURL:aURL delegate:aDelegate];
     else if (aURL)
-        return [[BDSKLinkedURL alloc] initWithURL:aURL delegate:aDelegate];
+        return (id)[[BDSKLinkedURL alloc] initWithURL:aURL delegate:aDelegate];
     else
         return nil;
 }
 
 - (id)initWithBase64String:(NSString *)base64String delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 {
-    return [[BDSKLinkedAliasFile alloc] initWithBase64String:base64String delegate:aDelegate];
+    return (id)[[BDSKLinkedAliasFile alloc] initWithBase64String:base64String delegate:aDelegate];
 }
 
 - (id)initWithURLString:(NSString *)aString;
 {
-    return [[BDSKLinkedURL alloc] initWithURLString:aString];
+    return (id)[[BDSKLinkedURL alloc] initWithURLString:aString];
 }
 
 - (id)retain { return self; }
 
 - (id)autorelease { return self; }
 
-- (void)release {}
+- (oneway void)release {}
 
 - (NSUInteger)retainCount { return NSUIntegerMax; }
 

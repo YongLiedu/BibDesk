@@ -74,6 +74,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKMacroResolver.h"
 #import "NSString_BDSKExtensions.h"
+#import "BDSKServerInfo.h"
 
 #define BDSKDisableMigrationWarningKey @"BDSKDisableMigrationWarning"
 

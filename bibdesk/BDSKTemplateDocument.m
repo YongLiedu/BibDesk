@@ -1469,11 +1469,16 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
 
 #pragma mark -
 
+@interface NSTokenField (Private)
+- (NSRange)textView:(NSTextView *)aTextView willChangeSelectionFromCharacterRange:(NSRange)oldSelectedCharRange toCharacterRange:(NSRange)newSelectedCharRange;
+- (void)textViewDidChangeSelection:(NSNotification *)notification;
+@end
+
 @implementation BDSKTokenField
 
 - (NSRange)textView:(NSTextView *)aTextView willChangeSelectionFromCharacterRange:(NSRange)oldSelectedCharRange toCharacterRange:(NSRange)newSelectedCharRange {
     if ([[BDSKTokenField superclass] instancesRespondToSelector:_cmd])
-        newSelectedCharRange = [(id)super textView:aTextView willChangeSelectionFromCharacterRange:oldSelectedCharRange toCharacterRange:newSelectedCharRange];
+        newSelectedCharRange = [super textView:aTextView willChangeSelectionFromCharacterRange:oldSelectedCharRange toCharacterRange:newSelectedCharRange];
     if ([self isEditable] == NO && newSelectedCharRange.length > 1)
         newSelectedCharRange.length = 1;
     return newSelectedCharRange;
@@ -1481,7 +1486,7 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
 
 - (void)textViewDidChangeSelection:(NSNotification *)notification {
     if ([[BDSKTokenField superclass] instancesRespondToSelector:_cmd])
-        [(id)super textViewDidChangeSelection:notification];
+        [super textViewDidChangeSelection:notification];
     if ([[self delegate] respondsToSelector:@selector(tokenField:textViewDidChangeSelection:)])
         [[self delegate] tokenField:self textViewDidChangeSelection:[notification object]];
 }

@@ -166,7 +166,7 @@ static void destroyTemporaryDirectory()
         path = @"/Applications";
         BOOL isDir;
         if ([self fileExistsAtPath:path isDirectory:&isDir] == NO || isDir == NO) {
-            NSLog(@"The system was unable to find your Applications folder.", @"");
+            NSLog(@"The system was unable to find your Applications folder.");
             return nil;
         }
     }
@@ -286,7 +286,7 @@ static void destroyTemporaryDirectory()
     FSRef tempItemsRef;
     CFURLRef tempItemsURL = NULL;
     if (noErr == FSFindFolder(catalogInfo.volume, kTemporaryFolderType, kCreateFolder, &tempItemsRef)) {
-        NSLog(@"Error %d:  the system was unable to find your temporary items folder on volume %i.", err, kTemporaryFolderType, catalogInfo.volume);
+        NSLog(@"Error %d:  the system was unable to find your temporary items folder on volume %i.", err, catalogInfo.volume);
     } else if ((tempItemsURL = CFURLCreateFromFSRef(kCFAllocatorDefault, &tempItemsRef))) {
         tempItemsPath = [(NSURL *)tempItemsURL path];
         CFRelease(tempItemsURL);

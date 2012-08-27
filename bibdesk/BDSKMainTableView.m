@@ -184,7 +184,7 @@ enum {
     if ([self canDelete]) {
         NSUInteger originalNumberOfRows = [self numberOfRows];
         // -selectedRow is last row of multiple selection, no good for trying to select the row before the selection.
-        NSUInteger selectedRow = [[self selectedRowIndexes] firstIndex];
+        NSInteger selectedRow = [[self selectedRowIndexes] firstIndex];
         [[self dataSource] tableView:self alternateDeleteRowsWithIndexes:[self selectedRowIndexes]];
         [self reloadData];
         NSUInteger newNumberOfRows = [self numberOfRows];
@@ -387,7 +387,7 @@ enum {
 }
 
 - (NSTableColumn *)newConfiguredTableColumnForField:(NSString *)colName {
-    BDSKTableColumn *tc = [[self tableColumnWithIdentifier:colName] retain];
+    BDSKTableColumn *tc = [(BDSKTableColumn *)[self tableColumnWithIdentifier:colName] retain];
     id dataCell = [tc dataCell];
     NSInteger columnType = [self columnTypeForField:colName];
     

@@ -175,9 +175,9 @@ static BibItem *createPublicationWithRecord(NSXMLNode *record);
     BibItem *newBI = nil;
     NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:10];
     
-    NSString *recordTerminator = [NSString stringWithFormat:@"%C", 0x1D];
-    NSString *fieldTerminator = [NSString stringWithFormat:@"%C", 0x1E];
-    NSString *subFieldIndicator = [NSString stringWithFormat:@"%C", 0x1F];
+    NSString *recordTerminator = [NSString stringWithFormat:@"%C", (unichar)0x1D];
+    NSString *fieldTerminator = [NSString stringWithFormat:@"%C", (unichar)0x1E];
+    NSString *subFieldIndicator = [NSString stringWithFormat:@"%C", (unichar)0x1F];
 	
     BOOL isUNIMARC = [itemString characterAtIndex:23] == ' ';
     
@@ -451,7 +451,7 @@ static BibItem *createPublicationWithRecord(NSXMLNode *record) {
 // Formatted MARC: @"^[ \t]*LDR[ \t]+[ \\-0-9]{5}[a-z]{3}[ \\-a][ a\\-0-9]22[ \\-0-9]{5}[ \\-1-8uz][ \\-a-z][ \\-r]45[ 0A-Z]0\n{1,2}[ \t]*[0-9]{3}[ \t]+"
 
 - (BOOL)isMARCString{
-    NSUInteger fieldTerminator = 0x1E;
+    unichar fieldTerminator = 0x1E;
     NSString *pattern = [NSString stringWithFormat:@"^[0-9]{5}[0-9a-zA-Z \\-\\.]{19}([0-9]{12})+%C", fieldTerminator];
     AGRegex *MARCRegex = [AGRegex regexWithPattern:pattern];
     

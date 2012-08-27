@@ -1132,7 +1132,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 - (NSString *)citation{
        NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
-    return [NSString stringWithFormat:@"\\%@%@", [sud stringForKey:BDSKCiteStringKey],
+    return [NSString stringWithFormat:@"\\%@%@%@%@", [sud stringForKey:BDSKCiteStringKey],
             [sud stringForKey:BDSKCiteStartBracketKey], [self citeKey], [sud stringForKey:BDSKCiteEndBracketKey]];
 }
 
@@ -2270,7 +2270,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
                 value = [self valueOfField:key inherit:([key isNoteField] == NO)];
                 if ([NSString isEmptyString:value] == NO) {
                     if ([result length])
-                        [result appendFormat:@"%C", 0x1E];
+                        [result appendFormat:@"%C", (unichar)0x1E];
                     [result appendString:value];
                 }
             }
@@ -2285,7 +2285,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
                 value = [thePubFields objectForKey:key];
                 if ([NSString isEmptyString:value] == NO) {
                     if ([result length])
-                        [result appendFormat:@"%C", 0x1E];
+                        [result appendFormat:@"%C", (unichar)0x1E];
                     [result appendString:value];
                 }
             }

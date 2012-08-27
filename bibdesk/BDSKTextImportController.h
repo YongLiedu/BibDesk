@@ -46,7 +46,7 @@
 @class BibDocument, BibItem, BDSKEdgeView, WebDownload, BDSKComplexStringEditor;
 @class BDSKCiteKeyFormatter;
 
-@interface BDSKTextImportController : NSWindowController <BDSKOwner, BDSKTextImportItemTableViewDelegate, NSTableViewDataSource, NSTextViewDelegate, NSSplitViewDelegate, BDSKComplexStringFormatterDelegate, BDSKCitationFormatterDelegate, BDSKWebViewDelegate> {
+@interface BDSKTextImportController : NSWindowController <BDSKOwner, BDSKTextImportItemTableViewDelegate, NSTableViewDataSource, NSTextViewDelegate, NSSplitViewDelegate, BDSKComplexStringFormatterDelegate, BDSKCitationFormatterDelegate, BDSKWebViewDelegate, NSURLDownloadDelegate> {
     IBOutlet NSTextView* sourceTextView;
     IBOutlet NSTableView* itemTableView;
     IBOutlet NSTextField* citeKeyField;

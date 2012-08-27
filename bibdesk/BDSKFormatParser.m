@@ -852,7 +852,7 @@ static NSDictionary *errorAttr = nil;
 					 force:(BOOL)force {
 	
 	NSString *uniqueStr = nil;
-	char c;
+	unichar c;
 	
 	if (number > 0) {
 		for (c = fromChar; c <= toChar; c++) {

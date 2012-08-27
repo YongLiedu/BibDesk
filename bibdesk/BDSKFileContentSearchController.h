@@ -62,7 +62,7 @@
 {
     NSMutableArray *results;
     NSMutableArray *filteredResults;
-    NSMutableSet *filterURLs;
+    NSSet *filterURLs;
     BDSKFileSearch *search;
     BDSKFileSearchIndex *searchIndex;
     

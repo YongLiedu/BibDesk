@@ -53,6 +53,7 @@
 #import "BDSKGroupsArray.h"
 #import "BDSKCustomCiteDrawerController.h"
 #import "BDSKPreviewer.h"
+#import <objc/runtime.h>
 
 @implementation BibDocument (Menus)
 

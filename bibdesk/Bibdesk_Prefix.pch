@@ -29,6 +29,11 @@
 
     #define BDSK_BUNDLE_IDENTIFIER @"edu.ucsd.cs.mmccrack.bibdesk"
 
+    #ifndef MAC_OS_X_VERSION_10_7
+    @protocol NSURLDownloadDelegate <NSObject>
+    @end
+    #endif
+
     #define __FILENAMEASNSSTRING__ [[NSString stringWithFileSystemRepresentation:__FILE__] lastPathComponent]
 
     #if defined (DEBUG)

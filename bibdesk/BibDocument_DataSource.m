@@ -80,6 +80,7 @@
 #import "BDSKFileContentSearchController.h"
 #import "NSEvent_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
+#import "BDSKServerInfo.h"
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
 
@@ -1160,8 +1161,10 @@
         BDSKGroup *group = [items firstObject];
         if ([group isExternal]) {
             pubs = [NSArray arrayWithArray:[(id)group publications]];
-            if ([group isSearch])
-                additionalFilenames = [NSArray arrayWithObject:[[[(BDSKSearchGroup *)group serverInfo] name] stringByAppendingPathExtension:@"bdsksearch"]];
+            if ([group isSearch]) {
+                BDSKServerInfo *serverInfo = [(BDSKSearchGroup *)group serverInfo];
+                additionalFilenames = [NSArray arrayWithObject:[[serverInfo name] stringByAppendingPathExtension:@"bdsksearch"]];
+            }
             docFlags.dragFromExternalGroups = YES;
         } else if ([group isParent] == NO) {
             NSMutableArray *pubsInGroup = [NSMutableArray arrayWithCapacity:[publications count]];
@@ -1399,7 +1402,13 @@
         [plist removeObjectForKey:@"search term"];
         [plist removeObjectForKey:@"history"];
         
-        NSString *fileName = [group respondsToSelector:@selector(serverInfo)] ? [[(BDSKSearchGroup *)group serverInfo] name] : [group name];
+        NSString *fileName;
+        if ([group respondsToSelector:@selector(serverInfo)]) {
+            BDSKServerInfo *serverInfo = [(BDSKSearchGroup *)group serverInfo];
+            fileName = [serverInfo name];
+        } else {
+            fileName = [group name];
+        }
         fileName = [fileName stringByAppendingPathExtension:@"bdsksearch"];
         
         // make sure the filename is unique

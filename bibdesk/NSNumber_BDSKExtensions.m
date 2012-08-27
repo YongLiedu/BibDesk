@@ -90,7 +90,7 @@ inline static NSString *romanNumeralForDigit(NSUInteger digit, NSString *i, NSSt
     while (number > 0) {
         letter = (number - 1) % 26;
         number = (number - 1)  / 26;
-        [string insertString:[NSString stringWithFormat:@"%C", 'a' + letter] atIndex:0];
+        [string insertString:[NSString stringWithFormat:@"%C", (unichar)('a' + letter)] atIndex:0];
     }
     return string;
 }
@@ -104,7 +104,7 @@ inline static NSString *romanNumeralForDigit(NSUInteger digit, NSString *i, NSSt
         if (letter > 16)
             letter++;
         number = (number - 1) / 24;
-        [string insertString:[NSString stringWithFormat:@"%C", 0x03b1 + letter] atIndex:0];
+        [string insertString:[NSString stringWithFormat:@"%C", (unichar)(0x03b1 + letter)] atIndex:0];
     }
     return string;
 }

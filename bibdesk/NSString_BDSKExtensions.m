@@ -95,7 +95,7 @@
 {
     static NSString *string = nil;
     if (string == nil)
-        string = [[self stringWithFormat:@"%C", 0x2026] retain];
+        string = [[self stringWithFormat:@"%C", (unichar)0x2026] retain];
     return string;
 }
 
@@ -104,7 +104,7 @@
 {
     static NSString *string = nil;
     if (string == nil)
-        string = [[self stringWithFormat:@"%C", 0x2014] retain];
+        string = [[self stringWithFormat:@"%C", (unichar)0x2014] retain];
     return string;
 }
 
@@ -113,7 +113,7 @@
 {
     static NSString *string = nil;
     if (string == nil)
-        string = [[self stringWithFormat:@"%C", 0x2013] retain];
+        string = [[self stringWithFormat:@"%C", (unichar)0x2013] retain];
     return string;
 }
 
@@ -122,7 +122,7 @@
 {
     static NSString *string = nil;
     if (string == nil)
-        string = [[self stringWithFormat:@"%C", 0x2318] retain];
+        string = [[self stringWithFormat:@"%C", (unichar)0x2318] retain];
     return string;
 }
 
@@ -131,7 +131,7 @@
 {
     static NSString *string = nil;
     if (string == nil)
-        string = [[self stringWithFormat:@"%C", 0x2303] retain];
+        string = [[self stringWithFormat:@"%C", (unichar)0x2303] retain];
     return string;
 }
 
@@ -140,7 +140,7 @@
 {
     static NSString *string = nil;
     if (string == nil)
-        string = [[self stringWithFormat:@"%C", 0x2325] retain];
+        string = [[self stringWithFormat:@"%C", (unichar)0x2325] retain];
     return string;
 }
 
@@ -149,7 +149,7 @@
 {
     static NSString *string = nil;
     if (string == nil)
-        string = [[self stringWithFormat:@"%C", 0x21E7] retain];
+        string = [[self stringWithFormat:@"%C", (unichar)0x21E7] retain];
     return string;
 }
 
@@ -174,7 +174,7 @@ static NSInteger MAX_RATING = 5;
         NSMutableString *ratingString = [NSMutableString string];
         do {
             ratingStrings[rating] = [ratingString copy];
-            [ratingString appendFormat:@"%C", (0x278A + i)];
+            [ratingString appendFormat:@"%C", (unichar)(0x278A + i)];
         } while(i++ < MAX_RATING);
     }
     if (rating >= 0 && rating <= MAX_RATING)
@@ -1363,12 +1363,11 @@ http://home.planet.nl/~faase009/GNU.txt
     static NSCharacterSet *unsafeCharacterSet = nil;
     if (unsafeCharacterSet == nil) {
         // unsafeCharacterSet is approximately the inverse of the set of characters that may appear in a URI according to RFC2396.  Note that it's a bit different from AcceptableCharacterSet; it has a different purpose.
-        NSMutableCharacterSet *tmpSet = [[NSMutableCharacterSet alloc] initWithString:@"!$%&'()*+,-./0123456789:;=?@ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz~"];
+        NSMutableCharacterSet *tmpSet = [NSMutableCharacterSet characterSetWithCharactersInString:@"!$%&'()*+,-./0123456789:;=?@ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz~"];
         // Note: RFC2396 requires us to escape backslashes, carets, and pipes, which we don't do because this prevents us from interoperating with some web servers which don't correctly decode their requests.  See <bug://bugs/4467>: Should we stop escaping the pipe | char in URLs? (breaks counters, lycos.de).
         [tmpSet addCharactersInString:@"\\^|"];
         [tmpSet invert];
         unsafeCharacterSet = [tmpSet copy];
-        [tmpSet release];
     }
     
     // Omni uses the inverse check here, which seems to completely negate the use of this method

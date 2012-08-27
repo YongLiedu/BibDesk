@@ -41,7 +41,7 @@
 
 @class BDSKServerInfo;
 
-@interface BDSKEntrezGroupServer : NSObject <BDSKSearchGroupServer>
+@interface BDSKEntrezGroupServer : NSObject <BDSKSearchGroupServer, NSURLDownloadDelegate>
 {
     id<BDSKSearchGroup> group;
     BDSKServerInfo *serverInfo;

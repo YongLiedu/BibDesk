@@ -1751,7 +1751,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                                                  defaultButton:NSLocalizedString(@"Cancel", @"Button title")
                                                alternateButton:NSLocalizedString(@"Ignore", @"Button title")
                                                    otherButton:NSLocalizedString(@"Reopen", @"Button title")
-                                     informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"The document will be opened with encoding %@, but it was previously saved with encoding %@.  You should cancel opening and then reopen with the correct encoding.", @"Informative text in alert dialog when opening a document with different encoding"), [NSString localizedNameOfStringEncoding:encoding], [NSString localizedNameOfStringEncoding:encodingFromFile]]];
+                                     informativeTextWithFormat:@"%@", [NSString stringWithFormat:NSLocalizedString(@"The document will be opened with encoding %@, but it was previously saved with encoding %@.  You should cancel opening and then reopen with the correct encoding.", @"Informative text in alert dialog when opening a document with different encoding"), [NSString localizedNameOfStringEncoding:encoding], [NSString localizedNameOfStringEncoding:encodingFromFile]]];
         rv = [encodingAlert runModal];
 
         if (rv == NSAlertDefaultReturn) {
