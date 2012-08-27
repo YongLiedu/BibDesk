@@ -202,7 +202,7 @@ enum {
                 }
             } else {
                 // Don't try to go past the new # of rows
-                selectedRow = MIN(selectedRow - 1, newNumberOfRows - 1);
+                selectedRow = MIN((NSUInteger)selectedRow - 1, newNumberOfRows - 1);
                 
                 // Skip all unselectable rows if the delegate responds to -tableView:shouldSelectRow:
                 if ([[self delegate] respondsToSelector:@selector(tableView:shouldSelectRow:)]) {
