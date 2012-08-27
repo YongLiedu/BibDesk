@@ -147,14 +147,14 @@ static Class FVOperationClass = Nil;
 @implementation FVPlaceholderOperation
 
 - (id)init {
-    return [[FVConcreteOperation allocWithZone:[self zone]] init];
+    return (id)[[FVConcreteOperation allocWithZone:[self zone]] init];
 }
 
 - (id)retain { return self; }
 
 - (id)autorelease { return self; }
 
-- (void)release {}
+- (oneway void)release {}
 
 - (NSUInteger)retainCount { return NSUIntegerMax; }
 

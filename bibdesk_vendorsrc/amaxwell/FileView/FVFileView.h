@@ -207,7 +207,7 @@ typedef NSInteger FVDisplayMode;
     NSUInteger               _numberOfRows;
     NSColor                 *_backgroundColor;
     CFRunLoopTimerRef        _zombieTimer;
-    NSMutableIndexSet       *_selectionIndexes;
+    NSIndexSet              *_selectionIndexes;
     CGLayerRef               _selectionOverlay;
     NSUInteger               _lastClickedIndex;
     NSUInteger               _dropIndex;

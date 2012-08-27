@@ -98,9 +98,9 @@ static NSInteger FVCacheLogLevel = 0;
     FVCacheLogLevel = [[NSUserDefaults standardUserDefaults] integerForKey:@"FVCacheLogLevel"];  
 }
 
-+ (id <NSObject, NSCopying>)newKeyForURL:(NSURL *)aURL;
++ (id)newKeyForURL:(NSURL *)aURL;
 {
-    return [_FVCacheKey newWithURL:aURL];
+    return (id)[_FVCacheKey newWithURL:aURL];
 }
 
 - (id)init
@@ -541,7 +541,7 @@ static NSInteger FVCacheLogLevel = 0;
     CFRelease(_identifier);
     [super dealloc];
 }
-- (NSString *)description { return [NSString stringWithFormat:@"%.2f kilobytes in %d files", _kbytes, _count]; }
+- (NSString *)description { return [NSString stringWithFormat:@"%.2f kilobytes in %lu files", _kbytes, (unsigned long)_count]; }
 - (NSUInteger)hash { return CFHash(_identifier); }
 - (BOOL)isEqual:(id)other { return CFStringCompare(_identifier, ((_FVCacheEventRecord *)other)->_identifier, 0) == kCFCompareEqualTo; }
 @end

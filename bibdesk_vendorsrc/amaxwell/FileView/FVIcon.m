@@ -202,7 +202,7 @@ static inline id _placeholderForZone(NSZone *aZone)
 
 - (id)autorelease { return self; }
 
-- (void)release {}
+- (oneway void)release {}
 
 - (NSUInteger)retainCount { return NSUIntegerMax; }
 
@@ -220,10 +220,10 @@ static inline id _placeholderForZone(NSZone *aZone)
     
     // initWithURLScheme requires a scheme, so there's not much we can do without it
     if ([representedURL isEqual:_missingFileURL] || nil == scheme) {
-        return [[FVFinderIcon allocWithZone:zone] initWithURL:nil];
+        return (id)[[FVFinderIcon allocWithZone:zone] initWithURL:nil];
     }
     else if (NO == [representedURL isFileURL]) {
-        return [[FVWebViewIcon allocWithZone:zone] initWithURL:representedURL];
+        return (id)[[FVWebViewIcon allocWithZone:zone] initWithURL:representedURL];
     }
     
     OSStatus err = noErr;
@@ -236,7 +236,7 @@ static inline id _placeholderForZone(NSZone *aZone)
     
     // return missing file icon if we can't convert the path to an FSRef
     if (noErr != err)
-        return [[FVFinderIcon allocWithZone:zone] initWithURL:nil];    
+        return (id)[[FVFinderIcon allocWithZone:zone] initWithURL:nil];
     
     // kLSItemContentType returns a CFStringRef, according to the header
     CFTypeRef theUTI = NULL;
@@ -335,7 +335,7 @@ static inline id _placeholderForZone(NSZone *aZone)
     
     [(id)theUTI release];
     
-    return anIcon;    
+    return (id)anIcon;
 }
 
 @end

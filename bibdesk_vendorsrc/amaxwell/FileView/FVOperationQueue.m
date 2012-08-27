@@ -128,14 +128,14 @@ static Class FVOperationQueueClass = Nil;
 @implementation FVPlaceholderOperationQueue
 
 - (id)init {
-    return [[FVConcreteOperationQueue allocWithZone:[self zone]] init];
+    return (id)[[FVConcreteOperationQueue allocWithZone:[self zone]] init];
 }
 
 - (id)retain { return self; }
 
 - (id)autorelease { return self; }
 
-- (void)release {}
+- (oneway void)release {}
 
 - (NSUInteger)retainCount { return NSUIntegerMax; }
 

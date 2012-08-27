@@ -121,9 +121,9 @@ static FVCGImageCache *_smallImageCache = nil;
 
 #pragma mark Class methods
 
-+ (id <NSObject, NSCopying>)newKeyForURL:(NSURL *)aURL;
++ (id)newKeyForURL:(NSURL *)aURL;
 {
-    return [FVCacheFile newKeyForURL:aURL];
+    return (id)[FVCacheFile newKeyForURL:aURL];
 }
 
 + (CGImageRef)newThumbnailForKey:(id)aKey;

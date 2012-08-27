@@ -184,7 +184,7 @@ static AGRegex *backrefPattern;
     if(buffer == NULL){
         usedStack = NO;
         buffer = NSZoneMalloc(NSDefaultMallocZone(), bufSize);
-        NSAssert1(buffer != NULL, @"Unable to allocate buffer of length %d and size UInt8", bufLen + 1);
+        NSAssert1(buffer != NULL, @"Unable to allocate buffer of length %zu and size UInt8", bufLen + 1);
     }
     CFStringGetBytes((CFStringRef)str, fullRange, kCFStringEncodingUTF8, 0, FALSE, buffer, bufSize, NULL);
     buffer[bufLen] = '\0'; // null terminate to make this a cstring
@@ -243,7 +243,7 @@ static AGRegex *backrefPattern;
 	repLength = [rep length];
 	// create case mod list
 	caseModVector = malloc(sizeof(case_modifier_t) * allCount * allBackrefsCount);
-	NSAssert1(caseModVector, @"couldn't allocate memory for %d case modifiers", allCount * allBackrefsCount);
+	NSAssert1(caseModVector, @"couldn't allocate memory for %ld case modifiers", (long)(allCount * allBackrefsCount));
 	// while limit is not reached and there are more matches to replace
 	for (i = 0; (lim < 1 || i < lim) && i < allCount; i++) {
 		// get the the next match
@@ -371,7 +371,7 @@ static AGRegex *backrefPattern;
 		// add captured subpatterns if any
 		count = [match count];
 		for (j = 1; j < count; j++)
-			if (group = [match groupAtIndex:j])
+			if ((group = [match groupAtIndex:j]))
 				[result addObject:group];
 		// set remaining range to the part after the split
 		remainRange.location = matchRange.location + matchRange.length;
@@ -433,7 +433,7 @@ static AGRegex *backrefPattern;
 - (NSRange)rangeAtIndex:(NSInteger)idx {
 	int start, end;
 	if (idx >= count)
-		[NSException raise:NSRangeException format:@"index %d out of bounds", idx];
+		[NSException raise:NSRangeException format:@"index %ld out of bounds", (long)idx];
 	start = matchv[2 * idx];
 	end = matchv[2 * idx + 1];
 	if (start < 0)
@@ -452,7 +452,7 @@ static AGRegex *backrefPattern;
     if(buffer == NULL){
         usedStack = NO;
         buffer = NSZoneMalloc(NSDefaultMallocZone(), bufSize);
-        NSAssert1(buffer != NULL, @"Unable to allocate buffer of length %d and size UInt8", bufLen);
+        NSAssert1(buffer != NULL, @"Unable to allocate buffer of length %zu and size UInt8", bufLen);
     }
     CFStringGetBytes((CFStringRef)string, fullRange, kCFStringEncodingUTF8, 0, FALSE, buffer, bufSize, NULL);
 
@@ -508,7 +508,7 @@ static AGRegex *backrefPattern;
 
 - (id)nextObject {
     AGRegexMatch *next;
-    if (next = [regex findInString:string range:range]) {
+    if ((next = [regex findInString:string range:range])) {
         range.location = [next range].location + [next range].length;
         if ([next range].length == 0)
             range.location++;
