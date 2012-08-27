@@ -226,7 +226,7 @@
     
     // workaround for a known bug, week is 1 for last week of the year
     if (period == BDSKPeriodWeek && [components week] == 1 && [components month] > 1) {
-        components = [calendar components:unitFlags fromDate:[self addTimeInterval:-7 * 24 * 3600]];
+        components = [calendar components:unitFlags fromDate:[self dateByAddingTimeInterval:-7 * 24 * 3600]];
         needsWorkaround = YES;
     }
     [components setHour:0];
@@ -253,7 +253,7 @@
     }
     NSDate *date = [calendar dateFromComponents:components];
     if (needsWorkaround)
-        date = [date addTimeInterval:7 * 24 * 3600];
+        date = [date dateByAddingTimeInterval:7 * 24 * 3600];
     return date;
 }
 
