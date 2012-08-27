@@ -119,11 +119,9 @@ extern NSString * const FVPreviewerWillCloseNotification;
  @param screenRect The rect of the icon to display, in screen coordinates.  Pass NSZeroRect to use the center of the main screen. */
 - (void)previewURL:(NSURL *)absoluteURL forIconInRect:(NSRect)screenRect;
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
 /** For Interface Builder only.
  @warning Do not call directly. */
 - (void)toggleFullscreen:(id)sender;
-#endif
 
 /** Cancel preview or fullscreen.
  
