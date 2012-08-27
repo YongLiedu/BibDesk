@@ -4734,7 +4734,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CEEBA6860D746DD7000204B8 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
-				SKIP_INSTALL = YES;
 			};
 			name = Debug;
 		};
@@ -4742,7 +4741,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CEEBA6870D746DD7000204B8 /* BibDesk-Release.xcconfig */;
 			buildSettings = {
-				SKIP_INSTALL = YES;
 			};
 			name = Release;
 		};
