@@ -64,7 +64,7 @@
 - (void)reorganizeWindowsItem:(NSWindow *)aWindow {
     NSMenu *windowsMenu = [self windowsMenu];
     NSWindowController *windowController = [aWindow windowController];
-    NSWindowController *mainWindowController = [[[[aWindow windowController] document] windowControllers] objectAtIndex:0];
+    NSWindowController *mainWindowController = [[[windowController document] windowControllers] objectAtIndex:0];
     NSInteger numberOfItems = [windowsMenu numberOfItems];
     NSInteger itemIndex = [windowsMenu indexOfItemWithTarget:aWindow andAction:@selector(makeKeyAndOrderFront:)];
     
