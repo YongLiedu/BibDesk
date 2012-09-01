@@ -1532,7 +1532,7 @@
 		F9022DEC0758099D00C3F701 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		F9022FBC07580B9400C3F701 /* BDSKAppController+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BDSKAppController+Scripting.m"; sourceTree = "<group>"; };
 		F9022FBE07580B9400C3F701 /* BibAuthor+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BibAuthor+Scripting.m"; sourceTree = "<group>"; };
-		F9022FBF07580B9400C3F701 /* BibDesk.sdef */ = {isa = PBXFileReference; explicitFileType = text.sdef; fileEncoding = 4; languageSpecificationIdentifier = plist; name = BibDesk.sdef; path = Scripting/BibDesk.sdef; sourceTree = "<group>"; };
+		F9022FBF07580B9400C3F701 /* BibDesk.sdef */ = {isa = PBXFileReference; explicitFileType = text.sdef; fileEncoding = 4; languageSpecificationIdentifier = plist; lastKnownFileType = file; name = BibDesk.sdef; path = Scripting/BibDesk.sdef; sourceTree = "<group>"; };
 		F9022FC107580B9400C3F701 /* BDSKSearchForCommand.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchForCommand.m; sourceTree = "<group>"; };
 		F9022FC307580B9400C3F701 /* BibDocument+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BibDocument+Scripting.m"; sourceTree = "<group>"; };
 		F9022FC507580B9400C3F701 /* BibItem+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BibItem+Scripting.m"; sourceTree = "<group>"; };

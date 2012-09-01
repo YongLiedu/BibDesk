@@ -243,7 +243,7 @@ if __name__ == '__main__':
     #     sendEmailAndRemoveTemporaryDirectory()
     #     exit(1)
     
-    bump the project version with agvtool
+    # bump the project version with agvtool
     rc = runVersionBump()
     if rc != 0:
         sendEmailAndRemoveTemporaryDirectory()
