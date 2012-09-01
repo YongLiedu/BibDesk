@@ -250,7 +250,7 @@ if __name__ == '__main__':
         exit(1)
 
     # clean and build the Xcode project
-    rc = runXcodeBuild(clean=False)
+    rc = runXcodeBuild(clean=True)
     if rc != 0:
         sendEmailAndRemoveTemporaryDirectory()
         exit(1)
