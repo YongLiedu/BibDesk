@@ -37,7 +37,6 @@ import tempfile
 import glob
 import shutil
 from getpass import getuser
-
 import datetime
 
 import smtplib
@@ -54,7 +53,7 @@ from email.mime.text import MIMEText
 #
 
 # svn checkout directory
-SOURCE_DIR="/Volumes/Local/Users/amaxwell/build/bibdesk-clean"
+SOURCE_DIR=os.path.abspath(".")
 
 # create a private temporary directory
 TEMP_DIR = os.path.join("/var/tmp", "BibDesk-%s" % (getuser()))
@@ -65,7 +64,7 @@ except Exception, e:
     assert os.path.isdir(TEMP_DIR), "%s does not exist" % (TEMP_DIR)
 OBJROOT = os.path.join(TEMP_DIR, "objroot")
 SYMROOT = os.path.join(TEMP_DIR, "symroot")
-XCODEBUILD = "/Xcode3/usr/bin/xcodebuild"
+XCODEBUILD = "/usr/bin/xcodebuild"
 
 # wherever the final app ends up
 BUILT_APP = os.path.join(SYMROOT, "Release", "BibDesk.app")
@@ -76,8 +75,7 @@ TEMP_DMG = os.path.join(TEMP_DIR, "BibDesk.dmg")
 AGE_LIMIT = 14
 
 # nightly build ftp server
-HOST_NAME = 'michael-mccracken.net'
-SERVER_PATH = "/users/home/michaelmccracken/web/public/bibdesk/nightlies"
+SERVER_PATH = os.path.expanduser("~/Dropbox/Public/BibDesk")
 
 # path for error logging (log is e-mailed in case of failure)
 LOG_PATH=os.path.join(TEMP_DIR, "build_bibdesk_py.log")
@@ -117,27 +115,6 @@ def sendEmailAndRemoveTemporaryDirectory():
     finally:
         removeTemporaryDirectory()
     
-# return dictionary with keys "username" and "password" from keychain
-def getUserAndPass():
-    try:
-        pwtask = subprocess.Popen(["security", "find-internet-password", "-g", "-s", HOST_NAME], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        [output, error] = pwtask.communicate()
-        pwoutput = output + error
-        pwlines = pwoutput.splitlines()
-        username = ''
-        password = ''
-        for line in pwlines:
-            line = line.lstrip()
-            if line.startswith('"acct"<blob>='):
-                username = line.replace('"acct"<blob>=', '').strip('"')
-
-            if line.startswith('password: '):
-                password = line.replace('password: ', '').strip('"')
-    except Exception, e:
-        print e
-            
-    return { "username":username, "password":password }
-
 def runSvnUpdate():
     cmd = ["/usr/bin/svn", "up"]
     try:
@@ -162,8 +139,11 @@ def runVersionBump():
     logFile.close()
     return rc
     
-def runXcodeBuild():
-    cmd = [XCODEBUILD, "-configuration", "Release", "-target", "BibDesk", "clean", "build", "SYMROOT=" + SYMROOT, "OBJROOT=" + OBJROOT]
+def runXcodeBuild(clean=True):
+    cmd = [XCODEBUILD, "-configuration", "Release", "-target", "BibDesk"]
+    if clean:
+        cmd.append("clean")
+    cmd += ["build", "SYMROOT=" + SYMROOT, "OBJROOT=" + OBJROOT]
     try:
         logFile = open(LOG_PATH, "a", -1)
         x = subprocess.Popen(cmd, cwd=SOURCE_DIR, stdout=logFile, stderr=logFile)
@@ -248,121 +228,94 @@ def createDiskImage(imageName):
         logFile.close()
         sendEmailAndRemoveTemporaryDirectory()
         exit(1)
+
+if __name__ == '__main__':
+        
+    # update the source tree
+    rc = runSvnUpdate()
+    if rc != 0:
+        sendEmailAndRemoveTemporaryDirectory()
+        exit(1)
+
+    # run the unit test target first, since it builds quicker
+    # rc = runXcodeUnitTest()
+    # if rc != 0:
+    #     sendEmailAndRemoveTemporaryDirectory()
+    #     exit(1)
     
-# update the source tree
-rc = runSvnUpdate()
-if rc != 0:
-    sendEmailAndRemoveTemporaryDirectory()
-    exit(1)
+    bump the project version with agvtool
+    rc = runVersionBump()
+    if rc != 0:
+        sendEmailAndRemoveTemporaryDirectory()
+        exit(1)
 
-# run the unit test target first, since it builds quicker
-rc = runXcodeUnitTest()
-if rc != 0:
-    sendEmailAndRemoveTemporaryDirectory()
-    exit(1)
+    # clean and build the Xcode project
+    rc = runXcodeBuild(clean=False)
+    if rc != 0:
+        sendEmailAndRemoveTemporaryDirectory()
+        exit(1)
+
+    # the build function should have returned nonzero in this case, but check again
+    if os.access(BUILT_APP, os.F_OK) == False:
+        logFile = open(LOG_PATH, "a")
+        logFile.write("No application at " + BUILT_APP)
+        logFile.close()
+        sendEmailAndRemoveTemporaryDirectory()
+        exit(1)
     
-# bump the project version with agvtool
-rc = runVersionBump()
-if rc != 0:
-    sendEmailAndRemoveTemporaryDirectory()
-    exit(1)
+    # disable localizations if needed
+    if int(buildConfig["disableLocalizations"]) != 0:
+        disableLocalizations(BUILT_APP)      
 
-# clean and build the Xcode project
-rc = runXcodeBuild()
-if rc != 0:
-    sendEmailAndRemoveTemporaryDirectory()
-    exit(1)
+    # create a name for the disk image based on today's date
+    imageName = datetime.date.today().strftime("%Y%m%d")
+    imageName = os.path.join(TEMP_DIR, "BibDesk-" + imageName + ".dmg")
+    if os.path.exists(imageName):
+        os.unlink(imageName)
+    createDiskImage(imageName)
 
-# the build function should have returned nonzero in this case, but check again
-if os.access(BUILT_APP, os.F_OK) == False:
-    logFile = open(LOG_PATH, "a")
-    logFile.write("No application at " + BUILT_APP)
-    logFile.close()
-    sendEmailAndRemoveTemporaryDirectory()
-    exit(1)
-    
-# disable localizations if needed
-if int(buildConfig["disableLocalizations"]) != 0:
-    disableLocalizations(BUILT_APP)      
+    # takes a string of the form "20081102" (year month day) and returns a date object
+    def dateFromString(datePart):
+        year = datePart[0:4]
+        month = datePart[4:6]
+        day = datePart[6:8]
+        theDate = datetime.date(int(year), int(month), int(day))
+        return theDate
 
-# create a name for the disk image based on today's date
-imageName = datetime.date.today().strftime("%Y%m%d")
-imageName = os.path.join(TEMP_DIR, "BibDesk-" + imageName + ".dmg")
-if os.path.exists(imageName):
-    os.unlink(imageName)
-createDiskImage(imageName)
+    def removeOldFiles():
+        try:
+            os.chdir(SERVER_PATH)
+            dirlist = os.listdir(SERVER_PATH)
+            for fileName in dirlist:
+                if fileName.startswith("BibDesk-") and fileName.endswith(".dmg"):
+                    datePart = fileName.replace("BibDesk-", "")
+                    datePart = datePart.replace(".dmg", "")
+                    if datePart.isdigit() and len(datePart) == 8:
+                        # check to see how old the file is, based on its name
+                        diff = datetime.date.today() - dateFromString(datePart)
+                        if diff.days >= AGE_LIMIT:
+                            os.unlink(fileName)
+                    else:
+                        # file had BibDesk- as prefix, so assume it's a bad filename
+                        os.unlink(fileName)
+        except Exception, e:
+            print "Failed deleting old files", e
 
-# takes a string of the form "20081102" (year month day) and returns a date object
-def dateFromString(datePart):
-    year = datePart[0:4]
-    month = datePart[4:6]
-    day = datePart[6:8]
-    theDate = datetime.date(int(year), int(month), int(day))
-    return theDate
+    # remove old files before uploading
+    removeOldFiles()
 
-def removeOldFiles(ftp):
+    # now try to put the new file in place
     try:
-        ftp.chdir(SERVER_PATH)
-        dirlist = ftp.listdir()
-        for fileName in dirlist:
-            if fileName.startswith("BibDesk-") and fileName.endswith(".dmg"):
-                datePart = fileName.replace("BibDesk-", "")
-                datePart = datePart.replace(".dmg", "")
-                if datePart.isdigit() and len(datePart) == 8:
-                    # check to see how old the file is, based on its name
-                    diff = datetime.date.today() - dateFromString(datePart)
-                    if diff.days >= AGE_LIMIT:
-                        ftp.unlink(fileName)
-                else:
-                    # file had BibDesk- as prefix, so assume it's a bad filename
-                    ftp.unlink(fileName)
+        shutil.copy(imageName, SERVER_PATH)
     except Exception, e:
-        print "Failed deleting old files", e
-
-# get user/pass from keychain
-d = getUserAndPass()
-if len(d["username"]) == 0 or len(d["password"]) == 0:
-    # truncate the log file
-    logFile = open(LOG_PATH, "w")
-    logFile.write("Failed getting username and password from keychain")
-    logFile.close()
-    sendEmailAndRemoveTemporaryDirectory()
-    exit(1)
-
-# create the ftp object and log in...
-sftp = None
-try:
-    import paramiko
-    t = paramiko.Transport((HOST_NAME, 22))
-    t.connect(username=d["username"], password=d["password"])
-    sftp = paramiko.SFTPClient.from_transport(t)
-except Exception, e:
-    # truncate the log file
-    logFile = open(LOG_PATH, "w")
-    logFile.write("Failed sftp connection with exception " + str(e) + "\n")
-    logFile.close()
-    sendEmailAndRemoveTemporaryDirectory()
-    exit(1)
-
-# remove old files before uploading
-removeOldFiles(sftp)
-
-# now try to put the new file in place
-try:
-    sftp.chdir(SERVER_PATH)
-    sftp.put(imageName, os.path.basename(imageName))
-except Exception, e:
-    # truncate the log file
-    logFile = open(LOG_PATH, "w")
-    logFile.write("Failed to upload file with exception " + str(e) + "\n")
-    logFile.write("File was " + imageName)
-    logFile.close()
-    sendEmailAndRemoveTemporaryDirectory()
-finally:
-    sftp.close()
-    # close the connection or else we don't exit because of a select() loop hanging around
-    t.close()
-    removeTemporaryDirectory()
+        # truncate the log file
+        logFile = open(LOG_PATH, "w")
+        logFile.write("Failed to upload file with exception " + str(e) + "\n")
+        logFile.write("File was " + imageName)
+        logFile.close()
+        sendEmailAndRemoveTemporaryDirectory()
+    finally:
+        removeTemporaryDirectory()
   
 #
 # Sourceforge has broken ssh support such that this step will no longer work.  Hopefully
