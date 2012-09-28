@@ -123,6 +123,10 @@ enum {
 
 #pragma mark -
 
+@interface BDSKStringEncodingManager (BDSKPrivate)
+- (void)setupEncodingsList;
+@end
+
 @implementation BDSKStringEncodingManager
 
 static BDSKStringEncodingManager *sharedEncodingManager = nil;
@@ -142,6 +146,31 @@ static BDSKStringEncodingManager *sharedEncodingManager = nil;
     BDSKPRECONDITION(sharedEncodingManager == nil);
     self = [super init];
     return self;
+}
+
+- (void)dealloc {
+    BDSKDESTROY(encodings);
+    [super dealloc];
+}
+
+- (NSString *)windowNibName {
+    return @"SelectEncodingsPanel";
+}
+
+- (void)windowDidLoad {
+    [super windowDidLoad];
+    
+    // This should work when open panel is up
+    [(NSPanel *)[self window] setWorksWhenModal:YES];	
+    [[self window] setLevel:NSModalPanelWindowLevel];
+    
+    [self setupEncodingsList];
+}
+
+// Because we want the encoding list to be modifiable even when a modal panel (such as the open panel) is up, we indicate that both the encodings list panel and the target work when modal. (See showPanel: below for the former...)
+// CMH: this method seems to be undocumented, it is only documented for NSWindow, not for targets or whatever
+- (BOOL)worksWhenModal{
+    return YES;
 }
 
 #pragma mark -
@@ -268,7 +297,7 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
         [[popup lastItem] setTag:BDSKNoStringEncoding];
     }
     [popup addItemWithTitle:[NSLocalizedString(@"Customize Encodings List", @"Encoding popup entry for bringing up the Customize Encodings List panel") stringByAppendingEllipsis]];
-    [[popup lastItem] setAction:@selector(showPanel:)];
+    [[popup lastItem] setAction:@selector(showWindow:)];
     [[popup lastItem] setTarget:self];
     [[popup lastItem] setTag:BDSKNoStringEncoding];
 
@@ -320,26 +349,7 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
     if (post) [[NSNotificationCenter defaultCenter] postNotificationName:BDSKEncodingsListChangedNotification object:nil];
 }
 
-// Because we want the encoding list to be modifiable even when a modal panel (such as the open panel) is up, we indicate that both the encodings list panel and the target work when modal. (See showPanel: below for the former...)
-// CMH: this method seems to be undocumented, it is only documented for NSWindow, not for targets or whatever
-- (BOOL)worksWhenModal{
-    return YES;
-}
-
 #pragma mark Action methods
-
-- (IBAction)showPanel:(id)sender {
-    if (encodingMatrix == nil) {
-        if (NO == [NSBundle loadNibNamed:@"SelectEncodingsPanel" owner:self])  {
-            NSLog(@"Failed to load SelectEncodingsPanel.nib");
-            return;
-        }
-        [(NSPanel *)[encodingMatrix window] setWorksWhenModal:YES];	// This should work when open panel is up
-        [[encodingMatrix window] setLevel:NSModalPanelWindowLevel];	// Again, for the same reason
-        [self setupEncodingsList];					// Initialize the list (only need to do this once)
-    }
-    [[encodingMatrix window] makeKeyAndOrderFront:nil];
-}
 
 - (IBAction)encodingListChanged:(id)sender {
     NSInteger cnt, numRows = [encodingMatrix numberOfRows];
