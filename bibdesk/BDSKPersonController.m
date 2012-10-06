@@ -482,7 +482,7 @@
 		return NO;
 		
 	[pboard setData:data forType:NSVCardPboardType];
-	[pboard setPropertyList:[NSArray arrayWithObject:[[person name] stringByAppendingPathExtension:@"vcf"]] forType:NSFilesPromisePboardType];
+	[pboard setPropertyList:[NSArray arrayWithObject:@"vcf"] forType:NSFilesPromisePboardType];
 	return YES;
 }
 
