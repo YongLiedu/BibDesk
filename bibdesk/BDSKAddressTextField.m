@@ -187,9 +187,7 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFlagsChangedNotification object:NSApp];
 }
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
 - (id <BDSKAddressTextFieldDelegate>)delegate { return (id <BDSKAddressTextFieldDelegate>)[super delegate]; }
 - (void)setDelegate:(id <BDSKAddressTextFieldDelegate>)newDelegate { [super setDelegate:newDelegate]; }
-#endif
 
 @end

@@ -84,15 +84,6 @@
     [enableBrowsingButton setState:[sud boolForKey:BDSKShouldLookForSharedFilesKey] ? NSOnState : NSOffState];
     [usePasswordButton setState:[sud boolForKey:BDSKSharingRequiresPasswordKey] ? NSOnState : NSOffState];
     
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_5) {
-        NSRect imageRect, textRect = [statusField frame];
-        NSDivideRect([statusField frame], &imageRect, &textRect, 16.0, NSMinXEdge);
-        [statusField setFrame:textRect];
-        imageRect.size.height = 16.0;
-        statusImageView = [[[NSImageView alloc] initWithFrame:imageRect] autorelease];
-        [[statusField superview] addSubview:statusImageView];
-    }
-    
     [self updateSettingsUI];
     [self updateNameUI];
     [self updateUI];

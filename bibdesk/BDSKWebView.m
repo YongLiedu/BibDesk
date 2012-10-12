@@ -511,28 +511,3 @@ static id sharedHandler = nil;
 }
 
 @end
-
-#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_5
-
-// WebKit now sets the background color to clearColor by default, which is drawn black when using the 10.5 SDK
-
-@interface NSTextFieldCell (BDSKExtensions)
-@end
-
-@implementation NSTextFieldCell (BDSKExtensions)
-
-static void (*original_setBackgroundColor)(id, SEL, id) = NULL;
-
-- (void)replacement_setBackgroundColor:(NSColor *)color {
-    if ([self drawsBackground] && [color isEqual:[NSColor clearColor]])
-        color = [NSColor textBackgroundColor];
-    original_setBackgroundColor(self, _cmd, color);
-}
-
-+ (void)load{
-    original_setBackgroundColor = (void (*)(id, SEL, id))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(setBackgroundColor:), @selector(replacement_setBackgroundColor:));
-}
-
-@end
-
-#endif

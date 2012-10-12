@@ -753,11 +753,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         if (dividerIndex == 0)
             return proposedMax - 150.0;
         else
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-            return floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_5 ? proposedMax - 100.0 - [groupSplitView dividerThickness] : proposedMax - 100.0;
-#else
-            return proposedMax - 100.0 - [groupSplitView dividerThickness];
-#endif
+            return proposedMax - 100.0;
     } else if ([sender isEqual:splitView]) {
         if (dividerIndex == (NSInteger)[[splitView subviews] count] - 2)
             return proposedMax - 50.0;
@@ -770,11 +766,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 - (CGFloat)splitView:(NSSplitView *)sender constrainMinCoordinate:(CGFloat)proposedMin ofSubviewAt:(NSInteger)dividerIndex {
     if ([sender isEqual:groupSplitView]) {
         if (dividerIndex == 0)
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-            return floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_5 ? proposedMin + 100.0 + [groupSplitView dividerThickness] : proposedMin + 100.0;
-#else
-            return proposedMin + 100.0 + [groupSplitView dividerThickness];
-#endif
+            return proposedMin + 100.0;
         else
             return proposedMin + 150.0;
     }

@@ -1491,10 +1491,8 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
         [[self delegate] tokenField:self textViewDidChangeSelection:[notification object]];
 }
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
 - (id <BDSKTokenFieldDelegate>)delegate { return (id <BDSKTokenFieldDelegate>)[super delegate]; }
 - (void)setDelegate:(id <BDSKTokenFieldDelegate>)newDelegate { [super setDelegate:newDelegate]; }
-#endif
 
 @end
 
