@@ -40,7 +40,7 @@
 	return unescapedString;
 }
 
-- (const xmlChar *)xmlString
+- (const xmlChar *)xmlCString
 {
 	return (xmlChar *)[[self stringByEscapingXML] UTF8String];
 }
@@ -57,7 +57,7 @@
 		nodeName = elName;
 	}
 	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlString], (xmlChar *)[self UTF8String]); // FIX [self xmlString]);
+	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], (xmlChar *)[self UTF8String]); // FIX [self xmlCString]);
 	
 	return node;
 }
@@ -91,7 +91,7 @@
 		nodeName = elName;
 	}
 	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlString], [[self stringValue] xmlString]);
+	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], [[self stringValue] xmlCString]);
 	
 	return node;
 }
@@ -118,7 +118,7 @@
 		nodeName = elName;
 	}
 	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlString], [[self ISO8601DateString] xmlString]);
+	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], [[self ISO8601DateString] xmlCString]);
 	
 	return node;
 }
@@ -144,7 +144,7 @@
 		nodeName = elName;
 	}
 	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlString], [[self base64Encoding] xmlString]);
+	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], [[self base64Encoding] xmlCString]);
 	
 	return node;
 }
@@ -190,8 +190,8 @@ static const char encodingTable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq
 			decodingTable[(short)encodingTable[i]] = i;
 	}
 	
-	const char *characters = [string cStringUsingEncoding:NSASCIIStringEncoding];
-	if (characters == NULL)     //  Not an ASCII string!
+	const char *chars = [string cStringUsingEncoding:NSASCIIStringEncoding];
+	if (chars == NULL)     //  Not an ASCII string!
 		return nil;
 	char *bytes = malloc((([string length] + 3) / 4) * 3);
 	if (bytes == NULL)
@@ -205,11 +205,11 @@ static const char encodingTable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq
 		short bufferLength;
 		for (bufferLength = 0; bufferLength < 4; i++)
 		{
-			if (characters[i] == '\0')
+			if (chars[i] == '\0')
 				break;
-			if (isspace(characters[i]) || characters[i] == '=')
+			if (isspace(chars[i]) || chars[i] == '=')
 				continue;
-			buffer[bufferLength] = decodingTable[(short)characters[i]];
+			buffer[bufferLength] = decodingTable[(short)chars[i]];
 			if (buffer[bufferLength++] == CHAR_MAX)      //  Illegal character!
 			{
 				free(bytes);
@@ -242,8 +242,8 @@ static const char encodingTable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq
 	if ([self length] == 0)
 		return @"";
 
-    char *characters = malloc((([self length] + 2) / 3) * 4);
-	if (characters == NULL)
+    char *chars = malloc((([self length] + 2) / 3) * 4);
+	if (chars == NULL)
 		return nil;
 	NSUInteger length = 0;
 	
@@ -256,17 +256,17 @@ static const char encodingTable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq
 			buffer[bufferLength++] = ((char *)[self bytes])[i++];
 		
 		//  Encode the bytes in the buffer to four characters, including padding "=" characters if necessary.
-		characters[length++] = encodingTable[(buffer[0] & 0xFC) >> 2];
-		characters[length++] = encodingTable[((buffer[0] & 0x03) << 4) | ((buffer[1] & 0xF0) >> 4)];
+		chars[length++] = encodingTable[(buffer[0] & 0xFC) >> 2];
+		chars[length++] = encodingTable[((buffer[0] & 0x03) << 4) | ((buffer[1] & 0xF0) >> 4)];
 		if (bufferLength > 1)
-			characters[length++] = encodingTable[((buffer[1] & 0x0F) << 2) | ((buffer[2] & 0xC0) >> 6)];
-		else characters[length++] = '=';
+			chars[length++] = encodingTable[((buffer[1] & 0x0F) << 2) | ((buffer[2] & 0xC0) >> 6)];
+		else chars[length++] = '=';
 		if (bufferLength > 2)
-			characters[length++] = encodingTable[buffer[2] & 0x3F];
-		else characters[length++] = '=';	
+			chars[length++] = encodingTable[buffer[2] & 0x3F];
+		else chars[length++] = '=';	
 	}
 	
-	return [[[NSString alloc] initWithBytesNoCopy:characters length:length encoding:NSASCIIStringEncoding freeWhenDone:YES] autorelease];
+	return [[[NSString alloc] initWithBytesNoCopy:chars length:length encoding:NSASCIIStringEncoding freeWhenDone:YES] autorelease];
 }
 
 @end
@@ -302,7 +302,7 @@ static const char encodingTable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq
 		nodeName = elName;
 	}
 	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlString], [[self stringValue] xmlString]);
+	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], [[self stringValue] xmlCString]);
 	
 	return node;
 }

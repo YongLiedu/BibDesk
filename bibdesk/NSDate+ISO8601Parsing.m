@@ -435,10 +435,10 @@ static BOOL is_leap_year(unsigned year) {
             case 1:; //-YY; -YY-MM (implicit century)
               NSLog(@"(%@) found %u digits and one hyphen, so this is either -YY or -YY-MM; segment (year) is %u", str, num_digits, segment);
               unsigned current_year = [dateComps year];
-              unsigned century = (current_year % 100U);
-              year = segment + (current_year - century);
+              unsigned current_century = (current_year % 100U);
+              year = segment + (current_year - current_century);
               if(num_digits == 1U) //implied decade
-                year += century - (current_year % 10U);
+                year += current_century - (current_year % 10U);
               
               if(*ch == '-') {
                 ++ch;

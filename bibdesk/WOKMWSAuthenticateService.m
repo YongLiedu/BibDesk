@@ -32,7 +32,7 @@
 		nodeName = [NSString stringWithFormat:@"%@:%@", @"WOKMWSAuthenticateService", elName];
 	}
 	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlString], NULL);
+	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
 	
 	
 	[self addAttributesToNode:node];
@@ -105,7 +105,7 @@
 		nodeName = [NSString stringWithFormat:@"%@:%@", @"WOKMWSAuthenticateService", elName];
 	}
 	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlString], NULL);
+	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
 	
 	
 	[self addAttributesToNode:node];
@@ -176,7 +176,7 @@
 						NSString *prefix = [elementTypeArray objectAtIndex:0];
 						NSString *localName = [elementTypeArray objectAtIndex:1];
 						
-						xmlNsPtr elementNamespace = xmlSearchNs(cur->doc, cur, [prefix xmlString]);
+						xmlNsPtr elementNamespace = xmlSearchNs(cur->doc, cur, [prefix xmlCString]);
 						
 						NSString *standardPrefix = [[USGlobals sharedInstance].wsdlStandardNamespaces objectForKey:[NSString stringWithCString:(char*)elementNamespace->href encoding:NSUTF8StringEncoding]];
 						
@@ -226,7 +226,7 @@
 		nodeName = [NSString stringWithFormat:@"%@:%@", @"WOKMWSAuthenticateService", elName];
 	}
 	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlString], NULL);
+	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
 	
 	
 	[self addAttributesToNode:node];
@@ -297,7 +297,7 @@
 		nodeName = [NSString stringWithFormat:@"%@:%@", @"WOKMWSAuthenticateService", elName];
 	}
 	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlString], NULL);
+	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
 	
 	
 	[self addAttributesToNode:node];
@@ -368,7 +368,7 @@
 		nodeName = [NSString stringWithFormat:@"%@:%@", @"WOKMWSAuthenticateService", elName];
 	}
 	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlString], NULL);
+	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
 	
 	
 	[self addAttributesToNode:node];
@@ -439,7 +439,7 @@
 		nodeName = [NSString stringWithFormat:@"%@:%@", @"WOKMWSAuthenticateService", elName];
 	}
 	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlString], NULL);
+	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
 	
 	
 	[self addAttributesToNode:node];
@@ -510,7 +510,7 @@
 		nodeName = [NSString stringWithFormat:@"%@:%@", @"WOKMWSAuthenticateService", elName];
 	}
 	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlString], NULL);
+	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
 	
 	
 	[self addAttributesToNode:node];
@@ -581,7 +581,7 @@
 		nodeName = [NSString stringWithFormat:@"%@:%@", @"WOKMWSAuthenticateService", elName];
 	}
 	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlString], NULL);
+	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
 	
 	
 	[self addAttributesToNode:node];
@@ -652,7 +652,7 @@
 		nodeName = [NSString stringWithFormat:@"%@:%@", @"WOKMWSAuthenticateService", elName];
 	}
 	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlString], NULL);
+	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
 	
 	
 	[self addAttributesToNode:node];
@@ -723,7 +723,7 @@
 		nodeName = [NSString stringWithFormat:@"%@:%@", @"WOKMWSAuthenticateService", elName];
 	}
 	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlString], NULL);
+	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
 	
 	
 	[self addAttributesToNode:node];

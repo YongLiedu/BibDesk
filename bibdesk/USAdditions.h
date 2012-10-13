@@ -16,7 +16,7 @@
 
 - (NSString *)stringByEscapingXML;
 - (NSString *)stringByUnescapingXML;
-- (const xmlChar *)xmlString;
+- (const xmlChar *)xmlCString;
 - (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
 + (NSString *)deserializeNode:(xmlNodePtr)cur;
 
