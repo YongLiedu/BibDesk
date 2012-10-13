@@ -54,6 +54,8 @@ typedef struct _BDSKISIGroupFlags {
     volatile int32_t fetchedResults;
     BDSKISIGroupFlags flags;
     NSString *errorMessage;
+    NSHTTPCookie *sessionCookie;
 }
 - (void)setErrorMessage:(NSString *)newErrorMessage;
+- (void)authenticate;
 @end

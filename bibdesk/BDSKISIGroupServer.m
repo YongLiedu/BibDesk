@@ -37,7 +37,8 @@
  */
 
 #import "BDSKISIGroupServer.h"
-#import "BDSKISIWebServices.h"
+#import "WOKMWSAuthenticateService.h"
+#import "WokSearchService.h"
 #import "BDSKLinkedFile.h"
 #import "BDSKServerInfo.h"
 #import "BibItem.h"
@@ -71,7 +72,7 @@ static NSArray *sourceXMLTagPriority = nil;
 static NSString *ISIURLFieldName = nil;
 
 static NSArray *publicationInfosWithISIXMLString(NSString *xmlString);
-static NSArray *publicationInfosWithISIRefXMLString(NSString *xmlString, NSMutableArray *hotRecids);
+static NSArray *publicationInfosWithISICitedReferences(NSArray *citedReferences);
 static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs, NSString *fieldName);
 static NSArray *publicationsFromData(NSData *data);
 
@@ -132,6 +133,7 @@ static NSArray *publicationsFromData(NSData *data);
         flags.isRetrieving = 0;
         availableResults = 0;
         fetchedResults = 0;
+        sessionCookie = nil;
     
         [self startDOServerSync];
     }
@@ -141,6 +143,7 @@ static NSArray *publicationsFromData(NSData *data);
 - (void)dealloc {
     group = nil;
     BDSKDESTROY(serverInfo);
+    [sessionCookie release];
     [super dealloc];
 }
 
@@ -239,8 +242,7 @@ static NSArray *publicationsFromData(NSData *data);
 - (oneway void)downloadWithSearchTerm:(NSString *)searchTerm database:(NSString *)database;
 {    
     NSArray *pubs = nil;
-    NSMutableArray *identifiers = nil;
-    enum operationTypes { search, retrieve, retrieveRecid, citedReferences, citingArticles, citingArticlesByRecids } operation = search;
+    enum operationTypes { search, citedReferences, citingArticles, relatedRecords, retrieveById } operation = search;
     NSInteger availableResultsLocal = [self numberOfAvailableResults];
     NSInteger fetchedResultsLocal = [self numberOfFetchedResults];
     
@@ -251,120 +253,181 @@ static NSArray *publicationsFromData(NSData *data);
          */
         
         NSRange prefixRange;
-        if ((prefixRange = [searchTerm rangeOfString:@"RetrieveRecid:" options:NSAnchoredSearch]).location == 0) {
-            searchTerm = [searchTerm substringFromIndex:NSMaxRange(prefixRange)];
-            operation = retrieveRecid;
-        } else if ((prefixRange = [searchTerm rangeOfString:@"CitedReferences:" options:NSAnchoredSearch]).location == 0) {
+        if ((prefixRange = [searchTerm rangeOfString:@"CitedReferences:" options:NSAnchoredSearch]).location == 0) {
             searchTerm = [searchTerm substringFromIndex:NSMaxRange(prefixRange)];
             operation = citedReferences;
         } else if ((prefixRange = [searchTerm rangeOfString:@"CitingArticles:" options:NSAnchoredSearch]).location == 0) {
             searchTerm = [searchTerm substringFromIndex:NSMaxRange(prefixRange)];
             operation = citingArticles;
-        } else if ((prefixRange = [searchTerm rangeOfString:@"CitingArticlesRecid:" options:NSAnchoredSearch]).location == 0) {
+        } else if ((prefixRange = [searchTerm rangeOfString:@"RelatedRecords:" options:NSAnchoredSearch]).location == 0) {
             searchTerm = [searchTerm substringFromIndex:NSMaxRange(prefixRange)];
-            operation = citingArticlesByRecids;
+            operation = relatedRecords;
+        } else if ((prefixRange = [searchTerm rangeOfString:@"RetrieveById:" options:NSAnchoredSearch]).location == 0) {
+            searchTerm = [searchTerm substringFromIndex:NSMaxRange(prefixRange)];
+            operation = retrieveById;
         } else if ([searchTerm rangeOfString:@"="].location == NSNotFound)
             searchTerm = [NSString stringWithFormat:@"TS=\"%@\"", searchTerm];
+        
+        // authenticate if necessary
+        if (!sessionCookie) {
+            [self authenticate];
+            if (!sessionCookie) {
+                OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
+            }
+        }
         
         // Strip whitespace from the search term to make WOS happy
         searchTerm = [searchTerm stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         
         // perform WS query to get count of results; don't pass zero for record numbers, although it's not clear what the values mean in this context
-        NSDictionary *resultInfo = nil;
         NSString *resultString = nil;
         
-        NSString *fields = @"doctype authors bib_vol pub_url source_title source_abbrev item_title bib_issue bib_pages keywords abstract source_series article_nos bib_date publisher pub_address issue_ed times_cited get_parent ut refs ";
-        if (sourceXMLTagPriority)
-            fields = [fields stringByAppendingString:[sourceXMLTagPriority componentsJoinedByString:@" "]];
+        WokSearchService_editionDesc *edition = [[[WokSearchService_editionDesc alloc] init] autorelease];
+        edition.collection = WOS_DB_ID;
+        edition.edition = database;
+        
+        WokSearchService_retrieveParameters *retrieveParameters = [[[WokSearchService_retrieveParameters alloc] init] autorelease];
+        retrieveParameters.firstRecord = [NSNumber numberWithInt:1];
+        retrieveParameters.count = [NSNumber numberWithInt:1];
+        
+        WokSearchService_timeSpan *timeSpan = [[[WokSearchService_timeSpan alloc] init] autorelease];
+        timeSpan.begin = @"1600-01-01";
+        timeSpan.end = @"2020-01-01";
+        
+        WokSearchService_search *searchRequest = nil;
+        WokSearchService_searchResponse *searchResponse = nil;
+        
+        WokSearchService_citedReferences *citedReferencesRequest = nil;
+        WokSearchService_citedReferencesResponse *citedReferencesResponse = nil;
+        
+        WokSearchService_citingArticles *citingArticlesRequest = nil;
+        WokSearchService_citingArticlesResponse *citingArticlesResponse = nil;
+        
+        WokSearchService_relatedRecords *relatedRecordsRequest = nil;
+        WokSearchService_relatedRecordsResponse *relatedRecordsResponse = nil;
+        
+        WokSearchService_retrieveById *retrieveByIdRequest = nil;
+        WokSearchService_retrieveByIdResponse *retrieveByIdResponse = nil;
+        
+        WokSearchServiceSoapBindingResponse *response = nil;
+        NSArray *responseBodyParts;
+        WokSearchService_fullRecordSearchResults *fullRecordSearchResults;
+        WokSearchService_citedReferencesSearchResults *citedReferencesSearchResults = nil;
+        
+        WokSearchServiceSoapBinding *binding = [WokSearchService WokSearchServiceSoapBinding];
+        [binding addCookie:sessionCookie];
+        binding.logXMLInOut = NO;
+        
+        // ISI seems to return all fields, so the below aren't currently needed
+        //NSString *fields = @"doctype authors bib_vol pub_url source_title source_abbrev item_title bib_issue bib_pages keywords abstract source_series article_nos bib_date publisher pub_address issue_ed times_cited get_parent ut refs ";
+        //if (sourceXMLTagPriority)
+        //    fields = [fields stringByAppendingString:[sourceXMLTagPriority componentsJoinedByString:@" "]];
         
         // @@ Currently limited to WOS database; extension to other WOS databases might require different WebService stubs?  Note that the value we're passing as database is referred to as  "edition" in the WoS docs.
         NSScanner *scanner;
+        NSString *token;
         switch (operation) {
             
             case search:
-                resultInfo = [BDSKISISearchRetrieveService search:WOS_DB_ID
-                                                         in_query:searchTerm
-                                                         in_depth:@""
-                                                      in_editions:database
-                                                      in_firstRec:1
-                                                       in_numRecs:1];
-                availableResultsLocal = [[resultInfo objectForKey:RECORDSFOUND_KEY] integerValue];
-                break;
-            
-            case retrieve:
-                resultString = [BDSKISISearchRetrieveService retrieve:WOS_DB_ID
-                                                       in_primaryKeys:searchTerm
-                                                              in_sort:@""
-                                                            in_fields:fields];
-                pubs = publicationInfosWithISIXMLString(resultString);
-                availableResultsLocal = [pubs count];
-                fetchedResultsLocal = [pubs count];
-                break;
-            
-            case retrieveRecid:
-                scanner = [[[NSScanner alloc] initWithString:searchTerm] autorelease];
-                identifiers = [[[NSMutableArray alloc] init] autorelease];
-                while ([scanner scanUpToCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:NULL]) {
-                    NSString *token;
-                    if ([scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:&token])
-                        [identifiers addObject:token];
+                searchRequest = [[[WokSearchService_search alloc] init] autorelease];
+                searchRequest.queryParameters = [[[WokSearchService_queryParameters alloc] init] autorelease];
+                searchRequest.queryParameters.databaseID = WOS_DB_ID;
+                [searchRequest.queryParameters addEditions:edition];
+                searchRequest.queryParameters.userQuery = searchTerm;
+                searchRequest.queryParameters.queryLanguage = @"en";
+                searchRequest.retrieveParameters = retrieveParameters;
+                response = [binding searchUsingParameters:searchRequest];
+                responseBodyParts = response.bodyParts;
+                for (id bodyPart in responseBodyParts) {
+                    if ([bodyPart isKindOfClass:[WokSearchService_searchResponse class]]) {
+                        searchResponse = bodyPart;
+                        fullRecordSearchResults = searchResponse.return_;
+                        availableResultsLocal = fullRecordSearchResults.recordsFound.integerValue;
+                    }
                 }
-                availableResultsLocal = [identifiers count];
                 break;
             
             case citedReferences:
-                resultString = [BDSKISISearchRetrieveService citedReferences:WOS_DB_ID
-                                                               in_primaryKey:searchTerm];
-                if (resultString) {
-                    NSMutableArray *hotRecids = [[[NSMutableArray alloc] init] autorelease];
-                    pubs = publicationInfosWithISIRefXMLString(resultString, hotRecids);
-                    NSRange retrieveRange = {0, 0};
-                    while ([hotRecids count] > retrieveRange.location) {
-                        retrieveRange.length = MIN((NSUInteger)MAX_RESULTS, [hotRecids count] - retrieveRange.location);
-                        NSArray *subHotRecids = [hotRecids subarrayWithRange:retrieveRange];
-                        NSString *fullString;
-                        fullString = [BDSKISISearchRetrieveService retrieveRecid:WOS_DB_ID
-                                                                        in_recid:[subHotRecids componentsJoinedByString:@" "]
-                                                                         in_sort:@""
-                                                                       in_fields:fields];
-                        if (fullString) {
-                            NSArray *fullPubs = publicationInfosWithISIXMLString(fullString);
-                            if (fullPubs)
-                                pubs = replacePubInfosByField(pubs, fullPubs, @"Isi-Recid");
-                        }
-                        retrieveRange.location += MAX_RESULTS;
+                citedReferencesRequest = [[[WokSearchService_citedReferences alloc] init] autorelease];
+                citedReferencesRequest.databaseId = WOS_DB_ID;
+                citedReferencesRequest.uid = searchTerm;
+                [citedReferencesRequest addEditions:edition];
+                citedReferencesRequest.timeSpan = timeSpan;
+                citedReferencesRequest.queryLanguage = @"en";
+                citedReferencesRequest.retrieveParameters = retrieveParameters;
+                response = [binding citedReferencesUsingParameters:citedReferencesRequest];
+                responseBodyParts = response.bodyParts;
+                for (id bodyPart in responseBodyParts) {
+                    if ([bodyPart isKindOfClass:[WokSearchService_citedReferencesResponse class]]) {
+                        citedReferencesResponse = bodyPart;
+                        citedReferencesSearchResults = citedReferencesResponse.return_;
+                        availableResultsLocal = citedReferencesSearchResults.recordsFound.integerValue;
                     }
                 }
-                availableResultsLocal = [pubs count];
-                fetchedResultsLocal = [pubs count];
                 break;
             
             case citingArticles:
-                resultInfo = [BDSKISISearchRetrieveService citingArticles:WOS_DB_ID
-                                                            in_primaryKey:searchTerm
-                                                                 in_depth:@""
-                                                              in_editions:database
-                                                                  in_sort:@""
-                                                              in_firstRec:1
-                                                               in_numRecs:1
-                                                                in_fields:@""];
-                availableResultsLocal = [[resultInfo objectForKey:RECORDSFOUND_KEY] integerValue];
+                citingArticlesRequest = [[[WokSearchService_citingArticles alloc] init] autorelease];
+                citingArticlesRequest.databaseId = WOS_DB_ID;
+                citingArticlesRequest.uid = searchTerm;
+                [citingArticlesRequest addEditions:edition];
+                citingArticlesRequest.timeSpan = timeSpan;
+                citingArticlesRequest.queryLanguage = @"en";
+                citingArticlesRequest.retrieveParameters = retrieveParameters;
+                response = [binding citingArticlesUsingParameters:citingArticlesRequest];
+                responseBodyParts = response.bodyParts;
+                for (id bodyPart in responseBodyParts) {
+                    if ([bodyPart isKindOfClass:[WokSearchService_citingArticlesResponse class]]) {
+                        citingArticlesResponse = bodyPart;
+                        fullRecordSearchResults = citingArticlesResponse.return_;
+                        availableResultsLocal = fullRecordSearchResults.recordsFound.integerValue;
+                    }
+                }
                 break;
             
-            case citingArticlesByRecids:
-                resultInfo = [BDSKISISearchRetrieveService citingArticlesByRecids:WOS_DB_ID
-                                                                        in_recids:searchTerm
-                                                                         in_depth:@""
-                                                                      in_editions:database
-                                                                          in_sort:@""
-                                                                      in_firstRec:1
-                                                                       in_numRecs:1
-                                                                        in_fields:@""];
-                availableResultsLocal = [[resultInfo objectForKey:RECORDSFOUND_KEY] integerValue];
+            case relatedRecords:
+                relatedRecordsRequest = [[[WokSearchService_relatedRecords alloc] init] autorelease];
+                relatedRecordsRequest.databaseId = WOS_DB_ID;
+                relatedRecordsRequest.uid = searchTerm;
+                [relatedRecordsRequest addEditions:edition];
+                relatedRecordsRequest.timeSpan = timeSpan;
+                relatedRecordsRequest.queryLanguage = @"en";
+                relatedRecordsRequest.retrieveParameters = retrieveParameters;
+                response = [binding relatedRecordsUsingParameters:relatedRecordsRequest];
+                responseBodyParts = response.bodyParts;
+                for (id bodyPart in responseBodyParts) {
+                    if ([bodyPart isKindOfClass:[WokSearchService_relatedRecordsResponse class]]) {
+                        relatedRecordsResponse = bodyPart;
+                        fullRecordSearchResults = relatedRecordsResponse.return_;
+                        availableResultsLocal = fullRecordSearchResults.recordsFound.integerValue;
+                    }
+                }
+                break;
+            
+            case retrieveById:
+                retrieveByIdRequest = [[[WokSearchService_retrieveById alloc] init] autorelease];
+                retrieveByIdRequest.databaseId = WOS_DB_ID;
+                scanner = [[[NSScanner alloc] initWithString:searchTerm] autorelease];
+                [scanner scanUpToCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:NULL];
+                while ([scanner scanUpToCharactersFromSet:[[NSCharacterSet decimalDigitCharacterSet] invertedSet] intoString:&token]) {
+                    [retrieveByIdRequest addUids:token];
+                    [scanner scanUpToCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:NULL];
+                }
+                retrieveByIdRequest.queryLanguage = @"en";
+                retrieveByIdRequest.retrieveParameters = retrieveParameters;
+                response = [binding retrieveByIdUsingParameters:retrieveByIdRequest];
+                responseBodyParts = response.bodyParts;
+                for (id bodyPart in responseBodyParts) {
+                    if ([bodyPart isKindOfClass:[WokSearchService_retrieveByIdResponse class]]) {
+                        retrieveByIdResponse = bodyPart;
+                        fullRecordSearchResults = retrieveByIdResponse.return_;
+                        availableResultsLocal = fullRecordSearchResults.recordsFound.integerValue;
+                    }
+                }
                 break;
         }
         
-        if (nil == resultString && nil == resultInfo && operation != retrieveRecid) {
+        if (nil == fullRecordSearchResults && nil == citedReferencesSearchResults && sessionCookie) {
             OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
             // we already know that a connection can be made, so we likely don't have permission to read this edition or database
             [self setErrorMessage:NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.")];
@@ -378,56 +441,80 @@ static NSArray *publicationsFromData(NSData *data);
             switch (operation) {
                 
                 case search:
-                    resultInfo = [BDSKISISearchRetrieveService searchRetrieve:WOS_DB_ID
-                                                                     in_query:searchTerm
-                                                                     in_depth:@""
-                                                                  in_editions:database
-                                                                      in_sort:@""
-                                                                  in_firstRec:fetchedResultsLocal
-                                                                   in_numRecs:numResults
-                                                                    in_fields:fields];
-                    resultString = [resultInfo objectForKey:RECORDS_KEY];
+                    searchRequest.retrieveParameters.firstRecord = [NSNumber numberWithInt:fetchedResultsLocal+1];
+                    searchRequest.retrieveParameters.count = [NSNumber numberWithInt:numResults];
+                    response = [binding searchUsingParameters:searchRequest];
+                    responseBodyParts = response.bodyParts;
+                    for (id bodyPart in responseBodyParts) {
+                        if ([bodyPart isKindOfClass:[WokSearchService_searchResponse class]]) {
+                            searchResponse = bodyPart;
+                            fullRecordSearchResults = searchResponse.return_;
+                            resultString = fullRecordSearchResults.records;
+                        }
+                    }
                     break;
-                
-                case retrieveRecid:
-                    searchTerm = [[identifiers subarrayWithRange:NSMakeRange(fetchedResultsLocal, numResults)] componentsJoinedByString:@" "];
-                    resultString = [BDSKISISearchRetrieveService retrieveRecid:WOS_DB_ID
-                                                                      in_recid:searchTerm
-                                                                       in_sort:@""
-                                                                     in_fields:fields];
+            
+                case citedReferences:
+                    citedReferencesRequest.retrieveParameters.firstRecord = [NSNumber numberWithInt:fetchedResultsLocal+1];
+                    citedReferencesRequest.retrieveParameters.count = [NSNumber numberWithInt:numResults];
+                    response = [binding citedReferencesUsingParameters:citedReferencesRequest];
+                    responseBodyParts = response.bodyParts;
+                    for (id bodyPart in responseBodyParts) {
+                        if ([bodyPart isKindOfClass:[WokSearchService_citedReferencesResponse class]]) {
+                            citedReferencesResponse = bodyPart;
+                            citedReferencesSearchResults = citedReferencesResponse.return_;
+                        }
+                    }
                     break;
 
                 case citingArticles:
-                    resultInfo = [BDSKISISearchRetrieveService citingArticles:WOS_DB_ID
-                                                                in_primaryKey:searchTerm
-                                                                     in_depth:@""
-                                                                  in_editions:database
-                                                                      in_sort:@""
-                                                                  in_firstRec:fetchedResultsLocal
-                                                                   in_numRecs:numResults
-                                                                    in_fields:fields];
-                    resultString = [resultInfo objectForKey:RECORDS_KEY];
+                    citingArticlesRequest.retrieveParameters.firstRecord = [NSNumber numberWithInt:fetchedResultsLocal+1];
+                    citingArticlesRequest.retrieveParameters.count = [NSNumber numberWithInt:numResults];
+                    response = [binding citingArticlesUsingParameters:citingArticlesRequest];
+                    responseBodyParts = response.bodyParts;
+                    for (id bodyPart in responseBodyParts) {
+                        if ([bodyPart isKindOfClass:[WokSearchService_citingArticlesResponse class]]) {
+                            citingArticlesResponse = bodyPart;
+                            fullRecordSearchResults = citingArticlesResponse.return_;
+                            resultString = fullRecordSearchResults.records;
+                        }
+                    }
                     break;
-                
-                case citingArticlesByRecids:
-                    resultInfo = [BDSKISISearchRetrieveService citingArticlesByRecids:WOS_DB_ID
-                                                                            in_recids:searchTerm
-                                                                             in_depth:@""
-                                                                          in_editions:database
-                                                                              in_sort:@""
-                                                                          in_firstRec:fetchedResultsLocal
-                                                                           in_numRecs:numResults
-                                                                            in_fields:fields];
-                    resultString = [resultInfo objectForKey:RECORDS_KEY];
+
+                case relatedRecords:
+                    relatedRecordsRequest.retrieveParameters.firstRecord = [NSNumber numberWithInt:fetchedResultsLocal+1];
+                    relatedRecordsRequest.retrieveParameters.count = [NSNumber numberWithInt:numResults];
+                    response = [binding relatedRecordsUsingParameters:relatedRecordsRequest];
+                    responseBodyParts = response.bodyParts;
+                    for (id bodyPart in responseBodyParts) {
+                        if ([bodyPart isKindOfClass:[WokSearchService_relatedRecordsResponse class]]) {
+                            relatedRecordsResponse = bodyPart;
+                            fullRecordSearchResults = relatedRecordsResponse.return_;
+                            resultString = fullRecordSearchResults.records;
+                        }
+                    }
                     break;
-                
-                // get rid of warnings
-                case retrieve:
-                case citedReferences:
+                    
+                case retrieveById:
+                    retrieveByIdRequest.retrieveParameters.firstRecord = [NSNumber numberWithInt:fetchedResultsLocal+1];
+                    retrieveByIdRequest.retrieveParameters.count = [NSNumber numberWithInt:numResults];
+                    response = [binding retrieveByIdUsingParameters:retrieveByIdRequest];
+                    responseBodyParts = response.bodyParts;
+                    for (id bodyPart in responseBodyParts) {
+                        if ([bodyPart isKindOfClass:[WokSearchService_retrieveByIdResponse class]]) {
+                            retrieveByIdResponse = bodyPart;
+                            fullRecordSearchResults = retrieveByIdResponse.return_;
+                            resultString = fullRecordSearchResults.records;
+                        }
+                    }
                     break;
             }
         
-            pubs = publicationInfosWithISIXMLString(resultString);
+            if (citedReferencesSearchResults) {
+                pubs = publicationInfosWithISICitedReferences(citedReferencesSearchResults.records);
+            } else {
+                pubs = publicationInfosWithISIXMLString(resultString);
+            }
             
             // now increment this so we don't get the same set next time; BDSKSearchGroup resets it when the searcn term changes
             fetchedResultsLocal += [pubs count];
@@ -444,6 +531,36 @@ static NSArray *publicationsFromData(NSData *data);
     
     // this will create the array if it doesn't exist
     [[self serverOnMainThread] addPublicationsToGroup:data];
+}
+
+- (void)authenticate {
+
+    WOKMWSAuthenticateServiceSoapBinding *binding = [WOKMWSAuthenticateService WOKMWSAuthenticateServiceSoapBinding];
+    //binding.logXMLInOut = YES;
+    
+    WOKMWSAuthenticateService_authenticate *request = [[[WOKMWSAuthenticateService_authenticate alloc] init] autorelease];
+    
+    WOKMWSAuthenticateServiceSoapBindingResponse *response = [binding authenticateUsingParameters:request];
+    
+    NSArray *responseBodyParts = response.bodyParts;
+    
+    for (id bodyPart in responseBodyParts) {
+        
+        if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+        
+            NSString *errorString = ((SOAPFault *)bodyPart).simpleFaultString;
+            [self setErrorMessage:[NSString stringWithFormat:NSLocalizedString(@"ISI Authentication Error: %@", "ISI Authentication Error Format"), errorString]];
+            [sessionCookie release];
+            sessionCookie = nil;
+        }
+        
+        if ([bodyPart isKindOfClass:[WOKMWSAuthenticateService_authenticateResponse class]]) {
+        
+            // if we reach this point the only session cookie should be the SID
+            [sessionCookie release];
+            sessionCookie = [[binding.cookies objectAtIndex:0] retain];
+        }
+    }
 }
 
 #pragma mark XML Parsing
@@ -505,7 +622,7 @@ static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
      which is clearly wrong.  Likewise, any journal with "Review" in the name is listed as a 
      "Review" type, when it should probably be a journal (e.g., "Earth Science Reviews").
      */
-    NSString *docType =[[[record nodesForXPath:@"doctype" error:NULL] lastObject] stringValue];
+    NSString *docType =[[[record nodesForXPath:@"item/doctype" error:NULL] lastObject] stringValue];
     if ([docType isEqualToString:@"Meeting Abstract"]) {
         pubType = BDSKInproceedingsString;
         sourceField = BDSKBooktitleString;
@@ -519,6 +636,21 @@ static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
     addStringToDictionaryIfNotNil([[(NSXMLElement *)record attributeForName:@"timescited"] stringValue], @"Times-Cited", pubFields);
     addStringToDictionaryIfNotNil([[(NSXMLElement *)record attributeForName:@"recid"] stringValue], @"Isi-Recid", pubFields);
         
+    // in the 2.0 API, record data is buried in "item" and "issue" subnodes
+    NSXMLNode *itemChild = nil;
+    NSXMLNode *issueChild = nil;
+    while (nil != child) {
+        if ([child.name isEqualToString:@"item"]) {
+            itemChild = [child childCount] ? [child childAtIndex:0] : nil;
+        }
+        if ([child.name isEqualToString:@"issue"]) {
+            issueChild = [child childCount] ? [child childAtIndex:0] : nil;
+        }
+        child = [child nextSibling];
+    }
+    
+    child = itemChild;
+    
     while (nil != child) {
         
         NSString *name = [child name];
@@ -604,7 +736,7 @@ static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
             addStringValueOfNodeForField(child, BDSKAddressString, pubFields);
         else if ([name isEqualToString:@"ut"]) {
             addStringValueOfNodeForField(child, @"Isi", pubFields);
-            isiURL = [@"http://gateway.isiknowledge.com/gateway/Gateway.cgi?GWVersion=2&SrcAuth=Alerting&SrcApp=Alerting&DestApp=WOS&DestLinkType=FullRecord;KeyUT=" stringByAppendingString:[pubFields objectForKey:@"Isi"]];
+            isiURL = [@"http://ws.isiknowledge.com/cps/openurl/service?url_ver=Z39.88-2004&rft_id=info:ut/" stringByAppendingString:[pubFields objectForKey:@"Isi"]];
             [pubFields setObject:isiURL forKey:ISIURLFieldName];
         } else if ([name isEqualToString:@"refs"])
             addStringToDictionaryIfNotNil( nodeStringsForXPathJoinedByString(child, @".//ref", @" "), @"Isi-Ref-Recids", pubFields);
@@ -619,6 +751,25 @@ static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
             }
         }
         
+        child = [child nextSibling];
+    }
+    
+    child = issueChild;
+    
+    while (nil != child) {
+        
+        NSString *name = [child name];
+        
+        // check to see if the current tag name matches an item in the source XML tag priority list
+        NSString *sourceTagValue;
+        for (NSString *sourceTagName in sourceXMLTagPriority) {
+            if ([name isEqualToString:sourceTagName]) {
+                sourceTagValue = (useTitlecase ? [[child stringValue] titlecaseString] : [child stringValue]);
+                if (sourceTagValue && [sourceTagValue length])
+                    [sourceTagValues setObject:sourceTagValue forKey:sourceTagName];
+            }
+        }
+    
         child = [child nextSibling];
     }
     
@@ -650,7 +801,7 @@ static NSArray *publicationInfosWithISIXMLString(NSString *xmlString)
         return nil;
     }
     
-    NSArray *records = [xmlDoc nodesForXPath:@"/RECORDS/REC" error:&error];
+    NSArray *records = [xmlDoc nodesForXPath:@"/records/REC" error:&error];
     if (nil == records)
         NSLog(@"%@", error);
     
@@ -668,89 +819,42 @@ static NSArray *publicationInfosWithISIXMLString(NSString *xmlString)
     return pubs;
 }
 
-static NSDictionary *createPublicationInfoWithRefRecord(NSXMLNode *record)
-{
-    // this is now a field/value set for a particular publication record
-    NSXMLNode *child = [record childCount] ? [record childAtIndex:0] : nil;
-    NSMutableDictionary *pubFields = [NSMutableDictionary new];
+static NSDictionary *createPublicationInfoWithCitedReference(WokSearchService_citedReference *citedReference) {
 
-    // fallback values
-    NSString *sourceField = BDSKJournalString;
+    NSMutableDictionary *pubFields = [NSMutableDictionary new];
     
     [pubFields setObject:BDSKArticleString forKey:BDSKPubTypeString];
     
-    addStringToDictionaryIfNotNil([[(NSXMLElement *)record attributeForName:@"timescited"] stringValue], @"Timescited", pubFields);
-    addStringToDictionaryIfNotNil([[(NSXMLElement *)record attributeForName:@"recid"] stringValue], @"Isi-Recid", pubFields);
-    
-    // if there is no ISI data for the publication (hot==no), then set the title to Unknown
-    //if ([(NSXMLElement *)record attributeForName:@"hot"] && 
-    //    [[[(NSXMLElement *)record attributeForName:@"hot"] stringValue] isEqualToString:@"no"])
-    //    addStringToDictionaryIfNotNil(@"Unknown", BDSKTitleString, pubFields);
-        
-    while (nil != child) {
-
-        NSString *name = [child name];
-        
-        if ([name isEqualToString:@"AU"]) {
-            NSArray *authorTokens = [[child stringValue] componentsSeparatedByString:@" "];
-            if ([authorTokens count] == 2) {
-                NSString *lastName = [authorTokens objectAtIndex:0];
-                NSString *firstInitials = [authorTokens objectAtIndex:1];
-                NSString *authorName = [[lastName capitalizedString] stringByAppendingFormat:@", %@", firstInitials];
-                addStringToDictionaryIfNotNil(authorName, BDSKAuthorString, pubFields);
-            } else
-                addStringValueOfNodeForField(child, BDSKAuthorString, pubFields);
-        } else if ([name isEqualToString:@"J2"])
-            addStringToDictionaryIfNotNil((useTitlecase ? [[child stringValue] titlecaseString] : [child stringValue]), sourceField, pubFields);
-        else if ([name isEqualToString:@"PY"])
-            addStringValueOfNodeForField(child, BDSKYearString, pubFields);
-        else if ([name isEqualToString:@"VL"])
-            addStringValueOfNodeForField(child, BDSKVolumeString, pubFields);
-        else if ([name isEqualToString:@"BP"])
-            addStringValueOfNodeForField(child, BDSKPagesString, pubFields);
-        else if ([name isEqualToString:@"AR"])
-            addStringValueOfNodeForField(child, BDSKPagesString, pubFields);
-
-        child = [child nextSibling];
+    NSArray *authorTokens = [citedReference.citedAuthor componentsSeparatedByString:@" "];
+    if ([authorTokens count] == 2) {
+        NSString *lastName = [authorTokens objectAtIndex:0];
+        NSString *firstInitials = [authorTokens objectAtIndex:1];
+        NSString *authorName = [[lastName capitalizedString] stringByAppendingFormat:@", %@", firstInitials];
+        addStringToDictionaryIfNotNil(authorName, BDSKAuthorString, pubFields);
     }
     
-    // mainly useful for debugging
-    if (addXMLStringToAnnote)
-        addStringToDictionaryIfNotNil([record XMLString], BDSKAnnoteString, pubFields);
+    addStringToDictionaryIfNotNil((useTitlecase ? [citedReference.citedWork titlecaseString] : citedReference.citedWork), BDSKJournalString, pubFields);
+
+    addStringToDictionaryIfNotNil(citedReference.page, BDSKPagesString, pubFields);
+    addStringToDictionaryIfNotNil(citedReference.recID, @"Isi-Recid", pubFields);
+    addStringToDictionaryIfNotNil(citedReference.timesCited, @"Times-Cited", pubFields);
+    addStringToDictionaryIfNotNil(citedReference.volume, BDSKVolumeString, pubFields);
+    addStringToDictionaryIfNotNil(citedReference.year, BDSKYearString, pubFields);
     
     return pubFields;
 }
 
-static NSArray *publicationInfosWithISIRefXMLString(NSString *xmlString, NSMutableArray *hotRecids)
-{
-    NSCParameterAssert(nil != xmlString);
-    NSError *error;
-    NSXMLDocument *xmlDoc = [[[NSXMLDocument alloc] initWithXMLString:xmlString options:0 error:&error] autorelease];
-    if (nil == xmlDoc) {
-        NSLog(@"failed to create XML document from ISI referece string.  %@", error);
-        return nil;
-    }
-    
-    NSArray *records = [xmlDoc nodesForXPath:@"/RECORDS/REC" error:&error];
-    if (nil == records)
-        NSLog(@"%@", error);
-    
-    NSXMLNode *record = [records firstObject];
+static NSArray *publicationInfosWithISICitedReferences(NSArray *citedReferences) {
+
     NSMutableArray *pubs = [NSMutableArray array];
     
-    while (nil != record) {
-        
-        NSDictionary *pub = createPublicationInfoWithRefRecord(record);
+    for (WokSearchService_citedReference *citedReference in citedReferences) {
+    
+        NSDictionary *pub = createPublicationInfoWithCitedReference(citedReference);
         [pubs addObject:pub];
         [pub release];
-        
-        if ([(NSXMLElement *)record attributeForName:@"hot"] && 
-            [[[(NSXMLElement *)record attributeForName:@"hot"] stringValue] isEqualToString:@"yes"] &&
-            [(NSXMLElement *)record attributeForName:@"recid"])
-            [hotRecids addObject:[[(NSXMLElement *)record attributeForName:@"recid"] stringValue]];
-        
-        record = [record nextSibling];
     }
+    
     return pubs;
 }
 

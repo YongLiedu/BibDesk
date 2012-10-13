@@ -38,6 +38,19 @@
 		2730078107CF20B500F2E485 /* BDSKComplexStringEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2730077A07CF20B500F2E485 /* BDSKComplexStringEditor.m */; };
 		2730078307CF20B500F2E485 /* BDSKMacroWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2730077C07CF20B500F2E485 /* BDSKMacroWindowController.m */; };
 		27AFAF9D080D1E1B0096F5D2 /* BDSKTextImportController.m in Sources */ = {isa = PBXBuildFile; fileRef = 27AFAF9B080D1E1B0096F5D2 /* BDSKTextImportController.m */; };
+		3B91DD49162225850088206D /* NSDate+ISO8601Parsing.h in Headers */ = {isa = PBXBuildFile; fileRef = 3B91DD3D162225850088206D /* NSDate+ISO8601Parsing.h */; };
+		3B91DD4A162225850088206D /* NSDate+ISO8601Parsing.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD3E162225850088206D /* NSDate+ISO8601Parsing.m */; };
+		3B91DD4B162225850088206D /* NSDate+ISO8601Unparsing.h in Headers */ = {isa = PBXBuildFile; fileRef = 3B91DD3F162225850088206D /* NSDate+ISO8601Unparsing.h */; };
+		3B91DD4C162225850088206D /* NSDate+ISO8601Unparsing.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD40162225850088206D /* NSDate+ISO8601Unparsing.m */; };
+		3B91DD4D162225850088206D /* USAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = 3B91DD41162225850088206D /* USAdditions.h */; };
+		3B91DD4E162225850088206D /* USAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD42162225850088206D /* USAdditions.m */; };
+		3B91DD4F162225850088206D /* USGlobals.h in Headers */ = {isa = PBXBuildFile; fileRef = 3B91DD43162225850088206D /* USGlobals.h */; };
+		3B91DD50162225850088206D /* USGlobals.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD44162225850088206D /* USGlobals.m */; };
+		3B91DD51162225850088206D /* WOKMWSAuthenticateService.h in Headers */ = {isa = PBXBuildFile; fileRef = 3B91DD45162225850088206D /* WOKMWSAuthenticateService.h */; };
+		3B91DD52162225850088206D /* WOKMWSAuthenticateService.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD46162225850088206D /* WOKMWSAuthenticateService.m */; };
+		3B91DD53162225850088206D /* WokSearchService.h in Headers */ = {isa = PBXBuildFile; fileRef = 3B91DD47162225850088206D /* WokSearchService.h */; };
+		3B91DD54162225850088206D /* WokSearchService.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD48162225850088206D /* WokSearchService.m */; };
+		3B91DD56162229B70088206D /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B91DD55162229B70088206D /* libxml2.dylib */; };
 		3D0D76B3084898C100A495A5 /* BibPref_Crossref.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D0D76B1084898C100A495A5 /* BibPref_Crossref.m */; };
 		3D4373AD07FB3E960007BA84 /* gear.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 3D4373AC07FB3E960007BA84 /* gear.tiff */; };
 		3D44F5630812A91D003C67F0 /* BDSKFormatParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D44F5610812A91D003C67F0 /* BDSKFormatParser.m */; };
@@ -470,7 +483,6 @@
 		F97BF0BA090AE7520063504B /* NSBezierPath_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F97BF0B8090AE7520063504B /* NSBezierPath_BDSKExtensions.m */; };
 		F97C9DB20C4481670002EE01 /* BDSKISIGroupServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F97C9DB10C4481670002EE01 /* BDSKISIGroupServer.m */; };
 		F97C9DBE0C44866F0002EE01 /* WSGeneratedObj.m in Sources */ = {isa = PBXBuildFile; fileRef = F97C9DBB0C44866F0002EE01 /* WSGeneratedObj.m */; };
-		F97C9DBF0C4486700002EE01 /* BDSKISIWebServices.m in Sources */ = {isa = PBXBuildFile; fileRef = F97C9DBD0C44866F0002EE01 /* BDSKISIWebServices.m */; };
 		F98DB3180A23C7730040D347 /* BDSKTemplate.m in Sources */ = {isa = PBXBuildFile; fileRef = F98DB3160A23C7730040D347 /* BDSKTemplate.m */; };
 		F990C58C0D42D58D00B5425E /* BDSKDocumentSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = F990C58A0D42D58D00B5425E /* BDSKDocumentSearch.m */; };
 		F9936CC60BC746C300A32DC4 /* BDSKItemSearchIndexes.m in Sources */ = {isa = PBXBuildFile; fileRef = F9936CC40BC746C300A32DC4 /* BDSKItemSearchIndexes.m */; };
@@ -800,6 +812,19 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* Bibdesk_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bibdesk_Prefix.pch; sourceTree = "<group>"; };
+		3B91DD3D162225850088206D /* NSDate+ISO8601Parsing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+ISO8601Parsing.h"; sourceTree = "<group>"; };
+		3B91DD3E162225850088206D /* NSDate+ISO8601Parsing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+ISO8601Parsing.m"; sourceTree = "<group>"; };
+		3B91DD3F162225850088206D /* NSDate+ISO8601Unparsing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+ISO8601Unparsing.h"; sourceTree = "<group>"; };
+		3B91DD40162225850088206D /* NSDate+ISO8601Unparsing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+ISO8601Unparsing.m"; sourceTree = "<group>"; };
+		3B91DD41162225850088206D /* USAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = USAdditions.h; sourceTree = "<group>"; };
+		3B91DD42162225850088206D /* USAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = USAdditions.m; sourceTree = "<group>"; };
+		3B91DD43162225850088206D /* USGlobals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = USGlobals.h; sourceTree = "<group>"; };
+		3B91DD44162225850088206D /* USGlobals.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = USGlobals.m; sourceTree = "<group>"; };
+		3B91DD45162225850088206D /* WOKMWSAuthenticateService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WOKMWSAuthenticateService.h; sourceTree = "<group>"; };
+		3B91DD46162225850088206D /* WOKMWSAuthenticateService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WOKMWSAuthenticateService.m; sourceTree = "<group>"; };
+		3B91DD47162225850088206D /* WokSearchService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WokSearchService.h; sourceTree = "<group>"; };
+		3B91DD48162225850088206D /* WokSearchService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WokSearchService.m; sourceTree = "<group>"; };
+		3B91DD55162229B70088206D /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
 		3D0D76B0084898C100A495A5 /* BibPref_Crossref.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibPref_Crossref.h; sourceTree = "<group>"; };
 		3D0D76B1084898C100A495A5 /* BibPref_Crossref.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibPref_Crossref.m; sourceTree = "<group>"; };
 		3D4373AC07FB3E960007BA84 /* gear.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = gear.tiff; sourceTree = "<group>"; };
@@ -1532,7 +1557,7 @@
 		F9022DEC0758099D00C3F701 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		F9022FBC07580B9400C3F701 /* BDSKAppController+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BDSKAppController+Scripting.m"; sourceTree = "<group>"; };
 		F9022FBE07580B9400C3F701 /* BibAuthor+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BibAuthor+Scripting.m"; sourceTree = "<group>"; };
-		F9022FBF07580B9400C3F701 /* BibDesk.sdef */ = {isa = PBXFileReference; explicitFileType = text.sdef; fileEncoding = 4; languageSpecificationIdentifier = plist; name = BibDesk.sdef; path = Scripting/BibDesk.sdef; sourceTree = "<group>"; };
+		F9022FBF07580B9400C3F701 /* BibDesk.sdef */ = {isa = PBXFileReference; explicitFileType = text.sdef; fileEncoding = 4; languageSpecificationIdentifier = plist; lastKnownFileType = file; name = BibDesk.sdef; path = Scripting/BibDesk.sdef; sourceTree = "<group>"; };
 		F9022FC107580B9400C3F701 /* BDSKSearchForCommand.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchForCommand.m; sourceTree = "<group>"; };
 		F9022FC307580B9400C3F701 /* BibDocument+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BibDocument+Scripting.m"; sourceTree = "<group>"; };
 		F9022FC507580B9400C3F701 /* BibItem+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BibItem+Scripting.m"; sourceTree = "<group>"; };
@@ -1639,8 +1664,6 @@
 		F97C9DB10C4481670002EE01 /* BDSKISIGroupServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKISIGroupServer.m; sourceTree = "<group>"; };
 		F97C9DBA0C44866F0002EE01 /* WSGeneratedObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WSGeneratedObj.h; sourceTree = "<group>"; };
 		F97C9DBB0C44866F0002EE01 /* WSGeneratedObj.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WSGeneratedObj.m; sourceTree = "<group>"; };
-		F97C9DBC0C44866F0002EE01 /* BDSKISIWebServices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKISIWebServices.h; sourceTree = "<group>"; };
-		F97C9DBD0C44866F0002EE01 /* BDSKISIWebServices.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKISIWebServices.m; sourceTree = "<group>"; };
 		F98AA67F0971E3F400184BD8 /* BDSKTextViewCompletionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTextViewCompletionController.h; sourceTree = "<group>"; };
 		F98AA6800971E3F400184BD8 /* BDSKTextViewCompletionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTextViewCompletionController.m; sourceTree = "<group>"; };
 		F98AACDD0D43DB5A00D3CD64 /* libssl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.dylib; path = /usr/lib/libssl.dylib; sourceTree = "<absolute>"; };
@@ -1747,6 +1770,7 @@
 				CE94C0DA10A8F2A2002634D2 /* SkimNotesBase.framework in Frameworks */,
 				CEB34C490F5D49BD0037E086 /* Sparkle.framework in Frameworks */,
 				CEED306C0F4ED3410078E87A /* libz.dylib in Frameworks */,
+				3B91DD56162229B70088206D /* libxml2.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1975,6 +1999,26 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		3B91DD3C1622254B0088206D /* ISI wsdl2objc */ = {
+			isa = PBXGroup;
+			children = (
+				3B91DD3D162225850088206D /* NSDate+ISO8601Parsing.h */,
+				3B91DD3E162225850088206D /* NSDate+ISO8601Parsing.m */,
+				3B91DD3F162225850088206D /* NSDate+ISO8601Unparsing.h */,
+				3B91DD40162225850088206D /* NSDate+ISO8601Unparsing.m */,
+				3B91DD41162225850088206D /* USAdditions.h */,
+				3B91DD42162225850088206D /* USAdditions.m */,
+				3B91DD43162225850088206D /* USGlobals.h */,
+				3B91DD44162225850088206D /* USGlobals.m */,
+				3B91DD45162225850088206D /* WOKMWSAuthenticateService.h */,
+				3B91DD46162225850088206D /* WOKMWSAuthenticateService.m */,
+				3B91DD47162225850088206D /* WokSearchService.h */,
+				3B91DD48162225850088206D /* WokSearchService.m */,
+			);
+			name = "ISI wsdl2objc";
+			path = ..;
+			sourceTree = "<group>";
+		};
 		CE1255DF0C80DD3000F755F8 /* Scripting */ = {
 			isa = PBXGroup;
 			children = (
@@ -2013,6 +2057,7 @@
 				CE3E4A090E75BA1A0014C328 /* ukdirectoryenumerator */,
 				CE3E4A070E75B9910014C328 /* BDAlias */,
 				CE3E4A080E75B9F20014C328 /* Ken Ferry */,
+				3B91DD3C1622254B0088206D /* ISI wsdl2objc */,
 			);
 			name = "Third Party Sources";
 			path = vendorsrc;
@@ -2037,6 +2082,7 @@
 				F98AACF40D43E13C00D3CD64 /* libcrypto.dylib */,
 				F98AACDD0D43DB5A00D3CD64 /* libssl.dylib */,
 				CEED306B0F4ED3410078E87A /* libz.dylib */,
+				3B91DD55162229B70088206D /* libxml2.dylib */,
 			);
 			name = "Linked Libraries";
 			sourceTree = "<group>";
@@ -2222,7 +2268,6 @@
 				F925352808FDFAE40045D563 /* BDSKFileSearchResult.m */,
 				CE38FB8B091D94A100BCB69D /* BDSKFilter.m */,
 				CEEFE6C00B0403E700668BB0 /* BDSKGroupsArray.m */,
-				F97C9DBD0C44866F0002EE01 /* BDSKISIWebServices.m */,
 				F911D7110CFE90050009C77B /* BDSKLinkedFile.m */,
 				CE2E78CB0D40F6BB00340B39 /* BDSKManyToManyDictionary.m */,
 				CEED2C130F4DA0E00078E87A /* BDSKMultiValueDictionary.m */,
@@ -2664,7 +2709,6 @@
 				CE40EC520EE9AAEF00BCF379 /* BDSKImportCommand.h */,
 				CE33D619136AB8A700ACE924 /* BDSKImportTextView.h */,
 				F97C9DB00C4481670002EE01 /* BDSKISIGroupServer.h */,
-				F97C9DBC0C44866F0002EE01 /* BDSKISIWebServices.h */,
 				CE7A313F0B08EA1F00D1B333 /* BDSKItemPasteboardHelper.h */,
 				F9936CC30BC746C300A32DC4 /* BDSKItemSearchIndexes.h */,
 				CEAE613C097FF60A000B618C /* BDSKJSTORParser.h */,
@@ -2957,6 +3001,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
+				3B91DD49162225850088206D /* NSDate+ISO8601Parsing.h in Headers */,
+				3B91DD4B162225850088206D /* NSDate+ISO8601Unparsing.h in Headers */,
+				3B91DD4D162225850088206D /* USAdditions.h in Headers */,
+				3B91DD4F162225850088206D /* USGlobals.h in Headers */,
+				3B91DD51162225850088206D /* WOKMWSAuthenticateService.h in Headers */,
+				3B91DD53162225850088206D /* WokSearchService.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3698,7 +3748,6 @@
 				CE4D85290C3A8C8F002C20CB /* BDSKAutofileCommand.m in Sources */,
 				F97C9DB20C4481670002EE01 /* BDSKISIGroupServer.m in Sources */,
 				F97C9DBE0C44866F0002EE01 /* WSGeneratedObj.m in Sources */,
-				F97C9DBF0C4486700002EE01 /* BDSKISIWebServices.m in Sources */,
 				F90C4ACE0C7395FC0035DD50 /* BDSKSciFinderParser.m in Sources */,
 				CEF83F380C77911F00A3AD51 /* BDSKBookmarkController.m in Sources */,
 				45DB3E4E0CAADFC3001EACDA /* BDSKACMDLParser.m in Sources */,
@@ -3806,6 +3855,12 @@
 				CEA498A61481185100AB81C5 /* BDSKAddressTextFieldCell.m in Sources */,
 				CE15198214B62E47003AE698 /* BDSKLineNumberView.m in Sources */,
 				CE0AB70114BB019400638C8F /* BDSKMASParser.m in Sources */,
+				3B91DD4A162225850088206D /* NSDate+ISO8601Parsing.m in Sources */,
+				3B91DD4C162225850088206D /* NSDate+ISO8601Unparsing.m in Sources */,
+				3B91DD4E162225850088206D /* USAdditions.m in Sources */,
+				3B91DD50162225850088206D /* USGlobals.m in Sources */,
+				3B91DD52162225850088206D /* WOKMWSAuthenticateService.m in Sources */,
+				3B91DD54162225850088206D /* WokSearchService.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
