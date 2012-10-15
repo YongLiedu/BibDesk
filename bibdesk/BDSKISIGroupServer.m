@@ -273,6 +273,9 @@ static NSArray *publicationsFromData(NSData *data);
             [self authenticate];
             if (!sessionCookie) {
                 OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
+                OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
+                [[self serverOnMainThread] addPublicationsToGroup:nil];
+                return;
             }
         }
         
@@ -427,7 +430,7 @@ static NSArray *publicationsFromData(NSData *data);
                 break;
         }
         
-        if (nil == fullRecordSearchResults && nil == citedReferencesSearchResults && sessionCookie) {
+        if (nil == fullRecordSearchResults && nil == citedReferencesSearchResults) {
             OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
             // we already know that a connection can be made, so we likely don't have permission to read this edition or database
             [self setErrorMessage:NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.")];
@@ -882,6 +885,7 @@ static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs,
 }
 
 static NSArray *publicationsFromData(NSData *data) {
+    if (!data) return [NSArray array];
     NSArray *pubInfos = [NSKeyedUnarchiver unarchiveObjectWithData:data];
     NSMutableArray *pubs = [NSMutableArray arrayWithCapacity:[pubInfos count]];
     for (NSDictionary *pubInfo in pubInfos) {
