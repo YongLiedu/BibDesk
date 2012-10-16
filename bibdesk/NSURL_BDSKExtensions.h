@@ -53,8 +53,6 @@
 
 - (NSComparisonResult)UTICompare:(NSURL *)other;
 
-+ (NSURL *)URLFromPasteboardAnyType:(NSPasteboard *)pasteboard;
-
 - (NSArray *)SkimNotes;
 - (NSString *)textSkimNotes;
 - (NSAttributedString *)richTextSkimNotes;

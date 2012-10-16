@@ -48,6 +48,7 @@
 #import "BDSKTableView.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
+#import "NSPasteboard_BDSKExtensions.h"
 
 // this corresponds with the menu item order in the nib
 enum {
@@ -193,7 +194,7 @@ static NSSet *alwaysDisabledFields = nil;
     BDSKFieldNameFormatter *fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
     [[[[defaultFieldsTableView tableColumns] objectAtIndex:0] dataCell] setFormatter:fieldNameFormatter];
     [fieldNameFormatter release];
-    [globalMacroFilesTableView registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
+    [globalMacroFilesTableView registerForDraggedTypes:[NSArray arrayWithObjects:(NSString *)kUTTypeFileURL, NSFilenamesPboardType, nil]];
     
     NSWorkspace *sws = [NSWorkspace sharedWorkspace];
     NSArray *pdfViewers = [sws editorAndViewerNamesAndBundleIDsForPathExtension:@"pdf"];
@@ -417,24 +418,29 @@ static NSSet *alwaysDisabledFields = nil;
 - (BOOL)tableView:(NSTableView *)tableView acceptDrop:(id <NSDraggingInfo> )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op{
     if (tableView != globalMacroFilesTableView) 
         return NO;
+    
     NSPasteboard *pboard = [info draggingPasteboard];
-    if([pboard availableTypeFromArray:[NSArray arrayWithObject:NSFilenamesPboardType]] == nil)
+    NSArray *fileURLs = [pboard readFileURLsOfTypes:nil];
+    
+    if ([fileURLs count] > 0) {
+        NSFileManager *fm = [NSFileManager defaultManager];
+        
+        for (NSURL *fileURL in fileURLs) {
+            NSString *file = [fileURL path];
+            NSString *extension = [file pathExtension];
+            if ([fm fileExistsAtPath:[file stringByStandardizingPath]] == NO ||
+                ([extension isCaseInsensitiveEqual:@"bib"] == NO && [extension isCaseInsensitiveEqual:@"bst"] == NO))
+                continue;
+            [globalMacroFiles addObject:file];
+        }
+        [sud setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
+        
+        [globalMacroFilesTableView reloadData];
+        
+        return YES;
+    } else {
         return NO;
-    NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
-    NSFileManager *fm = [NSFileManager defaultManager];
-    
-    for (NSString *file in fileNames) {
-        NSString *extension = [file pathExtension];
-        if ([fm fileExistsAtPath:[file stringByStandardizingPath]] == NO ||
-            ([extension isCaseInsensitiveEqual:@"bib"] == NO && [extension isCaseInsensitiveEqual:@"bst"] == NO))
-            continue;
-        [globalMacroFiles addObject:file];
     }
-    [sud setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
-    
-    [globalMacroFilesTableView reloadData];
-    
-    return YES;
 }
 
 #pragma mark TableView Delegate methods

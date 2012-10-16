@@ -105,45 +105,36 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.0, 0.1, 0.2, 0.25, 0.35, 0.5, 
 // override so we can put the entire document on the pasteboard if there is no selection
 - (void)copy:(id)sender;
 {
-    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    [pboard declareTypes:[NSArray arrayWithObjects:NSPDFPboardType, NSStringPboardType, NSRTFPboardType, nil] owner:nil];
-    
-    PDFSelection *theSelection = [self currentSelection];
-    if(!theSelection)
-        theSelection = [[self document] selectionForEntireDocument];
+    PDFSelection *theSelection = [self currentSelection] ?: [[self document] selectionForEntireDocument];
     NSAttributedString *attrString = [theSelection attributedString];
-    
-    [pboard setData:[[self document] dataRepresentation] forType:NSPDFPboardType];
-    [pboard setString:[attrString string] forType:NSStringPboardType];
-    [pboard setData:[attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil] forType:NSRTFPboardType];
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+    NSPasteboardItem *item = [[[NSPasteboardItem alloc] init] autorelease];
+    [item setData:[[self document] dataRepresentation] forType:NSPasteboardTypePDF];
+    [pboard clearContents];
+    [pboard writeObjects:[NSArray arrayWithObjects:attrString, item, nil]];
 }
 
 - (void)copyAsPDF:(id)sender;
 {
-    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    [pboard declareTypes:[NSArray arrayWithObjects:NSPDFPboardType, nil] owner:nil];
-    [pboard setData:[[self document] dataRepresentation] forType:NSPDFPboardType];
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+    [pboard clearContents];
+    [pboard setData:[[self document] dataRepresentation] forType:NSPasteboardTypePDF];
 }
 
 - (void)copyAsText:(id)sender;
 {
-    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    [pboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, NSRTFPboardType, nil] owner:nil];
-    
-    PDFSelection *theSelection = [self currentSelection];
-    if(!theSelection)
-        theSelection = [[self document] selectionForEntireDocument];
+    PDFSelection *theSelection = [self currentSelection] ?: [[self document] selectionForEntireDocument];
     NSAttributedString *attrString = [theSelection attributedString];
-    
-    [pboard setString:[attrString string] forType:NSStringPboardType];
-    [pboard setData:[attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil] forType:NSRTFPboardType];
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+    [pboard clearContents];
+    [pboard writeObjects:[NSArray arrayWithObjects:attrString, nil]];
 }
 
 - (void)copyPDFPage:(id)sender;
 {
-    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    [pboard declareTypes:[NSArray arrayWithObjects:NSPDFPboardType, nil] owner:self];
-    [pboard setData:[[self currentPage] dataRepresentation] forType:NSPDFPboardType];
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+    [pboard clearContents];
+    [pboard setData:[[self currentPage] dataRepresentation] forType:NSPasteboardTypePDF];
 }
 
 - (void)saveDocumentSheetDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode  contextInfo:(void  *)contextInfo;

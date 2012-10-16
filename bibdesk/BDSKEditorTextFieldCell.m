@@ -121,13 +121,8 @@
                     NSImage *image = [[NSImage imageForURL:[self URL]] dragImageWithCount:0];
                     NSSize imageSize = [image size];
                     NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
-                    if ([[self URL] isFileURL]) {
-                        [pboard declareTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil] owner:nil];
-                        [pboard setPropertyList:[NSArray arrayWithObjects:[[self URL] path], nil] forType:NSFilenamesPboardType];
-                    } else {
-                        [pboard declareTypes:[NSArray arrayWithObjects:NSURLPboardType, nil] owner:nil];
-                        [[self URL] writeToPasteboard:pboard];
-                    }
+                    [pboard clearContents];
+                    [pboard writeObjects:[NSArray arrayWithObjects:[self URL], nil]];
                     [controlView dragImage:image at:NSMakePoint(mouseLoc.x - 0.5f * imageSize.width, mouseLoc.y + 0.5f * imageSize.height) offset:NSZeroSize event:theEvent pasteboard:pboard source:controlView slideBack:YES]; 
                 }
             }

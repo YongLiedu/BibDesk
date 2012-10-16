@@ -52,6 +52,7 @@
 #import "BDSKMacro.h"
 #import "BDSKGroupsArray.h"
 #import "NSTableView_BDSKExtensions.h"
+#import "NSPasteboard_BDSKExtensions.h"
 
 #define BDSKMacroWindowFrameAutosaveName @"BDSKMacroWindow"
 
@@ -130,7 +131,7 @@
     NSTableColumn *tc = [tableView tableColumnWithIdentifier:MACRO_COLUMNID];
     [[tc dataCell] setFormatter:[[[MacroKeyFormatter alloc] init] autorelease]];
     if(isEditable)
-        [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, nil]];
+        [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSPasteboardTypeString, (NSString *)kUTTypeFileURL, NSFilenamesPboardType, nil]];
     tc = [tableView tableColumnWithIdentifier:DEFINITION_COLUMNID];
     [[tc dataCell] setFormatter:tableCellFormatter];
     [tableView reloadData];
@@ -493,14 +494,16 @@
     NSMutableString *pboardStr = [NSMutableString string];
     NSArray *arrangedMacros = [arrayController arrangedObjects];
     NSUInteger row = [rowIndexes firstIndex];
-    [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
 
     while (row != NSNotFound) {
         BDSKMacro *macro = [arrangedMacros objectAtIndex:row];
         [pboardStr appendStrings:@"@string{", [macro name], @" = ", [macro bibTeXString], @"}\n", nil];
         row = [rowIndexes indexGreaterThanIndex:row];
     }
-    return [pboard setString:pboardStr forType:NSStringPboardType];
+    
+    [pboard clearContents];
+    
+    return [pboard writeObjects:[NSArray arrayWithObjects:pboardStr, nil]];
     
 }
 
@@ -524,29 +527,29 @@
 
 - (BOOL)tableView:(NSTableView *)tv acceptDrop:(id <NSDraggingInfo> )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op{
     NSPasteboard *pboard = [info draggingPasteboard];
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, nil]];
+    NSArray *fileURLs = [pboard readFileURLsOfTypes:nil];
+    BOOL success = NO;
     
-    if([type isEqualToString:NSStringPboardType]) {
-        NSString *pboardStr = [pboard stringForType:NSStringPboardType];
-        return [self addMacrosFromBibTeXString:pboardStr];
-    } else if ([type isEqualToString:NSFilenamesPboardType]) {
+    if ([fileURLs count] > 0) {
         NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
         NSFileManager *fm = [NSFileManager defaultManager];
-        BOOL success = NO;
         
-        for (NSString *file in fileNames) {
-            NSString *extension = [file pathExtension];
-            file = [file stringByStandardizingPath];
-            if ([fm fileExistsAtPath:file] == NO ||
+        for (NSURL *fileURL in fileURLs) {
+            NSString *extension = [fileURL pathExtension];
+            fileURL = [fileURL URLByStandardizingPath];
+            if ([fm fileExistsAtPath:[fileURL path]] == NO ||
                 ([extension isCaseInsensitiveEqual:@"bib"] == NO && [extension isCaseInsensitiveEqual:@"bst"] == NO))
                 continue;
-            NSString *fileStr = [NSString stringWithContentsOfFile:file guessedEncoding:0];
+            NSString *fileStr = [NSString stringWithContentsOfFile:[fileURL path] guessedEncoding:0];
             if (fileStr != nil)
                 success = success || [self addMacrosFromBibTeXString:fileStr];
         }
-        return success;
-    } else
-        return NO;
+    } else {
+        NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+        if ([strings count] > 0)
+            success = [self addMacrosFromBibTeXString:[strings objectAtIndex:0]];
+    }
+    return success;
 }
 
 #pragma mark OA extensions
@@ -559,8 +562,10 @@
 
 // called from tableView paste: action defined in NSTableView_OAExtensions
 - (void)tableView:(NSTableView *)tv pasteFromPasteboard:(NSPasteboard *)pboard{
-    if(isEditable && [pboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]]) {
-        [self addMacrosFromBibTeXString:[pboard stringForType:NSStringPboardType]];
+    if(isEditable) {
+        NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+        if ([strings count] > 0)
+            [self addMacrosFromBibTeXString:[strings objectAtIndex:0]];
     }
 }
 

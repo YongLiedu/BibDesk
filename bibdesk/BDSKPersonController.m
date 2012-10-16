@@ -129,7 +129,7 @@
     
     if (isEditable) {
         [nameTableView setDoubleAction:@selector(edit:)];
-        [imageView registerForDraggedTypes:[NSArray arrayWithObject:NSVCardPboardType]];
+        [imageView registerForDraggedTypes:[NSArray arrayWithObjects:(NSString *)kUTTypeVCard, nil]];
     }
     
     [editButton setEnabled:isEditable];
@@ -437,7 +437,7 @@
 	
 	NSPasteboard *pboard = [sender draggingPasteboard];
     
-    if([[pboard types] containsObject:NSVCardPboardType])
+    if([pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:(NSString *)kUTTypeVCard, nil]])
         return NSDragOperationCopy;
 
     return NSDragOperationNone;
@@ -446,10 +446,10 @@
 - (BOOL)dragImageView:(BDSKDragImageView *)view acceptDrop:(id <NSDraggingInfo>)sender {
     NSPasteboard *pboard = [sender draggingPasteboard];
     
-    if([[pboard types] containsObject:NSVCardPboardType] == NO)
+    if([pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:(NSString *)kUTTypeVCard, nil]] == NO)
         return NO;
 	
-	BibAuthor *newAuthor = [BibAuthor authorWithVCardRepresentation:[pboard dataForType:NSVCardPboardType]];
+	BibAuthor *newAuthor = [BibAuthor authorWithVCardRepresentation:[pboard dataForType:(NSString *)kUTTypeVCard]];
 	
 	if([newAuthor isEqual:[BibAuthor emptyAuthor]])
 		return NO;
@@ -472,16 +472,15 @@
 }
 
 - (BOOL)dragImageView:(BDSKDragImageView *)view writeDataToPasteboard:(NSPasteboard *)pboard {
-	[pboard declareTypes:[NSArray arrayWithObjects:NSVCardPboardType, NSFilesPromisePboardType, nil] owner:nil];
-
 	// if we don't have a match in the address book, this will create a new person record
 	NSData *data = [person vCardRepresentation];
 	BDSKPOSTCONDITION(data);
 
 	if(data == nil)
 		return NO;
-		
-	[pboard setData:data forType:NSVCardPboardType];
+    
+    [pboard clearContents];
+	[pboard setData:data forType:(NSString *)kUTTypeVCard];
 	[pboard setPropertyList:[NSArray arrayWithObject:@"vcf"] forType:NSFilesPromisePboardType];
 	return YES;
 }

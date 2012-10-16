@@ -306,7 +306,7 @@ static BOOL changingColors = NO;
 
 - (IBAction)copyAsAction:(id)sender{
 	NSInteger copyType = [sender tag];
-    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
 	[self writePublications:[self clickedOrSelectedPublications] forDragCopyType:copyType toPasteboard:pboard];
 }
 
@@ -863,8 +863,8 @@ static BOOL changingColors = NO;
     
     if ([notes isEqualToString:@""] == NO) {
         NSPasteboard *pboard = [NSPasteboard generalPasteboard];
-        [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-        [pboard setString:notes forType:NSStringPboardType];
+        [pboard clearContents];
+        [pboard writeObjects:[NSArray arrayWithObjects:notes, nil]];
     } else {
         NSBeep();
     }
@@ -1040,8 +1040,8 @@ static BOOL changingColors = NO;
     
     if ([notes isEqualToString:@""] == NO) {
         NSPasteboard *pboard = [NSPasteboard generalPasteboard];
-        [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-        [pboard setString:notes forType:NSStringPboardType];
+        [pboard clearContents];
+        [pboard writeObjects:[NSArray arrayWithObjects:notes, nil]];
     } else {
         NSBeep();
     }
@@ -1437,19 +1437,19 @@ static BOOL changingColors = NO;
 
 - (IBAction)importFromPasteboardAction:(id)sender{
     
-    NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    NSString *type = [pasteboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKReferenceMinerStringPboardType, BDSKBibItemPboardType, NSStringPboardType, nil]];
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+    BOOL isKnownFormat = [pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]];
     
-    if(type != nil){
-        BOOL isKnownFormat = YES;
-		if([type isEqualToString:NSStringPboardType]){
+    if (isKnownFormat = NO) {
+        NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+        if ([strings count] > 0)
 			// sniff the string to see if we should add it directly
-			NSString *pboardString = [pasteboard stringForType:type];
-			isKnownFormat = ([pboardString contentStringType] != BDSKUnknownStringType);
-		}
-		
-        NSArray *newPubs = isKnownFormat ? [self addPublicationsFromPasteboard:pasteboard selectLibrary:YES verbose:NO error:NULL] : nil;
-        if([newPubs count] > 0)
+			isKnownFormat = ([[strings objectAtIndex:0] contentStringType] != BDSKUnknownStringType);
+    }
+    
+    if (isKnownFormat) {		
+        NSArray *newPubs = [self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:NO error:NULL];
+        if ([newPubs count] > 0)
             return; // it worked, so we're done here
     }
     

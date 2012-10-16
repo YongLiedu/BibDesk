@@ -39,7 +39,7 @@
 #import "BibDocument.h"
 #import "BibItem.h"
 #import "NSArray_BDSKExtensions.h"
-#import "WebURLsWithTitles.h"
+#import "NSPasteboard_BDSKExtensions.h"
 
 
 @interface BDSKItemPasteboardHelper (Private)
@@ -50,7 +50,6 @@
 - (NSArray *)promisedCiteKeysForPasteboard:(NSPasteboard *)pboard;
 - (void)removePromisedType:(NSString *)type forPasteboard:(NSPasteboard *)pboard;
 - (void)removePromisedTypesForPasteboard:(NSPasteboard *)pboard;
-- (void)provideAllPromisedTypes;
 
 - (void)absolveDelegateResponsibility;
 - (void)absolveResponsibility;
@@ -97,78 +96,65 @@
 
 #pragma mark Promising and adding data
 
-- (void)declareType:(NSString *)type dragCopyType:(NSInteger)dragCopyType forItems:(NSArray *)items forPasteboard:(NSPasteboard *)pboard{
-	NSMutableArray *types = [NSMutableArray arrayWithObjects:type, BDSKBibItemPboardType, nil];
+- (void)writeObjects:(NSArray *)objects items:(NSArray *)items forDragCopyType:(NSInteger)dragCopyType toPasteboard:(NSPasteboard *)pboard{
+	NSMutableArray *types = [NSMutableArray arrayWithObjects:BDSKPasteboardTypePublications, nil];
+    NSPasteboardItem *item;
     
-    if ([type isEqualToString:NSURLPboardType]) {
-        Class WebURLsWithTitlesClass = NSClassFromString(@"WebURLsWithTitles");
-        if (WebURLsWithTitlesClass && [WebURLsWithTitlesClass respondsToSelector:@selector(writeURLs:andTitles:toPasteboard:)])
-            [types addObject:@"WebURLsWithTitlesPboardType"];
+    // we should be starting with a cleared pasteboard
+    BDSKASSERT([[pboard pasteboardItems] count] == 0);
+    BDSKASSERT([promisedPboardTypes objectForKey:[pboard name]] == nil);
+    
+    if (objects == nil) {
+        NSString *type = nil;
+        switch (dragCopyType) {
+            case BDSKPDFDragCopyType:
+                type = NSPasteboardTypePDF;
+                break;
+            case BDSKRTFDragCopyType:
+                type = NSPasteboardTypeRTF;
+                break;
+            case BDSKLaTeXDragCopyType:
+            case BDSKLTBDragCopyType:
+                type = NSPasteboardTypeString;
+                break;
+            default:
+                break;
+        }
+        if (type) {
+            item = [[[NSPasteboardItem alloc] init] autorelease];
+            [item setDataProvider:self forTypes:[NSArray arrayWithObjects:type, nil]];
+            objects = [NSArray arrayWithObjects:item, nil];
+            [types addObject:type];
+        }
     }
-    [self clearPromisedTypesForPasteboard:pboard];
-    [pboard declareTypes:types owner:self];
+    if ([objects count] > 0) {
+        if (dragCopyType == BDSKURLDragCopyType && [objects count] == [items count])
+            [pboard writeURLs:objects names:[items valueForKey:@"citeKey"]];
+        else
+            [pboard writeObjects:objects];
+    }
+    item = [[[NSPasteboardItem alloc] init] autorelease];
+    [item setDataProvider:self forTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]];
+    [pboard writeObjects:[NSArray arrayWithObjects:item, nil]];
+
 	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:items, @"items", types, @"types", [NSNumber numberWithInteger:dragCopyType], @"dragCopyType", nil];
 	[promisedPboardTypes setObject:dict forKey:[pboard name]];
 }
 
-- (void)addTypes:(NSArray *)newTypes forPasteboard:(NSPasteboard *)pboard{
-    [pboard addTypes:newTypes owner:self];
-	NSMutableArray *types = [self promisedTypesForPasteboard:pboard];
-    [types addObjectsFromArray:newTypes];
-}
-
-- (BOOL)setString:(NSString *)string forType:(NSString *)type forPasteboard:(NSPasteboard *)pboard{
-    [self removePromisedType:type forPasteboard:pboard];
-    return [pboard setString:string forType:type];
-}
-
-- (BOOL)setData:(NSData *)data forType:(NSString *)type forPasteboard:(NSPasteboard *)pboard{
-    [self removePromisedType:type forPasteboard:pboard];
-    return [pboard setData:data forType:type];
-}
-
-- (BOOL)setPropertyList:(id)propertyList forType:(NSString *)type forPasteboard:(NSPasteboard *)pboard{
-    [self removePromisedType:type forPasteboard:pboard];
-    return [pboard setPropertyList:propertyList forType:type];
-}
-
-- (BOOL)setURLs:(NSArray *)URLs forType:(NSString *)type forPasteboard:(NSPasteboard *)pboard{
-    if ([URLs count] == 0)
-        return NO;
-    
-    NSArray *titles = [[self promisedItemsForPasteboard:pboard] valueForKey:@"citeKey"] ?: [URLs valueForKey:@"absoluteString"];
-    
-    NSURL *firstURL = [URLs objectAtIndex:0];
-    NSString *firstTitle = [titles objectAtIndex:0];
-    
-    Class WebURLsWithTitlesClass = NSClassFromString(@"WebURLsWithTitles");
-    
-    if (WebURLsWithTitlesClass && [WebURLsWithTitlesClass respondsToSelector:@selector(writeURLs:andTitles:toPasteboard:)]) {
-        [self removePromisedType:@"WebURLsWithTitlesPboardType" forPasteboard:pboard];
-        [WebURLsWithTitlesClass writeURLs:URLs andTitles:titles toPasteboard:pboard];
-    }
-    
-    [self removePromisedType:NSURLPboardType forPasteboard:pboard];
-    [firstURL writeToPasteboard:pboard];
-    [pboard writeObjects:URLs];
-    
-    return YES;
-}
-
-#pragma mark NSPasteboard delegate methods
+#pragma mark NSPasteboardItemDataProvider protocol methods
 
 // we generate PDF, RTF, LaTeX, LTB, and archived items data only when they are dropped or pasted
-- (void)pasteboard:(NSPasteboard *)pboard provideDataForType:(NSString *)type{
+- (void)pasteboard:(NSPasteboard *)pboard item:(NSPasteboardItem *)item provideDataForType:(NSString *)type {
 	NSArray *items = [self promisedItemsForPasteboard:pboard];
     
-    if([type isEqualToString:BDSKBibItemPboardType]){
+    if([type isEqualToString:BDSKPasteboardTypePublications]){
         NSData *data = nil;
         
         if(items != nil)
             data = [BibItem archivedPublications:items];
         else NSBeep();
         
-        [pboard setData:data forType:BDSKBibItemPboardType];
+        [item setData:data forType:BDSKPasteboardTypePublications];
     }else{
         NSString *bibString = nil;
         NSArray *citeKeys = nil;
@@ -181,19 +167,19 @@
         }
         if(bibString != nil){
             NSInteger dragCopyType = [self promisedDragCopyTypeForPasteboard:pboard];
-            if([type isEqualToString:NSPDFPboardType]){
+            if([type isEqualToString:NSPasteboardTypePDF]){
                 BDSKASSERT(dragCopyType == BDSKPDFDragCopyType);
                 NSData *data = nil;
                 if([texTask runWithBibTeXString:bibString citeKeys:citeKeys generatedTypes:BDSKGeneratePDF])
                     data = [texTask PDFData];
-                [pboard setData:data forType:NSPDFPboardType];
-            }else if([type isEqualToString:NSRTFPboardType]){
+                [item setData:data forType:NSPasteboardTypePDF];
+            }else if([type isEqualToString:NSPasteboardTypeRTF]){
                 BDSKASSERT(dragCopyType == BDSKRTFDragCopyType);
                 NSData *data = nil;
                 if([texTask runWithBibTeXString:bibString citeKeys:citeKeys generatedTypes:BDSKGenerateRTF])
                     data = [texTask RTFData];
-                [pboard setData:data forType:NSRTFPboardType];
-            }else if([type isEqualToString:NSStringPboardType]){
+                [item setData:data forType:NSPasteboardTypeRTF];
+            }else if([type isEqualToString:NSPasteboardTypeString]){
                 BDSKASSERT(dragCopyType == BDSKLTBDragCopyType || dragCopyType == BDSKLaTeXDragCopyType);
                 NSString *string = nil;
                 if(dragCopyType == BDSKLTBDragCopyType){
@@ -203,22 +189,21 @@
                     if([texTask runWithBibTeXString:bibString citeKeys:citeKeys generatedTypes:BDSKGenerateLaTeX])
                         string = [texTask LaTeXString];
                 }
-                [pboard setString:string forType:NSStringPboardType];
+                [item setString:string forType:NSPasteboardTypeString];
                 if(string == nil) NSBeep();
             }else{
-                [pboard setData:nil forType:type];
+                [item setData:nil forType:type];
                 NSBeep();
             }
         }else{
-            [pboard setData:nil forType:type];
+            [item setData:nil forType:type];
             NSBeep();
         }
     }
 	[self removePromisedType:type forPasteboard:pboard];
 }
 
-// NSPasteboard delegate method for the owner
-- (void)pasteboardChangedOwner:(NSPasteboard *)pboard {
+- (void)pasteboardFinishedWithDataProvider:(NSPasteboard *)pboard {
 	[self removePromisedTypesForPasteboard:pboard];
 }
 
@@ -258,6 +243,14 @@
 
 
 @implementation BDSKItemPasteboardHelper (Private)
+
+static NSPasteboardItem *pasteboardItemForType(NSPasteboard *pboard, NSString *type) {
+    for (NSPasteboardItem *item in [pboard pasteboardItems]) {
+        if ([[item types] containsObject:type])
+            return item;
+    }
+    return nil;
+}
 
 - (BOOL)pasteboardIsValid:(NSPasteboard *)pboard
 {
@@ -314,16 +307,6 @@
     }
 }
 
-- (void)provideAllPromisedTypes {
-	for (NSString *name in [promisedPboardTypes allKeys]) {
-        NSPasteboard *pboard = [NSPasteboard pasteboardWithName:name];
-        NSArray *types = [[self promisedTypesForPasteboard:pboard] copy]; // we need to copy as types can be removed
-        for (NSString *type in types)
-            [self pasteboard:pboard provideDataForType:type];
-        [types release];
-    }
-}
-
 - (void)absolveDelegateResponsibility{
     if(delegate == nil)
         return;
@@ -331,11 +314,11 @@
 	for (NSString *name in [promisedPboardTypes allKeys]) {
         NSPasteboard *pboard = [NSPasteboard pasteboardWithName:name];
         
-        // if we have BDSKBibItemPboardType, call to pasteboard:provideDataForType: will make this array go away
+        // if we have BDSKPasteboardTypePublications, call to pasteboard:item:provideDataForType: will make this array go away
         NSMutableArray *types = [self promisedTypesForPasteboard:pboard];
         
-        if([types containsObject:BDSKBibItemPboardType])
-            [self pasteboard:pboard provideDataForType:BDSKBibItemPboardType];
+        if([types containsObject:BDSKPasteboardTypePublications])
+            [self pasteboard:pboard item:pasteboardItemForType(pboard, BDSKPasteboardTypePublications) provideDataForType:BDSKPasteboardTypePublications];
         
         // now operate on any remaining types
         types = [self promisedTypesForPasteboard:pboard];
@@ -361,8 +344,6 @@
 }
 
 - (void)absolveResponsibility {
-    if([promisedPboardTypes count])
-        [self provideAllPromisedTypes];
     if(promisedPboardTypes != nil && delegate == nil){
         [promisedPboardTypes release];
         promisedPboardTypes = nil; // this is a sign that we have released ourselves
@@ -375,7 +356,13 @@
 
 - (void)handleApplicationWillTerminateNotification:(NSNotification *)aNotification{
     // the built-in AppKit variant of this comes too late, when the temporary workingDir of the texTask is already removed
-    [self provideAllPromisedTypes];
+	for (NSString *name in [promisedPboardTypes allKeys]) {
+        NSPasteboard *pboard = [NSPasteboard pasteboardWithName:name];
+        NSArray *types = [[self promisedTypesForPasteboard:pboard] copy]; // we need to copy as types can be removed
+        for (NSString *type in types)
+            [self pasteboard:pboard item:pasteboardItemForType(pboard, type) provideDataForType:type];
+        [types release];
+    }
 }
 
 @end

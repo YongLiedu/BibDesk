@@ -54,6 +54,7 @@
 #import "NSParagraphStyle_BDSKExtensions.h"
 #import "NSInvocation_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "NSPasteboard_BDSKExtensions.h"
 
 #define BDSKShouldLogFilesAddedToMatchingSearchIndexKey @"BDSKShouldLogFilesAddedToMatchingSearchIndex"
 
@@ -129,7 +130,7 @@ static id sharedInstance = nil;
     
     [outlineView setDoubleAction:@selector(openAction:)];
     [outlineView setTarget:self];
-    [outlineView registerForDraggedTypes:[NSArray arrayWithObject:NSURLPboardType]];
+    [outlineView registerForDraggedTypes:[NSArray arrayWithObjects:(NSString *)kUTTypeFileURL, NSFilenamesPboardType, nil]];
     [progressIndicator setUsesThreadedAnimation:YES];
     [abortButton setEnabled:NO];
     [statusField setStringValue:@""];
@@ -257,8 +258,8 @@ static id sharedInstance = nil;
 {
     id item = [items lastObject];
     if ([item isLeaf]) {
-        [pboard declareTypes:[NSArray arrayWithObject:NSURLPboardType] owner:nil];
-        [[item valueForKey:@"fileURL"] writeToPasteboard:pboard];
+        [pboard clearContents];
+        [pboard writeObjects:[NSArray arrayWithObjects:[item valueForKey:@"fileURL"], nil]];
         return YES;
     }
     return NO;
@@ -266,7 +267,8 @@ static id sharedInstance = nil;
 
 - (NSDragOperation)outlineView:(NSOutlineView*)olv validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(NSInteger)idx;
 {
-    if ([[info draggingSource] isEqual:outlineView] && [item isLeaf] == NO) {
+    NSPasteboard *pboard = [info draggingPasteboard];
+    if ([[info draggingSource] isEqual:outlineView] && [item isLeaf] == NO && [pboard canReadFileURLOfTypes:nil]) {
         [olv setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex];
         return NSDragOperationLink;
     }
@@ -275,13 +277,13 @@ static id sharedInstance = nil;
 
 - (BOOL)outlineView:(NSOutlineView*)olv acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(NSInteger)idx;
 {
-    NSArray *types = [[info draggingPasteboard] types];
-    NSURL *fileURL = ([types containsObject:NSURLPboardType] ? [NSURL URLFromPasteboard:[info draggingPasteboard]] : nil);
-    if (nil == fileURL)
+    NSPasteboard *pboard = [info draggingPasteboard];
+    NSArray *fileURLs = [pboard readFileURLsOfTypes:nil];
+    if ([fileURLs count] == 0)
         return NO;
     
     BibItem *pub = [item valueForKey:@"pub"];
-    [pub addFileForURL:fileURL autoFile:NO runScriptHook:YES];
+    [pub addFileForURL:[fileURLs objectAtIndex:0] autoFile:NO runScriptHook:YES];
     [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     return YES;
 }

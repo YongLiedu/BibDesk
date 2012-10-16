@@ -37,6 +37,8 @@
 #import "BDSKTextWithIconCell.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "NSPasteboard_BDSKExtensions.h"
+
 
 @implementation BDSKFileMatchConfigController
 
@@ -148,7 +150,7 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
 - (void)windowDidLoad
 {
     [self handleDocumentAddRemove:nil];
-    [fileTableView registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
+    [fileTableView registerForDraggedTypes:[NSArray arrayWithObjects:(NSString *)kUTTypeFileURL, NSFilenamesPboardType, nil]];
     [addRemoveButton setEnabled:[fileTableView numberOfSelectedRows] > 0 forSegment:1];
 }
 
@@ -214,18 +216,20 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
 
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op
 {
-    [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
-    return NSDragOperationLink;
+    NSPasteboard *pboard = [info draggingPasteboard];
+    if ([pboard canReadFileURLOfTypes:nil]) {
+        [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
+        return NSDragOperationLink;
+    }
+    return NSDragOperationNone;
 }
 
 - (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op;
 {
     NSPasteboard *pboard = [info draggingPasteboard];
-    NSArray *types = [pboard types];
-    if ([types containsObject:NSFilenamesPboardType]) {
-        NSArray *newFiles = [pboard propertyListForType:NSFilenamesPboardType];
-        if ([newFiles count])
-            [[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[self URLsFromPathsAndDirectories:newFiles]];
+    NSArray *fileURLs = [pboard readFileURLsOfTypes:nil];
+    if ([fileURLs count] > 0) {
+        [[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[self URLsFromPathsAndDirectories:[fileURLs valueForKey:@"path"]]];
         return YES;
     }
     return NO;

@@ -125,6 +125,7 @@
 #import "BDSKMetadataCacheOperation.h"
 #import "NSSplitView_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
+#import "NSPasteboard_BDSKExtensions.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -136,11 +137,12 @@ NSString *BDSKMODSDocumentType = @"MODS XML";
 NSString *BDSKAtomDocumentType = @"Atom XML";
 NSString *BDSKArchiveDocumentType = @"BibTeX and Papers Archive";
 
-NSString *BDSKReferenceMinerStringPboardType = @"CorePasteboardFlavorType 0x57454253";
-NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk.BibItemPasteboardType";
-NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
+NSString *BDSKPasteboardTypePublications = @"edu.ucsd.mmccrack.bibdesk.pasteboard.publications";
 
 NSString *BDSKDocumentPublicationsKey = @"publications";
+
+// pasteboard type from Reference Miner, determined using Pasteboard Peeker
+#define BDSKReferenceMinerStringPboardType @"CorePasteboardFlavorType 0x57454253"
 
 // private keys used for storing window information in xattrs
 #define BDSKMainWindowExtendedAttributeKey @"net.sourceforge.bibdesk.BDSKDocumentWindowAttributes"
@@ -512,7 +514,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
     [[groups categoryParent] setName:[NSString isEmptyString:currentGroupField] ? NSLocalizedString(@"FIELD", @"source list group row title") : [currentGroupField uppercaseString]];
     
     [tableView setDoubleAction:@selector(editPubOrOpenURLAction:)];
-    NSArray *dragTypes = [NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSColorPboardType, nil];
+    NSArray *dragTypes = [NSArray arrayWithObjects:BDSKPasteboardTypePublications, (NSString *)kUTTypeURL, (NSString *)kUTTypeFileURL, NSFilenamesPboardType, NSURLPboardType, NSPasteboardTypeString, NSPasteboardTypeColor, nil];
     [tableView registerForDraggedTypes:dragTypes];
     [groupOutlineView registerForDraggedTypes:dragTypes];
     
@@ -1615,17 +1617,19 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 - (NSData *)LTBDataAndReturnError:(NSError **)error{
     NSPasteboard *pboard = [NSPasteboard pasteboardWithUniqueName];
-    [pboardHelper declareType:NSStringPboardType dragCopyType:BDSKLTBDragCopyType forItems:[self publicationsForSaving] forPasteboard:pboard];
-    NSString *ltbString = [pboard stringForType:NSStringPboardType];
-    [pboardHelper clearPromisedTypesForPasteboard:pboard];
-	if(ltbString == nil){
+    [pboard clearContents];
+    [pboardHelper writeObjects:nil items:[self publicationsForSaving] forDragCopyType:BDSKLTBDragCopyType toPasteboard:pboard];
+    NSArray *ltbStrings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+    [pboard clearContents]; // this will clear the pasteboard helper for this pasteboard
+    [pboardHelper clearPromisedTypesForPasteboard:pboard]; // just to be sure
+	if([ltbStrings count] == 0){
         if (error)
             *error = [NSError localErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to run TeX processes for these publications", @"Error description")];
 		return nil;
     }
     
     NSMutableString *s = [NSMutableString stringWithString:@"\\documentclass{article}\n\\usepackage{amsrefs}\n\\begin{document}\n\n"];
-	[s appendString:ltbString];
+	[s appendString:[ltbStrings objectAtIndex:0]];
 	[s appendString:@"\n\\end{document}\n"];
     
     NSStringEncoding encoding = [self encodingForSaving];
@@ -2292,51 +2296,57 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
 }
 
-- (NSArray *)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)shouldSelect verbose:(BOOL)verbose error:(NSError **)outError{
-	// these are the types we support, the order here is important!
-    NSString *type = [pb availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
+- (NSArray *)addPublicationsFromPasteboard:(NSPasteboard *)pboard selectLibrary:(BOOL)shouldSelect verbose:(BOOL)verbose error:(NSError **)outError{
     NSArray *newPubs = nil;
     NSArray *newFilePubs = nil;
-    NSArray *newFiles = nil;
-    NSURL *newURL = nil;
 	NSError *error = nil;
     BOOL isPartialData = NO;
     NSString *temporaryCiteKey = nil;
     BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
     
-    if([type isEqualToString:BDSKBibItemPboardType]){
-        NSData *pbData = [pb dataForType:BDSKBibItemPboardType];
+    if ([pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]]) {
+        [pboard types];
+        NSData *pbData = [pboard dataForType:BDSKPasteboardTypePublications];
 		newPubs = [BibItem publicationsFromArchivedData:pbData macroResolver:[self macroResolver]];
-    }else if([type isEqualToString:BDSKReferenceMinerStringPboardType]){
-        NSString *pbString = [pb stringForType:NSStringPboardType]; 	
-        // sniffing the string for RIS is broken because RefMiner puts junk at the beginning
-		newPubs = [BDSKStringParser itemsFromString:pbString ofType:BDSKReferenceMinerStringType owner:self isPartialData:&isPartialData error:&error];
-    }else if([type isEqualToString:NSStringPboardType]){
-        NSString *pbString = [pb stringForType:NSStringPboardType]; 	
-        // sniff the string to see what its type is
-		newPubs = [BDSKStringParser itemsFromString:pbString ofType:BDSKUnknownStringType owner:self isPartialData:&isPartialData error:&error];
-    }else if([type isEqualToString:NSFilenamesPboardType]){
-		NSArray *pbArray = [pb propertyListForType:NSFilenamesPboardType]; // we will get an array
-        // try this first, in case these files are a type we can open
-        newPubs = [self extractPublicationsFromFiles:pbArray unparseableFiles:&newFiles verbose:verbose error:&error];
-    }else if([type isEqualToString:BDSKWeblocFilePboardType]){
-        newURL = [NSURL URLWithString:[pb stringForType:BDSKWeblocFilePboardType]]; 	
-    }else if([type isEqualToString:NSURLPboardType]){
-        newURL = [NSURL URLFromPasteboard:pb]; 	
-	}else{
-        // errors are key, value
-        error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Did not find anything appropriate on the pasteboard", @"Error description")];
-	}
-    
-    if(newURL){
-		if([newURL isFileURL])
-            newFiles = [NSArray arrayWithObject:[newURL path]];
-        else
-            newPubs = [self publicationsForURL:newURL title:[WebView URLTitleFromPasteboard:pb]];
-    }
-    if([newFiles count]){
-        newFilePubs = [self publicationsForFiles:newFiles];
-        newPubs = newPubs ? [newPubs arrayByAddingObjectsFromArray:newFilePubs]: newFilePubs;
+    } else {
+        NSArray *newURLs = [pboard readURLs];
+        if ([newURLs count] > 0) {
+            NSMutableArray *newFileURLs = [NSMutableArray array];
+            NSMutableArray *newURLPubs = [NSMutableArray array];
+            NSArray *titles = [pboard readURLNames];
+            if ([titles count] != [newURLs count])
+                titles = nil;
+            for (NSURL *newURL in newURLs) {
+                if ([newURL isFileURL])
+                    [newFileURLs addObject:newURL];
+                else
+                    [newURLPubs addObjectsFromArray:[self publicationsForURL:newURL title:[titles objectAtIndex:[newURLs indexOfObject:newURL]]]];
+            }
+            if ([newFileURLs count] > 0) {
+                // try this first, in case these files are a type we can open
+                NSArray *newFiles = nil;
+                newPubs = [self extractPublicationsFromFiles:[newFileURLs valueForKey:@"path"] unparseableFiles:&newFiles verbose:verbose error:&error];
+                if ([newFiles count] > 0) {
+                    newFilePubs = [self publicationsForFiles:newFiles];
+                    newPubs = newPubs ? [newPubs arrayByAddingObjectsFromArray:newFilePubs]: newFilePubs;
+                }
+            }
+            if ([newURLPubs count] > 0) {
+                newPubs = newPubs ? [newPubs arrayByAddingObjectsFromArray:newURLPubs]: newURLPubs;
+            }
+        } else {
+            NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+            if ([strings count] > 0) {
+                BDSKStringType stringType = BDSKUnknownStringType;
+                // sniffing the string for RIS is broken because RefMiner puts junk at the beginning
+                if ([pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKReferenceMinerStringPboardType, nil]])
+                    stringType = BDSKReferenceMinerStringType;
+                newPubs = [BDSKStringParser itemsFromString:[strings objectAtIndex:0] ofType:stringType owner:self isPartialData:&isPartialData error:&error];
+            } else {
+                // errors are key, value
+                error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Did not find anything appropriate on the pasteboard", @"Error description")];
+            }
+        }
     }
     
     if([error isLocalErrorWithCode:kBDSKHadMissingCiteKeys]) {

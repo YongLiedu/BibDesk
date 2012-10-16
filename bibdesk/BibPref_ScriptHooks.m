@@ -41,6 +41,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
 #import "NSArray_BDSKExtensions.h"
+#import "NSPasteboard_BDSKExtensions.h"
 
 
 @implementation BibPref_ScriptHooks
@@ -48,7 +49,7 @@
 - (void)awakeFromNib{
 	[tableView setTarget:self];
 	[tableView setDoubleAction:@selector(showOrChooseScriptFile:)];
-    [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
+    [tableView registerForDraggedTypes:[NSArray arrayWithObjects:(NSString *)kUTTypeFileURL, NSFilenamesPboardType, nil]];
 	[self tableViewSelectionDidChange:nil];
 	[tableView reloadData];
 }
@@ -164,25 +165,23 @@
 
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op{
     NSPasteboard *pboard = [info draggingPasteboard];
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
-    if (type && row >= 0 && row < [tableView numberOfRows]) {
-        NSString *path = [[pboard propertyListForType:NSFilenamesPboardType] firstObject];
-        if ([[NSSet setWithObjects:@"scpt", @"scptd", @"applescript", nil] containsObject:[path pathExtension]]) {
-            [tableView setDropRow:row dropOperation:NSTableViewDropOn];
-            return NSDragOperationEvery;
-        }
+    NSArray *types = [NSArray arrayWithObjects:@"com.apple.applescript.script", @"com.apple.applescript.text", @"com.apple.applescript.script-bundle", nil];
+    if ([pboard canReadFileURLOfTypes:types] && row >= 0 && row < [tableView numberOfRows]) {
+        [tableView setDropRow:row dropOperation:NSTableViewDropOn];
+        return NSDragOperationEvery;
     }
     return NSDragOperationNone;
 }
 
 - (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op{
     NSPasteboard *pboard = [info draggingPasteboard];
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
-    if (type) {
-        NSString *path = [[pboard propertyListForType:NSFilenamesPboardType] firstObject];
+    NSArray *types = [NSArray arrayWithObjects:@"com.apple.applescript.script", @"com.apple.applescript.text", @"com.apple.applescript.script-bundle", nil];
+    NSArray *fileURLs = [pboard readFileURLsOfTypes:types];
+    if ([fileURLs count] > 0) {
+        NSURL *fileURL = [fileURLs firstObject];
         NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
         NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[sud dictionaryForKey:BDSKScriptHooksKey]];
-        [dict setObject:path forKey:name];
+        [dict setObject:[fileURL path] forKey:name];
         [sud setObject:dict forKey:BDSKScriptHooksKey];
         [tableView reloadData];
         return YES;

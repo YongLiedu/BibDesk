@@ -68,8 +68,8 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 
 #define BDSKTokenFieldDidChangeSelectionNotification @"BDSKTokenFieldDidChangeSelectionNotification"
 
-#define BDSKTemplateTokensPboardType @"BDSKTemplateTokensPboardType"
-#define BDSKTypeTemplateRowsPboardType @"BDSKTypeTemplateRowsPboardType"
+#define BDSKPasteboardTypeTemplateTokens @"edu.ucsd.mmccrack.bibdesk.pasteboard.template-tokens"
+#define BDSKPasteboardTypeTemplateRows  @"edu.ucsd.mmccrack.bibdesk.pasteboard.template-rows"
 #define BDSKValueOrNoneTransformerName @"BDSKValueOrNone"
 
 static char BDSKTypeTemplateObservationContext;
@@ -257,7 +257,7 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
     
     [tableView setTypeSelectHelper:[[[BDSKTypeSelectHelper alloc] init] autorelease]];
     
-    [tableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKTypeTemplateRowsPboardType, nil]];
+    [tableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPasteboardTypeTemplateRows, nil]];
     
 	[fieldField setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
     
@@ -1097,21 +1097,24 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
     for (id object in objects)
         [str appendString:[self tokenField:tokenField displayStringForRepresentedObject:object]];
     
-    [pboard declareTypes:[NSArray arrayWithObjects:BDSKTemplateTokensPboardType, NSStringPboardType, nil] owner:nil];
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:objects];
-    [pboard setData:data forType:BDSKTemplateTokensPboardType];
-    [pboard setString:str forType:NSStringPboardType];
+    
+    [pboard clearContents];
+    [pboard setData:data forType:BDSKPasteboardTypeTemplateTokens];
+    [pboard writeObjects:[NSArray arrayWithObjects:str, nil]];
+    
     return nil != data;
 }
 
 - (NSArray *)tokenField:(NSTokenField *)tokenField readFromPasteboard:(NSPasteboard *)pboard {
     if (tokenField == itemTemplateTokenField) {
-        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKTemplateTokensPboardType, NSStringPboardType, nil]];
-        if ([type isEqualToString:BDSKTemplateTokensPboardType]) {
-            NSData *data = [pboard dataForType:BDSKTemplateTokensPboardType];
+        if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPasteboardTypeTemplateTokens, nil]]) {
+            NSData *data = [pboard dataForType:BDSKPasteboardTypeTemplateTokens];
             return [NSKeyedUnarchiver unarchiveObjectWithData:data];
-        } else if ([type isEqualToString:NSStringPboardType]) {
-            return [NSArray arrayWithObjects:[pboard stringForType:NSStringPboardType], nil];
+        } else {
+            NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+            if ([strings count] > 0)
+                return strings;
         }
     }
     return nil;
@@ -1200,27 +1203,27 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
 - (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row { return nil; }
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard {
-    [pboard declareTypes:[NSArray arrayWithObjects:BDSKTypeTemplateRowsPboardType, nil] owner:nil];
-    [pboard setData:[NSKeyedArchiver archivedDataWithRootObject:rowIndexes] forType:BDSKTypeTemplateRowsPboardType];
+    [pboard clearContents];
+    [pboard setData:[NSKeyedArchiver archivedDataWithRootObject:rowIndexes] forType:BDSKPasteboardTypeTemplateRows];
     return YES;
 }
 
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op {
     NSPasteboard *pboard = [info draggingPasteboard];
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKTypeTemplateRowsPboardType, nil]];
+    BOOL canRead = [pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypeTemplateRows, nil]];
     
     if (op == NSTableViewDropAbove)
         [tv setDropRow:row == -1 ? 0 : row dropOperation:NSTableViewDropOn];
     
-    return type ? NSDragOperationCopy : NSDragOperationNone;
+    return canRead ? NSDragOperationCopy : NSDragOperationNone;
 }
 
 - (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op{
     NSPasteboard *pboard = [info draggingPasteboard];
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKTypeTemplateRowsPboardType, nil]];
+    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPasteboardTypeTemplateRows, nil]];
     
     if (type) {
-        NSInteger idx = [[NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:BDSKTypeTemplateRowsPboardType]] lastIndex];
+        NSInteger idx = [[NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:BDSKPasteboardTypeTemplateRows]] lastIndex];
         BDSKTypeTemplate *sourceTemplate = [typeTemplates objectAtIndex:idx];
         BDSKTypeTemplate *targetTemplate = [typeTemplates objectAtIndex:row];
         [targetTemplate setItemTemplate:[[[NSArray alloc] initWithArray:[sourceTemplate itemTemplate] copyItems:YES] autorelease]];

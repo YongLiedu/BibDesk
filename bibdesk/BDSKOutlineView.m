@@ -414,6 +414,7 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
             NSPasteboard *pboard = [NSPasteboard pasteboardWithUniqueName];
             if ([[self dataSource] outlineView:self writeItems:[self selectedItems] toPasteboard:pboard])
                 [[self dataSource] outlineView:self pasteFromPasteboard:pboard];
+            [pboard clearContents];
         }
     } else
         NSBeep();

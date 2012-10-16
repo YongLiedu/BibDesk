@@ -172,7 +172,7 @@
     [sourceBox retain];
     [webViewView retain];
 	
-    [itemTableView registerForDraggedTypes:[NSArray arrayWithObject:NSStringPboardType]];
+    [itemTableView registerForDraggedTypes:[NSArray arrayWithObject:NSPasteboardTypeString]];
     [itemTableView setDoubleAction:@selector(addTextToCurrentFieldAction:)];
     
     [self setWindowFrameAutosaveName:BDSKTextImportControllerFrameAutosaveName];
@@ -1199,18 +1199,20 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 
 // This method is used by NSTableView to determine a valid drop target.  Based on the mouse position, the table view will suggest a proposed drop location.  This method must return a value that indicates which dragging operation the data source will perform.  The data source may "re-target" a drop if desired by calling setDropRow:dropOperation: and returning something other than NSDragOperationNone.  One may choose to re-target for various reasons (eg. for better visual feedback when inserting into a sorted position).
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op{
-    if(op ==  NSTableViewDropOn)
+    NSPasteboard *pboard = [info draggingPasteboard];
+    if ([pboard canReadObjectForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]] &&
+        op ==  NSTableViewDropOn)
         return NSDragOperationCopy;
-    else return NSDragOperationNone;
+    return NSDragOperationNone;
 }
 
 // This method is called when the mouse is released over a table view that previously decided to allow a drop via the validateDrop method.  The data source should incorporate the data from the dragging pasteboard at this time.
 - (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op{
-    NSPasteboard *pb = [info draggingPasteboard];
-    NSString *pbType = [pb availableTypeFromArray:[NSArray arrayWithObjects:NSStringPboardType, nil]];
-    if ([NSStringPboardType isEqualToString:pbType]){
+    NSPasteboard *pboard = [info draggingPasteboard];
+    NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+    if ([strings count] > 0) {
 
-        NSString *value = [pb stringForType:NSStringPboardType];
+        NSString *value = [strings objectAtIndex:0];
         NSString *key = [fields objectAtIndex:row];
         NSString *oldValue = [[self publication] valueOfField:key];
         
@@ -1233,26 +1235,28 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 
 - (void)tableView:(NSTableView *)tv pasteFromPasteboard:(NSPasteboard *)pboard{
 	NSInteger idx = [tv selectedRow];
-	NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
-	
-	if (type && idx != -1) {
-        NSString *selKey = [fields objectAtIndex:idx];
-        NSString *string = [pboard stringForType:NSStringPboardType];
-        NSString *oldValue = [[self publication] valueOfField:selKey];
+    if (idx != -1) {
+        NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+        if ([strings count] > 0) {
         
-        if(([NSEvent standardModifierFlags] & NSControlKeyMask) != 0 && 
-           [NSString isEmptyString:oldValue] == NO && 
-           [selKey isSingleValuedField] == NO){
+            NSString *selKey = [fields objectAtIndex:idx];
+            NSString *string = [strings objectAtIndex:0];
+            NSString *oldValue = [[self publication] valueOfField:selKey];
             
-            NSString *separator;
-            if([selKey isPersonField])
-                separator = @" and ";
-            else
-                separator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
-            string = [NSString stringWithFormat:@"%@%@%@", oldValue, separator, string];
+            if(([NSEvent standardModifierFlags] & NSControlKeyMask) != 0 && 
+               [NSString isEmptyString:oldValue] == NO && 
+               [selKey isSingleValuedField] == NO){
+                
+                NSString *separator;
+                if([selKey isPersonField])
+                    separator = @" and ";
+                else
+                    separator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+                string = [NSString stringWithFormat:@"%@%@%@", oldValue, separator, string];
+            }
+            
+            [self recordChangingField:selKey toValue:string];
         }
-        
-        [self recordChangingField:selKey toValue:string];
     }
 }
 

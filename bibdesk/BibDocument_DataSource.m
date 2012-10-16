@@ -81,16 +81,9 @@
 #import "NSEvent_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKServerInfo.h"
+#import "NSPasteboard_BDSKExtensions.h"
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
-
-@interface NSPasteboard (BDSKExtensions)
-- (BOOL)containsUnparseableFile;
-- (BOOL)writeURLs:(NSArray *)URLs names:(NSArray *)names;
-- (NSUInteger)numberOfURLsOnPasteboard;
-@end
-
-#pragma mark -
 
 @implementation BibDocument (DataSource)
 
@@ -295,24 +288,24 @@
                 // if we have more than one row, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
                 NSUInteger row = [rowIndexes firstIndex];
                 BibItem *pub = nil;
-                NSString *path;
-                NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
+                NSURL *fileURL;
+                NSMutableArray *fileURLs = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
 
                 while(row != NSNotFound){
                     pub = [shownPublications objectAtIndex:row];
-                    if ((path = [[pub localFileURLForField:dragColumnId] path])){
-                        [filePaths addObject:path];
+                    if ((fileURL = [pub localFileURLForField:dragColumnId])){
+                        [fileURLs addObject:fileURL];
                         NSError *xerror = nil;
                         // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
-                        if([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:0 error:&xerror] == NO)
+                        if([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:[fileURL path] options:0 error:&xerror] == NO)
                             NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
                     }
                     row = [rowIndexes indexGreaterThanIndex:row];
                 }
                 
-                if([filePaths count]){
-                    [pboard declareTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil] owner:nil];
-                    return [pboard setPropertyList:filePaths forType:NSFilenamesPboardType];
+                if([fileURLs count] > 0){
+                    [pboard clearContents];
+                    return [pboard writeObjects:[NSArray arrayWithObjects:fileURLs, nil]];
                 }
                 
             }else if([dragColumnId isRemoteURLField]){
@@ -334,35 +327,37 @@
                     row = [rowIndexes indexGreaterThanIndex:row];
                 }
                 
-                if ([theURLs count])
+                if ([theURLs count]) {
+                    [pboard clearContents];
                     return [pboard writeURLs:theURLs names:theNames];
+                }
             
             }else if([dragColumnId isEqualToString:BDSKLocalFileString]){
 
                 // if we have more than one files, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
                 NSUInteger row = [rowIndexes firstIndex];
                 BibItem *pub = nil;
-                NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
-                NSString *path;
+                NSMutableArray *fileURLs = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
+                NSURL *fileURL;
                 
                 while(row != NSNotFound){
                     pub = [shownPublications objectAtIndex:row];
                     
                     for (BDSKLinkedFile *file in [pub localFiles]) {
-                        if ((path = [file path])) {
-                            [filePaths addObject:path];
+                        if ((fileURL = [file URL])) {
+                            [fileURLs addObject:fileURL];
                             NSError *xerror = nil;
                             // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
-                            if([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:0 error:&xerror] == NO)
+                            if([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:[fileURL path] options:0 error:&xerror] == NO)
                                 NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
                         }
                     }
                     row = [rowIndexes indexGreaterThanIndex:row];
                 }
                 
-                if([filePaths count]){
-                    [pboard declareTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil] owner:nil];
-                    return [pboard setPropertyList:filePaths forType:NSFilenamesPboardType];
+                if([fileURLs count] > 0){
+                    [pboard clearContents];
+                    return [pboard writeObjects:fileURLs];
                 }
                 
             }else if([dragColumnId isEqualToString:BDSKRemoteURLString]){
@@ -390,8 +385,10 @@
                     row = [rowIndexes indexGreaterThanIndex:row];
                 }
                 
-                if ([theURLs count])
+                if ([theURLs count]) {
+                    [pboard clearContents];
                     return [pboard writeURLs:theURLs names:theNames];
+                }
             }
         }
     }
@@ -404,62 +401,42 @@
             dragCopyType += templateIdx;
     }
 	
-	success = [self writePublications:pubs fileExtensions:nil forDragCopyType:dragCopyType toPasteboard:pboard];
+	success = [self writePublications:pubs forDragCopyType:dragCopyType toPasteboard:pboard];
     
     return success;
 }
 	
 - (BOOL)writePublications:(NSArray *)pubs forDragCopyType:(NSInteger)dragCopyType toPasteboard:(NSPasteboard*)pboard{
-    return [self writePublications:pubs fileExtensions:nil forDragCopyType:dragCopyType citeString:nil toPasteboard:pboard];
-}
-
-- (BOOL)writePublications:(NSArray *)pubs fileExtensions:(NSArray *)fileNames forDragCopyType:(NSInteger)dragCopyType toPasteboard:(NSPasteboard*)pboard{
-    return [self writePublications:pubs fileExtensions:fileNames forDragCopyType:dragCopyType citeString:nil toPasteboard:pboard];
+    return [self writePublications:pubs forDragCopyType:dragCopyType citeString:nil toPasteboard:pboard];
 }
 
 - (BOOL)writePublications:(NSArray *)pubs forDragCopyType:(NSInteger)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard{
-    return [self writePublications:pubs fileExtensions:nil forDragCopyType:dragCopyType citeString:citeString toPasteboard:pboard];
-}
-
-- (BOOL)writePublications:(NSArray *)pubs fileExtensions:(NSArray *)fileExtensions forDragCopyType:(NSInteger)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard{
-	NSString *mainType = nil;
-	NSString *string = nil;
-	NSData *data = nil;
-    NSArray *URLs = nil;
+    NSArray *objects = nil;
 	
 	switch(dragCopyType){
 		case BDSKBibTeXDragCopyType:
-			mainType = NSStringPboardType;
-			string = [self bibTeXStringForPublications:pubs];
-			BDSKASSERT(string != nil);
+			objects = [NSArray arrayWithObjects:[self bibTeXStringForPublications:pubs], nil];
+			BDSKASSERT([objects count] == 1);
 			break;
 		case BDSKCiteDragCopyType:
-			mainType = NSStringPboardType;
-			string = [self citeStringForPublications:pubs citeString:citeString];
-			BDSKASSERT(string != nil);
+			objects = [NSArray arrayWithObjects:[self citeStringForPublications:pubs citeString:citeString], nil];
+			BDSKASSERT([objects count] == 1);
 			break;
 		case BDSKPDFDragCopyType:
-			mainType = NSPDFPboardType;
-			break;
 		case BDSKRTFDragCopyType:
-			mainType = NSRTFPboardType;
-			break;
 		case BDSKLaTeXDragCopyType:
 		case BDSKLTBDragCopyType:
-			mainType = NSStringPboardType;
 			break;
 		case BDSKMinimalBibTeXDragCopyType:
-			mainType = NSStringPboardType;
-			string = [self bibTeXStringDroppingInternal:YES forPublications:pubs];
-			BDSKASSERT(string != nil);
+			objects = [NSArray arrayWithObjects:[self bibTeXStringDroppingInternal:YES forPublications:pubs], nil];
+			BDSKASSERT([objects count] == 1);
 			break;
 		case BDSKRISDragCopyType:
-			mainType = NSStringPboardType;
-			string = [self RISStringForPublications:pubs];
+			objects = [NSArray arrayWithObjects:[self RISStringForPublications:pubs], nil];
+			BDSKASSERT([objects count] == 1);
 			break;
 		case BDSKURLDragCopyType:
-			mainType = NSURLPboardType;
-			URLs = [pubs valueForKey:@"bdskURL"];
+			objects = [pubs valueForKey:@"bdskURL"];
 			break;
         default:
             if (dragCopyType >= BDSKTemplateDragCopyType ) {
@@ -467,38 +444,16 @@
                 BDSKTemplate *template = [BDSKTemplate templateForStyle:style];
                 BDSKTemplateFormat format = [template templateFormat];
                 if (format & BDSKPlainTextTemplateFormat) {
-                    mainType = NSStringPboardType;
-                    string = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:pubs];
+                    objects = [NSArray arrayWithObjects:[BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:pubs], nil];
                 } else if (format & BDSKRichTextTemplateFormat) {
-                    NSDictionary *docAttributes = nil;
-                    NSAttributedString *templateString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:pubs documentAttributes:&docAttributes];
-                    if (format & BDSKRTFDTemplateFormat) {
-                        mainType = NSRTFDPboardType;
-                        data = [templateString RTFDFromRange:NSMakeRange(0,[templateString length]) documentAttributes:docAttributes];
-                    } else {
-                        mainType = NSRTFPboardType;
-                        data = [templateString RTFFromRange:NSMakeRange(0,[templateString length]) documentAttributes:docAttributes];
-                    }
+                    objects = [NSArray arrayWithObjects:[BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:pubs documentAttributes:NULL], nil];
                 }
+                BDSKASSERT([objects count] == 1);
             }
 	}
     
-	[pboardHelper declareType:mainType dragCopyType:dragCopyType forItems:pubs forPasteboard:pboard];
-    
-    if (string != nil) {
-        [pboardHelper setString:string forType:mainType forPasteboard:pboard];
-	} else if(data != nil) {
-        [pboardHelper setData:data forType:mainType forPasteboard:pboard];
-    } else if (URLs != nil) {
-        [pboardHelper setURLs:URLs forType:mainType forPasteboard:pboard];
-    } else if(dragCopyType >= BDSKTemplateDragCopyType) {
-        [pboardHelper setData:nil forType:mainType forPasteboard:pboard];
-    }
-    
-    if ([fileExtensions count]) {
-        [pboardHelper addTypes:[NSArray arrayWithObject:NSFilesPromisePboardType] forPasteboard:pboard];
-        [pboardHelper setPropertyList:fileExtensions forType:NSFilesPromisePboardType forPasteboard:pboard];
-    }
+    [pboard clearContents];
+    [pboardHelper writeObjects:objects items:pubs forDragCopyType:dragCopyType toPasteboard:pboard];
     
     return YES;
 }
@@ -531,40 +486,34 @@
     NSImage *image = nil;
     
     NSPasteboard *pb = [NSPasteboard pasteboardWithName:NSDragPboard];
-    NSString *dragType = [pb availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, NSFilesPromisePboardType, NSPDFPboardType, NSRTFPboardType, NSStringPboardType, nil]];
-	NSArray *promisedDraggedItems = [pboardHelper promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
+	NSArray *promisedDraggedItems = [pboardHelper promisedItemsForPasteboard:pb];
 	NSInteger dragCopyType = -1;
 	NSInteger count = 0;
     BOOL inside = NO;
     BOOL isIcon = NO;
-	
-    if ([dragType isEqualToString:NSFilenamesPboardType]) {
-		NSArray *fileNames = [pb propertyListForType:NSFilenamesPboardType];
-		count = [fileNames count];
-		image = [[NSWorkspace sharedWorkspace] iconForFiles:fileNames];
+    NSArray *array;
+    
+    if ([pb availableTypeFromArray:[NSArray arrayWithObjects:NSFilesPromisePboardType, nil]]) {
+        // dragging a search group
+		NSArray *fileExts = [pb propertyListForType:NSFilesPromisePboardType];
+		count = [fileExts count];
+        NSString *pathExt = count > 0 ? [fileExts objectAtIndex:0] : @"";
+        image = [[NSWorkspace sharedWorkspace] iconForFileType:pathExt];
         isIcon = YES;
-        
-    } else if ([dragType isEqualToString:NSURLPboardType]) {
+    } else if ((array = [pb readFileURLsOfTypes:nil])) {
+		count = [array count];
+		image = [[NSWorkspace sharedWorkspace] iconForFiles:[array valueForKey:@"path"]];
+        isIcon = YES;
+    } else if ([pb canReadURL]) {
         count = 1;
         image = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kInternetLocationGenericIcon)];
         isIcon = YES;
-        if ([pb availableTypeFromArray:[NSArray arrayWithObject:NSFilesPromisePboardType]])
-            count = MAX(1, (NSInteger)[[pb propertyListForType:NSFilesPromisePboardType] count]);
-        else if ([pb availableTypeFromArray:[NSArray arrayWithObject:@"WebURLsWithTitlesPboardType"]])
-            count = MAX(1, (NSInteger)[[pboardHelper promisedItemsForPasteboard:pb] count]);
+        if ([pb canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]])
+            count = MAX(1, (NSInteger)[promisedDraggedItems count]);
         else
-            count = MAX(1, (NSInteger)[pb numberOfURLsOnPasteboard]);
-    
-	} else if ([dragType isEqualToString:NSFilesPromisePboardType]) {
-		NSArray *fileNames = [pb propertyListForType:NSFilesPromisePboardType];
-		count = [fileNames count];
-        NSString *pathExt = count ? [fileNames objectAtIndex:0] : @"";
-        // promise drags don't use full paths
-        image = [[NSWorkspace sharedWorkspace] iconForFileType:pathExt];
-        isIcon = YES;
-    
-	} else {
-		NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
+            count = MAX(1, (NSInteger)[[pb readURLs] count]);
+    } else {
+		NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
 		NSMutableString *s = [NSMutableString string];
         NSString *dragCopyTypeKey = ([NSEvent standardModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
         
@@ -618,10 +567,10 @@
                 case BDSKURLDragCopyType:
                     // in fact, this should already be handled above
                     count = 1;
-                    image = [NSImage imageForURL:[NSURL URLFromPasteboard:pb]];
+                    image = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kInternetLocationGenericIcon)];
                     isIcon = YES;
-                    if ([pb availableTypeFromArray:[NSArray arrayWithObject:@"WebURLsWithTitlesPboardType"]])
-                        count = MAX(1, (NSInteger)[[pboardHelper promisedItemsForPasteboard:pb] count]);
+                    if ([pb canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]])
+                        count = MAX(1, (NSInteger)[promisedDraggedItems count]);
                     break;
                 default:
                     [s appendString:@"["];
@@ -667,26 +616,30 @@
 #pragma mark TableView dragging destination
 
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op{
-    if (tv != tableView)
+    if (tv != tableView || [self hasExternalGroupsSelected])
         return NSDragOperationNone;
     
     NSPasteboard *pboard = [info draggingPasteboard];
-    id source = [info draggingSource];
-    BOOL isDragFromMainTable = [source isEqual:tableView];
-    BOOL isDragFromGroupTable = [source isEqual:groupOutlineView];
-    BOOL isDragFromDrawer = [source isEqual:[drawerController tableView]];
     
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSColorPboardType, nil]];
-    
-    if([self hasExternalGroupsSelected] || type == nil) 
-        return NSDragOperationNone;
-    if ([type isEqualToString:NSColorPboardType]) {
+    if ([pboard canReadObjectForClasses:[NSArray arrayWithObject:[NSColor class]] options:[NSDictionary dictionary]]) {
         if (row == -1 || row == [tableView numberOfRows])
             return NSDragOperationNone;
         else if (op == NSTableViewDropAbove)
             [tv setDropRow:row dropOperation:NSTableViewDropOn];
         return NSDragOperationEvery;
     }
+    
+    id source = [info draggingSource];
+    BOOL isDragFromMainTable = [source isEqual:tableView];
+    BOOL isDragFromGroupTable = [source isEqual:groupOutlineView];
+    BOOL isDragFromDrawer = [source isEqual:[drawerController tableView]];
+    BOOL hasPub = [pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]];
+    BOOL hasURL = [pboard canReadURL];
+    BOOL hasString = [pboard canReadObjectForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+    
+    if (hasPub == NO && hasURL == NO && hasString == NO)
+        return NSDragOperationNone;
+    
     if (isDragFromGroupTable && docFlags.dragFromExternalGroups && [self hasLibraryGroupSelected]) {
         [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
         return NSDragOperationCopy;
@@ -700,14 +653,10 @@
         [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
     }
     // We were checking -containsUnparseableFile here as well, but I think it makes sense to allow the user to target a specific row with any file type (including BibTeX).  Further, checking -containsUnparseableFile can be unacceptably slow (see bug #1799630), which ruins the dragging experience.
-    else if(([type isEqualToString:NSFilenamesPboardType] == NO) &&
-             [type isEqualToString:BDSKWeblocFilePboardType] == NO && [type isEqualToString:NSURLPboardType] == NO){
+    else if(hasURL == NO){
         [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
     }
-    if ([type isEqualToString:BDSKBibItemPboardType])   
-        return NSDragOperationCopy;
-    else
-        return NSDragOperationEvery;
+    return hasPub ? NSDragOperationCopy : NSDragOperationEvery;
 }
 
 - (BOOL)selectItemsInAuxFileAtPath:(NSString *)auxPath {
@@ -749,54 +698,52 @@
 - (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op{
     if (tv == tableView) {
         NSPasteboard *pboard = [info draggingPasteboard];
-        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSColorPboardType, nil]];
         
         if ([self hasExternalGroupsSelected])
             return NO;
-		if (row != -1) {
+		
+        if (row != -1) {
+            
             BibItem *pub = [shownPublications objectAtIndex:row];
-            NSMutableArray *urlsToAdd = [NSMutableArray array];
+            NSArray *colors = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSColor class]] options:[NSDictionary dictionary]];
             
-            if ([type isEqualToString:NSFilenamesPboardType]) {
-                NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
-                if ([fileNames count] == 0)
+            if ([colors count] > 0) {
+                [pub setColor:[colors objectAtIndex:0]];
+                [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+            } else {
+                NSArray *urlsToAdd = [pboard readURLs];
+                if ([urlsToAdd count] > 0) {
+                    for (NSURL *theURL in urlsToAdd)
+                        [pub addFileForURL:theURL autoFile:YES runScriptHook:YES];
+                    [self selectPublication:pub];
+                    [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+                    return YES;
+                } else {
                     return NO;
-                for (NSString *aPath in fileNames)
-                    [urlsToAdd addObject:[NSURL fileURLWithPath:[aPath stringByExpandingTildeInPath]]];
-            } else if([type isEqualToString:BDSKWeblocFilePboardType]) {
-                [urlsToAdd addObject:[NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]]];
-            } else if([type isEqualToString:NSURLPboardType]) {
-                [urlsToAdd addObject:[NSURL URLFromPasteboard:pboard]];
-            } else if([type isEqualToString:NSColorPboardType]) {
-                [[[self shownPublications] objectAtIndex:row] setColor:[NSColor colorFromPasteboard:pboard]];
-                return YES;
-            } else
-                return NO;
-            
-            if([urlsToAdd count] == 0)
-                return NO;
-            
-            for (NSURL *theURL in urlsToAdd)
-                [pub addFileForURL:theURL autoFile:YES runScriptHook:YES];
-            
-            [self selectPublication:pub];
-            [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-            return YES;
-            
-        } else {
-            
-            [self selectLibraryGroup:nil];
-            
-            if ([type isEqualToString:NSFilenamesPboardType]) {
-                NSArray *filenames = [pboard propertyListForType:NSFilenamesPboardType];
-                if ([filenames count] == 1) {
-                    NSString *file = [filenames lastObject];
-                    if([[file pathExtension] isCaseInsensitiveEqual:@"aux"])
-                        return [self selectItemsInAuxFileAtPath:file];
                 }
             }
             
-            return nil != [self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL];
+        } else {
+            
+            NSArray *fileURLs = [pboard readFileURLsOfTypes:nil];
+            if ([fileURLs count] == 1) {
+                NSURL *fileURL = [fileURLs lastObject];
+                if([[fileURL pathExtension] isCaseInsensitiveEqual:@"aux"]){
+                    [self selectLibraryGroup:nil];
+                    return [self selectItemsInAuxFileAtPath:[fileURL path]];
+                }
+            }
+            
+            if ([pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, NSPasteboardTypeString, nil]] ||
+                [pboard canReadURL]) {
+                
+                return nil != [self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL];
+                
+            } else {
+            
+                return NO;
+                
+            }
         }
     }
       
@@ -1174,7 +1121,7 @@
             pubs = pubsInGroup;
         }
     }
-    if ([pubs count] > 0 || [self hasSearchGroupsSelected]) {
+    if ([pubs count] > 0) {
         if (dragCopyType == BDSKTemplateDragCopyType) {
             NSString *dragCopyTemplateKey = ([NSEvent standardModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTemplateKey : BDSKDefaultDragCopyTemplateKey;
             NSString *template = [sud stringForKey:dragCopyTemplateKey];
@@ -1182,8 +1129,17 @@
             if (templateIdx != NSNotFound)
                 dragCopyType += templateIdx;
         }
-        
-        success = [self writePublications:pubs fileExtensions:additionalFileExtensions forDragCopyType:dragCopyType toPasteboard:pboard];
+        success = [self writePublications:pubs forDragCopyType:dragCopyType toPasteboard:pboard];
+    } else if ([additionalFileExtensions count] > 0) {
+        success = [pboard clearContents];
+    }
+    
+    if (success && [additionalFileExtensions count]) {
+        // The documentation says to use kPasteboardTypeFileURLPromise, but that does not work, because there's absolutely no support for this in the Cocoa API
+        NSString *filesPromiseUTI = [(NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassNSPboardType, (CFStringRef)NSFilesPromisePboardType, kUTTypeData) autorelease];
+        NSPasteboardItem *item = [[[NSPasteboardItem alloc] init] autorelease];
+        [item setPropertyList:additionalFileExtensions forType:filesPromiseUTI];
+        [pboard writeObjects:[NSArray arrayWithObjects:item, nil]];
     }
     
     return success;
@@ -1205,34 +1161,37 @@
 
 - (NSDragOperation)outlineView:(NSOutlineView *)outlineView validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(NSInteger)idx {
     NSPasteboard *pboard = [info draggingPasteboard];
-    
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
-    
-    // bail out if no recognizable types
-    if (nil == type)
-        return NSDragOperationNone;
-    
     id source = [info draggingSource];
     BOOL isDragFromMainTable = [source isEqual:tableView];
     BOOL isDragFromGroupTable = [source isEqual:groupOutlineView];
     BOOL isDragFromDrawer = [source isEqual:[drawerController tableView]];
     
-    // we don't allow local drags unless they're targeted on a specific group
-    if (isDragFromDrawer || isDragFromGroupTable)
+    // we don't allow local drags from the drawer or on the whole table
+    if (isDragFromDrawer || item == nil)
         return NSDragOperationNone;
     
     // drop a file or URL on external groups
-    if ([item isWeb] && idx == NSOutlineViewDropOnItemIndex && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil] containsObject:type]) {
-        return NSDragOperationEvery;
-    } else if (([item isExternal] || [item isEqual:[groups externalParent]]) && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil] containsObject:type]) {
-        [outlineView setDropItem:[groups externalParent] dropChildIndex:NSOutlineViewDropOnItemIndex];
-        return NSDragOperationLink;
+    if ([item isExternal] || [item isEqual:[groups externalParent]]) {
+        if (isDragFromGroupTable ||  [pboard canReadURL] == NO) {
+            return NSDragOperationNone;
+        } else if ([item isWeb] && [pboard canReadFileURLOfTypes:nil] == NO){
+            return NSDragOperationEvery;
+        } else {
+            [outlineView setDropItem:[groups externalParent] dropChildIndex:NSOutlineViewDropOnItemIndex];
+            return NSDragOperationLink;
+        }
     }
+    
+    BOOL hasPub = [pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]];
+    
+    // bail out if no recognizable types
+    if (hasPub == NO &&  [pboard canReadURL] == NO && [pboard canReadObjectForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]] == NO)
+        return NSDragOperationNone;
     
     // we don't insert in a particular location
     if (idx != NSOutlineViewDropOnItemIndex) {
-        if (nil == item || [(BDSKParentGroup *)item numberOfChildren] == 0) {
-            // here we actually target the whole table or the parent
+        if ([(BDSKParentGroup *)item numberOfChildren] == 0) {
+            // here we actually target the parent
             [outlineView setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex];
         } else {
             // redirect to a drop on the closest child
@@ -1242,119 +1201,114 @@
         idx = NSOutlineViewDropOnItemIndex;
     }
     
-    // no dropping on shared groups or parents other than the static parent
-    if (item && [item isValidDropTarget] == NO)
+    if ([item isValidDropTarget] == NO)
         return NSDragOperationNone;
     
-    if ((isDragFromGroupTable || isDragFromMainTable) && docFlags.dragFromExternalGroups) {
-        if ([type isEqualToString:BDSKBibItemPboardType] == NO || item == nil)
-            return NSDragOperationNone;
-        return NSDragOperationCopy;
-    } else if (isDragFromMainTable) {
-        if ([type isEqualToString:BDSKBibItemPboardType] == NO || item == nil || [item isEqual:[groups libraryGroup]])
-            return NSDragOperationNone;
-        return NSDragOperationLink;
-    } else if ([type isEqualToString:BDSKBibItemPboardType]) {
-        return NSDragOperationCopy;
-    } else {
-        return NSDragOperationEvery;
+    if (isDragFromGroupTable) {
+        if (hasPub && docFlags.dragFromExternalGroups)
+            return NSDragOperationCopy;
+        return NSDragOperationNone;
     }
-    return NSDragOperationNone;
+    
+    if (isDragFromMainTable) {
+        if (hasPub == NO || [item isEqual:[groups libraryGroup]])
+            return NSDragOperationNone;
+        else if (docFlags.dragFromExternalGroups)
+            return NSDragOperationCopy;
+        return NSDragOperationLink;
+    }
+    
+    if (hasPub)
+        return NSDragOperationCopy;
+    else
+        return NSDragOperationEvery;
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(NSInteger)idx {
 	
     NSPasteboard *pboard = [info draggingPasteboard];
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSStringPboardType, nil]];
+    
+    if ([item isExternal] || [item isEqual:[groups externalParent]]) {
+        if ([pboard canReadURL] == NO) {
+            
+            return NO;
+            
+        } else if ([item isWeb] && [pboard canReadFileURLOfTypes:nil] == NO) {
+            
+            NSArray *urls = [pboard readURLs];
+            NSURL *url = nil;
+            
+            for (url in urls) {
+                if ([url isFileURL] == NO) {
+                    [(BDSKWebGroup *)item setURL:url];
+                    return YES;
+                }
+            }
+            return NO;
+            
+        } else {
+            
+            NSArray *urls = [pboard readURLs];
+            
+            BDSKGroup *group = nil;
+            BDSKGroup *lastGroup = nil;
+            BOOL undoable = NO;
+            
+            for (NSURL *url in urls) {
+                if ([url isFileURL] && [[[url path] pathExtension] isEqualToString:@"bdsksearch"]) {
+                    NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfURL:url];
+                    Class groupClass = NSClassFromString([dictionary objectForKey:@"class"]);
+                    if ((group = [[[(groupClass ?: [BDSKSearchGroup class]) alloc] initWithDictionary:dictionary] autorelease])) {
+                        [groups addSearchGroup:(BDSKSearchGroup *)group];
+                        lastGroup = group;
+                    }
+                } else if ([[url scheme] isEqualToString:BDSKSearchGroupURLScheme]) {
+                    if ((group = [[[BDSKSearchGroup alloc] initWithURL:url] autorelease])) {
+                        [groups addSearchGroup:(BDSKSearchGroup *)group];
+                        lastGroup = group;
+                    }
+                } else {
+                    if ((group = [[[BDSKURLGroup alloc] initWithURL:url] autorelease])) {
+                        [groups addURLGroup:(BDSKURLGroup *)group];
+                        lastGroup = group;
+                        undoable = YES;
+                    }
+                }
+            }
+            if (lastGroup) {
+                [self selectGroup:lastGroup];
+                if (undoable)
+                    [[self undoManager] setActionName:NSLocalizedString(@"Add Group", @"Undo action name")];
+                return YES;
+            } else {
+                return NO;
+            }
+            
+        }
+    }
+    
+    if (idx != NSOutlineViewDropOnItemIndex || [item isValidDropTarget] == NO) {
+        // shouldn't get here at this point
+        return NO;
+    }
+    
     NSArray *pubs = nil;
     id source = [info draggingSource];
     BOOL isDragFromMainTable = [source isEqual:tableView];
     BOOL isDragFromGroupTable = [source isEqual:groupOutlineView];
     BOOL isDragFromDrawer = [source isEqual:[drawerController tableView]];
     
-    if (idx == NSOutlineViewDropOnItemIndex && [item isWeb] && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil] containsObject:type]) {
-        
-        NSURL *url = nil;
-        
-        if ([type isEqualToString:BDSKWeblocFilePboardType])
-            url = [NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]]; 	
-        else if ([type isEqualToString:NSURLPboardType])
-            url = [NSURL URLFromPasteboard:pboard];
-        if (url) {
-            [(BDSKWebGroup *)item setURL:url];
-            return YES;
-        } else
-            return NO;
-        
-    } else if (([item isExternal] || [item isEqual:[groups externalParent]]) && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil] containsObject:type]){
-        
-        NSArray *urls = nil;
-        
-        if ([type isEqualToString:BDSKWeblocFilePboardType]) {
-            urls = [NSArray arrayWithObjects:[NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]], nil]; 	
-        } else if ([type isEqualToString:NSURLPboardType]) {
-            urls = [NSArray arrayWithObjects:[NSURL URLFromPasteboard:pboard], nil];
-        } else if ([type isEqualToString:NSFilenamesPboardType]) {
-            urls = [NSMutableArray array];
-            for (NSString *file in [pboard propertyListForType:NSFilenamesPboardType])
-                [(NSMutableArray *)urls addObject:[NSURL fileURLWithPath:file]];
-        }
-        
-        BDSKGroup *group = nil;
-        BDSKGroup *lastGroup = nil;
-        BOOL undoable = NO;
-        
-        for (NSURL *url in urls) {
-            if ([url isFileURL] && [[[url path] pathExtension] isEqualToString:@"bdsksearch"]) {
-                NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfURL:url];
-                Class groupClass = NSClassFromString([dictionary objectForKey:@"class"]);
-                if ((group = [[[(groupClass ?: [BDSKSearchGroup class]) alloc] initWithDictionary:dictionary] autorelease])) {
-                    [groups addSearchGroup:(BDSKSearchGroup *)group];
-                    lastGroup = group;
-                }
-            } else if ([[url scheme] isEqualToString:BDSKSearchGroupURLScheme]) {
-                if ((group = [[[BDSKSearchGroup alloc] initWithURL:url] autorelease])) {
-                    [groups addSearchGroup:(BDSKSearchGroup *)group];
-                    lastGroup = group;
-                    undoable = YES;
-                }
-            } else {
-                if ((group = [[[BDSKURLGroup alloc] initWithURL:url] autorelease])) {
-                    [groups addURLGroup:(BDSKURLGroup *)group];
-                    lastGroup = group;
-                    undoable = YES;
-                }
-            }
-        }
-        if (lastGroup) {
-            [self selectGroup:lastGroup];
-            if (undoable)
-                [[self undoManager] setActionName:NSLocalizedString(@"Add Group", @"Undo action name")];
-            return YES;
-        } else {
-            return NO;
-        }
-        
-    }
-    
-    if (idx != NSOutlineViewDropOnItemIndex || (item && [item isValidDropTarget] == NO)) {
-        // shouldn't get here at this point
-        return NO;
-    }
-    
     if ((isDragFromGroupTable || isDragFromMainTable) && docFlags.dragFromExternalGroups) {
         pubs = [self addPublicationsFromPasteboard:pboard selectLibrary:NO verbose:YES error:NULL];
     } else if (isDragFromMainTable) {
         // we already have these publications, so we just want to add them to the group, not the document
-        pubs = [pboardHelper promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
+        pubs = [pboardHelper promisedItemsForPasteboard:pboard];
     } else if (isDragFromGroupTable == NO && isDragFromDrawer == NO) {
         pubs = [self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL];
     }
     
     if ([pubs count] == 0)
         return NO;
-    
-    BOOL shouldSelect = (item == nil || [item isParent] || [[self selectedGroups] containsObject:item]) && docFlags.dragFromExternalGroups == NO;
     
     // if dropping on the static group parent, create a new static groups using a common author name or keyword if available
     if ([item isEqual:[groups staticParent]]) {
@@ -1379,11 +1333,11 @@
     }
     
     // add to the group we're dropping on, /not/ the currently selected group; no need to add to all pubs group, though
-    if (item && [item isParent] == NO && [item isEqual:[groups libraryGroup]] == NO) {
+    if ([item isParent] == NO && [item isEqual:[groups libraryGroup]] == NO) {
         
         [self addPublications:pubs toGroup:item];
         // Reselect if necessary, or we default to selecting the all publications group (which is really annoying when creating a new pub by dropping a PDF on a group).
-        if (shouldSelect)
+        if ([[self selectedGroups] containsObject:item] == NO && docFlags.dragFromExternalGroups == NO)
             [self selectGroup:item];
     }
     
@@ -1762,129 +1716,6 @@
         dragOp = NSDragOperationGeneric;
     }
     return dragOp;
-}
-
-@end
-
-#pragma mark -
-
-@implementation NSPasteboard (BDSKExtensions)
-
-- (BOOL)containsUnparseableFile{
-    NSString *type = [self availableTypeFromArray:[NSArray arrayWithObject:NSFilenamesPboardType]];
-    
-    if(type == nil)
-        return NO;
-    
-    NSArray *fileNames = [self propertyListForType:NSFilenamesPboardType];
-    
-    if([fileNames count] != 1)  
-        return NO;
-        
-    NSString *fileName = [fileNames lastObject];
-    NSSet *unreadableTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"pdf", @"ps", @"eps", @"doc", @"htm", @"textClipping", @"webloc", @"html", @"rtf", @"tiff", @"tif", @"png", @"jpg", @"jpeg", nil];
-    NSSet *readableTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"bib", @"aux", @"ris", @"fcgi", @"refman", nil];
-    
-    if([unreadableTypes containsObject:[fileName pathExtension]])
-        return YES;
-    if([readableTypes containsObject:[fileName pathExtension]])
-        return NO;
-    
-    NSString *contentString = [[NSString alloc] initWithContentsOfFile:fileName guessedEncoding:NSUTF8StringEncoding];
-    
-    if(contentString == nil)
-        return YES;
-    if([contentString contentStringType] == BDSKUnknownStringType){
-        [contentString release];
-        return YES;
-    }
-    [contentString release];
-    return NO;
-}
-
-- (BOOL)writeURLs:(NSArray *)URLs names:(NSArray *)names
-{
-    OSStatus err;
-    
-    PasteboardRef carbonPboard;
-    err = PasteboardCreate((CFStringRef)[self name], &carbonPboard);
-    
-    if (noErr == err)
-        err = PasteboardClear(carbonPboard);
-    
-    if (noErr == err)
-        (void)PasteboardSynchronize(carbonPboard);
-    
-    NSUInteger i, urlCount = [URLs count], namesCount = [names count];
-    
-    for (i = 0; i < urlCount && noErr == err; i++) {
-        
-        NSURL *theURL = [URLs objectAtIndex:i];
-        CFDataRef utf8Data = (CFDataRef)[[theURL absoluteString] dataUsingEncoding:NSUTF8StringEncoding];
-        NSString *name = i < namesCount ? [names objectAtIndex:i] : nil;
-        
-        // any pointer type; private to the creating application
-        PasteboardItemID itemID = (void *)theURL;
-        
-        // Finder adds a file URL and destination URL for weblocs, but only a file URL for regular files
-        // could also put a string representation of the URL, but Finder doesn't do that
-        
-        err = PasteboardPutItemFlavor(carbonPboard, itemID, kUTTypeURL, utf8Data, kPasteboardFlavorNoFlags);
-        if (err == noErr && name)
-            err = PasteboardPutItemFlavor(carbonPboard, itemID, CFSTR("public.url-name"), (CFDataRef)[name dataUsingEncoding:NSUTF8StringEncoding], kPasteboardFlavorNoFlags);
-    }
-    
-    if (carbonPboard) 
-        CFRelease(carbonPboard);
-    
-    return noErr == err;
-}
-
-- (NSUInteger)numberOfURLsOnPasteboard
-{
-    OSStatus err;
-    
-    PasteboardRef carbonPboard;
-    err = PasteboardCreate((CFStringRef)[self name], &carbonPboard);
-    
-    if (noErr == err)
-        (void)PasteboardSynchronize(carbonPboard);
-    
-    ItemCount itemCount, itemIndex;
-    if (noErr == err)
-        err = PasteboardGetItemCount(carbonPboard, &itemCount);
-    
-    if (noErr != err)
-        itemCount = 0;
-    
-    NSUInteger count = 0;
-    
-    // Pasteboard has 1-based indexing!
-    
-    for (itemIndex = 1; itemIndex <= itemCount; itemIndex++) {
-        
-        PasteboardItemID itemID;
-        CFArrayRef flavors = NULL;
-        CFIndex flavorIndex, flavorCount = 0;
-        
-        err = PasteboardGetItemIdentifier(carbonPboard, itemIndex, &itemID);
-        if (noErr == err)
-            err = PasteboardCopyItemFlavors(carbonPboard, itemID, &flavors);
-        
-        if (noErr == err)
-            flavorCount = CFArrayGetCount(flavors);
-        
-        // flavorCount will be zero in case of an error...
-        for (flavorIndex = 0; flavorIndex < flavorCount; flavorIndex++) {
-            if (UTTypeConformsTo(CFArrayGetValueAtIndex(flavors, flavorIndex), kUTTypeURL))
-                count++;
-        }
-        
-        if (NULL != flavors)
-            CFRelease(flavors);
-    }
-    
-    return count;
 }
 
 @end

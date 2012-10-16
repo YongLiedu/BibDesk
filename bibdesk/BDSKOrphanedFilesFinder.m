@@ -54,6 +54,7 @@
 #import "BDSKLinkedFile.h"
 #import "BDSKTableView.h"
 #import "NSMenu_BDSKExtensions.h"
+#import "NSPasteboard_BDSKExtensions.h"
 
 #define BDSKOrphanedFilesWindowFrameAutosaveName @"BDSKOrphanedFilesWindow"
 
@@ -281,9 +282,8 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
     [draggedFiles release];
     draggedFiles = [[[arrayController arrangedObjects] objectsAtIndexes:rowIndexes] retain];
-    NSArray *filePaths = [draggedFiles valueForKey:@"path"];
-    [pboard declareTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil] owner:nil];
-    [pboard setPropertyList:filePaths forType:NSFilenamesPboardType];
+    [pboard clearContents];
+    [pboard writeObjects:[draggedFiles valueForKey:@"fileURL"]];
     return YES;
 }
 
@@ -309,18 +309,13 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (NSImage *)tableView:(NSTableView *)aTableView dragImageForRowsWithIndexes:(NSIndexSet *)dragRows{
     NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
-    NSString *dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
+    NSArray *fileURLs = [pboard readFileURLsOfTypes:nil];
     NSImage *image = nil;
-    NSInteger count = 0;
     
-    if ([dragType isEqualToString:NSFilenamesPboardType]) {
-		NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
-        count = [fileNames count];
-		if (count)
-            image = [[NSWorkspace sharedWorkspace] iconForFiles:fileNames];
-    }
+    if ([fileURLs count] > 0)
+        image = [[NSWorkspace sharedWorkspace] iconForFiles:[fileURLs valueForKey:@"path"]];
     
-    return image ? [image dragImageWithCount:count] : nil;
+    return [image dragImageWithCount:[fileURLs count]];
 }
 
 #pragma mark Contextual menu

@@ -78,7 +78,6 @@
 #import "BDSKSearchBookmarkController.h"
 #import "BDSKSearchBookmark.h"
 #import "BDSKSharingClient.h"
-#import "WebURLsWithTitles.h"
 #import "NSColor_BDSKExtensions.h"
 #import "NSView_BDSKExtensions.h"
 #import "BDSKCFCallBacks.h"
@@ -89,6 +88,7 @@
 #import "NSMenu_BDSKExtensions.h"
 #import "BDSKBookmarkSheetController.h"
 #import "BDSKBookmarkController.h"
+#import "NSPasteboard_BDSKExtensions.h"
 
 
 @implementation BibDocument (Groups)
@@ -1087,8 +1087,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	id group = [[self clickedOrSelectedGroups] lastObject];
     NSURL *url = nil;
     NSString *title = nil;
-    NSString *theUTI = nil;
-    NSData *data = nil;
     
 	if ([group isExternal] == NO) {
 		NSBeep();
@@ -1113,27 +1111,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         title = [url isFileURL] ? [[url path] lastPathComponent] : [url absoluteString];
 	
     NSPasteboard *pboard = [NSPasteboard generalPasteboard];
-    Class WebURLsWithTitlesClass = NSClassFromString(@"WebURLsWithTitles");
-    if (NO == [WebURLsWithTitlesClass respondsToSelector:@selector(writeURLs:andTitles:toPasteboard:)])
-        WebURLsWithTitlesClass = Nil;
-    
-    if ((data = [(NSData *)CFURLCreateData(nil, (CFURLRef)url, kCFStringEncodingUTF8, true) autorelease]))
-        theUTI = (NSString *)([url isFileURL] ? kUTTypeFileURL : kUTTypeURL);
-    
-    if (WebURLsWithTitlesClass) {
-        [pboard declareTypes:[NSArray arrayWithObjects:@"WebURLsWithTitlesPboardType", NSURLPboardType, NSStringPboardType, theUTI, @"public.url-name", nil] owner:nil];
-        [WebURLsWithTitlesClass writeURLs:[NSArray arrayWithObjects:url, nil] andTitles:[NSArray arrayWithObjects:title, nil] toPasteboard:pboard];
-    } else {
-        [pboard declareTypes:[NSArray arrayWithObjects:NSURLPboardType, NSStringPboardType, theUTI, @"public.url-name", nil] owner:nil];
-    }
-    
-    [url writeToPasteboard:pboard];
-    [pboard setString:[url absoluteString] forType:NSStringPboardType];
-    
-    if (theUTI) {
-        [pboard setData:data forType:theUTI];
-        [pboard setString:title forType:@"public.url-name"];
-    }
+    [pboard clearContents];
+    [pboard writeURLs:[NSArray arrayWithObjects:url, nil] names:[NSArray arrayWithObjects:title, nil]];
 }
 
 - (IBAction)selectLibraryGroup:(id)sender {

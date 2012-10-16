@@ -798,13 +798,13 @@ static NSArray *publicationInfosWithISIXMLString(NSString *xmlString)
 {
     NSCParameterAssert(nil != xmlString);
     NSError *error;
-    NSXMLDocument *xmlDoc = [[[NSXMLDocument alloc] initWithXMLString:xmlString options:0 error:&error] autorelease];
-    if (nil == xmlDoc) {
+    NSXMLDocument *doc = [[[NSXMLDocument alloc] initWithXMLString:xmlString options:0 error:&error] autorelease];
+    if (nil == doc) {
         NSLog(@"failed to create XML document from ISI string.  %@", error);
         return nil;
     }
     
-    NSArray *records = [xmlDoc nodesForXPath:@"/records/REC" error:&error];
+    NSArray *records = [doc nodesForXPath:@"/records/REC" error:&error];
     if (nil == records)
         NSLog(@"%@", error);
     

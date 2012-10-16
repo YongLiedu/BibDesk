@@ -201,18 +201,8 @@
             [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
     } else {
         NSPasteboard *pboard = [NSPasteboard generalPasteboard];
-        if (format & BDSKRTFDTemplateFormat) {
-            [pboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, NSRTFPboardType, NSRTFDPboardType, nil] owner:nil];
-            [pboard setData:[attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:docAttributes] forType:NSRTFPboardType];
-            [pboard setData:[attrString RTFDFromRange:NSMakeRange(0, [attrString length]) documentAttributes:docAttributes] forType:NSRTFDPboardType];
-        } else if (format & BDSKRichTextTemplateFormat) {
-            [pboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, NSRTFPboardType, nil] owner:nil];
-            [pboard setData:[attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:docAttributes] forType:NSRTFPboardType];
-        } else {
-            [pboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, nil] owner:nil];
-            string = [[[NSString alloc] initWithData:fileData encoding:NSUTF8StringEncoding] autorelease];
-        }
-        [pboard setString:(string ?: [attrString string]) forType:NSStringPboardType];
+        [pboard clearContents];
+        [pboard writeObjects:[NSArray arrayWithObjects:(id)attrString ?: (id)string, nil]];
     }
     
 	return nil;

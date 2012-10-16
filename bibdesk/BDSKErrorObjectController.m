@@ -442,8 +442,8 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
         [s appendString:[errObj errorMessage]];
         [s appendString:@"\n\n"];
     }
-    [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-    [pboard setString:s forType:NSStringPboardType];
+    [pboard clearContents];
+    [pboard writeObjects:[NSArray arrayWithObjects:s, nil]];
     return YES;
 }
 

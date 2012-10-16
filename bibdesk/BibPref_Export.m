@@ -45,8 +45,9 @@
 #import "BDSKAppController.h"
 #import "NSMenu_BDSKExtensions.h"
 #import "BDSKPreferenceRecord.h"
+#import "NSPasteboard_BDSKExtensions.h"
 
-#define BDSKTemplateRowsPboardType @"BDSKTemplateRowsPboardType"
+#define BDSKPasteboardTypeTemplateRows @"edu.ucsd.mmccrack.bibdesk.pasteboard.template-rows"
 
 
 @interface BibPref_Export (Private)
@@ -90,7 +91,7 @@
     // Default behavior is to expand column 0, which slides column 1 outside the clip view; since we only have one expandable column, this is more annoying than helpful.
     [outlineView setAutoresizesOutlineColumn:NO];
     
-    [outlineView registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, BDSKTemplateRowsPboardType, nil]];
+    [outlineView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPasteboardTypeTemplateRows, (NSString *)kUTTypeFileURL, NSFilenamesPboardType, nil]];
     [outlineView setDoubleAction:@selector(chooseFileDoubleAction:)];
     [outlineView setTarget:self];
     
@@ -385,8 +386,8 @@
 - (BOOL)outlineView:(NSOutlineView *)ov writeItems:(NSArray *)items toPasteboard:(NSPasteboard *)pboard{
     BDSKTemplate *item = [items lastObject];
     if (pboard == [NSPasteboard pasteboardWithName:NSDragPboard] && ([item isLeaf] == NO || [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString] == NO)) {
-        [pboard declareTypes:[NSArray arrayWithObject:BDSKTemplateRowsPboardType] owner:nil];
-        [pboard setData:[NSKeyedArchiver archivedDataWithRootObject:[items lastObject]] forType:BDSKTemplateRowsPboardType];
+        [pboard clearContents];
+        [pboard setData:[NSKeyedArchiver archivedDataWithRootObject:[items lastObject]] forType:BDSKPasteboardTypeTemplateRows];
         return YES;
     }
     return NO;
@@ -398,9 +399,8 @@
 
 - (NSDragOperation)outlineView:(NSOutlineView *)ov validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(NSInteger)idx{
     NSPasteboard *pboard = [info draggingPasteboard];
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, BDSKTemplateRowsPboardType, nil]];
     
-    if ([type isEqualToString:NSFilenamesPboardType]) {
+    if ([pboard canReadFileURLOfTypes:nil]) {
         if ([item isLeaf] && idx == NSOutlineViewDropOnItemIndex) {
             return NSDragOperationCopy;
         } else if (item == nil) {
@@ -410,10 +410,10 @@
         } else if ([item isLeaf] == NO && idx != NSOutlineViewDropOnItemIndex && idx > 0) {
             return NSDragOperationCopy;
         }
-    } else if ([type isEqualToString:BDSKTemplateRowsPboardType]) {
+    } else if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPasteboardTypeTemplateRows, nil]]) {
         if (idx == NSOutlineViewDropOnItemIndex)
             return NSDragOperationNone;
-        id dropItem = [NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:BDSKTemplateRowsPboardType]];
+        id dropItem = [NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:BDSKPasteboardTypeTemplateRows]];
         if ([dropItem isLeaf]) {
             if ([[item children] containsObject:dropItem] && idx > 0)
                 return NSDragOperationMove;
@@ -435,11 +435,11 @@
         return;
     
     NSDictionary *info = [(NSDictionary *)contextInfo autorelease];
-    NSArray *fileNames = [info objectForKey:@"fileNames"];
+    NSArray *fileURLs = [info objectForKey:@"fileURLs"];
     NSInteger idx = [[info objectForKey:@"index"] integerValue];
     
     NSInteger mainIndex = [chooseMainPagePopup indexOfSelectedItem] - 1;
-    NSInteger i, count = [fileNames count];
+    NSInteger i, count = [fileURLs count];
     id newNode = nil;
     id childNode = nil;
     NSMutableArray *addedItems = [NSMutableArray array];
@@ -459,7 +459,7 @@
             [[newNode mutableArrayValueForKey:@"children"] addObject:childNode];
         }
         [childNode release];
-        [childNode setValue:[NSURL fileURLWithPath:[fileNames objectAtIndex:i]] forKey:BDSKTemplateFileURLString];
+        [childNode setValue:[fileURLs objectAtIndex:i] forKey:BDSKTemplateFileURLString];
     }
     
     [self updateUI];
@@ -472,20 +472,19 @@
 
 - (BOOL)outlineView:(NSOutlineView *)ov acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(NSInteger)idx{
     NSPasteboard *pboard = [info draggingPasteboard];
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, BDSKTemplateRowsPboardType, nil]];
+    NSArray *fileURLs = [pboard readFileURLsOfTypes:nil];
     
-    if ([type isEqualToString:NSFilenamesPboardType]) {
-        NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
-        NSString *fileName;
+    if ([fileURLs count] > 0) {
+        NSURL *fileURL;
         id newNode = nil;
         id childNode = nil;
         
         if ([item isLeaf] && idx == NSOutlineViewDropOnItemIndex) {
-            fileName = [fileNames objectAtIndex:0];
-            [item setValue:[NSURL fileURLWithPath:fileName] forKey:BDSKTemplateFileURLString];
+            fileURL = [fileURLs objectAtIndex:0];
+            [item setValue:fileURL forKey:BDSKTemplateFileURLString];
             newNode = item;
         } else if (item == nil && idx != NSOutlineViewDropOnItemIndex) {
-            if ([fileNames count] == 1){
+            if ([fileURLs count] == 1){
                 newNode = [[BDSKTemplate alloc] init];
                 childNode = [[BDSKTemplate alloc] init];
                 [itemNodes insertObject:newNode atIndex:idx++];
@@ -493,14 +492,14 @@
                 [newNode release];
                 [childNode release];
                 [childNode setValue:BDSKTemplateMainPageString forKey:BDSKTemplateRoleString];
-                fileName = [fileNames objectAtIndex:0];
-                [childNode setValue:[NSURL fileURLWithPath:fileName] forKey:BDSKTemplateFileURLString];
+                fileURL = [fileURLs objectAtIndex:0];
+                [childNode setValue:fileURL forKey:BDSKTemplateFileURLString];
             } else {
                 [chooseMainPagePopup removeAllItems];
                 [chooseMainPagePopup addItemWithTitle:NSLocalizedString(@"Separate templates", @"Popup menu item title")];
-                [chooseMainPagePopup addItemsWithTitles:[fileNames valueForKey:@"lastPathComponent"]];
+                [chooseMainPagePopup addItemsWithTitles:[fileURLs valueForKey:@"lastPathComponent"]];
                 [chooseMainPagePopup selectItemAtIndex:0];
-                NSDictionary *contextInfo = [[NSDictionary alloc] initWithObjectsAndKeys:fileNames, @"fileNames", [NSNumber numberWithInteger:idx], @"index", nil];
+                NSDictionary *contextInfo = [[NSDictionary alloc] initWithObjectsAndKeys:fileURLs, @"fileURLs", [NSNumber numberWithInteger:idx], @"index", nil];
                 [NSApp beginSheet:chooseMainPageSheet modalForWindow:[[self view] window]
                                                        modalDelegate:self
                                                       didEndSelector:@selector(chooseMainPageSheetDidEnd:returnCode:contextInfo:)
@@ -508,10 +507,10 @@
                 return YES;
             }
         } else if ([item isLeaf] == NO && idx != NSOutlineViewDropOnItemIndex && idx > 0) {
-            for (fileName in fileNames) {
+            for (fileURL in fileURLs) {
                 newNode = [[[BDSKTemplate alloc] init] autorelease];
                 [item insertObject:newNode inChildrenAtIndex:idx++];
-                [newNode setValue:[NSURL fileURLWithPath:fileName] forKey:BDSKTemplateFileURLString];
+                [newNode setValue:fileURL forKey:BDSKTemplateFileURLString];
             }
         } else return NO;
         [self updateUI];
@@ -519,8 +518,8 @@
         if ([newNode isLeaf] == NO)
             [outlineView expandItem:newNode];
         return YES;
-    } else if ([type isEqualToString:BDSKTemplateRowsPboardType]) {
-        id dropItem = [NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:BDSKTemplateRowsPboardType]];
+    } else if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPasteboardTypeTemplateRows, nil]]) {
+        id dropItem = [NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:BDSKPasteboardTypeTemplateRows]];
         if ([dropItem isLeaf]) {
             NSInteger sourceIndex = [[item children] indexOfObject:dropItem];
             if (sourceIndex == NSNotFound)

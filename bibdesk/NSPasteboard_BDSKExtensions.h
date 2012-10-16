@@ -1,8 +1,11 @@
-//  BibDocument_DataSource.h
-//  Created by Michael McCracken on Tue Mar 26 2002.
+//
+//  NSPasteboard_BDSKExtensions.h
+//  Bibdesk
+//
+//  Created by Christiaan Hofman on 10/13/12.
 /*
- This software is Copyright (c) 2002-2012
- Michael O. McCracken. All rights reserved.
+ This software is Copyright (c) 2012
+ Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
@@ -16,7 +19,7 @@
     the documentation and/or other materials provided with the
     distribution.
 
- - Neither the name of Michael O. McCracken nor the names of any
+ - Neither the name of Christiaan Hofman nor the names of any
     contributors may be used to endorse or promote products derived
     from this software without specific prior written permission.
 
@@ -34,23 +37,17 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BibDocument.h"
-#import "BDSKMainTableView.h"
-#import "BDSKGroupOutlineView.h"
-#import <FileView/FileView.h>
 
-/*! @category  BibDocument(DataSource)
-@discussion Additions to BibDocument for handling table views.
-*/
-@interface BibDocument (DataSource) <BDSKMainTableViewDelegate, BDSKMainTableViewDataSource, BDSKGroupOutlineViewDelegate, NSOutlineViewDataSource, FVFileViewDelegate, FVFileViewDataSource>
 
-- (BOOL)writePublications:(NSArray*)pubs forDragCopyType:(NSInteger)dragCopyType toPasteboard:(NSPasteboard*)pboard;
-- (BOOL)writePublications:(NSArray*)pubs forDragCopyType:(NSInteger)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard;
-- (NSImage *)dragImageForPromisedItemsUsingCiteString:(NSString *)citeString;
-- (void)clearPromisedDraggedItems;
-- (NSDictionary *)currentTableColumnWidthsAndIdentifiers;
-- (BOOL)isDragFromExternalGroups;
-- (void)setDragFromExternalGroups:(BOOL)flag;
-- (BOOL)selectItemsInAuxFileAtPath:(NSString *)auxPath;
+@interface NSPasteboard (BDSKExtensions)
+
+- (BOOL)writeURLs:(NSArray *)URLs names:(NSArray *)names;
+- (NSArray *)readURLNames;
+
+- (BOOL)canReadFileURLOfTypes:(NSArray *)types;
+- (NSArray *)readFileURLsOfTypes:(NSArray *)types;
+
+- (BOOL)canReadURL;
+- (NSArray *)readURLs;
 
 @end

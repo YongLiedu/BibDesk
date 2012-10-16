@@ -86,6 +86,7 @@
 #import "NSInvocation_BDSKExtensions.h"
 #import "NSTextView_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
+#import "NSPasteboard_BDSKExtensions.h"
 
 #define WEAK_NULL NULL
 
@@ -218,7 +219,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [self resetFields];
     [self setupMatrix];
     if (editorFlags.isEditable)
-        [tableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
+        [tableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, (NSString *)kUTTypeURL, (NSString *)kUTTypeFileURL, NSURLPboardType, NSFilenamesPboardType, nil]];
     
     // Setup the citekey textfield
     BDSKCiteKeyFormatter *citeKeyFormatter = [[BDSKCiteKeyFormatter alloc] init];
@@ -262,7 +263,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     
     [[self window] setDelegate:self];
     if (editorFlags.isEditable)
-        [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];					
+        [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, NSPasteboardTypeString, nil]];					
 	
     [self updateCiteKeyDuplicateWarning];
     
@@ -429,7 +430,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
     NSString *copyTypeKey = ([NSEvent standardModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
 	NSInteger copyType = [sud integerForKey:copyTypeKey];
-    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
     NSArray *pubs = [NSArray arrayWithObject:publication];
     
     if (copyType == BDSKTemplateDragCopyType) {
@@ -445,7 +446,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 
 - (IBAction)copyAsAction:(id)sender {
 	NSInteger copyType = [sender tag];
-    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
     NSArray *pubs = [NSArray arrayWithObject:publication];
 	[[self document] writePublications:pubs forDragCopyType:copyType toPasteboard:pboard];
 }
@@ -541,8 +542,8 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     }
     if ([string length]) {
         NSPasteboard *pboard = [NSPasteboard generalPasteboard];
-        [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-        [pboard setString:string forType:NSStringPboardType];
+        [pboard clearContents];
+        [pboard writeObjects:[NSArray arrayWithObjects:string, nil]];
     }
 }
 
@@ -2648,27 +2649,24 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender {
     NSPasteboard *pboard = [sender draggingPasteboard];
     // weblocs also put strings on the pboard, so check for that type first so we don't get a false positive on NSStringPboardType
-	NSString *pboardType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];
+    BOOL canRead = [pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]];
+    
+    if (canRead == NO) {
+        NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+        // sniff the string to see if it's a format we can parse
+        if ([strings count] > 0 && [[strings objectAtIndex:0] contentStringType] != BDSKUnknownStringType)
+            canRead = YES;
+    }
 	
-	if(pboardType == nil){
-        return NSDragOperationNone;
+    if (canRead) {
+        NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
+        // get the correct cursor depending on the modifiers
+        if ( ([NSEvent standardModifierFlags] & (NSAlternateKeyMask | NSCommandKeyMask)) == (NSAlternateKeyMask | NSCommandKeyMask) )
+            return NSDragOperationLink;
+        else if (sourceDragMask & NSDragOperationCopy)
+            return NSDragOperationCopy;
     }
-	// sniff the string to see if it's a format we can parse
-    if([pboardType isEqualToString:NSStringPboardType]){
-        NSString *pbString = [pboard stringForType:pboardType];    
-        if([pbString contentStringType] == BDSKUnknownStringType)
-            return NSDragOperationNone;
-    }
-
-    NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
-    // get the correct cursor depending on the modifiers
-	if( ([NSEvent standardModifierFlags] & (NSAlternateKeyMask | NSCommandKeyMask)) == (NSAlternateKeyMask | NSCommandKeyMask) ){
-		return NSDragOperationLink;
-    }else if (sourceDragMask & NSDragOperationCopy){
-		return NSDragOperationCopy;
-	} else {
-        return NSDragOperationNone;
-    }
+    return NSDragOperationNone;
 }
 
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender {
@@ -2678,31 +2676,33 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender {
     
     NSPasteboard *pboard = [sender draggingPasteboard];
-	NSString *pboardType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];
 	NSArray *draggedPubs = nil;
     BOOL hasTemporaryCiteKey = NO;
     
-	if([pboardType isEqualToString:NSStringPboardType]){
-		NSString *pbString = [pboard stringForType:NSStringPboardType];
-        NSError *error = nil;
-        BOOL isPartialData = NO;
-        // this returns nil when there was a parser error and the user didn't decide to proceed anyway
-        draggedPubs = [BDSKStringParser itemsFromString:pbString ofType:[pbString contentStringType] owner:[self document] isPartialData:&isPartialData error:&error];
-        // we ignore warnings for parsing with temporary keys, but we want to ignore the cite key in that case
-        if (isPartialData) {
-            if ([error isLocalErrorWithCode:kBDSKHadMissingCiteKeys]) {
-                hasTemporaryCiteKey = YES;
-                error = nil;
-            } else if ([error isLocalErrorWithCode:kBDSKBibTeXParserFailed]) {
-                // should we accept partially parsed bibtex?
-                draggedPubs = nil;
-            }
-        }
-	}else if([pboardType isEqualToString:BDSKBibItemPboardType]){
-		NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
+    if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]]) {
+		NSData *pbData = [pboard dataForType:BDSKPasteboardTypePublications];
         // we can't just unarchive, as this gives complex strings with the wrong macroResolver
 		draggedPubs = [BibItem publicationsFromArchivedData:pbData macroResolver:[publication macroResolver]];
-	}
+    } else {
+        NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+        if ([strings count] > 0) {
+            NSString *pbString = [strings objectAtIndex:0];
+            NSError *error = nil;
+            BOOL isPartialData = NO;
+            // this returns nil when there was a parser error and the user didn't decide to proceed anyway
+            draggedPubs = [BDSKStringParser itemsFromString:pbString ofType:[pbString contentStringType] owner:[self document] isPartialData:&isPartialData error:&error];
+            // we ignore warnings for parsing with temporary keys, but we want to ignore the cite key in that case
+            if (isPartialData) {
+                if ([error isLocalErrorWithCode:kBDSKHadMissingCiteKeys]) {
+                    hasTemporaryCiteKey = YES;
+                    error = nil;
+                } else if ([error isLocalErrorWithCode:kBDSKBibTeXParserFailed]) {
+                    // should we accept partially parsed bibtex?
+                    draggedPubs = nil;
+                }
+            }
+        }
+    }
     
     // this happens when we didn't find a valid pboardType or parsing failed
     if([draggedPubs count] == 0) 
@@ -2799,7 +2799,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	if (dragFieldEditor == nil) {
 		dragFieldEditor = [[BDSKFieldEditor alloc] init];
         if (editorFlags.isEditable)
-            [(BDSKFieldEditor *)dragFieldEditor registerForDelegatedDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
+            [(BDSKFieldEditor *)dragFieldEditor registerForDelegatedDraggedTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, (NSString *)kUTTypeURL, (NSString *)kUTTypeFileURL, NSURLPboardType, NSFilenamesPboardType, nil]];
 	}
 	return dragFieldEditor;
 }
@@ -2991,17 +2991,16 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         if ([info draggingSource] == tableView) {
             return NSDragOperationNone;
         } else if ([field isCitationField] || [field isEqualToString:BDSKCrossrefString]) {
-            if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]])
+            if ([pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]])
                 return NSDragOperationEvery;
         } else if ([field isLocalFileField]) {
             NSString *type;
-            if ((type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, nil]]) &&
-                ([type isEqualToString:NSURLPboardType] == NO || [[NSURL URLFromPasteboard:pboard] isFileURL])) {
+            if ([pboard canReadFileURLOfTypes:nil]) {
                 NSDragOperation mask = [info draggingSourceOperationMask];
                 return mask == NSDragOperationGeneric ? NSDragOperationLink : mask == NSDragOperationCopy ? NSDragOperationCopy : NSDragOperationEvery;
             }
         } else if ([field isRemoteURLField]) {
-            if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil]])
+            if ([pboard canReadURL])
                 return NSDragOperationEvery;
         }
     }
@@ -3015,9 +3014,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         NSString *type;
         
         if ([field isEqualToString:BDSKCrossrefString]){
-            if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]]) {
+            if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]]) {
                 
-                NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
+                NSData *pbData = [pboard dataForType:BDSKPasteboardTypePublications];
                 NSArray *draggedPubs = [BibItem publicationsFromArchivedData:pbData macroResolver:[publication macroResolver]];
                 NSString *crossref = [[draggedPubs firstObject] citeKey];
                 
@@ -3050,9 +3049,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                 
             }
         } else if ([field isCitationField]) {
-            if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]]) {
+            if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]]) {
                 
-                NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
+                NSData *pbData = [pboard dataForType:BDSKPasteboardTypePublications];
                 NSArray *draggedPubs = [BibItem publicationsFromArchivedData:pbData macroResolver:[publication macroResolver]];
                 
                 if ([draggedPubs count]) {
@@ -3068,50 +3067,33 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                 
             }
         } else if ([field isLocalFileField]) {
-            if ((type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, nil]])) {
+            NSArray *fileURLs = [pboard readFileURLsOfTypes:nil];
+            
+            if ([fileURLs count] > 0) {
                 
-                NSURL *url = nil;
+                NSURL *url = [fileURLs objectAtIndex:0];
                 NSString *filename = nil;
-                if ([type isEqualToString:NSURLPboardType])
-                    url = [NSURL URLFromPasteboard:pboard];
-                else if ([type isEqualToString:NSFilenamesPboardType])
-                    filename = [[pboard propertyListForType:NSFilenamesPboardType] firstObject];
-                
-                if (filename || url) {
-                    NSDragOperation mask = [info draggingSourceOperationMask];
-                    if (mask == NSDragOperationGeneric) {
-                        NSString *basePath = [publication basePath];
-                        if (filename == nil)
-                            filename = [url path];
-                        if (basePath)
-                            filename = [filename relativePathFromPath:basePath];
-                    } else if (mask == NSDragOperationCopy) {
-                        if (filename == nil)
-                            filename = [url path];
-                    } else {
-                        if (url == nil)
-                            url = [NSURL fileURLWithPath:filename];
-                        filename = [url absoluteString];
-                    }
-                    [self recordChangingField:field toValue:filename];
-                    return YES;
+                NSDragOperation mask = [info draggingSourceOperationMask];
+                if (mask == NSDragOperationGeneric) {
+                    NSString *basePath = [publication basePath];
+                    filename = [url path];
+                    if (basePath)
+                        filename = [filename relativePathFromPath:basePath];
+                } else if (mask == NSDragOperationCopy) {
+                    filename = [url path];
+                } else {
+                    filename = [url absoluteString];
                 }
+                [self recordChangingField:field toValue:filename];
+                return YES;
                 
             }
         } else if ([field isRemoteURLField]) {
-            if ((type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil]])) {
-                
-                NSString *urlString = nil;
-                if ([type isEqualToString:NSURLPboardType])
-                    urlString = [[NSURL URLFromPasteboard:pboard] absoluteString];
-                else if ([type isEqualToString:BDSKWeblocFilePboardType])
-                    urlString = [pboard stringForType:BDSKWeblocFilePboardType];
-                
-                if (urlString) {
-                    [self recordChangingField:field toValue:urlString];
-                    return YES;
-                }
-                
+            NSArray *urls = [pboard readURLs];
+            
+            if ([urls count] > 0) {
+                [self recordChangingField:field toValue:[[urls objectAtIndex:0] absoluteString]];
+                return YES;
             }
         }
     }
