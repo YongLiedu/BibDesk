@@ -41,10 +41,6 @@
 
 #define BDSKStandardModifierFlagsMask (NSCommandKeyMask | NSAlternateKeyMask | NSShiftKeyMask | NSControlKeyMask)
 
-@interface NSEvent (BDSKSnowLeopardDeclarations)
-+ (NSUInteger)modifierFlags;
-@end
-
 @implementation NSEvent (BDSKExtensions)
 
 + (NSUInteger)standardModifierFlags {

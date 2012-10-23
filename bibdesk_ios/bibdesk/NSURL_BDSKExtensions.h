@@ -77,14 +77,4 @@
 
 @end
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_5
-@interface NSURL (BDSKSnowLeopardExtensions)
-- (NSString *)lastPathComponent;
-- (NSString *)pathExtension;
-- (NSURL *)URLByDeletingLastPathComponent;
-- (NSURL *)URLByDeletingPathExtension;
-- (NSURL *)filePathURL;
-@end
-#endif
-
 CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL);

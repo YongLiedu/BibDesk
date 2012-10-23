@@ -50,8 +50,6 @@
 @interface BDSKDragTextField : NSTextField {
     BOOL highlight;
 }
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
 - (id <BDSKDragTextFieldDelegate>)delegate;
 - (void)setDelegate:(id <BDSKDragTextFieldDelegate>)newDelegate;
-#endif
 @end

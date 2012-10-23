@@ -53,16 +53,6 @@
 
 @implementation NSMenu (BDSKExtensions)
 
-- (void)Leopard_removeAllItems {
-    NSUInteger numItems = 0;
-    while ((numItems = [self numberOfItems]))
-        [self removeItemAtIndex:numItems - 1];
-}
-
-+ (void)load {
-    BDSKAddInstanceMethodImplementationFromSelector(self, @selector(removeAllItems), @selector(Leopard_removeAllItems));
-}
-
 - (NSMenuItem *)itemWithAction:(SEL)action {
     NSUInteger i = [self numberOfItems];
     while (i--) {

@@ -1035,7 +1035,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
                                          defaultButton:NSLocalizedString(@"File Now", @"Button title")
                                        alternateButton:NSLocalizedString(@"Cancel", @"Button title")
                                            otherButton:otherButton
-                             informativeTextWithFormat:message];
+                             informativeTextWithFormat:@"%@", message];
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:self
                          didEndSelector:@selector(consolidateAlertDidEnd:returnCode:contextInfo:) 
@@ -2056,7 +2056,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
                                                  defaultButton:NSLocalizedString(@"OK", @"Button title")
                                                alternateButton:nil
                                                    otherButton:nil
-                                     informativeTextWithFormat:message];
+                                     informativeTextWithFormat:@"%@", message];
                 
                 [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
                 endEdit = NO;
@@ -2092,7 +2092,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
                                              defaultButton:defaultButton
                                            alternateButton:cancelButton
                                                otherButton:nil
-                                 informativeTextWithFormat:message];
+                                 informativeTextWithFormat:@"%@", message];
             
             NSInteger rv = [alert runModal];
             
@@ -2737,7 +2737,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                                              defaultButton:NSLocalizedString(@"OK", @"Button title")
                                            alternateButton:nil
                                                otherButton:nil
-                                  informativeTextWithFormat:message];
+                                  informativeTextWithFormat:@"%@", message];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return NO;
 		}
@@ -2853,7 +2853,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                                          defaultButton:NSLocalizedString(@"Keep", @"Button title")
                                        alternateButton:discardMsg
                                            otherButton:NSLocalizedString(@"Edit", @"Button title")
-                              informativeTextWithFormat:errMsg];
+                              informativeTextWithFormat:@"%@", errMsg];
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:self 
                          didEndSelector:@selector(shouldCloseAlertDidEnd:returnCode:contextInfo:) 
@@ -3039,7 +3039,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                                                      defaultButton:NSLocalizedString(@"OK", @"Button title")
                                                    alternateButton:nil
                                                        otherButton:nil
-                                          informativeTextWithFormat:message];
+                                          informativeTextWithFormat:@"%@", message];
                     [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
                     return NO;
                 }

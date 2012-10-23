@@ -396,7 +396,7 @@ static NSSet *alwaysDisabledFields = nil;
                                              defaultButton:nil
                                            alternateButton:nil
                                                otherButton:nil
-                                 informativeTextWithFormat:error];
+                                 informativeTextWithFormat:@"%@", error];
             [alert beginSheetModalForWindow:globalMacroFileSheet modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         } else {
             [globalMacroFiles replaceObjectAtIndex:row withObject:object];

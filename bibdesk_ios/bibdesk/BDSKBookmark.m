@@ -190,11 +190,11 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (id)initWithUrlString:(NSString *)aUrlString name:(NSString *)aName {
-    return [[BDSKURLBookmark alloc] initWithUrlString:aUrlString name:aName ?: NSLocalizedString(@"New Boookmark", @"Default name for boookmark")];
+    return (id)[[BDSKURLBookmark alloc] initWithUrlString:aUrlString name:aName ?: NSLocalizedString(@"New Boookmark", @"Default name for boookmark")];
 }
 
 - (id)initFolderWithChildren:(NSArray *)aChildren name:(NSString *)aName {
-    return [[BDSKFolderBookmark alloc] initFolderWithChildren:aChildren name:aName];
+    return (id)[[BDSKFolderBookmark alloc] initFolderWithChildren:aChildren name:aName];
 }
 
 - (id)initFolderWithName:(NSString *)aName {
@@ -202,11 +202,11 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (id)initSeparator {
-    return [[BDSKSeparatorBookmark alloc] init];
+    return (id)[[BDSKSeparatorBookmark alloc] init];
 }
 
 - (id)initRootWithChildren:(NSArray *)aChildren {
-    return [[BDSKRootBookmark alloc] initFolderWithChildren:aChildren name:NSLocalizedString(@"Bookmarks Menu", @"Menu item title")];
+    return (id)[[BDSKRootBookmark alloc] initFolderWithChildren:aChildren name:NSLocalizedString(@"Bookmarks Menu", @"Menu item title")];
 }
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
@@ -232,7 +232,7 @@ static Class BDSKBookmarkClass = Nil;
 
 - (id)autorelease { return self; }
 
-- (void)release {}
+- (oneway void)release {}
 
 - (NSUInteger)retainCount { return NSUIntegerMax; }
 

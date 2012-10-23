@@ -163,7 +163,7 @@ static id sharedManager = nil;
                                      defaultButton:nil
                                    alternateButton:nil
                                        otherButton:nil
-                         informativeTextWithFormat:errorDescription];
+                         informativeTextWithFormat:@"%@", errorDescription];
     [alert runModal];
 }
 

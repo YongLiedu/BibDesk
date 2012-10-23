@@ -80,6 +80,7 @@
 #import "BDSKFileContentSearchController.h"
 #import "NSEvent_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
+#import "BDSKServerInfo.h"
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
 
@@ -263,7 +264,6 @@
 	NSInteger dragCopyType = [sud integerForKey:dragCopyTypeKey];
     BOOL success = NO;
     NSArray *pubs = nil;
-    NSArray *additionalFilenames = nil;
     
 	BDSKPRECONDITION(pboard == [NSPasteboard pasteboardWithName:NSDragPboard] || pboard == [NSPasteboard pasteboardWithName:NSGeneralPboard]);
 
@@ -404,24 +404,24 @@
             dragCopyType += templateIdx;
     }
 	
-	success = [self writePublications:pubs fileNames:additionalFilenames forDragCopyType:dragCopyType toPasteboard:pboard];
+	success = [self writePublications:pubs fileExtensions:nil forDragCopyType:dragCopyType toPasteboard:pboard];
     
     return success;
 }
 	
 - (BOOL)writePublications:(NSArray *)pubs forDragCopyType:(NSInteger)dragCopyType toPasteboard:(NSPasteboard*)pboard{
-    return [self writePublications:pubs fileNames:nil forDragCopyType:dragCopyType citeString:nil toPasteboard:pboard];
+    return [self writePublications:pubs fileExtensions:nil forDragCopyType:dragCopyType citeString:nil toPasteboard:pboard];
 }
 
-- (BOOL)writePublications:(NSArray *)pubs fileNames:(NSArray *)fileNames forDragCopyType:(NSInteger)dragCopyType toPasteboard:(NSPasteboard*)pboard{
-    return [self writePublications:pubs fileNames:fileNames forDragCopyType:dragCopyType citeString:nil toPasteboard:pboard];
+- (BOOL)writePublications:(NSArray *)pubs fileExtensions:(NSArray *)fileNames forDragCopyType:(NSInteger)dragCopyType toPasteboard:(NSPasteboard*)pboard{
+    return [self writePublications:pubs fileExtensions:fileNames forDragCopyType:dragCopyType citeString:nil toPasteboard:pboard];
 }
 
 - (BOOL)writePublications:(NSArray *)pubs forDragCopyType:(NSInteger)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard{
-    return [self writePublications:pubs fileNames:nil forDragCopyType:dragCopyType citeString:citeString toPasteboard:pboard];
+    return [self writePublications:pubs fileExtensions:nil forDragCopyType:dragCopyType citeString:citeString toPasteboard:pboard];
 }
 
-- (BOOL)writePublications:(NSArray *)pubs fileNames:(NSArray *)fileNames forDragCopyType:(NSInteger)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard{
+- (BOOL)writePublications:(NSArray *)pubs fileExtensions:(NSArray *)fileExtensions forDragCopyType:(NSInteger)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard{
 	NSString *mainType = nil;
 	NSString *string = nil;
 	NSData *data = nil;
@@ -495,9 +495,9 @@
         [pboardHelper setData:nil forType:mainType forPasteboard:pboard];
     }
     
-    if ([fileNames count]) {
+    if ([fileExtensions count]) {
         [pboardHelper addTypes:[NSArray arrayWithObject:NSFilesPromisePboardType] forPasteboard:pboard];
-        [pboardHelper setPropertyList:fileNames forType:NSFilesPromisePboardType forPasteboard:pboard];
+        [pboardHelper setPropertyList:fileExtensions forType:NSFilesPromisePboardType forPasteboard:pboard];
     }
     
     return YES;
@@ -558,7 +558,7 @@
 	} else if ([dragType isEqualToString:NSFilesPromisePboardType]) {
 		NSArray *fileNames = [pb propertyListForType:NSFilesPromisePboardType];
 		count = [fileNames count];
-        NSString *pathExt = count ? [[fileNames objectAtIndex:0] pathExtension] : @"";
+        NSString *pathExt = count ? [fileNames objectAtIndex:0] : @"";
         // promise drags don't use full paths
         image = [[NSWorkspace sharedWorkspace] iconForFileType:pathExt];
         isIcon = YES;
@@ -1144,7 +1144,7 @@
 	NSInteger dragCopyType = [sud integerForKey:dragCopyTypeKey];
     BOOL success = NO;
     NSArray *pubs = nil;
-    NSArray *additionalFilenames = nil;
+    NSArray *additionalFileExtensions = nil;
     
 	BDSKPRECONDITION(pboard == [NSPasteboard pasteboardWithName:NSDragPboard] || pboard == [NSPasteboard pasteboardWithName:NSGeneralPboard]);
     
@@ -1160,8 +1160,10 @@
         BDSKGroup *group = [items firstObject];
         if ([group isExternal]) {
             pubs = [NSArray arrayWithArray:[(id)group publications]];
-            if ([group isSearch])
-                additionalFilenames = [NSArray arrayWithObject:[[[(BDSKSearchGroup *)group serverInfo] name] stringByAppendingPathExtension:@"bdsksearch"]];
+            if ([group isSearch]) {
+                BDSKServerInfo *serverInfo = [(BDSKSearchGroup *)group serverInfo];
+                additionalFileExtensions = [NSArray arrayWithObject:@"bdsksearch"];
+            }
             docFlags.dragFromExternalGroups = YES;
         } else if ([group isParent] == NO) {
             NSMutableArray *pubsInGroup = [NSMutableArray arrayWithCapacity:[publications count]];
@@ -1181,7 +1183,7 @@
                 dragCopyType += templateIdx;
         }
         
-        success = [self writePublications:pubs fileNames:additionalFilenames forDragCopyType:dragCopyType toPasteboard:pboard];
+        success = [self writePublications:pubs fileExtensions:additionalFileExtensions forDragCopyType:dragCopyType toPasteboard:pboard];
     }
     
     return success;
@@ -1399,7 +1401,13 @@
         [plist removeObjectForKey:@"search term"];
         [plist removeObjectForKey:@"history"];
         
-        NSString *fileName = [group respondsToSelector:@selector(serverInfo)] ? [[(BDSKSearchGroup *)group serverInfo] name] : [group name];
+        NSString *fileName;
+        if ([group respondsToSelector:@selector(serverInfo)]) {
+            BDSKServerInfo *serverInfo = [(BDSKSearchGroup *)group serverInfo];
+            fileName = [serverInfo name];
+        } else {
+            fileName = [group name];
+        }
         fileName = [fileName stringByAppendingPathExtension:@"bdsksearch"];
         
         // make sure the filename is unique

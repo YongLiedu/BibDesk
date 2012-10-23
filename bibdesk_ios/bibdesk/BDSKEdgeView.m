@@ -83,7 +83,7 @@
 		if ((edges & (1 << edge)) == 0)
 			continue;
 		NSDivideRect(rect, &edgeRect, &rect, BORDER_SIZE, edge);
-		[[edgeColors objectAtIndex:edge] set];
+		[(NSColor *)[edgeColors objectAtIndex:edge] set];
 		NSRectFill(edgeRect);
 	}
 }

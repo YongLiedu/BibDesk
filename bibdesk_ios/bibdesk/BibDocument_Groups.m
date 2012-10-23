@@ -762,7 +762,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
                                          defaultButton:nil
                                        alternateButton:nil
                                            otherButton:nil
-                            informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"The field \"%@\" can not be used for groups.", @"Informative text in alert dialog"), [newGroupField localizedFieldName]]];
+                            informativeTextWithFormat:@"%@", [NSString stringWithFormat:NSLocalizedString(@"The field \"%@\" can not be used for groups.", @"Informative text in alert dialog"), [newGroupField localizedFieldName]]];
         [alert beginSheetModalForWindow:documentWindow modalDelegate:self didEndSelector:NULL contextInfo:NULL];
 		return;
 	}

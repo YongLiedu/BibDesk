@@ -168,8 +168,6 @@ extern NSString *BDSKRichTextTemplateDocumentType;
 #pragma mark -
 
 @interface BDSKTokenField : NSTokenField
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
 - (id <BDSKTokenFieldDelegate>)delegate;
 - (void)setDelegate:(id <BDSKTokenFieldDelegate>)newDelegate;
-#endif
 @end

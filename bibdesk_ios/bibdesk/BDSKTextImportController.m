@@ -580,7 +580,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 		
 		[self setShowingWebView:NO];
 		
-        NSString *pbString = nil;
+        id pbString = nil;
         NSData *pbData;
         
 		if([pbType isEqualToString:NSRTFPboardType]){

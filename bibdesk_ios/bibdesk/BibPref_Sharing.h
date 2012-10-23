@@ -49,7 +49,7 @@
     IBOutlet NSTextField *sharedNameField;
     IBOutlet NSTextField *statusField;
     IBOutlet NSTextField *usedNameField;
-    NSImageView *statusImageView;
+    IBOutlet NSImageView *statusImageView;
 }
 
 - (IBAction)changePassword:(id)sender;

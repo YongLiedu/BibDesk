@@ -52,7 +52,7 @@
 @end
 
 
-@interface BDSKStringEncodingManager : NSObject {
+@interface BDSKStringEncodingManager : NSWindowController {
     IBOutlet NSMatrix *encodingMatrix;
     NSArray *encodings;
 }
@@ -73,7 +73,6 @@
 - (NSArray *)enabledEncodings;
 - (void)setupPopUp:(BDSKEncodingPopUpButton *)button selectedEncoding:(NSUInteger)selectedEncoding;
 
-- (IBAction)showPanel:(id)sender;
 - (IBAction)encodingListChanged:(id)sender;
 - (IBAction)clearAll:(id)sender;
 - (IBAction)selectAll:(id)sender;

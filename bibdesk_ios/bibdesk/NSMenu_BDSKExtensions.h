@@ -53,12 +53,6 @@
 
 @end
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_5
-@interface NSMenu (BDSKSnowLeopardExtensions)
-- (void)removeAllItems;
-@end
-#endif
-
 @interface NSMenuItem (BDSKImageExtensions)
 - (void)setImageAndSize:(NSImage *)image;
 @end

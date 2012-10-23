@@ -283,8 +283,8 @@ static char BDSKConditionObservationContext;
         if (comparison == BDSKEqual || comparison == BDSKNotEqual) {
             if ([key isEqualToString:BDSKAllFieldsString]) {
                 comparison = comparison == BDSKEqual ? BDSKContain : BDSKNotContain;
-                itemValue = [NSString stringWithFormat:@"%C%@%C", 0x1E, itemValue, 0x1E];
-                value = [NSString stringWithFormat:@"%C%@%C", 0x1E, stringValue, 0x1E];
+                itemValue = [NSString stringWithFormat:@"%C%@%C", (unichar)0x1E, itemValue, (unichar)0x1E];
+                value = [NSString stringWithFormat:@"%C%@%C", (unichar)0x1E, stringValue, (unichar)0x1E];
             } else {
                 if (comparison == BDSKEqual) 
                     return ([value isCaseInsensitiveEqual:itemValue]);
@@ -306,11 +306,11 @@ static char BDSKConditionObservationContext;
         if (comparison == BDSKEndWith || comparison == BDSKStartWith) {
             if ([key isEqualToString:BDSKAllFieldsString]) {
                 if (comparison == BDSKEndWith) {
-                    itemValue = [NSString stringWithFormat:@"%@%C", itemValue, 0x1E];
-                    value = [NSString stringWithFormat:@"%@%C", stringValue, 0x1E];
+                    itemValue = [NSString stringWithFormat:@"%@%C", itemValue, (unichar)0x1E];
+                    value = [NSString stringWithFormat:@"%@%C", stringValue, (unichar)0x1E];
                 } else if (comparison == BDSKStartWith) {
-                    itemValue = [NSString stringWithFormat:@"%C%@", 0x1E, itemValue];
-                    value = [NSString stringWithFormat:@"%C%@", 0x1E, stringValue];
+                    itemValue = [NSString stringWithFormat:@"%C%@", (unichar)0x1E, itemValue];
+                    value = [NSString stringWithFormat:@"%C%@", (unichar)0x1E, stringValue];
                 }
             } else {
                 if (comparison == BDSKEndWith)
@@ -670,7 +670,7 @@ static char BDSKConditionObservationContext;
         if (dateComparison < BDSKDate && group) {
             // we fire every day at 1 second past midnight, because the condition changes at midnight
             NSTimeInterval refreshInterval = 24 * 3600;
-            NSDate *fireDate = [[[NSDate date] startOfPeriod:BDSKPeriodDay] addTimeInterval:refreshInterval + 1];
+            NSDate *fireDate = [[[NSDate date] startOfPeriod:BDSKPeriodDay] dateByAddingTimeInterval:refreshInterval + 1];
             cacheTimer = [[NSTimer alloc] initWithFireDate:fireDate interval:refreshInterval target:self selector:@selector(refreshCachedDate:) userInfo:NULL repeats:YES];
             [[NSRunLoop currentRunLoop] addTimer:cacheTimer forMode:NSDefaultRunLoopMode];
             [cacheTimer release];

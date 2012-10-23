@@ -2,6 +2,7 @@ INSTALL_PATH = $(HOME)/Applications
 
 // this is for 10.5 code signing, which is necessary to use the firewall
 OTHER_LDFLAGS = -sectcreate __TEXT __info_plist $(SRCROOT)/$(INFOPLIST_FILE)
+OTHER_CFLAGS = -I/usr/include/libxml2
 
 INFOPLIST_FILE = Info.plist
 INFOPLIST_OTHER_PREPROCESSOR_FLAGS = -C
@@ -11,7 +12,8 @@ WRAPPER_EXTENSION = app
 
 VERSIONING_SYSTEM = apple-generic
 
-FRAMEWORK_SEARCH_PATHS = "$(SOURCE_ROOT)/SkimNotes/build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)" "$(SOURCE_ROOT)/vendorsrc/gward/btparse/objc/build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)" "$(SOURCE_ROOT)/vendorsrc/amaxwell/FileView/build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)" "$(SOURCE_ROOT)/vendorsrc/agkit_sourceforge/agregex/build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)" "$(SOURCE_ROOT)/vendorsrc/indexdata/yaz/objc/build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)" "$(SOURCE_ROOT)/vendorsrc/andymatuschak/Sparkle/build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)"
+// causes lots of warnings about missing paths in Xcode 4
+//FRAMEWORK_SEARCH_PATHS = "$(SOURCE_ROOT)/SkimNotes/build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)" "$(SOURCE_ROOT)/vendorsrc/gward/btparse/objc/build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)" "$(SOURCE_ROOT)/vendorsrc/amaxwell/FileView/build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)" "$(SOURCE_ROOT)/vendorsrc/agkit_sourceforge/agregex/build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)" "$(SOURCE_ROOT)/vendorsrc/indexdata/yaz/objc/build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)" "$(SOURCE_ROOT)/vendorsrc/andymatuschak/Sparkle/build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)"
 
 GCC_PRECOMPILE_PREFIX_HEADER = YES
 GCC_PREFIX_HEADER = Bibdesk_Prefix.pch

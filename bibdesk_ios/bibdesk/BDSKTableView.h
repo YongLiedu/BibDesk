@@ -119,11 +119,9 @@
 - (NSFont *)font;
 - (void)setFont:(NSFont *)font;
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
 - (id <BDSKTableViewDelegate>)delegate;
 - (void)setDelegate:(id <BDSKTableViewDelegate>)newDelegate;
 - (id <BDSKTableViewDataSource>)dataSource;
 - (void)setDataSource:(id <BDSKTableViewDataSource>)newDataSource;
-#endif
 
 @end

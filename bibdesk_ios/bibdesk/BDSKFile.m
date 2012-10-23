@@ -202,7 +202,7 @@ static Class BDSKFileClass = Nil;
 // returns an FSRef wrapper
 - (id)initWithFSRef:(FSRef *)aRef;
 {
-    return aRef != NULL ? [[BDSKFSRefFile alloc] initWithFSRef:aRef] : nil;
+    return aRef != NULL ? (id)[[BDSKFSRefFile alloc] initWithFSRef:aRef] : nil;
 }
 
 // This is a common, convenient initializer, but we prefer to return the FSRef variant so we can use FSCompareFSRefs and survive external name changes.  If the file doesn't exist (yet), though, we return an NSURL variant.
@@ -214,9 +214,9 @@ static Class BDSKFileClass = Nil;
     if (aURL == nil)
         return nil;
     else if (CFURLGetFSRef((CFURLRef)aURL, &aRef))
-        return [[BDSKFSRefFile alloc] initWithFSRef:&aRef];
+        return (id)[[BDSKFSRefFile alloc] initWithFSRef:&aRef];
     else
-        return [[BDSKURLFile alloc] initWithURL:aURL];
+        return (id)[[BDSKURLFile alloc] initWithURL:aURL];
 }
 
 - (id)initWithPath:(NSString *)aPath;
@@ -233,7 +233,7 @@ static Class BDSKFileClass = Nil;
 
 - (id)autorelease { return self; }
 
-- (void)release {}
+- (oneway void)release {}
 
 - (NSUInteger)retainCount { return NSUIntegerMax; }
 

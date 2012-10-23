@@ -184,7 +184,7 @@ enum {
     if ([self canDelete]) {
         NSUInteger originalNumberOfRows = [self numberOfRows];
         // -selectedRow is last row of multiple selection, no good for trying to select the row before the selection.
-        NSUInteger selectedRow = [[self selectedRowIndexes] firstIndex];
+        NSInteger selectedRow = [[self selectedRowIndexes] firstIndex];
         [[self dataSource] tableView:self alternateDeleteRowsWithIndexes:[self selectedRowIndexes]];
         [self reloadData];
         NSUInteger newNumberOfRows = [self numberOfRows];
@@ -202,7 +202,7 @@ enum {
                 }
             } else {
                 // Don't try to go past the new # of rows
-                selectedRow = MIN(selectedRow - 1, newNumberOfRows - 1);
+                selectedRow = MIN((NSUInteger)selectedRow - 1, newNumberOfRows - 1);
                 
                 // Skip all unselectable rows if the delegate responds to -tableView:shouldSelectRow:
                 if ([[self delegate] respondsToSelector:@selector(tableView:shouldSelectRow:)]) {
@@ -387,7 +387,7 @@ enum {
 }
 
 - (NSTableColumn *)newConfiguredTableColumnForField:(NSString *)colName {
-    BDSKTableColumn *tc = [[self tableColumnWithIdentifier:colName] retain];
+    BDSKTableColumn *tc = [(BDSKTableColumn *)[self tableColumnWithIdentifier:colName] retain];
     id dataCell = [tc dataCell];
     NSInteger columnType = [self columnTypeForField:colName];
     
@@ -540,12 +540,10 @@ enum {
 
 #pragma mark Delegate and DataSource
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
 - (id <BDSKMainTableViewDelegate>)delegate { return (id <BDSKMainTableViewDelegate>)[super delegate]; }
 - (void)setDelegate:(id <BDSKMainTableViewDelegate>)newDelegate { [super setDelegate:newDelegate]; }
 - (id <BDSKMainTableViewDataSource>)dataSource { return (id <BDSKMainTableViewDataSource>)[super dataSource]; }
 - (void)setDataSource:(id <BDSKMainTableViewDataSource>)newDataSource { [super setDataSource:newDataSource]; }
-#endif
 
 @end
 
