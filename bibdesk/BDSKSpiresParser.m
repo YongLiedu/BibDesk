@@ -54,7 +54,7 @@
     
     NSString *host = [[url host] lowercaseString];
     
-    if ([host isEqualToString:@"inspirebeta.net"] == NO && ([spiresHosts containsObject:host] == NO || [[url path] hasCaseInsensitivePrefix:@"/spires"] == NO))
+    if ([host isEqualToString:@"inspirehep.net"] == NO && ([spiresHosts containsObject:host] == NO || [[url path] hasCaseInsensitivePrefix:@"/spires"] == NO))
         return NO;
     
     NSString *containsBibTexLinkNode = @"//a[contains(text(),'BibTeX')]"; 
@@ -153,7 +153,7 @@
 
 + (NSDictionary *)parserInfo {
 	NSString * parserDescription = NSLocalizedString(@"INSPIRE database of literature on particle physics.", @"Description for INSPIRE site");
-	return [BDSKWebParser parserInfoWithName:@"INSPIRE" address:@"http://inspirebeta.net/"  description:parserDescription feature:BDSKParserFeaturePublic];
+	return [BDSKWebParser parserInfoWithName:@"INSPIRE" address:@"http://inspirehep.net/"  description:parserDescription feature:BDSKParserFeaturePublic];
 }
 
 
