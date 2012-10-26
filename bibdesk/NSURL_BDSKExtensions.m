@@ -59,7 +59,7 @@
 - (NSAppleEventDescriptor *)aeDescriptorValue {
     NSAppleEventDescriptor *resultDesc = nil;
     
-    NSData *data = (NSData *)CFURLCreateData(nil, (CFURLRef)self, kCFStringEncodingUTF8, true);
+    NSData *data = [[self absoluteString] dataUsingEncoding:NSUTF8StringEncoding];
     if (data)
         resultDesc = [NSAppleEventDescriptor descriptorWithDescriptorType:typeFileURL data:data];
     [data release];
