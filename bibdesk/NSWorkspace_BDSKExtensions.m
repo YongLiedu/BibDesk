@@ -76,9 +76,8 @@
         // Create the odoc Apple event
         NSAppleEventDescriptor *appDesc = [NSAppleEventDescriptor descriptorWithDescriptorType:typeApplicationBundleID data:[bundleID dataUsingEncoding:NSUTF8StringEncoding]];
         NSAppleEventDescriptor *openEvent = [NSAppleEventDescriptor appleEventWithEventClass:kCoreEventClass eventID:kAEOpenDocuments targetDescriptor:appDesc returnID:kAutoGenerateReturnID transactionID:kAnyTransactionID];
-        NSAppleEventDescriptor *fileDesc = [NSAppleEventDescriptor descriptorWithDescriptorType:typeFileURL data:[[fileURL absoluteString] dataUsingEncoding:NSUTF8StringEncoding]];
         NSAppleEventDescriptor *fileListDesc = [NSAppleEventDescriptor listDescriptor];
-        [fileListDesc insertDescriptor:fileDesc atIndex:1];
+        [fileListDesc insertDescriptor:[fileURL aeDescriptorValue] atIndex:1];
         [openEvent setParamDescriptor:fileListDesc forKeyword:keyDirectObject];
         if ([NSString isEmptyString:searchString] == NO)
             [openEvent setParamDescriptor:[NSAppleEventDescriptor descriptorWithString:searchString] forKeyword:keyAESearchText];
