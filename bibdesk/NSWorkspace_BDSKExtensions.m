@@ -54,13 +54,13 @@
     NSParameterAssert([fileURL isFileURL]);
     
     if ([NSString isEmptyString:searchString])
-        return [self openLinkedFile:[fileURL path]];
+        return [self openLinkedURL:fileURL];
     
     // Find the application that should open this file
     BOOL success = NO;
     NSURL *appURL = NULL;
     NSString *bundleID = nil;
-    NSString *extension = [[[fileURL path] pathExtension] lowercaseString];
+    NSString *extension = [[fileURL pathExtension] lowercaseString];
     NSDictionary *defaultViewers = [[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKDefaultViewersKey];
     NSWorkspace *ws = [NSWorkspace sharedWorkspace];
     bundleID = [defaultViewers objectForKey:extension];
@@ -109,31 +109,20 @@
     return success;
 }
 
-- (BOOL)openLinkedFile:(NSString *)fullPath {
-    NSString *extension = [[fullPath pathExtension] lowercaseString];
-    NSDictionary *defaultViewers = [[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKDefaultViewersKey];
-    NSString *appID = [defaultViewers objectForKey:extension];
-    NSString *appPath = appID ? [self absolutePathForAppBundleWithIdentifier:appID] : nil;
-    BOOL rv = NO;
-    
-    if (appPath && [[NSFileManager defaultManager] fileExistsAtPath:appPath])
-        rv = [self openFile:fullPath withApplication:appPath];
-    if (rv == NO)
-        rv = [self openFile:fullPath];
-    return rv;
-}
-
 - (BOOL)openLinkedURL:(NSURL *)aURL {
     BOOL rv = NO;
+    NSString *appID = nil;
     if ([aURL isFileURL]) {
-        rv = [self openLinkedFile:[aURL path]];
+        NSString *extension = [[aURL pathExtension] lowercaseString];
+        NSDictionary *defaultViewers = [[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKDefaultViewersKey];
+        appID = [defaultViewers objectForKey:extension];
     } else {
-        NSString *appID = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKDefaultBrowserKey];
-        if (appID)
-            rv = [self openURLs:[NSArray arrayWithObjects:aURL, nil] withAppBundleIdentifier:appID options:NSWorkspaceLaunchDefault additionalEventParamDescriptor:nil launchIdentifiers:NULL];
-        if (rv == NO)
-            rv = [self openURL:aURL];
+        appID = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKDefaultBrowserKey];
     }
+    if (appID)
+        rv = [self openURLs:[NSArray arrayWithObjects:aURL, nil] withAppBundleIdentifier:appID options:NSWorkspaceLaunchDefault additionalEventParamDescriptor:nil launchIdentifiers:NULL];
+    if (rv == NO)
+        rv = [self openURL:aURL];
     return rv;
 }
 

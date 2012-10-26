@@ -236,12 +236,13 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     
     NSArray *paths = [[[arrayController arrangedObjects] objectsAtIndexes:rowIndexes] valueForKey:@"path"];
     NSInteger type = ([sender isKindOfClass:[NSMenuItem class]]) ? [sender tag] : 0;
+    NSWorkspace *ws = [NSWorkspace sharedWorkspace];
     
     for (NSString *path in paths) {
         if(type == 1)
-            [[NSWorkspace sharedWorkspace] openLinkedFile:path];
+            [ws openLinkedURL:[NSURL fileURLWithPath:path]];
         else
-            [[NSWorkspace sharedWorkspace] selectFile:path inFileViewerRootedAtPath:nil];
+            [ws selectFile:path inFileViewerRootedAtPath:nil];
     }
 }   
 

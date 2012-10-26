@@ -462,7 +462,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     
     for (fileURL in urls) {
         if ([fileURL isEqual:[NSNull null]] == NO) {
-            [[NSWorkspace sharedWorkspace] openLinkedFile:[fileURL path]];
+            [[NSWorkspace sharedWorkspace] openLinkedURL:fileURL];
         }
     }
 }
@@ -1710,10 +1710,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 }
 
 - (BOOL)fileView:(FVFileView *)aFileView shouldOpenURL:(NSURL *)aURL {
-    if ([aURL isFileURL])
-        return [[NSWorkspace sharedWorkspace] openLinkedFile:[aURL path]] == NO;
-    else
-        return [[NSWorkspace sharedWorkspace] openLinkedURL:aURL] == NO;
+    return [[NSWorkspace sharedWorkspace] openLinkedURL:aURL] == NO;
 }
 
 - (NSDragOperation)fileView:(FVFileView *)aFileView validateDrop:(id <NSDraggingInfo>)info proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation {
@@ -2561,7 +2558,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             NSString *path = [[[BDSKPersistentSearch sharedSearch] resultsForQuery:queryStringWithCiteKey(aLink) attribute:(id)kMDItemPath] firstObject];
             // if it was a valid key/link, we should definitely have a path, but better make sure
             if (path)
-                [[NSWorkspace sharedWorkspace] openLinkedFile:path];
+                [[NSWorkspace sharedWorkspace] openLinkedURL:[NSURL fileURLWithPath:path]];
             else
                 NSBeep();
         } else {
