@@ -56,100 +56,58 @@
     if ([NSString isEmptyString:searchString])
         return [self openLinkedFile:[fileURL path]];
     
-    /*
-     Modified after Apple sample code for FinderLaunch http://developer.apple.com/samplecode/FinderLaunch/FinderLaunch.html
-     Create an open documents event targeting the file's creator application; if that doesn't work, fall back on the Finder (which will discard the search text info).
-     */
-    
-    OSStatus err = noErr;
-    FSRef fileRef;
-    
-    // FSRefs are now valid across processes, so we can pass them directly
-    fileURL = [fileURL fileURLByResolvingAliases]; 
-    BDSKASSERT(fileURL != nil);
-    if (fileURL == nil)
-        err = fnfErr;
-    else if (CFURLGetFSRef((CFURLRef)fileURL, &fileRef) == NO)
-        err = coreFoundationUnknownErr;
-    
-    // Find the application that should open this file.  NB: we need to release this URL when we're done with it.
-    CFURLRef appURL = NULL;
+    // Find the application that should open this file
+    BOOL success = NO;
+    NSURL *appURL = NULL;
     NSString *bundleID = nil;
-	if (noErr == err) {
-        NSString *extension = [[[fileURL path] pathExtension] lowercaseString];
-        NSDictionary *defaultViewers = [[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKDefaultViewersKey];
-        bundleID = [defaultViewers objectForKey:extension];
-		if (bundleID == nil || noErr != LSFindApplicationForInfo(kLSUnknownCreator, (CFStringRef)bundleID, NULL, NULL, &appURL)) {
-            err = LSGetApplicationForURL((CFURLRef)fileURL, kLSRolesAll, NULL, &appURL);
-            if (noErr == err)
-                bundleID = [[NSBundle bundleWithPath:[(NSURL *)appURL path]] bundleIdentifier];
-        }
+    NSString *extension = [[[fileURL path] pathExtension] lowercaseString];
+    NSDictionary *defaultViewers = [[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKDefaultViewersKey];
+    NSWorkspace *ws = [NSWorkspace sharedWorkspace];
+    bundleID = [defaultViewers objectForKey:extension];
+    if (bundleID)
+        appURL = [ws URLForApplicationWithBundleIdentifier:bundleID];
+    if (appURL == nil) {
+        appURL = [ws URLForApplicationToOpenURL:fileURL];
+        if (appURL)
+            bundleID = [[NSBundle bundleWithURL:appURL] bundleIdentifier];
     }
     
-    NSAppleEventDescriptor *openEvent = nil;
-    
     if (bundleID) {
-        NSAppleEventDescriptor *appDesc = nil;
-        NSAppleEventDescriptor *fileListDesc = nil;
-        NSAppleEventDescriptor *fileDesc = nil;
-        
-        appDesc = [NSAppleEventDescriptor descriptorWithDescriptorType:typeApplicationBundleID data:[bundleID dataUsingEncoding:NSUTF8StringEncoding]];
-        openEvent = [NSAppleEventDescriptor appleEventWithEventClass:kCoreEventClass eventID:kAEOpenDocuments targetDescriptor:appDesc returnID:kAutoGenerateReturnID transactionID:kAnyTransactionID];
-        fileDesc = [NSAppleEventDescriptor descriptorWithDescriptorType:typeFSRef bytes:&fileRef length:sizeof(FSRef)];
-        fileListDesc = [NSAppleEventDescriptor listDescriptor];
+        // Create the odoc Apple event
+        NSAppleEventDescriptor *appDesc = [NSAppleEventDescriptor descriptorWithDescriptorType:typeApplicationBundleID data:[bundleID dataUsingEncoding:NSUTF8StringEncoding]];
+        NSAppleEventDescriptor *openEvent = [NSAppleEventDescriptor appleEventWithEventClass:kCoreEventClass eventID:kAEOpenDocuments targetDescriptor:appDesc returnID:kAutoGenerateReturnID transactionID:kAnyTransactionID];
+        NSAppleEventDescriptor *fileDesc = [NSAppleEventDescriptor descriptorWithDescriptorType:typeFileURL data:[[fileURL absoluteString] dataUsingEncoding:NSUTF8StringEncoding]];
+        NSAppleEventDescriptor *fileListDesc = [NSAppleEventDescriptor listDescriptor];
         [fileListDesc insertDescriptor:fileDesc atIndex:1];
         [openEvent setParamDescriptor:fileListDesc forKeyword:keyDirectObject];
         if ([NSString isEmptyString:searchString] == NO)
             [openEvent setParamDescriptor:[NSAppleEventDescriptor descriptorWithString:searchString] forKeyword:keyAESearchText];
-    }
-    
-    if (openEvent) {
         
-        // Find the running process with te bundle ID
-        ProcessSerialNumber psn;
-        psn.highLongOfPSN = 0;
-        psn.lowLongOfPSN  = kNoProcess;
-        err = GetNextProcess(&psn);
-        while (noErr == err) {
-            NSDictionary *info = (NSDictionary *)ProcessInformationCopyDictionary(&psn, kProcessDictionaryIncludeAllInformationMask);
-            BOOL foundProcess = [bundleID isEqualToString:[info objectForKey:(NSString *)kCFBundleIdentifierKey]];
-            [info release];
-            if (foundProcess)
-                break;
-            err = GetNextProcess(&psn);
-        }
-        
-        if (noErr == err) {
-            // using this call, we end up with the newly opened doc in front; with 'misc'/'actv', window layering is messed up
-            err = SetFrontProcessWithOptions(&psn, 0);
-            // try to send the odoc event
-            if (noErr == err)
-                err = AESendMessage([openEvent aeDesc], NULL, kAENoReply, kAEDefaultTimeout);
-        }
-        
-         // If the app wasn't running, we need to use LaunchApplication...which doesn't seem to work if the app (at least Skim) is already running, hence the initial call to AESendMessage.  Possibly this can be done with LaunchServices, but the documentation for this stuff isn't sufficient to say and I'm not in the mood for any more trial-and-error AppleEvent coding.
-        if (procNotFound == err && appURL) {
+        NSArray *runningApps = [NSRunningApplication runningApplicationsWithBundleIdentifier:bundleID];
+        if ([runningApps count] > 0) {
+            [[runningApps objectAtIndex:0] activateWithOptions:0];
+            if (noErr == AESendMessage([openEvent aeDesc], NULL, kAENoReply, kAEDefaultTimeout))
+                success = YES;
+        } else if (appURL) {
+            // If the app wasn't running, we need to use LaunchApplication...which doesn't seem to work if the app (at least Skim) is already running, hence the initial call to AESendMessage.  Possibly this can be done with LaunchServices, but the documentation for this stuff isn't sufficient to say and I'm not in the mood for any more trial-and-error AppleEvent coding.
             FSRef appRef;
-            if (CFURLGetFSRef(appURL, &appRef)) {
+            if (CFURLGetFSRef((CFURLRef)appURL, &appRef)) {
                 LSApplicationParameters appParams;
                 memset(&appParams, 0, sizeof(LSApplicationParameters));
                 appParams.flags = kLSLaunchDefaults;
                 appParams.application = &appRef;
                 appParams.initialEvent = (AppleEvent *)[openEvent aeDesc];
-                err = LSOpenApplication(&appParams, NULL);
-            } else {
-                err = fnfErr;
+                if (noErr == LSOpenApplication(&appParams, NULL))
+                    success = YES;
             }
         }
     }
     
-    BDSKCFDESTROY(appURL);
-    
     // handle the case where somehow we are still not able to open
-    if (noErr != err || openEvent == nil)
-        err = (OSStatus)([self openURL:fileURL] == NO);
+    if (success = NO)
+        success = [self openURL:fileURL];
     
-    return (err == noErr);
+    return success;
 }
 
 - (BOOL)openLinkedFile:(NSString *)fullPath {
