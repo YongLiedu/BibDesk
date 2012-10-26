@@ -104,7 +104,7 @@
     }
     
     // handle the case where somehow we are still not able to open
-    if (success = NO)
+    if (success == NO)
         success = [self openURL:fileURL];
     
     return success;
