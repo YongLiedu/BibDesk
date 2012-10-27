@@ -62,7 +62,6 @@
     NSData *data = [[self absoluteString] dataUsingEncoding:NSUTF8StringEncoding];
     if (data)
         resultDesc = [NSAppleEventDescriptor descriptorWithDescriptorType:typeFileURL data:data];
-    [data release];
     
     return resultDesc;
 }
