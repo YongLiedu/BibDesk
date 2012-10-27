@@ -74,19 +74,17 @@
     
     if (bundleID) {
         // Create the odoc Apple event
-        NSAppleEventDescriptor *openEvent = nil;
+        NSAppleEventDescriptor *openEvent = [NSAppleEventDescriptor appleEventWithEventClass:kCoreEventClass eventID:kAEOpenDocuments targetDescriptor:nil returnID:kAutoGenerateReturnID transactionID:kAnyTransactionID];
         NSAppleEventDescriptor *fileListDesc = [NSAppleEventDescriptor listDescriptor];
-        NSAppleEventDescriptor *searchStringDesc = [NSAppleEventDescriptor descriptorWithString:searchString];
         [fileListDesc insertDescriptor:[fileURL aeDescriptorValue] atIndex:1];
+        [openEvent setParamDescriptor:fileListDesc forKeyword:keyDirectObject];
+        [openEvent setParamDescriptor:[NSAppleEventDescriptor descriptorWithString:searchString] forKeyword:keyAESearchText];
         
         NSArray *runningApps = [NSRunningApplication runningApplicationsWithBundleIdentifier:bundleID];
         if ([runningApps count] > 0) {
             NSRunningApplication *runningApp = [runningApps objectAtIndex:0];
             pid_t pid = [runningApp processIdentifier];
-            NSAppleEventDescriptor *appDesc = [NSAppleEventDescriptor descriptorWithDescriptorType:typeKernelProcessID bytes:&pid length:sizeof(pid)];
-            openEvent = [NSAppleEventDescriptor appleEventWithEventClass:kCoreEventClass eventID:kAEOpenDocuments targetDescriptor:appDesc returnID:kAutoGenerateReturnID transactionID:kAnyTransactionID];
-            [openEvent setParamDescriptor:fileListDesc forKeyword:keyDirectObject];
-            [openEvent setParamDescriptor:searchStringDesc forKeyword:keyAESearchText];
+            [openEvent setAttributeDescriptor:[NSAppleEventDescriptor descriptorWithDescriptorType:typeKernelProcessID bytes:&pid length:sizeof(pid)] forKeyword:keyAddressAttr];
             [runningApp activateWithOptions:0];
             if (noErr == AESendMessage([openEvent aeDesc], NULL, kAENoReply, kAEDefaultTimeout))
                 success = YES;
@@ -94,9 +92,6 @@
             // If the app wasn't running, we need to use LaunchApplication...which doesn't seem to work if the app (at least Skim) is already running, hence the initial call to AESendMessage.  Possibly this can be done with LaunchServices, but the documentation for this stuff isn't sufficient to say and I'm not in the mood for any more trial-and-error AppleEvent coding.
             FSRef appRef;
             if (CFURLGetFSRef((CFURLRef)appURL, &appRef)) {
-                openEvent = [NSAppleEventDescriptor appleEventWithEventClass:kCoreEventClass eventID:kAEOpenDocuments targetDescriptor:nil returnID:kAutoGenerateReturnID transactionID:kAnyTransactionID];
-                [openEvent setParamDescriptor:fileListDesc forKeyword:keyDirectObject];
-                [openEvent setParamDescriptor:searchStringDesc forKeyword:keyAESearchText];
                 LSApplicationParameters appParams;
                 memset(&appParams, 0, sizeof(LSApplicationParameters));
                 appParams.flags = kLSLaunchDefaults;
