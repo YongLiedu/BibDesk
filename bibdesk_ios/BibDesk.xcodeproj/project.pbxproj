@@ -85,6 +85,7 @@
 		3BBB1355150245A700F61870 /* BDSKDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BBB1354150245A700F61870 /* BDSKDetailViewController.m */; };
 		3BBB135C150249E200F61870 /* DropboxSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BBB135B150249E200F61870 /* DropboxSDK.framework */; };
 		3BBB135E15024A7C00F61870 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BBB135D15024A7C00F61870 /* Security.framework */; };
+		3BC3365F163D68CC00F359BD /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3BC3365E163D68CC00F359BD /* Default-568h@2x.png */; };
 		3BDF392B150E58280023EC36 /* IconPad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3BDF392A150E58280023EC36 /* IconPad@2x.png */; };
 		3BDF396E150E98F70023EC36 /* BTParse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BDF396D150E98F70023EC36 /* BTParse.framework */; };
 		3BDF3970150E98FC0023EC36 /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BDF396F150E98FC0023EC36 /* AGRegex.framework */; };
@@ -230,6 +231,7 @@
 		3BBB1354150245A700F61870 /* BDSKDetailViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BDSKDetailViewController.m; sourceTree = "<group>"; };
 		3BBB135B150249E200F61870 /* DropboxSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DropboxSDK.framework; sourceTree = "<group>"; };
 		3BBB135D15024A7C00F61870 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		3BC3365E163D68CC00F359BD /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		3BDF392A150E58280023EC36 /* IconPad@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "IconPad@2x.png"; sourceTree = "<group>"; };
 		3BDF396D150E98F70023EC36 /* BTParse.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BTParse.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/BibDesk-cpvsyxqrqdqrvfghemcnjbpqxgaf/Build/Products/Debug-iphoneos/BTParse.framework"; sourceTree = "<group>"; };
 		3BDF396F150E98FC0023EC36 /* AGRegex.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AGRegex.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/BibDesk-cpvsyxqrqdqrvfghemcnjbpqxgaf/Build/Products/Debug-iphoneos/AGRegex.framework"; sourceTree = "<group>"; };
@@ -548,6 +550,7 @@
 		3BBB1329150245A700F61870 = {
 			isa = PBXGroup;
 			children = (
+				3BC3365E163D68CC00F359BD /* Default-568h@2x.png */,
 				3BBB133E150245A700F61870 /* BibDesk iOS */,
 				3B13606A15068D19001DBBA5 /* BibDesk OS X */,
 				3BBB1337150245A700F61870 /* Frameworks */,
@@ -668,6 +671,7 @@
 				3BAA370B1504FCDB008BDE2A /* bib@2x.png in Resources */,
 				3B79CF261509838B00E9C5F5 /* TypeInfo.plist in Resources */,
 				3B79CF281509879A00E9C5F5 /* CharacterConversion.plist in Resources */,
+				3BC3365F163D68CC00F359BD /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
