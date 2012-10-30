@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN"  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>CFBundleDevelopmentRegion</key>
+<string>en-US</string>
+<key>CFBundleIdentifier</key>
+<string>edu.ucsd.cs.mmccrack.bibdesk.help</string>
+<key>CFBundleInfoDictionaryVersion</key>
+<string>6.0</string>
+<key>CFBundleName</key>
+<string>BibDeskHelp</string>
+<key>CFBundlePackageType</key>
+<string>BNDL</string>
+<key>CFBundleShortVersionString</key>
+<string>1.0</string>
+<key>CFBundleSignature</key>
+<string>hbwr</string>
+<key>CFBundleVersion</key>
+<string>1.0</string>
+<key>HPDBookAccessPath</key>
+<string>BibDeskHelp.html</string>
+<key>HPDBookIconPath</key>
+<string>shrd/BibDeskIcon.png</string>
+<key>HPDBookIndexPath</key>
+<string>BibDeskHelp.helpindex</string>
+<key>HPDBookKBProduct</key>
+<string>bibdesk1</string>
+<key>HPDBookRemoteURL</key>
+<string>http://bibdesk.sourceforge.net/manual/</string>
+<key>HPDBookTitle</key>
+<string>BibDesk Help</string>
+<key>HPDBookType</key>
+<string>3</string>
+</dict>
+</plist>
