@@ -54,7 +54,7 @@
 #define DOWNLOADS_SPECIFIER @"downloads"
 #define FILEICON_SPECIFIER  @"fileicon:"
 #define HELP_SPECIFIER      @"help"
-#define HELP_DIRECTORY      @"BibDeskHelp"
+#define HELP_BUNDLE         @"BibDesk.help"
 #define HELP_START_FILE     @"BibDeskHelp.html"
 
 NSString *BDSKBibDeskScheme = @"bibdesk";
@@ -121,7 +121,8 @@ NSString *BDSKBibDeskScheme = @"bibdesk";
             path = [path substringFromIndex:1];
         if ([path length] == 0)
             path = HELP_START_FILE;
-        path = [[NSBundle mainBundle] pathForResource:[[path lastPathComponent] stringByDeletingPathExtension] ofType:[path pathExtension] inDirectory:[HELP_DIRECTORY stringByAppendingPathComponent:[path stringByDeletingLastPathComponent]]];
+        NSBundle *helpBundle = [NSBundle bundleWithURL:[[NSBundle mainBundle] URLForResource:HELP_BUNDLE withExtension:nil]];
+        path = [helpBundle pathForResource:[[path lastPathComponent] stringByDeletingPathExtension] ofType:[path pathExtension] inDirectory:[path stringByDeletingLastPathComponent]];
         if (path) {
             NSData *data = [NSData dataWithContentsOfFile:path];
             NSString *theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:path error:NULL];
