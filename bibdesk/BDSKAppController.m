@@ -292,9 +292,7 @@ static void fixLegacyTableColumnIdentifiers()
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:BDSKIsRelaunchKey];
     
     // register our help book, so it's available for methods that don't register this, e.g. the web group
-    FSRef appRef;
-    if (noErr == FSPathMakeRef((const UInt8 *)[[[NSBundle mainBundle] bundlePath] fileSystemRepresentation], &appRef, NULL))
-        AHRegisterHelpBook(&appRef);
+    [[NSHelpManager sharedHelpManager] registerBooksInBundle:[NSBundle mainBundle]];
     
     // validate the Cite Key and LocalUrl format strings
     [self checkFormatStrings];
