@@ -187,8 +187,6 @@ $description
 <meta name="resource-type" content="document">
 <meta name="distribution" content="global">
 <meta name="Generator" content="$Texi2HTML::THISDOC{program}">
-<meta name="AppleTitle" content="BibDesk Help">
-<meta name="AppleIcon" content="BibDesk%20Help/gfx/BibDeskIcon.png">
 <meta name="robots" content="anchors">
 $encoding
 $CSS_LINES
