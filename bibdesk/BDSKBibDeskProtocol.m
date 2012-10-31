@@ -103,7 +103,7 @@ NSString *BDSKBibDeskScheme = @"bibdesk";
         NSData *data = [self HTMLDataUsingTemplateFile:@"WebGroupDownloads" usingObject:[BDSKDownloadManager sharedManager]];
         [self loadData:data MIMEType:@"text/html"];
     } else if ([resourceSpecifier hasCaseInsensitivePrefix:FILEICON_SPECIFIER]) {
-        NSString *extension = [resourceSpecifier substringFromIndex:[FILEICON_SPECIFIER length]];
+        NSString *extension = [[resourceSpecifier substringFromIndex:[FILEICON_SPECIFIER length]] stringByReplacingPercentEscapes];
         NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFileType:extension];
         [self loadData:[icon TIFFRepresentation] MIMEType:@"image/tiff"];
     } else if ([HELP_SPECIFIER isCaseInsensitiveEqual:[[resourceSpecifier pathComponents] firstObject]]) {
