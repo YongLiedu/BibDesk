@@ -54,8 +54,6 @@
 #define DOWNLOADS_SPECIFIER @"downloads"
 #define FILEICON_SPECIFIER  @"fileicon:"
 #define HELP_SPECIFIER      @"help"
-#define HELP_BUNDLE         @"BibDesk.help"
-#define HELP_START_FILE     @"BibDeskHelp.html"
 
 NSString *BDSKBibDeskScheme = @"bibdesk";
 
@@ -116,12 +114,13 @@ NSString *BDSKBibDeskScheme = @"bibdesk";
         [response release];
         [redirectRequest release];
     } else if ([HELP_SPECIFIER isCaseInsensitiveEqual:[theURL host]]) {
+        NSString *helpBookFolder = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleHelpBookFolder"];
+        NSBundle *helpBundle = [NSBundle bundleWithURL:[[NSBundle mainBundle] URLForResource:helpBookFolder withExtension:nil]];
         NSString *path = [theURL path];
         if ([path hasPrefix:@"/"])
             path = [path substringFromIndex:1];
         if ([path length] == 0)
-            path = HELP_START_FILE;
-        NSBundle *helpBundle = [NSBundle bundleWithURL:[[NSBundle mainBundle] URLForResource:HELP_BUNDLE withExtension:nil]];
+            path = [helpBundle objectForInfoDictionaryKey:@"HPDBookAccessPath"];
         path = [helpBundle pathForResource:[[path lastPathComponent] stringByDeletingPathExtension] ofType:[path pathExtension] inDirectory:[path stringByDeletingLastPathComponent]];
         if (path) {
             NSData *data = [NSData dataWithContentsOfFile:path];
