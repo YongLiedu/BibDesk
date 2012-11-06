@@ -44,4 +44,6 @@
 
 @property (strong, nonatomic) BDSKDetailViewController *detailViewController;
 
+- (void)refresh;
+
 @end

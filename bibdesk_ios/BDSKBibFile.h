@@ -1,5 +1,5 @@
 //
-//  BDSKDropboxStore.h
+//  BDSKBibFile.h
 //  BibDesk
 //
 //  Created by Colin Smith on 10/28/12.
@@ -36,16 +36,15 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKFileStore.h"
+#import <Foundation/Foundation.h>
 
-@interface BDSKDropboxStore : BDSKFileStore
+@class BibDocument;
 
-+ (BDSKDropboxStore *)sharedStore;
+@interface BDSKBibFile : NSObject
 
-- (void)addLocalFiles;
-- (void)startSync;
-
-@property (retain) NSString *drobboxBibFilePath;
-@property (readonly) BOOL isSyncing;
+@property (retain) NSString *path;
+@property (retain) NSDate *lastModifiedDate;
+@property (assign) NSUInteger totalBytes;
+@property (retain) BibDocument* bibDocument;
 
 @end

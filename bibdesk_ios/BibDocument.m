@@ -37,10 +37,13 @@
  */
 
 #import "BibDocument.h"
+#import "BibItem.h"
+#import "BDSKLinkedFile.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKMacroResolver.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKGroupsArray.h"
+#import "BDSKSmartGroup.h"
 #import "NSDictionary_BDSKExtensions.h"
 
 @implementation BibDocument
@@ -54,6 +57,8 @@
         macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         documentInfo = nil;
         wasLoaded = NO;
+        linkedFilePaths = [[NSMutableSet alloc] init];
+        linkedFilePathsToStore = [[NSMutableSet alloc] init];
     }
 
     return self;
@@ -64,6 +69,8 @@
     [publications release];
     [macroResolver release];
     [documentInfo release];
+    [linkedFilePaths release];
+    [linkedFilePathsToStore release];
     
     [super dealloc];
 }
@@ -149,6 +156,11 @@
         //[self sortPubsByKey:nil]; // resort
     }
     
+    NSArray *smartGroups = [[self groups] smartGroups];
+    for (BDSKSmartGroup *group in smartGroups) {
+        [group filterItems:self.publications];
+    }
+    
     wasLoaded = YES;
 }
 
@@ -160,6 +172,7 @@
     [publications setValue:nil forKey:@"owner"];
     [publications setArray:newPubs];
     [publications setValue:self forKey:@"owner"];
+    [self updateLinkedFilePaths];
 }    
 
 - (BDSKPublicationsArray *)publications{
@@ -182,5 +195,32 @@
     return documentStringEncoding;
 }
 
+#pragma mark -
+#pragma mark Linked file path management
+
+- (NSSet *)linkedFilePaths {
+
+    return linkedFilePaths;
+}
+
+- (NSSet *)linkedFilePathsToStore {
+
+    return linkedFilePathsToStore;
+}
+
+- (void)updateLinkedFilePaths {
+
+    [linkedFilePaths removeAllObjects];
+    [linkedFilePathsToStore removeAllObjects];
+    
+    for (BibItem *bibItem in publications) {
+    
+        for (BDSKLinkedFile *file in bibItem.localFiles) {
+            
+            [linkedFilePaths addObject:file.relativePath];
+            [linkedFilePathsToStore addObject:file.relativePath];
+        }
+    }
+}
 
 @end

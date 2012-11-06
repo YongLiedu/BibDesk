@@ -40,7 +40,6 @@
 
 #import <DBSessionInit/DBSessionInit.h>
 #import "BDSKDropboxStore.h"
-#import "BDSKLocalFile.h"
 #import "BDSKTypeManager.h"
 
 @interface BDSKAppDelegate () {
@@ -76,19 +75,9 @@
     [DBSession setSharedSession:session];
     [session release];
     
-#if TARGET_IPHONE_SIMULATOR
-    [BDSKLocalFile setDropboxRoot:@"/PapersSimulator"];
-#else
-    [BDSKLocalFile setDropboxRoot:@"/Papers"];
-#endif
-
     [[BDSKDropboxStore sharedStore] addLocalFiles];
     
     _dropboxLinked = [[DBSession sharedSession] isLinked];
-    
-    //if (self.dropboxLinked) {
-    //    [[BDSKDropboxStore sharedStore] startSync];
-    //}
     
     NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
     

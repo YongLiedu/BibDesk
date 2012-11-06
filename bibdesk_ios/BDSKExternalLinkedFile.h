@@ -1,8 +1,8 @@
 //
-//  BDSKDropboxStore.h
-//  BibDesk
+//  BDSKExternalLinkedFile.h
+//  ExternalLinkedDesk
 //
-//  Created by Colin Smith on 10/28/12.
+//  Created by Colin Smith on 11/4/12.
 /*
  This software is Copyright (c) 2012-2012
  Colin A. Smith. All rights reserved.
@@ -36,16 +36,20 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKFileStore.h"
+#import <Foundation/Foundation.h>
 
-@interface BDSKDropboxStore : BDSKFileStore
+typedef enum {
+    NotAvailable,
+    Downloadable,
+    Downloading,
+    Available
+} BDSKLinkedFileAvailability;
 
-+ (BDSKDropboxStore *)sharedStore;
+@interface BDSKExternalLinkedFile : NSObject
 
-- (void)addLocalFiles;
-- (void)startSync;
-
-@property (retain) NSString *drobboxBibFilePath;
-@property (readonly) BOOL isSyncing;
+@property (retain) NSString *path;
+@property (retain) NSDate *lastModifiedDate;
+@property (assign) NSUInteger totalBytes;
+@property (assign) BDSKLinkedFileAvailability availability;
 
 @end

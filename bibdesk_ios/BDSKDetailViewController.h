@@ -42,7 +42,7 @@
 
 @interface BDSKDetailViewController : UIViewController <UISplitViewControllerDelegate, UIWebViewDelegate>
 
-@property (strong, nonatomic) BDSKLocalFile *displayedFile;
+@property (strong, nonatomic) NSString *displayedFile;
 
 @property (strong, nonatomic) IBOutlet UIWebView *webView;
 

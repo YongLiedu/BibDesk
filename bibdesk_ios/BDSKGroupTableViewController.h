@@ -38,10 +38,11 @@
 
 #import <UIKit/UIKit.h>
 
-@class BibDocument;
+@class BDSKFileStore;
 
 @interface BDSKGroupTableViewController : UITableViewController
 
-@property (retain, nonatomic) BibDocument *document;
+@property (assign) BDSKFileStore *fileStore;
+@property (retain) NSString *bibFileName;
 
 @end

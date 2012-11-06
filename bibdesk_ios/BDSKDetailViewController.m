@@ -38,8 +38,6 @@
 
 #import "BDSKDetailViewController.h"
 
-#import "BDSKLocalFile.h"
-
 @interface BDSKDetailViewController ()
 @property (strong, nonatomic) UIPopoverController *masterPopoverController;
 - (void)configureView;
@@ -60,15 +58,14 @@
 
 #pragma mark - Managing the detail item
 
-- (void)setDisplayedFile:(BDSKLocalFile *)newDisplayedFile
+- (void)setDisplayedFile:(NSString *)newDisplayedFile
 {
-    if (_displayedFile != newDisplayedFile) {
-        [_displayedFile release];
-        _displayedFile = [newDisplayedFile retain];
+    [newDisplayedFile retain];
+    [_displayedFile release];
+    _displayedFile = newDisplayedFile;
 
-        // Update the view.
-        [self configureView];
-    }
+    // Update the view.
+    [self configureView];
 
     if (self.masterPopoverController != nil) {
         [self.masterPopoverController dismissPopoverAnimated:YES];
@@ -80,10 +77,10 @@
     // Update the user interface for the detail item.
 
     if (self.displayedFile && self.webView) {
-        NSURL *url = [NSURL fileURLWithPath:self.displayedFile.fullPath];
+        NSURL *url = [NSURL fileURLWithPath:self.displayedFile];
         NSURLRequest *urlRequest = [NSURLRequest requestWithURL:url];
         [self.webView loadRequest:urlRequest];
-        self.title = self.displayedFile.nameNoExtension;
+        self.title = [[self.displayedFile lastPathComponent] stringByDeletingPathExtension];
     }
 }
 

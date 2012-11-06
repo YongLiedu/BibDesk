@@ -39,10 +39,14 @@
 #import "BDSKPubTableViewController.h"
 
 #import "BDSKDetailViewController.h"
-#import "BDSKDropboxStore.h"
-#import "BDSKLocalFile.h"
+#import "BibDocument.h"
 #import "BibItem.h"
+#import "BDSKFileStore.h"
+#import "BDSKGroupsArray.h"
 #import "BDSKLinkedFile.h"
+#import "BDSKPublicationsArray.h"
+#import "BDSKSmartGroup.h"
+#import "BDSKStaticGroup.h"
 #import "BDSKTableSortDescriptor.h"
 #import "BDSKStringConstants.h"
 #import "NSString_BDSKExtensions.h"
@@ -50,22 +54,14 @@
 #import "BDSKTemplate.h"
 #import "BDSKTemplateObjectProxy.h"
 
-BDSKLocalFile *LocalFileForBibItem(BibItem *bibItem) {
-
-    BDSKDropboxStore *dropboxStore = [BDSKDropboxStore sharedStore];
-    
-    BDSKLocalFile *localFile = nil;
-    for (BDSKLinkedFile *file in bibItem.localFiles) {
-        if ((localFile = [dropboxStore.pdfFilePaths objectForKey:file.relativePath])) {
-            break;
-        }
-    }
-    
-    return localFile;
-}
 
 @interface BDSKPubTableViewController () {
 
+    BDSKFileStore *_fileStore;
+    NSString *_bibFileName;
+    BDSKGroupType _groupType;
+    NSString *_groupName;
+    NSArray *_bibItems;
     NSMutableArray *_filteredBibItems;
     BOOL _firstAppearance;
 }
@@ -74,26 +70,38 @@ BDSKLocalFile *LocalFileForBibItem(BibItem *bibItem) {
 
 @implementation BDSKPubTableViewController
 
-@synthesize bibItems;
-
 - (id)initWithStyle:(UITableViewStyle)style
 {
     self = [super initWithStyle:style];
     if (self) {
-        // Custom initialization
+        _fileStore = nil;
+        _bibFileName = nil;
+        _groupType = Library;
+        _groupName = nil;
+        _bibItems = nil;
+        _filteredBibItems = [[NSMutableArray alloc] init];
+        _firstAppearance = YES;
     }
     return self;
 }
 
 - (void)awakeFromNib
 {
-    self.bibItems = [NSArray array];
+    _fileStore = nil;
+    _bibFileName = nil;
+    _groupType = Library;
+    _groupName = nil;
+    _bibItems = nil;
     _filteredBibItems = [[NSMutableArray alloc] init];
     _firstAppearance = YES;
 }
 
 - (void)dealloc {
 
+    [_fileStore release];
+    [_bibFileName release];
+    [_groupName release];
+    [_bibItems release];
     [_filteredBibItems release];
     [super dealloc];
 }
@@ -107,6 +115,7 @@ BDSKLocalFile *LocalFileForBibItem(BibItem *bibItem) {
  
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    [self updateActivityIndicator];
 }
 
 - (void)viewDidUnload
@@ -124,6 +133,7 @@ BDSKLocalFile *LocalFileForBibItem(BibItem *bibItem) {
         self.tableView.contentOffset = CGPointMake(0, self.searchDisplayController.searchBar.bounds.size.height);
         _firstAppearance = NO;
     }
+    self.navigationItem.title = self.groupName;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -143,7 +153,7 @@ BDSKLocalFile *LocalFileForBibItem(BibItem *bibItem) {
         return [_filteredBibItems objectAtIndex:indexPath.row];
     }
     
-   return [bibItems objectAtIndex:indexPath.row];
+   return [self.bibItems objectAtIndex:indexPath.row];
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -184,7 +194,7 @@ BDSKLocalFile *LocalFileForBibItem(BibItem *bibItem) {
     
     //NSLog(@"File Count: %i", bibItem.files.count);
     
-    if (LocalFileForBibItem(bibItem)) {
+    if ([self localLinkedFilePathForBibItem:bibItem]) {
         //cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         cell.accessoryView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"pdf.png"]] autorelease];
         cell.selectionStyle = UITableViewCellSelectionStyleBlue;
@@ -242,7 +252,7 @@ BDSKLocalFile *LocalFileForBibItem(BibItem *bibItem) {
 
     BibItem *bibItem = [self tableView:tableView bibItemForRowAtIndexPath:indexPath];
 
-    if (LocalFileForBibItem(bibItem)) return indexPath;
+    if ([self localLinkedFilePathForBibItem:bibItem]) return indexPath;
     
     return nil;
 }
@@ -251,13 +261,13 @@ BDSKLocalFile *LocalFileForBibItem(BibItem *bibItem) {
 {
     BibItem *bibItem = [self tableView:tableView bibItemForRowAtIndexPath:indexPath];
 
-    BDSKLocalFile *pdfFile = LocalFileForBibItem(bibItem);
+    NSString *localPath = [self localLinkedFilePathForBibItem:bibItem];
 
-    if (pdfFile) {
+    if (localPath) {
         if (self.splitViewController) {
             UINavigationController *navigationController = [self.splitViewController.viewControllers objectAtIndex:1];
             BDSKDetailViewController *viewController = (BDSKDetailViewController *)[navigationController.viewControllers objectAtIndex:0];
-            [viewController setDisplayedFile:pdfFile];
+            [viewController setDisplayedFile:localPath];
         } else {
             [self performSegueWithIdentifier:@"showPDF" sender:self];
         }
@@ -275,28 +285,33 @@ BDSKLocalFile *LocalFileForBibItem(BibItem *bibItem) {
         }
         NSIndexPath *indexPath = [tableView indexPathForSelectedRow];
         BibItem *bibItem = [self tableView:tableView bibItemForRowAtIndexPath:indexPath];
-        BDSKLocalFile *pdfFile = LocalFileForBibItem(bibItem);
-        [[segue destinationViewController] setDisplayedFile:pdfFile];
+        NSString *localPath = [self localLinkedFilePathForBibItem:bibItem];
+        [[segue destinationViewController] setDisplayedFile:localPath];
     }
+}
+
+- (NSArray *)bibItems {
+
+    return _bibItems;
 }
 
 - (void)setBibItems:(NSArray *)newBibItems {
 
-    if (bibItems != newBibItems) {
-        [bibItems release];
+    if (_bibItems != newBibItems) {
+        [_bibItems release];
         BDSKTableSortDescriptor *sortDescriptor = [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:BDSKPubDateString ascending:NO];
-        bibItems = [[newBibItems sortedArrayUsingMergesortWithDescriptors:[NSArray arrayWithObject:sortDescriptor]] retain];
+        _bibItems = [[newBibItems sortedArrayUsingMergesortWithDescriptors:[NSArray arrayWithObject:sortDescriptor]] retain];
         
         [self.tableView reloadData];
         
         // Template Testing Code
-        if ([bibItems count] && NO) {
+        if ([_bibItems count] && NO) {
         
             BDSKTemplate *testTemplate = [BDSKTemplate templateWithString:@"<$publications><$authors.abbreviatedNormalizedName.stringByRemovingTeX.@componentsJoinedByCommaAndAnd/> (<$fields.Year/>). <$fields.Title.stringByRemovingTeX/>, <$fields.Journal.stringByRemovingTeX/>, <$fields.Volume/>(<$fields.Number/>), <$fields.Pages/>\n</$publications>" fileType:@"txt"];
             
-            BibItem *firstBibItem = [bibItems objectAtIndex:0];
+            BibItem *firstBibItem = [_bibItems objectAtIndex:0];
             
-            NSString *templateString = [BDSKTemplateObjectProxy stringByParsingTemplate:testTemplate withObject:[firstBibItem owner] publications:bibItems];
+            NSString *templateString = [BDSKTemplateObjectProxy stringByParsingTemplate:testTemplate withObject:[firstBibItem owner] publications:_bibItems];
                 
             NSLog(@"Template Text:\n%@", templateString);
         }
@@ -317,7 +332,7 @@ BDSKLocalFile *LocalFileForBibItem(BibItem *bibItem) {
 	/*
 	 Search the main list for products whose type matches the scope (if selected) and whose name matches searchText; add items that match to the filtered array.
 	 */
-	for (BibItem *bibItem in bibItems) {
+	for (BibItem *bibItem in self.bibItems) {
 		NSString *bibString = [bibItem allFieldsString];
         if ([bibString rangeOfString:searchText options:NSCaseInsensitiveSearch].location != NSNotFound) {
             [_filteredBibItems addObject:bibItem];
@@ -360,6 +375,167 @@ BDSKLocalFile *LocalFileForBibItem(BibItem *bibItem) {
         NSIndexPath *indexPathToSelect = [NSIndexPath indexPathForRow:row inSection:0];
         [self.tableView selectRowAtIndexPath:indexPathToSelect animated:NO scrollPosition:UITableViewScrollPositionMiddle];
     }
+}
+
+- (BibDocument *)document {
+
+    return [self.fileStore bibDocumentForName:self.bibFileName];
+}
+
+- (BOOL)documentReady {
+
+    return self.bibFileName && self.fileStore && [self.fileStore bibDocumentForName:self.bibFileName].documentState != UIDocumentStateClosed;
+}
+
+- (BDSKFileStore *)fileStore {
+
+    return _fileStore;
+}
+
+- (void)setFileStore:(BDSKFileStore *)fileStore {
+
+    if (fileStore != _fileStore) {
+        [self unregisterForNotifications];
+        [_fileStore release];
+        _fileStore = [fileStore retain];
+        [self registerForNotifications];
+        [self updateBibItems];
+    }
+}
+
+- (NSString *)bibFileName {
+
+    return _bibFileName;
+}
+
+- (void)setBibFileName:(NSString *)bibFileName {
+
+    if (![bibFileName isEqual:_bibFileName]) {
+        [_bibFileName release];
+        _bibFileName = [bibFileName retain];
+        [self updateBibItems];
+    }
+}
+
+- (BDSKGroupType)groupType {
+
+    return _groupType;
+}
+
+- (void)setGroupType:(BDSKGroupType)groupType {
+
+    if (groupType != _groupType) {
+        _groupType = groupType;
+        [self updateBibItems];
+    }
+}
+
+- (NSString *)groupName {
+
+    return _groupName;
+}
+
+- (void)setGroupName:(NSString *)groupName {
+
+    if (![groupName isEqual:_groupName]) {
+        [_groupName release];
+        _groupName = [groupName retain];
+        [self updateBibItems];
+    }
+}
+
+- (void)updateBibItems {
+
+    NSArray *newBibItems = nil;
+
+    if ([self documentReady]) {
+    
+        if (self.groupType == Library) {
+            newBibItems = [NSArray arrayWithArray:self.document.publications];
+        } else if (self.groupType == Smart) {
+            if (self.groupName) {
+                NSUInteger index = [[[self.document groups] smartGroups] indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+                    return [self.groupName isEqualToString:[(BDSKSmartGroup *)obj name]];
+                }];
+                if (index != NSNotFound) {
+                    BDSKSmartGroup *group = [[[self.document groups] smartGroups] objectAtIndex:index];
+                    newBibItems = [group filterItems:self.document.publications];
+                }
+            }
+        } else if (self.groupType = Static) {
+            if (self.groupName) {
+                NSUInteger index = [[[self.document groups] staticGroups] indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+                    return [self.groupName isEqualToString:[(BDSKStaticGroup *)obj name]];
+                }];
+                if (index != NSNotFound) {
+                    BDSKStaticGroup *group = [[[self.document groups] staticGroups] objectAtIndex:index];
+                    newBibItems = [group publications];
+                }
+            }
+        }
+    }
+    
+    [self setBibItems:newBibItems];
+    
+    [self.tableView reloadData];
+    [self updateActivityIndicator];
+}
+
+- (void)updateActivityIndicator
+{
+    if (self.documentReady) {
+        self.navigationItem.rightBarButtonItem = nil;
+    } else {
+
+        UIActivityIndicatorViewStyle activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
+        
+        // barStyle is 3 (undocumented) when in a popover controller
+        if (self.navigationController.navigationBar.barStyle > 2) activityIndicatorViewStyle = UIActivityIndicatorViewStyleWhite;
+        UIActivityIndicatorView *activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:activityIndicatorViewStyle];
+        UIBarButtonItem *refreshButton = [[UIBarButtonItem alloc] initWithCustomView:activityIndicator];
+        self.navigationItem.rightBarButtonItem = refreshButton;
+        [activityIndicator startAnimating];
+        [refreshButton release];
+        [activityIndicator release];
+    }
+}
+
+- (NSString *)localLinkedFilePathForBibItem:(BibItem *)bibItem {
+
+    NSString *localPath = nil;
+    
+    for (BDSKLinkedFile *file in bibItem.localFiles) {
+        NSString *linkedFilePath = [self.fileStore pathForLinkedFilePath:file.relativePath relativeToBibFileName:self.bibFileName];
+        if ([self.fileStore availabilityForLinkedFilePath:linkedFilePath] != NotAvailable) {
+            localPath = [self.fileStore localPathForLinkedFilePath:linkedFilePath];
+            break;
+        }
+    }
+    
+    return localPath;
+}
+
+#pragma mark - Notification support
+
+- (void)handleBibDocumentChangedNotification:(NSNotification *)notification {
+
+    if ([[notification.userInfo objectForKey:@"bibFileName"] isEqual:self.bibFileName]) {
+        if (self.document) {
+            [self updateBibItems];
+        } else {
+            [self.navigationController popToRootViewControllerAnimated:YES];
+        }
+    }
+}
+
+- (void)registerForNotifications {
+
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBibDocumentChangedNotification:) name:@"BDSKBibDocumentChanged" object:self.fileStore];
+}
+
+- (void)unregisterForNotifications {
+
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"BDSKBibDocumentChanged" object:self.fileStore];
 }
 
 @end

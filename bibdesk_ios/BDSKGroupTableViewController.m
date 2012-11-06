@@ -40,12 +40,19 @@
 
 #import "BDSKPubTableViewController.h"
 #import "BibDocument.h"
-#import "BDSKPublicationsArray.h"
+#import "BDSKFileStore.h"
 #import "BDSKGroupsArray.h"
 #import "BDSKSmartGroup.h"
 #import "BDSKStaticGroup.h"
 
-@interface BDSKGroupTableViewController ()
+@interface BDSKGroupTableViewController () {
+
+    BDSKFileStore *_fileStore;
+    NSString *_bibFileName;
+}
+
+@property (readonly) BibDocument *document;
+@property (readonly) BOOL documentReady;
 
 - (void)updateActivityIndicator;
 
@@ -53,15 +60,21 @@
 
 @implementation BDSKGroupTableViewController
 
-@synthesize document;
-
 - (id)initWithStyle:(UITableViewStyle)style
 {
     self = [super initWithStyle:style];
     if (self) {
-        // Custom initialization
+        _fileStore = nil;
+        _bibFileName = nil;
     }
     return self;
+}
+
+- (void)dealloc {
+
+    [_fileStore release];
+    [_bibFileName release];
+    [super dealloc];
 }
 
 - (void)viewDidLoad
@@ -80,6 +93,7 @@
 - (void)viewDidUnload
 {
     [super viewDidUnload];
+    [self unregisterForNotifications];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
 }
@@ -97,7 +111,7 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    if (self.document) return 3;
+    if (self.documentReady) return 3;
     
     return 0;
 }
@@ -138,14 +152,14 @@
     
     } else if (indexPath.section == 1) {
     
-        BDSKSmartGroup *group = [[[document groups] smartGroups] objectAtIndex:indexPath.row];
+        BDSKSmartGroup *group = [[[self.document groups] smartGroups] objectAtIndex:indexPath.row];
         cell.textLabel.text = [group name];
         cell.detailTextLabel.text = [NSString stringWithFormat:@"%i", [group count]];
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     
     } else if (indexPath.section == 2) {
     
-        BDSKStaticGroup *group = [[[document groups] staticGroups] objectAtIndex:indexPath.row];
+        BDSKStaticGroup *group = [[[self.document groups] staticGroups] objectAtIndex:indexPath.row];
         cell.textLabel.text = [group name];
         cell.detailTextLabel.text = [NSString stringWithFormat:@"%i", [group count]];
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
@@ -211,17 +225,20 @@
         NSIndexPath *indexPath = self.tableView.indexPathForSelectedRow;        
         BDSKPubTableViewController *viewController = segue.destinationViewController;
         
+        viewController.fileStore = self.fileStore;
+        viewController.bibFileName = self.bibFileName;
+        
         if (indexPath.section == 0 && indexPath.row == 0) {
-            viewController.navigationItem.title = @"Library";
-            viewController.bibItems = [NSArray arrayWithArray:self.document.publications];
+            viewController.groupType = Library;
+            viewController.groupName = @"Library";
         } else if (indexPath.section == 1) {
-            BDSKSmartGroup *group = [[[document groups] smartGroups] objectAtIndex:indexPath.row];
-            viewController.navigationItem.title = [group name];
-            viewController.bibItems = [group filterItems:document.publications];
+            BDSKSmartGroup *group = [[[self.document groups] smartGroups] objectAtIndex:indexPath.row];
+            viewController.groupType = Smart;
+            viewController.groupName = [group name];
         } else if (indexPath.section == 2) {
-            BDSKStaticGroup *group = [[[document groups] staticGroups] objectAtIndex:indexPath.row];
-            viewController.navigationItem.title = [group name];
-            viewController.bibItems = [group publications];
+            BDSKStaticGroup *group = [[[self.document groups] staticGroups] objectAtIndex:indexPath.row];
+            viewController.groupType = Static;
+            viewController.groupName = [group name];
         } else if (indexPath.section == 3) {
             
         
@@ -229,15 +246,43 @@
     }
 }
 
-- (void)setDocument:(BibDocument *)newDocument {
+- (BibDocument *)document {
 
-    if (document != newDocument) {
-        [document release];
-        document = [newDocument retain];
-        NSArray *smartGroups = [[document groups] smartGroups];
-        for (BDSKSmartGroup *group in smartGroups) {
-            [group filterItems:document.publications];
-        }
+    return [self.fileStore bibDocumentForName:self.bibFileName];
+}
+
+- (BOOL)documentReady {
+
+    return self.bibFileName && self.fileStore && [self.fileStore bibDocumentForName:self.bibFileName].documentState != UIDocumentStateClosed;
+}
+
+- (BDSKFileStore *)fileStore {
+
+    return _fileStore;
+}
+
+- (void)setFileStore:(BDSKFileStore *)fileStore {
+
+    if (fileStore != _fileStore) {
+        [self unregisterForNotifications];
+        [_fileStore release];
+        _fileStore = [fileStore retain];
+        [self registerForNotifications];
+        [self.tableView reloadData];
+        [self updateActivityIndicator];
+    }
+}
+
+- (NSString *)bibFileName {
+
+    return _bibFileName;
+}
+
+- (void)setBibFileName:(NSString *)bibFileName {
+
+    if (![bibFileName isEqual:_bibFileName]) {
+        [_bibFileName release];
+        _bibFileName = [bibFileName retain];
         [self.tableView reloadData];
         [self updateActivityIndicator];
     }
@@ -245,7 +290,7 @@
 
 - (void)updateActivityIndicator
 {
-    if (self.document) {
+    if (self.documentReady) {
         self.navigationItem.rightBarButtonItem = nil;
     } else {
 
@@ -260,6 +305,30 @@
         [refreshButton release];
         [activityIndicator release];
     }
+}
+
+#pragma mark - Notification support
+
+- (void)handleBibDocumentChangedNotification:(NSNotification *)notification {
+
+    if ([[notification.userInfo objectForKey:@"bibFileName"] isEqual:self.bibFileName]) {
+        if (self.document) {
+            [self.tableView reloadData];
+            [self updateActivityIndicator];
+        } else {
+            [self.navigationController popToRootViewControllerAnimated:YES];
+        }
+    }
+}
+
+- (void)registerForNotifications {
+
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBibDocumentChangedNotification:) name:@"BDSKBibDocumentChanged" object:self.fileStore];
+}
+
+- (void)unregisterForNotifications {
+
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"BDSKBibDocumentChanged" object:self.fileStore];
 }
 
 @end

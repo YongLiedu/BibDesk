@@ -39,8 +39,7 @@
 #import "BDSKPDFTableViewController.h"
 
 #import "BDSKAppDelegate.h"
-#import "BDSKDropboxStore.h"
-#import "BDSKLocalFile.h"
+#import "BDSKFileStore.h"
 
 @interface BDSKPDFTableViewController ()
 
@@ -48,7 +47,7 @@
 
 @implementation BDSKPDFTableViewController
 
-@synthesize pdfFiles;
+@synthesize fileStore;
 
 - (id)initWithStyle:(UITableViewStyle)style
 {
@@ -64,8 +63,6 @@
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         self.clearsSelectionOnViewWillAppear = NO;
     }
-
-    self.pdfFiles = [NSMutableArray array];
     
     [super awakeFromNib];
 }
@@ -108,7 +105,7 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
-        return self.pdfFiles.count;
+    return self.fileStore.linkedFilePaths.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -116,9 +113,9 @@
     static NSString *CellIdentifier = @"Cell";
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     
-    BDSKLocalFile *pdfFile = [self.pdfFiles objectAtIndex:indexPath.row];
+    NSString *pdfPath = [self.fileStore.linkedFilePaths objectAtIndex:indexPath.row];
     
-    cell.textLabel.text = pdfFile.nameNoExtension;
+    cell.textLabel.text = [[pdfPath lastPathComponent] stringByDeletingPathExtension];
     
     return cell;
 }
@@ -170,8 +167,9 @@
         UINavigationController *navigationController = [self.splitViewController.viewControllers objectAtIndex:1];
         BDSKDetailViewController *viewController = (BDSKDetailViewController *)[navigationController.viewControllers objectAtIndex:0];
         //NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
-        BDSKLocalFile    *pdfFile = [pdfFiles objectAtIndex:indexPath.row];
-        [viewController setDisplayedFile:pdfFile];
+        NSString *pdfPath = [self.fileStore.linkedFilePaths objectAtIndex:indexPath.row];
+        NSString *localPdfPath = [self.fileStore localPathForLinkedFilePath:pdfPath];
+        [viewController setDisplayedFile:localPdfPath];
     } else {
         [self performSegueWithIdentifier:@"showPDF" sender:self];
     }
@@ -181,8 +179,9 @@
 {
     if ([[segue identifier] isEqualToString:@"showPDF"]) {
         NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
-        BDSKLocalFile    *pdfFile = [pdfFiles objectAtIndex:indexPath.row];
-        [[segue destinationViewController] setDisplayedFile:pdfFile];
+        NSString *pdfPath = [self.fileStore.linkedFilePaths objectAtIndex:indexPath.row];
+        NSString *localPdfPath = [self.fileStore localPathForLinkedFilePath:pdfPath];
+        [[segue destinationViewController] setDisplayedFile:localPdfPath];
     }
 }
 

@@ -41,7 +41,6 @@
 #import "BDSKDetailViewController.h"
 #import "BDSKAppDelegate.h"
 #import "BDSKDropboxStore.h"
-#import "BDSKLocalFile.h"
 #import "BDSKGroupTableViewController.h"
 #import "BDSKPDFTableViewController.h"
 #import <DropboxSDK/DropboxSDK.h>
@@ -50,7 +49,8 @@
 
 @interface BDSKMasterViewController () {
     NSMutableArray *_objects;
-        BOOL _pdfsVisible;
+    BOOL _pdfsVisible;
+    id _dropboxBibDocumentChangedObserver;
 }
 
 - (void)updateRefreshButton;
@@ -74,6 +74,7 @@
 {
     [_detailViewController release];
     [_objects release];
+    [_dropboxBibDocumentChangedObserver release];
     [super dealloc];
 }
 
@@ -84,10 +85,10 @@
     self.navigationItem.title = NSLocalizedString(@"Bibliographies", @"Bibliographies");
 
     BDSKDropboxStore *dropboxStore = [BDSKDropboxStore sharedStore];
-    [dropboxStore addObserver:self forKeyPath:@"bibliographies" options:0 context:nil];
+    [dropboxStore addObserver:self forKeyPath:@"bibFileNames" options:0 context:nil];
 
-    _pdfsVisible = [dropboxStore.pdfs count] != 0;
-    [dropboxStore addObserver:self forKeyPath:@"pdfs" options:0 context:nil];
+    _pdfsVisible = [dropboxStore.linkedFilePaths count] != 0;
+    [dropboxStore addObserver:self forKeyPath:@"linkedFilePaths" options:0 context:nil];
 
     BDSKAppDelegate *appDelegate = (BDSKAppDelegate *)[[UIApplication sharedApplication] delegate];
 
@@ -100,7 +101,11 @@
     
     [self updateRefreshButton];
     
-    [dropboxStore addObserver:self forKeyPath:@"syncing" options:0 context:nil];
+    [dropboxStore addObserver:self forKeyPath:@"isSyncing" options:0 context:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserverForName:@"BDSKBibDocumentChanged" object:dropboxStore queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+        [(UITableView *)self.view reloadData];
+    }];
     
     self.detailViewController = (BDSKDetailViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
 }
@@ -109,12 +114,13 @@
 {
     [super viewDidUnload];
     // Release any retained subviews of the main view.
-        BDSKAppDelegate *appDelegate = (BDSKAppDelegate *)[[UIApplication sharedApplication] delegate];
-        [appDelegate removeObserver:self forKeyPath:@"dropboxLinked"];
-        BDSKDropboxStore *dropboxStore = [BDSKDropboxStore sharedStore];
-        [dropboxStore removeObserver:self forKeyPath:@"bibliographies"];
-        [dropboxStore removeObserver:self forKeyPath:@"pdfs"];
-        [dropboxStore removeObserver:self forKeyPath:@"syncing"];
+    BDSKAppDelegate *appDelegate = (BDSKAppDelegate *)[[UIApplication sharedApplication] delegate];
+    [appDelegate removeObserver:self forKeyPath:@"dropboxLinked"];
+    BDSKDropboxStore *dropboxStore = [BDSKDropboxStore sharedStore];
+    [dropboxStore removeObserver:self forKeyPath:@"bibFileNames"];
+    [dropboxStore removeObserver:self forKeyPath:@"linkedFilePaths"];
+    [dropboxStore removeObserver:self forKeyPath:@"iSyncing"];
+    [[NSNotificationCenter defaultCenter] removeObserver:_dropboxBibDocumentChangedObserver];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -144,7 +150,7 @@
 {
     BDSKDropboxStore *dropboxStore = [BDSKDropboxStore sharedStore];
 
-    if ([dropboxStore.pdfs count]) {
+    if ([dropboxStore.linkedFilePaths count]) {
         return 2;
         _pdfsVisible = YES;
     }
@@ -157,7 +163,7 @@
     if (section == 1) return 1;    
 
     BDSKDropboxStore *dropboxStore = [BDSKDropboxStore sharedStore];
-    return dropboxStore.bibliographies.count;
+    return dropboxStore.bibFileNames.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -166,9 +172,14 @@
 
     if (indexPath.section == 0){
         BDSKDropboxStore *dropboxStore = [BDSKDropboxStore sharedStore];
-        BDSKLocalFile *file = [dropboxStore.bibliographies objectAtIndex:indexPath.row];
-        cell.textLabel.text = file.nameNoExtension;
+        NSString *name = [dropboxStore.bibFileNames objectAtIndex:indexPath.row];
+        cell.textLabel.text = [name stringByDeletingPathExtension];
         cell.imageView.image = [UIImage imageNamed:@"bib.png"];
+        if ([dropboxStore bibDocumentForName:name].documentState == UIDocumentStateNormal) {
+            cell.imageView.alpha = 1;
+        } else {
+            cell.imageView.alpha = 0.25;
+        }
     } else {
         cell.textLabel.text = @"All PDFs";
         cell.imageView.image = [UIImage imageNamed:@"pdf.png"];
@@ -224,43 +235,31 @@
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
+    BDSKDropboxStore *dropboxStore = [BDSKDropboxStore sharedStore];
+    
     if ([[segue identifier] isEqualToString:@"documentGroups"]) {
 
         NSIndexPath *indexPath = self.tableView.indexPathForSelectedRow;        
-        BDSKLocalFile *file = [[BDSKDropboxStore sharedStore].bibliographies objectAtIndex:indexPath.row];
-        BibDocument *document = [[BibDocument alloc] initWithFileURL:[NSURL fileURLWithPath:file.fullPath]];
+        NSString *name = [dropboxStore.bibFileNames objectAtIndex:indexPath.row];
+        
         BDSKGroupTableViewController *viewController = segue.destinationViewController;
-        viewController.navigationItem.title = file.nameNoExtension;
-        
-        NSDate *startOpenDate = [NSDate date];
-        [document openWithCompletionHandler:^(BOOL success) {            
-            if (success) {
-                NSTimeInterval openingTime = -[startOpenDate timeIntervalSinceNow];
-                NSLog(@"Opened %@ in %f seconds", file.name, openingTime);
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    viewController.document = document;
-                    [document release];
-                });
-            } else {
-                NSLog(@"Couldn't Open Document: %@", file.fullPath);
-                [document release];
-            }
-        }];
-        
+        viewController.navigationItem.title = [name stringByDeletingPathExtension];
+        viewController.fileStore = dropboxStore;
+        viewController.bibFileName = name;
+    
     } else if ([[segue identifier] isEqualToString:@"allPDFFiles"]) {
-
+    
         BDSKPDFTableViewController *viewController = segue.destinationViewController;
-        BDSKDropboxStore *dropboxStore = [BDSKDropboxStore sharedStore];
-        [viewController.pdfFiles setArray:dropboxStore.pdfs];
+        viewController.fileStore = dropboxStore;
     }
 }
 
 - (void)updateRefreshButton {
 
     BDSKDropboxStore *dropboxStore = [BDSKDropboxStore sharedStore];
-    BDSKAppDelegate    *appDelegate = (BDSKAppDelegate    *)[[UIApplication sharedApplication] delegate];
+    BDSKAppDelegate *appDelegate = (BDSKAppDelegate *)[[UIApplication sharedApplication] delegate];
 
-    if (dropboxStore.syncing) {
+    if (dropboxStore.isSyncing) {
 
         UIActivityIndicatorViewStyle activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
         
@@ -277,7 +276,7 @@
     
     } else if (appDelegate.dropboxLinked) {
     
-        UIBarButtonItem *refreshButton = [[UIBarButtonItem alloc] initWithTitle:@"Refresh" style:UIBarButtonItemStylePlain target:dropboxStore action:@selector(startSync)];
+        UIBarButtonItem *refreshButton = [[UIBarButtonItem alloc] initWithTitle:@"Refresh" style:UIBarButtonItemStylePlain target:self action:@selector(refresh)];
         self.navigationItem.rightBarButtonItem = refreshButton;
         [refreshButton release];
     
@@ -285,6 +284,11 @@
     
         self.navigationItem.rightBarButtonItem = nil;
     }
+}
+
+- (void)refresh {
+
+    [[BDSKDropboxStore sharedStore] startSync];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
@@ -295,18 +299,18 @@
         self.navigationItem.leftBarButtonItem.title = linked ? @"Logout" : @"Login";
         [self updateRefreshButton];
     
-    } else if (keyPath == @"syncing") {
+    } else if (keyPath == @"isSyncing") {
     
         [self updateRefreshButton];
     
-    } else if (keyPath == @"bibliographies") {
+    } else if (keyPath == @"bibFileNames") {
     
         [(UITableView *)self.view reloadData];
     
-    } else if (keyPath == @"pdfs") {
+    } else if (keyPath == @"linkedFilePaths") {
     
         BDSKDropboxStore *dropboxStore = [BDSKDropboxStore sharedStore];
-        if ([dropboxStore.pdfs count]) {
+        if ([dropboxStore.linkedFilePaths count]) {
             if (!_pdfsVisible) [self.tableView insertSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationAutomatic];
             _pdfsVisible = YES;
         } else {

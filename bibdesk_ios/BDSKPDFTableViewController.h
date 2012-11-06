@@ -40,11 +40,13 @@
 
 #import "BDSKDetailViewController.h"
 
+@class BDSKFileStore;
+
 @interface BDSKPDFTableViewController : UITableViewController {
 
     IBOutlet BDSKDetailViewController *detailViewController;
 }
 
-@property (retain) NSMutableArray *pdfFiles;
+@property (assign) BDSKFileStore *fileStore;
 
 @end

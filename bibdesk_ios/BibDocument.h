@@ -70,7 +70,16 @@ enum {
     NSStringEncoding documentStringEncoding;
     
     BOOL wasLoaded;
+
+#pragma mark iOS specific
+    
+    NSMutableSet *linkedFilePaths;
+    
+    NSMutableSet *linkedFilePathsToStore;
 }
+
+@property (readonly) NSSet *linkedFilePaths;
+@property (readonly) NSSet *linkedFilePathsToStore;
 
 - (BOOL)loadFromContents:(id)contents ofType:(NSString *)typeName error:(NSError **)outError;
 

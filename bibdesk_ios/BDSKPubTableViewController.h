@@ -38,10 +38,21 @@
 
 #import <UIKit/UIKit.h>
 
+typedef enum {
+    Library,
+    Smart,
+    Static
+} BDSKGroupType;
+
+@class BDSKFileStore;
 @class BibItem;
 
 @interface BDSKPubTableViewController : UITableViewController <UISearchDisplayDelegate, UISearchBarDelegate>
 
-@property (nonatomic, retain) NSArray *bibItems;
+@property (assign) BDSKFileStore *fileStore;
+@property (retain) NSString *bibFileName;
+@property (assign) BDSKGroupType groupType;
+@property (retain) NSString *groupName;
+@property (readonly) NSArray *bibItems;
 
 @end

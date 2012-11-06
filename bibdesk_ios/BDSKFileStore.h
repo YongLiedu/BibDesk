@@ -1,8 +1,8 @@
 //
-//  BDSKLocalFile.h
+//  BDSKFileStore.h
 //  BibDesk
 //
-//  Created by Colin A. Smith on 3/3/12.
+//  Created by Colin Smith on 10/28/12.
 /*
  This software is Copyright (c) 2012-2012
  Colin A. Smith. All rights reserved.
@@ -38,26 +38,33 @@
 
 #import <Foundation/Foundation.h>
 
-@interface BDSKLocalFile : NSObject
+#import "BDSKExternalLinkedFile.h"
 
-@property (retain) NSString *path;
-@property (retain) NSDate *lastModifiedDate;
-@property long long totalBytes;
-@property (readonly) NSString *fullPath;
-@property (readonly) NSString *dropboxPath;
-@property (readonly) NSString *name;
-@property (readonly) NSString *nameNoExtension;
-@property (readonly) NSString *pathWithoutLeadingSlash;
+@class BibDocument;
+@class BDSKBibFile;
+@class BDSKExternalLinkedFile;
 
-+ (void)initialize;
-+ (NSString *)documentsRoot;
-+ (void)setDocumentsRoot:(NSString *)root;
-+ (NSString *)dropboxRoot;
-+ (void)setDropboxRoot:(NSString *)root;
+@interface BDSKFileStore : NSObject
 
-- (id)initWithFullPath:(NSString *)fullPath;
-- (id)initWithDropboxPath:(NSString *)dropboxPath lastModifiedDate:(NSDate *)date totalByets:(long long)bytes;
+@property (readonly) NSArray *bibFileNames;
+@property (readonly) NSArray *linkedFilePaths;
 
-- (void)updateWithRevisedFile:(BDSKLocalFile *)revisedFile;
+- (BibDocument *)bibDocumentForName:(NSString *)bibFileName;
+- (BDSKLinkedFileAvailability)availabilityForLinkedFilePath:(NSString *)path;
+
+// methods subclasses must override
+- (NSString *)localPathForBibFilePath:(NSString *)path;
+- (NSString *)localPathForLinkedFilePath:(NSString *)path;
+- (NSString *)pathForLinkedFilePath:(NSString *)relativePath relativeToBibFileName:(NSString *)bibFileName;
+
+// only for access by subclasses
+@property (readonly) NSDictionary *bibFiles;
+@property (readonly) NSDictionary *linkedFiles;
+
+- (void)addedOrUpdatedBibFile:(BDSKBibFile *)bibFile;
+- (void)removedBibFile:(BDSKBibFile *)bibFile;
+
+- (void)addedOrUpdatedLinkedFile:(BDSKExternalLinkedFile *)linkedFile newContents:(BOOL)newContents;
+- (void)removedLinkedFile:(BDSKExternalLinkedFile *)linkedFile;
 
 @end
