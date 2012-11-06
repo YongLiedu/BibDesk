@@ -96,7 +96,13 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 @protocol BDSKSharingServerLocalThread <BDSKAsyncDOServerThread>
 
 - (oneway void)notifyClientsOfChange;
-- (oneway void)mainThreadServerDidSetup:(BOOL)success;
+
+@end
+
+// private protocol for inter-thread messaging
+@protocol BDSKSharingServerMainThread <BDSKAsyncDOServerMainThread>
+
+- (oneway void)localThreadServerDidSetup:(BOOL)success;
 
 @end
 
@@ -584,7 +590,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKClientConnectionsChangedNotification object:nil];
 }
 
-- (void)mainThreadServerDidSetup:(BOOL)success
+- (void)localThreadServerDidSetup:(BOOL)success
 {
     [sharingServer server:(BDSKSharingDOServer *)self didSetup:success];
 }
@@ -594,6 +600,8 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 #pragma mark | DO Server
 
 - (Protocol *)protocolForServerThread { return @protocol(BDSKSharingServerLocalThread); }
+
+- (Protocol *)protocolForMainThread { return @protocol(BDSKSharingServerMainThread); }
 
 - (void)serverDidSetup
 {
@@ -617,7 +625,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         // the callback from the delegate should stop the DO server, and may try again with a different name
     }
     @finally {
-        [[self serverOnMainThread] mainThreadServerDidSetup:success];
+        [[self serverOnMainThread] localThreadServerDidSetup:success];
     }
 }
 
