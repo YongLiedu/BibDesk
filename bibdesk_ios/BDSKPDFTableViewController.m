@@ -76,6 +76,7 @@
  
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleLinkedFileChangedNotification:) name:@"BDSKLinkedFileChanged" object:fileStore];
 }
 
 - (void)viewDidUnload
@@ -83,6 +84,7 @@
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -116,6 +118,20 @@
     NSString *pdfPath = [self.fileStore.linkedFilePaths objectAtIndex:indexPath.row];
     
     cell.textLabel.text = [[pdfPath lastPathComponent] stringByDeletingPathExtension];
+    
+    if ([fileStore availabilityForLinkedFilePath:pdfPath] == Available) {
+        cell.selectionStyle = UITableViewCellSelectionStyleBlue;
+        cell.imageView.alpha = 1;
+        if (self.splitViewController) {
+            cell.accessoryType = UITableViewCellAccessoryNone;
+        } else {
+            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        }
+    } else {
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        cell.imageView.alpha = 0.25;
+        cell.accessoryType = UITableViewCellAccessoryNone;
+    }
     
     return cell;
 }
@@ -163,15 +179,17 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  if (self.splitViewController) {
-        UINavigationController *navigationController = [self.splitViewController.viewControllers objectAtIndex:1];
-        BDSKDetailViewController *viewController = (BDSKDetailViewController *)[navigationController.viewControllers objectAtIndex:0];
-        //NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
-        NSString *pdfPath = [self.fileStore.linkedFilePaths objectAtIndex:indexPath.row];
-        NSString *localPdfPath = [self.fileStore localPathForLinkedFilePath:pdfPath];
-        [viewController setDisplayedFile:localPdfPath];
-    } else {
-        [self performSegueWithIdentifier:@"showPDF" sender:self];
+    NSString *pdfPath = [self.fileStore.linkedFilePaths objectAtIndex:indexPath.row];
+    if ([fileStore availabilityForLinkedFilePath:pdfPath] == Available) {
+        if (self.splitViewController) {
+            UINavigationController *navigationController = [self.splitViewController.viewControllers objectAtIndex:1];
+            BDSKDetailViewController *viewController = (BDSKDetailViewController *)[navigationController.viewControllers objectAtIndex:0];
+            //NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
+            NSString *localPdfPath = [self.fileStore localPathForLinkedFilePath:pdfPath];
+            [viewController setDisplayedFile:localPdfPath];
+        } else {
+            [self performSegueWithIdentifier:@"showPDF" sender:self];
+        }
     }
 }
 
@@ -183,6 +201,11 @@
         NSString *localPdfPath = [self.fileStore localPathForLinkedFilePath:pdfPath];
         [[segue destinationViewController] setDisplayedFile:localPdfPath];
     }
+}
+
+- (void)handleLinkedFileChangedNotification:(NSNotification *)notification {
+
+    [self.tableView reloadData];
 }
 
 @end
