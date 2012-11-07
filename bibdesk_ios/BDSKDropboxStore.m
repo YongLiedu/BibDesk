@@ -659,7 +659,7 @@ NSString *BDSKRemoveParentReferencesFromPath(NSString *path) {
             
             BDSKExternalLinkedFile *existingLinkedFile = [self.linkedFiles objectForKey:linkedFilePath];
             
-            if (existingLinkedFile && [child.lastModifiedDate isEqualToDate:existingLinkedFile.lastModifiedDate] && child.totalBytes == existingLinkedFile.totalBytes) {
+            if (existingLinkedFile && existingLinkedFile.availability == Available && [child.lastModifiedDate isEqualToDate:existingLinkedFile.lastModifiedDate] && child.totalBytes == existingLinkedFile.totalBytes) {
                 continue;
             }
             
