@@ -46,13 +46,6 @@ enum {
 	BDSKGenerateRTF = 3,
 };
 
-typedef struct _BDSKTeXTaskFlags {
-    volatile int32_t hasLTB;
-    volatile int32_t hasLaTeX;
-    volatile int32_t hasPDFData;
-    volatile int32_t hasRTFData;
-} BDSKTeXTaskFlags;
-
 @class BDSKTeXTask;
 
 @protocol BDSKTeXTaskDelegate <NSObject>
@@ -61,40 +54,35 @@ typedef struct _BDSKTeXTaskFlags {
 - (void)texTask:(BDSKTeXTask *)texTask finishedWithResult:(BOOL)success;
 @end
 
-@class BDSKTeXPath, BDSKTask, BDSKReadWriteLock;
+@class BDSKTeXPath, BDSKTeXSubTask;
 
 @interface BDSKTeXTask : NSObject {	
     NSString *texTemplatePath;
     BDSKTeXPath *texPath;
     NSString *binDirPath;
+    NSMutableDictionary *environment;
 	
 	id<BDSKTeXTaskDelegate> delegate;
-    NSInvocation *taskShouldStartInvocation;
-    NSInvocation *taskFinishedInvocation;
-    BDSKTask *currentTask;
-	
-    BDSKTeXTaskFlags flags;
-
-    NSLock *processingLock;    
-    BDSKReadWriteLock *dataFileLock;
+    
+    BDSKTeXSubTask *currentTask;
+    
+    NSMutableArray *pendingTasks;
+    
+    NSUInteger generatedDataMask;
+    
+	BOOL synchronous;
 }
 
 - (id)init;
-- (id)initWithFileName:(NSString *)fileName;
+- (id)initWithFileName:(NSString *)fileName synchronous:(BOOL)isSync;
 
 - (id<BDSKTeXTaskDelegate>)delegate;
 - (void)setDelegate:(id<BDSKTeXTaskDelegate>)newDelegate;
 
-// the next few methods are thread-unsafe
-
-- (BOOL)runWithBibTeXString:(NSString *)bibStr;
-- (BOOL)runWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys;
-- (BOOL)runWithBibTeXString:(NSString *)bibStr generatedTypes:(NSInteger)flag;
 - (BOOL)runWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys generatedTypes:(NSInteger)flag;
 
+- (void)cancel;
 - (void)terminate;
-
-// these methods are thread-safe
 
 - (NSString *)logFileString;
 - (NSString *)LTBString;

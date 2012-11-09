@@ -63,7 +63,7 @@
 - (id)init{
     if(self = [super init]){
 		promisedPboardTypes = [[NSMutableDictionary alloc] initWithCapacity:2];
-		texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibcopy"];
+		texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibcopy" synchronous:YES];
 		[texTask setDelegate:self];
         delegate = nil;
         
