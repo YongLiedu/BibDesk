@@ -47,7 +47,6 @@
 #import "NSImage_BDSKExtensions.h"
 #import "NSBezierPath_BDSKExtensions.h"
 #import "NSTableView_BDSKExtensions.h"
-#import "BDSKFile.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKFileMatcher.h"
 #import "NSWorkspace_BDSKExtensions.h"
@@ -143,18 +142,19 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (NSSet *)knownFiles
 {
-    NSURL *fileURL;
-    
     NSMutableSet *knownFiles = [NSMutableSet set];
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSURL *fileURL;
     
     for (BibDocument *doc in [[NSDocumentController sharedDocumentController] documents]) {
         fileURL = [doc fileURL];
-        if (fileURL)
-            [knownFiles addObject:[BDSKFile fileWithURL:fileURL]];
+        if ([fm fileExistsAtPath:[fileURL path]])
+            [knownFiles addObject:fileURL];
         for (BibItem *pub in [doc publications]) {
             for (BDSKLinkedFile *file in [pub localFiles]) {
-                if ((fileURL = [file URL]))
-                    [knownFiles addObject:[BDSKFile fileWithURL:fileURL]];
+                fileURL = [file URL];
+                if ([fm fileExistsAtPath:[fileURL path]])
+                    [knownFiles addObject:fileURL];
             }
         }
     }

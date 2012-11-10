@@ -37,9 +37,7 @@
  */
 
 #import "BDSKOrphanedFileServer.h"
-#import "UKDirectoryEnumerator.h"
 #import "NSURL_BDSKExtensions.h"
-#import "BDSKFile.h"
 
 @interface BDSKOrphanedFileServer (PrivateServerThread)
 
@@ -159,53 +157,24 @@
 // must not be oneway; we need to wait for this method to return and set a flag when enumeration is complete (or been stopped)
 - (void)checkAllFilesInDirectoryRootedAtURL:(NSURL *)theURL
 {
-    UKDirectoryEnumerator *enumerator = [UKDirectoryEnumerator enumeratorWithURL:theURL];
-
-    // default is 16, which is a bit small (don't set it too large, though, since we use -cacheExhausted to signal that it's time to flush the found files)
-    [enumerator setCacheSize:32];
+    NSFileManager *fm = [[[NSFileManager alloc] init] autorelease];
+    NSDirectoryEnumerator *dirEnum = [fm enumeratorAtURL:theURL includingPropertiesForKeys:[NSArray arrayWithObjects:NSURLIsDirectoryKey, NSURLIsPackageKey, nil] options:NSDirectoryEnumerationSkipsHiddenFiles errorHandler:nil];
     
-    // get visibility and directory flags
-    [enumerator setDesiredInfo:(kFSCatInfoFinderInfo | kFSCatInfoNodeFlags)];
-    
-    BOOL isDir, isHidden, isPackage;
-    LSItemInfoRecord infoRec;
-    BDSKFile *aFile;
-    OSMemoryBarrier();
-    
-    while ( (1 == keepEnumerating) && (aFile = [enumerator nextObjectFile]) ){
-        
-        // periodically flush the cache        
-        if([enumerator cacheExhausted] && [foundFiles count] >= 16){
-            [self flushFoundFiles];
-        }
-        
-        isDir = [enumerator isDirectory];
-        isHidden = [enumerator isInvisible] || CFStringHasPrefix((CFStringRef)[aFile fileName], CFSTR("."));
-        isPackage = NO;
-        
-        if (noErr == LSCopyItemInfoForRef([aFile fsRef], kLSRequestBasicFlagsOnly, &infoRec))
-            isPackage = (infoRec.flags & kLSItemInfoIsPackage) != 0;
-
-        // ignore hidden files
-        if (isHidden)
-            continue;
-        
-        if (isDir && NO == isPackage){
-            
-            // resolve aliases in parent directories, since that's what BibItem does
-            NSURL *resolvedURL = (NSURL *)BDCopyFileURLResolvingAliases((CFURLRef)[aFile fileURL]);
-            if(resolvedURL){
-                // recurse
-                [self checkAllFilesInDirectoryRootedAtURL:resolvedURL];
-                CFRelease(resolvedURL);
-            }
-            
-        } else if([knownFiles containsObject:aFile] == NO){
-            
-            [foundFiles addObject:[aFile fileURL]];
-            
-        }
+    for (NSURL *aURL in dirEnum) {
         OSMemoryBarrier();
+        if (0 == keepEnumerating)
+            break;
+        
+        if ([foundFiles count] >= 16)
+            [self flushFoundFiles];
+        
+        NSNumber *isDir = nil;
+        NSNumber *isPackage = nil;
+        [aURL getResourceValue:&isDir forKey:NSURLIsDirectoryKey error:NULL];
+        [aURL getResourceValue:&isPackage forKey:NSURLIsPackageKey error:NULL];
+        
+        if ((NO == [isDir boolValue] || [isPackage boolValue]) && [knownFiles containsObject:aURL] == NO)
+            [foundFiles addObject:aURL];
     }
     
 }
