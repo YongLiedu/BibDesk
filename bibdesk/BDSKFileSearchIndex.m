@@ -44,14 +44,13 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSData_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
-#import "UKDirectoryEnumerator.h"
 #import "BDSKReadWriteLock.h"
 
 #define BDSKDisableFileSearchIndexCacheKey @"BDSKDisableFileSearchIndexCacheKey"
 
 @interface BDSKFileSearchIndex (Private)
 
-+ (NSString *)indexCacheFolder;
++ (NSURL *)indexCacheFolderURL;
 - (void)runIndexThreadWithInfo:(NSDictionary *)info;
 - (void)processNotification:(NSNotification *)note;
 - (void)writeIndexToDiskForDocumentURL:(NSURL *)documentURL;
@@ -93,7 +92,7 @@
         NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:items, @"items", documentURL, @"documentURL", nil];
         
         // setting up the cache folder is not thread safe, so make sure it's done on the main thread
-        [[self class] indexCacheFolder];
+        [[self class] indexCacheFolderURL];
         
         delegate = nil;
         lastUpdateTime = CFAbsoluteTimeGetCurrent();
@@ -231,25 +230,24 @@ static inline id signatureForURL(NSURL *aURL) {
     return signature ?: [NSData data];
 }
 
-+ (NSString *)indexCacheFolder
++ (NSURL *)indexCacheFolderURL
 {
-    static NSString *cacheFolder = nil;
-    if (nil == cacheFolder) {
-        cacheFolder = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
-        cacheFolder = [cacheFolder stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
-        if (cacheFolder && [[NSFileManager defaultManager] fileExistsAtPath:cacheFolder] == NO)
-            [[NSFileManager defaultManager] createDirectoryAtPath:cacheFolder withIntermediateDirectories:NO attributes:nil error:NULL];
-        cacheFolder = [cacheFolder stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-v%@", NSStringFromClass(self), CACHE_VERSION]];
-        if (cacheFolder && [[NSFileManager defaultManager] fileExistsAtPath:cacheFolder] == NO)
-            [[NSFileManager defaultManager] createDirectoryAtPath:cacheFolder withIntermediateDirectories:NO attributes:nil error:NULL];
-        cacheFolder = [cacheFolder copy];
+    static NSURL *cacheFolderURL = nil;
+    if (nil == cacheFolderURL) {
+        NSFileManager *fm = [NSFileManager defaultManager];
+        cacheFolderURL = [fm URLForDirectory:NSCachesDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:YES error:NULL];
+        cacheFolderURL = [cacheFolderURL URLByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
+        cacheFolderURL = [cacheFolderURL URLByAppendingPathComponent:[NSString stringWithFormat:@"%@-v%@", NSStringFromClass(self), CACHE_VERSION]];
+        if (cacheFolderURL && [fm fileExistsAtPath:[cacheFolderURL path]] == NO)
+            [fm createDirectoryAtPath:[cacheFolderURL path] withIntermediateDirectories:YES attributes:nil error:NULL];
+        cacheFolderURL = [cacheFolderURL copy];
     }
-    return cacheFolder;
+    return cacheFolderURL;
 }
 
-static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL) {
+static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
     BOOL isIndexCache = NO;
-    NSData *data = [NSData dataWithContentsOfMappedFile:path];
+    NSData *data = [NSData dataWithContentsOfURL:aURL options:NSDataReadingMapped error:NULL];
     if (data) {
         NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
         isIndexCache = [[unarchiver decodeObjectForKey:@"documentURL"] isEqual:documentURL];
@@ -260,28 +258,30 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
 }
 
 // Read each cache file and see which one has a matching documentURL.  If this gets too slow, we could save a plist mapping URL -> UUID and use that instead.
-+ (NSString *)indexCachePathForDocumentURL:(NSURL *)documentURL
++ (NSURL *)indexCacheURLForDocumentURL:(NSURL *)documentURL
 {
     NSParameterAssert(nil != documentURL);
-    NSString *indexCachePath = nil;
-    NSString *indexCacheFolder = [self indexCacheFolder];
-    NSString *defaultPath = [[[[documentURL path] lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bdskindex"];
+    NSURL *indexCacheURL = nil;
+    NSURL *indexCacheFolderURL = [self indexCacheFolderURL];
+    NSString *defaultPathName = [[[[documentURL path] lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bdskindex"];
+    NSURL *defaultURL = [indexCacheFolderURL URLByAppendingPathComponent:defaultPathName];
     
-    defaultPath = [indexCacheFolder stringByAppendingPathComponent:defaultPath];
-    if (isIndexCacheForDocumentURL(defaultPath, documentURL)) {
-        indexCachePath = defaultPath;
+    if (isIndexCacheForDocumentURL(defaultURL, documentURL)) {
+        indexCacheURL = defaultURL;
     } else {
-        UKDirectoryEnumerator *indexEnum = [UKDirectoryEnumerator enumeratorWithPath:indexCacheFolder];
-        NSString *path;
+        NSFileManager *fm = [[[NSFileManager alloc] init] autorelease];
+        NSArray *folderContents = [fm contentsOfDirectoryAtURL:indexCacheFolderURL includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsSubdirectoryDescendants | NSDirectoryEnumerationSkipsSubdirectoryDescendants error:NULL];
         
-        while ((path = [indexEnum nextObjectFullPath]) && nil == indexCachePath) {
-            if ([[path pathExtension] isEqualToString:@"bdskindex"] && 
-                [path isEqualToString:defaultPath] == NO && 
-                isIndexCacheForDocumentURL(path, documentURL))
-                indexCachePath = path;
+        for (NSURL *url in folderContents) {
+            if ([[url pathExtension] isEqualToString:@"bdskindex"] && 
+                [url isEqual:defaultURL] == NO && 
+                isIndexCacheForDocumentURL(url, documentURL)) {
+                indexCacheURL = url;
+                break;
+            }
         }
     }
-    return indexCachePath;
+    return indexCacheURL;
 }
 
 - (void)writeIndexToDiskForDocumentURL:(NSURL *)documentURL
@@ -299,10 +299,10 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
         CFRelease(skIndex);
         skIndex = NULL;
         
-        NSString *indexCachePath = [[self class] indexCachePathForDocumentURL:documentURL];
-        if (nil == indexCachePath) {
-            indexCachePath = [[[[documentURL path] lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bdskindex"];
-            indexCachePath = [[NSFileManager defaultManager] uniqueFilePathWithName:indexCachePath atPath:[[self class] indexCacheFolder]];
+        NSURL *indexCacheURL = [[self class] indexCacheURLForDocumentURL:documentURL];
+        if (nil == indexCacheURL) {
+            NSString *indexCacheName = [[[documentURL lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bdskindex"];
+            indexCacheURL = [NSURL fileURLWithPath:[[NSFileManager defaultManager] uniqueFilePathWithName:indexCacheName atPath:[[[self class] indexCacheFolderURL] path]]];
         }
         
         NSMutableData *data = [NSMutableData data];
@@ -312,7 +312,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
         [archiver encodeObject:signatures forKey:@"signatures"];
         [archiver finishEncoding];
         [archiver release];
-        [data writeToFile:indexCachePath atomically:YES];
+        [data writeToURL:indexCacheURL atomically:YES];
     }
 }
 
@@ -576,7 +576,7 @@ static void addItemFunction(const void *value, void *context) {
     
     SKIndexRef tmpIndex = NULL;
     NSURL *documentURL = [info objectForKey:@"documentURL"];
-    NSString *indexCachePath = documentURL ? [[self class] indexCachePathForDocumentURL:documentURL] : nil;
+    NSURL *indexCacheURL = documentURL ? [[self class] indexCacheURLForDocumentURL:documentURL] : nil;
     NSArray *items = [info objectForKey:@"items"];
     
     double totalObjectCount = [items count];
@@ -586,10 +586,10 @@ static void addItemFunction(const void *value, void *context) {
     
     [items retain];
     
-    if (indexCachePath) {
+    if (indexCacheURL) {
         [self updateStatus:BDSKSearchIndexStatusVerifying];
         
-        NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:[NSData dataWithContentsOfFile:indexCachePath]];
+        NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:[NSData dataWithContentsOfURL:indexCacheURL]];
         indexData = (CFMutableDataRef)[[unarchiver decodeObjectForKey:@"indexData"] mutableCopy];
         if (indexData != NULL) {
             tmpIndex = SKIndexOpenWithMutableData(indexData, NULL);
