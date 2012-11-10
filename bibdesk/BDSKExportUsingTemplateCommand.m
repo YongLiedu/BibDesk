@@ -198,7 +198,7 @@
         
         NSURL *destDirURL = [fileURL URLByDeletingLastPathComponent];
         for (NSURL *accessoryURL in [template accessoryFileURLs])
-            [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
+            [[NSFileManager defaultManager] copyItemAtURL:accessoryURL toURL:[destDirURL URLByAppendingPathComponent:[accessoryURL lastPathComponent]] error:NULL];
     } else {
         NSPasteboard *pboard = [NSPasteboard generalPasteboard];
         [pboard clearContents];

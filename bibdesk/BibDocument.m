@@ -1049,6 +1049,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSInvocation *invocation = [info objectForKey:@"callback"];
     
     if (didSave) {
+        NSFileManager *fm = [NSFileManager defaultManager];
         NSStringEncoding encoding = NSUTF8StringEncoding;
         if ([self needsEncodingForType:typeName]) {
             encoding = [self encodingForSaving];
@@ -1060,7 +1061,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         // set com.apple.TextEncoding for other apps
         NSString *UTI = [[NSWorkspace sharedWorkspace] typeOfFile:[saveTargetURL path] error:NULL];
         if (UTI && [[NSWorkspace sharedWorkspace] type:UTI conformsToType:(id)kUTTypePlainText])
-            [[NSFileManager defaultManager] setAppleStringEncoding:encoding atPath:[saveTargetURL path] error:NULL];
+            [fm setAppleStringEncoding:encoding atPath:[saveTargetURL path] error:NULL];
         
         if (docState.currentSaveOperationType == NSSaveToOperation) {
             
@@ -1069,7 +1070,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             if(selectedTemplate){
                 NSURL *destDirURL = [saveTargetURL URLByDeletingLastPathComponent];
                 for (NSURL *accessoryURL in [selectedTemplate accessoryFileURLs])
-                    [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
+                    [fm copyItemAtURL:accessoryURL toURL:[destDirURL URLByAppendingPathComponent:[accessoryURL lastPathComponent]] error:NULL];
             }
             
         } else if (docState.currentSaveOperationType == NSSaveOperation || docState.currentSaveOperationType == NSSaveAsOperation) {

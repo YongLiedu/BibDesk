@@ -81,7 +81,7 @@
 
 - (NSString *)temporaryPathForWritingToPath:(NSString *)path error:(NSError **)outError;
 
-// creates a temporary directory with default attributes in a system temp location; this is thread safe
+// creates a temporary directory with default attributes in a system temp location; should only be used on the main thread
 - (NSString *)makeTemporaryDirectoryWithBasename:(NSString *)fileName;
 
 // !!! The next two methods are not thread safe, since they return a name without creating a file, and other threads/processes may return the same value
@@ -92,8 +92,6 @@
 - (NSString *)temporaryFileWithBasename:(NSString *)fileName;
 
 // for spotlight stuff; thread safe
-- (BOOL)spotlightCacheFolderExists;
-- (BOOL)removeSpotlightCacheFolder;
 - (NSString *)spotlightCacheFolderPathByCreating:(NSError **)anError;
 - (BOOL)removeSpotlightCacheFilesForCiteKeys:(NSArray *)itemNames;
 - (BOOL)removeSpotlightCacheFileForCiteKey:(NSString *)citeKey;
@@ -109,13 +107,6 @@
 
 - (NSString *)resolveAliasesInPath:(NSString *)path;
 
-//
-// Thread safe API
-//
-
-- (BOOL)createDirectoryAtPathWithNoAttributes:(NSString *)path;
 - (BOOL)objectExistsAtFileURL:(NSURL *)fileURL;
-- (BOOL)deleteObjectAtFileURL:(NSURL *)fileURL error:(NSError **)error;
-- (BOOL)copyObjectAtURL:(NSURL *)srcURL toDirectoryAtURL:(NSURL *)dstURL error:(NSError **)error;
 
 @end

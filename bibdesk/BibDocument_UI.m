@@ -168,7 +168,7 @@ enum {
             NSString *tmpDir = [fm makeTemporaryDirectoryWithBasename:nil];
             NSURL *tmpDirURL = [NSURL fileURLWithPath:tmpDir];
             for (NSURL *accessoryURL in accessoryURLs)
-                [fm copyObjectAtURL:accessoryURL toDirectoryAtURL:tmpDirURL error:NULL];
+                [fm copyItemAtURL:accessoryURL toURL:[tmpDirURL URLByAppendingPathComponent:[accessoryURL lastPathComponent]] error:NULL];
             NSString *tmpFile = [fm uniqueFilePathWithName:[@"templatepreview" stringByAppendingPathExtension:[template fileExtension]] atPath:tmpDir];
             [str writeToFile:tmpFile atomically:NO encoding:NSUTF8StringEncoding error:NULL];
             templateString = [[[NSAttributedString alloc] initWithPath:tmpFile documentAttributes:nil] autorelease];

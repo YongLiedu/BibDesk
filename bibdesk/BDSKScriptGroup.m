@@ -153,7 +153,7 @@
 - (void)dealloc;
 {
     // don't release currentTask; it's managed in the thread
-    [[NSFileManager defaultManager] deleteObjectAtFileURL:[NSURL fileURLWithPath:workingDirPath] error:NULL];
+    [[NSFileManager defaultManager] removeItemAtURL:[NSURL fileURLWithPath:workingDirPath] error:NULL];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self stopRetrieving];
     BDSKDESTROY(scriptPath);
@@ -171,7 +171,7 @@
 
 - (void)handleApplicationWillTerminate:(NSNotification *)aNotification{
     [self stopRetrieving];
-    [[NSFileManager defaultManager] deleteObjectAtFileURL:[NSURL fileURLWithPath:workingDirPath] error:NULL];
+    [[NSFileManager defaultManager] removeItemAtURL:[NSURL fileURLWithPath:workingDirPath] error:NULL];
 }
 
 #pragma mark Accessors

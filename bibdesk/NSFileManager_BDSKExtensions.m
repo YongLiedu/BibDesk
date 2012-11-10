@@ -333,25 +333,22 @@ static void destroyTemporaryDirectory()
 	return [self uniqueFilePathWithName:fileName atPath:temporaryBaseDirectory];
 }
 
-// This method is subject to a race condition in our temporary directory if we pass the same baseName to this method and temporaryFileWithBasename: simultaneously; hence the lock in uniqueFilePathWithName:atPath:, even though it and temporaryFileWithBasename: are not thread safe or secure.
 - (NSString *)makeTemporaryDirectoryWithBasename:(NSString *)baseName {
     NSString *finalPath = nil;
     
-    @synchronized(self) {
-        if (baseName == nil)
-            baseName = [(NSString *)BDCreateUniqueString() autorelease];
-        
-        NSUInteger i = 0;
-        NSURL *fileURL = [NSURL fileURLWithPath:[temporaryBaseDirectory stringByAppendingPathComponent:baseName]];
-        while ([self objectExistsAtFileURL:fileURL]) {
-            fileURL = [NSURL fileURLWithPath:[temporaryBaseDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%lu", baseName, (unsigned long)++i]]];
-        }
-        finalPath = [fileURL path];
-        
-        // raise if we can't create a file in the chewable folder?
-        if (NO == [self createDirectoryAtPathWithNoAttributes:finalPath])
-            finalPath = nil;
+    if (baseName == nil)
+        baseName = [(NSString *)BDCreateUniqueString() autorelease];
+    
+    NSUInteger i = 0;
+    NSURL *fileURL = [NSURL fileURLWithPath:[temporaryBaseDirectory stringByAppendingPathComponent:baseName]];
+    while ([self objectExistsAtFileURL:fileURL]) {
+        fileURL = [NSURL fileURLWithPath:[temporaryBaseDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%lu", baseName, (unsigned long)++i]]];
     }
+    finalPath = [fileURL path];
+    
+    if (NO == [self createDirectoryAtPath:finalPath withIntermediateDirectories:NO attributes:nil error:NULL])
+        finalPath = nil;
+    
     return finalPath;
 }
 
@@ -508,193 +505,8 @@ static void destroyTemporaryDirectory()
     return path;
 }
 
-#pragma mark Thread safe methods
-
-- (BOOL)createDirectoryAtPathWithNoAttributes:(NSString *)path
-{
-    NSParameterAssert(path != nil);
-    
-    NSURL *parent = [NSURL fileURLWithPath:[path stringByDeletingLastPathComponent]];
-    NSString *fileName = [path lastPathComponent];
-    NSUInteger length = [fileName length];
-    UniChar *name = (UniChar *)NSZoneMalloc(NULL, length * sizeof(UniChar));
-    [fileName getCharacters:name];
-    
-    FSRef parentFileRef;
-    BOOL success = CFURLGetFSRef((CFURLRef)parent, &parentFileRef);
-    OSErr err = noErr;
-    if(success)    
-        err = FSCreateDirectoryUnicode(&parentFileRef, length, name, kFSCatInfoNone, NULL, NULL, NULL, NULL);
-
-    NSZoneFree(NULL, name);
-    if(noErr != err)
-        success = NO;
-    
-    return success;
-}
-
 - (BOOL)objectExistsAtFileURL:(NSURL *)fileURL{
-    NSParameterAssert(fileURL != nil);
-    NSParameterAssert([fileURL isFileURL]);
-    
-    // we can use CFURLGetFSRef to see if a file exists, but it fails if there is an alias in the path before the last path component; this method should return YES even if the file is pointed to by an alias
-    CFURLRef resolvedURL = BDCopyFileURLResolvingAliases((CFURLRef)fileURL);
-    BOOL exists;
-    if(resolvedURL){
-        exists = YES;
-        CFRelease(resolvedURL);
-    } else {
-        exists = NO;
-    }
-    return exists;
-}
-
-// The following function is copied from Apple's MoreFilesX sample project
-
-struct FSDeleteContainerGlobals
-{
-	OSErr							result;			/* result */
-	ItemCount						actualObjects;	/* number of objects returned */
-	FSCatalogInfo					catalogInfo;	/* FSCatalogInfo */
-};
-typedef struct FSDeleteContainerGlobals FSDeleteContainerGlobals;
-
-static
-void
-FSDeleteContainerLevel(
-	const FSRef *container,
-	FSDeleteContainerGlobals *theGlobals)
-{
-	/* level locals */
-	FSIterator					iterator;
-	FSRef						itemToDelete;
-	UInt16						nodeFlags;
-	
-	/* Open FSIterator for flat access and give delete optimization hint */
-	theGlobals->result = FSOpenIterator(container, kFSIterateFlat + kFSIterateDelete, &iterator);
-	require_noerr(theGlobals->result, FSOpenIterator);
-	
-	/* delete the contents of the directory */
-	do
-	{
-		/* get 1 item to delete */
-		theGlobals->result = FSGetCatalogInfoBulk(iterator, 1, &theGlobals->actualObjects,
-								NULL, kFSCatInfoNodeFlags, &theGlobals->catalogInfo,
-								&itemToDelete, NULL, NULL);
-		if ( (noErr == theGlobals->result) && (1 == theGlobals->actualObjects) )
-		{
-			/* save node flags in local in case we have to recurse */
-			nodeFlags = theGlobals->catalogInfo.nodeFlags;
-			
-			/* is it a file or directory? */
-			if ( 0 != (nodeFlags & kFSNodeIsDirectoryMask) )
-			{
-				/* it's a directory -- delete its contents before attempting to delete it */
-				FSDeleteContainerLevel(&itemToDelete, theGlobals);
-			}
-			/* are we still OK to delete? */
-			if ( noErr == theGlobals->result )
-			{
-				/* is item locked? */
-				if ( 0 != (nodeFlags & kFSNodeLockedMask) )
-				{
-					/* then attempt to unlock it (ignore result since FSDeleteObject will set it correctly) */
-					theGlobals->catalogInfo.nodeFlags = nodeFlags & ~kFSNodeLockedMask;
-					(void) FSSetCatalogInfo(&itemToDelete, kFSCatInfoNodeFlags, &theGlobals->catalogInfo);
-				}
-				/* delete the item */
-				theGlobals->result = FSDeleteObject(&itemToDelete);
-			}
-		}
-	} while ( noErr == theGlobals->result );
-	
-	/* we found the end of the items normally, so return noErr */
-	if ( errFSNoMoreItems == theGlobals->result )
-	{
-		theGlobals->result = noErr;
-	}
-	
-	/* close the FSIterator (closing an open iterator should never fail) */
-	verify_noerr(FSCloseIterator(iterator));
-
-FSOpenIterator:
-
-	return;
-}
-
-- (BOOL)deleteObjectAtFileURL:(NSURL *)fileURL error:(NSError **)error{
-    NSParameterAssert(fileURL != nil);
-    NSParameterAssert([fileURL isFileURL]);
-
-    FSRef fileRef;
-    BOOL success = CFURLGetFSRef((CFURLRef)fileURL, &fileRef);
-    
-    // if we couldn't create the FSRef, try to resolve aliases
-    if(NO == success){
-        CFURLRef resolvedURL = BDCopyFileURLResolvingAliases((CFURLRef)fileURL);
-        if(resolvedURL){
-            success = CFURLGetFSRef(resolvedURL, &fileRef);
-            CFRelease(resolvedURL);
-        } else {
-            success = NO;
-        }
-    }
-    
-    if(NO == success && error != NULL)
-        *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"File does not exist.", @"Error description") forKey:NSLocalizedDescriptionKey]];
-    
-    if(success){
-        FSCatalogInfo catalogInfo;
-        success = (noErr == FSGetCatalogInfo(&fileRef, kFSCatInfoNodeFlags, &catalogInfo, NULL, NULL, NULL));
-        if(NO == success && error != NULL)
-            *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"Unable to delete file.", @"Error description") forKey:NSLocalizedDescriptionKey]];
-        
-        if(success && 0 != (catalogInfo.nodeFlags & kFSNodeIsDirectoryMask)){
-            FSDeleteContainerGlobals theGlobals;
-            FSDeleteContainerLevel(&fileRef, &theGlobals);
-            success = (noErr == theGlobals.result);
-            if(NO == success && error != NULL)
-                *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"Unable to delete directory contents.", @"Error description") forKey:NSLocalizedDescriptionKey]];
-        }
-        
-        if(success){
-            success = (noErr == FSDeleteObject(&fileRef));
-            if(NO == success && error != NULL)
-                *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"Unable to delete file.", @"Error description") forKey:NSLocalizedDescriptionKey]];
-        }
-    }
-    
-    return success;
-}
-
-- (BOOL)copyObjectAtURL:(NSURL *)srcURL toDirectoryAtURL:(NSURL *)dstURL error:(NSError **)error;
-{
-    NSParameterAssert(srcURL != nil);
-    NSParameterAssert(dstURL != nil);
-    
-    FSRef srcFileRef, dstDirRef;
-    BOOL success;
-    
-    //@@ should we resolve aliases here?
-    success = CFURLGetFSRef((CFURLRef)srcURL, &srcFileRef);
-    if(success)
-        success = CFURLGetFSRef((CFURLRef)dstURL, &dstDirRef);
-    
-    OSErr err = noErr;
-    FSRef newObjectRef;
-    
-    err = FSCopyObjectSync(&srcFileRef, &dstDirRef, NULL, &newObjectRef, 0);
-    
-    if(NO == success && error != nil){
-        NSString *errorMessage = nil;
-        if(noErr != err)
-            errorMessage = [NSString stringWithUTF8String:GetMacOSStatusCommentString(err)];
-        if(nil == errorMessage)
-            errorMessage = NSLocalizedString(@"Unable to copy file.", @"Error description");
-        *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:[NSDictionary dictionaryWithObject:errorMessage forKey:NSLocalizedDescriptionKey]];
-    }
-    
-    return success;
+    return [self fileExistsAtPath:[fileURL path]];
 }
 
 #pragma mark Spotlight support
@@ -706,35 +518,19 @@ FSOpenIterator:
     
 - (NSString *)spotlightCacheFolderPathByCreating:(NSError **)anError{
 
-    NSString *cachePath = nil;
-    
     NSString *basePath = [self metadataFolderPath];
+    NSString *cachePath = [basePath stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
     
     BOOL dirExists = YES;
     
-    if(![self objectExistsAtFileURL:[NSURL fileURLWithPath:basePath]])
-        dirExists = [self createDirectoryAtPathWithNoAttributes:basePath];
-    
-    if(dirExists){
-        cachePath = [basePath stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
-        if(![self fileExistsAtPath:cachePath])
-            dirExists = [self createDirectoryAtPathWithNoAttributes:cachePath];
-    }
+    if (NO == [self fileExistsAtPath:cachePath])
+        dirExists = [self createDirectoryAtPath:cachePath withIntermediateDirectories:YES attributes:nil error:NULL];
 
     if(dirExists == NO && anError != nil){
         *anError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:basePath, NSFilePathErrorKey, NSLocalizedString(@"Unable to create the cache directory.", @"Error description"), NSLocalizedDescriptionKey, nil]];
     }
         
     return cachePath;
-}
-
-- (BOOL)removeSpotlightCacheFolder{
-    return [self deleteObjectAtFileURL:[NSURL fileURLWithPath:[self spotlightCacheFolderPathByCreating:NULL]] error:NULL];
-}
-
-- (BOOL)spotlightCacheFolderExists{
-    NSString *path = [[self metadataFolderPath] stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
-    return [self objectExistsAtFileURL:[NSURL fileURLWithPath:path]];
 }
 
 - (BOOL)removeSpotlightCacheFilesForCiteKeys:(NSArray *)itemNames;
@@ -769,7 +565,7 @@ FSOpenIterator:
     NSURL *theURL = nil;
     if(path)
         theURL = [NSURL fileURLWithPath:path];
-    return theURL ? [self deleteObjectAtFileURL:theURL error:NULL] : NO;
+    return theURL ? [self removeItemAtURL:theURL error:NULL] : NO;
 }
 
 #pragma mark Apple String Encoding
