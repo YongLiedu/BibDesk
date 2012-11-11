@@ -217,15 +217,9 @@ static inline id signatureForURL(NSURL *aURL) {
     id signature = [NSData sha1SignatureForFile:[aURL path]];
     if (signature == nil) {
         // this could happen for packages, use a timestamp instead
-        FSRef fileRef;
-        FSCatalogInfo info;
-        CFAbsoluteTime absoluteTime;
-        
-        if (CFURLGetFSRef((CFURLRef)aURL, &fileRef) &&
-            noErr == FSGetCatalogInfo(&fileRef, kFSCatInfoContentMod, &info, NULL, NULL, NULL) &&
-            noErr == UCConvertUTCDateTimeToCFAbsoluteTime(&info.contentModDate, &absoluteTime)) {
-            signature = [NSDate dateWithTimeIntervalSinceReferenceDate:(NSTimeInterval)absoluteTime];
-        }
+        NSDate *modDate = nil;
+        [aURL getResourceValue:&modDate forKey:NSURLContentModificationDateKey error:NULL];
+        signature = modDate;
     }
     return signature ?: [NSData data];
 }
