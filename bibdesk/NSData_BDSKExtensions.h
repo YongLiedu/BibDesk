@@ -68,8 +68,6 @@ extern NSString *BDSKEncodingConversionException;
 - (NSData *)compressedData;
 - (NSData *)decompressedData;
 
-- (FILE *)openReadStream;
-
 + (id)scriptingRtfWithDescriptor:(NSAppleEventDescriptor *)descriptor;
 - (id)scriptingRtfDescriptor;
 

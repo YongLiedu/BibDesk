@@ -429,30 +429,6 @@ static unsigned char hexDecodeTable[256] =
 	return [NSData dataWithData:compressed];
 }
 
-- (void)_writeToPipeInBackground:(NSPipe *)aPipe
-{
-    NSAutoreleasePool *pool = [NSAutoreleasePool new];
-    @try {
-        [[aPipe fileHandleForWriting] writeData:self];
-    }
-    @catch (id exception) {
-        NSLog(@"caught exception writing %ld bytes to pipe (%@)", (long)[self length], exception);
-    }
-    [[aPipe fileHandleForWriting] closeFile];
-    [pool release];
-}
-
-- (FILE *)openReadStream
-{    
-    (void) signal(SIGPIPE, SIG_IGN);
-    NSPipe *aPipe = [NSPipe pipe];
-    [NSThread detachNewThreadSelector:@selector(_writeToPipeInBackground:) toTarget:self withObject:aPipe];
-    int fd = [[aPipe fileHandleForReading] fileDescriptor];
-    NSParameterAssert(-1 != fd);
-    // caller will block on this until we write to it
-    return (-1 == fd) ? NULL : fdopen(fd, "r");
-}
-
 + (id)scriptingRtfWithDescriptor:(NSAppleEventDescriptor *)descriptor {
     return [descriptor data];
 }
