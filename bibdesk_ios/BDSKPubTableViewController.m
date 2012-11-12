@@ -147,15 +147,6 @@
 
 #pragma mark - Table view data source
 
-- (BibItem *)tableView:(UITableView *)tableView bibItemForRowAtIndexPath:(NSIndexPath *)indexPath {
-
-    if (tableView == self.searchDisplayController.searchResultsTableView) {
-        return [_filteredBibItems objectAtIndex:indexPath.row];
-    }
-    
-   return [self.bibItems objectAtIndex:indexPath.row];
-}
-
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     // Return the number of sections.
@@ -197,11 +188,11 @@
     if ([self localLinkedFilePathForBibItem:bibItem]) {
         //cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         cell.accessoryView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"pdf.png"]] autorelease];
-        cell.selectionStyle = UITableViewCellSelectionStyleBlue;
+        //cell.selectionStyle = UITableViewCellSelectionStyleBlue;
     } else {
         //cell.accessoryType = UITableViewCellAccessoryNone;
         cell.accessoryView = nil;
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        //cell.selectionStyle = UITableViewCellSelectionStyleNone;
     }
     
     return cell;
@@ -248,29 +239,15 @@
 
 #pragma mark - Table view delegate
 
-- (NSIndexPath *)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-
-    BibItem *bibItem = [self tableView:tableView bibItemForRowAtIndexPath:indexPath];
-
-    if ([self localLinkedFilePathForBibItem:bibItem]) return indexPath;
-    
-    return nil;
-}
-
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    BibItem *bibItem = [self tableView:tableView bibItemForRowAtIndexPath:indexPath];
-
-    NSString *localPath = [self localLinkedFilePathForBibItem:bibItem];
-
-    if (localPath) {
-        if (self.splitViewController) {
-            UINavigationController *navigationController = [self.splitViewController.viewControllers objectAtIndex:1];
-            BDSKDetailViewController *viewController = (BDSKDetailViewController *)[navigationController.viewControllers objectAtIndex:0];
-            [viewController setDisplayedFile:localPath];
-        } else {
-            [self performSegueWithIdentifier:@"showPDF" sender:self];
-        }
+    if (self.splitViewController) {
+        UINavigationController *navigationController = [self.splitViewController.viewControllers objectAtIndex:1];
+        BDSKDetailViewController *viewController = (BDSKDetailViewController *)[navigationController.viewControllers objectAtIndex:0];
+        NSURL *url = [self tableView:tableView urlForRowAtIndexPath:indexPath];
+        viewController.displayedURL = url;
+    } else {
+        [self performSegueWithIdentifier:@"showPDF" sender:self];
     }
 }
 
@@ -283,10 +260,10 @@
         } else {
             tableView = self.tableView;
         }
+        BDSKDetailViewController *viewController = segue.destinationViewController;
         NSIndexPath *indexPath = [tableView indexPathForSelectedRow];
-        BibItem *bibItem = [self tableView:tableView bibItemForRowAtIndexPath:indexPath];
-        NSString *localPath = [self localLinkedFilePathForBibItem:bibItem];
-        [[segue destinationViewController] setDisplayedFile:localPath];
+        NSURL *url = [self tableView:tableView urlForRowAtIndexPath:indexPath];
+        viewController.displayedURL = url;
     }
 }
 
@@ -376,6 +353,9 @@
         [self.tableView selectRowAtIndexPath:indexPathToSelect animated:NO scrollPosition:UITableViewScrollPositionMiddle];
     }
 }
+
+#pragma mark -
+#pragma mark Property Methods
 
 - (BibDocument *)document {
 
@@ -498,6 +478,24 @@
         [refreshButton release];
         [activityIndicator release];
     }
+}
+
+- (BibItem *)tableView:(UITableView *)tableView bibItemForRowAtIndexPath:(NSIndexPath *)indexPath {
+
+    if (tableView == self.searchDisplayController.searchResultsTableView) {
+        return [_filteredBibItems objectAtIndex:indexPath.row];
+    }
+    
+   return [self.bibItems objectAtIndex:indexPath.row];
+}
+
+- (NSURL *)tableView:(UITableView *)tableView urlForRowAtIndexPath:(NSIndexPath *)indexPath {
+
+    BibItem *bibItem = [self tableView:tableView bibItemForRowAtIndexPath:indexPath];
+    NSString *urlPath = [NSString stringWithFormat:@"/%@?citeKey=%@", self.bibFileName, bibItem.citeKey];
+    NSURL *url = [[[NSURL alloc] initWithScheme:@"bibdesk" host:[self.fileStore.class storeName] path:urlPath] autorelease];
+    
+    return url;
 }
 
 - (NSString *)localLinkedFilePathForBibItem:(BibItem *)bibItem {

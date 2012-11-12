@@ -181,7 +181,7 @@
             cell.imageView.alpha = 0.25;
         }
     } else {
-        cell.textLabel.text = @"All PDFs";
+        cell.textLabel.text = @"Linked Files";
         cell.imageView.image = [UIImage imageNamed:@"pdf.png"];
     }
     

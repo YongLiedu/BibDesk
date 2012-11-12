@@ -38,25 +38,61 @@
 
 #import "BDSKDetailViewController.h"
 
-@interface BDSKDetailViewController ()
+#import "BibItem.h"
+#import "BDSKBibDeskURLHandler.h"
+#import "BDSKFileStore.h"
+#import "BDSKTemplate.h"
+#import "BDSKTemplateObjectProxy.h"
+
+@interface BDSKDetailViewController () <BDSKBibDeskURLHandlerDelegate> {
+
+    NSString *_htmlText;
+    NSMutableArray *_linkedFileLocalPaths;
+    NSMutableArray *_webViews;
+    UISegmentedControl *_segmentedControl;
+}
+
 @property (strong, nonatomic) UIPopoverController *masterPopoverController;
+@property (strong, nonatomic) BDSKBibDeskURLHandler *urlHandler;
+
 - (void)configureView;
+
 @end
 
 @implementation BDSKDetailViewController
 
+@synthesize displayedURL = _displayedURL;
 @synthesize displayedFile = _displayedFile;
 @synthesize masterPopoverController = _masterPopoverController;
-@synthesize webView;
+@synthesize webView = _webView;
 
 - (void)dealloc
 {
+    [_htmlText release];
+    [_linkedFileLocalPaths release];
+    [_webViews release];
+    [_urlHandler release];
+    [_displayedURL release];
     [_displayedFile release];
     [_masterPopoverController release];
     [super dealloc];
 }
 
+- (void)awakeFromNib {
+
+    [super awakeFromNib];
+    _htmlText = nil;
+    _linkedFileLocalPaths = [[NSMutableArray alloc] init];
+    _webViews = [[NSMutableArray alloc] init];
+}
+
 #pragma mark - Managing the detail item
+
+- (void)setDisplayedURL:(NSURL *)displayedURL {
+
+    self.urlHandler = [BDSKBibDeskURLHandler urlHandlerWithURL:displayedURL delegate:self];
+    [self.urlHandler startLoad];
+}
 
 - (void)setDisplayedFile:(NSString *)newDisplayedFile
 {
@@ -76,12 +112,77 @@
 {
     // Update the user interface for the detail item.
 
-    if (self.displayedFile && self.webView) {
-        NSURL *url = [NSURL fileURLWithPath:self.displayedFile];
-        NSURLRequest *urlRequest = [NSURLRequest requestWithURL:url];
-        [self.webView loadRequest:urlRequest];
-        self.title = [[self.displayedFile lastPathComponent] stringByDeletingPathExtension];
+    if (self.webView) {
+        
+        if (_webViews.count < 1) {
+            [_webViews addObject:self.webView];
+        }
+        
+        if (self.displayedFile) {
+        
+            NSURL *url = [NSURL fileURLWithPath:self.displayedFile];
+            NSURLRequest *urlRequest = [NSURLRequest requestWithURL:url];
+            [self.webView loadRequest:urlRequest];
+            self.title = [[self.displayedFile lastPathComponent] stringByDeletingPathExtension];
+        
+        } else if (_htmlText) {
+        
+            self.title = nil;
+            [self.webView loadHTMLString:_htmlText baseURL:nil];
+        }
+        
+        UIBarButtonItem *barButtonItem = nil;
+        _segmentedControl = nil;
+            
+        if (_linkedFileLocalPaths.count) {
+            
+            _segmentedControl = [[UISegmentedControl alloc] initWithItems:@[ @"Citation" ]];
+            _segmentedControl.segmentedControlStyle = UISegmentedControlStyleBar;
+            _segmentedControl.selectedSegmentIndex = 0;
+            [_segmentedControl addTarget:self action:@selector(segmentedControlChanged:) forControlEvents:UIControlEventValueChanged];
+            
+            for (NSUInteger i = 0; i < _linkedFileLocalPaths.count; ++i) {
+            
+                if (_webViews.count < i+2) {
+                    UIWebView *webView = [[UIWebView alloc] initWithFrame:self.webView.frame];
+                    webView.autoresizingMask = self.webView.autoresizingMask;
+                    webView.delegate = self;
+                    webView.scalesPageToFit = YES;
+                    [self.view addSubview:webView];
+                    [_webViews addObject:webView];
+                    [webView release];
+                }
+                NSURL *url = [NSURL fileURLWithPath:[_linkedFileLocalPaths objectAtIndex:i]];
+                NSURLRequest *urlRequest = [NSURLRequest requestWithURL:url];
+                UIWebView *webView = [_webViews objectAtIndex:i+1];
+                [webView loadRequest:urlRequest];
+            
+                if (_linkedFileLocalPaths.count == 1) {
+                    [_segmentedControl insertSegmentWithTitle:@"File" atIndex:i+1 animated:NO];
+                } else {
+                    [_segmentedControl insertSegmentWithTitle:[NSString stringWithFormat:@"File %i", i+1] atIndex:i+1 animated:NO];
+                }
+            }
+            
+            barButtonItem = [[UIBarButtonItem alloc] initWithCustomView:_segmentedControl];
+            
+            [_segmentedControl release];
+        }
+        
+        [self showWebViewAtIndex:0];
+        
+        self.navigationItem.rightBarButtonItem = barButtonItem;
+        [barButtonItem release];
     }
+}
+
+- (void)showWebViewAtIndex:(NSUInteger)index {
+
+    _segmentedControl.selectedSegmentIndex = index;
+    
+    [_webViews enumerateObjectsUsingBlock:^(UIWebView *webView, NSUInteger idx, BOOL *stop) {
+        webView.hidden = index != idx;
+    }];
 }
 
 - (void)viewDidLoad
@@ -120,6 +221,54 @@
     // Called when the view is shown again in the split view, invalidating the button and popover controller.
     [self.navigationItem setLeftBarButtonItem:nil animated:YES];
     self.masterPopoverController = nil;
+}
+
+#pragma mark - URL handler
+
+- (void)urlHandlerUpdated:(BDSKBibDeskURLHandler *)urlHandler {
+
+    if (urlHandler.bibItems.count) {
+    
+        BibItem *firstBibItem = [urlHandler.bibItems objectAtIndex:0];
+    
+        NSString *defaultTemplatePath = [[NSBundle mainBundle] pathForResource:@"DefaultTemplate.html" ofType:nil];
+	
+        NSString *templateString = [NSString stringWithContentsOfFile:defaultTemplatePath encoding:NSASCIIStringEncoding error:nil];
+    
+        BDSKTemplate *template = [BDSKTemplate templateWithString:templateString fileType:@"html"];
+    
+        [_htmlText release];
+        _htmlText = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:[firstBibItem owner] publications:urlHandler.bibItems];
+        [_htmlText retain];
+        
+        [_linkedFileLocalPaths removeAllObjects];
+        
+        if (urlHandler.bibItems.count == 1) {
+        
+            for (BDSKLinkedFile *linkedFile in firstBibItem.localFiles) {
+            
+                NSString *linkedFilePath = [urlHandler.fileStore pathForLinkedFilePath:linkedFile.relativePath relativeToBibFileName:urlHandler.bibFileName];
+                if ([urlHandler.fileStore availabilityForLinkedFilePath:linkedFilePath] == Available) {
+                    
+                    [_linkedFileLocalPaths addObject:[urlHandler.fileStore localPathForLinkedFilePath:linkedFilePath]];
+                }
+            }
+        }
+    }
+    
+    [self configureView];
+    
+    if (self.masterPopoverController != nil) {
+        [self.masterPopoverController dismissPopoverAnimated:YES];
+    }
+}
+
+- (IBAction)segmentedControlChanged:(id)sender {
+
+    if (sender == _segmentedControl) {
+    
+        [self showWebViewAtIndex:_segmentedControl.selectedSegmentIndex];
+    }
 }
 
 @end

@@ -49,10 +49,14 @@
 @property (readonly) NSArray *bibFileNames;
 @property (readonly) NSArray *linkedFilePaths;
 
++ (BDSKFileStore *)fileStoreForName:(NSString *)storeName;
+
 - (BibDocument *)bibDocumentForName:(NSString *)bibFileName;
 - (BDSKLinkedFileAvailability)availabilityForLinkedFilePath:(NSString *)path;
 
-// methods subclasses must override
+// properties and methods subclasses must override
++ (NSString *)storeName;
+
 - (NSString *)localPathForBibFilePath:(NSString *)path;
 - (NSString *)localPathForLinkedFilePath:(NSString *)path;
 - (NSString *)pathForLinkedFilePath:(NSString *)relativePath relativeToBibFileName:(NSString *)bibFileName;

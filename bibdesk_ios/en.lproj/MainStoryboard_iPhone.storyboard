@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="1.1" toolsVersion="2182" systemVersion="11D50b" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" initialViewController="3">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="2.0" toolsVersion="2844" systemVersion="12C60" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" initialViewController="3">
     <dependencies>
-        <deployment defaultVersion="1296" identifier="iOS"/>
-        <development defaultVersion="4200" identifier="xcode"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="1179"/>
+        <deployment defaultVersion="1536" identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="1930"/>
     </dependencies>
     <scenes>
         <!--Navigation Controller-->
         <scene sceneID="11">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="10" sceneMemberID="firstResponder"/>
                 <navigationController id="3" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" id="4">
                         <autoresizingMask key="autoresizingMask"/>
@@ -18,13 +16,13 @@
                         <segue destination="12" kind="relationship" relationship="rootViewController" id="19"/>
                     </connections>
                 </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="10" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-1" y="64"/>
         </scene>
         <!--Master View Controller - Bibliographies-->
         <scene sceneID="18">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="17" sceneMemberID="firstResponder"/>
                 <tableViewController storyboardIdentifier="" title="Bibliographies" id="12" customClass="BDSKMasterViewController" sceneMemberID="viewController">
                     <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="13">
                         <rect key="frame" x="0.0" y="64" width="320" height="416"/>
@@ -63,13 +61,13 @@
                         <segue destination="Dmr-c8-l4c" kind="push" identifier="documentGroups" id="3U3-vl-MWK"/>
                     </connections>
                 </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="17" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="459" y="64"/>
         </scene>
         <!--Detail View Controller - Detail-->
         <scene sceneID="24">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="23" sceneMemberID="firstResponder"/>
                 <viewController storyboardIdentifier="" title="Detail" id="21" customClass="BDSKDetailViewController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="22">
                         <rect key="frame" x="0.0" y="64" width="320" height="416"/>
@@ -92,13 +90,13 @@
                         <outlet property="webView" destination="4oD-pl-bf7" id="ovK-uO-KHc"/>
                     </connections>
                 </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="23" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1422" y="422"/>
         </scene>
         <!--Group Table View Controller-->
         <scene sceneID="TzV-iB-t2c">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="93w-rt-CRO" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <tableViewController id="Dmr-c8-l4c" customClass="BDSKGroupTableViewController" sceneMemberID="viewController">
                     <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="8QT-bf-2O6">
                         <rect key="frame" x="0.0" y="64" width="320" height="416"/>
@@ -141,13 +139,13 @@
                         <segue destination="tQb-MC-Rtt" kind="push" identifier="publications" id="Gnb-7c-2Qj"/>
                     </connections>
                 </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="93w-rt-CRO" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1001" y="-198"/>
         </scene>
         <!--Table View Controller - PDFs-->
         <scene sceneID="YEK-7Q-QqI">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="oGY-MC-2G0" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <tableViewController id="dxS-9z-MqH" customClass="BDSKPDFTableViewController" sceneMemberID="viewController">
                     <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="PIE-Du-tnr">
                         <rect key="frame" x="0.0" y="64" width="320" height="416"/>
@@ -187,13 +185,13 @@
                         <segue destination="21" kind="push" identifier="showPDF" id="59u-q7-Z2F"/>
                     </connections>
                 </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="oGY-MC-2G0" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1002" y="422"/>
         </scene>
         <!--Pub Table View Controller-->
         <scene sceneID="I1g-CI-4T1">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="N2z-dd-rTy" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <tableViewController id="tQb-MC-Rtt" customClass="BDSKPubTableViewController" sceneMemberID="viewController">
                     <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="88" sectionHeaderHeight="22" sectionFooterHeight="22" id="UwX-zQ-xCl">
                         <rect key="frame" x="0.0" y="64" width="320" height="416"/>
@@ -246,6 +244,7 @@
                         <segue destination="21" kind="push" identifier="showPDF" id="CnH-em-F7k"/>
                     </connections>
                 </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="N2z-dd-rTy" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <searchDisplayController id="d8n-6V-obc">
                     <connections>
                         <outlet property="delegate" destination="tQb-MC-Rtt" id="KQj-lI-RgP"/>
@@ -266,6 +265,7 @@
         <class className="BDSKDetailViewController" superclassName="UIViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/BDSKDetailViewController.h"/>
             <relationships>
+                <relationship kind="action" name="segmentedControlChanged:"/>
                 <relationship kind="outlet" name="webView" candidateClass="UIWebView"/>
             </relationships>
         </class>

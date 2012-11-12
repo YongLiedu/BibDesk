@@ -95,6 +95,7 @@
         if ([personFields containsObject:BDSKEditorString] == NO)
             [(NSMutableArray *)personFields insertObject:BDSKEditorString atIndex:idx];
         [sud setObject:personFields forKey:BDSKPersonFieldsKey];
+        [personFields release];
         [[BDSKTypeManager sharedManager] updateCustomFields];
     }
     

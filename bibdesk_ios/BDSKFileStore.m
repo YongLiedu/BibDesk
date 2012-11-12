@@ -38,6 +38,7 @@
 
 #import "BDSKFileStore.h"
 
+#import "BDSKDropboxStore.h"
 #import "BibDocument.h"
 #import "BDSKBibFile.h"
 #import "BDSKExternalLinkedFile.h"
@@ -53,6 +54,20 @@
 @end
 
 @implementation BDSKFileStore
+
++ (BDSKFileStore *)fileStoreForName:(NSString *)storeName {
+
+    if ([storeName isEqualToString:[BDSKDropboxStore storeName]]) {
+        return [BDSKDropboxStore sharedStore];
+    }
+    
+    return nil;
+}
+
++ (NSString *)storeName {
+
+    return nil;
+}
 
 - (BDSKFileStore *)init {
 

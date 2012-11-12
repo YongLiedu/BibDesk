@@ -1,8 +1,8 @@
 //
-//  BDSKDetailViewController.h
+//  BDSKBibDeskURLHandler.h
 //  BibDesk
 //
-//  Created by Colin A. Smith on 3/3/12.
+//  Created by Colin Smith on 11/9/12.
 /*
  This software is Copyright (c) 2012-2012
  Colin A. Smith. All rights reserved.
@@ -36,17 +36,30 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
 
-@class BDSKLocalFile;
+@protocol BDSKBibDeskURLHandlerDelegate;
+@class BDSKFileStore;
 
-@interface BDSKDetailViewController : UIViewController <UISplitViewControllerDelegate, UIWebViewDelegate>
+@interface BDSKBibDeskURLHandler : NSObject
 
-@property (strong, nonatomic) NSURL *displayedURL;
-@property (strong, nonatomic) NSString *displayedFile;
++ (BDSKBibDeskURLHandler *)urlHandlerWithURL:(NSURL *)url delegate:(id<BDSKBibDeskURLHandlerDelegate>)delegate;
 
-@property (strong, nonatomic) IBOutlet UIWebView *webView;
+- (void)startLoad;
 
-- (IBAction)segmentedControlChanged:(id)sender;
+@property (readonly) NSURL *url;
+@property (readonly) id<BDSKBibDeskURLHandlerDelegate> delegate;
+@property (readonly) BDSKFileStore *fileStore;
+@property (readonly) NSString *bibFileName;
+@property (readonly) NSArray *bibItems;
+@property (readonly) NSString *filePath;
+@property (readonly) BOOL isLoading;
+@property (readonly) BOOL isFailed;
+
+@end
+
+@protocol BDSKBibDeskURLHandlerDelegate <NSObject>
+
+- (void)urlHandlerUpdated:(BDSKBibDeskURLHandler *)urlHandler;
 
 @end

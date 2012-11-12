@@ -135,6 +135,11 @@ static BDSKDropboxStore *sharedDropboxStore = nil;
     return sharedDropboxStore;
 }
 
++ (NSString *)storeName {
+
+    return @"Dropbox";
+}
+
 - (BDSKDropboxStore *)init {
 
     if (self = [super init]) {
