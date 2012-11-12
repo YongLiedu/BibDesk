@@ -119,10 +119,8 @@
 
 - (void)dealloc
 {
-    if (queue) dispatch_release(queue);
-    queue = NULL;
-    if (lockQueue) dispatch_release(lockQueue);
-    lockQueue = NULL;
+    BDSKDISPATCHDESTROY(queue);
+    BDSKDISPATCHDESTROY(lockQueue);
     [rwLock lockForWriting];
 	BDSKDESTROY(identifierURLs);
     [rwLock unlock];

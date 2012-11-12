@@ -68,8 +68,7 @@
 // owner should have already sent -terminate; sending it from -dealloc causes resurrection
 - (void)dealloc
 {
-    if (queue) dispatch_release(queue);
-    queue = nil;
+    BDSKDISPATCHDESTROY(queue);
     delegate = nil;
     BDSKDESTROY(currentSearchString);
     BDSKDESTROY(previouslySelectedPublications);

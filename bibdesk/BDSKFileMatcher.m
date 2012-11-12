@@ -108,8 +108,7 @@ static id sharedInstance = nil;
 
 - (void)dealloc
 {
-    if (group) dispatch_release(group);
-    group = NULL;
+    BDSKDISPATCHDESTROY(group);
     BDSKDESTROY(matches);
     BDSKCFDESTROY(searchIndex);
     [super dealloc];
