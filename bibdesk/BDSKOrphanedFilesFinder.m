@@ -60,9 +60,14 @@
 @interface BDSKOrphanedFilesFinder (Private)
 - (void)refreshOrphanedFiles;
 - (void)findAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
-- (void)restartServer;
+- (void)restartChecking;
 - (void)startAnimationWithStatusMessage:(NSString *)message;
 - (void)stopAnimationWithStatusMessage:(NSString *)message;
+- (void)checkForOrphansWithKnownFiles:(NSSet *)theFiles baseURL:(NSURL *)theURL;
+- (void)flushFoundFiles;
+- (void)clearFoundFiles;
+- (BOOL)allFilesEnumerated;
+- (void)stopEnumerating;
 @end
 
 @implementation BDSKOrphanedFilesFinder
@@ -81,6 +86,9 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     if (self) {
         orphanedFiles = [[NSMutableArray alloc] init];
         wasLaunched = NO;
+        foundFiles = [[NSMutableArray alloc] initWithCapacity:32];
+        keepEnumerating = 0;
+        allFilesEnumerated = 0;
     }
     return self;
 }
@@ -182,7 +190,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 - (IBAction)stopRefreshing:(id)sender{
-    [server stopEnumerating];
+    [self stopEnumerating];
 }
 
 - (IBAction)search:(id)sender{
@@ -340,21 +348,22 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 - (void)refreshOrphanedFiles{
     [self startAnimationWithStatusMessage:[NSLocalizedString(@"Looking for orphaned files", @"Status message") stringByAppendingEllipsis]];
     // do the actual work with a zero delay to let the UI update 
-    [self performSelector:@selector(restartServer) withObject:nil afterDelay:0.0];
+    [self performSelector:@selector(restartChecking) withObject:nil afterDelay:0.0];
 }
 
-- (void)restartServer{
+- (void)restartChecking{
     [[self mutableArrayValueForKey:@"orphanedFiles"] removeAllObjects];
     
     NSURL *baseURL = [self baseURL];
     
     if(baseURL){
-        if(nil == server){
-            server = [[BDSKOrphanedFileServer alloc] init];
-            [server setDelegate:self];
-        }
+        if(queue == NULL)
+            queue = dispatch_queue_create("edu.ucsd.cs.mmccrack.bibdesk.queue.BDSKOrphanedFilesFinder", NULL);
         
-        [[server serverOnServerThread] checkForOrphansWithKnownFiles:[self knownFiles] baseURL:baseURL];
+        NSSet *knownFiles = [self knownFiles];
+        dispatch_async(queue, ^{
+            [self checkForOrphansWithKnownFiles:knownFiles baseURL:baseURL];
+        });
         
     } else {
         NSBeep();
@@ -378,22 +387,90 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     [statusField setStringValue:message];
 }
 
-// server delegate methods
-- (void)orphanedFileServer:(BDSKOrphanedFileServer *)aServer foundFiles:(NSArray *)newFiles{
-    NSMutableArray *mutableArray = [self mutableArrayValueForKey:@"orphanedFiles"];
-    [mutableArray addObjectsFromArray:newFiles];
-    NSUInteger count = [[arrayController arrangedObjects] count];
-    NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%ld orphaned file found", @"Status message"), (long)count] : [NSString stringWithFormat:NSLocalizedString(@"%ld orphaned files found", @"Status message"), (long)count];
-    [statusField setStringValue:[message stringByAppendingEllipsis]];
+- (void)checkForOrphansWithKnownFiles:(NSSet *)theFiles baseURL:(NSURL *)theURL;
+{
+    // set the stop flag so enumeration ceases
+    // CMH: is this necessary, shouldn't we already be done as we're on the same thread?
+    OSAtomicCompareAndSwap32Barrier(1, 0, &keepEnumerating);
+    
+    [self clearFoundFiles];
+    
+    OSAtomicCompareAndSwap32Barrier(0, 1, &keepEnumerating);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &allFilesEnumerated);
+    
+    // increase file limit for enumerating a home directory http://developer.apple.com/qa/qa2001/qa1292.html
+    struct rlimit limit;
+    int err;
+    
+    err = getrlimit(RLIMIT_NOFILE, &limit);
+    if (err == 0) {
+        limit.rlim_cur = RLIM_INFINITY;
+        (void) setrlimit(RLIMIT_NOFILE, &limit);
+    }
+        
+    // run directory enumerator; if knownFiles doesn't contain object, add to foundFiles
+    NSFileManager *fm = [[[NSFileManager alloc] init] autorelease];
+    NSDirectoryEnumerator *dirEnum = [fm enumeratorAtURL:theURL includingPropertiesForKeys:[NSArray arrayWithObjects:NSURLIsDirectoryKey, NSURLIsPackageKey, nil] options:NSDirectoryEnumerationSkipsHiddenFiles errorHandler:nil];
+    
+    for (NSURL *aURL in dirEnum) {
+        OSMemoryBarrier();
+        if (0 == keepEnumerating)
+            break;
+        
+        if ([foundFiles count] >= 16)
+            [self flushFoundFiles];
+        
+        NSNumber *isDir = nil;
+        NSNumber *isPackage = nil;
+        [aURL getResourceValue:&isDir forKey:NSURLIsDirectoryKey error:NULL];
+        [aURL getResourceValue:&isPackage forKey:NSURLIsPackageKey error:NULL];
+        
+        if ((NO == [isDir boolValue] || [isPackage boolValue]) && [theFiles containsObject:aURL] == NO)
+            [foundFiles addObject:aURL];
+    }
+    
+    
+    // see if we have some left in the cache
+    [self flushFoundFiles];
+    
+    // keepEnumerating is 0 when enumeration was stopped
+    OSMemoryBarrier();
+    if (keepEnumerating == 1)
+        OSAtomicCompareAndSwap32Barrier(0, 1, &allFilesEnumerated);
+    
+    // notify the delegate that we're done
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSUInteger count = [[arrayController arrangedObjects] count];
+        NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%ld orphaned file found", @"Status message"), (long)count] : [NSString stringWithFormat:NSLocalizedString(@"%ld orphaned files found", @"Status message"), (long)count];
+        if ([self allFilesEnumerated] == NO)
+            message = [NSString stringWithFormat:@"%@. %@", NSLocalizedString(@"Stopped", @"Partial status message"), message];
+        [self stopAnimationWithStatusMessage:message];
+    });
 }
 
-- (void)orphanedFileServerDidFinish:(BDSKOrphanedFileServer *)aServer{
-    NSUInteger count = [[arrayController arrangedObjects] count];
-    NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%ld orphaned file found", @"Status message"), (long)count] : [NSString stringWithFormat:NSLocalizedString(@"%ld orphaned files found", @"Status message"), (long)count];
-    if ([server allFilesEnumerated] == NO)
-        message = [NSString stringWithFormat:@"%@. %@", NSLocalizedString(@"Stopped", @"Partial status message"), message];
-    [self stopAnimationWithStatusMessage:message];
+- (void)flushFoundFiles;
+{
+    if([foundFiles count]){
+        NSArray *newFiles = [[foundFiles copy] autorelease];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSMutableArray *mutableArray = [self mutableArrayValueForKey:@"orphanedFiles"];
+            [mutableArray addObjectsFromArray:newFiles];
+            NSUInteger count = [[arrayController arrangedObjects] count];
+            NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%ld orphaned file found", @"Status message"), (long)count] : [NSString stringWithFormat:NSLocalizedString(@"%ld orphaned files found", @"Status message"), (long)count];
+            [statusField setStringValue:[message stringByAppendingEllipsis]];
+        });
+        [self clearFoundFiles];
+    }
 }
+
+- (void)clearFoundFiles;
+{
+    [foundFiles removeAllObjects];
+}
+
+- (BOOL)allFilesEnumerated { OSMemoryBarrier(); return (BOOL)(1 == allFilesEnumerated); }
+
+- (void)stopEnumerating { OSAtomicCompareAndSwap32Barrier(1, 0, &keepEnumerating); }
 
 @end
 

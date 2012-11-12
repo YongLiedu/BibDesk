@@ -474,7 +474,9 @@ typedef struct _BDSKSharingClientFlags {
         [self setErrorMessage:NSLocalizedString(@"Failed to retrieve publications", @"")];
         
         // this posts a notification that the publications of the client changed, forcing a redisplay of the table cell
-        [client performSelectorOnMainThread:@selector(setArchivedPublicationsAndMacros:) withObject:nil waitUntilDone:NO];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [client setArchivedPublicationsAndMacros:nil];
+        });
         // the client will reset the isRetriving flag when the data is set
     }
     @finally{

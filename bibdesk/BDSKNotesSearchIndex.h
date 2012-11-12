@@ -43,9 +43,8 @@
     SKIndexRef skIndex;
     volatile int32_t shouldKeepRunning;
     volatile int32_t needsFlushing;
-    NSConditionLock *queueLock;
-    NSMutableArray *queue;
-    NSConditionLock *setupLock;
+    dispatch_queue_t queue;
+    dispatch_queue_t lockQueue;
     NSFileManager *fileManager;
 }
 

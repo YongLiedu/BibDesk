@@ -37,22 +37,24 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKOrphanedFileServer.h"
 
 @class BDSKOrphanedFilesArrayController, BDSKTableView;
 
-@interface BDSKOrphanedFilesFinder : NSWindowController <NSTableViewDelegate, NSTableViewDataSource, BDSKOrphanedFileServerDelegate> {
+@interface BDSKOrphanedFilesFinder : NSWindowController <NSTableViewDelegate, NSTableViewDataSource> {
     IBOutlet BDSKTableView *tableView;
     IBOutlet NSButton *refreshButton;
     IBOutlet BDSKOrphanedFilesArrayController *arrayController;
     IBOutlet NSProgressIndicator *progressIndicator;
     IBOutlet NSTextField *statusField;
     IBOutlet NSMenu *contextMenu;
+    IBOutlet NSButton *matchButton;
     NSMutableArray *orphanedFiles;
     BOOL wasLaunched;
-    BDSKOrphanedFileServer *server;
     NSArray *draggedFiles;
-    IBOutlet NSButton *matchButton;
+    NSMutableArray *foundFiles;
+    dispatch_queue_t queue;
+    int32_t keepEnumerating;
+    int32_t allFilesEnumerated;
 }
 
 + (id)sharedFinder;

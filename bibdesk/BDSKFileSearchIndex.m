@@ -51,8 +51,10 @@
 @interface BDSKFileSearchIndex (Private)
 
 + (NSURL *)indexCacheFolderURL;
-- (void)runIndexThreadWithInfo:(NSDictionary *)info;
-- (void)processNotification:(NSNotification *)note;
+- (void)buildIndexWithItems:(NSArray *)items forDocumentAtURL:(NSURL *)documentURL;
+- (void)processInfoChangedNotification:(NSNotification *)note;
+- (void)processAddItemNotification:(NSNotification *)note;
+- (void)processDelItemNotification:(NSNotification *)note;
 - (void)writeIndexToDiskForDocumentURL:(NSURL *)documentURL;
 
 @end
@@ -60,14 +62,6 @@
 #pragma mark -
 
 @implementation BDSKFileSearchIndex
-
-#define INDEX_STARTUP 1
-#define INDEX_STARTUP_COMPLETE 2
-#define INDEX_THREAD_WORKING 3
-#define INDEX_THREAD_DONE 4
-
-#define QUEUE_EMPTY 0
-#define QUEUE_HAS_NOTIFICATIONS 1
 
 // increment if incompatible changes are introduced
 #define CACHE_VERSION @"2"
@@ -89,22 +83,12 @@
         // new document won't have a URL, so we'll have to wait for the controller to set it
         NSURL *documentURL = [owner fileURL];
         NSArray *items = [[owner publications] valueForKey:@"searchIndexInfo"];
-        NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:items, @"items", documentURL, @"documentURL", nil];
         
         // setting up the cache folder is not thread safe, so make sure it's done on the main thread
         [[self class] indexCacheFolderURL];
         
         delegate = nil;
         lastUpdateTime = CFAbsoluteTimeGetCurrent();
-        
-        notificationQueue = [[NSMutableArray alloc] init];
-        noteLock = [[NSConditionLock alloc] initWithCondition:QUEUE_EMPTY];
-        
-        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-        SEL handler = @selector(processNotification:);
-        [nc addObserver:self selector:handler name:BDSKFileSearchIndexInfoChangedNotification object:owner];
-        [nc addObserver:self selector:handler name:BDSKDocAddItemNotification object:owner];
-        [nc addObserver:self selector:handler name:BDSKDocDelItemNotification object:owner];
         
         flags.shouldKeepRunning = 1;
         flags.updateScheduled = 0;
@@ -116,14 +100,17 @@
         
         progressValue = 0.0;
         
-        setupLock = [[NSConditionLock alloc] initWithCondition:INDEX_STARTUP];
+        queue = dispatch_queue_create("edu.ucsd.cs.mmccrack.bibdesk.queue.BDSKFileSearchIndex", NULL);
+        lockQueue = dispatch_queue_create("edu.ucsd.cs.mmccrack.bibdesk.lockQueue.BDSKFileSearchIndex", NULL);
         
-        // this will create a retain cycle, so we'll have to tickle the thread to exit properly in -cancel
-        [NSThread detachNewThreadSelector:@selector(runIndexThreadWithInfo:) toTarget:self withObject:info];
+        dispatch_async(queue, ^{
+            [self buildIndexWithItems:items forDocumentAtURL:documentURL];
+        });
         
-        // block until the NSMachPort is set up to receive messages
-        [setupLock lockWhenCondition:INDEX_STARTUP_COMPLETE];
-        [setupLock unlockWithCondition:INDEX_THREAD_WORKING];
+        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+        [nc addObserver:self selector:@selector(processInfoChangedNotification:) name:BDSKFileSearchIndexInfoChangedNotification object:owner];
+        [nc addObserver:self selector:@selector(processAddItemNotification:) name:BDSKDocAddItemNotification object:owner];
+        [nc addObserver:self selector:@selector(processDelItemNotification:) name:BDSKDocDelItemNotification object:owner];
 
     }
     
@@ -132,16 +119,17 @@
 
 - (void)dealloc
 {
+    if (queue) dispatch_release(queue);
+    queue = NULL;
+    if (lockQueue) dispatch_release(lockQueue);
+    lockQueue = NULL;
     [rwLock lockForWriting];
 	BDSKDESTROY(identifierURLs);
     [rwLock unlock];
     BDSKDESTROY(rwLock);
-    BDSKDESTROY(notificationQueue);
-    BDSKDESTROY(noteLock);
     BDSKDESTROY(signatures);
     BDSKCFDESTROY(skIndex);
     BDSKCFDESTROY(indexData);
-    BDSKDESTROY(setupLock);
     [super dealloc];
 }
 
@@ -158,15 +146,10 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     OSAtomicCompareAndSwap32Barrier(1, 0, &flags.shouldKeepRunning);
     
-    [noteLock lock];
-    [notificationQueue removeAllObjects];
-    // wake the thread if necessary
-    [noteLock unlockWithCondition:QUEUE_HAS_NOTIFICATIONS];
-    
-    // wait until the thread exits, so we have exclusive access to the ivars
-    [setupLock lockWhenCondition:INDEX_THREAD_DONE];
-    [self writeIndexToDiskForDocumentURL:documentURL];
-    [setupLock unlock];
+    // write index to file as last block on the queue and wait for it to finish
+    dispatch_sync(queue, ^{
+        [self writeIndexToDiskForDocumentURL:documentURL];
+    });
 }
 
 - (SKIndexRef)index
@@ -200,10 +183,10 @@
 
 - (double)progressValue
 {
-    double theValue;
-    @synchronized(self) {
+    __block double theValue;
+    dispatch_sync(lockQueue, ^{
         theValue = progressValue;
-    }
+    });
     return theValue;
 }
 
@@ -281,7 +264,6 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
 - (void)writeIndexToDiskForDocumentURL:(NSURL *)documentURL
 {
     NSParameterAssert([NSThread isMainThread]);
-    NSParameterAssert([setupLock condition] == INDEX_THREAD_DONE);
     
     // @@ temporary for testing
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKDisableFileSearchIndexCacheKey])
@@ -290,8 +272,6 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
     if (skIndex && documentURL) {
         // flush all pending updates and compact the index as needed before writing
         SKIndexCompact(skIndex);
-        CFRelease(skIndex);
-        skIndex = NULL;
         
         NSURL *indexCacheURL = [[self class] indexCacheURLForDocumentURL:documentURL];
         if (nil == indexCacheURL) {
@@ -340,14 +320,19 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
 - (void)didUpdate
 {
     OSMemoryBarrier();
-    if (0 == flags.updateScheduled)
-        [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
+    if (0 == flags.updateScheduled) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self searchIndexDidUpdate];
+        });
+    }
 }
 
 - (void)updateStatus:(NSUInteger)status
 {
     OSAtomicCompareAndSwap32Barrier(flags.status, status, &flags.status);
-    [self performSelectorOnMainThread:@selector(searchIndexDidUpdateStatus) withObject:nil waitUntilDone:NO];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self searchIndexDidUpdateStatus];
+    });
 }
 
 #pragma mark Indexing
@@ -388,8 +373,6 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
 
 - (void)indexFileURLs:(NSSet *)urlsToAdd forIdentifierURL:(NSURL *)identifierURL
 {
-    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
-    
     BDSKASSERT(identifierURL);
     
     // SKIndexSetProperties is more generally useful, but is really slow when creating the index
@@ -407,8 +390,6 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
 
 - (void)removeFileURLs:(NSSet *)urlsToRemove forIdentifierURL:(NSURL *)identifierURL
 {
-    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
-
     BDSKASSERT(identifierURL);
         
     BOOL shouldBeRemoved;
@@ -430,8 +411,6 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
 
 - (void)indexFilesForItems:(NSArray *)items numberPreviouslyIndexed:(double)numberIndexed totalCount:(double)totalObjectCount
 {
-    NSAssert2([[NSThread currentThread] isEqual:notificationThread], @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
-    
     // Use a local pool since initial indexing can use a fair amount of memory, and it's not released until the thread's run loop starts
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
         
@@ -439,9 +418,9 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
         if ([self shouldKeepRunning] == NO) break;
         [self indexFileURLs:[NSSet setWithArray:[anObject objectForKey:@"urls"]] forIdentifierURL:[anObject objectForKey:@"identifierURL"]];
         numberIndexed++;
-        @synchronized(self) {
+        dispatch_async(lockQueue, ^{
             progressValue = (numberIndexed / totalObjectCount) * 100;
-        }
+        });
         
         [pool release];
         pool = [NSAutoreleasePool new];
@@ -456,122 +435,75 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
 
 #pragma mark Change notification handling
 
-- (void)processNotification:(NSNotification *)note
-{    
-    BDSKASSERT([NSThread isMainThread]);
-    // get the search index info, don't use the note because we don't want to retain the pubs
-    NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[note name], @"name", 
-                                [[note userInfo] valueForKeyPath:@"publications.searchIndexInfo"], @"searchIndexInfo", nil];
-    [noteLock lock];
-    [notificationQueue addObject:info];
-    [noteLock unlockWithCondition:QUEUE_HAS_NOTIFICATIONS];
+- (void)processAddItemNotification:(NSNotification *)note
+{
+    NSArray *searchIndexInfo = [[note userInfo] valueForKeyPath:@"publications.searchIndexInfo"];
+    
+    dispatch_async(queue, ^{
+        // this will update the delegate when all is complete
+        if ([self shouldKeepRunning])
+            [self indexFilesForItems:searchIndexInfo numberPreviouslyIndexed:0 totalCount:[searchIndexInfo count]];
+    });
 }
 
-- (void)processDocAddItem:(NSArray *)searchIndexInfo
+- (void)processDelItemNotification:(NSNotification *)note
 {
-    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
+    NSArray *searchIndexInfo = [[note userInfo] valueForKeyPath:@"publications.searchIndexInfo"];
 
-    BDSKPRECONDITION(searchIndexInfo);
+    dispatch_async(queue, ^{
+        if ([self shouldKeepRunning]) {
+            for (id anItem in searchIndexInfo) {
+                NSURL *identifierURL = [anItem valueForKey:@"identifierURL"];
+                
+                [rwLock lockForReading];
+                NSSet *urlsToRemove = [[[identifierURLs allKeysForObject:identifierURL] copy] autorelease];
+                [rwLock unlock];
+               
+                [self removeFileURLs:urlsToRemove forIdentifierURL:identifierURL];
+            }
             
-    // this will update the delegate when all is complete
-    [self indexFilesForItems:searchIndexInfo numberPreviouslyIndexed:0 totalCount:[searchIndexInfo count]];        
+            [self didUpdate];
+        }
+    });
 }
 
-- (void)processDocDelItem:(NSArray *)searchIndexInfo
+- (void)processInfoChangedNotification:(NSNotification *)note
 {
-    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
-
-    NSURL *identifierURL = nil;
-    NSSet *urlsToRemove;
-    	
-    for (id anItem in searchIndexInfo) {
-        identifierURL = [anItem valueForKey:@"identifierURL"];
-        
-        [rwLock lockForReading];
-        urlsToRemove = [[[identifierURLs allKeysForObject:identifierURL] copy] autorelease];
-        [rwLock unlock];
-       
-        [self removeFileURLs:urlsToRemove forIdentifierURL:identifierURL];
-	}
-	
-    [self didUpdate];
-}
-
-- (void)processSearchIndexInfoChanged:(NSArray *)searchIndexInfo
-{
-    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
+    NSArray *searchIndexInfo = [[note userInfo] valueForKeyPath:@"publications.searchIndexInfo"];
     
-    NSDictionary *item = [searchIndexInfo lastObject];
-    NSURL *identifierURL = [item objectForKey:@"identifierURL"];
-    
-    NSSet *newURLs = [[NSSet alloc] initWithArray:[item valueForKey:@"urls"]];
-    NSMutableSet *removedURLs;
-    
-    [rwLock lockForReading];
-    removedURLs = [[identifierURLs allKeysForObject:identifierURL] mutableCopy];
-    [rwLock unlock];
-    [removedURLs minusSet:newURLs];
-    
-    if ([removedURLs count])
-        [self removeFileURLs:removedURLs forIdentifierURL:identifierURL];
-    
-    if ([newURLs count])
-        [self indexFileURLs:newURLs forIdentifierURL:identifierURL];
-        
-    [removedURLs release];
-    [newURLs release];
-    
-    [self didUpdate];
+    dispatch_async(queue, ^{
+        if ([self shouldKeepRunning]) {
+            NSDictionary *item = [searchIndexInfo lastObject];
+            NSURL *identifierURL = [item objectForKey:@"identifierURL"];
+            
+            NSSet *newURLs = [[NSSet alloc] initWithArray:[item valueForKey:@"urls"]];
+            NSMutableSet *removedURLs;
+            
+            [rwLock lockForReading];
+            removedURLs = [[identifierURLs allKeysForObject:identifierURL] mutableCopy];
+            [rwLock unlock];
+            [removedURLs minusSet:newURLs];
+            
+            if ([removedURLs count])
+                [self removeFileURLs:removedURLs forIdentifierURL:identifierURL];
+            
+            if ([newURLs count])
+                [self indexFileURLs:newURLs forIdentifierURL:identifierURL];
+                
+            [removedURLs release];
+            [newURLs release];
+            
+            [self didUpdate];
+        }
+    });
 }    
 
-- (void)processNextNotification
+#pragma mark Index initialization
+
+- (void)buildIndexWithItems:(NSArray *)items forDocumentAtURL:(NSURL *)documentURL
 {
-    NSDictionary *note = nil;
-    
-    [noteLock lockWhenCondition:QUEUE_HAS_NOTIFICATIONS];
-    NSUInteger count = [notificationQueue count];
-    if (count > 0) {
-        note = [[notificationQueue objectAtIndex:0] retain];
-        [notificationQueue removeObjectAtIndex:0];
-        count--;
-    }
-    [noteLock unlockWithCondition:(count > 0 ? QUEUE_HAS_NOTIFICATIONS : QUEUE_EMPTY)];
-    
-    if (note) {
-        NSString *name = [note valueForKey:@"name"];
-        NSArray *searchIndexInfo = [note valueForKey:@"searchIndexInfo"];
-        
-        // this is a background thread that can handle these notifications
-        if ([name isEqualToString:BDSKFileSearchIndexInfoChangedNotification])
-            [self processSearchIndexInfoChanged:searchIndexInfo];
-        else if ([name isEqualToString:BDSKDocAddItemNotification])
-            [self processDocAddItem:searchIndexInfo];
-        else if ([name isEqualToString:BDSKDocDelItemNotification])
-            [self processDocDelItem:searchIndexInfo];
-        
-        [note release];
-    }
-}
-
-#pragma mark Thread initialization
-
-static void addItemFunction(const void *value, void *context) {
-    BDSKManyToManyDictionary *dict = (BDSKManyToManyDictionary *)context;
-    NSDictionary *item = (NSDictionary *)value;
-    NSURL *identifierURL = [item objectForKey:@"identifierURL"];
-    NSSet *keys = [[NSSet alloc] initWithArray:[item objectForKey:@"urls"]];
-    [dict addObject:identifierURL forKeys:keys];
-    [keys release];
-}
-
-- (void)buildIndexWithInfo:(NSDictionary *)info
-{
-    NSAssert2([[NSThread currentThread] isEqual:notificationThread], @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
-    
     SKIndexRef tmpIndex = NULL;
-    NSURL *documentURL = [info objectForKey:@"documentURL"];
     NSURL *indexCacheURL = documentURL ? [[self class] indexCacheURLForDocumentURL:documentURL] : nil;
-    NSArray *items = [info objectForKey:@"items"];
     
     double totalObjectCount = [items count];
     double numberIndexed = 0;
@@ -612,7 +544,12 @@ static void addItemFunction(const void *value, void *context) {
         // set the identifierURLs map, so we can build search results immediately; no problem if it contains URLs that were not indexed or are replaced, we know these URLs should be added eventually
         if ([self shouldKeepRunning]) {
             [rwLock lockForWriting];
-            CFArrayApplyFunction((CFArrayRef)items, CFRangeMake(0, totalObjectCount), addItemFunction, (void *)identifierURLs);
+            for (NSDictionary *item in items) {
+                NSURL *identifierURL = [item objectForKey:@"identifierURL"];
+                NSSet *keys = [[NSSet alloc] initWithArray:[item objectForKey:@"urls"]];
+                [identifierURLs addObject:identifierURL forKeys:keys];
+                [keys release];
+            }
             [rwLock unlock];
         }
         
@@ -646,9 +583,9 @@ static void addItemFunction(const void *value, void *context) {
                 [itemsToAdd addObject:[NSDictionary dictionaryWithObjectsAndKeys:identifierURL, @"identifierURL", missingURLs, @"urls", nil]];
             } else {
                 numberIndexed++;
-                @synchronized(self) {
+                dispatch_async(lockQueue, ^{
                     progressValue = (numberIndexed / totalObjectCount) * 100;
-                }
+                });
                 
                 [self didUpdate];
             }
@@ -679,55 +616,6 @@ static void addItemFunction(const void *value, void *context) {
     [items release];
 
     [self updateStatus:BDSKSearchIndexStatusRunning];
-}
-
-- (void)runIndexThreadWithInfo:(NSDictionary *)info
-{
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    
-    [setupLock lockWhenCondition:INDEX_STARTUP];
-    
-    // release at the end of this method, just before the thread exits
-    notificationThread = [[NSThread currentThread] retain];
-    
-    [setupLock unlockWithCondition:INDEX_STARTUP_COMPLETE];
-    
-    [setupLock lockWhenCondition:INDEX_THREAD_WORKING];
-    
-    // an exception here can probably be ignored safely
-    @try{
-        [self buildIndexWithInfo:info];
-    }
-    @catch(id e){
-        NSLog(@"Ignoring exception %@ raised while rebuilding index", e);
-    }
-        
-    // process notifications from the notificationQueue until we should stop
-    @try{
-        while ([self shouldKeepRunning]) {
-            // this blocks until a new note is available, or the index finishes
-            [self processNextNotification];
-            
-            [pool release];
-            pool = [[NSAutoreleasePool alloc] init];
-        }
-    }
-    @catch(id e){
-        NSLog(@"Exception %@ raised in search index; exiting thread run loop.", e);
-        
-        // clean these up to make sure we have no chance of saving it to disk
-        BDSKCFDESTROY(skIndex);
-        BDSKCFDESTROY(indexData);
-        @throw;
-    }
-    @finally{
-        // allow the top-level pool to catch this autorelease pool
-        
-        BDSKDESTROY(notificationThread);
-        [setupLock unlockWithCondition:INDEX_THREAD_DONE];
-        
-        [pool release];
-    }
 }
 
 @end

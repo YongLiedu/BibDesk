@@ -45,7 +45,7 @@
 
 
 @interface BDSKNotesSearchIndex (BDSKPrivate)
-- (void)runIndexThread;
+- (void)indexItemForIdentifierURL:(NSURL *)identifierURL fileURLs:(NSArray *)fileURLs;
 @end
 
 @implementation BDSKNotesSearchIndex
@@ -62,17 +62,13 @@
 {
     self = [super init];
     if (self) {
-        queueLock = [[NSConditionLock alloc] initWithCondition:QUEUE_EMPTY];
-        queue = [[NSMutableArray alloc] init];
         shouldKeepRunning = 1;
         needsFlushing = 0;
         
-        setupLock = [[NSConditionLock alloc] initWithCondition:INDEX_STARTUP];
+        queue = dispatch_queue_create("edu.ucsd.cs.mmccrack.bibdesk.queue.BDSKNotesSearchIndex", NULL);
+        lockQueue = dispatch_queue_create("edu.ucsd.cs.mmccrack.bibdesk.lockQueue.BDSKNotesSearchIndex", NULL);
         
-        [NSThread detachNewThreadSelector:@selector(runIndexThread) toTarget:self withObject:nil];
-        
-        [setupLock lockWhenCondition:INDEX_STARTUP_COMPLETE];
-        [setupLock unlockWithCondition:INDEX_THREAD_WORKING];
+        fileManager = [[NSFileManager alloc] init];
         
         [self resetWithPublications:nil];
     }
@@ -81,10 +77,12 @@
 
 - (void)dealloc
 {
+    if (queue) dispatch_release(queue);
+    queue = NULL;
+    if (lockQueue) dispatch_release(lockQueue);
+    lockQueue = NULL;
     BDSKCFDESTROY(skIndex);
-    BDSKDESTROY(queue);
-	BDSKDESTROY(queueLock);
-    BDSKDESTROY(setupLock);
+    BDSKDESTROY(fileManager);
     [super dealloc];
 }
 
@@ -97,50 +95,40 @@
 - (void)terminate
 {
     OSAtomicCompareAndSwap32Barrier(1, 0, &shouldKeepRunning);
-    [queueLock lock];
-    [queue removeAllObjects];
-    // make sure the worker thread wakes up
-    [queueLock unlockWithCondition:QUEUE_HAS_ITEMS];
-    [setupLock lockWhenCondition:INDEX_THREAD_DONE];
-    [setupLock unlock];
-}
-
-- (void)queueItemForIdentifierURL:(NSURL *)identifierURL fileURLs:(NSArray *)fileURLs
-{
-    if ([self shouldKeepRunning]) {
-        NSDictionary *info = [[NSDictionary alloc] initWithObjectsAndKeys:identifierURL, @"identifierURL", ([fileURLs count] ? fileURLs : nil), @"fileURLs", nil];
-        [queueLock lock];
-        NSInteger i = [queue count];
-        while (i-- > 0) {
-            if ([[[queue objectAtIndex:i] valueForKey:@"identifierURL"] isEqual:identifierURL])
-                [queue removeObjectAtIndex:i];
-        }
-        [queue addObject:info];
-        [queueLock unlockWithCondition:QUEUE_HAS_ITEMS];
-        [info release];
-    }
+    dispatch_sync(queue, ^{});
 }
 
 - (void)addPublications:(NSArray *)pubs
 {
-    for (BibItem *pub in pubs)
-        [self queueItemForIdentifierURL:[pub identifierURL] fileURLs:[[pub existingLocalFiles] valueForKey:@"URL"]];
+    for (BibItem *pub in pubs) {
+        if ([self shouldKeepRunning] == NO) break;
+        NSURL *identifierURL = [pub identifierURL];
+        NSArray *fileURLs = [[pub existingLocalFiles] valueForKey:@"URL"];
+        dispatch_async(queue, ^{
+            [self indexItemForIdentifierURL:identifierURL fileURLs:fileURLs];
+        });
+    }
 }
 
 - (void)removePublications:(NSArray *)pubs
 {
-    for (BibItem *pub in pubs)
-        [self queueItemForIdentifierURL:[pub identifierURL] fileURLs:nil];
+    for (BibItem *pub in pubs) {
+        if ([self shouldKeepRunning] == NO) break;
+        NSURL *identifierURL = [pub identifierURL];
+        dispatch_async(queue, ^{
+            [self indexItemForIdentifierURL:identifierURL fileURLs:nil];
+        });
+    }
 }
 
 - (void)resetWithPublications:(NSArray *)pubs
 {
     CFMutableDataRef indexData = CFDataCreateMutable(NULL, 0);
     NSDictionary *options = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInteger:0], (id)kSKMaximumTerms, nil];
-    @synchronized(self) {
+    dispatch_sync(lockQueue, ^{
         BDSKCFDESTROY(skIndex);
         skIndex = SKIndexCreateWithMutableData(indexData, (CFStringRef)BDSKSkimNotesString, kSKIndexInverted, (CFDictionaryRef)options);
-    }
+    });
     CFRelease(indexData);
     [options release];
     
@@ -151,10 +139,10 @@
 
 - (SKIndexRef)index
 {
-    SKIndexRef theIndex = NULL;
-    @synchronized(self) {
+    __block SKIndexRef theIndex = NULL;
+    dispatch_sync(lockQueue, ^{
         if (skIndex) theIndex = (SKIndexRef)CFRetain(skIndex);
-    }
+    });
     OSMemoryBarrier();
     if (needsFlushing) {
         SKIndexFlush(theIndex);
@@ -163,11 +151,12 @@
     return (SKIndexRef)[(id)theIndex autorelease];
 }
 
-- (void)indexItem:(NSDictionary *)info
+- (void)indexItemForIdentifierURL:(NSURL *)identifierURL fileURLs:(NSArray *)fileURLs
 {
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+    
     @try {
-        SKDocumentRef doc = SKDocumentCreateWithURL((CFURLRef)[info valueForKey:@"identifierURL"]);
-        NSArray *fileURLs = [info valueForKey:@"fileURLs"];
+        SKDocumentRef doc = SKDocumentCreateWithURL((CFURLRef)identifierURL);
         NSMutableString *searchText = nil;
         if ([fileURLs count]) {
             searchText = [NSMutableString string];
@@ -200,10 +189,10 @@
             }
         }
         if (doc) {
-            SKIndexRef theIndex = NULL;
-            @synchronized(self) {
+            __block SKIndexRef theIndex = NULL;
+            dispatch_sync(lockQueue, ^{
                 if (skIndex) theIndex = (SKIndexRef)CFRetain(skIndex);
-            }
+            });
             if (theIndex) {
                 if ([searchText length])
                     SKIndexAddDocumentWithText(theIndex, doc, (CFStringRef)searchText, TRUE);
@@ -217,50 +206,8 @@
     @catch(id e) {
         NSLog(@"Ignored exception %@ when executing an index update", e);
     }
-}
-
-- (void)runIndexThread
-{
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
-    fileManager = [[NSFileManager alloc] init];
-    
-    [setupLock lockWhenCondition:INDEX_STARTUP];
-    [setupLock unlockWithCondition:INDEX_STARTUP_COMPLETE];
-    [setupLock lockWhenCondition:INDEX_THREAD_WORKING];
-	
-    // process items from the queue until we should stop
-    @try {
-        while ([self shouldKeepRunning]) {
-            NSDictionary *info = nil;
-            
-            // get the next item from the queue as soon as it's available
-            [queueLock lockWhenCondition:QUEUE_HAS_ITEMS];
-            NSUInteger count = [queue count];
-            if (count) {
-                info = [[queue objectAtIndex:0] retain];
-                [queue removeObjectAtIndex:0];
-                count--;
-            }
-            [queueLock unlockWithCondition:count > 0 ? QUEUE_HAS_ITEMS : QUEUE_EMPTY];
-            
-            if (info)
-                [self indexItem:info];
-            
-            [pool release];
-            pool = [[NSAutoreleasePool alloc] init];
-        }
-    }
-    @catch(id e) {
-        NSLog(@"Exception %@ raised in search index; exiting thread run loop.", e);
-        @throw;
-    }
-    @finally {
-        // allow the top-level pool to catch this autorelease pool
-        [fileManager release];
-        [setupLock unlockWithCondition:INDEX_THREAD_DONE];
-        [pool release];
-    }
+    [pool drain];
 }
 
 @end
