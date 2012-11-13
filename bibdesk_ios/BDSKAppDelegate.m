@@ -64,6 +64,7 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Override point for customization after application launch.
+    _networkActivityIndicatorCount = 0;
 
     // Set these variables before launching the app
     //NSString* appKey = @"";
@@ -75,9 +76,9 @@
     [DBSession setSharedSession:session];
     [session release];
     
-    [[BDSKDropboxStore sharedStore] addLocalFiles];
-    
     _dropboxLinked = [[DBSession sharedSession] isLinked];
+    
+    [[BDSKDropboxStore sharedStore] addLocalFiles];
     
     NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
     
@@ -212,6 +213,29 @@
     }
     [relinkUserId release];
     relinkUserId = nil;
+}
+
+#pragma mark -
+#pragma mark Network Activity Indicator methods
+
+- (void)showNetworkActivityIndicator {
+
+    _networkActivityIndicatorCount += 1;
+
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+}
+
+- (void)hideNetworkActivityIndicator {
+
+    _networkActivityIndicatorCount -= 1;
+
+    if (_networkActivityIndicatorCount <= 0) {
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+    }
+    
+    if (_networkActivityIndicatorCount < 0) {
+        NSLog(@"Unbalanced BDSKAppDelegate Network Activity Indicator Calls");
+    }
 }
 
 

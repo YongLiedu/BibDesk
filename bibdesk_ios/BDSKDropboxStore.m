@@ -40,6 +40,7 @@
 
 #import <DropboxSDK/DropboxSDK.h>
 #import "BibDocument.h"
+#import "BDSKAppDelegate.h"
 #import "BDSKBibFile.h"
 #import "BDSKExternalLinkedFile.h"
 
@@ -407,6 +408,11 @@ NSString *BDSKRemoveParentReferencesFromPath(NSString *path) {
         [self willChangeValueForKey:@"isSyncing"];
         _syncStage = syncStage;
         [self didChangeValueForKey:@"isSyncing"];
+        if (_syncStage == none) {
+            [(BDSKAppDelegate *)[UIApplication sharedApplication].delegate hideNetworkActivityIndicator];
+        } else {
+            [(BDSKAppDelegate *)[UIApplication sharedApplication].delegate showNetworkActivityIndicator];
+        }
     } else {
         _syncStage = syncStage;
     }

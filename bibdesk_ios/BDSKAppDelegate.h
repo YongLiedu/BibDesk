@@ -40,9 +40,15 @@
 
 #import <DropboxSDK/DropboxSDK.h>
 
-@interface BDSKAppDelegate : UIResponder <UIApplicationDelegate, DBSessionDelegate>
+@interface BDSKAppDelegate : UIResponder <UIApplicationDelegate, DBSessionDelegate> {
+
+    NSInteger _networkActivityIndicatorCount;
+}
 
 @property (strong, nonatomic) UIWindow *window;
 @property (readonly) BOOL dropboxLinked;
+
+- (void)showNetworkActivityIndicator;
+- (void)hideNetworkActivityIndicator;
 
 @end

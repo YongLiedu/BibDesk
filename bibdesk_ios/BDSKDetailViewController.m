@@ -39,17 +39,19 @@
 #import "BDSKDetailViewController.h"
 
 #import "BibItem.h"
+#import "BDSKAppDelegate.h"
 #import "BDSKBibDeskURLHandler.h"
 #import "BDSKFileStore.h"
 #import "BDSKTemplate.h"
 #import "BDSKTemplateObjectProxy.h"
 
-@interface BDSKDetailViewController () <BDSKBibDeskURLHandlerDelegate> {
+@interface BDSKDetailViewController () <UIWebViewDelegate, BDSKBibDeskURLHandlerDelegate> {
 
     NSString *_htmlText;
     NSMutableArray *_linkedFileLocalPaths;
     NSMutableArray *_webViews;
     UISegmentedControl *_segmentedControl;
+    BOOL _loadingHTTP;
 }
 
 @property (strong, nonatomic) UIPopoverController *masterPopoverController;
@@ -68,6 +70,7 @@
 
 - (void)dealloc
 {
+    if (_loadingHTTP) [(BDSKAppDelegate *)[UIApplication sharedApplication].delegate hideNetworkActivityIndicator];
     [_htmlText release];
     [_linkedFileLocalPaths release];
     [_webViews release];
@@ -84,6 +87,7 @@
     _htmlText = nil;
     _linkedFileLocalPaths = [[NSMutableArray alloc] init];
     _webViews = [[NSMutableArray alloc] init];
+    _loadingHTTP = NO;
 }
 
 #pragma mark - Managing the detail item
@@ -207,7 +211,7 @@
     }
 }
 
-#pragma mark - Split view
+#pragma mark - Split view delegate methods
 
 - (void)splitViewController:(UISplitViewController *)splitController willHideViewController:(UIViewController *)viewController withBarButtonItem:(UIBarButtonItem *)barButtonItem forPopoverController:(UIPopoverController *)popoverController
 {
@@ -223,7 +227,53 @@
     self.masterPopoverController = nil;
 }
 
-#pragma mark - URL handler
+#pragma mark - Web view delegate methods
+
+- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
+
+    if (!_loadingHTTP && ([request.URL.scheme isEqualToString:@"http"] || [request.URL.scheme isEqualToString:@"https"])) {
+    
+        NSString *urlFragment = request.URL.fragment;
+
+        if (urlFragment) {
+        
+            NSString *url = request.URL.absoluteString;
+            url = [url substringToIndex:url.length - (urlFragment.length+1)];
+            
+            NSString *currentUrlFragment = webView.request.URL.fragment;
+            NSString *currentUrl = webView.request.URL.absoluteString;
+            if (currentUrlFragment) currentUrl = [currentUrl substringToIndex:currentUrl.length - (currentUrlFragment.length+1)];
+            
+            if ([url isEqual:currentUrl]) return YES;
+        }
+        
+        _loadingHTTP = YES;
+        [(BDSKAppDelegate *)[UIApplication sharedApplication].delegate showNetworkActivityIndicator];
+    }
+    
+    return YES;
+}
+
+- (void)webViewDidFinishLoad:(UIWebView *)webView {
+
+    if (_loadingHTTP && ([webView.request.URL.scheme isEqualToString:@"http"] || [webView.request.URL.scheme isEqualToString:@"https"])) {
+    
+        _loadingHTTP = NO;
+        [(BDSKAppDelegate *)[UIApplication sharedApplication].delegate hideNetworkActivityIndicator];
+    }
+}
+
+- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
+
+    if (_loadingHTTP && ([webView.request.URL.scheme isEqualToString:@"http"] || [webView.request.URL.scheme isEqualToString:@"https"])) {
+    
+        _loadingHTTP = NO;
+        [(BDSKAppDelegate *)[UIApplication sharedApplication].delegate hideNetworkActivityIndicator];
+    }
+}
+
+
+#pragma mark - URL handler delegate methods
 
 - (void)urlHandlerUpdated:(BDSKBibDeskURLHandler *)urlHandler {
 
