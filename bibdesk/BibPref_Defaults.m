@@ -629,7 +629,7 @@ static NSSet *alwaysDisabledFields = nil;
             if(result == NSFileHandlingPanelCancelButton)
                 return;
             
-            [globalMacroFiles addNonDuplicateObjectsFromArray:[openPanel filenames]];
+            [globalMacroFiles addNonDuplicateObjectsFromArray:[[openPanel URLs] valueForKey:@"path"]];
             [globalMacroFilesTableView reloadData];
             [sud setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
         }];

@@ -81,25 +81,22 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
     return isVisible;
 }
 
-- (NSArray *)URLsFromPathsAndDirectories:(NSArray *)filesAndDirectories
+- (NSArray *)URLsFromURLsAndDirectories:(NSArray *)filesAndDirectories
 {
     NSMutableArray *URLs = [NSMutableArray arrayWithCapacity:[filesAndDirectories count]];
     BOOL isDir;
     NSFileManager *fm = [NSFileManager defaultManager];
-    for (NSString *path in filesAndDirectories) {
+    for (NSURL *aURL in filesAndDirectories) {
         // presumably the file exists, since it arrived here because of drag-and-drop or the open panel, but we handle directories specially
-        if (([fm fileExistsAtPath:path isDirectory:&isDir])) {
+        if (([fm fileExistsAtPath:[aURL path] isDirectory:&isDir])) {
             // if not a directory, or it's a package, add it immediately
-            if (NO == isDir || [[NSWorkspace sharedWorkspace] isFilePackageAtPath:path]) {
-                [URLs addObject:[NSURL fileURLWithPath:path]];
+            if (NO == isDir || [[NSWorkspace sharedWorkspace] isFilePackageAtPath:[aURL path]]) {
+                [URLs addObject:aURL];
             } else {
                 // shallow directory traversal: only add the (non-folder) contents of a folder that was dropped, since an arbitrarily deep traversal would have performance issues for file listing and for the search kit indexing
-                for (NSString *relPath in [fm contentsOfDirectoryAtPath:path error:NULL]) {
-                    // directoryContentsAtPath returns relative paths with the starting directory as base
-                    NSString *subpath = [path stringByAppendingPathComponent:relPath];
-                    NSURL *fileURL = [NSURL fileURLWithPath:subpath];
-                    [fm fileExistsAtPath:subpath isDirectory:&isDir];
-                    if (fileURLIsVisible(fileURL) && NO == isDir || [[NSWorkspace sharedWorkspace] isFilePackageAtPath:subpath])
+                for (NSURL *fileURL in [fm contentsOfDirectoryAtURL:aURL includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsHiddenFiles error:NULL]) {
+                    [fm fileExistsAtPath:[fileURL path] isDirectory:&isDir];
+                    if (fileURLIsVisible(fileURL) && NO == isDir || [[NSWorkspace sharedWorkspace] isFilePackageAtPath:[fileURL path]])
                         [URLs addObject:fileURL];
                 }
             }
@@ -118,7 +115,7 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
         [openPanel setPrompt:NSLocalizedString(@"Choose", @"")];
         [openPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
             if (result == NSFileHandlingPanelOKButton)
-                [[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[self URLsFromPathsAndDirectories:[openPanel filenames]]];
+                [[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[self URLsFromURLsAndDirectories:[openPanel URLs]]];
         }];
         
     } else { // remove
@@ -241,7 +238,7 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
     NSPasteboard *pboard = [info draggingPasteboard];
     NSArray *fileURLs = [pboard readFileURLsOfTypes:nil];
     if ([fileURLs count] > 0) {
-        [[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[self URLsFromPathsAndDirectories:[fileURLs valueForKey:@"path"]]];
+        [[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[self URLsFromURLsAndDirectories:fileURLs]];
         return YES;
     }
     return NO;
