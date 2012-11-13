@@ -159,29 +159,17 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     }
 }
 
-- (void)addBookmarkSheetDidEnd:(BDSKBookmarkSheetController *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    NSString *urlString = (NSString *)contextInfo;
-	if (returnCode == NSOKButton) {
-        BDSKBookmark *bookmark = [BDSKBookmark bookmarkWithUrlString:urlString name:[sheet stringValue]];
-        if (bookmark) {
-            BDSKBookmark *folder = [sheet selectedFolder] ?: bookmarkRoot;
-            [folder insertObject:bookmark inChildrenAtIndex:[folder countOfChildren]];
-        }
-	}
-    [urlString release]; //the contextInfo was retained
-}
-
 - (void)addMenuItemsForBookmarks:(NSArray *)bookmarksArray level:(NSInteger)level toMenu:(NSMenu *)menu {
-    for (BDSKBookmark *bm in bookmarksArray) {
-        if ([bm bookmarkType] == BDSKBookmarkTypeFolder) {
-            NSString *name = [bm name];
-            NSMenuItem *item = [menu addItemWithTitle:name ?: @"" action:NULL keyEquivalent:@""];
-            [item setImageAndSize:[bm icon]];
-            [item setIndentationLevel:level];
-            [item setRepresentedObject:bm];
-            [self addMenuItemsForBookmarks:[bm children] level:level+1 toMenu:menu];
-        }
-    }
+            for (BDSKBookmark *bm in bookmarksArray) {
+                if ([bm bookmarkType] == BDSKBookmarkTypeFolder) {
+                    NSString *name = [bm name];
+                    NSMenuItem *item = [menu addItemWithTitle:name ?: @"" action:NULL keyEquivalent:@""];
+                    [item setImageAndSize:[bm icon]];
+                    [item setIndentationLevel:level];
+                    [item setRepresentedObject:bm];
+                    [self addMenuItemsForBookmarks:[bm children] level:level+1 toMenu:menu];
+                }
+            }
 }
 
 - (void)addBookmarkWithUrlString:(NSString *)urlString proposedName:(NSString *)name modalForWindow:(NSWindow *)window {
@@ -193,10 +181,15 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     [self addMenuItemsForBookmarks:[NSArray arrayWithObjects:bookmarkRoot, nil] level:0 toMenu:[folderPopUp menu]];
     [folderPopUp selectItemAtIndex:0];
 	
-    [bookmarkSheetController beginSheetModalForWindow:window 
-                                        modalDelegate:self
-                                       didEndSelector:@selector(addBookmarkSheetDidEnd:returnCode:contextInfo:)
-                                          contextInfo:[urlString retain]];
+    [bookmarkSheetController beginSheetModalForWindow:window completionHandler:^(NSInteger result){
+        if (result == NSOKButton) {
+            BDSKBookmark *bookmark = [BDSKBookmark bookmarkWithUrlString:urlString name:[bookmarkSheetController stringValue]];
+            if (bookmark) {
+                BDSKBookmark *folder = [bookmarkSheetController selectedFolder] ?: bookmarkRoot;
+                [folder insertObject:bookmark inChildrenAtIndex:[folder countOfChildren]];
+            }
+        }
+    }];
 }
 
 #pragma mark Actions

@@ -125,9 +125,6 @@
 - (IBAction)changeIntersectGroupsAction:(id)sender;
 - (IBAction)editNewStaticGroupWithSelection:(id)sender;
 - (IBAction)editNewCategoryGroupWithSelection:(id)sender;
-- (void)smartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(NSInteger) returnCode contextInfo:(void *)contextInfo;
-- (void)URLGroupSheetDidEnd:(BDSKURLGroupSheetController *)sheetController returnCode:(NSInteger) returnCode contextInfo:(void *)contextInfo;
-- (void)scriptGroupSheetDidEnd:(BDSKScriptGroupSheetController *)sheetController returnCode:(NSInteger) returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)mergeInExternalGroup:(id)sender;
 - (IBAction)mergeInExternalPublications:(id)sender;

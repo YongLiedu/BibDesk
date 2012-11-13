@@ -149,7 +149,7 @@
 }
 
 - (IBAction)showConversionEditor:(id)sender{
-	[[BDSKCharacterConversion sharedConversionEditor] beginSheetModalForWindow:[[self view] window]];
+	[[BDSKCharacterConversion sharedConversionEditor] beginSheetModalForWindow:[[self view] window] completionHandler:nil];
 }
 
 - (void)conversionsAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{

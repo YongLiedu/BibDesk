@@ -298,12 +298,12 @@
     [super showWindow:sender];
 }
 
-- (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo {
+- (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler {
     [self window]; // make sure we loaded the nib
     [tableView reloadData];
     [closeButton setKeyEquivalent:@"\E"];
     
-    [super beginSheetModalForWindow:window modalDelegate:delegate didEndSelector:didEndSelector contextInfo:contextInfo];
+    [super beginSheetModalForWindow:window completionHandler:handler];
 }
 
 - (IBAction)closeAction:(id)sender{

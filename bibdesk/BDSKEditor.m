@@ -645,35 +645,6 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 
-- (void)chooseRemoteURLSheetDidEnd:(BDSKURLSheetController *)urlController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-
-    if (returnCode == NSOKButton) {
-        // remove the sheet in case we get an alert
-        [[urlController window] orderOut:nil];
-        
-        NSURL *aURL = [urlController URL];
-        if (aURL == nil)
-            return;
-        NSUInteger anIndex = (NSUInteger)contextInfo;
-        if (anIndex != NSNotFound) {
-            BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
-            if (aFile == nil)
-                return;
-            NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
-            [publication removeObjectFromFilesAtIndex:anIndex];
-            [publication insertObject:aFile inFilesAtIndex:anIndex];
-            if (oldURL)
-                [[self document] userRemovedURL:oldURL forPublication:publication];
-            [oldURL release];
-            [[self document] userAddedURL:aURL forPublication:publication];
-            [publication autoFileLinkedFile:aFile];
-        } else {
-            [publication addFileForURL:aURL autoFile:NO runScriptHook:YES];
-            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-        }
-    }        
-}
-
 - (IBAction)chooseRemoteURL:(id)sender{
     NSUInteger anIndex = NSNotFound;
     NSNumber *indexNumber = [sender representedObject];
@@ -683,14 +654,35 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         urlString = [[[publication objectInFilesAtIndex:anIndex] URL] absoluteString];
     }
     
-    BDSKURLSheetController *urlController = [[BDSKURLSheetController alloc] init];
+    BDSKURLSheetController *urlController = [[[BDSKURLSheetController alloc] init] autorelease];
     
     [urlController setUrlString:urlString];
-    [urlController beginSheetModalForWindow:[self window]
-                              modalDelegate:self
-                             didEndSelector:@selector(chooseRemoteURLSheetDidEnd:returnCode:contextInfo:)
-                                contextInfo:(void *)anIndex];
-    [urlController release];
+    [urlController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        if (result == NSOKButton) {
+            // remove the sheet in case we get an alert
+            [[urlController window] orderOut:nil];
+            
+            NSURL *aURL = [urlController URL];
+            if (aURL == nil)
+                return;
+            if (anIndex != NSNotFound) {
+                BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
+                if (aFile == nil)
+                    return;
+                NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
+                [publication removeObjectFromFilesAtIndex:anIndex];
+                [publication insertObject:aFile inFilesAtIndex:anIndex];
+                if (oldURL)
+                    [[self document] userRemovedURL:oldURL forPublication:publication];
+                [oldURL release];
+                [[self document] userAddedURL:aURL forPublication:publication];
+                [publication autoFileLinkedFile:aFile];
+            } else {
+                [publication addFileForURL:aURL autoFile:NO runScriptHook:YES];
+                [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+            }
+        }
+    }];
 }
 
 - (void)addRemoteURLFromMenuItem:(NSMenuItem *)sender{
@@ -701,26 +693,6 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 
 - (IBAction)trashLinkedFiles:(id)sender{
     [self deleteURLsAtIndexes:[sender representedObject] moveToTrash:BDSKMoveToTrashYes];
-}
-
-- (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    NSArray *currentFields = [(NSArray *)contextInfo autorelease];
-	NSString *newField = [addFieldController field];
-    if(returnCode == NSCancelButton || newField == nil)
-        return;
-    
-    // remove the sheet in case we get an alert
-    [[addFieldController window] orderOut:nil];
-    
-    newField = [newField fieldName];
-    if([currentFields containsObject:newField] == NO){
-        if (addedFields == nil)
-            addedFields = [[NSMutableSet alloc] init];
-        [addedFields addObject:newField];
-		[tabView selectFirstTabViewItem:nil];
-		[self resetFields];
-        [self setKeyField:newField];
-    }
 }
 
 // raises the add field sheet
@@ -736,35 +708,26 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     
     fieldNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObject:BDSKCrossrefString] excluding:currentFields];
     
-    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:", @"Label for adding field")
-                                                                                              fieldsArray:fieldNames];
     if ([self commitEditing]) {
-        [addFieldController beginSheetModalForWindow:[self window]
-                                       modalDelegate:self
-                                      didEndSelector:@selector(addFieldSheetDidEnd:returnCode:contextInfo:)
-                                         contextInfo:currentFields];
-    }
-    [addFieldController release];
-}
-
-- (void)removeFieldSheetDidEnd:(BDSKRemoveFieldSheetController *)removeFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-	NSString *oldField = [removeFieldController field];
-    NSString *oldValue = [[[publication valueOfField:oldField inherit:NO] retain] autorelease];
-    NSArray *removableFields = [removeFieldController fieldsArray];
-    
-    if (returnCode == NSOKButton && oldField != nil && [removableFields count]) {
-        // remove the sheet in case we get an alert
-        [[removeFieldController window] orderOut:nil];
-        
-        [addedFields removeObject:oldField];
-        [tabView selectFirstTabViewItem:nil];
-        if ([NSString isEmptyString:oldValue]) {
-            [self resetFields];
-        } else {
-            [publication setField:oldField toValue:nil];
-            [[self undoManager] setActionName:NSLocalizedString(@"Remove Field", @"Undo action name")];
-            [self userChangedField:oldField from:oldValue to:@""];
-        }
+        BDSKAddFieldSheetController *addFieldController = [[[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:", @"Label for adding field") fieldsArray:fieldNames] autorelease];
+        [addFieldController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+            NSString *newField = [addFieldController field];
+            if(result == NSCancelButton || newField == nil)
+                return;
+            
+            // remove the sheet in case we get an alert
+            [[addFieldController window] orderOut:nil];
+            
+            newField = [newField fieldName];
+            if([currentFields containsObject:newField] == NO){
+                if (addedFields == nil)
+                    addedFields = [[NSMutableSet alloc] init];
+                [addedFields addObject:newField];
+                [tabView selectFirstTabViewItem:nil];
+                [self resetFields];
+                [self setKeyField:newField];
+            }
+        }];
     }
 }
 
@@ -784,8 +747,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 		prompt = NSLocalizedString(@"No fields to remove", @"Label when no field to remove");
 	}
     
-    BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:prompt
-                                                                                                       fieldsArray:removableFields];
+    BDSKRemoveFieldSheetController *removeFieldController = [[[BDSKRemoveFieldSheetController alloc] initWithPrompt:prompt fieldsArray:removableFields] autorelease];
     NSInteger selectedRow = [tableView clickedOrSelectedRow];
     NSString *selectedField = selectedRow == -1 ? nil : [fields objectAtIndex:selectedRow];
     BOOL didValidate = YES;
@@ -798,34 +760,25 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 	[removableFields release];
 	
     if (didValidate) {
-        [removeFieldController beginSheetModalForWindow:[self window]
-                                          modalDelegate:self
-                                         didEndSelector:@selector(removeFieldSheetDidEnd:returnCode:contextInfo:)
-                                            contextInfo:NULL];
-    }
-    [removeFieldController release];
-}
-
-- (void)changeFieldSheetDidEnd:(BDSKChangeFieldSheetController *)changeFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-	NSString *oldField = [changeFieldController field];
-    NSString *newField = [changeFieldController replaceField];
-    NSString *oldValue = [[[publication valueOfField:oldField inherit:NO] retain] autorelease];
-    NSInteger autoGenerateStatus = 0;
-    
-    if (returnCode == NSOKButton && [NSString isEmptyString:newField] == NO  && 
-        [newField isEqualToString:oldField] == NO && [fields containsObject:newField] == NO) {
-        // remove the sheet in case we get an alert
-        [[changeFieldController window] orderOut:nil];
-        
-        [addedFields removeObject:oldField];
-        [addedFields addObject:newField];
-        [tabView selectFirstTabViewItem:nil];
-        [publication setField:oldField toValue:nil];
-        [publication setField:newField toValue:oldValue];
-        [[self undoManager] setActionName:NSLocalizedString(@"Change Field Name", @"Undo action name")];
-        [self setKeyField:newField];
-        autoGenerateStatus = [self userChangedField:oldField from:oldValue to:@""];
-        [self userChangedField:newField from:@"" to:oldValue didAutoGenerate:autoGenerateStatus];
+        [removeFieldController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+            NSString *oldField = [removeFieldController field];
+            NSString *oldValue = [[[publication valueOfField:oldField inherit:NO] retain] autorelease];
+            
+            if (result == NSOKButton && oldField != nil && [removableFields count]) {
+                // remove the sheet in case we get an alert
+                [[removeFieldController window] orderOut:nil];
+                
+                [addedFields removeObject:oldField];
+                [tabView selectFirstTabViewItem:nil];
+                if ([NSString isEmptyString:oldValue]) {
+                    [self resetFields];
+                } else {
+                    [publication setField:oldField toValue:nil];
+                    [[self undoManager] setActionName:NSLocalizedString(@"Remove Field", @"Undo action name")];
+                    [self userChangedField:oldField from:oldValue to:@""];
+                }
+            }
+        }];
     }
 }
 
@@ -851,10 +804,10 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         return;
     }
     
-    BDSKChangeFieldSheetController *changeFieldController = [[BDSKChangeFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to change:", @"Label for changing field name")
-                                                                                                       fieldsArray:fields
-                                                                                                     replacePrompt:NSLocalizedString(@"New field name:", @"Label for changing field name")
-                                                                                                replaceFieldsArray:fieldNames];
+    BDSKChangeFieldSheetController *changeFieldController = [[[BDSKChangeFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to change:", @"Label for changing field name")
+                                                                                                        fieldsArray:fields
+                                                                                                      replacePrompt:NSLocalizedString(@"New field name:", @"Label for changing field name")
+                                                                                                 replaceFieldsArray:fieldNames] autorelease];
     if (field == nil)
         field = [tableView selectedRow] == -1 ? nil : [fields objectAtIndex:[tableView selectedRow]];
     
@@ -862,11 +815,28 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     if (field)
         [changeFieldController setField:field];
     
-	[changeFieldController beginSheetModalForWindow:[self window]
-                                      modalDelegate:self
-                                     didEndSelector:@selector(changeFieldSheetDidEnd:returnCode:contextInfo:)
-                                        contextInfo:NULL];
-	[changeFieldController release];
+	[changeFieldController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        NSString *oldField = [changeFieldController field];
+        NSString *newField = [changeFieldController replaceField];
+        NSString *oldValue = [[[publication valueOfField:oldField inherit:NO] retain] autorelease];
+        NSInteger autoGenerateStatus = 0;
+        
+        if (result == NSOKButton && [NSString isEmptyString:newField] == NO  && 
+            [newField isEqualToString:oldField] == NO && [fields containsObject:newField] == NO) {
+            // remove the sheet in case we get an alert
+            [[changeFieldController window] orderOut:nil];
+            
+            [addedFields removeObject:oldField];
+            [addedFields addObject:newField];
+            [tabView selectFirstTabViewItem:nil];
+            [publication setField:oldField toValue:nil];
+            [publication setField:newField toValue:oldValue];
+            [[self undoManager] setActionName:NSLocalizedString(@"Change Field Name", @"Undo action name")];
+            [self setKeyField:newField];
+            autoGenerateStatus = [self userChangedField:oldField from:oldValue to:@""];
+            [self userChangedField:newField from:@"" to:oldValue didAutoGenerate:autoGenerateStatus];
+        }
+	}];
     [currentFields release];
 }
 

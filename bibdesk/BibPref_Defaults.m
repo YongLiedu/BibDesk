@@ -532,7 +532,7 @@ static NSSet *alwaysDisabledFields = nil;
 }
 
 - (IBAction)showTypeInfoEditor:(id)sender{
-	[[BDSKTypeInfoEditor sharedTypeInfoEditor] beginSheetModalForWindow:[[self view] window]];
+	[[BDSKTypeInfoEditor sharedTypeInfoEditor] beginSheetModalForWindow:[[self view] window] completionHandler:nil];
 }
 
 #pragma mark default viewer
@@ -598,7 +598,7 @@ static NSSet *alwaysDisabledFields = nil;
 	if (!macroWC){
 		macroWC = [[BDSKMacroWindowController alloc] initWithMacroResolver:[BDSKMacroResolver defaultMacroResolver]];
 	}
-	[macroWC beginSheetModalForWindow:[[self view] window]];
+	[macroWC beginSheetModalForWindow:[[self view] window] completionHandler:nil];
 }
 
 - (IBAction)showMacroFileWindow:(id)sender{

@@ -1132,42 +1132,6 @@ static BOOL changingColors = NO;
     }];
 }
 
-- (void)chooseLinkedURLSheetDidEnd:(BDSKURLSheetController *)urlController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if (returnCode == NSOKButton) {
-        BibItem *publication = nil;
-        if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
-            NSArray *selPubs = [self selectedPublications];
-            if ([selPubs count] == 1)
-                publication = [selPubs lastObject];
-        }
-        if (publication == nil) {
-            NSBeep();
-            return;
-        }
-        
-        NSURL *aURL = [urlController URL];
-        if (aURL == nil)
-            return;
-        NSUInteger anIndex = (NSUInteger)contextInfo;
-        if (anIndex != NSNotFound) {
-            BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
-            if (aFile == nil)
-                return;
-            NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
-            [publication removeObjectFromFilesAtIndex:anIndex];
-            [publication insertObject:aFile inFilesAtIndex:anIndex];
-            if (oldURL)
-                [self userRemovedURL:oldURL forPublication:publication];
-            [oldURL release];
-            [self userAddedURL:aURL forPublication:publication];
-            [publication autoFileLinkedFile:aFile];
-        } else {
-            [publication addFileForURL:aURL autoFile:NO runScriptHook:YES];
-        }
-        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-    }        
-}
-
 - (IBAction)chooseLinkedURL:(id)sender{
     if ([self isDisplayingFileContentSearch] || [self hasExternalGroupsSelected] || [[self selectedPublications] count] != 1) {
         NSBeep();
@@ -1182,14 +1146,43 @@ static BOOL changingColors = NO;
         urlString = [[[[self shownFiles] objectAtIndex:anIndex] URL] absoluteString];
     }
     
-    BDSKURLSheetController *urlController = [[BDSKURLSheetController alloc] init];
+    BDSKURLSheetController *urlController = [[[BDSKURLSheetController alloc] init] autorelease];
     
     [urlController setUrlString:urlString];
-    [urlController beginSheetModalForWindow:documentWindow
-                              modalDelegate:self
-                             didEndSelector:@selector(chooseLinkedURLSheetDidEnd:returnCode:contextInfo:)
-                                contextInfo:(void *)anIndex];
-    [urlController release];
+    [urlController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+        if (result == NSOKButton) {
+            BibItem *publication = nil;
+            if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
+                NSArray *selPubs = [self selectedPublications];
+                if ([selPubs count] == 1)
+                    publication = [selPubs lastObject];
+            }
+            if (publication == nil) {
+                NSBeep();
+                return;
+            }
+            
+            NSURL *aURL = [urlController URL];
+            if (aURL == nil)
+                return;
+            if (anIndex != NSNotFound) {
+                BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
+                if (aFile == nil)
+                    return;
+                NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
+                [publication removeObjectFromFilesAtIndex:anIndex];
+                [publication insertObject:aFile inFilesAtIndex:anIndex];
+                if (oldURL)
+                    [self userRemovedURL:oldURL forPublication:publication];
+                [oldURL release];
+                [self userAddedURL:aURL forPublication:publication];
+                [publication autoFileLinkedFile:aFile];
+            } else {
+                [publication addFileForURL:aURL autoFile:NO runScriptHook:YES];
+            }
+            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+        }        
+    }];
 }
 
 - (IBAction)migrateFiles:(id)sender {
@@ -1376,20 +1369,18 @@ static BOOL changingColors = NO;
     [drawerController toggle:sender];
 }
 
-- (void)documentInfoSheetDidEnd:(BDSKDocumentInfoWindowController *)infoController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if (returnCode == NSOKButton) {
-        NSDictionary *info = [infoController info];
-        if ([info isEqualToDictionary:[self documentInfo]] == NO) {
-            [self setDocumentInfo:info];
-            [[self undoManager] setActionName:NSLocalizedString(@"Change Document Info", @"Undo action name")];
-        }
-    }
-}
-
 - (IBAction)showDocumentInfoWindow:(id)sender{
-    BDSKDocumentInfoWindowController *infoWC = [[[BDSKDocumentInfoWindowController alloc] init] autorelease];
-    [infoWC setInfo:[self documentInfo]];
-    [infoWC beginSheetModalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(documentInfoSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+    BDSKDocumentInfoWindowController *infoController = [[[BDSKDocumentInfoWindowController alloc] init] autorelease];
+    [infoController setInfo:[self documentInfo]];
+    [infoController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+        if (result == NSOKButton) {
+            NSDictionary *info = [infoController info];
+            if ([info isEqualToDictionary:[self documentInfo]] == NO) {
+                [self setDocumentInfo:info];
+                [[self undoManager] setActionName:NSLocalizedString(@"Change Document Info", @"Undo action name")];
+            }
+        }
+    }];
 }
 
 - (IBAction)showMacrosWindow:(id)sender{
@@ -1422,12 +1413,6 @@ static BOOL changingColors = NO;
 
 #pragma mark Text import sheet support
 
-- (void)importSheetDidEnd:(BDSKTextImportController *)controller returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    NSArray *addedPubs = [controller addedPublications];
-    if ([addedPubs count] > 0)
-        [self addPublications:addedPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:YES edit:NO];
-}
-
 - (IBAction)importFromPasteboardAction:(id)sender{
     
     NSPasteboard *pboard = [NSPasteboard generalPasteboard];
@@ -1447,11 +1432,11 @@ static BOOL changingColors = NO;
     }
     
     BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initForOwner:self] autorelease];
-    [tic beginSheetForURL:nil
-           modalForWindow:documentWindow 
-            modalDelegate:self 
-           didEndSelector:@selector(importSheetDidEnd:returnCode:contextInfo:) 
-              contextInfo:NULL];
+    [tic beginSheetForURL:nil modalForWindow:documentWindow completionHandler:^(NSInteger result){
+        NSArray *addedPubs = [tic addedPublications];
+        if ([addedPubs count] > 0)
+            [self addPublications:addedPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:YES edit:NO];
+    }];
 }
 
 - (IBAction)importFromFileAction:(id)sender{
@@ -1473,42 +1458,37 @@ static BOOL changingColors = NO;
                 [oPanel orderOut:nil];
                 
                 BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initForOwner:self] autorelease];
-                [tic beginSheetForURL:[NSURL fileURLWithPath:fileName] 
-                       modalForWindow:documentWindow 
-                        modalDelegate:self 
-                       didEndSelector:@selector(importSheetDidEnd:returnCode:contextInfo:) 
-                          contextInfo:NULL];
+                [tic beginSheetForURL:[NSURL fileURLWithPath:fileName] modalForWindow:documentWindow  completionHandler:^(NSInteger result2){
+                    NSArray *addedPubs = [tic addedPublications];
+                    if ([addedPubs count] > 0)
+                        [self addPublications:addedPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:YES edit:NO];
+                }];
             }
         }
     }];
 }
 
-- (void)importFromWebSheetDidEnd:(BDSKURLSheetController *)urlSheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if (returnCode == NSOKButton) {
-        [[urlSheetController window] orderOut:nil];
-        
-        NSURL *url = [urlSheetController URL];
-        if (url == nil) {
-            NSBeep();
-            return;
-        }
-        
-        BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initForOwner:self] autorelease];
-        [tic beginSheetForURL:url 
-               modalForWindow:documentWindow 
-                modalDelegate:self 
-               didEndSelector:@selector(importSheetDidEnd:returnCode:contextInfo:) 
-                  contextInfo:NULL];
-    }
-}
-
 - (IBAction)importFromWebAction:(id)sender{
     BDSKURLSheetController *urlSheetController = [[[BDSKURLSheetController alloc] init] autorelease];
     
-	[urlSheetController beginSheetModalForWindow:documentWindow
-                                   modalDelegate:self
-                                  didEndSelector:@selector(importFromWebSheetDidEnd:returnCode:contextInfo:)
-                                     contextInfo:NULL];
+	[urlSheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+        if (result == NSOKButton) {
+            [[urlSheetController window] orderOut:nil];
+            
+            NSURL *url = [urlSheetController URL];
+            if (url == nil) {
+                NSBeep();
+                return;
+            }
+            
+            BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initForOwner:self] autorelease];
+            [tic beginSheetForURL:url modalForWindow:documentWindow completionHandler:^(NSInteger result2){
+                NSArray *addedPubs = [tic addedPublications];
+                if ([addedPubs count] > 0)
+                    [self addPublications:addedPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:YES edit:NO];
+            }];
+        }
+    }];
 }
 
 #pragma mark AutoFile stuff

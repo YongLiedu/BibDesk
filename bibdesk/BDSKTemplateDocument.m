@@ -746,24 +746,18 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
 
 #pragma mark Actions
 
-- (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSOKButton) {
-        NSArray *tokens = [self tokensForFields:[NSArray arrayWithObjects:[addFieldController field], nil]];
-        [self setDefaultTokens:[[self defaultTokens] arrayByAddingObjectsFromArray:tokens]];
-        [defaultTokenField setObjectValue:[self defaultTokens]];
-        [self updateTokenFields];
-    }
-}
-
 - (IBAction)addField:(id)sender {
     NSArray *allFields = [[BDSKTypeManager sharedManager] allFieldNamesIncluding:nil excluding:nil];
-    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Field:", @"Label for adding a field for a template")
-                                                                                              fieldsArray:allFields];
-	[addFieldController beginSheetModalForWindow:[self windowForSheet]
-                                   modalDelegate:self
-                                  didEndSelector:@selector(addFieldSheetDidEnd:returnCode:contextInfo:)
-                                     contextInfo:NULL];
-    [addFieldController release];
+    BDSKAddFieldSheetController *addFieldController = [[[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Field:", @"Label for adding a field for a template")
+                                                                                               fieldsArray:allFields] autorelease];
+	[addFieldController beginSheetModalForWindow:[self windowForSheet] completionHandler:^(NSInteger result){
+        if (result == NSOKButton) {
+            NSArray *tokens = [self tokensForFields:[NSArray arrayWithObjects:[addFieldController field], nil]];
+            [self setDefaultTokens:[[self defaultTokens] arrayByAddingObjectsFromArray:tokens]];
+            [defaultTokenField setObjectValue:[self defaultTokens]];
+            [self updateTokenFields];
+        }
+    }];
 }
 
 - (void)changeValueFromMenu:(id)sender {

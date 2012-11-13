@@ -240,15 +240,12 @@ static id sharedInstance = nil;
     [progressIndicator stopAnimation:nil];
 }
 
-- (void)configSheetDidEnd:(BDSKFileMatchConfigController *)config returnCode:(NSInteger)code contextInfo:(void *)context;
-{
-    [self matchFiles:[config files] withPublications:[config publications]];
-}
-
 - (IBAction)configure:(id)sender;
 {
     BDSKFileMatchConfigController *config = [[[BDSKFileMatchConfigController alloc] init] autorelease];
-    [config beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:@selector(configSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+    [config beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        [self matchFiles:[config files] withPublications:[config publications]];
+    }];
 }
 
 #pragma mark Outline view drag-and-drop

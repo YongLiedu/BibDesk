@@ -83,7 +83,6 @@
 - (void)setupTypeUI;
 - (void)setType:(NSString *)type;
 
-- (void)urlSheetDidEnd:(BDSKURLSheetController *)urlSheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)autoDiscoverFromFrameAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)autoDiscoverFromStringAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 
@@ -201,7 +200,7 @@
 
 #pragma mark Calling the main sheet
 
-- (void)beginSheetForURL:(NSURL *)aURL modalForWindow:(NSWindow *)aWindow modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo {
+- (void)beginSheetForURL:(NSURL *)aURL modalForWindow:(NSWindow *)aWindow completionHandler:(void (^)(NSInteger result))handler {
     // make sure we loaded the nib
     [self window];
     if (aURL == nil) {
@@ -212,7 +211,11 @@
 		[self setShowingWebView:YES];
         [webView setURL:aURL];
     }
-    [self beginSheetModalForWindow:aWindow modalDelegate:delegate didEndSelector:didEndSelector contextInfo:contextInfo];
+    [super beginSheetModalForWindow:aWindow completionHandler:handler];
+}
+
+- (void)beginSheetModalForWindow:(NSWindow *)aWindow completionHandler:(void (^)(NSInteger result))handler {
+    [self beginSheetForURL:nil modalForWindow:aWindow completionHandler:handler];
 }
 
 #pragma mark Actions
@@ -300,10 +303,27 @@
 
 - (IBAction)importFromWebAction:(id)sender{
 	BDSKURLSheetController *urlSheetController = [[[BDSKURLSheetController alloc] init] autorelease];
-    [urlSheetController beginSheetModalForWindow:[self window]
-                                   modalDelegate:self
-                                  didEndSelector:@selector(urlSheetDidEnd:returnCode:contextInfo:)
-                                     contextInfo:NULL];
+    [urlSheetController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        if(result == NSOKButton){
+            // setup webview and load page
+            
+            [self setShowingWebView:YES];
+            
+            NSURL *url = [urlSheetController URL];
+            
+            if(url == nil){
+                [[urlSheetController window] orderOut:nil];
+                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error", @"Message in alert dialog when error occurs")
+                                                 defaultButton:nil
+                                               alternateButton:nil
+                                                   otherButton:nil
+                                     informativeTextWithFormat:NSLocalizedString(@"Mac OS X does not recognize this as a valid URL.  Please re-enter the address and try again.", @"Informative text in alert dialog")];
+                [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+            } else {        
+                [webView setURL:url];
+            }
+        }        
+    }];
 }
 
 - (IBAction)importFromFileAction:(id)sender{
@@ -334,32 +354,27 @@
 	}
 }
 
-- (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-	NSString *newField = [addFieldController field];
-    newField = [newField fieldName];
-    
-    if(newField == nil || [fields containsObject:newField])
-        return;
-    
-    NSInteger row = [fields count];
-    
-    [fields addObject:newField];
-    [itemTableView reloadData];
-    [itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-    [itemTableView editColumn:2 row:row withEvent:nil select:YES];
-}
-
 - (IBAction)addField:(id)sender{
     BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
     NSArray *currentFields = [[self publication] allFieldNames];
     NSArray *fieldNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObject:BDSKCrossrefString] excluding:currentFields];
     
-    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:",@"Label for adding field")
-                                                                                              fieldsArray:fieldNames];
-	[addFieldController beginSheetModalForWindow:[self window]
-                                   modalDelegate:self
-                                  didEndSelector:@selector(addFieldSheetDidEnd:returnCode:contextInfo:)
-                                     contextInfo:NULL];
+    BDSKAddFieldSheetController *addFieldController = [[[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:",@"Label for adding field")
+                                                                                               fieldsArray:fieldNames] autorelease];
+	[addFieldController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        NSString *newField = [addFieldController field];
+        newField = [newField fieldName];
+        
+        if(newField == nil || [fields containsObject:newField] || result == NSCancelButton)
+            return;
+        
+        NSInteger row = [fields count];
+        
+        [fields addObject:newField];
+        [itemTableView reloadData];
+        [itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+        [itemTableView editColumn:2 row:row withEvent:nil select:YES];
+    }];
     [addFieldController release];
 }
 
@@ -697,30 +712,6 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 	// the default fields can contain fields already contained in typeInfo
     [fields addNonDuplicateObjectsFromArray:[typeMan userDefaultFieldsForType:type]];
     [fields addNonDuplicateObjectsFromArray:[NSArray arrayWithObjects:BDSKAbstractString, BDSKAnnoteString, nil]];
-}
-
-#pragma mark Sheet callbacks
-
-- (void)urlSheetDidEnd:(BDSKURLSheetController *)urlSheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if(returnCode == NSOKButton){
-		// setup webview and load page
-        
-		[self setShowingWebView:YES];
-        
-        NSURL *url = [urlSheetController URL];
-        
-        if(url == nil){
-            [[urlSheetController window] orderOut:nil];
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error", @"Message in alert dialog when error occurs")
-                                             defaultButton:nil
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"Mac OS X does not recognize this as a valid URL.  Please re-enter the address and try again.", @"Informative text in alert dialog")];
-            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-        } else {        
-            [webView setURL:url];
-        }
-    }        
 }
 
 #pragma mark Page loading methods

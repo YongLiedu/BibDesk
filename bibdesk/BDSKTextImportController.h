@@ -103,7 +103,7 @@
 - (BibItem *)publication;
 - (NSArray *)addedPublications;
 
-- (void)beginSheetForURL:(NSURL *)aURL modalForWindow:(NSWindow *)aWindow modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
+- (void)beginSheetForURL:(NSURL *)aURL modalForWindow:(NSWindow *)aWindow completionHandler:(void (^)(NSInteger result))handler;
 
 - (IBAction)addItemAction:(id)sender;
 - (IBAction)closeAction:(id)sender;
