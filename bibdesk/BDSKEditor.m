@@ -584,46 +584,21 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     }
 }
 
-- (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-
-    if(returnCode == NSFileHandlingPanelOKButton){
-        NSUInteger anIndex = (NSUInteger)contextInfo;
-        NSURL *aURL = [[sheet URLs] objectAtIndex:0];
-        BOOL shouldAutoFile = [disableAutoFileButton state] == NSOffState && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey];
-        if (anIndex != NSNotFound) {
-            BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
-            if (aFile == nil)
-                return;
-            NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
-            [publication removeObjectFromFilesAtIndex:anIndex];
-            [publication insertObject:aFile inFilesAtIndex:anIndex];
-            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-            if (oldURL)
-                [[self document] userRemovedURL:oldURL forPublication:publication];
-            [oldURL release];
-            [[self document] userAddedURL:aURL forPublication:publication];
-            if (shouldAutoFile)
-                [publication autoFileLinkedFile:aFile];
-        } else {
-            [publication addFileForURL:aURL autoFile:shouldAutoFile runScriptHook:YES];
-            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-        }
-    }        
-}
-
 - (IBAction)chooseLocalFile:(id)sender{
     NSUInteger anIndex = NSNotFound;
     NSNumber *indexNumber = [sender representedObject];
-    NSString *path = nil;
+    NSURL *url = nil;
     if (indexNumber) {
         anIndex = [indexNumber unsignedIntegerValue];
-        path = [[[publication objectInFilesAtIndex:anIndex] URL] path];
+        url = [[publication objectInFilesAtIndex:anIndex] URL];
     }
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:NO];
     [oPanel setResolvesAliases:NO];
     [oPanel setCanChooseDirectories:YES];
     [oPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
+    [oPanel setDirectoryURL:[url URLByDeletingLastPathComponent]];
+    [oPanel setNameFieldStringValue:[url lastPathComponent]];
     
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]) {
         if (disableAutoFileButton == nil) {
@@ -637,13 +612,30 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         [oPanel setAccessoryView:disableAutoFileButton];
 	}
     
-    [oPanel beginSheetForDirectory:[path stringByDeletingLastPathComponent] 
-                              file:[path lastPathComponent] 
-                    modalForWindow:[self window] 
-                     modalDelegate:self 
-                    didEndSelector:@selector(chooseLocalFilePanelDidEnd:returnCode:contextInfo:) 
-                       contextInfo:(void *)anIndex];
-  
+    [oPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        if(result == NSFileHandlingPanelOKButton){
+            NSURL *aURL = [[oPanel URLs] objectAtIndex:0];
+            BOOL shouldAutoFile = [disableAutoFileButton state] == NSOffState && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey];
+            if (anIndex != NSNotFound) {
+                BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
+                if (aFile == nil)
+                    return;
+                NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
+                [publication removeObjectFromFilesAtIndex:anIndex];
+                [publication insertObject:aFile inFilesAtIndex:anIndex];
+                [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+                if (oldURL)
+                    [[self document] userRemovedURL:oldURL forPublication:publication];
+                [oldURL release];
+                [[self document] userAddedURL:aURL forPublication:publication];
+                if (shouldAutoFile)
+                    [publication autoFileLinkedFile:aFile];
+            } else {
+                [publication addFileForURL:aURL autoFile:shouldAutoFile runScriptHook:YES];
+                [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+            }
+        }        
+    }];
 }
 
 - (void)addLinkedFileFromMenuItem:(NSMenuItem *)sender{
@@ -1749,12 +1741,13 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     } else {
         NSSavePanel *sPanel = [NSSavePanel savePanel];
         if (NO == [extension isEqualToString:@""]) 
-            [sPanel setRequiredFileType:extension];
+            [sPanel setAllowedFileTypes:[NSArray arrayWithObjects:extension, nil]];
         [sPanel setAllowsOtherFileTypes:YES];
         [sPanel setCanSelectHiddenExtension:YES];
+        [sPanel setNameFieldStringValue:filename];
         
         // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
-        if (NSFileHandlingPanelOKButton == [sPanel runModalForDirectory:nil file:filename])
+        if (NSFileHandlingPanelOKButton == [sPanel runModal])
             fileURL = [sPanel URL];
     }
     return fileURL;

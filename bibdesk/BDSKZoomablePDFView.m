@@ -136,25 +136,24 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.0, 0.1, 0.2, 0.25, 0.35, 0.5, 
     [pboard clearContents];
     [pboard setData:[[self currentPage] dataRepresentation] forType:NSPasteboardTypePDF];
 }
-
-- (void)saveDocumentSheetDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode  contextInfo:(void  *)contextInfo;
-{
-    NSError *error = nil;
-    if(returnCode == NSFileHandlingPanelOKButton){
-        // -[PDFDocument writeToURL:] returns YES even if you don't have write permission, so we'll use NSData rdar://problem/4475062
-        NSData *data = [[self document] dataRepresentation];
-        
-        if([data writeToURL:[sheet URL] options:NSAtomicWrite error:&error] == NO){
-            [sheet orderOut:nil];
-            [self presentError:error];
-        }
-    }
-}
     
 - (void)saveDocumentAs:(id)sender;
 {
     NSString *name = [[[self document] documentURL] lastPathComponent];
-    [[NSSavePanel savePanel] beginSheetForDirectory:nil file:(name ?: NSLocalizedString(@"Untitled.pdf", @"Default file name for saved PDF")) modalForWindow:[self window] modalDelegate:self didEndSelector:@selector(saveDocumentSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+    NSSavePanel *savePanel = [NSSavePanel savePanel];
+    [savePanel setNameFieldStringValue:name ?: NSLocalizedString(@"Untitled.pdf", @"Default file name for saved PDF")];
+    [savePanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        if(result == NSFileHandlingPanelOKButton){
+            // -[PDFDocument writeToURL:] returns YES even if you don't have write permission, so we'll use NSData rdar://problem/4475062
+            NSError *error = nil;
+            NSData *data = [[self document] dataRepresentation];
+            
+            if([data writeToURL:[savePanel URL] options:NSDataWritingAtomic error:&error] == NO){
+                [savePanel orderOut:nil];
+                [self presentError:error];
+            }
+        }
+    }];
 }
 
 - (void)doActualSize:(id)sender;

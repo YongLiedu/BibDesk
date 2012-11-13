@@ -172,12 +172,13 @@ static id sharedManager = nil;
    
 	NSSavePanel *sPanel = [NSSavePanel savePanel];
     if (NO == [extension isEqualToString:@""]) 
-		[sPanel setRequiredFileType:extension];
+		[sPanel setAllowedFileTypes:[NSArray arrayWithObjects:extension, nil]];
     [sPanel setAllowsOtherFileTypes:YES];
     [sPanel setCanSelectHiddenExtension:YES];
+    [sPanel setNameFieldStringValue:filename];
 	
     // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
-    NSInteger returnCode = [sPanel runModalForDirectory:nil file:filename];
+    NSInteger returnCode = [sPanel runModal];
     if (returnCode == NSFileHandlingPanelOKButton)
         [URLDownload setDestination:[sPanel filename] allowOverwrite:YES];
     else

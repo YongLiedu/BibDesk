@@ -455,7 +455,9 @@
     filename = [[NSFileManager defaultManager] uniqueFilePathWithName:filename atPath:downloadsDir];
     if (showingPanel) {
         NSSavePanel *savePanel = [NSSavePanel savePanel];
-        NSInteger returnCode = [savePanel runModalForDirectory:downloadsDir file:[filename lastPathComponent]];
+        [savePanel setDirectoryURL:[NSURL fileURLWithPath:downloadsDir]];
+        [savePanel setNameFieldStringValue:[filename lastPathComponent]];
+        NSInteger returnCode = [savePanel runModal];
         if (returnCode == NSFileHandlingPanelCancelButton)
             return;
         filename = [savePanel filename];

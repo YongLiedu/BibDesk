@@ -62,22 +62,6 @@
     }
 }
 
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSFileHandlingPanelCancelButton)
-        return;
-    
-	NSString *path = [[sheet filenames] objectAtIndex: 0];
-	if (path == nil)
-		return;
-
-	NSInteger row = [tableView selectedRow]; // cannot be -1
-	NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
-	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[sud dictionaryForKey:BDSKScriptHooksKey]];
-	[dict setObject:path forKey:name];
-	[sud setObject:dict forKey:BDSKScriptHooksKey];
-	[tableView reloadData];
-}
-
 - (IBAction)addRemoveScriptHook:(id)sender{
     if (sender == nil || [sender selectedSegment] == 0) { // add
         
@@ -88,13 +72,22 @@
         NSOpenPanel *openPanel = [NSOpenPanel openPanel];
         [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
         [openPanel setAllowsMultipleSelection:NO];
-        [openPanel beginSheetForDirectory:directory 
-                                     file:nil
-                                    types:[NSArray arrayWithObjects:@"scpt", @"scptd", @"applescript", nil] 
-                           modalForWindow:[[self view] window] 
-                            modalDelegate:self 
-                           didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
-                              contextInfo:NULL];
+        [openPanel setAllowedFileTypes:[NSArray arrayWithObjects:@"scpt", @"scptd", @"applescript", nil]];
+        [openPanel setDirectoryURL:[NSURL fileURLWithPath:directory]];
+        [openPanel beginSheetModalForWindow:[[self view] window] completionHandler:^(NSInteger result){
+            if (result == NSFileHandlingPanelOKButton) {
+                NSString *path = [[openPanel URL] path];
+                if (path == nil)
+                    return;
+
+                NSInteger row = [tableView selectedRow]; // cannot be -1
+                NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
+                NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[sud dictionaryForKey:BDSKScriptHooksKey]];
+                [dict setObject:path forKey:name];
+                [sud setObject:dict forKey:BDSKScriptHooksKey];
+                [tableView reloadData];
+            }
+        }];
         
     } else { // remove
         

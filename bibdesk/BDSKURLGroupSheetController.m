@@ -112,25 +112,18 @@
     [super dismiss:sender];
 }
 
-- (void)chooseURLPanelDidEnd:(NSOpenPanel *)oPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSOKButton) {
-        NSURL *url = [[oPanel URLs] firstObject];
-        [self setUrlString:[url absoluteString]];
-    }
-}
-
 - (IBAction)chooseURL:(id)sender {
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:NO];
     [oPanel setResolvesAliases:NO];
     [oPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
     
-    [oPanel beginSheetForDirectory:nil 
-                              file:nil 
-                    modalForWindow:[self window]
-                     modalDelegate:self 
-                    didEndSelector:@selector(chooseURLPanelDidEnd:returnCode:contextInfo:) 
-                       contextInfo:nil];
+    [oPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        if (result == NSOKButton) {
+            NSURL *url = [[oPanel URLs] firstObject];
+            [self setUrlString:[url absoluteString]];
+        }
+    }];
 }
 
 - (BDSKURLGroup *)group {

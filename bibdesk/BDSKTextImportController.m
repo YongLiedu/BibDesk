@@ -83,9 +83,7 @@
 - (void)setupTypeUI;
 - (void)setType:(NSString *)type;
 
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)urlSheetDidEnd:(BDSKURLSheetController *)urlSheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
-- (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)autoDiscoverFromFrameAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)autoDiscoverFromStringAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 
@@ -312,14 +310,12 @@
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:NO];
     [oPanel setCanChooseDirectories:NO];
+    [oPanel setAllowedFileTypes:[NSAttributedString textTypes]];
 
-    [oPanel beginSheetForDirectory:nil 
-                              file:nil 
-							 types:[NSAttributedString textTypes]
-                    modalForWindow:[self window]
-                     modalDelegate:self 
-                    didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
-                       contextInfo:nil];
+    [oPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        if(result == NSFileHandlingPanelOKButton)
+            [self loadFromFileURL:[[oPanel URLs] lastObject]];
+    }];
 }
 
 - (IBAction)openBookmark:(id)sender{
@@ -424,15 +420,23 @@
 
     NSSavePanel *sPanel = [NSSavePanel savePanel];
     if (![extension isEqualToString:@""]) 
-		[sPanel setRequiredFileType:extension];
+		[sPanel setAllowedFileTypes:[NSArray arrayWithObjects:extension, nil]];
     [sPanel setCanCreateDirectories:YES];
+    [sPanel setNameFieldStringValue:fileName];
 
-    [sPanel beginSheetForDirectory:nil 
-                              file:fileName 
-                    modalForWindow:[self window]
-                     modalDelegate:self 
-                    didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:) 
-                       contextInfo:nil];
+    [sPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        if (result == NSFileHandlingPanelOKButton) {
+            NSURL *fileURL = [NSURL fileURLWithPath:[sPanel filename]];
+            if ([[[[webView mainFrame] dataSource] data] writeToURL:fileURL atomically:YES]) {
+                [[self publication] addFileForURL:fileURL autoFile:YES runScriptHook:NO];
+                [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+            } else {
+                NSLog(@"Could not write downloaded file.");
+            }
+        }
+
+        [itemTableView reloadData];
+    }]; 
 }
 
 - (void)downloadLinkedFileAsLocalUrl:(id)sender{
@@ -696,11 +700,6 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 }
 
 #pragma mark Sheet callbacks
-	
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if(returnCode == NSFileHandlingPanelOKButton)
-        [self loadFromFileURL:[[sheet URLs] lastObject]];
-}
 
 - (void)urlSheetDidEnd:(BDSKURLSheetController *)urlSheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     if(returnCode == NSOKButton){
@@ -722,22 +721,6 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
             [webView setURL:url];
         }
     }        
-}
-
-- (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    
-	if (returnCode == NSFileHandlingPanelOKButton) {
-		if ([[[[webView mainFrame] dataSource] data] writeToFile:[sheet filename] atomically:YES]) {
-			NSURL *fileURL = [NSURL fileURLWithPath:[sheet filename]];
-			
-            [[self publication] addFileForURL:fileURL autoFile:YES runScriptHook:NO];
-            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-		} else {
-			NSLog(@"Could not write downloaded file.");
-		}
-    }
-
-    [itemTableView reloadData];
 }
 
 #pragma mark Page loading methods
@@ -926,12 +909,13 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
    
 	NSSavePanel *sPanel = [NSSavePanel savePanel];
     if (NO == [extension isEqualToString:@""]) 
-		[sPanel setRequiredFileType:extension];
+		[sPanel setAllowedFileTypes:[NSArray arrayWithObjects:extension, nil]];
     [sPanel setAllowsOtherFileTypes:YES];
     [sPanel setCanSelectHiddenExtension:YES];
+    [sPanel setNameFieldStringValue:filename];
 	
     // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
-    NSInteger returnCode = [sPanel runModalForDirectory:nil file:filename];
+    NSInteger returnCode = [sPanel runModal];
     if (returnCode == NSFileHandlingPanelOKButton) {
         [download setDestination:[sPanel filename] allowOverwrite:YES];
     } else {

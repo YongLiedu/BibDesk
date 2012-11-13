@@ -256,18 +256,6 @@
     return [NSKeyedArchiver archivedDataWithRootObject:item];
 }
 
-- (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(NSInteger)returnCode contextInfo:(BDSKTemplate *)aNode
-{
-    NSURL *fileURL = [[panel URLs] lastObject];
-    if(NSFileHandlingPanelOKButton == returnCode && nil != fileURL){
-        // this will set the name property
-        [aNode setValue:fileURL forKey:BDSKTemplateFileURLString];
-    }
-    [aNode release];
-    [panel orderOut:nil];
-    [self updateUI];
-}
-
 // Formerly implemented in outlineView:shouldEditTableColumn:item:, but on Leopard a second click on the selected row (outside the double click interval) would cause the open panel to run.  This was highly annoying.
 - (IBAction)chooseFileDoubleAction:(id)sender
 {
@@ -617,15 +605,18 @@
     [openPanel setCanChooseDirectories:YES];
     [openPanel setCanCreateDirectories:NO];
     [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
-    
     // start the panel in the same directory as the item's existing path (may be nil)
-    NSString *dirPath = [[[item representedFileURL] path] stringByDeletingLastPathComponent];
-    [openPanel beginSheetForDirectory:dirPath 
-                                 file:nil 
-                                types:nil 
-                       modalForWindow:[[self view] window] 
-                        modalDelegate:self didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
-                          contextInfo:[item retain]];
+    [openPanel setDirectoryURL:[[item representedFileURL] URLByDeletingLastPathComponent]];
+    
+    [openPanel beginSheetModalForWindow:[[self view] window] completionHandler:^(NSInteger result){
+        NSURL *fileURL = [[openPanel URLs] lastObject];
+        if(NSFileHandlingPanelOKButton == result && nil != fileURL){
+            // this will set the name property
+            [item setValue:fileURL forKey:BDSKTemplateFileURLString];
+        }
+        [openPanel orderOut:nil];
+        [self updateUI];
+    }];
 }
 
 @end

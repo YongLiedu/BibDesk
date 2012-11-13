@@ -137,13 +137,6 @@
     [super dismiss:sender];
 }
 
-- (void)chooseScriptPathPanelDidEnd:(NSOpenPanel *)oPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSFileHandlingPanelOKButton) {
-        NSURL *url = [[oPanel URLs] firstObject];
-        [self setPath:[url path]];
-    }
-}
-
 // open panel delegate method
 - (BOOL)panel:(id)sender shouldShowFilename:(NSString *)filename {
     return ([[NSWorkspace sharedWorkspace] isAppleScriptFileAtPath:filename] || [[NSFileManager defaultManager] isExecutableFileAtPath:filename] || [[NSWorkspace sharedWorkspace] isFolderAtPath:filename]);
@@ -157,12 +150,12 @@
     [oPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
     [oPanel setDelegate:self];
     
-    [oPanel beginSheetForDirectory:nil 
-                              file:nil 
-                    modalForWindow:[self window]
-                     modalDelegate:self 
-                    didEndSelector:@selector(chooseScriptPathPanelDidEnd:returnCode:contextInfo:) 
-                       contextInfo:nil];
+    [oPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        if (result == NSFileHandlingPanelOKButton) {
+            NSURL *url = [[oPanel URLs] firstObject];
+            [self setPath:[url path]];
+        }
+    }];
 }
 
 - (BDSKScriptGroup *)group {

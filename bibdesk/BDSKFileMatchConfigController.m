@@ -108,11 +108,6 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
     return URLs;
 }
 
-- (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-	if (returnCode == NSFileHandlingPanelOKButton)
-		[[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[self URLsFromPathsAndDirectories:[panel filenames]]];
-}
-
 - (IBAction)addRemove:(id)sender;
 {
     if ([sender selectedSegment] == 0) { // add
@@ -121,7 +116,10 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
         [openPanel setAllowsMultipleSelection:YES];
         [openPanel setCanChooseDirectories:YES];
         [openPanel setPrompt:NSLocalizedString(@"Choose", @"")];
-        [openPanel beginSheetForDirectory:nil file:nil types:nil modalForWindow:[self window] modalDelegate:self didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+        [openPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+            if (result == NSFileHandlingPanelOKButton)
+                [[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[self URLsFromPathsAndDirectories:[openPanel filenames]]];
+        }];
         
     } else { // remove
         

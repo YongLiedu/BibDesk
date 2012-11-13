@@ -537,56 +537,49 @@ static NSSet *alwaysDisabledFields = nil;
 
 #pragma mark default viewer
 
-- (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(NSInteger)returnCode contextInfo:(void  *)contextInfo{
-    NSString *bundleID;
-    if (returnCode == NSFileHandlingPanelOKButton)
-        bundleID = [[NSBundle bundleWithPath:[panel filename]] bundleIdentifier];
-    else
-        bundleID = [[sud dictionaryForKey:BDSKDefaultViewersKey] objectForKey:@"pdf"];
-    
-    if([bundleID length]){
-        NSInteger i, iMax = [pdfViewerPopup numberOfItems] - 2;
-        
-        for(i = 2; i < iMax; i++){
-            if([[[pdfViewerPopup itemAtIndex:i] representedObject] isEqualToString:bundleID]){
-                [pdfViewerPopup selectItemAtIndex:i];
-                break;
-            }
-        }
-        if(i == iMax){
-            NSString *appPath = [[NSWorkspace sharedWorkspace] absolutePathForAppBundleWithIdentifier:bundleID];
-            NSString *name = [[appPath lastPathComponent] stringByDeletingPathExtension];
-            [pdfViewerPopup insertItemWithTitle:name atIndex:2];
-            [[pdfViewerPopup itemAtIndex:2] setRepresentedObject:bundleID];
-            [(NSMenuItem *)[pdfViewerPopup itemAtIndex:2] setImageAndSize:[[NSWorkspace sharedWorkspace] iconForFile:appPath]];
-            [pdfViewerPopup selectItemAtIndex:2];
-        }
-    }else{
-        [pdfViewerPopup selectItemAtIndex:0];
-    }
-    NSMutableDictionary *defaultViewers = [[sud dictionaryForKey:BDSKDefaultViewersKey] mutableCopy];
-    if ([bundleID length])
-        [defaultViewers setObject:bundleID forKey:@"pdf"];
-    else
-        [defaultViewers removeObjectForKey:@"pdf"];
-    [sud setObject:defaultViewers forKey:BDSKDefaultViewersKey];
-    [defaultViewers release];
-}
-
 - (IBAction)changeDefaultPDFViewer:(id)sender{
     if([sender indexOfSelectedItem] == [sender numberOfItems] - 1){
         NSOpenPanel *openPanel = [NSOpenPanel openPanel];
         [openPanel setCanChooseDirectories:NO];
         [openPanel setAllowsMultipleSelection:NO];
         [openPanel setPrompt:NSLocalizedString(@"Choose Viewer", @"Prompt for Choose panel")];
-        
-        [openPanel beginSheetForDirectory:[[NSFileManager defaultManager] applicationsDirectory] 
-                                     file:nil 
-                                    types:[NSArray arrayWithObjects:@"app", nil]
-                           modalForWindow:[[self view] window]
-                            modalDelegate:self
-                           didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:)
-                              contextInfo:NULL];
+        [openPanel setDirectoryURL:[NSURL fileURLWithPath:[[NSFileManager defaultManager] applicationsDirectory]]];
+        [openPanel setAllowedFileTypes:[NSArray arrayWithObjects:@"app", nil]];
+        [openPanel beginSheetModalForWindow:[[self view] window] completionHandler:^(NSInteger result){
+            NSString *bundleID;
+            if (result == NSFileHandlingPanelOKButton)
+                bundleID = [[NSBundle bundleWithURL:[openPanel URL]] bundleIdentifier];
+            else
+                bundleID = [[sud dictionaryForKey:BDSKDefaultViewersKey] objectForKey:@"pdf"];
+            
+            if([bundleID length]){
+                NSInteger i, iMax = [pdfViewerPopup numberOfItems] - 2;
+                
+                for(i = 2; i < iMax; i++){
+                    if([[[pdfViewerPopup itemAtIndex:i] representedObject] isEqualToString:bundleID]){
+                        [pdfViewerPopup selectItemAtIndex:i];
+                        break;
+                    }
+                }
+                if(i == iMax){
+                    NSString *appPath = [[NSWorkspace sharedWorkspace] absolutePathForAppBundleWithIdentifier:bundleID];
+                    NSString *name = [[appPath lastPathComponent] stringByDeletingPathExtension];
+                    [pdfViewerPopup insertItemWithTitle:name atIndex:2];
+                    [[pdfViewerPopup itemAtIndex:2] setRepresentedObject:bundleID];
+                    [(NSMenuItem *)[pdfViewerPopup itemAtIndex:2] setImageAndSize:[[NSWorkspace sharedWorkspace] iconForFile:appPath]];
+                    [pdfViewerPopup selectItemAtIndex:2];
+                }
+            }else{
+                [pdfViewerPopup selectItemAtIndex:0];
+            }
+            NSMutableDictionary *defaultViewers = [[sud dictionaryForKey:BDSKDefaultViewersKey] mutableCopy];
+            if ([bundleID length])
+                [defaultViewers setObject:bundleID forKey:@"pdf"];
+            else
+                [defaultViewers removeObjectForKey:@"pdf"];
+            [sud setObject:defaultViewers forKey:BDSKDefaultViewersKey];
+            [defaultViewers release];
+        }];
     }else{
         NSString *bundleID = [[sender selectedItem] representedObject];
         NSMutableDictionary *defaultViewers = [[sud dictionaryForKey:BDSKDefaultViewersKey] mutableCopy];
@@ -621,15 +614,6 @@ static NSSet *alwaysDisabledFields = nil;
     [NSApp endSheet:globalMacroFileSheet];
 }
 
-- (void)addGlobalMacroFilePanelDidEnd:(NSOpenPanel *)openPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if(returnCode == NSFileHandlingPanelCancelButton)
-        return;
-    
-    [globalMacroFiles addNonDuplicateObjectsFromArray:[openPanel filenames]];
-    [globalMacroFilesTableView reloadData];
-    [sud setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
-}
-
 - (IBAction)addRemoveGlobalMacroFile:(id)sender{
     if ([sender selectedSegment] == 0) { // add
         
@@ -638,14 +622,17 @@ static NSSet *alwaysDisabledFields = nil;
         [openPanel setResolvesAliases:NO];
         [openPanel setCanChooseDirectories:NO];
         [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
-
-        [openPanel beginSheetForDirectory:@"/usr" 
-                                     file:nil 
-                                    types:[NSArray arrayWithObjects:@"bib", @"bst", nil] 
-                           modalForWindow:globalMacroFileSheet
-                            modalDelegate:self 
-                           didEndSelector:@selector(addGlobalMacroFilePanelDidEnd:returnCode:contextInfo:) 
-                              contextInfo:nil];
+        [openPanel setDirectoryURL:[NSURL fileURLWithPath:@"/usr"]];
+        [openPanel setAllowedFileTypes:[NSArray arrayWithObjects:@"bib", @"bst", nil]];
+        
+        [openPanel beginSheetModalForWindow:globalMacroFileSheet completionHandler:^(NSInteger result){
+            if(result == NSFileHandlingPanelCancelButton)
+                return;
+            
+            [globalMacroFiles addNonDuplicateObjectsFromArray:[openPanel filenames]];
+            [globalMacroFilesTableView reloadData];
+            [sud setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
+        }];
         
     } else { // remove
         
