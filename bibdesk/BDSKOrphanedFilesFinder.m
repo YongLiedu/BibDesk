@@ -458,6 +458,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
             NSUInteger count = [[arrayController arrangedObjects] count];
             NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%ld orphaned file found", @"Status message"), (long)count] : [NSString stringWithFormat:NSLocalizedString(@"%ld orphaned files found", @"Status message"), (long)count];
             [statusField setStringValue:[message stringByAppendingEllipsis]];
+            [statusField displayIfNeeded];
         });
         [self clearFoundFiles];
     }
