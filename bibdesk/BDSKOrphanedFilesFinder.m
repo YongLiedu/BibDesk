@@ -223,6 +223,10 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     [orphanedFiles removeObjectAtIndex:theIndex];
 }
 
+- (BOOL)wasLaunched {
+    return wasLaunched;
+}
+
 #pragma mark TableView stuff
 
 // dummy dataSource implementation
@@ -445,6 +449,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
         if ([self allFilesEnumerated] == NO)
             message = [NSString stringWithFormat:@"%@. %@", NSLocalizedString(@"Stopped", @"Partial status message"), message];
         [self stopAnimationWithStatusMessage:message];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKOrphanedFilesFinderFinishedNotification object:self];
     });
 }
 

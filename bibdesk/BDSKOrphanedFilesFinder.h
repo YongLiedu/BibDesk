@@ -76,6 +76,8 @@
 - (void)insertObject:(id)obj inOrphanedFilesAtIndex:(NSUInteger)theIndex;
 - (void)removeObjectFromOrphanedFilesAtIndex:(NSUInteger)theIndex;
 
+- (BOOL)wasLaunched;
+
 @end
 
 @interface BDSKOrphanedFilesArrayController : NSArrayController

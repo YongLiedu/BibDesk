@@ -203,13 +203,27 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
     return useOrphanedFiles;
 }
 
+- (void)orphanedFilesFinderFinished:(NSNotification *)note{
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:BDSKOrphanedFilesFinderFinishedNotification object:[BDSKOrphanedFilesFinder sharedFinder]];
+    if (useOrphanedFiles)
+        [[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[[BDSKOrphanedFilesFinder sharedFinder] orphanedFiles]];
+}
+
 - (void)setUseOrphanedFiles:(BOOL)flag;
 {
     useOrphanedFiles = flag;
-    if (flag)
-        [[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[[BDSKOrphanedFilesFinder sharedFinder] orphanedFiles]];
-    else
-        [[self mutableArrayValueForKey:@"files"] removeObjectsInArray:[[BDSKOrphanedFilesFinder sharedFinder] orphanedFiles]];
+    BDSKOrphanedFilesFinder *finder = [BDSKOrphanedFilesFinder sharedFinder];
+    if (flag) {
+        if ([finder wasLaunched] == NO) {
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(orphanedFilesFinderFinished:) name:BDSKOrphanedFilesFinderFinishedNotification object:finder];
+            [finder showWindow:nil];
+        } else {
+            [[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[finder orphanedFiles]];
+        }
+    }
+    else {
+        [[self mutableArrayValueForKey:@"files"] removeObjectsInArray:[finder orphanedFiles]];
+    }
 }
     
 - (NSString *)windowNibName { return @"FileMatcherConfigSheet"; }

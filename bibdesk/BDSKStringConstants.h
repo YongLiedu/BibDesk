@@ -318,6 +318,7 @@ extern NSString *BDSKFileSearchIndexInfoChangedNotification;
 extern NSString *BDSKEncodingsListChangedNotification;
 extern NSString *BDSKTemporaryFileMigrationNotification;
 extern NSString *BDSKFlagsChangedNotification;
+extern NSString *BDSKOrphanedFilesFinderFinishedNotification;
 
 #pragma mark Exception name strings
 

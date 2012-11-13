@@ -328,6 +328,7 @@ NSString *BDSKFileSearchIndexInfoChangedNotification = @"BDSKFileSearchIndexInfo
 NSString *BDSKEncodingsListChangedNotification = @"BDSKEncodingsListChangedNotification";
 NSString *BDSKTemporaryFileMigrationNotification = @"BDSKTemporaryFileMigrationNotification";
 NSString *BDSKFlagsChangedNotification = @"BDSKFlagsChangedNotification";
+NSString *BDSKOrphanedFilesFinderFinishedNotification = @"BDSKOrphanedFilesFinderFinishedNotification";
 
 #pragma mark Exception name strings
 
