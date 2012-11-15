@@ -44,44 +44,45 @@
 - (id)init {
     self = [super init];
     if (self) {
-        dictionary = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-        inverseDictionary = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        NSMapTableOptions options = NSMapTableStrongMemory | NSMapTableObjectPointerPersonality;
+        mapTable = [[NSMapTable alloc] initWithKeyOptions:options valueOptions:options capacity:0];
+        inverseMapTable = [[NSMapTable alloc] initWithKeyOptions:options valueOptions:options capacity:0];
     }
     return self;
 }
 
 - (void)dealloc {
-    BDSKCFDESTROY(dictionary);
-    BDSKCFDESTROY(inverseDictionary);
+    BDSKDESTROY(mapTable);
+    BDSKDESTROY(inverseMapTable);
     [super dealloc];
 }
 
 - (NSString *)description {
-    return [(id)dictionary description];
+    return [mapTable description];
 }
 
-- (CFMutableDictionaryRef)_dictionary:(BOOL)inverse {
-    return inverse ? inverseDictionary : dictionary;
+- (NSMapTable *)_mapTable:(BOOL)inverse {
+    return inverse ? inverseMapTable : mapTable;
 }
 
 - (NSMutableSet *)_setForValue:(id)aValue inverse:(BOOL)inverse create:(BOOL)create {
-    CFMutableDictionaryRef dict = [self _dictionary:inverse];
-    NSMutableSet *value = (NSMutableSet *)CFDictionaryGetValue(dict, aValue);
+    NSMapTable *map = [self _mapTable:inverse];
+    NSMutableSet *value = (NSMutableSet *)[map valueForKey:aValue];
 
     if (create && value == nil) {
         value = [[NSMutableSet alloc] init];
-        CFDictionaryAddValue(dict, aValue, value);
+        [map setObject:value forKey:aValue];
         [value release];
     }
     return value;
 }
 
 - (NSUInteger)keyCount {
-    return CFDictionaryGetCount(dictionary);
+    return [mapTable count];
 }
 
 - (NSUInteger)objectCount {
-    return CFDictionaryGetCount(inverseDictionary);
+    return [inverseMapTable count];
 }
 
 - (NSUInteger)countForKey:(id)aKey {
@@ -113,36 +114,19 @@
     [[self _setForValue:anObject inverse:YES create:YES] addObject:aKey];
 }
 
-typedef struct _addValueContext {
-    BDSKManyToManyDictionary *dict;
-    id value;
-    BOOL inverse;
-} addValueContext;
-
-static void addValueFunction(const void *value, void *context) {
-    addValueContext *ctxt = context;
-    [[ctxt->dict _setForValue:(id)value inverse:ctxt->inverse create:YES] addObject:(id)(ctxt->value)];
-}
-
 - (void)addObjects:(NSSet *)newObjects forKey:(id)aKey {
     if ([newObjects count]) {
         [[self _setForValue:aKey inverse:NO create:YES] unionSet:newObjects];
-        addValueContext ctxt;
-        ctxt.dict = self;
-        ctxt.value = aKey;
-        ctxt.inverse = YES;
-        CFSetApplyFunction((CFSetRef)newObjects, addValueFunction, &ctxt);
+        for (id anObject in newObjects)
+            [[self _setForValue:anObject inverse:YES create:YES] addObject:aKey];
     }
 }
 
 - (void)addObject:(id)anObject forKeys:(NSSet *)newKeys {
     if ([newKeys count]) {
         [[self _setForValue:anObject inverse:YES create:YES] unionSet:newKeys];
-        addValueContext ctxt;
-        ctxt.dict = self;
-        ctxt.value = anObject;
-        ctxt.inverse = NO;
-        CFSetApplyFunction((CFSetRef)newKeys, addValueFunction, &ctxt);
+        for (id aKey in newKeys)
+            [[self _setForValue:aKey inverse:NO create:YES] addObject:anObject];
     }
 }
 
@@ -152,18 +136,18 @@ static void addValueFunction(const void *value, void *context) {
     if (objectSet) {
         [objectSet removeObject:anObject];
         if ([objectSet count] == 0)
-            CFDictionaryRemoveValue(dictionary, aKey);
+            [mapTable removeObjectForKey:aKey];
     }
     if (keySet) {
         [keySet removeObject:anObject];
         if ([keySet count] == 0)
-            CFDictionaryRemoveValue(inverseDictionary, anObject);
+            [inverseMapTable removeObjectForKey:anObject];
     }
 }
 
 - (void)removeAllObjects {
-    CFDictionaryRemoveAllValues(dictionary);
-    CFDictionaryRemoveAllValues(inverseDictionary);
+    [mapTable removeAllObjects];
+    [inverseMapTable removeAllObjects];
 }
 
 @end

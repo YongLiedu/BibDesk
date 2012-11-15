@@ -40,8 +40,8 @@
 
 
 @interface BDSKManyToManyDictionary : NSObject {
-    CFMutableDictionaryRef dictionary;
-    CFMutableDictionaryRef inverseDictionary;
+    NSMapTable *mapTable;
+    NSMapTable *inverseMapTable;
 }
 
 - (NSUInteger)keyCount;
