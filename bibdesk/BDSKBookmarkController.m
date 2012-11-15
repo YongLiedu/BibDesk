@@ -63,7 +63,7 @@
 
 #define CHILDREN_KEY    @"children"
 #define NAME_KEY        @"name"
-#define URLSTRING_KEY   @"urlString"
+#define URL_KEY         @"URL"
 
 static char BDSKBookmarkPropertiesObservationContext;
 
@@ -172,7 +172,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
             }
 }
 
-- (void)addBookmarkWithUrlString:(NSString *)urlString proposedName:(NSString *)name modalForWindow:(NSWindow *)window {
+- (void)addBookmarkWithURL:(NSURL *)aURL proposedName:(NSString *)name modalForWindow:(NSWindow *)window {
     BDSKBookmarkSheetController *bookmarkSheetController = [[[BDSKBookmarkSheetController alloc] init] autorelease];
     NSPopUpButton *folderPopUp = [bookmarkSheetController folderPopUpButton];
     
@@ -183,7 +183,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 	
     [bookmarkSheetController beginSheetModalForWindow:window completionHandler:^(NSInteger result){
         if (result == NSOKButton) {
-            BDSKBookmark *bookmark = [BDSKBookmark bookmarkWithUrlString:urlString name:[bookmarkSheetController stringValue]];
+            BDSKBookmark *bookmark = [BDSKBookmark bookmarkWithURL:aURL name:[bookmarkSheetController stringValue]];
             if (bookmark) {
                 BDSKBookmark *folder = [bookmarkSheetController selectedFolder] ?: bookmarkRoot;
                 [folder insertObject:bookmark inChildrenAtIndex:[folder countOfChildren]];
@@ -195,7 +195,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 #pragma mark Actions
 
 - (IBAction)insertBookmark:(id)sender {
-    BDSKBookmark *bookmark = [BDSKBookmark bookmarkWithUrlString:@"http://" name:nil];
+    BDSKBookmark *bookmark = [BDSKBookmark bookmarkWithURL:[NSURL URLWithString:@"http://"] name:nil];
     NSInteger rowIndex = [[outlineView selectedRowIndexes] lastIndex];
     BDSKBookmark *item = bookmarkRoot;
     NSUInteger idx = [[bookmarkRoot children] count];
@@ -305,7 +305,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     for (BDSKBookmark *bm in newBookmarks) {
         if ([bm bookmarkType] != BDSKBookmarkTypeSeparator) {
             [bm addObserver:self forKeyPath:NAME_KEY options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKBookmarkPropertiesObservationContext];
-            [bm addObserver:self forKeyPath:URLSTRING_KEY options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKBookmarkPropertiesObservationContext];
+            [bm addObserver:self forKeyPath:URL_KEY options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKBookmarkPropertiesObservationContext];
             if ([bm bookmarkType] == BDSKBookmarkTypeFolder) {
                 [bm addObserver:self forKeyPath:CHILDREN_KEY options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKBookmarkPropertiesObservationContext];
                 [self startObservingBookmarks:[bm children]];
@@ -318,7 +318,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     for (BDSKBookmark *bm in oldBookmarks) {
         if ([bm bookmarkType] != BDSKBookmarkTypeSeparator) {
             [bm removeObserver:self forKeyPath:NAME_KEY];
-            [bm removeObserver:self forKeyPath:URLSTRING_KEY];
+            [bm removeObserver:self forKeyPath:URL_KEY];
             if ([bm bookmarkType] == BDSKBookmarkTypeFolder) {
                 [bm removeObserver:self forKeyPath:CHILDREN_KEY];
                 [self stopObservingBookmarks:[bm children]];
@@ -363,8 +363,8 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
                     [[[self undoManager] prepareWithInvocationTarget:self] setChildren:oldValue ofBookmark:bookmark];
                 } else if ([keyPath isEqualToString:NAME_KEY]) {
                     [(BDSKBookmark *)[[self undoManager] prepareWithInvocationTarget:bookmark] setName:oldValue];
-                } else if ([keyPath isEqualToString:URLSTRING_KEY]) {
-                    [[[self undoManager] prepareWithInvocationTarget:bookmark] setUrlString:oldValue];
+                } else if ([keyPath isEqualToString:URL_KEY]) {
+                    [[[self undoManager] prepareWithInvocationTarget:bookmark] setURL:oldValue];
                 }
                 break;
             case NSKeyValueChangeInsertion:
@@ -418,7 +418,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
             NSInteger count = [[item children] count];
             return count == 1 ? NSLocalizedString(@"1 item", @"Bookmark folder description") : [NSString stringWithFormat:NSLocalizedString(@"%ld items", @"Bookmark folder description"), (long)count];
         } else {
-            return [item urlString];
+            return [[item URL] absoluteString];
         }
     }
     return nil;
@@ -432,7 +432,8 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
         if ([newName isEqualToString:[item name]] == NO)
             [(BDSKBookmark *)item setName:newName];
     } else if ([tcID isEqualToString:@"url"]) {
-        if ([(NSString *)object length] == 0 || [NSURL URLWithString:object] == nil) {
+        NSURL *theURL = [(NSString *)object length] == 0 ? nil : [NSURL URLWithString:object];
+        if (theURL == nil) {
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid URL", @"Message in alert dialog when setting an invalid URL") 
                                              defaultButton:NSLocalizedString(@"OK", @"Button title")
                                            alternateButton:nil
@@ -443,8 +444,8 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
                              didEndSelector:NULL
                                 contextInfo:NULL];
             [outlineView reloadData];
-        } else if ([object isEqualToString:[item urlString]] == NO) {
-            [(BDSKBookmark *)item setUrlString:object];
+        } else if ([theURL isEqual:[item URL]] == NO) {
+            [(BDSKBookmark *)item setURL:theURL];
         }
     }
 }
@@ -513,12 +514,12 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
         NSArray *urls = [pboard readURLs];
         if ([urls count] > 0) {
             if (idx == NSOutlineViewDropOnItemIndex && [item bookmarkType] == BDSKBookmarkTypeBookmark) {
-                [item setUrlString:[[urls objectAtIndex:0] absoluteString]];
+                [item setURL:[urls objectAtIndex:0]];
             } else {
                 if (idx == NSOutlineViewDropOnItemIndex)
                     idx = [[item children] count];
                 for (NSURL *url in urls) {
-                    BDSKBookmark *bookmark = [BDSKBookmark bookmarkWithUrlString:[url absoluteString] name:nil];
+                    BDSKBookmark *bookmark = [BDSKBookmark bookmarkWithURL:url name:nil];
                     if (bookmark)
                         [(BDSKBookmark *)item insertObject:bookmark inChildrenAtIndex:idx++];
                 }
@@ -568,7 +569,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     if ([tcID isEqualToString:@"name"]) {
         return [item name];
     } else if ([tcID isEqualToString:@"url"]) {
-        return [item urlString];
+        return [[item URL] absoluteString];
     }
     return nil;
 }

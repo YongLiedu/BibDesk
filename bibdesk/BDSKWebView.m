@@ -140,7 +140,7 @@
 	NSURL *theURL = [[datasource request] URL];
 	NSString *name = [datasource pageTitle] ?: [theURL lastPathComponent];
     if (theURL)
-        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:[theURL absoluteString] proposedName:name modalForWindow:[self window]];
+        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithURL:theURL proposedName:name modalForWindow:[self window]];
 }
 
 - (void)bookmarkLink:(id)sender {
@@ -148,7 +148,7 @@
 	NSURL *theURL = [element objectForKey:WebElementLinkURLKey];
 	NSString *name = [element objectForKey:WebElementLinkLabelKey] ?: [theURL lastPathComponent];
     if (theURL)
-        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:[theURL absoluteString] proposedName:name modalForWindow:[self window]];
+        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithURL:theURL proposedName:name modalForWindow:[self window]];
 }
 
 - (void)revealLink:(id)sender {

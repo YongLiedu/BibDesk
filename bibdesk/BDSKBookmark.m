@@ -42,7 +42,7 @@
 
 #define CHILDREN_KEY    @"Children"
 #define TITLE_KEY       @"Title"
-#define URL_KEY         @"URLString"
+#define URLSTRING_KEY   @"URLString"
 #define TYPE_KEY        @"Type"
 
 #define BOOKMARK_STRING  @"bookmark"
@@ -55,7 +55,7 @@
 
 @interface BDSKURLBookmark : BDSKBookmark {
     NSString *name;
-    NSString *urlString;
+    NSURL *url;
 }
 @end
 
@@ -88,8 +88,8 @@ static Class BDSKBookmarkClass = Nil;
     return BDSKBookmarkClass == self ? defaultPlaceholderBookmark : [super allocWithZone:aZone];
 }
 
-+ (id)bookmarkWithUrlString:(NSString *)aUrlString name:(NSString *)aName {
-    return [[[self alloc] initWithUrlString:aUrlString name:aName] autorelease];
++ (id)bookmarkWithURL:(NSURL *)aURL name:(NSString *)aName {
+    return [[[self alloc] initWithURL:aURL name:aName] autorelease];
 }
 
 + (id)bookmarkFolderWithName:(NSString *)aName {
@@ -100,7 +100,7 @@ static Class BDSKBookmarkClass = Nil;
     return [[[self alloc] initSeparator] autorelease];
 }
 
-- (id)initWithUrlString:(NSString *)aUrlString name:(NSString *)aName {
+- (id)initWithURL:(NSURL *)aURL name:(NSString *)aName {
     BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
 }
@@ -145,8 +145,7 @@ static Class BDSKBookmarkClass = Nil;
 - (NSImage *)icon { return nil; }
 
 - (NSURL *)URL { return nil; }
-- (NSString *)urlString { return nil; }
-- (void)setUrlString:(NSString *)newUrlString {}
+- (void)setURL:(NSURL *)newURL {}
 
 - (NSArray *)children { return nil; }
 - (NSUInteger)countOfChildren { return 0; }
@@ -186,11 +185,11 @@ static Class BDSKBookmarkClass = Nil;
 @implementation BDSKPlaceholderBookmark
 
 - (id)init {
-    return [self initWithUrlString:@"http://" name:nil];
+    return [self initWithURL:[NSURL URLWithString:@"http://"] name:nil];
 }
 
-- (id)initWithUrlString:(NSString *)aUrlString name:(NSString *)aName {
-    return (id)[[BDSKURLBookmark alloc] initWithUrlString:aUrlString name:aName ?: NSLocalizedString(@"New Boookmark", @"Default name for boookmark")];
+- (id)initWithURL:(NSURL *)aURL name:(NSString *)aName {
+    return (id)[[BDSKURLBookmark alloc] initWithURL:aURL name:aName ?: NSLocalizedString(@"New Boookmark", @"Default name for boookmark")];
 }
 
 - (id)initFolderWithChildren:(NSArray *)aChildren name:(NSString *)aName {
@@ -224,7 +223,7 @@ static Class BDSKBookmarkClass = Nil;
     } else if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:SEPARATOR_STRING]) {
         return [self initSeparator];
     } else {
-        return [self initWithUrlString:[dictionary objectForKey:URL_KEY] name:[dictionary objectForKey:TITLE_KEY]];
+        return [self initWithURL:[NSURL URLWithString:[dictionary objectForKey:URLSTRING_KEY]] name:[dictionary objectForKey:TITLE_KEY]];
     }
 }
 
@@ -242,10 +241,10 @@ static Class BDSKBookmarkClass = Nil;
 
 @implementation BDSKURLBookmark
 
-- (id)initWithUrlString:(NSString *)aUrlString name:(NSString *)aName {
+- (id)initWithURL:(NSURL *)aURL name:(NSString *)aName {
     self = [super init];
     if (self) {
-        urlString = [aUrlString copy];
+        url = [aURL copy];
         name = [aName copy];
     }
     return self;
@@ -253,16 +252,16 @@ static Class BDSKBookmarkClass = Nil;
 
 - (void)dealloc {
     BDSKDESTROY(name);
-    BDSKDESTROY(urlString);
+    BDSKDESTROY(url);
     [super dealloc];
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"<%@: name=%@, URL=%@>", [self class], name, urlString];
+    return [NSString stringWithFormat:@"<%@: name=%@, URL=%@>", [self class], name, url];
 }
 
 - (NSDictionary *)dictionaryValue {
-    return [NSDictionary dictionaryWithObjectsAndKeys:BOOKMARK_STRING, TYPE_KEY, urlString, URL_KEY, name, TITLE_KEY, nil];
+    return [NSDictionary dictionaryWithObjectsAndKeys:BOOKMARK_STRING, TYPE_KEY, [url absoluteString], URLSTRING_KEY, name, TITLE_KEY, nil];
 }
 
 - (BDSKBookmarkType)bookmarkType {
@@ -280,47 +279,15 @@ static Class BDSKBookmarkClass = Nil;
     }
 }
 
-- (BOOL)validateName:(id *)value error:(NSError **)error {
-    NSString *string = *value;
-    if ([NSString isEmptyString:string]) {
-        if (error) {
-            NSString *description = NSLocalizedString(@"Invalid name.", @"Error description");
-            NSString *reason = [NSString stringWithFormat:NSLocalizedString(@"Cannot set empty name for bookmark.", @"Error reason"), string];
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
-            *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:userInfo];
-        }
-        return NO;
-    }
-    return YES;
-}
-
 - (NSURL *)URL {
-    return [NSURL URLWithString:[self urlString]];
+    return url;
 }
 
-- (NSString *)urlString {
-    return [[urlString retain] autorelease];
-}
-
-- (void)setUrlString:(NSString *)newUrlString {
-    if (urlString != newUrlString) {
-        [urlString release];
-        urlString = [newUrlString retain];
+- (void)setURL:(NSURL *)newURL {
+    if (url != newURL) {
+        [url release];
+        url = [newURL retain];
     }
-}
-
-- (BOOL)validateUrlString:(id *)value error:(NSError **)error {
-    NSString *string = *value;
-    if (string == nil || [NSURL URLWithString:string] == nil) {
-        if (error) {
-            NSString *description = NSLocalizedString(@"Invalid URL.", @"Error description");
-            NSString *reason = [NSString stringWithFormat:NSLocalizedString(@"\"%@\" is not a valid URL.", @"Error reason"), string];
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
-            *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:userInfo];
-        }
-        return NO;
-    }
-    return YES;
 }
 
 - (NSImage *)icon {
@@ -386,20 +353,6 @@ static Class BDSKBookmarkClass = Nil;
         [name release];
         name = [newName retain];
     }
-}
-
-- (BOOL)validateName:(id *)value error:(NSError **)error {
-    NSString *string = *value;
-    if ([NSString isEmptyString:string]) {
-        if (error) {
-            NSString *description = NSLocalizedString(@"Invalid name.", @"Error description");
-            NSString *reason = [NSString stringWithFormat:NSLocalizedString(@"cannot set empty name for bookmark.", @"Error reason"), string];
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
-            *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:userInfo];
-        }
-        return NO;
-    }
-    return YES;
 }
 
 - (NSArray *)children {
