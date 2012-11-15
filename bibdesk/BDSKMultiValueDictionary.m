@@ -64,8 +64,15 @@
  */
 
 #import "BDSKMultiValueDictionary.h"
-#import "BDSKCFCallBacks.h"
+#import "CFString_BDSKExtensions.h"
 
+static BOOL caseInsensitiveStringEqual(const void *item1, const void *item2, NSUInteger (*size)(const void *item)) {
+    return CFStringCompare(item1, item2, kCFCompareCaseInsensitive | kCFCompareNonliteral) == kCFCompareEqualTo;
+}
+
+static NSUInteger caseInsensitiveStringHash(const void *item, NSUInteger (*size)(const void *item)) {
+    return BDCaseInsensitiveStringHash(item);
+}
 
 @implementation BDSKMultiValueDictionary
 
@@ -76,18 +83,24 @@
 - (id)initWithCaseInsensitiveKeys:(BOOL)caseInsensitive {
     self = [super init];
     if (self) {
-        dictionary = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, caseInsensitive ? &kBDSKCaseInsensitiveStringDictionaryKeyCallBacks : &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        NSPointerFunctions *keyPointerFunctions = [NSPointerFunctions pointerFunctionsWithOptions:NSPointerFunctionsStrongMemory | NSPointerFunctionsObjectPersonality];
+        if (caseInsensitive) {
+            [keyPointerFunctions setIsEqualFunction:&caseInsensitiveStringEqual];
+            [keyPointerFunctions setHashFunction:&caseInsensitiveStringHash];
+        }
+        NSPointerFunctions *valuePointerFunctions = [NSPointerFunctions pointerFunctionsWithOptions:NSPointerFunctionsStrongMemory | NSPointerFunctionsObjectPersonality];
+        mapTable = [[NSMapTable alloc] initWithKeyPointerFunctions:keyPointerFunctions valuePointerFunctions:valuePointerFunctions capacity:0];
     }
     return self;
 }
 
 - (void)dealloc {
-    BDSKCFDESTROY(dictionary);
+    BDSKCFDESTROY(mapTable);
     [super dealloc];
 }
 
 - (NSArray *)allObjectsForKey:(id)key {
-    return (NSArray *)CFDictionaryGetValue(dictionary, key);
+    return [mapTable objectForKey:key];
 }
 
 - (id)firstObjectForKey:(id)key {
@@ -99,31 +112,31 @@
 }
 
 - (void)addObject:(id)object forKey:(id)key {
-    NSMutableArray *array = (NSMutableArray *)CFDictionaryGetValue(dictionary, key);
+    NSMutableArray *array = [mapTable objectForKey:key];
     if (array) {
         [array addObject:object];
     } else {
         array = [[NSMutableArray alloc] initWithObjects:object, nil];
-        CFDictionaryAddValue(dictionary, key, array);
+        [mapTable setObject:array forKey:key];
         [array release];
     }
 }
 
 - (void)removeObject:(id)object forKey:(id)key {
-    NSMutableArray *array = (NSMutableArray *)CFDictionaryGetValue(dictionary, key);
+    NSMutableArray *array = [mapTable objectForKey:key];
     if (array) {
         [array removeObject:object];
         if ([array count] == 0)
-            CFDictionaryRemoveValue(dictionary, key);
+            [mapTable removeObjectForKey:key];
     }
 }
 
 - (void)removeAllObjectsForKey:(id)key {
-    CFDictionaryRemoveValue(dictionary, key);
+    [mapTable removeObjectForKey:key];
 }
 
 - (void)removeAllObjects {
-    CFDictionaryRemoveAllValues(dictionary);
+    [mapTable removeAllObjects];
 }
 
 @end

@@ -67,7 +67,7 @@
 
 
 @interface BDSKMultiValueDictionary : NSObject {
-    CFMutableDictionaryRef dictionary;
+    NSMapTable *mapTable;
 }
 
 - (id)init;
