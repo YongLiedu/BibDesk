@@ -166,19 +166,4 @@ static void addValueFunction(const void *value, void *context) {
     CFDictionaryRemoveAllValues(inverseDictionary);
 }
 
-static void addEntryFunction(const void *key, const void *value, void *context) {
-    addValueContext *ctxt = context;
-    [[ctxt->dict _setForValue:(id)key inverse:ctxt->inverse create:YES] unionSet:(NSSet *)value];
-}
-
-- (void)addEntriesFromDictionary:(BDSKManyToManyDictionary *)otherDictionary {
-    addValueContext ctxt;
-    ctxt.dict = self;
-    ctxt.value = nil;
-    ctxt.inverse = NO;
-    CFDictionaryApplyFunction([otherDictionary _dictionary:NO], addEntryFunction, &ctxt);
-    ctxt.inverse = YES;
-    CFDictionaryApplyFunction([otherDictionary _dictionary:YES], addEntryFunction, &ctxt);
-}
-
 @end
