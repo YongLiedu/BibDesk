@@ -54,6 +54,7 @@
 #import "BDSKTableView.h"
 #import "NSMenu_BDSKExtensions.h"
 #import "NSPasteboard_BDSKExtensions.h"
+#import "NSFileManager_BDSKExtensions.h"
 
 #define BDSKOrphanedFilesWindowFrameAutosaveName @"BDSKOrphanedFilesWindow"
 
@@ -144,7 +145,9 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
             return nil;
         }
     }
-
+    
+    papersFolderPath = [[NSFileManager defaultManager] resolveAliasesInPath:papersFolderPath];
+    
     return [NSURL fileURLWithPath:papersFolderPath];
 }
 
