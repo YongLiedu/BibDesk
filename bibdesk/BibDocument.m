@@ -1555,7 +1555,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         if(isOK && ([[groups staticGroups] count] > 0)){
             hasData = YES;
             isOK = [outputData appendDataFromString:@"\n\n@comment{BibDesk Static Groups{\n" encoding:encoding error:&error] &&
-                   [outputData appendStringData:[groups serializedGroupsDataOfType:BDSKStaticGroupType] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
+                   [outputData appendUTF8StringData:[groups serializedGroupsDataOfType:BDSKStaticGroupType] encoding:groupsEncoding error:&error] &&
                    [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
             if(NO == isOK){
                 if ([error isMutable] == NO) error = [[error mutableCopy] autorelease];
@@ -1565,7 +1565,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         if(isOK && ([[groups smartGroups] count] > 0)){
             hasData = YES;
             isOK = [outputData appendDataFromString:@"\n\n@comment{BibDesk Smart Groups{\n" encoding:encoding error:&error] &&
-                   [outputData appendStringData:[groups serializedGroupsDataOfType:BDSKSmartGroupType] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
+                   [outputData appendUTF8StringData:[groups serializedGroupsDataOfType:BDSKSmartGroupType] encoding:groupsEncoding error:&error] &&
                    [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
             if(NO == isOK){
                 if ([error isMutable] == NO) error = [[error mutableCopy] autorelease];
@@ -1575,7 +1575,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         if(isOK && ([[groups URLGroups] count] > 0)){
             hasData = YES;
             isOK = [outputData appendDataFromString:@"\n\n@comment{BibDesk URL Groups{\n" encoding:encoding error:&error] &&
-                   [outputData appendStringData:[groups serializedGroupsDataOfType:BDSKURLGroupType] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
+                   [outputData appendUTF8StringData:[groups serializedGroupsDataOfType:BDSKURLGroupType] encoding:groupsEncoding error:&error] &&
                    [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
             if(NO == isOK){
                 if ([error isMutable] == NO) error = [[error mutableCopy] autorelease];
@@ -1585,7 +1585,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         if(isOK && ([[groups scriptGroups] count] > 0)){
             hasData = YES;
             isOK = [outputData appendDataFromString:@"\n\n@comment{BibDesk Script Groups{\n" encoding:encoding error:&error] &&
-                   [outputData appendStringData:[groups serializedGroupsDataOfType:BDSKScriptGroupType] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
+                   [outputData appendUTF8StringData:[groups serializedGroupsDataOfType:BDSKScriptGroupType] encoding:groupsEncoding error:&error] &&
                    [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
             if(NO == isOK){
                 if ([error isMutable] == NO) error = [[error mutableCopy] autorelease];
