@@ -63,42 +63,28 @@
     [super dealloc];
 }
 
-static BOOL fileURLIsVisible(NSURL *fileURL)
-{
-    OSStatus err;
-    FSRef fileRef;
-    err = CFURLGetFSRef((CFURLRef)fileURL, &fileRef) ? noErr : fnfErr;
-    CFBooleanRef isInvisible;
-    BOOL isVisible = YES;
-    
-    if (noErr == err)
-        err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemIsInvisible, (CFTypeRef *)&isInvisible);
-    
-    if (noErr == err) {
-        isVisible = (CFBooleanGetValue(isInvisible) == FALSE);
-        CFRelease(isInvisible);
-    }
-    return isVisible;
-}
-
 - (NSArray *)URLsFromURLsAndDirectories:(NSArray *)filesAndDirectories
 {
     NSMutableArray *URLs = [NSMutableArray arrayWithCapacity:[filesAndDirectories count]];
-    BOOL isDir;
+    NSNumber *isDir;
+    NSNumber *isPackage;
     NSFileManager *fm = [NSFileManager defaultManager];
     for (NSURL *aURL in filesAndDirectories) {
+        isDir = isPackage = nil;
+        [aURL getResourceValue:&isDir forKey:NSURLIsDirectoryKey error:NULL];
+        [aURL getResourceValue:&isPackage forKey:NSURLIsPackageKey error:NULL];
         // presumably the file exists, since it arrived here because of drag-and-drop or the open panel, but we handle directories specially
-        if (([fm fileExistsAtPath:[aURL path] isDirectory:&isDir])) {
-            // if not a directory, or it's a package, add it immediately
-            if (NO == isDir || [[NSWorkspace sharedWorkspace] isFilePackageAtPath:[aURL path]]) {
-                [URLs addObject:aURL];
-            } else {
-                // shallow directory traversal: only add the (non-folder) contents of a folder that was dropped, since an arbitrarily deep traversal would have performance issues for file listing and for the search kit indexing
-                for (NSURL *fileURL in [fm contentsOfDirectoryAtURL:aURL includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsHiddenFiles error:NULL]) {
-                    [fm fileExistsAtPath:[fileURL path] isDirectory:&isDir];
-                    if (fileURLIsVisible(fileURL) && NO == isDir || [[NSWorkspace sharedWorkspace] isFilePackageAtPath:[fileURL path]])
-                        [URLs addObject:fileURL];
-                }
+        // if not a directory, or it's a package, add it immediately
+        if (NO == [isDir boolValue] || [isPackage boolValue]) {
+            [URLs addObject:aURL];
+        } else {
+            // shallow directory traversal: only add the (non-folder) contents of a folder that was dropped, since an arbitrarily deep traversal would have performance issues for file listing and for the search kit indexing
+            for (NSURL *fileURL in [fm contentsOfDirectoryAtURL:aURL includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsHiddenFiles error:NULL]) {
+                isDir = isPackage = nil;
+                [fileURL getResourceValue:&isDir forKey:NSURLIsDirectoryKey error:NULL];
+                [fileURL getResourceValue:&isPackage forKey:NSURLIsPackageKey error:NULL];
+                if (NO == [isDir boolValue] || [isPackage boolValue])
+                    [URLs addObject:fileURL];
             }
         }
     }
