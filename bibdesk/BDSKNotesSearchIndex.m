@@ -160,19 +160,17 @@
             searchText = [NSMutableString string];
             for (NSURL *fileURL in fileURLs) {
                 NSString *notesString = nil;
-                FSRef fileRef;
-                CFStringRef theUTI = NULL;
-                if (CFURLGetFSRef((CFURLRef)fileURL, &fileRef))
-                    LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, (CFTypeRef *)&theUTI);
-                if (theUTI && UTTypeConformsTo(theUTI, CFSTR("net.sourceforge.skim-app.pdfd")))
+                NSWorkspace *ws = [NSWorkspace sharedWorkspace];
+                NSString *type = [ws typeOfFile:[fileURL path] error:NULL];
+                if (type && [ws type:type conformsToType:@"net.sourceforge.skim-app.pdfd"])
                     notesString = [fileManager readSkimTextNotesFromPDFBundleAtURL:fileURL error:NULL];
                 else
                     notesString = [fileManager readSkimTextNotesFromExtendedAttributesAtURL:fileURL error:NULL];
                 if (notesString == nil) {
                     NSArray *notes = nil;
-                    if (theUTI && UTTypeConformsTo(theUTI, CFSTR("net.sourceforge.skim-app.pdfd")))
+                    if (type && [ws type:type conformsToType:@"net.sourceforge.skim-app.pdfd"])
                         notes = [fileManager readSkimNotesFromPDFBundleAtURL:fileURL error:NULL];
-                    else if (theUTI && UTTypeConformsTo(theUTI, CFSTR("net.sourceforge.skim-app.skimnotes")))
+                    else if (type && [ws type:type conformsToType:@"net.sourceforge.skim-app.skimnotes"])
                         notes = [fileManager readSkimNotesFromSkimFileAtURL:fileURL error:NULL];
                     else
                         notes = [fileManager readSkimNotesFromExtendedAttributesAtURL:fileURL error:NULL];
