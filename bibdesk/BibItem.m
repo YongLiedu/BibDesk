@@ -1514,20 +1514,9 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     NSMutableArray *urls = [[NSMutableArray alloc] initWithCapacity:5];
     NSNumber *isAlias;
     for (BDSKLinkedFile *file in [self localFiles]) {
-        if ((aURL = [file URL])) {
-            // SearchKit cannot handle alias files, so we resolve those
-            while ([aURL getResourceValue:&isAlias forKey:NSURLIsAliasFileKey error:NULL] && [isAlias boolValue]) {
-                NSURL *resolvedURL = nil;
-                NSData *data = [NSURL bookmarkDataWithContentsOfURL:aURL error:NULL];
-                if (data)
-                    resolvedURL = [NSURL URLByResolvingBookmarkData:data options:NSURLBookmarkResolutionWithoutUI relativeToURL:nil bookmarkDataIsStale:NULL error:NULL];
-                if (resolvedURL)
-                    aURL = resolvedURL;
-                else
-                    break;
-            }
+        // SearchKit cannot handle alias files, so we resolve those
+        if ((aURL = [[file URL] fileURLByResolvingAliases]))
             [urls addObject:aURL];
-        }
     }
     
     NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[self identifierURL], @"identifierURL", urls, @"urls", nil];
