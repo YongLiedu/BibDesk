@@ -2618,7 +2618,7 @@ static void addFilesToArray(const void *value, void *context)
 
 - (NSURL *)localFileURLForField:(NSString *)field{
     
-    NSURL *localURL = nil, *resolvedURL = nil;
+    NSURL *localURL = nil;
     NSString *localURLFieldValue = [self valueOfField:field inherit:NO];
     
     if ([NSString isEmptyString:localURLFieldValue]) return nil;
@@ -2644,9 +2644,10 @@ static void addFilesToArray(const void *value, void *context)
     
     // resolve aliases in the containing dir, as most NSFileManager methods do not follow them, and NSWorkspace can't open aliases
 	// we don't resolve the last path component if it's an alias, as this is used in auto file, which should move the alias rather than the target file 
-    // if the path to the file does not exist resolvedURL is nil, so we return the unresolved path
-    if ((resolvedURL = [localURL fileURLByResolvingAliasesBeforeLastPathComponent]))
-        localURL = resolvedURL;
+    // if the path to the file does not exist resolvedParentURL is nil, so we return the unresolved path
+    NSURL *resolvedParentURL = [[localURL URLByDeletingLastPathComponent] fileURLByResolvingAliases];
+    if (resolvedParentURL)
+        localURL = [resolvedParentURL URLByAppendingPathComponent:[localURL lastPathComponent]];
     
     return localURL;
 }
