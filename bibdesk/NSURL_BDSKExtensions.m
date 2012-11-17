@@ -130,7 +130,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
         while (idx--) {
             
             oldURL = fileURL;
-            fileURL = CFURLCreateCopyAppendingPathComponent(allocator, fileURL, CFArrayGetValueAtIndex(strippedComponents, idx), isFolder);
+            fileURL = CFURLCreateCopyAppendingPathComponent(allocator, fileURL, CFArrayGetValueAtIndex(strippedComponents, idx), idx > 0);
             CFRelease(oldURL);
             
             if (CFURLGetFSRef(fileURL, &fileRef) == FALSE) {
