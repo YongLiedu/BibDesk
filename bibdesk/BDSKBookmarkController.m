@@ -269,13 +269,13 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 #pragma mark Notification handlers
 
 - (void)handleApplicationWillTerminateNotification:(NSNotification *)notification {
-	NSString *error = nil;
-	NSData *data = [NSPropertyListSerialization dataFromPropertyList:[[bookmarkRoot children] valueForKey:@"dictionaryValue"]
-															  format:NSPropertyListXMLFormat_v1_0 
-													errorDescription:&error];
+	NSError *error = nil;
+	NSData *data = [NSPropertyListSerialization dataWithPropertyList:[[bookmarkRoot children] valueForKey:@"dictionaryValue"]
+															  format:NSPropertyListXMLFormat_v1_0
+                                                             options:0 
+													           error:&error];
 	if (error) {
 		NSLog(@"Error writing bookmarks: %@", error);
-        [error release];
 		return;
 	}
 	

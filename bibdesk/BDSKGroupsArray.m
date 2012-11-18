@@ -320,16 +320,15 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
 #pragma mark Serializing
 
 - (void)setGroupsOfType:(NSInteger)groupType fromSerializedData:(NSData *)data {
-	NSString *error = nil;
+	NSError *error = nil;
 	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
-	id plist = [NSPropertyListSerialization propertyListFromData:data
-												mutabilityOption:NSPropertyListImmutable
+	id plist = [NSPropertyListSerialization propertyListWithData:data
+                                                         options:NSPropertyListImmutable
 														  format:&format 
-												errorDescription:&error];
+                                                           error:&error];
 	
 	if (error) {
 		NSLog(@"Error deserializing: %@", error);
-        [error release];
 		return;
 	}
 	if ([plist isKindOfClass:[NSArray class]] == NO) {
@@ -397,15 +396,15 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
     if (groupClass && groupArray) {
         NSArray *array = [groupArray valueForKey:@"dictionaryValue"];
         
-        NSString *error = nil;
+        NSError *error = nil;
         NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
-        data = [NSPropertyListSerialization dataFromPropertyList:array
-                                                          format:format 
-                                                errorDescription:&error];
+        data = [NSPropertyListSerialization dataWithPropertyList:array
+                                                          format:format
+                                                         options:0
+                                                           error:&error];
             
         if (error) {
             NSLog(@"Error serializing: %@", error);
-            [error release];
             return nil;
         }
 	}

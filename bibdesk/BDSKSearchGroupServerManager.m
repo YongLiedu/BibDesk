@@ -122,12 +122,11 @@ static BOOL isSearchFileAtPath(NSString *path) {
 }
 
 - (void)saveServerFile:(BDSKServerInfo *)serverInfo {
-    NSString *error = nil;
+    NSError *error = nil;
     NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
-    NSData *data = [NSPropertyListSerialization dataFromPropertyList:[serverInfo dictionaryValue] format:format errorDescription:&error];
+    NSData *data = [NSPropertyListSerialization dataWithPropertyList:[serverInfo dictionaryValue] format:format options:0 error:&error];
     if (error) {
         NSLog(@"Error writing: %@", error);
-        [error release];
     } else {
         NSString *applicationSupportPath = [[NSFileManager defaultManager] applicationSupportDirectory];
         NSString *serversPath = [applicationSupportPath stringByAppendingPathComponent:SERVERS_DIRNAME];

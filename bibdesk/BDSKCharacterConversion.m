@@ -196,7 +196,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
             return;
         }
         
-        NSString *error = nil;
+        NSError *error = nil;
         NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
         
         NSMutableDictionary *reverseDict = [NSMutableDictionary dictionaryWithCapacity:[twoWayDict count]];
@@ -206,12 +206,12 @@ static BDSKCharacterConversion *sharedConversionEditor;
                                                                         twoWayDict, ROMAN_TO_TEX_KEY,
                                                                         reverseDict, TEX_TO_ROMAN_KEY, nil];
         
-        NSData *data = [NSPropertyListSerialization dataFromPropertyList:dict
+        NSData *data = [NSPropertyListSerialization dataWithPropertyList:dict
                                                                   format:format 
-                                                        errorDescription:&error];
+                                                                 options:0 
+                                                                   error:&error];
         if (error) {
             NSLog(@"Error writing: %@", error);
-            [error release];
         } else {
             NSString *applicationSupportPath = [[NSFileManager defaultManager] applicationSupportDirectory]; 
             NSString *charConvPath = [applicationSupportPath stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];

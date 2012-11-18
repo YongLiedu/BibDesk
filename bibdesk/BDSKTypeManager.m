@@ -269,14 +269,14 @@ static NSString *BDSKUserTypeInfoPath() {
                 newFieldsForTypes, FIELDS_FOR_TYPES_KEY, 
                 [NSDictionary dictionaryWithObject:newTypes forKey:BDSKBibtexString], TYPES_FOR_FILE_TYPE_KEY, nil];
     
-    NSString *error = nil;
+    NSError *error = nil;
     NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
-    NSData *data = [NSPropertyListSerialization dataFromPropertyList:dict
-                                                              format:format 
-                                                    errorDescription:&error];
+    NSData *data = [NSPropertyListSerialization dataWithPropertyList:dict
+                                                              format:format
+                                                             options:0
+                                                               error:&error];
     if (error) {
         NSLog(@"Error writing: %@", error);
-        [error release];
     } else {
         [data writeToFile:BDSKUserTypeInfoPath() atomically:YES];
         

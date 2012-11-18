@@ -777,11 +777,10 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     
     NSData *dataToSend = nil;
     if ([pubsAndMacros objectForKey:BDSKSharedArchivedDataKey]) {
-        NSString *errorString = nil;
-        dataToSend = [NSPropertyListSerialization dataFromPropertyList:pubsAndMacros format:NSPropertyListBinaryFormat_v1_0 errorDescription:&errorString];
-        if(errorString != nil){
-            NSLog(@"Error serializing publications for sharing: %@", errorString);
-            [errorString release];
+        NSError *error = nil;
+        dataToSend = [NSPropertyListSerialization dataWithPropertyList:pubsAndMacros format:NSPropertyListBinaryFormat_v1_0 options:0 error:&error];
+        if(error != nil){
+            NSLog(@"Error serializing publications for sharing: %@", error);
         } else {
             // Omni's bzip2 method caused a hang when I tried it, but -compressedData produced a 50% size decrease
             @try{ dataToSend = [dataToSend compressedData]; }

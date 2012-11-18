@@ -456,11 +456,10 @@ typedef struct _BDSKSharingClientFlags {
         if([proxyData length] != 0){
             if([proxyData mightBeCompressed])
                 proxyData = [proxyData decompressedData];
-            NSString *errorString = nil;
-            archive = [NSPropertyListSerialization propertyListFromData:proxyData mutabilityOption:NSPropertyListImmutable format:NULL errorDescription:&errorString];
-            if(errorString != nil){
-                NSString *errorStr = [NSString stringWithFormat:@"Error reading shared data: %@", errorString];
-                [errorString release];
+            NSError *error = nil;
+            archive = [NSPropertyListSerialization propertyListWithData:proxyData options:NSPropertyListImmutable format:NULL error:&error];
+            if(error != nil){
+                NSString *errorStr = [NSString stringWithFormat:@"Error reading shared data: %@", error];
                 @throw errorStr;
             }
         }
