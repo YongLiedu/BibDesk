@@ -775,7 +775,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             return;
         }
         
-        NSMutableArray *array = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
+        NSMutableArray *array = [groupFields mutableCopy];
         if ([array indexOfObject:newGroupField] == NSNotFound)
             [array addObject:newGroupField];
         [[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKGroupFieldsKey];	
@@ -785,14 +785,15 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (IBAction)removeGroupFieldAction:(id)sender{
+	NSArray *groupFields = [[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey];
     BDSKRemoveFieldSheetController *removeFieldController = [[[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field to remove:", @"Label for removing group field")
-                                                                                                        fieldsArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey]] autorelease];
+                                                                                                        fieldsArray:groupFields] autorelease];
 	[removeFieldController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
         NSString *oldGroupField = [removeFieldController field];
         if(result == NSCancelButton || [NSString isEmptyString:oldGroupField])
             return;
         
-        NSMutableArray *array = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
+        NSMutableArray *array = [groupFields mutableCopy];
         [array removeObject:oldGroupField];
         [[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKGroupFieldsKey];
         [array release];
