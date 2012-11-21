@@ -89,6 +89,7 @@
 #import "BDSKBookmarkSheetController.h"
 #import "BDSKBookmarkController.h"
 #import "NSPasteboard_BDSKExtensions.h"
+#import "NSTableView_BDSKExtensions.h"
 
 
 @implementation BibDocument (Groups)
@@ -207,11 +208,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (NSArray *)clickedOrSelectedGroups {
-    NSInteger row = [groupOutlineView clickedRow];
-    NSIndexSet *rowIndexes = [groupOutlineView selectedRowIndexes];
-    if (row != -1 && [rowIndexes containsIndex:row] == NO)
-        rowIndexes = [NSIndexSet indexSetWithIndex:row];
-    return [groupOutlineView itemsAtRowIndexes:rowIndexes];
+    return [groupOutlineView itemsAtRowIndexes:[groupOutlineView clickedOrSelectedRowIndexes]];
 }
 
 #pragma mark Search group view
