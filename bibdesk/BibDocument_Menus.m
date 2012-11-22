@@ -123,7 +123,7 @@
 }	
 		
 - (BOOL) validateRemoveSelectedPubsMenuItem:(NSMenuItem*) menuItem {
-    if ([self numberOfClickedOrSelectedPubs] == 0 && [self hasExternalGroupsSelected])
+    if ([self numberOfClickedOrSelectedPubs] == 0 || [self hasExternalGroupsSelected])
         return NO;
     if([self hasLibraryGroupSelected])
         return [self validateDeleteSelectedPubsMenuItem:menuItem];
