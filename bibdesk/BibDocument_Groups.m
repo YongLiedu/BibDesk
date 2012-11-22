@@ -801,15 +801,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }    
 
 - (void)editGroupWithoutWarning:(BDSKGroup *)group {
-    if ([group parent] == nil) {
-        // this can happen for a category group, as those are rebuild, so we use an existing group that is equal
-        NSArray *allGroups = [groups allChildren];
-        NSUInteger idx = [allGroups indexOfObject:group];
-        BDSKASSERT(idx != NSNotFound);
-        if (idx != NSNotFound)
-            group = [allGroups objectAtIndex:idx];
-    }
-    
     [groupOutlineView expandItem:[group parent]];
     NSInteger i = [groupOutlineView rowForItem:group];
     BDSKASSERT(i != -1);
@@ -1140,6 +1131,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [self addPublications:pubs toGroup:group];
     [groupOutlineView deselectAll:nil];
     [self updateCategoryGroupsPreservingSelection:NO];
+    
+    NSUInteger idx = [[groups categoryGroups] indexOfObject:group];
+    BDSKASSERT(idx != NSNotFound);
+    if (idx != NSNotFound)
+        group = [[groups categoryGroups] objectAtIndex:idx];
     
     [self performSelector:@selector(editGroupWithoutWarning:) withObject:group afterDelay:0.0];
 }
