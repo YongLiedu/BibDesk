@@ -502,13 +502,16 @@ static void removeInvalidItemsFromMenu(id validator, NSMenu *menu) {
     // kick out every item we won't need:
     NSInteger i = [menu numberOfItems];
     BOOL wasSeparator = YES;
+    BOOL wasAlternate = NO;
     
     while (--i >= 0) {
         NSMenuItem *item = [menu itemAtIndex:i];
-        if (([item isSeparatorItem] == NO && [validator validateMenuItem:item] == NO) || ((wasSeparator || i == 0) && [item isSeparatorItem]) || ([item submenu] && menuHasNoValidItems(validator, [item submenu])))
+        if (wasAlternate == NO && (([item isSeparatorItem] == NO && [validator validateMenuItem:item] == NO) || ((wasSeparator || i == 0) && [item isSeparatorItem]) || ([item submenu] && menuHasNoValidItems(validator, [item submenu])))) {
             [menu removeItem:item];
-        else
+        } else {
             wasSeparator = [item isSeparatorItem];
+            wasAlternate = [item isAlternate];
+        }
     }
     while ([menu numberOfItems] > 0 && [(NSMenuItem*)[menu itemAtIndex:0] isSeparatorItem])	
         [menu removeItemAtIndex:0];
