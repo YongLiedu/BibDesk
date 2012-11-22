@@ -96,12 +96,6 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 @protocol BDSKSharingServerLocalThread <BDSKAsyncDOServerThread>
 
 - (oneway void)notifyClientsOfChange;
-
-@end
-
-// private protocol for inter-thread messaging
-@protocol BDSKSharingServerMainThread <BDSKAsyncDOServerMainThread>
-
 - (oneway void)localThreadServerDidSetup:(BOOL)success;
 
 @end
@@ -600,8 +594,6 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 #pragma mark | DO Server
 
 - (Protocol *)protocolForServerThread { return @protocol(BDSKSharingServerLocalThread); }
-
-- (Protocol *)protocolForMainThread { return @protocol(BDSKSharingServerMainThread); }
 
 - (void)serverDidSetup
 {
