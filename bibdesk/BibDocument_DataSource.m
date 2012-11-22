@@ -1426,7 +1426,9 @@
 
 - (BOOL)outlineView:(NSOutlineView *)ov canDeleteItems:(NSArray *)items {
 	if (ov == groupOutlineView) {
-		return [[items filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isStatic == YES OR isSmart == YES OR isSearch == YES OR isURL == YES OR isScript == YES OR isWeb == YES"]] count] > 0;
+        return NSNotFound != [items indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop){
+            return [obj isStatic] || [obj isSmart] || [obj isSearch] || [obj isURL] || [obj isScript] || [obj isWeb];
+        }];
 	}
     return NO;
 }

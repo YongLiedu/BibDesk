@@ -125,15 +125,21 @@
 }
 
 - (BOOL)hasSmartGroupsSelected{
-    return [[[self selectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isSmart == YES"]] count] > 0;
+    return NSNotFound != [[self selectedGroups] indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        return [obj isSmart];
+    }];
 }
 
 - (BOOL)hasStaticGroupsSelected{
-    return [[[self selectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isStatic == YES"]] count] > 0;
+    return NSNotFound != [[self selectedGroups] indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        return [obj isStatic];
+    }];
 }
 
 - (BOOL)hasCategoryGroupsSelected{
-    return [[[self selectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isCategory == YES"]] count] > 0;
+    return NSNotFound != [[self selectedGroups] indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        return [obj isCategory];
+    }];
 }
 
 - (BOOL)hasExternalGroupsSelected{
@@ -169,15 +175,21 @@
 }
 
 - (BOOL)hasSmartGroupsClickedOrSelected{
-    return [[[self clickedOrSelectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isSmart == YES"]] count] > 0;
+    return NSNotFound != [[self clickedOrSelectedGroups] indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        return [obj isSmart];
+    }];
 }
 
 - (BOOL)hasStaticGroupsClickedOrSelected{
-    return [[[self clickedOrSelectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isStatic == YES"]] count] > 0;
+    return NSNotFound != [[self clickedOrSelectedGroups] indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        return [obj isStatic];
+    }];
 }
 
 - (BOOL)hasCategoryGroupsClickedOrSelected{
-    return [[[self clickedOrSelectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isCategory == YES"]] count] > 0;
+    return NSNotFound != [[self clickedOrSelectedGroups] indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        return [obj isCategory];
+    }];
 }
 
 - (BOOL)hasExternalGroupsClickedOrSelected{
