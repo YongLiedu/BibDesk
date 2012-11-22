@@ -1260,7 +1260,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             }
 		}else if(rv == BDSKOperationAsk){
 			NSString *otherButton = nil;
-			if([[self currentGroupField] isSingleValuedGroupField] == NO)
+			if(field && [field isSingleValuedGroupField] == NO)
 				otherButton = NSLocalizedString(@"Append", @"Button title");
 			
 			NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")

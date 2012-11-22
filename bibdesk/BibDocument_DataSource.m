@@ -934,8 +934,9 @@
     if ([group isCategory]) {
         NSArray *pubs = [groupedPublications copy];
         // change the name of the group first, so we can preserve the selection; we need to old group info to move though
-        id name = [[self currentGroupField] isPersonField] ? (id)[BibAuthor authorWithName:newName] : (id)newName;
-        BDSKCategoryGroup *oldGroup = [[[BDSKCategoryGroup alloc] initWithName:[group name] key:[(BDSKCategoryGroup *)group key]] autorelease];
+        NSString *key = [(BDSKCategoryGroup *)group key];
+        id name = [key isPersonField] ? (id)[BibAuthor authorWithName:newName] : (id)newName;
+        BDSKCategoryGroup *oldGroup = [[[BDSKCategoryGroup alloc] initWithName:[group name] key:key] autorelease];
         [(BDSKCategoryGroup *)group setName:name];
         [self movePublications:pubs fromGroup:oldGroup toGroupNamed:newName];
         [pubs release];
@@ -980,7 +981,7 @@
                                          defaultButton:NSLocalizedString(@"OK", @"Button title")
                                        alternateButton:NSLocalizedString(@"Cancel", @"Button title")
                                            otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"This action will change the %@ field in %ld items. Do you want to proceed?", @"Informative text in alert dialog"), [currentGroupField localizedFieldName], (long)[groupedPublications count]];
+                             informativeTextWithFormat:NSLocalizedString(@"This action will change the %@ field in %ld items. Do you want to proceed?", @"Informative text in alert dialog"), [[(BDSKCategoryGroup *)item key] localizedFieldName], (long)[groupedPublications count]];
         [alert setShowsSuppressionButton:YES];
         NSInteger rv = [alert runModal];
         if ([[alert suppressionButton] state] == NSOnState)
