@@ -145,17 +145,20 @@ static inline BOOL fileConformsToTypes(NSString *filename, NSArray *types) {
 
 - (NSArray *)readFileURLsOfTypes:(NSArray *)types {
     NSArray *fileURLs = [self readObjectsForClasses:[NSArray arrayWithObject:[NSURL class]] options:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:YES], NSPasteboardURLReadingFileURLsOnlyKey, types, NSPasteboardURLReadingContentsConformToTypesKey, nil]];
-    if ([fileURLs count] == 0 && [[self types] containsObject:NSFilenamesPboardType]) {
-        NSArray *filenames = [self propertyListForType:NSFilenamesPboardType];
-        if ([filenames count]  > 0) {
-            NSMutableArray *files = [NSMutableArray array];
-            for (NSString *filename in filenames) {
-                filename = [filename stringByExpandingTildeInPath];
-                if (types == nil || fileConformsToTypes(filename, types))
-                    [files addObject:[NSURL fileURLWithPath:filename]];
+    if ([fileURLs count] == 0) {
+        fileURLs = nil;
+        if ([[self types] containsObject:NSFilenamesPboardType]) {
+            NSArray *filenames = [self propertyListForType:NSFilenamesPboardType];
+            if ([filenames count]  > 0) {
+                NSMutableArray *files = [NSMutableArray array];
+                for (NSString *filename in filenames) {
+                    filename = [filename stringByExpandingTildeInPath];
+                    if (types == nil || fileConformsToTypes(filename, types))
+                        [files addObject:[NSURL fileURLWithPath:filename]];
+                }
+                if ([files count] > 0)
+                    fileURLs = files;
             }
-            if ([files count] > 0)
-                fileURLs = files;
         }
     }
     return fileURLs;
@@ -169,6 +172,7 @@ static inline BOOL fileConformsToTypes(NSString *filename, NSArray *types) {
 - (NSArray *)readURLs {
     NSArray *URLs = [self readObjectsForClasses:[NSArray arrayWithObject:[BDSKURL class]] options:[NSDictionary dictionary]];
     if ([URLs count] == 0) {
+        URLs = nil;
         NSString *type = [self availableTypeFromArray:[NSArray arrayWithObjects:NSURLPboardType, NSFilenamesPboardType, nil]];
         if ([type isEqualToString:NSURLPboardType]) {
             URLs = [NSArray arrayWithObjects:[NSURL URLFromPasteboard:self], nil];
