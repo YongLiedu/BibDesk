@@ -305,7 +305,7 @@
                 
                 if([fileURLs count] > 0){
                     [pboard clearContents];
-                    return [pboard writeObjects:[NSArray arrayWithObjects:fileURLs, nil]];
+                    return [pboard writeObjects:fileURLs];
                 }
                 
             }else if([dragColumnId isRemoteURLField]){
