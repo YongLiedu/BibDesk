@@ -96,7 +96,6 @@
 - (void)prepare{
     NSRect fieldsFrame = [fieldsControl frame];
     NSRect oldPromptFrame = [promptField frame];
-    [promptField setStringValue:(prompt)? prompt : @""];
     [promptField sizeToFit];
     NSRect newPromptFrame = [promptField frame];
     CGFloat dw = NSWidth(newPromptFrame) - NSWidth(oldPromptFrame);
@@ -228,9 +227,7 @@
     NSRect oldPromptFrame = [promptField frame];
     NSRect replaceFieldsFrame = [replaceFieldsComboBox frame];
     NSRect oldReplacePromptFrame = [replacePromptField frame];
-    [promptField setStringValue:(prompt)? prompt : @""];
     [promptField sizeToFit];
-    [replacePromptField setStringValue:replacePrompt ?: @""];
     [replacePromptField sizeToFit];
     NSRect newPromptFrame = [promptField frame];
     NSRect newReplacePromptFrame = [replacePromptField frame];
