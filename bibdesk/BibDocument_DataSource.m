@@ -491,7 +491,6 @@
 	NSInteger count = 0;
     BOOL inside = NO;
     BOOL isIcon = NO;
-    NSArray *array;
     
     if ([pb availableTypeFromArray:[NSArray arrayWithObjects:NSFilesPromisePboardType, nil]]) {
         // dragging a search group
@@ -500,9 +499,10 @@
         NSString *pathExt = count > 0 ? [fileExts objectAtIndex:0] : @"";
         image = [[NSWorkspace sharedWorkspace] iconForFileType:pathExt];
         isIcon = YES;
-    } else if ((array = [pb readFileURLsOfTypes:nil])) {
-		count = [array count];
-		image = [[NSWorkspace sharedWorkspace] iconForFiles:[array valueForKey:@"path"]];
+    } else if ([pb canReadFileURLOfTypes:nil]) {
+		NSArray *fileURLs = [pb readFileURLsOfTypes:nil];
+        count = [fileURLs count];
+		image = [[NSWorkspace sharedWorkspace] iconForFiles:[fileURLs valueForKey:@"path"]];
         isIcon = YES;
     } else if ([pb canReadURL]) {
         count = 1;
