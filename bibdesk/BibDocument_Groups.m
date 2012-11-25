@@ -200,19 +200,41 @@
 The groupedPublications array is a subset of the publications array, developed by searching the publications array; shownPublications is now a subset of the groupedPublications array, and searches in the searchfield will search only within groupedPublications (which may include all publications).
 */
 
-- (void)setCurrentGroupField:(NSString *)field{
-	if (field != currentGroupField) {
-		[currentGroupField release];
-		currentGroupField = [field copy];
-		[[groups categoryParent] setName:[NSString isEmptyString:field] ? NSLocalizedString(@"FIELD", @"source list group row title") : [field uppercaseString]];
-        // use the most recently changed group as default for newly opened documents; could also store on a per-document basis
-        [[NSUserDefaults standardUserDefaults] setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
-        [self updateCategoryGroupsPreservingSelection:NO];
-	}
-}	
+- (NSArray *)currentGroupFields{
+	return [[groups categoryParents] valueForKey:@"key"];
+}
 
-- (NSString *)currentGroupField{
-	return currentGroupField;
+- (void)addCurrentGroupField:(NSString *)newField {
+    if ([[self currentGroupFields] containsObject:newField] == NO) {
+        BDSKCategoryParentGroup *group = [[[BDSKCategoryParentGroup alloc] initWithKey:newField] autorelease];
+        [groups addCategoryParent:group];
+        [self updateCategoryGroups:group];
+        [groupOutlineView expandItem:group];
+        [[NSUserDefaults standardUserDefaults] setObject:[self currentGroupFields] forKey:BDSKCurrentGroupFieldsKey];
+    }
+}
+
+- (void)removeCurrentGroupField:(NSString *)oldField {
+    for (BDSKCategoryParentGroup *group in [groups categoryParents]) {
+        if ([[group key] isEqualToString:oldField]) {
+            [group retain];
+            [groups removeCategoryParent:group];
+            [self updateCategoryGroups:group];
+            [group release];
+            [[NSUserDefaults standardUserDefaults] setObject:[self currentGroupFields] forKey:BDSKCurrentGroupFieldsKey];
+            break;
+        }
+    }
+    
+}
+
+- (void)setCurrentGroupField:(NSString *)newField forGroup:(BDSKCategoryParentGroup *)group {
+    if ([[self currentGroupFields] containsObject:newField] == NO) {
+        [group setKey:newField];
+        [self updateCategoryGroups:group];
+        [[NSUserDefaults standardUserDefaults] setObject:[self currentGroupFields] forKey:BDSKCurrentGroupFieldsKey];
+    }
+    
 }
 
 - (NSArray *)selectedGroups {
@@ -378,12 +400,12 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)handleGroupNameChangedNotification:(NSNotification *)notification{
-    if([groups containsGroup:[notification object]] == NO)
-        return;
-    if([sortGroupsKey isEqualToString:BDSKGroupCellStringKey])
-        [self sortGroupsByKey:nil];
-    else
-        [groupOutlineView setNeedsDisplay:YES];
+    if([[notification object] document] == self) {
+        if ([sortGroupsKey isEqualToString:BDSKGroupCellStringKey])
+            [self sortGroupsByKey:nil];
+        else
+            [groupOutlineView setNeedsDisplay:YES];
+    }
 }
 
 - (void)handleStaticGroupChangedNotification:(NSNotification *)notification{
@@ -490,7 +512,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 // this method uses counted sets to compute the number of publications per group; each group object is just a name
 // and a count, and a group knows how to compare itself with other groups for sorting/equality, but doesn't know 
 // which pubs are associated with it
-- (void)updateCategoryGroupsPreservingSelection:(BOOL)preserve{
+- (void)updateCategoryGroups:(BDSKCategoryParentGroup *)parent {
 
     // this is a hack to keep us from getting selection change notifications while sorting (which updates the TeX and attributed text previews)
     docFlags.ignoreGroupSelectionChange = YES;
@@ -498,14 +520,16 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSPoint scrollPoint = [tableView scrollPositionAsPercentage];    
     
 	NSArray *selectedGroups = [self selectedGroups];
-	
-    NSString *groupField = [self currentGroupField];
     
-    if ([NSString isEmptyString:groupField]) {
+    NSArray *parentsToUpdate = [groups categoryParents]; // update all when parents == nil
+    if ([parentsToUpdate containsObject:parent]) // after adding this parent only update this one
+        parentsToUpdate = [NSArray arrayWithObjects:parent, nil];
+    else if (parent) // after removing this parent don't need to update any
+        parentsToUpdate = nil;
+	
+    for (parent in parentsToUpdate) {
         
-        [groups setCategoryGroups:[NSArray array]];
-        
-    } else {
+        NSString *groupField = [parent key];
         
         setAndBagContext setAndBag;
         if([groupField isPersonField]) {
@@ -516,7 +540,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             setAndBag.bag = CFBagCreateMutable(kCFAllocatorDefault, 0, &kBDSKCaseInsensitiveStringBagCallBacks);
         }
         
-        NSArray *oldGroups = [groups categoryGroups];
+        NSArray *oldGroups = [parent categoryGroups];
         NSArray *oldGroupNames = [NSArray array];
         
         if ([groupField isEqualToString:[[oldGroups lastObject] key]] && [groupField isPersonField] == [[[oldGroups lastObject] name] isKindOfClass:[BibAuthor class]])
@@ -562,7 +586,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             [group release];
         }
         
-        [groups setCategoryGroups:mutableGroups];
+        [groups setCategoryGroups:mutableGroups forParent:parent];
         CFRelease(setAndBag.set);
         CFRelease(setAndBag.bag);
         [mutableGroups release];
@@ -751,11 +775,21 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	[self sortGroupsByKey:BDSKGroupCellCountKey];
 }
 
-- (IBAction)changeGroupFieldAction:(id)sender{
-    NSString *field = [sender representedObject] ?: @"";
+- (IBAction)toggleGroupFieldAction:(id)sender{
+    NSString *field = [sender representedObject];
     
-	if(NO == [field isEqualToString:currentGroupField])
-		[self setCurrentGroupField:field];
+    if ([[self currentGroupFields] containsObject:field])
+        [self removeCurrentGroupField:field];
+    else
+        [self addCurrentGroupField:field];
+}
+
+- (IBAction)changeGroupFieldAction:(id)sender{
+    NSString *field = [sender representedObject];
+    
+    id group = [[self clickedOrSelectedGroups] lastObject];
+    if ([group isCategoryParent])
+        [self setCurrentGroupField:field forGroup:group];
 }
 
 // for adding/removing groups, we use the searchfield sheets
@@ -788,7 +822,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         if ([array indexOfObject:newGroupField] == NSNotFound)
             [array addObject:newGroupField];
         [[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKGroupFieldsKey];	
-        [self setCurrentGroupField:newGroupField];
+        id group = [[self clickedOrSelectedGroups] lastObject];
+        if ([group isCategoryParent])
+            [self setCurrentGroupField:newGroupField forGroup:group];
+        else
+            [self addCurrentGroupField:newGroupField];
         [array release];
     }];
 }
@@ -807,10 +845,16 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         [[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKGroupFieldsKey];
         [array release];
         
-        if([oldGroupField isEqualToString:currentGroupField])
-            [self setCurrentGroupField:@""];
+        if([[self currentGroupFields] containsObject:oldGroupField])
+            [self removeCurrentGroupField:oldGroupField];
     }];
 }    
+
+- (IBAction)removeCategoryParentAction:(id)sender {
+    BDSKCategoryParentGroup *group = [[self clickedOrSelectedGroups] lastObject];
+    if ([group isCategoryParent])
+        [self removeCurrentGroupField:[group key]];
+}
 
 - (void)editGroupWithoutWarning:(BDSKGroup *)group {
     [groupOutlineView expandItem:[group parent]];
@@ -1116,14 +1160,15 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [self performSelector:@selector(editGroupWithoutWarning:) withObject:group afterDelay:0.0];
 }
 
-- (IBAction)editNewCategoryGroupWithSelection:(id)sender{
-    if ([currentGroupField isEqualToString:@""]) {
-        NSBeep();
+- (void)editNewCategoryGroupWithSelectionForGroupField:(NSString *)groupField {
+    NSUInteger idx = [[self currentGroupFields] indexOfObject:groupField];
+    BDSKASSERT(idx != NSNotFound);
+    if (idx == NSNotFound)
         return;
-    }
-    
-    BOOL isAuthor = [currentGroupField isPersonField];
-    NSArray *names = [[groups categoryGroups] valueForKeyPath:isAuthor ? @"@distinctUnionOfObjects.name.lastName" : @"@distinctUnionOfObjects.name"];
+    BDSKCategoryParentGroup *parent = [[groups categoryParents] objectAtIndex:idx];
+    NSArray *categoryGroups = [parent categoryGroups];
+    BOOL isAuthor = [groupField isPersonField];
+    NSArray *names = [categoryGroups valueForKeyPath:isAuthor ? @"@distinctUnionOfObjects.name.lastName" : @"@distinctUnionOfObjects.name"];
     NSArray *pubs = [self selectedPublications];
     NSString *baseName = NSLocalizedString(@"Untitled", @"");
     id name = baseName;
@@ -1134,7 +1179,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         name = [NSString stringWithFormat:@"%@%lu", baseName, (unsigned long)i++];
     if (isAuthor)
         name = [BibAuthor authorWithName:name];
-    group = [[[BDSKCategoryGroup alloc] initWithName:name key:currentGroupField] autorelease];
+    group = [[[BDSKCategoryGroup alloc] initWithName:name key:groupField] autorelease];
     
     // first merge in shared groups
     if ([self hasExternalGroupsSelected])
@@ -1142,14 +1187,33 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     
     [self addPublications:pubs toGroup:group];
     [groupOutlineView deselectAll:nil];
-    [self updateCategoryGroupsPreservingSelection:NO];
+    [self updateCategoryGroups:parent];
     
-    NSUInteger idx = [[groups categoryGroups] indexOfObject:group];
+    idx = [categoryGroups indexOfObject:group];
     BDSKASSERT(idx != NSNotFound);
     if (idx != NSNotFound)
-        group = [[groups categoryGroups] objectAtIndex:idx];
+        group = [categoryGroups objectAtIndex:idx];
     
     [self performSelector:@selector(editGroupWithoutWarning:) withObject:group afterDelay:0.0];
+}
+
+- (IBAction)editNewCategoryGroupWithSelection:(id)sender{
+    NSArray *currentGroupFields = [self currentGroupFields];
+    if ([currentGroupFields count] == 0) {
+        NSBeep();
+    } else if ([currentGroupFields count] == 1) {
+        [self editNewCategoryGroupWithSelectionForGroupField:[currentGroupFields lastObject]];
+    } else {
+        BDSKRemoveFieldSheetController *chooseFieldController = [[[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field:", @"Label for choosing group field")
+                                                                                                            fieldsArray:currentGroupFields] autorelease];
+        [chooseFieldController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+            NSString *groupField = [chooseFieldController field];
+            if(result == NSCancelButton || [NSString isEmptyString:groupField])
+                return;
+            
+            [self editNewCategoryGroupWithSelectionForGroupField:groupField];
+        }];
+    }
 }
 
 - (IBAction)mergeInExternalGroup:(id)sender{

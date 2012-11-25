@@ -45,6 +45,7 @@
 #import "BibItem.h"
 #import "BibAuthor.h"
 #import "BDSKGroup.h"
+#import "BDSKCategoryGroup.h"
 #import "BDSKStaticGroup.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKGroupsArray.h"
@@ -109,41 +110,50 @@ static BOOL changingColors = NO;
 
 	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication", @"Undo action name")];
 	
-	BOOL isSingleValued = [[self currentGroupField] isSingleValuedGroupField];
-    NSInteger count = 0;
-    // we don't overwrite inherited single valued fields, they already have the field set through inheritance
-    NSInteger op, handleInherited = isSingleValued ? BDSKOperationIgnore : BDSKOperationAsk;
+    NSInteger op, handleInherited = BDSKOperationAsk;
+    NSMutableSet *changedFields = [NSMutableSet set];
+    NSMutableSet *ignoredSingleValuedFields = [NSMutableSet set];
+    NSString *groupField = nil;
+	BOOL isSingleValued;
     
     for (BDSKGroup *group in [self selectedGroups]) {
 		if ([group isCategory]){
-            if (isSingleValued && count > 0)
+            groupField = [(BDSKCategoryGroup *)group key];
+            isSingleValued = [groupField isSingleValuedGroupField];
+            if (isSingleValued && [changedFields containsObject:groupField]) {
+                [ignoredSingleValuedFields addObject:groupField];
                 continue;
-			op = [newBI addToGroup:group handleInherited:handleInherited];
-            if(op == BDSKOperationSet || op == BDSKOperationAppend){
-                count++;
-            }else if(op == BDSKOperationAsk){
+            }
+            // we don't overwrite inherited single valued fields, they already have the field set through inheritance
+			op = [newBI addToGroup:group handleInherited:isSingleValued ? BDSKOperationIgnore : handleInherited];
+            if (op == BDSKOperationAsk) {
                 NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
                                                  defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
                                                alternateButton:nil // "Set" would end up choosing an arbitrary one
                                                    otherButton:NSLocalizedString(@"Append", @"Button title")
                                      informativeTextWithFormat:NSLocalizedString(@"The new item has a group value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
                 handleInherited = [alert runModal];
-                if(handleInherited != BDSKOperationIgnore){
+                if (handleInherited != BDSKOperationIgnore) {
                     [newBI addToGroup:group handleInherited:handleInherited];
-                    count++;
+                    [changedFields addObject:groupField];
                 }
+            } else if (op != BDSKOperationIgnore) {
+                [changedFields addObject:groupField];
+            } else if (isSingleValued) {
+                [ignoredSingleValuedFields addObject:groupField];
             }
         } else if ([group isStatic]) {
             [(BDSKStaticGroup *)group addPublication:newBI];
         }
     }
 	
-	if (isSingleValued && [[[self selectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isCategory == YES"]] count] > 1) {
+	if ([ignoredSingleValuedFields count] > 0) {
+        NSString *quotedFields = [[[ignoredSingleValuedFields allObjects] valueForKey:@"quotedStringIfNotEmpty"] componentsJoinedByString:@", "];
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Cannot Add to All Groups", @"Message in alert dialog when trying to add to multiple single-valued field groups")
                                          defaultButton:nil
                                        alternateButton:nil
                                            otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The new item can only be added to one of the selected \"%@\" groups", @"Informative text in alert dialog"), [[self currentGroupField]localizedFieldName]];
+                             informativeTextWithFormat:NSLocalizedString(@"The new item can only be added to one of the selected %@ groups", @"Informative text in alert dialog"), quotedFields];
         [alert beginSheetModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
     
@@ -205,8 +215,8 @@ static BOOL changingColors = NO;
 		BOOL canRemove = NO;
         if ([self hasStaticGroupsSelected])
             canRemove = YES;
-        else if ([[self currentGroupField] isSingleValuedGroupField] == NO)
-            canRemove = [self hasCategoryGroupsSelected];
+        else if (NSNotFound != [[self clickedOrSelectedGroups] indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop){ return [obj isCategory] && [[obj key] isSingleValuedGroupField] == NO; }])
+            canRemove = YES;
 		if (canRemove == NO) {
 			NSBeep();
 		}

@@ -225,7 +225,6 @@ static NSOperationQueue *metadataCacheQueue = nil;
         previousSortKey = nil;
         tmpSortKey = nil;
         sortGroupsKey = nil;
-        currentGroupField = nil;
         docFlags.sortDescending = NO;
         docFlags.previousSortDescending = NO;
         docFlags.tmpSortDescending = NO;
@@ -314,7 +313,6 @@ static NSOperationQueue *metadataCacheQueue = nil;
     BDSKDESTROY(previousSortKey);
     BDSKDESTROY(tmpSortKey);
     BDSKDESTROY(sortGroupsKey);
-    BDSKDESTROY(currentGroupField);
     BDSKDESTROY(searchGroupViewController);
     BDSKDESTROY(webGroupViewController);
     BDSKDESTROY(searchIndexes);
@@ -510,8 +508,9 @@ static NSOperationQueue *metadataCacheQueue = nil;
     sortGroupsKey = [[xattrDefaults objectForKeyOrDefaultValue:BDSKSortGroupsKey] retain];
     docFlags.sortGroupsDescending = [xattrDefaults boolForKeyOrDefaultValue:BDSKSortGroupsDescendingKey];
     // don't use setter, because we don't want to change the prefs here, and the value should be nil at this point
-    currentGroupField = [[xattrDefaults objectForKeyOrDefaultValue:BDSKCurrentGroupFieldKey] copy];
-    [[groups categoryParent] setName:[NSString isEmptyString:currentGroupField] ? NSLocalizedString(@"FIELD", @"source list group row title") : [currentGroupField uppercaseString]];
+    NSArray *currentGroupFields = [xattrDefaults objectForKeyOrDefaultValue:BDSKCurrentGroupFieldsKey];
+    for (NSString *groupField in currentGroupFields)
+        [groups addCategoryParent:[[[BDSKCategoryParentGroup alloc] initWithKey:groupField] autorelease]];
     
     [tableView setDoubleAction:@selector(editPubOrOpenURLAction:)];
     NSArray *dragTypes = [NSArray arrayWithObjects:BDSKPasteboardTypePublications, (NSString *)kUTTypeURL, (NSString *)kUTTypeFileURL, NSFilenamesPboardType, NSURLPboardType, NSPasteboardTypeString, NSPasteboardTypeColor, nil];
@@ -566,7 +565,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
     
     // The UI update from setPublications is too early when loading a new document
     [self updateSmartGroupsCount];
-    [self updateCategoryGroupsPreservingSelection:NO];
+    [self updateCategoryGroups:nil];
     
     [saveTextEncodingPopupButton setEncoding:BDSKNoStringEncoding];
     
@@ -578,7 +577,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
     
     NSArray *groupsToExpand = [xattrDefaults objectForKey:BDSKDocumentGroupsToExpandKey];
     for (BDSKParentGroup *parent in groups) {
-        if (parent != [groups libraryParent] && (groupsToExpand == nil || [groupsToExpand containsObject:NSStringFromClass([parent class])]))
+        if (parent != [groups libraryParent] && (groupsToExpand == nil || [groupsToExpand containsObject:[parent identifier]]))
             [groupOutlineView expandItem:parent];
     }
     // make sure the groups are sorted and have their sort descriptors set
@@ -731,7 +730,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
         if (NO == [self hasWebGroupsSelected])
             [dictionary setDouble:[splitView fraction] forKey:BDSKMainTableSplitViewFractionKey];
         [dictionary setDouble:docState.lastWebViewFraction forKey:BDSKWebViewFractionKey];
-        [dictionary setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
+        //[dictionary setObject:[self currentGroupFields] forKey:BDSKCurrentGroupFieldsKey];
         
         // we can't just use -documentStringEncoding, because that may be different for SaveTo
         if (encoding != BDSKNoStringEncoding)
@@ -771,10 +770,10 @@ static NSOperationQueue *metadataCacheQueue = nil;
         NSMutableArray *groupsToExpand = [NSMutableArray array];
         for (BDSKParentGroup *parent in groups) {
             if (parent != [groups libraryParent] && [groupOutlineView isItemExpanded:parent])
-                [groupsToExpand addObject:NSStringFromClass([parent class])];
+                [groupsToExpand addObject:[parent identifier]];
             
         }
-        [dictionary setObject:groupsToExpand forKey:BDSKDocumentGroupsToExpandKey];
+        [dictionary removeObjectForKey:BDSKDocumentGroupsToExpandKey];
         
         NSError *error;
         
@@ -1856,7 +1855,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if (wasLoaded) {
         [self setSearchString:@""];
         [self updateSmartGroupsCount];
-        [self updateCategoryGroupsPreservingSelection:YES];
+        [self updateCategoryGroups:nil];
         [self sortGroupsByKey:nil]; // resort
 		[tableView deselectAll:self]; // clear before resorting
 		[self redoSearch]; // redo the search

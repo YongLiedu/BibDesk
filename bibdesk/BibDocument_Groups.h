@@ -38,7 +38,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
 
-@class BDSKGroup, BDSKSmartGroup, BDSKStaticGroup, BDSKExternalGroup, BDSKURLGroup, BDSKScriptGroup, BDSKWebGroup, BDSKFilterController, BDSKURLGroupSheetController, BDSKScriptGroupSheetController;
+@class BDSKGroup, BDSKSmartGroup, BDSKStaticGroup, BDSKExternalGroup, BDSKURLGroup, BDSKScriptGroup, BDSKWebGroup, BDSKCategoryParentGroup, BDSKFilterController, BDSKURLGroupSheetController, BDSKScriptGroupSheetController;
 
 @interface BibDocument (Groups)
 
@@ -66,12 +66,11 @@
 - (BOOL)hasCategoryGroupsClickedOrSelected;
 - (BOOL)hasExternalGroupsClickedOrSelected;
 
-- (void)setCurrentGroupField:(NSString *)field;
-- (NSString *)currentGroupField;
+- (NSArray *)currentGroupFields;
 
 - (NSArray *)selectedGroups;
 - (NSArray *)clickedOrSelectedGroups;
-- (void)updateCategoryGroupsPreservingSelection:(BOOL)preserve;
+- (void)updateCategoryGroups:(BDSKCategoryParentGroup *)parent;
 - (void)updateSmartGroupsCount;
 - (void)updateSmartGroups;
 - (void)displaySelectedGroups;
@@ -82,9 +81,11 @@
 - (BOOL)removePublications:(NSArray *)pubs fromGroups:(NSArray *)groupArray;
 - (BOOL)movePublications:(NSArray *)pubs fromGroup:(BDSKGroup *)group toGroupNamed:(NSString *)newGroupName;
 
+- (IBAction)toggleGroupFieldAction:(id)sender;
 - (IBAction)changeGroupFieldAction:(id)sender;
 - (IBAction)addGroupFieldAction:(id)sender;
 - (IBAction)removeGroupFieldAction:(id)sender;
+- (IBAction)removeCategoryParentAction:(id)sender;
 
 - (void)showWebGroupView;
 - (void)hideWebGroupView;

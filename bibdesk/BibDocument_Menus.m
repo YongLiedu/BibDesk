@@ -130,7 +130,7 @@
     if ([self hasStaticGroupsSelected])
         return YES;
     // don't remove from single valued group field, as that will clear the field, which is most probably a mistake. See bug # 1435344
-    if ([[self currentGroupField] isSingleValuedGroupField] == NO && [self hasCategoryGroupsSelected])
+    if (NSNotFound != [[self clickedOrSelectedGroups] indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop){ return [obj isCategory] && [[obj key] isSingleValuedGroupField] == NO; }])
         return YES;
     return NO;
 }	
@@ -326,8 +326,8 @@
 	return YES;
 } 
 
-- (BOOL) validateChangeGroupFieldActionMenuItem:(NSMenuItem *)menuItem{
-	if([([menuItem representedObject] ?: @"") isEqualToString:[self currentGroupField]])
+- (BOOL) validateToggleGroupFieldActionMenuItem:(NSMenuItem *)menuItem{
+	if([[self currentGroupFields] containsObject:[menuItem representedObject]])
 		[menuItem setState:NSOnState];
 	else
 		[menuItem setState:NSOffState];
@@ -439,7 +439,7 @@
 
 - (BOOL)validateEditNewCategoryGroupWithSelectionMenuItem:(NSMenuItem *)menuItem {
     [menuItem setTitle:[self hasExternalGroupsSelected] ? NSLocalizedString(@"New Field Group With Merged Selection", @"Menu item title") : NSLocalizedString(@"New Field Group With Selection", @"Menu item title")];
-    return ([self numberOfSelectedPubs] > 0 && [currentGroupField isEqualToString:@""] == NO);
+    return ([self numberOfSelectedPubs] > 0 && [[self currentGroupFields] count] > 0);
 }
 
 - (BOOL)validateAddSearchBookmarkMenuItem:(NSMenuItem *)menuItem {

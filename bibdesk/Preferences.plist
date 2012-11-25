@@ -32,8 +32,10 @@
 					<true/>
 					<key>BDSKCiteseerHostKey</key>
 					<string>http://citeseer.ist.psu.edu/</string>
-					<key>BDSKCurrentGroupFieldKey</key>
-					<string>Keywords</string>
+					<key>BDSKCurrentGroupFieldsKey</key>
+					<array>
+						<string>Keywords</string>
+					</array>
 					<key>BDSKDefaultBibFileAliasKey</key>
 					<data></data>
 					<key>BDSKDefaultGroupFieldSeparatorKey</key>

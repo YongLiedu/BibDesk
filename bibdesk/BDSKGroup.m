@@ -150,6 +150,8 @@ static NSArray *noCountCellValueKeys = nil;
 
 - (BOOL)isParent { return NO; }
 
+- (BOOL)isCategoryParent { return NO; }
+
 - (BOOL)isStatic { return NO; }
 
 - (BOOL)isSmart { return NO; }

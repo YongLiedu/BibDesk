@@ -197,7 +197,7 @@ NSString *BDSKFileContentSearchSortDescriptorKey = @"BDSKFileContentSearchSortDe
 
 NSString *BDSKScriptHooksKey = @"Script Hooks";
 NSString *BDSKGroupFieldsKey = @"BDSKGroupFieldsKey";
-NSString *BDSKCurrentGroupFieldKey = @"BDSKCurrentGroupFieldKey";
+NSString *BDSKCurrentGroupFieldsKey = @"BDSKCurrentGroupFieldsKey";
 NSString *BDSKDefaultGroupFieldSeparatorKey = @"BDSKDefaultGroupFieldSeparatorKey";
 NSString *BDSKGroupFieldSeparatorCharactersKey = @"BDSKGroupFieldSeparatorCharactersKey";
 NSString *BDSKDefaultArrayJoinStringKey = @"BDSKDefaultArrayJoinString";

@@ -67,36 +67,29 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
 
 - (id)initWithDocument:(BibDocument *)aDocument {
     if(self = [super init]) {
-        NSMutableArray *parents = [[NSMutableArray alloc] init];
+        groups = [[NSMutableArray alloc] init];
+        
         BDSKParentGroup *parent;
         
         parent = [[BDSKLibraryParentGroup alloc] init];
         [parent setDocument:aDocument];
-        [parents addObject:parent];
+        [groups addObject:parent];
         [parent release];
         
         parent = [[BDSKExternalParentGroup alloc] init];
         [parent setDocument:aDocument];
-        [parents addObject:parent];
+        [groups addObject:parent];
         [parent release];
         
         parent = [[BDSKSmartParentGroup alloc] init];
         [parent setDocument:aDocument];
-        [parents addObject:parent];
+        [groups addObject:parent];
         [parent release];
         
         parent = [[BDSKStaticParentGroup alloc] init];
         [parent setDocument:aDocument];
-        [parents addObject:parent];
+        [groups addObject:parent];
         [parent release];
-        
-        parent = [[BDSKCategoryParentGroup alloc] init];
-        [parent setDocument:aDocument];
-        [parents addObject:parent];
-        [parent release];
-        
-        groups = [parents copy];
-        [parents release];
         
         document = aDocument;
     }
@@ -136,7 +129,9 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
 
 - (BDSKStaticParentGroup *)staticParent { return [groups objectAtIndex:STATIC_PARENT_INDEX]; }
 
-- (BDSKCategoryParentGroup *)categoryParent { return [groups objectAtIndex:CATEGORY_PARENT_INDEX]; }
+- (NSArray *)categoryParents {
+    return [groups subarrayWithRange:NSMakeRange(CATEGORY_PARENT_INDEX, [groups count] - CATEGORY_PARENT_INDEX)];
+}
 
 - (BDSKLibraryGroup *)libraryGroup{
     return [[self libraryParent] childAtIndex:0];
@@ -175,7 +170,10 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
 }
 
 - (NSArray *)categoryGroups{
-    return [[self categoryParent] categoryGroups];
+    NSMutableArray *categoryGroups = [NSMutableArray array];
+    for (BDSKCategoryParentGroup *group in groups)
+        [categoryGroups addObjectsFromArray:[group categoryGroups]];
+    return categoryGroups;
 }
 
 - (NSArray *)allChildren{
@@ -185,17 +183,21 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
     return children;
 }
 
-#pragma mark Containment
+#pragma mark Mutable accessors
 
-- (BOOL)containsGroup:(id)group {
-    for (BDSKParentGroup *parent in groups) {
-        if ([parent containsChild:group])
-            return YES;
-    }
-    return NO;
+- (void)addCategoryParent:(BDSKCategoryParentGroup *)group {
+    [group setDocument:document];
+    [groups addObject:group];
 }
 
-#pragma mark Mutable accessors
+- (void)removeCategoryParent:(BDSKCategoryParentGroup *)group {
+    NSMutableArray *removedGroups = [[group categoryGroups] mutableCopy];
+    [removedGroups addObject:group];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:removedGroups, BDSKGroupsArrayGroupsKey, nil]];
+    [removedGroups release];
+    [group setDocument:nil];
+    [groups removeObject:group];
+}
 
 - (void)setLastImportedPublications:(NSArray *)pubs{
     [[self smartParent] setLastImportedPublications:pubs];
@@ -293,11 +295,11 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
 	[[self staticParent] removeStaticGroup:group];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
- 
-- (void)setCategoryGroups:(NSArray *)array{
+
+- (void)setCategoryGroups:(NSArray *)array forParent:(BDSKCategoryParentGroup *)parent {
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupsNotification
-        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[self categoryGroups], BDSKGroupsArrayGroupsKey, nil]];
-    [[self categoryParent] setCategoryGroups:array];
+        object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[parent categoryGroups], BDSKGroupsArrayGroupsKey, nil]];
+    [parent setCategoryGroups:array];
 }
 
 // this should only be used just before reading from file, in particular revert, so we shouldn't make this undoable

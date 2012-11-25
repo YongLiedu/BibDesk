@@ -462,15 +462,19 @@
 }
 
 - (BDSKCategoryGroup *)valueInFieldGroupsWithName:(NSString *)name {
-    if ([[self currentGroupField] isPersonField]) {
-        BibAuthor *fuzzyName = [NSString isEmptyString:name] ? [BibAuthor emptyAuthor] : [BibAuthor authorWithName:name];
-        for (BDSKCategoryGroup *group in [groups categoryGroups])
-            if ([[group name] fuzzyEqual:fuzzyName])
-                return group;
-    } else {
-        for (BDSKCategoryGroup *group in [groups categoryGroups])
-            if ([[group name] isCaseInsensitiveEqual:name])
-                return group;
+    BibAuthor *fuzzyName = nil;
+    for (BDSKCategoryParentGroup *parent in [groups categoryParents]) {
+        if ([[parent key] isPersonField]) {
+            if (fuzzyName == nil)
+                fuzzyName = [NSString isEmptyString:name] ? [BibAuthor emptyAuthor] : [BibAuthor authorWithName:name];
+            for (BDSKCategoryGroup *group in [parent categoryGroups])
+                if ([[group name] fuzzyEqual:fuzzyName])
+                    return group;
+        } else {
+            for (BDSKCategoryGroup *group in [parent categoryGroups])
+                if ([[group name] isCaseInsensitiveEqual:name])
+                    return group;
+        }
     }
     return nil;
 }

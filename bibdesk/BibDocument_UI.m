@@ -683,14 +683,19 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     if (row != -1) {
         id item = [groupOutlineView itemAtRow:row];
         
-        if (item == [groups categoryParent]) {
+        if ([item isCategoryParent]) {
             [menu addItemsFromMenu:groupFieldMenu];
-            while ([[menu itemAtIndex:1] isSeparatorItem] == NO)
-                [menu removeItemAtIndex:1];
-            for (NSString *field in [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] reverseObjectEnumerator]) {
-                NSMenuItem *menuItem = [menu insertItemWithTitle:field action:@selector(changeGroupFieldAction:) keyEquivalent:@"" atIndex:1];
+            NSString *key = [item key];
+            NSArray *fields = [[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey];
+            if ([fields containsObject:key] == NO)
+                fields = [fields arrayByAddingObject:key];
+            for (NSString *field in [fields reverseObjectEnumerator]) {
+                if ([key isEqualToString:field] == NO && [[self currentGroupFields] containsObject:field]) continue;
+                NSMenuItem *menuItem = [menu insertItemWithTitle:field action:@selector(changeGroupFieldAction:) keyEquivalent:@"" atIndex:0];
                 [menuItem setTarget:self];
                 [menuItem setRepresentedObject:field];
+                if ([[item key] isEqualToString:field])
+                    [menuItem setState:NSOnState];
             }
         } else {
             [menu addItemsFromMenu:groupMenu];
@@ -857,7 +862,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     // update smart group counts
     [self updateSmartGroupsCount];
     // this handles the remaining UI updates necessary (tableView and previews)
-	[self updateCategoryGroupsPreservingSelection:YES];
+	[self updateCategoryGroups:nil];
     
     NSArray *pubs = [[notification userInfo] objectForKey:BDSKDocumentPublicationsKey];
     [self setImported:isDelete == NO forPublications:pubs inGroup:nil];
@@ -905,14 +910,14 @@ static BOOL searchKeyDependsOnKey(NSString *searchKey, NSString *key) {
     if (displayingLocal && (docFlags.itemChangeMask & BDSKItemChangedFilesMask) != 0)
         [self updateFileViews];
 
-    BOOL shouldUpdateGroups = [NSString isEmptyString:[self currentGroupField]] == NO && (docFlags.itemChangeMask & BDSKItemChangedGroupFieldMask) != 0;
+    BOOL shouldUpdateGroups = [[self currentGroupFields] count] > 0 && (docFlags.itemChangeMask & BDSKItemChangedGroupFieldMask) != 0;
     
     // allow updating a smart group if it's selected
 	[self updateSmartGroups];
     
     if(shouldUpdateGroups){
         // this handles all UI updates if we call it, so don't bother with any others
-        [self updateCategoryGroupsPreservingSelection:YES];
+        [self updateCategoryGroups:nil];
     } else if (displayingLocal && (docFlags.itemChangeMask & BDSKItemChangedSearchKeyMask) != 0) {
         // this handles all UI updates if we call it, so don't bother with any others
         [self redoSearch];
@@ -1015,7 +1020,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         }
     }
     
-    if ([changedKey isEqualToString:[self currentGroupField]] || changedKey == nil)
+    if (changedKey == nil || [[self currentGroupFields] containsObject:changedKey])
         docFlags.itemChangeMask |= BDSKItemChangedGroupFieldMask;
     if ((tmpSortKey && sortKeyDependsOnKey(tmpSortKey, changedKey)) || sortKeyDependsOnKey(sortKey, changedKey) || sortKeyDependsOnKey(previousSortKey, changedKey))
         docFlags.itemChangeMask |= BDSKItemChangedSortKeyMask;
@@ -1043,7 +1048,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     
     // current group field may have changed its type (string->person)
     [self updateSmartGroups];
-    [self updateCategoryGroupsPreservingSelection:YES];
+    [self updateCategoryGroups:nil];
     [self updatePreviews];
 }
 
@@ -1098,7 +1103,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [tableView setupTableColumnsWithIdentifiers:[tableView tableColumnIdentifiers]];
     // current group field may have changed its type (string->person)
     [self updateSmartGroups];
-    [self updateCategoryGroupsPreservingSelection:YES];
+    [self updateCategoryGroups:nil];
     [self updatePreviews];
 }
 
@@ -1272,7 +1277,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
             [self sortPubsByKey:nil];
         } else if ([key isEqualToString:BDSKAuthorNameDisplayKey]) {
             [tableView reloadData];
-            if ([currentGroupField isPersonField])
+            if (NSNotFound != [[self currentGroupFields] indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){ return [obj isPersonField]; }])
                 [groupOutlineView reloadData];
         } else if ([key isEqualToString:BDSKBTStyleKey]) {
             if ([previewer isVisible])

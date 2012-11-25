@@ -47,12 +47,11 @@
     NSArray *sortDescriptors;
 }
 
+- (NSString *)identifier;
+
 - (NSUInteger)numberOfChildren;
 - (id)childAtIndex:(NSUInteger)anIndex;
 - (NSArray *)children;
-- (NSArray *)childrenInRange:(NSRange)range;
-
-- (BOOL)containsChild:(id)group;
 
 - (void)sortUsingDescriptors:(NSArray *)sortDescriptors;
 
@@ -108,12 +107,17 @@
 
 #pragma mark -
 
-@interface BDSKCategoryParentGroup : BDSKParentGroup
+@interface BDSKCategoryParentGroup : BDSKParentGroup {
+    NSString *key;
+}
+
+- (id)initWithKey:(NSString *)aKey;
 
 - (NSArray *)categoryGroups;
 - (void)setCategoryGroups:(NSArray *)array;
 
-- (void)setName:(id)newName;
+- (NSString *)key;
+- (void)setKey:(NSString *)newKey;
 
 @end
 

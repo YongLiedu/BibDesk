@@ -126,7 +126,6 @@ extern NSString *BDSKDocumentPublicationsKey;
     IBOutlet NSPopUpButton *groupAddButton;
     IBOutlet BDSKCollapsibleView *groupButtonView;
     IBOutlet NSMenu *groupFieldMenu;
-	NSString *currentGroupField;
     NSMapTable *groupSpinners;
     
 #pragma mark Side preview variables

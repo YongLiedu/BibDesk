@@ -93,6 +93,9 @@
 
 - (id)cellValue { return [self name]; }
 
+// this is used to remember expanded state, as they are usually unique we use the class, also for backward compatibility
+- (NSString *)identifier { return NSStringFromClass([self class]); }
+
 - (NSArray *)children {
     return children;
 }
@@ -155,10 +158,6 @@
     [children setValue:nil forKey:@"parent"];
     [children setValue:nil forKey:@"document"];
     [children removeAllObjects];
-}
-
-- (BOOL)containsChild:(id)group {
-    return NSNotFound != [children indexOfObjectIdenticalTo:group];
 }
 
 - (void)sortUsingDescriptors:(NSArray *)newSortDescriptors {
@@ -328,8 +327,19 @@
 
 @implementation BDSKCategoryParentGroup
 
-- (id)init {
-    return [self initWithName:NSLocalizedString(@"FIELD", @"source list group row title")];
+- (id)initWithKey:(NSString *)aKey {
+    self = [self initWithName:[aKey uppercaseString]];
+    if (self) {
+        key = [aKey retain];
+    }
+    return self;
+}
+
+- (BOOL)isCategoryParent { return YES; }
+
+// category parents aren't unique, so we need to use a different identifier for remembering expanded state
+- (NSString *)identifier {
+    return [self key];
 }
 
 - (NSArray *)categoryGroups {
@@ -349,10 +359,16 @@
     }
 }
 
-- (void)setName:(id)newName {
-    if (name != newName) {
+- (NSString *)key {
+    return key;
+}
+
+- (void)setKey:(NSString *)newKey {
+    if (key != newKey) {
+        [key release];
+        key = [newKey retain];
         [name release];
-        name = [newName retain];
+        name = [[key uppercaseString] retain];
     }
 }
 

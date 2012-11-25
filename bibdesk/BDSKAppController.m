@@ -578,11 +578,20 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         
     } else if ([menu isEqual:groupFieldMenu]) {
         
-        while ([[menu itemAtIndex:1] isSeparatorItem] == NO)
-            [menu removeItemAtIndex:1];
+        while ([[menu itemAtIndex:0] isSeparatorItem] == NO)
+            [menu removeItemAtIndex:0];
         
-        for (NSString *field in [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] reverseObjectEnumerator]) {
-            NSMenuItem *menuItem = [menu insertItemWithTitle:field action:@selector(changeGroupFieldAction:) keyEquivalent:@"" atIndex:1];
+        NSArray *fields = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
+        BibDocument *document = (BibDocument *)[[NSDocumentController sharedDocumentController] currentDocument];
+        if ([document respondsToSelector:@selector(currentGroupFields)]) {
+            for (NSString *field in [document currentGroupFields]) {
+                if ([fields containsObject:field] == NO)
+                    fields = [fields arrayByAddingObject:field];
+            }
+        }
+        
+        for (NSString *field in [fields reverseObjectEnumerator]) {
+            NSMenuItem *menuItem = [menu insertItemWithTitle:field action:@selector(toggleGroupFieldAction:) keyEquivalent:@"" atIndex:0];
             [menuItem setRepresentedObject:field];
         }
         

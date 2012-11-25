@@ -53,7 +53,7 @@ enum {
 @class BDSKGroup, BDSKLibraryGroup, BDSKLastImportGroup, BDSKSmartGroup, BDSKStaticGroup, BDSKURLGroup, BDSKScriptGroup, BDSKSearchGroup, BDSKWebGroup, BDSKLibraryParentGroup, BDSKExternalParentGroup, BDSKSmartParentGroup, BDSKStaticParentGroup, BDSKCategoryParentGroup, BibDocument;
 
 @interface BDSKGroupsArray : NSArray {
-    NSArray *groups;
+    NSMutableArray *groups;
     BibDocument *document;
 }
 
@@ -63,7 +63,7 @@ enum {
 - (BDSKExternalParentGroup *)externalParent;
 - (BDSKSmartParentGroup *)smartParent;
 - (BDSKStaticParentGroup *)staticParent;
-- (BDSKCategoryParentGroup *)categoryParent;
+- (NSArray *)categoryParents;
 
 - (BDSKLibraryGroup *)libraryGroup;
 - (BDSKLastImportGroup *)lastImportGroup;
@@ -78,7 +78,8 @@ enum {
 
 - (NSArray *)allChildren;
 
-- (BOOL)containsGroup:(id)group;
+- (void)addCategoryParent:(BDSKCategoryParentGroup *)group;
+- (void)removeCategoryParent:(BDSKCategoryParentGroup *)group;
 
 - (void)setLastImportedPublications:(NSArray *)pubs;
 - (void)setSharedGroups:(NSArray *)array;
@@ -94,7 +95,7 @@ enum {
 - (void)removeSmartGroup:(BDSKSmartGroup *)group;
 - (void)addStaticGroup:(BDSKStaticGroup *)group;
 - (void)removeStaticGroup:(BDSKStaticGroup *)group;
-- (void)setCategoryGroups:(NSArray *)array;
+- (void)setCategoryGroups:(NSArray *)array forParent:(BDSKCategoryParentGroup *)parent;
 - (void)removeAllUndoableGroups;
 
 - (void)sortUsingDescriptors:(NSArray *)sortDescriptors;
