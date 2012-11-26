@@ -1256,12 +1256,8 @@
             BOOL undoable = NO;
             
             for (NSURL *url in urls) {
-                if ([url isFileURL] && [[[url path] pathExtension] isEqualToString:@"bdsksearch"]) {
-                    if ((group = [[[BDSKSearchGroup alloc] initWithURL:url] autorelease])) {
-                        [groups addSearchGroup:(BDSKSearchGroup *)group];
-                        lastGroup = group;
-                    }
-                } else if ([[url scheme] isEqualToString:BDSKSearchGroupURLScheme]) {
+                if ([[url scheme] isEqualToString:BDSKSearchGroupURLScheme] ||
+                    ([url isFileURL] && [[url pathExtension] isEqualToString:@"bdsksearch"])) {
                     if ((group = [[[BDSKSearchGroup alloc] initWithURL:url] autorelease])) {
                         [groups addSearchGroup:(BDSKSearchGroup *)group];
                         lastGroup = group;
