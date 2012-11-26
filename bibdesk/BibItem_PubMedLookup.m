@@ -321,19 +321,19 @@ static void removeAliens(NSMutableString *string)
 	return bi;
 }
 
-+ (id)itemByParsingPDFFile:(NSString *)pdfPath;
++ (id)itemByParsingPDFAtURL:(NSURL *)pdfURL;
 {
 	BibItem *bi=nil;
 	
 	// see if we can find any bibliographic info in the filename
 	NSString *pubMedSearch=nil;
-	pubMedSearch=[[[pdfPath lastPathComponent] stringByDeletingPathExtension] stringByMakingPubmedSearchFromAnyBibliographicIDsInString];
+	pubMedSearch=[[[pdfURL lastPathComponent] stringByDeletingPathExtension] stringByMakingPubmedSearchFromAnyBibliographicIDsInString];
 	if(pubMedSearch!=nil){
 		bi=[BibItem itemWithPubMedSearchTerm:pubMedSearch];
 		if(bi!=nil) return bi;
 	}
 	
-	PDFDocument *pdfd = [[PDFDocument alloc] initWithURL:[NSURL fileURLWithPath:pdfPath]];
+	PDFDocument *pdfd = [[PDFDocument alloc] initWithURL:pdfURL];
 	if(pdfd==NULL) return nil;
 	
 	bi = [self itemByParsingPDFDocument: pdfd];

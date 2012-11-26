@@ -1456,10 +1456,10 @@ static BOOL changingColors = NO;
 
 	[oPanel beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
         if (result == NSFileHandlingPanelOKButton) {
-            NSString *fileName = [oPanel filename];
+            NSURL *fileURL = [oPanel URL];
             // first try to parse the file
             NSError *error = nil;
-            NSArray *newPubs = [self extractPublicationsFromFiles:[NSArray arrayWithObject:fileName] unparseableFiles:NULL verbose:NO error:&error];
+            NSArray *newPubs = [self extractPublicationsFromFileURLs:[NSArray arrayWithObject:fileURL] unparseableFileURLs:NULL verbose:NO error:&error];
             BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
             if ([newPubs count]) {
                 [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:[[error userInfo] valueForKey:BDSKTemporaryCiteKeyErrorKey] selectLibrary:YES edit:shouldEdit];
@@ -1468,7 +1468,7 @@ static BOOL changingColors = NO;
                 [oPanel orderOut:nil];
                 
                 BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initForOwner:self] autorelease];
-                [tic beginSheetForURL:[NSURL fileURLWithPath:fileName] modalForWindow:documentWindow  completionHandler:^(NSInteger result2){
+                [tic beginSheetForURL:fileURL modalForWindow:documentWindow  completionHandler:^(NSInteger result2){
                     NSArray *addedPubs = [tic addedPublications];
                     if ([addedPubs count] > 0)
                         [self addPublications:addedPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:YES edit:NO];

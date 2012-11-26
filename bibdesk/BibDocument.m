@@ -2107,19 +2107,17 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 #pragma mark -
 #pragma mark New publications from pasteboard
 
-- (NSArray *)publicationsForFiles:(NSArray *)filenames {
-    NSMutableArray *newPubs = [NSMutableArray arrayWithCapacity:[filenames count]];
-	NSURL *url = nil;
+- (NSArray *)publicationsForFileURLs:(NSArray *)fileURLs {
+    NSMutableArray *newPubs = [NSMutableArray arrayWithCapacity:[fileURLs count]];
     	
-	for (NSString *fnStr in filenames) {
-        fnStr = [fnStr stringByStandardizingPath];
-		if(url = [NSURL fileURLWithPath:fnStr]){
+	for (NSURL *url in fileURLs) {
+        if ((url = [url URLByStandardizingPath])) {
             NSError *xerror = nil;
             BibItem *newBI = nil;
             
             // most reliable metadata should be our private EA
             if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKReadExtendedAttributesKey]){
-                NSData *btData = [[SKNExtendedAttributeManager sharedNoSplitManager] extendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" atPath:fnStr traverseLink:NO error:&xerror];
+                NSData *btData = [[SKNExtendedAttributeManager sharedNoSplitManager] extendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" atPath:[url path] traverseLink:NO error:&xerror];
                 if(btData){
                     NSString *btString = [[NSString alloc] initWithData:btData encoding:NSUTF8StringEncoding];
                     BOOL isPartialData;
@@ -2130,9 +2128,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             }
             
 			// GJ try parsing pdf to extract info that is then used to get a PubMed record
-			if(newBI == nil && [[[NSWorkspace sharedWorkspace] typeOfFile:[[fnStr stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL] isEqualToUTI:(NSString *)kUTTypePDF]){
+			if(newBI == nil && [[[NSWorkspace sharedWorkspace] typeOfFile:[[[url URLByStandardizingPath] URLByResolvingSymlinksInPath] path] error:NULL] isEqualToUTI:(NSString *)kUTTypePDF]){
                 if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTermKey])
-                    newBI = [BibItem itemByParsingPDFFile:fnStr];			
+                    newBI = [BibItem itemByParsingPDFAtURL:url];			
                 // fall back on the least reliable metadata source (hidden pref)
                 if(newBI == nil && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldUsePDFMetadataKey])
                     newBI = [BibItem itemWithPDFMetadataFromURL:url];
@@ -2159,7 +2157,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 }
 
 // sniff the contents of each file, returning them in an array of BibItems, while unparseable files are added to the mutable array passed as a parameter
-- (NSArray *)extractPublicationsFromFiles:(NSArray *)filenames unparseableFiles:(NSArray **)unparseableFiles verbose:(BOOL)verbose error:(NSError **)outError {
+- (NSArray *)extractPublicationsFromFileURLs:(NSArray *)fileURLs unparseableFileURLs:(NSArray **)unparseableFileURLs verbose:(BOOL)verbose error:(NSError **)outError {
     NSMutableArray *array = [NSMutableArray array];
     NSMutableArray *unparseableFilesArray = nil;
     BDSKStringType type = BDSKUnknownStringType;
@@ -2167,14 +2165,14 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     // some common types that people might use as attachments; we don't need to sniff these
     NSSet *unreadableTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"pdf", @"ps", @"eps", @"doc", @"htm", @"textClipping", @"webloc", @"html", @"rtf", @"tiff", @"tif", @"png", @"jpg", @"jpeg", nil];
     
-    for (NSString *fileName in filenames) {
+    for (NSURL *fileURL in fileURLs) {
         type = BDSKUnknownStringType;
         
         // we /can/ create a string from these (usually), but there's no point in wasting the memory
         
-        NSString *theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:[[fileName stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL];
+        NSString *theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:[[[fileURL URLByStandardizingPath] URLByResolvingSymlinksInPath] path] error:NULL];
         if ([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.bdsksearch"]) {
-            NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfFile:fileName];
+            NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfURL:fileURL];
             Class aClass = NSClassFromString([dictionary objectForKey:@"class"]);
             BDSKSearchGroup *group = [[[(aClass ?: [BDSKSearchGroup class]) alloc] initWithDictionary:dictionary] autorelease];
             if(group)
@@ -2184,10 +2182,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             BOOL isPartialData = NO;
             NSArray *contentArray = nil;
             
-            if ([unreadableTypes containsObject:[fileName pathExtension]] == NO) {
+            if ([unreadableTypes containsObject:[fileURL pathExtension]] == NO) {
         
                 // try to create a string
-                NSString *contentString = [[NSString alloc] initWithContentsOfFile:fileName guessedEncoding:[self documentStringEncoding]];
+                NSString *contentString = [[NSString alloc] initWithContentsOfFile:[fileURL path] guessedEncoding:[self documentStringEncoding]];
                 
                 if (contentString != nil) {
                     if ([theUTI isEqualToUTI:@"org.tug.tex.bibtex"])
@@ -2218,17 +2216,17 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                 // forward any temporaryCiteKey warning
                 if (parseError && outError) *outError = parseError;
                 [array addObjectsFromArray:contentArray];
-            } else if (unparseableFiles) {
+            } else if (unparseableFileURLs) {
                 // unable to parse or find valid type, we link the file and can ignore the error
                 if (unparseableFilesArray == nil)
                     unparseableFilesArray = [NSMutableArray array];
-                [unparseableFilesArray addObject:fileName];
+                [unparseableFilesArray addObject:fileURL];
             }
         }
     }
     
-    if (unparseableFiles)
-        *unparseableFiles = unparseableFilesArray;
+    if (unparseableFileURLs)
+        *unparseableFileURLs = unparseableFilesArray;
     
     return array;
 }
@@ -2325,9 +2323,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             if ([newFileURLs count] > 0) {
                 // try this first, in case these files are a type we can open
                 NSArray *newFiles = nil;
-                newPubs = [self extractPublicationsFromFiles:[newFileURLs valueForKey:@"path"] unparseableFiles:&newFiles verbose:verbose error:&error];
+                newPubs = [self extractPublicationsFromFileURLs:newFileURLs unparseableFileURLs:&newFiles verbose:verbose error:&error];
                 if ([newFiles count] > 0) {
-                    newFilePubs = [self publicationsForFiles:newFiles];
+                    newFilePubs = [self publicationsForFileURLs:newFiles];
                     newPubs = newPubs ? [newPubs arrayByAddingObjectsFromArray:newFilePubs]: newFilePubs;
                 }
             }
