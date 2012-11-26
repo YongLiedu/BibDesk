@@ -1459,7 +1459,7 @@ static BOOL changingColors = NO;
             NSURL *fileURL = [oPanel URL];
             // first try to parse the file
             NSError *error = nil;
-            NSArray *newPubs = [self extractPublicationsFromFileURL:fileURL ofType:nil verbose:NO error:&error];
+            NSArray *newPubs = [self extractPublicationsFromFileURL:fileURL verbose:NO error:&error];
             BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
             if ([newPubs count]) {
                 [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:[[error userInfo] valueForKey:BDSKTemporaryCiteKeyErrorKey] selectLibrary:YES edit:shouldEdit];

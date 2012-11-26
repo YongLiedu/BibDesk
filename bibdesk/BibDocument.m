@@ -2107,7 +2107,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 #pragma mark -
 #pragma mark New publications from pasteboard
 
-- (BibItem *)publicationForFileURL:(NSURL *)fileURL ofType:(NSString *)theUTI {
+- (BibItem *)publicationForFileURL:(NSURL *)fileURL {
     NSError *xerror = nil;
     BibItem *newBI = nil;
     
@@ -2126,7 +2126,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
     
     // GJ try parsing pdf to extract info that is then used to get a PubMed record
-    if(newBI == nil && [theUTI isEqualToUTI:(NSString *)kUTTypePDF]){
+    if(newBI == nil && [[[NSWorkspace sharedWorkspace] typeOfFile:[[[fileURL URLByStandardizingPath] URLByResolvingSymlinksInPath] path] error:NULL] isEqualToUTI:(NSString *)kUTTypePDF]){
         if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTermKey])
             newBI = [BibItem itemByParsingPDFAtURL:fileURL];			
         // fall back on the least reliable metadata source (hidden pref)
@@ -2149,7 +2149,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 }
 
 // sniff the contents of each file, returning them in an array of BibItems, while unparseable files are added to the mutable array passed as a parameter
-- (NSArray *)extractPublicationsFromFileURL:(NSURL *)fileURL ofType:(NSString *)theUTI verbose:(BOOL)verbose error:(NSError **)outError {
+- (NSArray *)extractPublicationsFromFileURL:(NSURL *)fileURL verbose:(BOOL)verbose error:(NSError **)outError {
     BDSKStringType type = BDSKUnknownStringType;
     
     // some common types that people might use as attachments; we don't need to sniff these
@@ -2166,8 +2166,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         NSString *contentString = [[NSString alloc] initWithContentsOfFile:[fileURL path] guessedEncoding:[self documentStringEncoding]];
         
         if (contentString != nil) {
-            if (theUTI == nil)
-                theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:[[[fileURL URLByStandardizingPath] URLByResolvingSymlinksInPath] path] error:NULL];
+            NSString *theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:[[[fileURL URLByStandardizingPath] URLByResolvingSymlinksInPath] path] error:NULL];
             if ([theUTI isEqualToUTI:@"org.tug.tex.bibtex"])
                 type = BDSKBibTeXStringType;
             else if([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.ris"])
@@ -2283,18 +2282,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                 titles = nil;
             for (NSURL *newURL in newURLs) {
                 if ([newURL isFileURL]) {
-                    NSString *theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:[[[newURL URLByStandardizingPath] URLByResolvingSymlinksInPath] path] error:NULL];
-                    if ([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.bdsksearch"]) {
-                        BDSKSearchGroup *group = [[[BDSKSearchGroup alloc] initWithURL:newURL] autorelease];
-                        if (group)
-                            [groups addSearchGroup:group];
-                    } else {
-                        NSArray *parsedItems = [self extractPublicationsFromFileURL:newURL ofType:theUTI verbose:verbose error:&error];
-                        if ([parsedItems count] > 0)
-                            [newURLPubs addObjectsFromArray:parsedItems];
-                        else
-                            [newURLPubs addObject:[self publicationForFileURL:newURL ofType:theUTI]];
-                    }
+                    NSArray *parsedItems = [self extractPublicationsFromFileURL:newURL verbose:verbose error:&error];
+                    if ([parsedItems count] > 0)
+                        [newURLPubs addObjectsFromArray:parsedItems];
+                    else
+                        [newURLPubs addObject:[self publicationForFileURL:newURL]];
                 } else {
                     [newURLPubs addObject:[self publicationForURL:newURL title:[titles objectAtIndex:[newURLs indexOfObject:newURL]]]];
                 }
