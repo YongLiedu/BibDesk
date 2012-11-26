@@ -2108,9 +2108,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 #pragma mark New publications from pasteboard
 
 - (BibItem *)publicationForFileURL:(NSURL *)fileURL ofType:(NSString *)theUTI {
-    fileURL = [fileURL URLByStandardizingPath];
     NSError *xerror = nil;
     BibItem *newBI = nil;
+    
+    fileURL = [fileURL URLByStandardizingPath];
     
     // most reliable metadata should be our private EA
     if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKReadExtendedAttributesKey]){
@@ -2125,13 +2126,14 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
     
     // GJ try parsing pdf to extract info that is then used to get a PubMed record
-    if(newBI == nil && theUTI){
+    if(newBI == nil && [theUTI isEqualToUTI:(NSString *)kUTTypePDF]){
         if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTermKey])
             newBI = [BibItem itemByParsingPDFAtURL:fileURL];			
         // fall back on the least reliable metadata source (hidden pref)
         if(newBI == nil && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldUsePDFMetadataKey])
             newBI = [BibItem itemWithPDFMetadataFromURL:fileURL];
     }
+    
     if(newBI == nil)
         newBI = [[[BibItem alloc] init] autorelease];
     
