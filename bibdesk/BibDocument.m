@@ -2285,7 +2285,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                 if ([newURL isFileURL]) {
                     NSString *theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:[[[newURL URLByStandardizingPath] URLByResolvingSymlinksInPath] path] error:NULL];
                     if ([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.bdsksearch"]) {
-                        BDSKSearchGroup *group = [[[BDSKSearchGroup alloc] initWithDictionary:[NSDictionary dictionaryWithContentsOfURL:newURL]] autorelease];
+                        BDSKSearchGroup *group = [[[BDSKSearchGroup alloc] initWithURL:newURL] autorelease];
                         if (group)
                             [groups addSearchGroup:group];
                     } else {

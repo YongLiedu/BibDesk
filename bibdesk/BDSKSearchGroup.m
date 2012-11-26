@@ -101,70 +101,84 @@ NSString *BDSKSearchGroupURLScheme = @"x-bdsk-search";
 }
 
 - (id)initWithURL:(NSURL *)bdsksearchURL {
-    BDSKPRECONDITION([[bdsksearchURL scheme] isEqualToString:BDSKSearchGroupURLScheme]);
+    NSDictionary *dictionary = nil;
     
-    NSString *aHost = [[bdsksearchURL host] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    NSString *aPort = [[bdsksearchURL port] stringValue];
-    NSString *path = [bdsksearchURL path];
-    NSString *aDatabase = [([path hasPrefix:@"/"] ? [path substringFromIndex:1] : path ?: @"") stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    NSString *aName = [[bdsksearchURL parameterString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] ?: aDatabase;
-    NSString *query = [bdsksearchURL query];
-    NSString *aSearchTerm = nil;
-    NSString *aType = BDSKSearchGroupZoom;
-    NSMutableDictionary *options = [NSMutableDictionary dictionary];
-    
-    [options setValue:[bdsksearchURL password] forKey:@"password"];
-    [options setValue:[bdsksearchURL user] forKey:@"username"];
-    
-    if (aPort == nil) {
-        if ([aHost isCaseInsensitiveEqual:BDSKSearchGroupEntrez])
-            aType = BDSKSearchGroupEntrez;
-        else if ([aHost isCaseInsensitiveEqual:BDSKSearchGroupISI])
-            aType = BDSKSearchGroupISI;
-        else if ([aHost isCaseInsensitiveEqual:BDSKSearchGroupDBLP])
-            aType = BDSKSearchGroupDBLP;
-    }
-    
-    for (query in [query componentsSeparatedByString:@"&"]) {
-        NSUInteger idx = [query rangeOfString:@"="].location;
-        if (idx != NSNotFound && idx > 0) {
-            NSString *key = [query substringToIndex:idx];
-            NSString *value = [[query substringFromIndex:idx + 1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-            if ([key isCaseInsensitiveEqual:@"searchTerm"] || [key isCaseInsensitiveEqual:@"term"]) {
-                aSearchTerm = value;
-            } else if ([key isCaseInsensitiveEqual:@"name"]) {
-                aName = value;
-            } else if ([key isCaseInsensitiveEqual:@"database"] || [key isCaseInsensitiveEqual:@"db"]) {
-                aDatabase = value;
-            } else {
-                if ([key isCaseInsensitiveEqual:@"password"]) {
-                    key = @"password";
-                } else if ([key isCaseInsensitiveEqual:@"username"] || [key isCaseInsensitiveEqual:@"user"]) {
-                    key = @"username";
-                } else if ([key isCaseInsensitiveEqual:@"recordSyntax"] || [key isCaseInsensitiveEqual:@"syntax"]) {
-                    key = @"recordSyntax";
-                } else if ([key isCaseInsensitiveEqual:@"resultEncoding"] || [key isCaseInsensitiveEqual:@"encoding"]) {
-                    key = @"resultEncoding";
-                } else if ([key isCaseInsensitiveEqual:@"removeDiacritics"]) {
-                    key = @"removeDiacritics";
-                    if ([value boolValue])
-                        value = @"YES";
-                    else continue;
+    if ([bdsksearchURL isFileURL]) {
+        
+        dictionary = [NSDictionary dictionaryWithContentsOfURL:bdsksearchURL];
+        Class groupClass = NSClassFromString([dictionary objectForKey:@"class"]);
+        if (groupClass && groupClass != [self class]) {
+            [self release];
+            self = [[groupClass class] alloc];
+        }
+        
+    } else {
+        
+        BDSKPRECONDITION([[bdsksearchURL scheme] isEqualToString:BDSKSearchGroupURLScheme]);
+        
+        NSString *aHost = [[bdsksearchURL host] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        NSString *aPort = [[bdsksearchURL port] stringValue];
+        NSString *path = [bdsksearchURL path];
+        NSString *aDatabase = [([path hasPrefix:@"/"] ? [path substringFromIndex:1] : path ?: @"") stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        NSString *aName = [[bdsksearchURL parameterString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] ?: aDatabase;
+        NSString *query = [bdsksearchURL query];
+        NSString *aSearchTerm = nil;
+        NSString *aType = BDSKSearchGroupZoom;
+        NSMutableDictionary *options = [NSMutableDictionary dictionary];
+        
+        [options setValue:[bdsksearchURL password] forKey:@"password"];
+        [options setValue:[bdsksearchURL user] forKey:@"username"];
+        
+        if (aPort == nil) {
+            if ([aHost isCaseInsensitiveEqual:BDSKSearchGroupEntrez])
+                aType = BDSKSearchGroupEntrez;
+            else if ([aHost isCaseInsensitiveEqual:BDSKSearchGroupISI])
+                aType = BDSKSearchGroupISI;
+            else if ([aHost isCaseInsensitiveEqual:BDSKSearchGroupDBLP])
+                aType = BDSKSearchGroupDBLP;
+        }
+        
+        for (query in [query componentsSeparatedByString:@"&"]) {
+            NSUInteger idx = [query rangeOfString:@"="].location;
+            if (idx != NSNotFound && idx > 0) {
+                NSString *key = [query substringToIndex:idx];
+                NSString *value = [[query substringFromIndex:idx + 1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+                if ([key isCaseInsensitiveEqual:@"searchTerm"] || [key isCaseInsensitiveEqual:@"term"]) {
+                    aSearchTerm = value;
+                } else if ([key isCaseInsensitiveEqual:@"name"]) {
+                    aName = value;
+                } else if ([key isCaseInsensitiveEqual:@"database"] || [key isCaseInsensitiveEqual:@"db"]) {
+                    aDatabase = value;
+                } else {
+                    if ([key isCaseInsensitiveEqual:@"password"]) {
+                        key = @"password";
+                    } else if ([key isCaseInsensitiveEqual:@"username"] || [key isCaseInsensitiveEqual:@"user"]) {
+                        key = @"username";
+                    } else if ([key isCaseInsensitiveEqual:@"recordSyntax"] || [key isCaseInsensitiveEqual:@"syntax"]) {
+                        key = @"recordSyntax";
+                    } else if ([key isCaseInsensitiveEqual:@"resultEncoding"] || [key isCaseInsensitiveEqual:@"encoding"]) {
+                        key = @"resultEncoding";
+                    } else if ([key isCaseInsensitiveEqual:@"removeDiacritics"]) {
+                        key = @"removeDiacritics";
+                        if ([value boolValue])
+                            value = @"YES";
+                        else continue;
+                    }
+                    [options setValue:value forKey:key];
                 }
-                [options setValue:value forKey:key];
             }
         }
-    }
-    
-    NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:7];
-    [dictionary setValue:aType forKey:@"type"];
-    [dictionary setValue:aName forKey:@"name"];
-    [dictionary setValue:aDatabase forKey:@"database"];
-    [dictionary setValue:aSearchTerm forKey:@"search term"];
-    if ([aType isEqualToString:BDSKSearchGroupZoom]) {
-        [dictionary setValue:aHost forKey:@"host"];
-        [dictionary setValue:aPort forKey:@"port"];
-        [dictionary setValue:options forKey:@"options"];
+        
+        dictionary = [NSMutableDictionary dictionaryWithCapacity:7];
+        [dictionary setValue:aType forKey:@"type"];
+        [dictionary setValue:aName forKey:@"name"];
+        [dictionary setValue:aDatabase forKey:@"database"];
+        [dictionary setValue:aSearchTerm forKey:@"search term"];
+        if ([aType isEqualToString:BDSKSearchGroupZoom]) {
+            [dictionary setValue:aHost forKey:@"host"];
+            [dictionary setValue:aPort forKey:@"port"];
+            [dictionary setValue:options forKey:@"options"];
+        }
     }
     
     return [self initWithDictionary:dictionary];

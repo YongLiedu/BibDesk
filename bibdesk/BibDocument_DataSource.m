@@ -1257,9 +1257,7 @@
             
             for (NSURL *url in urls) {
                 if ([url isFileURL] && [[[url path] pathExtension] isEqualToString:@"bdsksearch"]) {
-                    NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfURL:url];
-                    Class groupClass = NSClassFromString([dictionary objectForKey:@"class"]);
-                    if ((group = [[[(groupClass ?: [BDSKSearchGroup class]) alloc] initWithDictionary:dictionary] autorelease])) {
+                    if ((group = [[[BDSKSearchGroup alloc] initWithURL:url] autorelease])) {
                         [groups addSearchGroup:(BDSKSearchGroup *)group];
                         lastGroup = group;
                     }
