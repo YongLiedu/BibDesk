@@ -568,7 +568,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         NSArray *linkedURLs;
         NSURL *theURL;
         
-        if([tcId isGeneralURLField]){
+        if([tcId isGeneralURLField] || [tcId isCitationField]){
             if([tcId isURLField]){
                 if([tcId isLocalFileField]){
                     item = [menu addItemWithTitle:NSLocalizedString(@"Open Linked File", @"Menu item title") action:@selector(openLocalURL:) keyEquivalent:@""];
@@ -637,25 +637,16 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                                             andSubmenuOfApplicationsForURL:theURL atIndex:1];
                     }
                 }
-            }
-            [menu addItem:[NSMenuItem separatorItem]];
-            item = [menu addItemWithTitle:NSLocalizedString(@"Get Info", @"Menu item title") action:@selector(editPubCmd:) keyEquivalent:@""];
-            [item setTarget:self];
-            item = [menu addItemWithTitle:NSLocalizedString(@"Remove", @"Menu item title") action:@selector(removeSelectedPubs:) keyEquivalent:@""];
-            [item setTarget:self];
-            item = [menu addItemWithTitle:NSLocalizedString(@"Delete", @"Menu item title") action:@selector(deleteSelectedPubs:) keyEquivalent:@""];
-            [item setTarget:self];
-            [item setKeyEquivalentModifierMask:NSAlternateKeyMask];
-            [item setAlternate:YES];
-        }else if([tcId isCitationField]){
-            NSMutableArray *linkedPubs = [NSMutableArray array];
-            BibItem *pub;
-            for (pub in [self clickedOrSelectedPublications])
-                [linkedPubs addObjectsFromArray:[pub citationValueOfField:tcId]];
-            for (pub in linkedPubs) {
-                item = [menu addItemWithTitle:[pub citeKey] action:@selector(editRepresentedPub:) keyEquivalent:@""];
-                [item setTarget:self];
-                [item setRepresentedObject:pub];
+            }else if([tcId isCitationField]){
+                NSMutableArray *linkedPubs = [NSMutableArray array];
+                BibItem *pub;
+                for (pub in [self clickedOrSelectedPublications])
+                    [linkedPubs addObjectsFromArray:[pub citationValueOfField:tcId]];
+                for (pub in linkedPubs) {
+                    item = [menu addItemWithTitle:[pub citeKey] action:@selector(editRepresentedPub:) keyEquivalent:@""];
+                    [item setTarget:self];
+                    [item setRepresentedObject:pub];
+                }
             }
             [menu addItem:[NSMenuItem separatorItem]];
             item = [menu addItemWithTitle:NSLocalizedString(@"Get Info", @"Menu item title") action:@selector(editPubCmd:) keyEquivalent:@""];
