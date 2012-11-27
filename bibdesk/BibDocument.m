@@ -2182,8 +2182,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                         if (verbose) [self presentError:parseError];
                         parseError = nil;
                     } else if([parseError isLocalErrorWithCode:kBDSKBibTeXParserFailed]) {
-                        if (verbose == NO || [self presentError:parseError] == NO)
+                        if (verbose == NO) {
                             contentArray = nil;
+                        } else {
+                            if ([self presentError:parseError] == NO)
+                                contentArray = nil;
+                            parseError = nil;
+                        }
                     }
                 }
             }
