@@ -2263,7 +2263,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 - (NSArray *)addPublicationsFromPasteboard:(NSPasteboard *)pboard selectLibrary:(BOOL)shouldSelect verbose:(BOOL)verbose error:(NSError **)outError{
     NSArray *newPubs = nil;
-    NSArray *newFilePubs = nil;
+    NSMutableArray *newFilePubs = nil;
 	NSError *error = nil;
     BOOL isPartialData = NO;
     NSString *temporaryCiteKey = nil;
@@ -2283,10 +2283,15 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             for (NSURL *newURL in newURLs) {
                 if ([newURL isFileURL]) {
                     NSArray *parsedItems = [self extractPublicationsFromFileURL:newURL verbose:verbose error:&error];
-                    if ([parsedItems count] > 0)
+                    if ([parsedItems count] > 0) {
                         [newURLPubs addObjectsFromArray:parsedItems];
-                    else
-                        [newURLPubs addObject:[self publicationForFileURL:newURL]];
+                    } else {
+                        BibItem *item = [self publicationForFileURL:newURL];
+                        if (newFilePubs == nil)
+                            newFilePubs = [NSMutableArray array];
+                        [newURLPubs addObject:item];
+                        [newFilePubs addObject:item];
+                    }
                 } else {
                     [newURLPubs addObject:[self publicationForURL:newURL title:[titles objectAtIndex:[newURLs indexOfObject:newURL]]]];
                 }
