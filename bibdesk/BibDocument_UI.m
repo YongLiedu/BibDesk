@@ -649,14 +649,12 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                 }
             }
             [menu addItem:[NSMenuItem separatorItem]];
-            item = [menu addItemWithTitle:NSLocalizedString(@"Get Info", @"Menu item title") action:@selector(editPubCmd:) keyEquivalent:@""];
-            [item setTarget:self];
-            item = [menu addItemWithTitle:NSLocalizedString(@"Remove", @"Menu item title") action:@selector(removeSelectedPubs:) keyEquivalent:@""];
-            [item setTarget:self];
-            item = [menu addItemWithTitle:NSLocalizedString(@"Delete", @"Menu item title") action:@selector(deleteSelectedPubs:) keyEquivalent:@""];
-            [item setTarget:self];
-            [item setKeyEquivalentModifierMask:NSAlternateKeyMask];
-            [item setAlternate:YES];
+            NSUInteger i, count = [actionMenu numberOfItems];
+            for (i = 1; i < count; i++) {
+                item = [actionMenu itemAtIndex:i];
+                if ([item isSeparatorItem]) break;
+                [menu addItem:[[item copyWithZone:[menu zone]] autorelease]];
+            }
         }else{
             [self menuNeedsUpdate:copyAsMenu];
             [menu addItemsFromMenu:actionMenu];
