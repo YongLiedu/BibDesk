@@ -567,72 +567,75 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         NSString *tcId = [[[tableView tableColumns] objectAtIndex:column] identifier];
         NSArray *linkedURLs;
         NSURL *theURL;
+        BOOL isSingle;
         
         if([tcId isGeneralURLField] || [tcId isCitationField]){
             if([tcId isURLField]){
+                isSingle = [tableView numberOfClickedOrSelectedRows] == 1;
                 if([tcId isLocalFileField]){
-                    item = [menu addItemWithTitle:NSLocalizedString(@"Open Linked File", @"Menu item title") action:@selector(openLocalURL:) keyEquivalent:@""];
+                    item = [menu addItemWithTitle:isSingle ? NSLocalizedString(@"Open Linked File", @"Menu item title") : NSLocalizedString(@"Open Linked Files", @"Menu item title") action:@selector(openLocalURL:) keyEquivalent:@""];
                     [item setTarget:self];
                     [item setRepresentedObject:tcId];
-                    item = [menu addItemWithTitle:NSLocalizedString(@"Reveal Linked File in Finder", @"Menu item title") action:@selector(revealLocalURL:) keyEquivalent:@""];
+                    item = [menu addItemWithTitle:isSingle ? NSLocalizedString(@"Reveal Linked File in Finder", @"Menu item title") : NSLocalizedString(@"Reveal Linked Files in Finder", @"Menu item title") action:@selector(revealLocalURL:) keyEquivalent:@""];
                     [item setTarget:self];
                     [item setRepresentedObject:tcId];
-                    item = [menu addItemWithTitle:NSLocalizedString(@"Show Skim Notes For Linked File", @"Menu item title") action:@selector(showNotesForLocalURL:) keyEquivalent:@""];
+                    item = [menu addItemWithTitle:isSingle ? NSLocalizedString(@"Show Skim Notes For Linked File", @"Menu item title") : NSLocalizedString(@"Show Skim Notes For Linked Files", @"Menu item title") action:@selector(showNotesForLocalURL:) keyEquivalent:@""];
                     [item setTarget:self];
                     [item setRepresentedObject:tcId];
-                    item = [menu addItemWithTitle:NSLocalizedString(@"Copy Skim Notes For Linked File", @"Menu item title") action:@selector(copyNotesForLocalURL:) keyEquivalent:@""];
+                    item = [menu addItemWithTitle:isSingle ? NSLocalizedString(@"Copy Skim Notes For Linked File", @"Menu item title") : NSLocalizedString(@"Copy Skim Notes For Linked Files", @"Menu item title") action:@selector(copyNotesForLocalURL:) keyEquivalent:@""];
                     [item setTarget:self];
                     [item setRepresentedObject:tcId];
                 }else{
-                    item = [menu addItemWithTitle:NSLocalizedString(@"Open URL in Browser", @"Menu item title") action:@selector(openRemoteURL:) keyEquivalent:@""];
+                    item = [menu addItemWithTitle:isSingle ? NSLocalizedString(@"Open URL in Browser", @"Menu item title") : NSLocalizedString(@"Open URLs in Browser", @"Menu item title") action:@selector(openRemoteURL:) keyEquivalent:@""];
                     [item setTarget:self];
                     [item setRepresentedObject:tcId];
                 }
-                if([tableView numberOfClickedOrSelectedRows] == 1 &&
-                   (theURL = [[shownPublications objectAtIndex:row] URLForField:tcId])){
+                if(isSingle && (theURL = [[shownPublications objectAtIndex:row] URLForField:tcId])){
                     item = [menu insertItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") 
                                         andSubmenuOfApplicationsForURL:theURL atIndex:1];
                 }
             }else if([tcId isEqualToString:BDSKLocalFileString]){
                 linkedURLs = [self clickedOrSelectedFileURLs];
+                isSingle = [linkedURLs count] == 1;
                 
                 if([linkedURLs count]){
                     item = [menu addItemWithTitle:NSLocalizedString(@"Quick Look", @"Menu item title") action:@selector(previewAction:) keyEquivalent:@""];
                     [item setTarget:self];
                     [item setRepresentedObject:linkedURLs];
-                    item = [menu addItemWithTitle:NSLocalizedString(@"Open Linked Files", @"Menu item title") action:@selector(openLinkedFile:) keyEquivalent:@""];
+                    item = [menu addItemWithTitle:isSingle ? NSLocalizedString(@"Open Linked File", @"Menu item title") : NSLocalizedString(@"Open Linked Files", @"Menu item title") action:@selector(openLinkedFile:) keyEquivalent:@""];
                     [item setTarget:self];
-                    if ([linkedURLs count] > 1)
+                    if (isSingle == NO)
                         addSubmenuForURLsToItem(linkedURLs, item);
-                    item = [menu addItemWithTitle:NSLocalizedString(@"Reveal Linked Files in Finder", @"Menu item title") action:@selector(revealLinkedFile:) keyEquivalent:@""];
+                    item = [menu addItemWithTitle:isSingle ? NSLocalizedString(@"Reveal Linked File in Finder", @"Menu item title") : NSLocalizedString(@"Reveal Linked Files in Finder", @"Menu item title") action:@selector(revealLinkedFile:) keyEquivalent:@""];
                     [item setTarget:self];
-                    if ([linkedURLs count] > 1)
+                    if (isSingle == NO)
                         addSubmenuForURLsToItem(linkedURLs, item);
-                    item = [menu addItemWithTitle:NSLocalizedString(@"Show Skim Notes For Linked Files", @"Menu item title") action:@selector(showNotesForLinkedFile:) keyEquivalent:@""];
+                    item = [menu addItemWithTitle:isSingle ? NSLocalizedString(@"Show Skim Notes For Linked File", @"Menu item title") : NSLocalizedString(@"Show Skim Notes For Linked Files", @"Menu item title") action:@selector(showNotesForLinkedFile:) keyEquivalent:@""];
                     [item setTarget:self];
-                    if ([linkedURLs count] > 1)
+                    if (isSingle == NO)
                         addSubmenuForURLsToItem(linkedURLs, item);
-                    item = [menu addItemWithTitle:NSLocalizedString(@"Copy Skim Notes For Linked Files", @"Menu item title") action:@selector(copyNotesForLinkedFile:) keyEquivalent:@""];
+                    item = [menu addItemWithTitle:isSingle ? NSLocalizedString(@"Copy Skim Notes For Linked File", @"Menu item title") : NSLocalizedString(@"Copy Skim Notes For Linked Files", @"Menu item title") action:@selector(copyNotesForLinkedFile:) keyEquivalent:@""];
                     [item setTarget:self];
-                    if ([linkedURLs count] > 1)
+                    if (isSingle == NO)
                         addSubmenuForURLsToItem(linkedURLs, item);
-                    if([linkedURLs count] == 1 && (theURL = [linkedURLs lastObject]) && [theURL isEqual:[NSNull null]] == NO){
+                    if(isSingle && (theURL = [linkedURLs lastObject]) && [theURL isEqual:[NSNull null]] == NO){
                         item = [menu insertItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") 
                                             andSubmenuOfApplicationsForURL:theURL atIndex:1];
                     }
                 }
             }else if([tcId isEqualToString:BDSKRemoteURLString]){
                 linkedURLs = [[self clickedOrSelectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
+                isSingle = [linkedURLs count] == 1;
                 
                 if([linkedURLs count]){
                     item = [menu addItemWithTitle:NSLocalizedString(@"Quick Look", @"Menu item title") action:@selector(previewAction:) keyEquivalent:@""];
                     [item setTarget:self];
                     [item setRepresentedObject:linkedURLs];
-                    item = [menu addItemWithTitle:NSLocalizedString(@"Open URLs in Browser", @"Menu item title") action:@selector(openLinkedURL:) keyEquivalent:@""];
+                    item = [menu addItemWithTitle:isSingle ? NSLocalizedString(@"Open URL in Browser", @"Menu item title") : NSLocalizedString(@"Open URLs in Browser", @"Menu item title") action:@selector(openLinkedURL:) keyEquivalent:@""];
                     [item setTarget:self];
-                    if ([linkedURLs count] > 1)
+                    if (isSingle == NO)
                         addSubmenuForURLsToItem(linkedURLs, item);
-                    if([linkedURLs count] == 1 && (theURL = [linkedURLs lastObject]) && [theURL isEqual:[NSNull null]] == NO){
+                    if(isSingle && (theURL = [linkedURLs lastObject]) && [theURL isEqual:[NSNull null]] == NO){
                         item = [menu insertItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") 
                                             andSubmenuOfApplicationsForURL:theURL atIndex:1];
                     }
