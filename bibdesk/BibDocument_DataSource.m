@@ -1109,7 +1109,6 @@
         if ([group isExternal]) {
             pubs = [NSArray arrayWithArray:[(id)group publications]];
             if ([group isSearch]) {
-                BDSKServerInfo *serverInfo = [(BDSKSearchGroup *)group serverInfo];
                 additionalFileExtensions = [NSArray arrayWithObject:@"bdsksearch"];
             }
             docFlags.dragFromExternalGroups = YES;

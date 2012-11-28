@@ -2954,7 +2954,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             if ([pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]])
                 return NSDragOperationEvery;
         } else if ([field isLocalFileField]) {
-            NSString *type;
             if ([pboard canReadFileURLOfTypes:nil]) {
                 NSDragOperation mask = [info draggingSourceOperationMask];
                 return mask == NSDragOperationGeneric ? NSDragOperationLink : mask == NSDragOperationCopy ? NSDragOperationCopy : NSDragOperationEvery;
@@ -2971,7 +2970,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     if ([tv isEqual:tableView]) {
         NSPasteboard *pboard = [info draggingPasteboard];
         NSString *field = [fields objectAtIndex:row];
-        NSString *type;
         
         if ([field isEqualToString:BDSKCrossrefString]){
             if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]]) {

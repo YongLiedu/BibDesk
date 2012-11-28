@@ -55,6 +55,7 @@
 #import "NSMenu_BDSKExtensions.h"
 #import "NSPasteboard_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import <libkern/OSAtomic.h>
 
 #define BDSKOrphanedFilesWindowFrameAutosaveName @"BDSKOrphanedFilesWindow"
 

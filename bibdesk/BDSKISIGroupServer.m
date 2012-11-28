@@ -314,7 +314,7 @@ static NSArray *publicationsFromData(NSData *data);
         
         WokSearchServiceSoapBindingResponse *response = nil;
         NSArray *responseBodyParts;
-        WokSearchService_fullRecordSearchResults *fullRecordSearchResults;
+        WokSearchService_fullRecordSearchResults *fullRecordSearchResults = nil;
         WokSearchService_citedReferencesSearchResults *citedReferencesSearchResults = nil;
         
         WokSearchServiceSoapBinding *binding = [WokSearchService WokSearchServiceSoapBinding];

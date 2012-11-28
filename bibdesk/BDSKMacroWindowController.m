@@ -531,7 +531,6 @@
     BOOL success = NO;
     
     if ([fileURLs count] > 0) {
-        NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
         NSFileManager *fm = [NSFileManager defaultManager];
         
         for (NSURL *fileURL in fileURLs) {

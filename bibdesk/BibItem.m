@@ -1512,7 +1512,6 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     
     // create an array of all local-URLs this object could have
     NSMutableArray *urls = [[NSMutableArray alloc] initWithCapacity:5];
-    NSNumber *isAlias;
     for (BDSKLinkedFile *file in [self localFiles]) {
         // SearchKit cannot handle alias files, so we resolve those
         if ((aURL = [[file URL] fileURLByResolvingAliases]))

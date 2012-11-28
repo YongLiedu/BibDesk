@@ -370,7 +370,6 @@ static double runLoopTimeout = 30;
     NSFileManager *fm = [NSFileManager defaultManager];
     NSURL *appSupportURL = [NSURL fileURLWithPath:[fm applicationSupportDirectory]];
     NSArray *contents = [fm contentsOfDirectoryAtURL:appSupportURL includingPropertiesForKeys:[NSArray arrayWithObjects:NSURLIsDirectoryKey, nil] options:NSDirectoryEnumerationSkipsHiddenFiles error:NULL];
-	NSString *path = nil;
     NSSet *helperTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"cfg", @"sty", @"bst", nil];
     NSMutableArray *helperFileURLs = [NSMutableArray array];
     

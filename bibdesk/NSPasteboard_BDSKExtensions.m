@@ -74,8 +74,6 @@
     for (i = 0; i < urlCount; i++) {
         
         NSURL *theURL = [URLs objectAtIndex:i];
-        CFDataRef utf8Data = (CFDataRef)[[theURL absoluteString] dataUsingEncoding:NSUTF8StringEncoding];
-        NSString *name = i < namesCount ? [names objectAtIndex:i] : nil;
         NSPasteboardItem *item = [[[NSPasteboardItem alloc] init] autorelease];
         
         [item setString:[theURL absoluteString] forType:(NSString *)([theURL isFileURL] ? kUTTypeFileURL : kUTTypeURL)];
