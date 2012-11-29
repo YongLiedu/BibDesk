@@ -2306,11 +2306,12 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         } else {
             NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
             if ([strings count] > 0) {
+                NSString *string = [strings componentsJoinedByString:@"\n\n"];
                 BDSKStringType stringType = BDSKUnknownStringType;
                 // sniffing the string for RIS is broken because RefMiner puts junk at the beginning
                 if ([pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKReferenceMinerStringPboardType, nil]])
                     stringType = BDSKReferenceMinerStringType;
-                newPubs = [BDSKStringParser itemsFromString:[strings objectAtIndex:0] ofType:stringType owner:self isPartialData:&isPartialData error:&error];
+                newPubs = [BDSKStringParser itemsFromString:string ofType:stringType owner:self isPartialData:&isPartialData error:&error];
             } else {
                 // errors are key, value
                 error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Did not find anything appropriate on the pasteboard", @"Error description")];
