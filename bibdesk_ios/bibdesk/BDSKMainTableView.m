@@ -85,7 +85,6 @@ enum {
 - (NSString *)headerTitleForField:(NSString *)field;
 - (void)columnsMenuSelectTableColumn:(id)sender;
 - (void)columnsMenuAddTableColumn:(id)sender;
-- (void)addColumnSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)updateColumnsMenuUpdatingButton:(BOOL)updateButton;
 - (void)tableColumnDidMove:(NSNotification *)note;
 - (IBAction)importItem:(id)sender;
@@ -622,28 +621,20 @@ enum {
     [[NSUserDefaults standardUserDefaults] setObject:[[[self tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString] forKey:BDSKShownColsNamesKey];
 }
 
-- (void)addColumnSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    NSString *newColumnName = [addFieldController field];
-    
-    if (newColumnName && returnCode == NSOKButton) {
-        [self insertTableColumnWithIdentifier:newColumnName atIndex:[self numberOfColumns]];
-        [[NSUserDefaults standardUserDefaults] setObject:[[[self tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString] forKey:BDSKShownColsNamesKey];
-    }
-}
-
 - (void)columnsMenuAddTableColumn:(id)sender{
     // first we fill the popup
 	BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
     NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKPubDateString, BDSKDateAddedString, BDSKDateModifiedString, BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKLastAuthorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKAuthorEditorString, BDSKLastAuthorEditorString, BDSKItemNumberString, BDSKContainerString, BDSKCrossrefString, BDSKLocalFileString, BDSKRemoteURLString, BDSKColorLabelString, nil]
                                               excluding:[self tableColumnIdentifiers]];
     
-    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of column to add:", @"Label for adding column")
-                                                                                              fieldsArray:colNames];
-	[addFieldController beginSheetModalForWindow:[self window]
-                                   modalDelegate:self
-                                  didEndSelector:@selector(addColumnSheetDidEnd:returnCode:contextInfo:)
-                                     contextInfo:NULL];
-    [addFieldController release];
+    BDSKAddFieldSheetController *addFieldController = [[[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of column to add:", @"Label for adding column") fieldsArray:colNames] autorelease];
+	[addFieldController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        NSString *newColumnName = [addFieldController field];
+        if (newColumnName && result == NSOKButton) {
+            [self insertTableColumnWithIdentifier:newColumnName atIndex:[self numberOfColumns]];
+            [[NSUserDefaults standardUserDefaults] setObject:[[[self tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString] forKey:BDSKShownColsNamesKey];
+        }
+    }];
 }
 
 - (void)updateColumnsMenuUpdatingButton:(BOOL)updateButton {

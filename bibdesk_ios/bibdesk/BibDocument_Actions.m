@@ -45,6 +45,7 @@
 #import "BibItem.h"
 #import "BibAuthor.h"
 #import "BDSKGroup.h"
+#import "BDSKCategoryGroup.h"
 #import "BDSKStaticGroup.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKGroupsArray.h"
@@ -109,41 +110,50 @@ static BOOL changingColors = NO;
 
 	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication", @"Undo action name")];
 	
-	BOOL isSingleValued = [[self currentGroupField] isSingleValuedGroupField];
-    NSInteger count = 0;
-    // we don't overwrite inherited single valued fields, they already have the field set through inheritance
-    NSInteger op, handleInherited = isSingleValued ? BDSKOperationIgnore : BDSKOperationAsk;
+    NSInteger op, handleInherited = BDSKOperationAsk;
+    NSMutableSet *changedFields = [NSMutableSet set];
+    NSMutableSet *ignoredSingleValuedFields = [NSMutableSet set];
+    NSString *groupField = nil;
+	BOOL isSingleValued;
     
     for (BDSKGroup *group in [self selectedGroups]) {
 		if ([group isCategory]){
-            if (isSingleValued && count > 0)
+            groupField = [(BDSKCategoryGroup *)group key];
+            isSingleValued = [groupField isSingleValuedGroupField];
+            if (isSingleValued && [changedFields containsObject:groupField]) {
+                [ignoredSingleValuedFields addObject:groupField];
                 continue;
-			op = [newBI addToGroup:group handleInherited:handleInherited];
-            if(op == BDSKOperationSet || op == BDSKOperationAppend){
-                count++;
-            }else if(op == BDSKOperationAsk){
+            }
+            // we don't overwrite inherited single valued fields, they already have the field set through inheritance
+			op = [newBI addToGroup:group handleInherited:isSingleValued ? BDSKOperationIgnore : handleInherited];
+            if (op == BDSKOperationAsk) {
                 NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
                                                  defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
                                                alternateButton:nil // "Set" would end up choosing an arbitrary one
                                                    otherButton:NSLocalizedString(@"Append", @"Button title")
                                      informativeTextWithFormat:NSLocalizedString(@"The new item has a group value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
                 handleInherited = [alert runModal];
-                if(handleInherited != BDSKOperationIgnore){
+                if (handleInherited != BDSKOperationIgnore) {
                     [newBI addToGroup:group handleInherited:handleInherited];
-                    count++;
+                    [changedFields addObject:groupField];
                 }
+            } else if (op != BDSKOperationIgnore) {
+                [changedFields addObject:groupField];
+            } else if (isSingleValued) {
+                [ignoredSingleValuedFields addObject:groupField];
             }
         } else if ([group isStatic]) {
             [(BDSKStaticGroup *)group addPublication:newBI];
         }
     }
 	
-	if (isSingleValued && [[[self selectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isCategory == YES"]] count] > 1) {
+	if ([ignoredSingleValuedFields count] > 0) {
+        NSString *quotedFields = [[[ignoredSingleValuedFields allObjects] valueForKey:@"quotedStringIfNotEmpty"] componentsJoinedByString:@", "];
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Cannot Add to All Groups", @"Message in alert dialog when trying to add to multiple single-valued field groups")
                                          defaultButton:nil
                                        alternateButton:nil
                                            otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The new item can only be added to one of the selected \"%@\" groups", @"Informative text in alert dialog"), [[self currentGroupField]localizedFieldName]];
+                             informativeTextWithFormat:NSLocalizedString(@"The new item can only be added to one of the selected %@ groups", @"Informative text in alert dialog"), quotedFields];
         [alert beginSheetModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
     
@@ -205,8 +215,8 @@ static BOOL changingColors = NO;
 		BOOL canRemove = NO;
         if ([self hasStaticGroupsSelected])
             canRemove = YES;
-        else if ([[self currentGroupField] isSingleValuedGroupField] == NO)
-            canRemove = [self hasCategoryGroupsSelected];
+        else if (NSNotFound != [[self clickedOrSelectedGroups] indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop){ return [obj isCategory] && [[obj key] isSingleValuedGroupField] == NO; }])
+            canRemove = YES;
 		if (canRemove == NO) {
 			NSBeep();
 		}
@@ -306,7 +316,7 @@ static BOOL changingColors = NO;
 
 - (IBAction)copyAsAction:(id)sender{
 	NSInteger copyType = [sender tag];
-    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
 	[self writePublications:[self clickedOrSelectedPublications] forDragCopyType:copyType toPasteboard:pboard];
 }
 
@@ -863,8 +873,8 @@ static BOOL changingColors = NO;
     
     if ([notes isEqualToString:@""] == NO) {
         NSPasteboard *pboard = [NSPasteboard generalPasteboard];
-        [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-        [pboard setString:notes forType:NSStringPboardType];
+        [pboard clearContents];
+        [pboard writeObjects:[NSArray arrayWithObjects:notes, nil]];
     } else {
         NSBeep();
     }
@@ -1040,8 +1050,8 @@ static BOOL changingColors = NO;
     
     if ([notes isEqualToString:@""] == NO) {
         NSPasteboard *pboard = [NSPasteboard generalPasteboard];
-        [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-        [pboard setString:notes forType:NSStringPboardType];
+        [pboard clearContents];
+        [pboard writeObjects:[NSArray arrayWithObjects:notes, nil]];
     } else {
         NSBeep();
     }
@@ -1065,43 +1075,6 @@ static BOOL changingColors = NO;
     }
 }
 
-- (void)chooseLinkedFilePanelDidEnd:(NSOpenPanel *)oPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSFileHandlingPanelOKButton) {
-        BibItem *publication = nil;
-        if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
-            NSArray *selPubs = [self selectedPublications];
-            if ([selPubs count] == 1)
-                publication = [selPubs lastObject];
-        }
-        if (publication == nil) {
-            NSBeep();
-            return;
-        }
-        
-        NSUInteger anIndex = (NSUInteger)contextInfo;
-        NSURL *aURL = [[oPanel URLs] objectAtIndex:0];
-        BOOL shouldAutoFile = [(NSButton *)[oPanel accessoryView] state] == NSOffState && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey];
-        if (anIndex != NSNotFound) {
-            BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
-            if (aFile == nil)
-                return;
-            NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
-            [publication removeObjectFromFilesAtIndex:anIndex];
-            [publication insertObject:aFile inFilesAtIndex:anIndex];
-            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-            if (oldURL)
-                [self userRemovedURL:oldURL forPublication:publication];
-            [oldURL release];
-            [self userAddedURL:aURL forPublication:publication];
-            if (shouldAutoFile)
-                [publication autoFileLinkedFile:aFile];
-        } else {
-            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-            [publication addFileForURL:aURL autoFile:shouldAutoFile runScriptHook:YES];
-        }
-    }        
-}
-
 - (IBAction)chooseLinkedFile:(id)sender {
     if ([self isDisplayingFileContentSearch] || [self hasExternalGroupsSelected] || [[self selectedPublications] count] != 1) {
         NSBeep();
@@ -1110,16 +1083,18 @@ static BOOL changingColors = NO;
     
     NSUInteger anIndex = NSNotFound;
     NSNumber *indexNumber = [sender representedObject];
-    NSString *path = nil;
+    NSURL *url = nil;
     if (indexNumber) {
         anIndex = [indexNumber unsignedIntegerValue];
-        path = [[[[self shownFiles] objectAtIndex:anIndex] URL] path];
+        url = [[[self shownFiles] objectAtIndex:anIndex] URL];
     }
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:NO];
     [oPanel setResolvesAliases:NO];
     [oPanel setCanChooseDirectories:YES];
     [oPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
+    [oPanel setDirectoryURL:[url URLByDeletingLastPathComponent]];
+    [oPanel setNameFieldStringValue:[url lastPathComponent]];
     
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]) {
         NSButton *disableAutoFileButton = [[[NSButton alloc] init] autorelease];
@@ -1130,49 +1105,41 @@ static BOOL changingColors = NO;
         [oPanel setAccessoryView:disableAutoFileButton];
 	}
     
-    [oPanel beginSheetForDirectory:[path stringByDeletingLastPathComponent] 
-                              file:[path lastPathComponent] 
-                    modalForWindow:documentWindow 
-                     modalDelegate:self 
-                    didEndSelector:@selector(chooseLinkedFilePanelDidEnd:returnCode:contextInfo:) 
-                       contextInfo:(void *)anIndex];
-  
-}
-
-- (void)chooseLinkedURLSheetDidEnd:(BDSKURLSheetController *)urlController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if (returnCode == NSOKButton) {
-        BibItem *publication = nil;
-        if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
-            NSArray *selPubs = [self selectedPublications];
-            if ([selPubs count] == 1)
-                publication = [selPubs lastObject];
-        }
-        if (publication == nil) {
-            NSBeep();
-            return;
-        }
-        
-        NSURL *aURL = [urlController URL];
-        if (aURL == nil)
-            return;
-        NSUInteger anIndex = (NSUInteger)contextInfo;
-        if (anIndex != NSNotFound) {
-            BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
-            if (aFile == nil)
+    [oPanel beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+        if (result == NSFileHandlingPanelOKButton) {
+            BibItem *publication = nil;
+            if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
+                NSArray *selPubs = [self selectedPublications];
+                if ([selPubs count] == 1)
+                    publication = [selPubs lastObject];
+            }
+            if (publication == nil) {
+                NSBeep();
                 return;
-            NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
-            [publication removeObjectFromFilesAtIndex:anIndex];
-            [publication insertObject:aFile inFilesAtIndex:anIndex];
-            if (oldURL)
-                [self userRemovedURL:oldURL forPublication:publication];
-            [oldURL release];
-            [self userAddedURL:aURL forPublication:publication];
-            [publication autoFileLinkedFile:aFile];
-        } else {
-            [publication addFileForURL:aURL autoFile:NO runScriptHook:YES];
-        }
-        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-    }        
+            }
+            
+            NSURL *aURL = [[oPanel URLs] objectAtIndex:0];
+            BOOL shouldAutoFile = [(NSButton *)[oPanel accessoryView] state] == NSOffState && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey];
+            if (anIndex != NSNotFound) {
+                BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
+                if (aFile == nil)
+                    return;
+                NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
+                [publication removeObjectFromFilesAtIndex:anIndex];
+                [publication insertObject:aFile inFilesAtIndex:anIndex];
+                [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+                if (oldURL)
+                    [self userRemovedURL:oldURL forPublication:publication];
+                [oldURL release];
+                [self userAddedURL:aURL forPublication:publication];
+                if (shouldAutoFile)
+                    [publication autoFileLinkedFile:aFile];
+            } else {
+                [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+                [publication addFileForURL:aURL autoFile:shouldAutoFile runScriptHook:YES];
+            }
+        }        
+    }];
 }
 
 - (IBAction)chooseLinkedURL:(id)sender{
@@ -1189,14 +1156,43 @@ static BOOL changingColors = NO;
         urlString = [[[[self shownFiles] objectAtIndex:anIndex] URL] absoluteString];
     }
     
-    BDSKURLSheetController *urlController = [[BDSKURLSheetController alloc] init];
+    BDSKURLSheetController *urlController = [[[BDSKURLSheetController alloc] init] autorelease];
     
     [urlController setUrlString:urlString];
-    [urlController beginSheetModalForWindow:documentWindow
-                              modalDelegate:self
-                             didEndSelector:@selector(chooseLinkedURLSheetDidEnd:returnCode:contextInfo:)
-                                contextInfo:(void *)anIndex];
-    [urlController release];
+    [urlController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+        if (result == NSOKButton) {
+            BibItem *publication = nil;
+            if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
+                NSArray *selPubs = [self selectedPublications];
+                if ([selPubs count] == 1)
+                    publication = [selPubs lastObject];
+            }
+            if (publication == nil) {
+                NSBeep();
+                return;
+            }
+            
+            NSURL *aURL = [urlController URL];
+            if (aURL == nil)
+                return;
+            if (anIndex != NSNotFound) {
+                BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
+                if (aFile == nil)
+                    return;
+                NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
+                [publication removeObjectFromFilesAtIndex:anIndex];
+                [publication insertObject:aFile inFilesAtIndex:anIndex];
+                if (oldURL)
+                    [self userRemovedURL:oldURL forPublication:publication];
+                [oldURL release];
+                [self userAddedURL:aURL forPublication:publication];
+                [publication autoFileLinkedFile:aFile];
+            } else {
+                [publication addFileForURL:aURL autoFile:NO runScriptHook:YES];
+            }
+            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+        }        
+    }];
 }
 
 - (IBAction)migrateFiles:(id)sender {
@@ -1383,20 +1379,18 @@ static BOOL changingColors = NO;
     [drawerController toggle:sender];
 }
 
-- (void)documentInfoSheetDidEnd:(BDSKDocumentInfoWindowController *)infoController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if (returnCode == NSOKButton) {
-        NSDictionary *info = [infoController info];
-        if ([info isEqualToDictionary:[self documentInfo]] == NO) {
-            [self setDocumentInfo:info];
-            [[self undoManager] setActionName:NSLocalizedString(@"Change Document Info", @"Undo action name")];
-        }
-    }
-}
-
 - (IBAction)showDocumentInfoWindow:(id)sender{
-    BDSKDocumentInfoWindowController *infoWC = [[[BDSKDocumentInfoWindowController alloc] init] autorelease];
-    [infoWC setInfo:[self documentInfo]];
-    [infoWC beginSheetModalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(documentInfoSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+    BDSKDocumentInfoWindowController *infoController = [[[BDSKDocumentInfoWindowController alloc] init] autorelease];
+    [infoController setInfo:[self documentInfo]];
+    [infoController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+        if (result == NSOKButton) {
+            NSDictionary *info = [infoController info];
+            if ([info isEqualToDictionary:[self documentInfo]] == NO) {
+                [self setDocumentInfo:info];
+                [[self undoManager] setActionName:NSLocalizedString(@"Change Document Info", @"Undo action name")];
+            }
+        }
+    }];
 }
 
 - (IBAction)showMacrosWindow:(id)sender{
@@ -1429,59 +1423,30 @@ static BOOL changingColors = NO;
 
 #pragma mark Text import sheet support
 
-- (void)importSheetDidEnd:(BDSKTextImportController *)controller returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    NSArray *addedPubs = [controller addedPublications];
-    if ([addedPubs count] > 0)
-        [self addPublications:addedPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:YES edit:NO];
-}
-
 - (IBAction)importFromPasteboardAction:(id)sender{
     
-    NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    NSString *type = [pasteboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKReferenceMinerStringPboardType, BDSKBibItemPboardType, NSStringPboardType, nil]];
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+    BOOL isKnownFormat = [pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]];
     
-    if(type != nil){
-        BOOL isKnownFormat = YES;
-		if([type isEqualToString:NSStringPboardType]){
+    if (isKnownFormat = NO) {
+        NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+        if ([strings count] > 0)
 			// sniff the string to see if we should add it directly
-			NSString *pboardString = [pasteboard stringForType:type];
-			isKnownFormat = ([pboardString contentStringType] != BDSKUnknownStringType);
-		}
-		
-        NSArray *newPubs = isKnownFormat ? [self addPublicationsFromPasteboard:pasteboard selectLibrary:YES verbose:NO error:NULL] : nil;
-        if([newPubs count] > 0)
+			isKnownFormat = ([[strings objectAtIndex:0] contentStringType] != BDSKUnknownStringType);
+    }
+    
+    if (isKnownFormat) {		
+        NSArray *newPubs = [self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:NO error:NULL];
+        if ([newPubs count] > 0)
             return; // it worked, so we're done here
     }
     
     BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initForOwner:self] autorelease];
-    [tic beginSheetForURL:nil
-           modalForWindow:documentWindow 
-            modalDelegate:self 
-           didEndSelector:@selector(importSheetDidEnd:returnCode:contextInfo:) 
-              contextInfo:NULL];
-}
-
-- (void)importOpenPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if (returnCode == NSFileHandlingPanelOKButton) {
-        NSString *fileName = [sheet filename];
-        // first try to parse the file
-        NSError *error = nil;
-        NSArray *newPubs = [self extractPublicationsFromFiles:[NSArray arrayWithObject:fileName] unparseableFiles:NULL verbose:NO error:&error];
-        BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
-        if ([newPubs count]) {
-            [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:[[error userInfo] valueForKey:BDSKTemporaryCiteKeyErrorKey] selectLibrary:YES edit:shouldEdit];
-            // succeeded to parse the file, we return immediately
-        } else {
-            [sheet orderOut:nil];
-            
-            BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initForOwner:self] autorelease];
-            [tic beginSheetForURL:[NSURL fileURLWithPath:fileName] 
-                   modalForWindow:documentWindow 
-                    modalDelegate:self 
-                   didEndSelector:@selector(importSheetDidEnd:returnCode:contextInfo:) 
-                      contextInfo:NULL];
-        }
-    }
+    [tic beginSheetForURL:nil modalForWindow:documentWindow completionHandler:^(NSInteger result){
+        NSArray *addedPubs = [tic addedPublications];
+        if ([addedPubs count] > 0)
+            [self addPublications:addedPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:YES edit:NO];
+    }];
 }
 
 - (IBAction)importFromFileAction:(id)sender{
@@ -1489,41 +1454,51 @@ static BOOL changingColors = NO;
 	[oPanel setAllowsMultipleSelection:NO];
 	[oPanel setCanChooseDirectories:NO];
 
-	[oPanel beginSheetForDirectory:nil 
-							  file:nil 
-							 types:nil
-					modalForWindow:documentWindow
-					 modalDelegate:self 
-					didEndSelector:@selector(importOpenPanelDidEnd:returnCode:contextInfo:) 
-					   contextInfo:NULL];
-}
-
-- (void)importFromWebSheetDidEnd:(BDSKURLSheetController *)urlSheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if (returnCode == NSOKButton) {
-        [[urlSheetController window] orderOut:nil];
-        
-        NSURL *url = [urlSheetController URL];
-        if (url == nil) {
-            NSBeep();
-            return;
+	[oPanel beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+        if (result == NSFileHandlingPanelOKButton) {
+            NSURL *fileURL = [oPanel URL];
+            // first try to parse the file
+            NSError *error = nil;
+            NSArray *newPubs = [self extractPublicationsFromFileURL:fileURL verbose:NO error:&error];
+            BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
+            if ([newPubs count]) {
+                [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:[[error userInfo] valueForKey:BDSKTemporaryCiteKeyErrorKey] selectLibrary:YES edit:shouldEdit];
+                // succeeded to parse the file, we return immediately
+            } else {
+                [oPanel orderOut:nil];
+                
+                BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initForOwner:self] autorelease];
+                [tic beginSheetForURL:fileURL modalForWindow:documentWindow  completionHandler:^(NSInteger result2){
+                    NSArray *addedPubs = [tic addedPublications];
+                    if ([addedPubs count] > 0)
+                        [self addPublications:addedPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:YES edit:NO];
+                }];
+            }
         }
-        
-        BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initForOwner:self] autorelease];
-        [tic beginSheetForURL:url 
-               modalForWindow:documentWindow 
-                modalDelegate:self 
-               didEndSelector:@selector(importSheetDidEnd:returnCode:contextInfo:) 
-                  contextInfo:NULL];
-    }
+    }];
 }
 
 - (IBAction)importFromWebAction:(id)sender{
     BDSKURLSheetController *urlSheetController = [[[BDSKURLSheetController alloc] init] autorelease];
     
-	[urlSheetController beginSheetModalForWindow:documentWindow
-                                   modalDelegate:self
-                                  didEndSelector:@selector(importFromWebSheetDidEnd:returnCode:contextInfo:)
-                                     contextInfo:NULL];
+	[urlSheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+        if (result == NSOKButton) {
+            [[urlSheetController window] orderOut:nil];
+            
+            NSURL *url = [urlSheetController URL];
+            if (url == nil) {
+                NSBeep();
+                return;
+            }
+            
+            BDSKTextImportController *tic = [[(BDSKTextImportController *)[BDSKTextImportController alloc] initForOwner:self] autorelease];
+            [tic beginSheetForURL:url modalForWindow:documentWindow completionHandler:^(NSInteger result2){
+                NSArray *addedPubs = [tic addedPublications];
+                if ([addedPubs count] > 0)
+                    [self addPublications:addedPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:YES edit:NO];
+            }];
+        }
+    }];
 }
 
 #pragma mark AutoFile stuff
@@ -1905,26 +1880,17 @@ static BOOL changingColors = NO;
     [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%ld incomplete %@ found.", @"Status message: [number] incomplete publication(s) found"), (long)countOfItems, pubSingularPlural]];
 }
 
-- (void)chooseAuxPanelDidEnd:(NSOpenPanel *)openPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSFileHandlingPanelCancelButton)
-        return;
-    
-	NSString *path = [[openPanel filenames] objectAtIndex:0];
-	if (path == nil)
-		return;
-    
-    [self selectItemsInAuxFileAtPath:path];
-}
-
 - (IBAction)selectPublicationsFromAuxFile:(id)sender{
     NSOpenPanel *openPanel = [NSOpenPanel openPanel];
     [openPanel setPrompt:NSLocalizedString(@"Choose", @"")];
-    [openPanel beginSheetForDirectory:nil 
-                                 file:nil 
-                                types:[NSArray arrayWithObject:@"aux"]  
-                       modalForWindow:documentWindow 
-                        modalDelegate:self 
-                       didEndSelector:@selector(chooseAuxPanelDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+    [openPanel setAllowedFileTypes:[NSArray arrayWithObject:@"aux"]];
+    [openPanel beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+        if (result == NSFileHandlingPanelOKButton) {
+            NSString *path = [[openPanel URL] path];
+            if (path)
+                [self selectItemsInAuxFileAtPath:path];
+        }
+    }];
 }
 
 @end

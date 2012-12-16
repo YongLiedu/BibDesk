@@ -86,6 +86,7 @@
 #import "NSInvocation_BDSKExtensions.h"
 #import "NSTextView_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
+#import "NSPasteboard_BDSKExtensions.h"
 
 #define WEAK_NULL NULL
 
@@ -218,7 +219,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     [self resetFields];
     [self setupMatrix];
     if (editorFlags.isEditable)
-        [tableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
+        [tableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, (NSString *)kUTTypeURL, (NSString *)kUTTypeFileURL, NSURLPboardType, NSFilenamesPboardType, nil]];
     
     // Setup the citekey textfield
     BDSKCiteKeyFormatter *citeKeyFormatter = [[BDSKCiteKeyFormatter alloc] init];
@@ -262,7 +263,7 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     
     [[self window] setDelegate:self];
     if (editorFlags.isEditable)
-        [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];					
+        [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, NSPasteboardTypeString, nil]];					
 	
     [self updateCiteKeyDuplicateWarning];
     
@@ -429,7 +430,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
     NSString *copyTypeKey = ([NSEvent standardModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
 	NSInteger copyType = [sud integerForKey:copyTypeKey];
-    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
     NSArray *pubs = [NSArray arrayWithObject:publication];
     
     if (copyType == BDSKTemplateDragCopyType) {
@@ -445,7 +446,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 
 - (IBAction)copyAsAction:(id)sender {
 	NSInteger copyType = [sender tag];
-    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
     NSArray *pubs = [NSArray arrayWithObject:publication];
 	[[self document] writePublications:pubs forDragCopyType:copyType toPasteboard:pboard];
 }
@@ -461,7 +462,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     
     for (fileURL in urls) {
         if ([fileURL isEqual:[NSNull null]] == NO) {
-            [[NSWorkspace sharedWorkspace] openLinkedFile:[fileURL path]];
+            [[NSWorkspace sharedWorkspace] openLinkedURL:fileURL];
         }
     }
 }
@@ -541,8 +542,8 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     }
     if ([string length]) {
         NSPasteboard *pboard = [NSPasteboard generalPasteboard];
-        [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-        [pboard setString:string forType:NSStringPboardType];
+        [pboard clearContents];
+        [pboard writeObjects:[NSArray arrayWithObjects:string, nil]];
     }
 }
 
@@ -583,46 +584,21 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     }
 }
 
-- (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-
-    if(returnCode == NSFileHandlingPanelOKButton){
-        NSUInteger anIndex = (NSUInteger)contextInfo;
-        NSURL *aURL = [[sheet URLs] objectAtIndex:0];
-        BOOL shouldAutoFile = [disableAutoFileButton state] == NSOffState && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey];
-        if (anIndex != NSNotFound) {
-            BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
-            if (aFile == nil)
-                return;
-            NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
-            [publication removeObjectFromFilesAtIndex:anIndex];
-            [publication insertObject:aFile inFilesAtIndex:anIndex];
-            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-            if (oldURL)
-                [[self document] userRemovedURL:oldURL forPublication:publication];
-            [oldURL release];
-            [[self document] userAddedURL:aURL forPublication:publication];
-            if (shouldAutoFile)
-                [publication autoFileLinkedFile:aFile];
-        } else {
-            [publication addFileForURL:aURL autoFile:shouldAutoFile runScriptHook:YES];
-            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-        }
-    }        
-}
-
 - (IBAction)chooseLocalFile:(id)sender{
     NSUInteger anIndex = NSNotFound;
     NSNumber *indexNumber = [sender representedObject];
-    NSString *path = nil;
+    NSURL *url = nil;
     if (indexNumber) {
         anIndex = [indexNumber unsignedIntegerValue];
-        path = [[[publication objectInFilesAtIndex:anIndex] URL] path];
+        url = [[publication objectInFilesAtIndex:anIndex] URL];
     }
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:NO];
     [oPanel setResolvesAliases:NO];
     [oPanel setCanChooseDirectories:YES];
     [oPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
+    [oPanel setDirectoryURL:[url URLByDeletingLastPathComponent]];
+    [oPanel setNameFieldStringValue:[url lastPathComponent]];
     
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]) {
         if (disableAutoFileButton == nil) {
@@ -636,13 +612,30 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         [oPanel setAccessoryView:disableAutoFileButton];
 	}
     
-    [oPanel beginSheetForDirectory:[path stringByDeletingLastPathComponent] 
-                              file:[path lastPathComponent] 
-                    modalForWindow:[self window] 
-                     modalDelegate:self 
-                    didEndSelector:@selector(chooseLocalFilePanelDidEnd:returnCode:contextInfo:) 
-                       contextInfo:(void *)anIndex];
-  
+    [oPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        if(result == NSFileHandlingPanelOKButton){
+            NSURL *aURL = [[oPanel URLs] objectAtIndex:0];
+            BOOL shouldAutoFile = [disableAutoFileButton state] == NSOffState && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey];
+            if (anIndex != NSNotFound) {
+                BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
+                if (aFile == nil)
+                    return;
+                NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
+                [publication removeObjectFromFilesAtIndex:anIndex];
+                [publication insertObject:aFile inFilesAtIndex:anIndex];
+                [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+                if (oldURL)
+                    [[self document] userRemovedURL:oldURL forPublication:publication];
+                [oldURL release];
+                [[self document] userAddedURL:aURL forPublication:publication];
+                if (shouldAutoFile)
+                    [publication autoFileLinkedFile:aFile];
+            } else {
+                [publication addFileForURL:aURL autoFile:shouldAutoFile runScriptHook:YES];
+                [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+            }
+        }        
+    }];
 }
 
 - (void)addLinkedFileFromMenuItem:(NSMenuItem *)sender{
@@ -650,35 +643,6 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     NSURL *aURL = [NSURL fileURLWithPath:path];
     [publication addFileForURL:aURL autoFile:YES runScriptHook:YES];
     [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-}
-
-- (void)chooseRemoteURLSheetDidEnd:(BDSKURLSheetController *)urlController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-
-    if (returnCode == NSOKButton) {
-        // remove the sheet in case we get an alert
-        [[urlController window] orderOut:nil];
-        
-        NSURL *aURL = [urlController URL];
-        if (aURL == nil)
-            return;
-        NSUInteger anIndex = (NSUInteger)contextInfo;
-        if (anIndex != NSNotFound) {
-            BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
-            if (aFile == nil)
-                return;
-            NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
-            [publication removeObjectFromFilesAtIndex:anIndex];
-            [publication insertObject:aFile inFilesAtIndex:anIndex];
-            if (oldURL)
-                [[self document] userRemovedURL:oldURL forPublication:publication];
-            [oldURL release];
-            [[self document] userAddedURL:aURL forPublication:publication];
-            [publication autoFileLinkedFile:aFile];
-        } else {
-            [publication addFileForURL:aURL autoFile:NO runScriptHook:YES];
-            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-        }
-    }        
 }
 
 - (IBAction)chooseRemoteURL:(id)sender{
@@ -690,14 +654,35 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         urlString = [[[publication objectInFilesAtIndex:anIndex] URL] absoluteString];
     }
     
-    BDSKURLSheetController *urlController = [[BDSKURLSheetController alloc] init];
+    BDSKURLSheetController *urlController = [[[BDSKURLSheetController alloc] init] autorelease];
     
     [urlController setUrlString:urlString];
-    [urlController beginSheetModalForWindow:[self window]
-                              modalDelegate:self
-                             didEndSelector:@selector(chooseRemoteURLSheetDidEnd:returnCode:contextInfo:)
-                                contextInfo:(void *)anIndex];
-    [urlController release];
+    [urlController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        if (result == NSOKButton) {
+            // remove the sheet in case we get an alert
+            [[urlController window] orderOut:nil];
+            
+            NSURL *aURL = [urlController URL];
+            if (aURL == nil)
+                return;
+            if (anIndex != NSNotFound) {
+                BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
+                if (aFile == nil)
+                    return;
+                NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
+                [publication removeObjectFromFilesAtIndex:anIndex];
+                [publication insertObject:aFile inFilesAtIndex:anIndex];
+                if (oldURL)
+                    [[self document] userRemovedURL:oldURL forPublication:publication];
+                [oldURL release];
+                [[self document] userAddedURL:aURL forPublication:publication];
+                [publication autoFileLinkedFile:aFile];
+            } else {
+                [publication addFileForURL:aURL autoFile:NO runScriptHook:YES];
+                [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+            }
+        }
+    }];
 }
 
 - (void)addRemoteURLFromMenuItem:(NSMenuItem *)sender{
@@ -708,26 +693,6 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 
 - (IBAction)trashLinkedFiles:(id)sender{
     [self deleteURLsAtIndexes:[sender representedObject] moveToTrash:BDSKMoveToTrashYes];
-}
-
-- (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    NSArray *currentFields = [(NSArray *)contextInfo autorelease];
-	NSString *newField = [addFieldController field];
-    if(returnCode == NSCancelButton || newField == nil)
-        return;
-    
-    // remove the sheet in case we get an alert
-    [[addFieldController window] orderOut:nil];
-    
-    newField = [newField fieldName];
-    if([currentFields containsObject:newField] == NO){
-        if (addedFields == nil)
-            addedFields = [[NSMutableSet alloc] init];
-        [addedFields addObject:newField];
-		[tabView selectFirstTabViewItem:nil];
-		[self resetFields];
-        [self setKeyField:newField];
-    }
 }
 
 // raises the add field sheet
@@ -743,35 +708,26 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     
     fieldNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObject:BDSKCrossrefString] excluding:currentFields];
     
-    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:", @"Label for adding field")
-                                                                                              fieldsArray:fieldNames];
     if ([self commitEditing]) {
-        [addFieldController beginSheetModalForWindow:[self window]
-                                       modalDelegate:self
-                                      didEndSelector:@selector(addFieldSheetDidEnd:returnCode:contextInfo:)
-                                         contextInfo:currentFields];
-    }
-    [addFieldController release];
-}
-
-- (void)removeFieldSheetDidEnd:(BDSKRemoveFieldSheetController *)removeFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-	NSString *oldField = [removeFieldController field];
-    NSString *oldValue = [[[publication valueOfField:oldField inherit:NO] retain] autorelease];
-    NSArray *removableFields = [removeFieldController fieldsArray];
-    
-    if (returnCode == NSOKButton && oldField != nil && [removableFields count]) {
-        // remove the sheet in case we get an alert
-        [[removeFieldController window] orderOut:nil];
-        
-        [addedFields removeObject:oldField];
-        [tabView selectFirstTabViewItem:nil];
-        if ([NSString isEmptyString:oldValue]) {
-            [self resetFields];
-        } else {
-            [publication setField:oldField toValue:nil];
-            [[self undoManager] setActionName:NSLocalizedString(@"Remove Field", @"Undo action name")];
-            [self userChangedField:oldField from:oldValue to:@""];
-        }
+        BDSKAddFieldSheetController *addFieldController = [[[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:", @"Label for adding field") fieldsArray:fieldNames] autorelease];
+        [addFieldController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+            NSString *newField = [addFieldController field];
+            if(result == NSCancelButton || newField == nil)
+                return;
+            
+            // remove the sheet in case we get an alert
+            [[addFieldController window] orderOut:nil];
+            
+            newField = [newField fieldName];
+            if([currentFields containsObject:newField] == NO){
+                if (addedFields == nil)
+                    addedFields = [[NSMutableSet alloc] init];
+                [addedFields addObject:newField];
+                [tabView selectFirstTabViewItem:nil];
+                [self resetFields];
+                [self setKeyField:newField];
+            }
+        }];
     }
 }
 
@@ -791,8 +747,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 		prompt = NSLocalizedString(@"No fields to remove", @"Label when no field to remove");
 	}
     
-    BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:prompt
-                                                                                                       fieldsArray:removableFields];
+    BDSKRemoveFieldSheetController *removeFieldController = [[[BDSKRemoveFieldSheetController alloc] initWithPrompt:prompt fieldsArray:removableFields] autorelease];
     NSInteger selectedRow = [tableView clickedOrSelectedRow];
     NSString *selectedField = selectedRow == -1 ? nil : [fields objectAtIndex:selectedRow];
     BOOL didValidate = YES;
@@ -805,34 +760,25 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 	[removableFields release];
 	
     if (didValidate) {
-        [removeFieldController beginSheetModalForWindow:[self window]
-                                          modalDelegate:self
-                                         didEndSelector:@selector(removeFieldSheetDidEnd:returnCode:contextInfo:)
-                                            contextInfo:NULL];
-    }
-    [removeFieldController release];
-}
-
-- (void)changeFieldSheetDidEnd:(BDSKChangeFieldSheetController *)changeFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-	NSString *oldField = [changeFieldController field];
-    NSString *newField = [changeFieldController replaceField];
-    NSString *oldValue = [[[publication valueOfField:oldField inherit:NO] retain] autorelease];
-    NSInteger autoGenerateStatus = 0;
-    
-    if (returnCode == NSOKButton && [NSString isEmptyString:newField] == NO  && 
-        [newField isEqualToString:oldField] == NO && [fields containsObject:newField] == NO) {
-        // remove the sheet in case we get an alert
-        [[changeFieldController window] orderOut:nil];
-        
-        [addedFields removeObject:oldField];
-        [addedFields addObject:newField];
-        [tabView selectFirstTabViewItem:nil];
-        [publication setField:oldField toValue:nil];
-        [publication setField:newField toValue:oldValue];
-        [[self undoManager] setActionName:NSLocalizedString(@"Change Field Name", @"Undo action name")];
-        [self setKeyField:newField];
-        autoGenerateStatus = [self userChangedField:oldField from:oldValue to:@""];
-        [self userChangedField:newField from:@"" to:oldValue didAutoGenerate:autoGenerateStatus];
+        [removeFieldController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+            NSString *oldField = [removeFieldController field];
+            NSString *oldValue = [[[publication valueOfField:oldField inherit:NO] retain] autorelease];
+            
+            if (result == NSOKButton && oldField != nil && [removableFields count]) {
+                // remove the sheet in case we get an alert
+                [[removeFieldController window] orderOut:nil];
+                
+                [addedFields removeObject:oldField];
+                [tabView selectFirstTabViewItem:nil];
+                if ([NSString isEmptyString:oldValue]) {
+                    [self resetFields];
+                } else {
+                    [publication setField:oldField toValue:nil];
+                    [[self undoManager] setActionName:NSLocalizedString(@"Remove Field", @"Undo action name")];
+                    [self userChangedField:oldField from:oldValue to:@""];
+                }
+            }
+        }];
     }
 }
 
@@ -858,10 +804,10 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         return;
     }
     
-    BDSKChangeFieldSheetController *changeFieldController = [[BDSKChangeFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to change:", @"Label for changing field name")
-                                                                                                       fieldsArray:fields
-                                                                                                     replacePrompt:NSLocalizedString(@"New field name:", @"Label for changing field name")
-                                                                                                replaceFieldsArray:fieldNames];
+    BDSKChangeFieldSheetController *changeFieldController = [[[BDSKChangeFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to change:", @"Label for changing field name")
+                                                                                                        fieldsArray:fields
+                                                                                                      replacePrompt:NSLocalizedString(@"New field name:", @"Label for changing field name")
+                                                                                                 replaceFieldsArray:fieldNames] autorelease];
     if (field == nil)
         field = [tableView selectedRow] == -1 ? nil : [fields objectAtIndex:[tableView selectedRow]];
     
@@ -869,11 +815,28 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     if (field)
         [changeFieldController setField:field];
     
-	[changeFieldController beginSheetModalForWindow:[self window]
-                                      modalDelegate:self
-                                     didEndSelector:@selector(changeFieldSheetDidEnd:returnCode:contextInfo:)
-                                        contextInfo:NULL];
-	[changeFieldController release];
+	[changeFieldController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        NSString *oldField = [changeFieldController field];
+        NSString *newField = [changeFieldController replaceField];
+        NSString *oldValue = [[[publication valueOfField:oldField inherit:NO] retain] autorelease];
+        NSInteger autoGenerateStatus = 0;
+        
+        if (result == NSOKButton && [NSString isEmptyString:newField] == NO  && 
+            [newField isEqualToString:oldField] == NO && [fields containsObject:newField] == NO) {
+            // remove the sheet in case we get an alert
+            [[changeFieldController window] orderOut:nil];
+            
+            [addedFields removeObject:oldField];
+            [addedFields addObject:newField];
+            [tabView selectFirstTabViewItem:nil];
+            [publication setField:oldField toValue:nil];
+            [publication setField:newField toValue:oldValue];
+            [[self undoManager] setActionName:NSLocalizedString(@"Change Field Name", @"Undo action name")];
+            [self setKeyField:newField];
+            autoGenerateStatus = [self userChangedField:oldField from:oldValue to:@""];
+            [self userChangedField:newField from:@"" to:oldValue didAutoGenerate:autoGenerateStatus];
+        }
+	}];
     [currentFields release];
 }
 
@@ -1709,10 +1672,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 }
 
 - (BOOL)fileView:(FVFileView *)aFileView shouldOpenURL:(NSURL *)aURL {
-    if ([aURL isFileURL])
-        return [[NSWorkspace sharedWorkspace] openLinkedFile:[aURL path]] == NO;
-    else
-        return [[NSWorkspace sharedWorkspace] openLinkedURL:aURL] == NO;
+    return [[NSWorkspace sharedWorkspace] openLinkedURL:aURL] == NO;
 }
 
 - (NSDragOperation)fileView:(FVFileView *)aFileView validateDrop:(id <NSDraggingInfo>)info proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation {
@@ -1751,12 +1711,13 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     } else {
         NSSavePanel *sPanel = [NSSavePanel savePanel];
         if (NO == [extension isEqualToString:@""]) 
-            [sPanel setRequiredFileType:extension];
+            [sPanel setAllowedFileTypes:[NSArray arrayWithObjects:extension, nil]];
         [sPanel setAllowsOtherFileTypes:YES];
         [sPanel setCanSelectHiddenExtension:YES];
+        [sPanel setNameFieldStringValue:filename];
         
         // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
-        if (NSFileHandlingPanelOKButton == [sPanel runModalForDirectory:nil file:filename])
+        if (NSFileHandlingPanelOKButton == [sPanel runModal])
             fileURL = [sPanel URL];
     }
     return fileURL;
@@ -2560,7 +2521,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             NSString *path = [[[BDSKPersistentSearch sharedSearch] resultsForQuery:queryStringWithCiteKey(aLink) attribute:(id)kMDItemPath] firstObject];
             // if it was a valid key/link, we should definitely have a path, but better make sure
             if (path)
-                [[NSWorkspace sharedWorkspace] openLinkedFile:path];
+                [[NSWorkspace sharedWorkspace] openLinkedURL:[NSURL fileURLWithPath:path]];
             else
                 NSBeep();
         } else {
@@ -2648,27 +2609,24 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender {
     NSPasteboard *pboard = [sender draggingPasteboard];
     // weblocs also put strings on the pboard, so check for that type first so we don't get a false positive on NSStringPboardType
-	NSString *pboardType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];
+    BOOL canRead = [pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]];
+    
+    if (canRead == NO) {
+        NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+        // sniff the string to see if it's a format we can parse
+        if ([strings count] > 0 && [[strings objectAtIndex:0] contentStringType] != BDSKUnknownStringType)
+            canRead = YES;
+    }
 	
-	if(pboardType == nil){
-        return NSDragOperationNone;
+    if (canRead) {
+        NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
+        // get the correct cursor depending on the modifiers
+        if ( ([NSEvent standardModifierFlags] & (NSAlternateKeyMask | NSCommandKeyMask)) == (NSAlternateKeyMask | NSCommandKeyMask) )
+            return NSDragOperationLink;
+        else if (sourceDragMask & NSDragOperationCopy)
+            return NSDragOperationCopy;
     }
-	// sniff the string to see if it's a format we can parse
-    if([pboardType isEqualToString:NSStringPboardType]){
-        NSString *pbString = [pboard stringForType:pboardType];    
-        if([pbString contentStringType] == BDSKUnknownStringType)
-            return NSDragOperationNone;
-    }
-
-    NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
-    // get the correct cursor depending on the modifiers
-	if( ([NSEvent standardModifierFlags] & (NSAlternateKeyMask | NSCommandKeyMask)) == (NSAlternateKeyMask | NSCommandKeyMask) ){
-		return NSDragOperationLink;
-    }else if (sourceDragMask & NSDragOperationCopy){
-		return NSDragOperationCopy;
-	} else {
-        return NSDragOperationNone;
-    }
+    return NSDragOperationNone;
 }
 
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender {
@@ -2678,31 +2636,33 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender {
     
     NSPasteboard *pboard = [sender draggingPasteboard];
-	NSString *pboardType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];
 	NSArray *draggedPubs = nil;
     BOOL hasTemporaryCiteKey = NO;
     
-	if([pboardType isEqualToString:NSStringPboardType]){
-		NSString *pbString = [pboard stringForType:NSStringPboardType];
-        NSError *error = nil;
-        BOOL isPartialData = NO;
-        // this returns nil when there was a parser error and the user didn't decide to proceed anyway
-        draggedPubs = [BDSKStringParser itemsFromString:pbString ofType:[pbString contentStringType] owner:[self document] isPartialData:&isPartialData error:&error];
-        // we ignore warnings for parsing with temporary keys, but we want to ignore the cite key in that case
-        if (isPartialData) {
-            if ([error isLocalErrorWithCode:kBDSKHadMissingCiteKeys]) {
-                hasTemporaryCiteKey = YES;
-                error = nil;
-            } else if ([error isLocalErrorWithCode:kBDSKBibTeXParserFailed]) {
-                // should we accept partially parsed bibtex?
-                draggedPubs = nil;
-            }
-        }
-	}else if([pboardType isEqualToString:BDSKBibItemPboardType]){
-		NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
+    if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]]) {
+		NSData *pbData = [pboard dataForType:BDSKPasteboardTypePublications];
         // we can't just unarchive, as this gives complex strings with the wrong macroResolver
 		draggedPubs = [BibItem publicationsFromArchivedData:pbData macroResolver:[publication macroResolver]];
-	}
+    } else {
+        NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+        if ([strings count] > 0) {
+            NSString *pbString = [strings objectAtIndex:0];
+            NSError *error = nil;
+            BOOL isPartialData = NO;
+            // this returns nil when there was a parser error and the user didn't decide to proceed anyway
+            draggedPubs = [BDSKStringParser itemsFromString:pbString ofType:[pbString contentStringType] owner:[self document] isPartialData:&isPartialData error:&error];
+            // we ignore warnings for parsing with temporary keys, but we want to ignore the cite key in that case
+            if (isPartialData) {
+                if ([error isLocalErrorWithCode:kBDSKHadMissingCiteKeys]) {
+                    hasTemporaryCiteKey = YES;
+                    error = nil;
+                } else if ([error isLocalErrorWithCode:kBDSKBibTeXParserFailed]) {
+                    // should we accept partially parsed bibtex?
+                    draggedPubs = nil;
+                }
+            }
+        }
+    }
     
     // this happens when we didn't find a valid pboardType or parsing failed
     if([draggedPubs count] == 0) 
@@ -2799,7 +2759,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	if (dragFieldEditor == nil) {
 		dragFieldEditor = [[BDSKFieldEditor alloc] init];
         if (editorFlags.isEditable)
-            [(BDSKFieldEditor *)dragFieldEditor registerForDelegatedDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
+            [(BDSKFieldEditor *)dragFieldEditor registerForDelegatedDraggedTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, (NSString *)kUTTypeURL, (NSString *)kUTTypeFileURL, NSURLPboardType, NSFilenamesPboardType, nil]];
 	}
 	return dragFieldEditor;
 }
@@ -2991,17 +2951,15 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         if ([info draggingSource] == tableView) {
             return NSDragOperationNone;
         } else if ([field isCitationField] || [field isEqualToString:BDSKCrossrefString]) {
-            if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]])
+            if ([pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]])
                 return NSDragOperationEvery;
         } else if ([field isLocalFileField]) {
-            NSString *type;
-            if ((type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, nil]]) &&
-                ([type isEqualToString:NSURLPboardType] == NO || [[NSURL URLFromPasteboard:pboard] isFileURL])) {
+            if ([pboard canReadFileURLOfTypes:nil]) {
                 NSDragOperation mask = [info draggingSourceOperationMask];
                 return mask == NSDragOperationGeneric ? NSDragOperationLink : mask == NSDragOperationCopy ? NSDragOperationCopy : NSDragOperationEvery;
             }
         } else if ([field isRemoteURLField]) {
-            if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil]])
+            if ([pboard canReadURL])
                 return NSDragOperationEvery;
         }
     }
@@ -3012,12 +2970,11 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     if ([tv isEqual:tableView]) {
         NSPasteboard *pboard = [info draggingPasteboard];
         NSString *field = [fields objectAtIndex:row];
-        NSString *type;
         
         if ([field isEqualToString:BDSKCrossrefString]){
-            if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]]) {
+            if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]]) {
                 
-                NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
+                NSData *pbData = [pboard dataForType:BDSKPasteboardTypePublications];
                 NSArray *draggedPubs = [BibItem publicationsFromArchivedData:pbData macroResolver:[publication macroResolver]];
                 NSString *crossref = [[draggedPubs firstObject] citeKey];
                 
@@ -3050,9 +3007,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                 
             }
         } else if ([field isCitationField]) {
-            if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]]) {
+            if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]]) {
                 
-                NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
+                NSData *pbData = [pboard dataForType:BDSKPasteboardTypePublications];
                 NSArray *draggedPubs = [BibItem publicationsFromArchivedData:pbData macroResolver:[publication macroResolver]];
                 
                 if ([draggedPubs count]) {
@@ -3068,50 +3025,33 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                 
             }
         } else if ([field isLocalFileField]) {
-            if ((type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, nil]])) {
+            NSArray *fileURLs = [pboard readFileURLsOfTypes:nil];
+            
+            if ([fileURLs count] > 0) {
                 
-                NSURL *url = nil;
+                NSURL *url = [fileURLs objectAtIndex:0];
                 NSString *filename = nil;
-                if ([type isEqualToString:NSURLPboardType])
-                    url = [NSURL URLFromPasteboard:pboard];
-                else if ([type isEqualToString:NSFilenamesPboardType])
-                    filename = [[pboard propertyListForType:NSFilenamesPboardType] firstObject];
-                
-                if (filename || url) {
-                    NSDragOperation mask = [info draggingSourceOperationMask];
-                    if (mask == NSDragOperationGeneric) {
-                        NSString *basePath = [publication basePath];
-                        if (filename == nil)
-                            filename = [url path];
-                        if (basePath)
-                            filename = [filename relativePathFromPath:basePath];
-                    } else if (mask == NSDragOperationCopy) {
-                        if (filename == nil)
-                            filename = [url path];
-                    } else {
-                        if (url == nil)
-                            url = [NSURL fileURLWithPath:filename];
-                        filename = [url absoluteString];
-                    }
-                    [self recordChangingField:field toValue:filename];
-                    return YES;
+                NSDragOperation mask = [info draggingSourceOperationMask];
+                if (mask == NSDragOperationGeneric) {
+                    NSString *basePath = [publication basePath];
+                    filename = [url path];
+                    if (basePath)
+                        filename = [filename relativePathFromPath:basePath];
+                } else if (mask == NSDragOperationCopy) {
+                    filename = [url path];
+                } else {
+                    filename = [url absoluteString];
                 }
+                [self recordChangingField:field toValue:filename];
+                return YES;
                 
             }
         } else if ([field isRemoteURLField]) {
-            if ((type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil]])) {
-                
-                NSString *urlString = nil;
-                if ([type isEqualToString:NSURLPboardType])
-                    urlString = [[NSURL URLFromPasteboard:pboard] absoluteString];
-                else if ([type isEqualToString:BDSKWeblocFilePboardType])
-                    urlString = [pboard stringForType:BDSKWeblocFilePboardType];
-                
-                if (urlString) {
-                    [self recordChangingField:field toValue:urlString];
-                    return YES;
-                }
-                
+            NSArray *urls = [pboard readURLs];
+            
+            if ([urls count] > 0) {
+                [self recordChangingField:field toValue:[[urls objectAtIndex:0] absoluteString]];
+                return YES;
             }
         }
     }

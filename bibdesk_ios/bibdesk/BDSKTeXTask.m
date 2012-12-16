@@ -41,15 +41,28 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
 #import "BDSKAppController.h"
-#import "UKDirectoryEnumerator.h"
 #import "BDSKShellCommandFormatter.h"
-#import <libkern/OSAtomic.h>
 #import "NSSet_BDSKExtensions.h"
-#import "NSInvocation_BDSKExtensions.h"
 #import "BDSKTask.h"
-#import "BDSKReadWriteLock.h"
 
 #define BDSKTeXTaskRunLoopTimeoutKey @"BDSKTeXTaskRunLoopTimeout"
+
+enum {
+	BDSKGeneratedNoneMask = 0,
+	BDSKGeneratedLTBMask = 1 << 0,
+	BDSKGeneratedLaTeXMask = 1 << 1,
+	BDSKGeneratedPDFMask = 1 << 2,
+	BDSKGeneratedRTFMask = 1 << 3,
+};
+
+@interface BDSKTeXSubTask : BDSKTask {
+    NSUInteger generatedType;
+}
+- (void)setGeneratedType:(NSUInteger)type;
+- (NSUInteger)generatedType;
+@end
+
+#pragma mark -
 
 @interface BDSKTeXPath : NSObject
 {
@@ -68,29 +81,21 @@
 - (NSString *)auxFilePath;
 @end
 
+#pragma mark -
+
 @interface BDSKTeXTask (Private) 
 
-- (NSArray *)helperFilePaths;
+- (NSArray *)helperFileURLs;
 
 - (void)writeHelperFiles;
-
 - (BOOL)writeTeXFileForCiteKeys:(NSArray *)citeKeys isLTB:(BOOL)ltb;
-
 - (BOOL)writeBibTeXFile:(NSString *)bibStr;
 
-- (BOOL)runTeXTasksForLaTeX;
+- (void)removeFilesFromPreviousRun;
 
-- (BOOL)runTeXTasksForPDF;
+- (BDSKTeXSubTask *)taskForGeneratedType:(NSUInteger)type;
 
-- (BOOL)runTeXTaskForRTF;
-
-- (NSInteger)runPDFTeXTask;
-
-- (NSInteger)runBibTeXTask;
-
-- (NSInteger)runLaTeX2RTFTask;
-
-- (NSInteger)runTask:(NSString *)binPath withArguments:(NSArray *)arguments;
+- (BOOL)invokePendingTasks;
 
 @end
 
@@ -133,41 +138,37 @@ static double runLoopTimeout = 30;
 }
 
 - (id)init{
-    return [self initWithFileName:@"tmpbib"];
+    return [self initWithFileName:@"tmpbib" synchronous:YES];
 }
 
-- (id)initWithFileName:(NSString *)newFileName{
+- (id)initWithFileName:(NSString *)fileName synchronous:(BOOL)isSync{
     self = [super init];
     if (self) {
 		
 		NSFileManager *fm = [NSFileManager defaultManager];
-        NSString *dirPath = [fm makeTemporaryDirectoryWithBasename:newFileName];
+        NSString *dirPath = [fm makeTemporaryDirectoryWithBasename:fileName];
         NSParameterAssert([fm fileExistsAtPath:dirPath]);
 		texTemplatePath = [[[fm applicationSupportDirectory] stringByAppendingPathComponent:@"previewtemplate.tex"] copy];
         
-		NSString *filePath = [dirPath stringByAppendingPathComponent:newFileName];
+		NSString *filePath = [dirPath stringByAppendingPathComponent:fileName];
         texPath = [[BDSKTeXPath alloc] initWithBasePath:filePath];
         
 		binDirPath = nil; // set from where we run the tasks, since some programs (e.g. XeLaTeX) need a real path setting     
         
+        environment = [[[NSProcessInfo processInfo] environment] mutableCopy];
+        
         // some users set BIBINPUTS in environment.plist, which will break our preview unless they added "." to the path (bug #1471984)
-        const char *bibInputs = getenv("BIBINPUTS");
-        if(bibInputs != NULL){
-            NSString *value = [NSString stringWithFileSystemRepresentation:bibInputs];
-            if([value rangeOfString:[texPath workingDirectory]].length == 0){
-                value = [NSString stringWithFormat:@"%@:%@", value, [texPath workingDirectory]];
-                setenv("BIBINPUTS", [value fileSystemRepresentation], 1);
-            }
-        }        
+        NSString *bibinputs = [environment objectForKey:@"BIBINPUTS"];
+        if (bibinputs != nil)
+            [environment setObject:[NSString stringWithFormat:@"%@:%@", bibinputs, [texPath workingDirectory]] forKey:@"BIBINPUTS"];
 		
 		[self writeHelperFiles];
 		
 		delegate = nil;
         currentTask = nil;
-        memset(&flags, 0, sizeof(flags));
-
-        processingLock = [[NSLock alloc] init];
-        dataFileLock = [[BDSKReadWriteLock alloc] init];
+        pendingTasks = [[NSMutableArray alloc] init];
+        generatedDataMask = BDSKGeneratedNoneMask;
+        synchronous = isSync;
 	}
 	return self;
 }
@@ -176,16 +177,14 @@ static double runLoopTimeout = 30;
     [[NSFileManager defaultManager] removeItemAtPath:[texPath workingDirectory] error:NULL];
     BDSKDESTROY(texTemplatePath);
     BDSKDESTROY(texPath);
-    BDSKDESTROY(taskShouldStartInvocation);
-    BDSKDESTROY(taskFinishedInvocation);
-    BDSKDESTROY(processingLock);
-    BDSKDESTROY(dataFileLock);
+    BDSKDESTROY(environment);
+    BDSKDESTROY(pendingTasks);
 	[super dealloc];
 }
 
 - (NSString *)description{
     NSMutableString *temporaryDescription = [[NSMutableString alloc] initWithString:[super description]];
-    [temporaryDescription appendFormat:@" {\nivars:\n\tdelegate = \"%@\"\n\tfile name = \"%@\"\n\ttemplate = \"%@\"\n\tTeX file = \"%@\"\n\tBibTeX file = \"%@\"\n\tTeX binary path = \"%@\"\n\tEncoding = \"%@\"\n\tBibTeX style = \"%@\"\n\tHelper files = %@\n\nenvironment:\n\tSHELL = \"%s\"\n\tBIBINPUTS = \"%s\"\n\tBSTINPUTS = \"%s\"\n\tPATH = \"%s\" }", delegate, [texPath baseNameWithoutExtension], texTemplatePath, [texPath texFilePath], [texPath bibFilePath], binDirPath, [NSString localizedNameOfStringEncoding:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey]], [[NSUserDefaults standardUserDefaults] objectForKey:BDSKBTStyleKey], [[self helperFilePaths] description], getenv("SHELL"), getenv("BIBINPUTS"), getenv("BSTINPUTS"), getenv("PATH")];
+    [temporaryDescription appendFormat:@" {\nivars:\n\tdelegate = \"%@\"\n\tfile name = \"%@\"\n\ttemplate = \"%@\"\n\tTeX file = \"%@\"\n\tBibTeX file = \"%@\"\n\tTeX binary path = \"%@\"\n\tEncoding = \"%@\"\n\tBibTeX style = \"%@\"\n\tHelper files = %@\n\nenvironment:\n\tSHELL = \"%s\"\n\tBIBINPUTS = \"%s\"\n\tBSTINPUTS = \"%s\"\n\tPATH = \"%s\" }", delegate, [texPath baseNameWithoutExtension], texTemplatePath, [texPath texFilePath], [texPath bibFilePath], binDirPath, [NSString localizedNameOfStringEncoding:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey]], [[NSUserDefaults standardUserDefaults] objectForKey:BDSKBTStyleKey], [[self helperFileURLs] description], getenv("SHELL"), getenv("BIBINPUTS"), getenv("BSTINPUTS"), getenv("PATH")];
     NSString *description = [temporaryDescription copy];
     [temporaryDescription release];
     return [description autorelease];
@@ -197,122 +196,70 @@ static double runLoopTimeout = 30;
 
 - (void)setDelegate:(id<BDSKTeXTaskDelegate>)newDelegate {
 	delegate = newDelegate;
-    
-    SEL theSelector;
-    
-    // set invocations to nil before creating them, since we use that as a check before invoking
-    theSelector = @selector(texTaskShouldStartRunning:);
-    [taskShouldStartInvocation autorelease];
-    taskShouldStartInvocation = nil;
-    
-    if ([delegate respondsToSelector:theSelector]) {
-        taskShouldStartInvocation = [[NSInvocation invocationWithTarget:delegate selector:theSelector] retain];
-        [taskShouldStartInvocation setArgument:&self atIndex:2];
-    }
-    
-    [taskFinishedInvocation autorelease];
-    taskFinishedInvocation = nil;
-    theSelector = @selector(texTask:finishedWithResult:);
+}
 
-    if ([delegate respondsToSelector:theSelector]) {
-        taskFinishedInvocation = [[NSInvocation invocationWithTarget:delegate selector:theSelector] retain];
-        [taskFinishedInvocation setArgument:&self atIndex:2];
-    }        
+- (void)cancel {
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSTaskDidTerminateNotification object:currentTask];
+    [currentTask terminate];
+    BDSKDESTROY(currentTask);
+    [pendingTasks removeAllObjects];
 }
 
 - (void)terminate{
-    // This method is mainly to ensure that we don't leave child processes around when exiting; it bypasses the processingLock, so this object is useless after it gets a -terminate message.  We used to wait here for a few seconds, but the application would quit before time was up, and currentTask could be left running.
-    if ([self isProcessing] && currentTask){
-        [currentTask terminate];
-        BDSKDESTROY(currentTask);
-    }    
+    [self cancel];
+    BDSKDESTROY(pendingTasks);
 }
 
 #pragma mark TeX Tasks
 
-- (BOOL)runWithBibTeXString:(NSString *)bibStr{
-	return [self runWithBibTeXString:bibStr citeKeys:nil generatedTypes:BDSKGenerateRTF];
-}
-
-- (BOOL)runWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys{
-	return [self runWithBibTeXString:bibStr citeKeys:citeKeys generatedTypes:BDSKGenerateRTF];
-}
-
-- (BOOL)runWithBibTeXString:(NSString *)bibStr generatedTypes:(NSInteger)flag{
-	return [self runWithBibTeXString:bibStr citeKeys:nil generatedTypes:flag];
-}
-
 - (BOOL)runWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys generatedTypes:(NSInteger)flag{
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-    if([processingLock tryLock] == NO){
-        NSLog(@"%@ couldn't get processing lock", self);
-		[pool release];
+	if ([delegate respondsToSelector:@selector(texTaskShouldStartRunning:)] && [delegate texTaskShouldStartRunning:self] == NO)
         return NO;
-    }
-
-	if (nil != taskShouldStartInvocation) {
-        BOOL shouldStart;
-        [taskShouldStartInvocation performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
-        [taskShouldStartInvocation getReturnValue:&shouldStart];
-        
-        if (NO == shouldStart) {
-            [processingLock unlock];
-            [pool release];
-            return NO;
-        }
-	}
-
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.hasLTB);
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.hasLaTeX);
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.hasPDFData);
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.hasRTFData);
+    
+    generatedDataMask = BDSKGeneratedNoneMask;
     
     // make sure the PATH environment variable is set correctly
-    NSString *pdfTeXBinPathDir = [[[NSUserDefaults standardUserDefaults] objectForKey:BDSKTeXBinPathKey] stringByDeletingLastPathComponent];
+    NSString *texCommand = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKTeXBinPathKey];
+    NSString *texCommandDir = [[BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:texCommand] stringByDeletingLastPathComponent];
 
-    if(![pdfTeXBinPathDir isEqualToString:binDirPath]){
+    if (NO == [texCommandDir isEqualToString:binDirPath]) {
         [binDirPath release];
-        binDirPath = [pdfTeXBinPathDir retain];
-        const char *path_cstring = getenv("PATH");
-        NSString *original_path = [NSString stringWithFileSystemRepresentation:path_cstring];
-        NSString *new_path = [NSString stringWithFormat: @"%@:%@", original_path, binDirPath];
-        setenv("PATH", [new_path fileSystemRepresentation], 1);
+        binDirPath = [texCommandDir retain];
+        NSString *path = [[[NSProcessInfo processInfo] environment] objectForKey:@"PATH"];
+        [environment setObject:[NSString stringWithFormat:@"%@:%@", path, binDirPath] forKey:@"PATH"];
     }
     
-    BOOL success = [self writeTeXFileForCiteKeys:citeKeys isLTB:(flag == BDSKGenerateLTB)] && [self writeBibTeXFile:bibStr];
+    BOOL isLTB = (flag == BDSKGenerateLTB);
+    BOOL success = [self writeTeXFileForCiteKeys:citeKeys isLTB:isLTB] && [self writeBibTeXFile:bibStr];
     
     if (success) {
-        success = [self runTeXTasksForLaTeX];
-        if (success) {
-            if (flag == BDSKGenerateLTB)
-                OSAtomicCompareAndSwap32Barrier(0, 1, &flags.hasLTB);
-            else
-                OSAtomicCompareAndSwap32Barrier(0, 1, &flags.hasLaTeX);
-            
-            if (flag > BDSKGenerateLaTeX) {
-                success = [self runTeXTasksForPDF];
-                if (success) {
-                    OSAtomicCompareAndSwap32Barrier(0, 1, &flags.hasPDFData);
-                    
-                    if(flag > BDSKGeneratePDF){
-                        success = [self runTeXTaskForRTF];
-                        if (success)
-                            OSAtomicCompareAndSwap32Barrier(0, 1, &flags.hasRTFData);
-                    }
-                }
+        NSParameterAssert([pendingTasks count] == 0);
+        
+        // nuke the log files in case the run fails without generating new ones (not very likely)
+        [self removeFilesFromPreviousRun];
+        
+        // tasks are launched from the end of pendingTasks, so we add them in opposite order
+        if (flag >= BDSKGeneratePDF) {
+            if (flag >= BDSKGenerateRTF) {
+                // latex2rtf
+                [pendingTasks addObject:[self taskForGeneratedType:BDSKGeneratedRTFMask]];
             }
+            // pdflatex
+            [pendingTasks addObject:[self taskForGeneratedType:BDSKGeneratedPDFMask]];
+            // pdflatex
+            [pendingTasks addObject:[self taskForGeneratedType:BDSKGeneratedNoneMask]];
         }
-	}
+        // bibtex
+        [pendingTasks addObject:[self taskForGeneratedType:isLTB ? BDSKGeneratedLTBMask : BDSKGeneratedLaTeXMask]];
+        // pdflatex
+        [pendingTasks addObject:[self taskForGeneratedType:BDSKGeneratedNoneMask]];
+        
+        success = [self invokePendingTasks];
+    }
     
-	if (nil != taskFinishedInvocation) {
-        [taskFinishedInvocation setArgument:&success atIndex:3];
-        [taskFinishedInvocation performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:NO];
-	}
-    
-	[processingLock unlock];
-    
-	[pool release];
+	if (synchronous && [delegate respondsToSelector:@selector(texTask:finishedWithResult:)])
+        [delegate texTask:self finishedWithResult:success];
+
     return success;
 }
 
@@ -321,13 +268,10 @@ static double runLoopTimeout = 30;
 - (NSString *)logFileString{
     NSString *logString = nil;
     NSString *blgString = nil;
-    if([dataFileLock tryLockForReading]) {
-        // @@ unclear if log files will always be written with ASCII encoding
-        // these will be nil if the file doesn't exist
-        logString = [NSString stringWithContentsOfFile:[texPath logFilePath] encoding:NSASCIIStringEncoding error:NULL];
-        blgString = [NSString stringWithContentsOfFile:[texPath blgFilePath] encoding:NSASCIIStringEncoding error:NULL];
-        [dataFileLock unlock];
-    }
+    // @@ unclear if log files will always be written with ASCII encoding
+    // these will be nil if the file doesn't exist
+    logString = [NSString stringWithContentsOfFile:[texPath logFilePath] encoding:NSASCIIStringEncoding error:NULL];
+    blgString = [NSString stringWithContentsOfFile:[texPath blgFilePath] encoding:NSASCIIStringEncoding error:NULL];
     
     NSMutableString *toReturn = [NSMutableString string];
     [toReturn setString:@"---------- TeX log file ----------\n"];
@@ -345,9 +289,8 @@ static double runLoopTimeout = 30;
 // which one was generated depends on the generatedTypes argument, and can be seen from the hasLTB and hasLaTeX flags
 - (NSString *)LTBString{
     NSString *string = nil;
-    if([self hasLTB] && [dataFileLock tryLockForReading]) {
+    if([self hasLTB]) {
         string = [NSString stringWithContentsOfFile:[texPath bblFilePath] encoding:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey] error:NULL];
-        [dataFileLock unlock];
         NSUInteger start, end;
         start = [string rangeOfString:@"\\bib{"].location;
         end = [string rangeOfString:@"\\end{biblist}" options:NSBackwardsSearch].location;
@@ -359,9 +302,8 @@ static double runLoopTimeout = 30;
 
 - (NSString *)LaTeXString{
     NSString *string = nil;
-    if([self hasLaTeX] && [dataFileLock tryLockForReading]) {
+    if([self hasLaTeX]) {
         string = [NSString stringWithContentsOfFile:[texPath bblFilePath] encoding:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey] error:NULL];
-        [dataFileLock unlock];
         NSUInteger start, end;
         start = [string rangeOfString:@"\\bibitem"].location;
         end = [string rangeOfString:@"\\end{thebibliography}" options:NSBackwardsSearch].location;
@@ -372,21 +314,11 @@ static double runLoopTimeout = 30;
 }
 
 - (NSData *)PDFData{
-    NSData *data = nil;
-    if ([self hasPDFData] && [dataFileLock tryLockForReading]) {
-        data = [NSData dataWithContentsOfFile:[texPath pdfFilePath]];
-        [dataFileLock unlock];
-    }
-    return data;
+    return [self hasPDFData] ? [NSData dataWithContentsOfFile:[texPath pdfFilePath]] : nil;
 }
 
 - (NSData *)RTFData{
-    NSData *data = nil;
-    if ([self hasRTFData] && [dataFileLock tryLockForReading]) {
-        data = [NSData dataWithContentsOfFile:[texPath rtfFilePath]];
-        [dataFileLock unlock];
-    }
-    return data;
+    return [self hasRTFData] ? [NSData dataWithContentsOfFile:[texPath rtfFilePath]] : nil;
 }
 
 - (NSString *)logFilePath{
@@ -410,32 +342,23 @@ static double runLoopTimeout = 30;
 }
 
 - (BOOL)hasLTB{
-    OSMemoryBarrier();
-    return 1 == flags.hasLTB;
+    return 0 != (generatedDataMask & BDSKGeneratedLTBMask);
 }
 
 - (BOOL)hasLaTeX{
-    OSMemoryBarrier();
-    return 1 == flags.hasLaTeX;
+    return 0 != (generatedDataMask & BDSKGeneratedLaTeXMask);
 }
 
 - (BOOL)hasPDFData{
-    OSMemoryBarrier();
-    return 1 == flags.hasPDFData;
+    return 0 != (generatedDataMask & BDSKGeneratedPDFMask);
 }
 
 - (BOOL)hasRTFData{
-    OSMemoryBarrier();
-    return 1 == flags.hasRTFData;
+    return 0 != (generatedDataMask & BDSKGeneratedRTFMask);
 }
 
 - (BOOL)isProcessing{
-	// just see if we can get the lock, otherwise we are processing
-    if([processingLock tryLock]){
-		[processingLock unlock];
-		return NO;
-	}
-	return YES;
+	return currentTask != nil;
 }
 
 @end
@@ -443,30 +366,32 @@ static double runLoopTimeout = 30;
 
 @implementation BDSKTeXTask (Private)
 
-- (NSArray *)helperFilePaths{
-    UKDirectoryEnumerator *enumerator = [UKDirectoryEnumerator enumeratorWithPath:[[NSFileManager defaultManager] applicationSupportDirectory]];
-    [enumerator setDesiredInfo:kFSCatInfoNodeFlags];
-    
-	NSString *path = nil;
+- (NSArray *)helperFileURLs{
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSURL *appSupportURL = [NSURL fileURLWithPath:[fm applicationSupportDirectory]];
+    NSArray *contents = [fm contentsOfDirectoryAtURL:appSupportURL includingPropertiesForKeys:[NSArray arrayWithObjects:NSURLIsDirectoryKey, nil] options:NSDirectoryEnumerationSkipsHiddenFiles error:NULL];
     NSSet *helperTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"cfg", @"sty", @"bst", nil];
-    NSMutableArray *helperFiles = [NSMutableArray array];
+    NSMutableArray *helperFileURLs = [NSMutableArray array];
     
 	// copy all user helper files from application support
-	while(path = [enumerator nextObjectFullPath]){
-		if([enumerator isDirectory] == NO && [helperTypes containsObject:[path pathExtension]]){
-            [helperFiles addObject:path];
-        }
+	for (NSURL *url in contents) {
+        NSNumber *isDir = nil;
+        [url getResourceValue:&isDir forKey:NSURLIsDirectoryKey error:NULL];
+		if ([isDir boolValue] == NO && [helperTypes containsObject:[url pathExtension]])
+            [helperFileURLs addObject:url];
     }
-    return helperFiles;
+    return helperFileURLs;
 }
 
 - (void)writeHelperFiles{
-    NSURL *dstURL = [NSURL fileURLWithPath:[texPath workingDirectory]];
-    NSError *error;
-
-    for (NSString *srcPath in [self helperFilePaths]) {
-        if (![[NSFileManager defaultManager] copyObjectAtURL:[NSURL fileURLWithPath:srcPath] toDirectoryAtURL:dstURL error:&error])
-            NSLog(@"unable to copy helper file %@ to %@; error %@", srcPath, [dstURL path], [error localizedDescription]);
+    NSURL *dstDirURL = [NSURL fileURLWithPath:[texPath workingDirectory]];
+    NSFileManager *fm = [NSFileManager defaultManager];
+    
+    for (NSURL *srcURL in [self helperFileURLs]) {
+        NSURL *dstURL = [dstDirURL URLByAppendingPathComponent:[srcURL lastPathComponent]];
+        NSError *error;
+        if (NO == [fm copyItemAtURL:srcURL toURL:dstURL error:&error])
+            NSLog(@"unable to copy helper file %@ to %@; error %@", [srcURL path], [dstURL path], [error localizedDescription]);
     }
 }
 
@@ -539,122 +464,98 @@ static double runLoopTimeout = 30;
 	return didWrite;
 }
 
-// caller must have acquired wrlock on dataFileLock
 - (void)removeFilesFromPreviousRun{
-    // use FSDeleteObject for thread safety
-    const FSRef fileRef;
-    NSArray *filesToRemove = [[NSArray alloc] initWithObjects:[texPath blgFilePath], [texPath logFilePath], [texPath bblFilePath], [texPath auxFilePath], [texPath pdfFilePath], [texPath rtfFilePath], nil];
-    CFURLRef fileURL;
+    NSArray *filesToRemove = [NSArray arrayWithObjects:[texPath blgFilePath], [texPath logFilePath], [texPath bblFilePath], [texPath auxFilePath], [texPath pdfFilePath], [texPath rtfFilePath], nil];
+    NSFileManager *fm = [NSFileManager defaultManager];
     
-    for (NSString *path in filesToRemove) {
-        fileURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, (CFStringRef)path, kCFURLPOSIXPathStyle, FALSE);
-        if (fileURL) {
-            if(CFURLGetFSRef(fileURL, (struct FSRef *)&fileRef))
-                FSDeleteObject(&fileRef);
-            CFRelease(fileURL);
-        }
+    for (NSString *path in filesToRemove)
+        [fm removeItemAtPath:path error:NULL];
+}
+
+- (BDSKTeXSubTask *)taskForGeneratedType:(NSUInteger)type {
+    NSString *binPath = nil;
+    NSArray *arguments = nil;
+    
+    if (type & BDSKGeneratedRTFMask) {
+        // This task runs latex2rtf on our tex file to generate tmpbib.rtf
+        binPath = [[NSBundle mainBundle] pathForResource:@"latex2rtf" ofType:nil];
+        // the arguments: it needs -P "path" which is the path to the cfg files in the app wrapper
+        arguments = [NSArray arrayWithObjects:@"-P", [[NSBundle mainBundle] sharedSupportPath], [texPath baseNameWithoutExtension], nil];
+    } else if (type & (BDSKGeneratedLaTeXMask | BDSKGeneratedLTBMask)) {
+        // This task runs bibtex on our bib file 
+        NSString *command = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKBibTeXBinPathKey];
+        binPath = [BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:command];
+        NSMutableArray *args = [NSMutableArray array];
+        [args addObjectsFromArray:[BDSKShellCommandFormatter argumentsFromCommand:command]];
+        [args addObject:[texPath baseNameWithoutExtension]];
+        arguments = args;
+    } else {
+        // This task runs latex on our tex file 
+        NSString *command = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKTeXBinPathKey];
+        binPath = [BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:command];
+        NSMutableArray *args = [NSMutableArray arrayWithObject:@"-interaction=batchmode"];
+        [args addObjectsFromArray:[BDSKShellCommandFormatter argumentsFromCommand:command]];
+        [args addObject:[texPath baseNameWithoutExtension]];
+        arguments = args;
     }
-    [filesToRemove release];
+    
+    BDSKTeXSubTask *task = [[[BDSKTeXSubTask alloc] init] autorelease];
+    [task setCurrentDirectoryPath:[texPath workingDirectory]];
+    [task setLaunchPath:binPath];
+    [task setArguments:arguments];
+    [task setEnvironment:environment];
+    [task setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
+    [task setStandardError:[NSFileHandle fileHandleWithNullDevice]];
+    [task setGeneratedType:type];
+    
+    return task;
 }
 
-- (BOOL)runTeXTasksForLaTeX{
-    volatile NSInteger rv;
-    rv = 0;
-    
-    [dataFileLock lockForWriting];
-
-    // nuke the log files in case the run fails without generating new ones (not very likely)
-    [self removeFilesFromPreviousRun];
-        
-    rv = [self runPDFTeXTask];
-    rv |= [self runBibTeXTask];
-    
-    [dataFileLock unlock];
-    
-	return rv == 0;
+- (void)taskFinished:(NSNotification *)notification{
+    NSParameterAssert([notification object] == currentTask);
+    NSParameterAssert(NO == synchronous);
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSTaskDidTerminateNotification object:[notification object]];
+    BOOL success = ([[notification object] terminationStatus] == 0);
+    if (success)
+        generatedDataMask |= [currentTask generatedType];
+    else
+        // avoid launching the remaining tasks; note failure and bail out
+        [pendingTasks removeAllObjects];
+    if ([pendingTasks count] > 0)
+        // previous task succeeded, so run the next one
+        [self invokePendingTasks];
+    // this was the final task in the queue, or the previous one failed
+    else if ([delegate respondsToSelector:@selector(texTask:finishedWithResult:)])
+        [delegate texTask:self finishedWithResult:success];
 }
 
-- (BOOL)runTeXTasksForPDF{
-    volatile NSInteger rv;
-    rv = 0;
-    
-    [dataFileLock lockForWriting];
-    
-    rv = [self runPDFTeXTask];
-    rv |= [self runPDFTeXTask];
-    
-    [dataFileLock unlock];
-    
-	return rv == 0;
-}
-
-- (BOOL)runTeXTaskForRTF{
-    volatile NSInteger rv;
-    rv = 0;
-    
-    [dataFileLock lockForWriting];
-    
-    rv = [self runLaTeX2RTFTask];
-    
-    [dataFileLock unlock];
-    
-	return rv == 0;
-}
-
-- (NSInteger)runPDFTeXTask{
-    NSString *command = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKTeXBinPathKey];
-
-    NSArray *argArray = [BDSKShellCommandFormatter argumentsFromCommand:command];
-    NSString *pdftexbinpath = [BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:command];
-    NSMutableArray *args = [NSMutableArray arrayWithObject:@"-interaction=batchmode"];
-    [args addObjectsFromArray:argArray];
-    [args addObject:[texPath baseNameWithoutExtension]];
-    
-    // This task runs latex on our tex file 
-    return [self runTask:pdftexbinpath withArguments:args];
-}
-
-- (NSInteger)runBibTeXTask{
-    NSString *command = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKBibTeXBinPathKey];
-	
-    NSArray *argArray = [BDSKShellCommandFormatter argumentsFromCommand:command];
-    NSString *bibtexbinpath = [BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:command];
-    NSMutableArray *args = [NSMutableArray array];
-    [args addObjectsFromArray:argArray];
-    [args addObject:[texPath baseNameWithoutExtension]];
-    
-    // This task runs bibtex on our bib file 
-    return [self runTask:bibtexbinpath withArguments:args];
-}
-
-- (NSInteger)runLaTeX2RTFTask{
-    NSString *latex2rtfpath = [[NSBundle mainBundle] pathForResource:@"latex2rtf" ofType:nil];
-    
-    // This task runs latex2rtf on our tex file to generate tmpbib.rtf
-    // the arguments: it needs -P "path" which is the path to the cfg files in the app wrapper
-    return [self runTask:latex2rtfpath withArguments:[NSArray arrayWithObjects:@"-P", [[NSBundle mainBundle] sharedSupportPath], [texPath baseNameWithoutExtension], nil]];
-}
-
-- (NSInteger)runTask:(NSString *)binPath withArguments:(NSArray *)arguments{
-    currentTask = [[BDSKTask alloc] init];
-    [currentTask setCurrentDirectoryPath:[texPath workingDirectory]];
-    [currentTask setLaunchPath:binPath];
-    [currentTask setArguments:arguments];
-    [currentTask setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
-    [currentTask setStandardError:[NSFileHandle fileHandleWithNullDevice]];
-    
-    NSInteger rv = 0;
+- (BOOL)invokePendingTasks {
+    BOOL success = YES;
+ 
+    [currentTask release];
+    currentTask = [[pendingTasks lastObject] retain];
+    [pendingTasks removeLastObject];
     
     [currentTask launch];
-    [currentTask waitUntilExit];
-    rv = [currentTask terminationStatus];
     
-    BDSKDESTROY(currentTask);
+    if (synchronous) {
+        [currentTask waitUntilExit];
+        success = (0 == [currentTask terminationStatus]);
+        if (success) {
+            generatedDataMask |= [currentTask generatedType];
+            if ([pendingTasks count] > 0)
+                success = [self invokePendingTasks];
+        }
+    } else if (currentTask) {
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(taskFinished:) name:NSTaskDidTerminateNotification object:currentTask];
+    }
     
-    return rv;
+    return success;
 }
 
 @end
+
+#pragma mark -
 
 @implementation BDSKTeXPath
 
@@ -685,5 +586,22 @@ static double runLoopTimeout = 30;
 - (NSString *)logFilePath { return [fullPathWithoutExtension stringByAppendingPathExtension:@"log"]; }
 - (NSString *)blgFilePath { return [fullPathWithoutExtension stringByAppendingPathExtension:@"blg"]; }
 - (NSString *)auxFilePath { return [fullPathWithoutExtension stringByAppendingPathExtension:@"aux"]; }
+
+@end
+
+#pragma mark -
+
+@implementation BDSKTeXSubTask
+
+- (id)init {
+    self = [super init];
+    if (self) {
+        generatedType = BDSKGeneratedNoneMask;
+    }
+    return self;
+}
+
+- (void)setGeneratedType:(NSUInteger)type { generatedType = type; }
+- (NSUInteger)generatedType { return generatedType; };
 
 @end

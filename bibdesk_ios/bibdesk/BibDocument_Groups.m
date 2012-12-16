@@ -78,7 +78,6 @@
 #import "BDSKSearchBookmarkController.h"
 #import "BDSKSearchBookmark.h"
 #import "BDSKSharingClient.h"
-#import "WebURLsWithTitles.h"
 #import "NSColor_BDSKExtensions.h"
 #import "NSView_BDSKExtensions.h"
 #import "BDSKCFCallBacks.h"
@@ -89,6 +88,8 @@
 #import "NSMenu_BDSKExtensions.h"
 #import "BDSKBookmarkSheetController.h"
 #import "BDSKBookmarkController.h"
+#import "NSPasteboard_BDSKExtensions.h"
+#import "NSTableView_BDSKExtensions.h"
 
 
 @implementation BibDocument (Groups)
@@ -124,15 +125,21 @@
 }
 
 - (BOOL)hasSmartGroupsSelected{
-    return [[[self selectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isSmart == YES"]] count] > 0;
+    return NSNotFound != [[self selectedGroups] indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        return [obj isSmart];
+    }];
 }
 
 - (BOOL)hasStaticGroupsSelected{
-    return [[[self selectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isStatic == YES"]] count] > 0;
+    return NSNotFound != [[self selectedGroups] indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        return [obj isStatic];
+    }];
 }
 
 - (BOOL)hasCategoryGroupsSelected{
-    return [[[self selectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isCategory == YES"]] count] > 0;
+    return NSNotFound != [[self selectedGroups] indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        return [obj isCategory];
+    }];
 }
 
 - (BOOL)hasExternalGroupsSelected{
@@ -168,15 +175,21 @@
 }
 
 - (BOOL)hasSmartGroupsClickedOrSelected{
-    return [[[self clickedOrSelectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isSmart == YES"]] count] > 0;
+    return NSNotFound != [[self clickedOrSelectedGroups] indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        return [obj isSmart];
+    }];
 }
 
 - (BOOL)hasStaticGroupsClickedOrSelected{
-    return [[[self clickedOrSelectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isStatic == YES"]] count] > 0;
+    return NSNotFound != [[self clickedOrSelectedGroups] indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        return [obj isStatic];
+    }];
 }
 
 - (BOOL)hasCategoryGroupsClickedOrSelected{
-    return [[[self clickedOrSelectedGroups] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isCategory == YES"]] count] > 0;
+    return NSNotFound != [[self clickedOrSelectedGroups] indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        return [obj isCategory];
+    }];
 }
 
 - (BOOL)hasExternalGroupsClickedOrSelected{
@@ -187,19 +200,41 @@
 The groupedPublications array is a subset of the publications array, developed by searching the publications array; shownPublications is now a subset of the groupedPublications array, and searches in the searchfield will search only within groupedPublications (which may include all publications).
 */
 
-- (void)setCurrentGroupField:(NSString *)field{
-	if (field != currentGroupField) {
-		[currentGroupField release];
-		currentGroupField = [field copy];
-		[[groups categoryParent] setName:[NSString isEmptyString:field] ? NSLocalizedString(@"FIELD", @"source list group row title") : [field uppercaseString]];
-        // use the most recently changed group as default for newly opened documents; could also store on a per-document basis
-        [[NSUserDefaults standardUserDefaults] setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
-        [self updateCategoryGroupsPreservingSelection:NO];
-	}
-}	
+- (NSArray *)currentGroupFields{
+	return [[groups categoryParents] valueForKey:@"key"];
+}
 
-- (NSString *)currentGroupField{
-	return currentGroupField;
+- (void)addCurrentGroupField:(NSString *)newField {
+    if ([[self currentGroupFields] containsObject:newField] == NO) {
+        BDSKCategoryParentGroup *group = [[[BDSKCategoryParentGroup alloc] initWithKey:newField] autorelease];
+        [groups addCategoryParent:group];
+        [self updateCategoryGroups:group];
+        [groupOutlineView expandItem:group];
+        [[NSUserDefaults standardUserDefaults] setObject:[self currentGroupFields] forKey:BDSKCurrentGroupFieldsKey];
+    }
+}
+
+- (void)removeCurrentGroupField:(NSString *)oldField {
+    for (BDSKCategoryParentGroup *group in [groups categoryParents]) {
+        if ([[group key] isEqualToString:oldField]) {
+            [group retain];
+            [groups removeCategoryParent:group];
+            [self updateCategoryGroups:group];
+            [group release];
+            [[NSUserDefaults standardUserDefaults] setObject:[self currentGroupFields] forKey:BDSKCurrentGroupFieldsKey];
+            break;
+        }
+    }
+    
+}
+
+- (void)setCurrentGroupField:(NSString *)newField forGroup:(BDSKCategoryParentGroup *)group {
+    if ([[self currentGroupFields] containsObject:newField] == NO) {
+        [group setKey:newField];
+        [self updateCategoryGroups:group];
+        [[NSUserDefaults standardUserDefaults] setObject:[self currentGroupFields] forKey:BDSKCurrentGroupFieldsKey];
+    }
+    
 }
 
 - (NSArray *)selectedGroups {
@@ -207,11 +242,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (NSArray *)clickedOrSelectedGroups {
-    NSInteger row = [groupOutlineView clickedRow];
-    NSIndexSet *rowIndexes = [groupOutlineView selectedRowIndexes];
-    if (row != -1 && [rowIndexes containsIndex:row] == NO)
-        rowIndexes = [NSIndexSet indexSetWithIndex:row];
-    return [groupOutlineView itemsAtRowIndexes:rowIndexes];
+    return [groupOutlineView itemsAtRowIndexes:[groupOutlineView clickedOrSelectedRowIndexes]];
 }
 
 #pragma mark Search group view
@@ -369,12 +400,12 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)handleGroupNameChangedNotification:(NSNotification *)notification{
-    if([groups containsGroup:[notification object]] == NO)
-        return;
-    if([sortGroupsKey isEqualToString:BDSKGroupCellStringKey])
-        [self sortGroupsByKey:nil];
-    else
-        [groupOutlineView setNeedsDisplay:YES];
+    if([[notification object] document] == self) {
+        if ([sortGroupsKey isEqualToString:BDSKGroupCellStringKey])
+            [self sortGroupsByKey:nil];
+        else
+            [groupOutlineView setNeedsDisplay:YES];
+    }
 }
 
 - (void)handleStaticGroupChangedNotification:(NSNotification *)notification{
@@ -481,7 +512,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 // this method uses counted sets to compute the number of publications per group; each group object is just a name
 // and a count, and a group knows how to compare itself with other groups for sorting/equality, but doesn't know 
 // which pubs are associated with it
-- (void)updateCategoryGroupsPreservingSelection:(BOOL)preserve{
+- (void)updateCategoryGroups:(BDSKCategoryParentGroup *)parent {
 
     // this is a hack to keep us from getting selection change notifications while sorting (which updates the TeX and attributed text previews)
     docFlags.ignoreGroupSelectionChange = YES;
@@ -489,14 +520,16 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSPoint scrollPoint = [tableView scrollPositionAsPercentage];    
     
 	NSArray *selectedGroups = [self selectedGroups];
-	
-    NSString *groupField = [self currentGroupField];
     
-    if ([NSString isEmptyString:groupField]) {
+    NSArray *parentsToUpdate = [groups categoryParents]; // update all when parents == nil
+    if ([parentsToUpdate containsObject:parent]) // after adding this parent only update this one
+        parentsToUpdate = [NSArray arrayWithObjects:parent, nil];
+    else if (parent) // after removing this parent don't need to update any
+        parentsToUpdate = nil;
+	
+    for (parent in parentsToUpdate) {
         
-        [groups setCategoryGroups:[NSArray array]];
-        
-    } else {
+        NSString *groupField = [parent key];
         
         setAndBagContext setAndBag;
         if([groupField isPersonField]) {
@@ -507,10 +540,10 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             setAndBag.bag = CFBagCreateMutable(kCFAllocatorDefault, 0, &kBDSKCaseInsensitiveStringBagCallBacks);
         }
         
-        NSArray *oldGroups = [groups categoryGroups];
+        NSArray *oldGroups = [parent categoryGroups];
         NSArray *oldGroupNames = [NSArray array];
         
-        if ([groupField isEqualToString:[[oldGroups lastObject] key]] && [groupField isPersonField] == [[oldGroups lastObject] isKindOfClass:[BibAuthor class]])
+        if ([groupField isEqualToString:[[oldGroups lastObject] key]] && [groupField isPersonField] == [[[oldGroups lastObject] name] isKindOfClass:[BibAuthor class]])
             oldGroupNames = [oldGroups valueForKey:@"name"];
         else
             oldGroups = nil;
@@ -553,7 +586,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             [group release];
         }
         
-        [groups setCategoryGroups:mutableGroups];
+        [groups setCategoryGroups:mutableGroups forParent:parent];
         CFRelease(setAndBag.set);
         CFRelease(setAndBag.bag);
         [mutableGroups release];
@@ -742,38 +775,24 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	[self sortGroupsByKey:BDSKGroupCellCountKey];
 }
 
-- (IBAction)changeGroupFieldAction:(id)sender{
-    NSString *field = [sender representedObject] ?: @"";
+- (IBAction)toggleGroupFieldAction:(id)sender{
+    NSString *field = [sender representedObject];
     
-	if(NO == [field isEqualToString:currentGroupField])
-		[self setCurrentGroupField:field];
+    if ([[self currentGroupFields] containsObject:field])
+        [self removeCurrentGroupField:field];
+    else
+        [self addCurrentGroupField:field];
+}
+
+- (IBAction)changeGroupFieldAction:(id)sender{
+    NSString *field = [sender representedObject];
+    
+    id group = [[self clickedOrSelectedGroups] lastObject];
+    if ([group isCategoryParent])
+        [self setCurrentGroupField:field forGroup:group];
 }
 
 // for adding/removing groups, we use the searchfield sheets
-    
-- (void)addGroupFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-	NSString *newGroupField = [addFieldController field];
-    if(returnCode == NSCancelButton || newGroupField == nil)
-        return; // the user canceled
-    
-	if([newGroupField isInvalidGroupField] || [newGroupField isEqualToString:@""]){
-        [[addFieldController window] orderOut:nil];
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Field", @"Message in alert dialog when choosing an invalid group field")
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                            informativeTextWithFormat:@"%@", [NSString stringWithFormat:NSLocalizedString(@"The field \"%@\" can not be used for groups.", @"Informative text in alert dialog"), [newGroupField localizedFieldName]]];
-        [alert beginSheetModalForWindow:documentWindow modalDelegate:self didEndSelector:NULL contextInfo:NULL];
-		return;
-	}
-	
-	NSMutableArray *array = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
-	if ([array indexOfObject:newGroupField] == NSNotFound)
-        [array addObject:newGroupField];
-	[[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKGroupFieldsKey];	
-    [self setCurrentGroupField:newGroupField];
-    [array release];
-}    
 
 - (IBAction)addGroupFieldAction:(id)sender{
 	BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
@@ -781,46 +800,60 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCrossrefString, nil]
                                               excluding:[[[typeMan invalidGroupFieldsSet] allObjects] arrayByAddingObjectsFromArray:groupFields]];
     
-    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of group field:", @"Label for adding group field")
-                                                                                              fieldsArray:colNames];
-	[addFieldController beginSheetModalForWindow:documentWindow
-                                   modalDelegate:self
-                                  didEndSelector:@selector(addGroupFieldSheetDidEnd:returnCode:contextInfo:)
-                                     contextInfo:NULL];
-    [addFieldController release];
-}
-
-- (void)removeGroupFieldSheetDidEnd:(BDSKRemoveFieldSheetController *)removeFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-	NSString *oldGroupField = [removeFieldController field];
-    if(returnCode == NSCancelButton || [NSString isEmptyString:oldGroupField])
-        return;
-    
-    NSMutableArray *array = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
-    [array removeObject:oldGroupField];
-    [[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKGroupFieldsKey];
-    [array release];
-    
-    if([oldGroupField isEqualToString:currentGroupField])
-        [self setCurrentGroupField:@""];
+    BDSKAddFieldSheetController *addFieldController = [[[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of group field:", @"Label for adding group field")
+                                                                                               fieldsArray:colNames] autorelease];
+	[addFieldController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+        NSString *newGroupField = [addFieldController field];
+        if(result == NSCancelButton || newGroupField == nil)
+            return; // the user canceled
+        
+        if([newGroupField isInvalidGroupField] || [newGroupField isEqualToString:@""]){
+            [[addFieldController window] orderOut:nil];
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Field", @"Message in alert dialog when choosing an invalid group field")
+                                             defaultButton:nil
+                                           alternateButton:nil
+                                               otherButton:nil
+                                informativeTextWithFormat:@"%@", [NSString stringWithFormat:NSLocalizedString(@"The field \"%@\" can not be used for groups.", @"Informative text in alert dialog"), [newGroupField localizedFieldName]]];
+            [alert beginSheetModalForWindow:documentWindow modalDelegate:self didEndSelector:NULL contextInfo:NULL];
+            return;
+        }
+        
+        NSMutableArray *array = [groupFields mutableCopy];
+        if ([array indexOfObject:newGroupField] == NSNotFound)
+            [array addObject:newGroupField];
+        [[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKGroupFieldsKey];	
+        id group = [[self clickedOrSelectedGroups] lastObject];
+        if ([group isCategoryParent])
+            [self setCurrentGroupField:newGroupField forGroup:group];
+        else
+            [self addCurrentGroupField:newGroupField];
+        [array release];
+    }];
 }
 
 - (IBAction)removeGroupFieldAction:(id)sender{
-    BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field to remove:", @"Label for removing group field")
-                                                                                                       fieldsArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey]];
-	[removeFieldController beginSheetModalForWindow:documentWindow
-                                      modalDelegate:self
-                                     didEndSelector:@selector(removeGroupFieldSheetDidEnd:returnCode:contextInfo:)
-                                        contextInfo:NULL];
-    [removeFieldController release];
+	NSArray *groupFields = [[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey];
+    BDSKRemoveFieldSheetController *removeFieldController = [[[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field to remove:", @"Label for removing group field")
+                                                                                                        fieldsArray:groupFields] autorelease];
+	[removeFieldController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+        NSString *oldGroupField = [removeFieldController field];
+        if(result == NSCancelButton || [NSString isEmptyString:oldGroupField])
+            return;
+        
+        NSMutableArray *array = [groupFields mutableCopy];
+        [array removeObject:oldGroupField];
+        [[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKGroupFieldsKey];
+        [array release];
+        
+        if([[self currentGroupFields] containsObject:oldGroupField])
+            [self removeCurrentGroupField:oldGroupField];
+    }];
 }    
 
-- (IBAction)addSmartGroupAction:(id)sender {
-	BDSKFilterController *filterController = [[BDSKFilterController alloc] init];
-    [filterController beginSheetModalForWindow:documentWindow
-                                 modalDelegate:self
-                                didEndSelector:@selector(smartGroupSheetDidEnd:returnCode:contextInfo:)
-                                   contextInfo:NULL];
-	[filterController release];
+- (IBAction)removeCategoryParentAction:(id)sender {
+    BDSKCategoryParentGroup *group = [[self clickedOrSelectedGroups] lastObject];
+    if ([group isCategoryParent])
+        [self removeCurrentGroupField:[group key]];
 }
 
 - (void)editGroupWithoutWarning:(BDSKGroup *)group {
@@ -837,16 +870,18 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     }
 }
 
-- (void)smartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(NSInteger) returnCode contextInfo:(void *)contextInfo{
-	if(returnCode == NSOKButton){
-		BDSKSmartGroup *group = [[BDSKSmartGroup alloc] initWithFilter:[filterController filter]];
-		[groups addSmartGroup:group];
-        [self editGroupWithoutWarning:group];
-		[group release];
-        [[self undoManager] setActionName:NSLocalizedString(@"Add Smart Group", @"Undo action name")];
-		// updating of the tables is done when finishing the edit of the name
-	}
-	
+- (IBAction)addSmartGroupAction:(id)sender {
+	BDSKFilterController *filterController = [[[BDSKFilterController alloc] init] autorelease];
+    [filterController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+        if(result == NSOKButton){
+            BDSKSmartGroup *group = [[BDSKSmartGroup alloc] initWithFilter:[filterController filter]];
+            [groups addSmartGroup:group];
+            [self editGroupWithoutWarning:group];
+            [group release];
+            [[self undoManager] setActionName:NSLocalizedString(@"Add Smart Group", @"Undo action name")];
+            // updating of the tables is done when finishing the edit of the name
+        }
+	}];
 }
 
 - (IBAction)addStaticGroupAction:(id)sender {
@@ -868,24 +903,18 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [group release];
 }
 
-- (void)searchGroupSheetDidEnd:(BDSKSearchGroupSheetController *)sheetController returnCode:(NSInteger) returnCode contextInfo:(void *)contextInfo{
-	if(returnCode == NSOKButton){
-        BDSKGroup *group = [sheetController group];
-		[groups addSearchGroup:(id)group];
-        [groupOutlineView expandItem:[group parent]];
-        NSInteger row = [groupOutlineView rowForItem:group];
-        if (row != -1)
-            [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-	}
-}
-
 - (IBAction)addSearchGroupAction:(id)sender {
-    BDSKSearchGroupSheetController *sheetController = [[BDSKSearchGroupSheetController alloc] init];
-    [sheetController beginSheetModalForWindow:documentWindow
-                                modalDelegate:self
-                               didEndSelector:@selector(searchGroupSheetDidEnd:returnCode:contextInfo:)
-                                  contextInfo:NULL];
-    [sheetController release];
+    BDSKSearchGroupSheetController *sheetController = [[[BDSKSearchGroupSheetController alloc] init] autorelease];
+    [sheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+        if(result == NSOKButton){
+            BDSKGroup *group = [sheetController group];
+            [groups addSearchGroup:(id)group];
+            [groupOutlineView expandItem:[group parent]];
+            NSInteger row = [groupOutlineView rowForItem:group];
+            if (row != -1)
+                [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+        }
+    }];
 }
 
 - (IBAction)newSearchGroupFromBookmark:(id)sender {
@@ -899,17 +928,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
     } else
         NSBeep();
-}
-
-- (void)searchBookmarkSheetDidEnd:(BDSKBookmarkSheetController *)sheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSOKButton) {
-        BDSKGroup *group = [[self selectedGroups] lastObject];
-        BDSKSearchBookmark *bookmark = [BDSKSearchBookmark searchBookmarkWithInfo:[group dictionaryValue] label:[sheetController stringValue]];
-        if (bookmark) {
-            BDSKSearchBookmark *folder = [sheetController selectedFolder] ?: [[BDSKSearchBookmarkController sharedBookmarkController] bookmarkRoot];
-            [folder insertObject:bookmark inChildrenAtIndex:[folder countOfChildren]];
-        }
-    }
 }
 
 - (void)addMenuItemsForBookmarks:(NSArray *)bookmarksArray level:(NSInteger)level toMenu:(NSMenu *)menu {
@@ -940,51 +958,43 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [self addMenuItemsForBookmarks:[NSArray arrayWithObjects:bookmark, nil] level:0 toMenu:[folderPopUp menu]];
     [folderPopUp selectItemAtIndex:0];
     
-    [bookmarkSheetController beginSheetModalForWindow:[self windowForSheet]
-                                        modalDelegate:self 
-                                       didEndSelector:@selector(searchBookmarkSheetDidEnd:returnCode:contextInfo:)
-                                          contextInfo:NULL];
+    [bookmarkSheetController beginSheetModalForWindow:[self windowForSheet] completionHandler:^(NSInteger result){
+        if (result == NSOKButton) {
+            BDSKSearchBookmark *newBookmark = [BDSKSearchBookmark searchBookmarkWithInfo:[group dictionaryValue] label:[bookmarkSheetController stringValue]];
+            if (newBookmark) {
+                BDSKSearchBookmark *folder = [bookmarkSheetController selectedFolder] ?: [[BDSKSearchBookmarkController sharedBookmarkController] bookmarkRoot];
+                [folder insertObject:newBookmark inChildrenAtIndex:[folder countOfChildren]];
+            }
+        }
+    }];
 }
 
 - (IBAction)addURLGroupAction:(id)sender {
-    BDSKURLGroupSheetController *sheetController = [[BDSKURLGroupSheetController alloc] init];
-    [sheetController beginSheetModalForWindow:documentWindow
-                                modalDelegate:self
-                               didEndSelector:@selector(URLGroupSheetDidEnd:returnCode:contextInfo:)
-                                  contextInfo:NULL];
-    [sheetController release];
-}
-
-- (void)URLGroupSheetDidEnd:(BDSKURLGroupSheetController *)sheetController returnCode:(NSInteger) returnCode contextInfo:(void *)contextInfo{
-	if(returnCode == NSOKButton){
-        BDSKURLGroup *group = [sheetController group];
-		[groups addURLGroup:group];
-        [group publications];
-        [self editGroupWithoutWarning:group];
-        [[self undoManager] setActionName:NSLocalizedString(@"Add External File Group", @"Undo action name")];
-		// updating of the tables is done when finishing the edit of the name
-	}
+    BDSKURLGroupSheetController *sheetController = [[[BDSKURLGroupSheetController alloc] init] autorelease];
+    [sheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+        if(result == NSOKButton){
+            BDSKURLGroup *group = [sheetController group];
+            [groups addURLGroup:group];
+            [group publications];
+            [self editGroupWithoutWarning:group];
+            [[self undoManager] setActionName:NSLocalizedString(@"Add External File Group", @"Undo action name")];
+            // updating of the tables is done when finishing the edit of the name
+        }
+    }];
 }
 
 - (IBAction)addScriptGroupAction:(id)sender {
-    BDSKScriptGroupSheetController *sheetController = [[BDSKScriptGroupSheetController alloc] init];
-    [sheetController beginSheetModalForWindow:documentWindow
-                                modalDelegate:self
-                               didEndSelector:@selector(scriptGroupSheetDidEnd:returnCode:contextInfo:)
-                                  contextInfo:NULL];
-    [sheetController release];
-}
-
-- (void)scriptGroupSheetDidEnd:(BDSKScriptGroupSheetController *)sheetController returnCode:(NSInteger) returnCode contextInfo:(void *)contextInfo{
-	if(returnCode == NSOKButton){
-        BDSKScriptGroup *group = [sheetController group];
-		[groups addScriptGroup:group];
-        [group publications];
-        [self editGroupWithoutWarning:group];
-        [[self undoManager] setActionName:NSLocalizedString(@"Add Script Group", @"Undo action name")];
-		// updating of the tables is done when finishing the edit of the name
-	}
-	
+    BDSKScriptGroupSheetController *sheetController = [[[BDSKScriptGroupSheetController alloc] init] autorelease];
+    [sheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+        if(result == NSOKButton){
+            BDSKScriptGroup *group = [sheetController group];
+            [groups addScriptGroup:group];
+            [group publications];
+            [self editGroupWithoutWarning:group];
+            [[self undoManager] setActionName:NSLocalizedString(@"Add Script Group", @"Undo action name")];
+            // updating of the tables is done when finishing the edit of the name
+        }
+    }];
 }
 
 - (void)removeGroups:(NSArray *)theGroups {
@@ -1029,7 +1039,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	if ([group isSmart]) {
 		BDSKFilter *filter = [(BDSKSmartGroup *)group filter];
 		BDSKFilterController *filterController = [[BDSKFilterController alloc] initWithFilter:filter];
-        [filterController beginSheetModalForWindow:documentWindow];
+        [filterController beginSheetModalForWindow:documentWindow completionHandler:nil];
         [filterController release];
 	} else if ([group isCategory]) {
         // this must be a person field
@@ -1037,15 +1047,15 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 		[self showPerson:(BibAuthor *)[group name]];
 	} else if ([group isURL]) {
         BDSKURLGroupSheetController *sheetController = [(BDSKURLGroupSheetController *)[BDSKURLGroupSheetController alloc] initWithGroup:(BDSKURLGroup *)group];
-        [sheetController beginSheetModalForWindow:documentWindow];
+        [sheetController beginSheetModalForWindow:documentWindow completionHandler:nil];
         [sheetController release];
 	} else if ([group isScript]) {
         BDSKScriptGroupSheetController *sheetController = [(BDSKScriptGroupSheetController *)[BDSKScriptGroupSheetController alloc] initWithGroup:(BDSKScriptGroup *)group];
-        [sheetController beginSheetModalForWindow:documentWindow];
+        [sheetController beginSheetModalForWindow:documentWindow completionHandler:nil];
         [sheetController release];
 	} else if ([group isSearch]) {
         BDSKSearchGroupSheetController *sheetController = [(BDSKSearchGroupSheetController *)[BDSKSearchGroupSheetController alloc] initWithGroup:(BDSKSearchGroup *)group];
-        [sheetController beginSheetModalForWindow:documentWindow];
+        [sheetController beginSheetModalForWindow:documentWindow completionHandler:nil];
         [sheetController release];
 	}
 }
@@ -1087,8 +1097,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	id group = [[self clickedOrSelectedGroups] lastObject];
     NSURL *url = nil;
     NSString *title = nil;
-    NSString *theUTI = nil;
-    NSData *data = nil;
     
 	if ([group isExternal] == NO) {
 		NSBeep();
@@ -1113,27 +1121,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         title = [url isFileURL] ? [[url path] lastPathComponent] : [url absoluteString];
 	
     NSPasteboard *pboard = [NSPasteboard generalPasteboard];
-    Class WebURLsWithTitlesClass = NSClassFromString(@"WebURLsWithTitles");
-    if (NO == [WebURLsWithTitlesClass respondsToSelector:@selector(writeURLs:andTitles:toPasteboard:)])
-        WebURLsWithTitlesClass = Nil;
-    
-    if ((data = [(NSData *)CFURLCreateData(nil, (CFURLRef)url, kCFStringEncodingUTF8, true) autorelease]))
-        theUTI = (NSString *)([url isFileURL] ? kUTTypeFileURL : kUTTypeURL);
-    
-    if (WebURLsWithTitlesClass) {
-        [pboard declareTypes:[NSArray arrayWithObjects:@"WebURLsWithTitlesPboardType", NSURLPboardType, NSStringPboardType, theUTI, @"public.url-name", nil] owner:nil];
-        [WebURLsWithTitlesClass writeURLs:[NSArray arrayWithObjects:url, nil] andTitles:[NSArray arrayWithObjects:title, nil] toPasteboard:pboard];
-    } else {
-        [pboard declareTypes:[NSArray arrayWithObjects:NSURLPboardType, NSStringPboardType, theUTI, @"public.url-name", nil] owner:nil];
-    }
-    
-    [url writeToPasteboard:pboard];
-    [pboard setString:[url absoluteString] forType:NSStringPboardType];
-    
-    if (theUTI) {
-        [pboard setData:data forType:theUTI];
-        [pboard setString:title forType:@"public.url-name"];
-    }
+    [pboard clearContents];
+    [pboard writeURLs:[NSArray arrayWithObjects:url, nil] names:[NSArray arrayWithObjects:title, nil]];
 }
 
 - (IBAction)selectLibraryGroup:(id)sender {
@@ -1171,14 +1160,15 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [self performSelector:@selector(editGroupWithoutWarning:) withObject:group afterDelay:0.0];
 }
 
-- (IBAction)editNewCategoryGroupWithSelection:(id)sender{
-    if ([currentGroupField isEqualToString:@""]) {
-        NSBeep();
+- (void)editNewCategoryGroupWithSelectionForGroupField:(NSString *)groupField {
+    NSUInteger idx = [[self currentGroupFields] indexOfObject:groupField];
+    BDSKASSERT(idx != NSNotFound);
+    if (idx == NSNotFound)
         return;
-    }
-    
-    BOOL isAuthor = [currentGroupField isPersonField];
-    NSArray *names = [[groups categoryGroups] valueForKeyPath:isAuthor ? @"@distinctUnionOfObjects.name.lastName" : @"@distinctUnionOfObjects.name"];
+    BDSKCategoryParentGroup *parent = [[groups categoryParents] objectAtIndex:idx];
+    NSArray *categoryGroups = [parent categoryGroups];
+    BOOL isAuthor = [groupField isPersonField];
+    NSArray *names = [categoryGroups valueForKeyPath:isAuthor ? @"@distinctUnionOfObjects.name.lastName" : @"@distinctUnionOfObjects.name"];
     NSArray *pubs = [self selectedPublications];
     NSString *baseName = NSLocalizedString(@"Untitled", @"");
     id name = baseName;
@@ -1189,7 +1179,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         name = [NSString stringWithFormat:@"%@%lu", baseName, (unsigned long)i++];
     if (isAuthor)
         name = [BibAuthor authorWithName:name];
-    group = [[[BDSKCategoryGroup alloc] initWithName:name key:currentGroupField] autorelease];
+    group = [[[BDSKCategoryGroup alloc] initWithName:name key:groupField] autorelease];
     
     // first merge in shared groups
     if ([self hasExternalGroupsSelected])
@@ -1197,9 +1187,33 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     
     [self addPublications:pubs toGroup:group];
     [groupOutlineView deselectAll:nil];
-    [self updateCategoryGroupsPreservingSelection:NO];
+    [self updateCategoryGroups:parent];
+    
+    idx = [categoryGroups indexOfObject:group];
+    BDSKASSERT(idx != NSNotFound);
+    if (idx != NSNotFound)
+        group = [categoryGroups objectAtIndex:idx];
     
     [self performSelector:@selector(editGroupWithoutWarning:) withObject:group afterDelay:0.0];
+}
+
+- (IBAction)editNewCategoryGroupWithSelection:(id)sender{
+    NSArray *currentGroupFields = [self currentGroupFields];
+    if ([currentGroupFields count] == 0) {
+        NSBeep();
+    } else if ([currentGroupFields count] == 1) {
+        [self editNewCategoryGroupWithSelectionForGroupField:[currentGroupFields lastObject]];
+    } else {
+        BDSKRemoveFieldSheetController *chooseFieldController = [[[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field:", @"Label for choosing group field")
+                                                                                                            fieldsArray:currentGroupFields] autorelease];
+        [chooseFieldController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+            NSString *groupField = [chooseFieldController field];
+            if(result == NSCancelButton || [NSString isEmptyString:groupField])
+                return;
+            
+            [self editNewCategoryGroupWithSelectionForGroupField:groupField];
+        }];
+    }
 }
 
 - (IBAction)mergeInExternalGroup:(id)sender{
@@ -1322,7 +1336,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             }
 		}else if(rv == BDSKOperationAsk){
 			NSString *otherButton = nil;
-			if([[self currentGroupField] isSingleValuedGroupField] == NO)
+			if(field && [field isSingleValuedGroupField] == NO)
 				otherButton = NSLocalizedString(@"Append", @"Button title");
 			
 			NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")

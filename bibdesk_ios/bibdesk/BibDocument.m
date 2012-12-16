@@ -125,6 +125,7 @@
 #import "BDSKMetadataCacheOperation.h"
 #import "NSSplitView_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
+#import "NSPasteboard_BDSKExtensions.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -136,11 +137,12 @@ NSString *BDSKMODSDocumentType = @"MODS XML";
 NSString *BDSKAtomDocumentType = @"Atom XML";
 NSString *BDSKArchiveDocumentType = @"BibTeX and Papers Archive";
 
-NSString *BDSKReferenceMinerStringPboardType = @"CorePasteboardFlavorType 0x57454253";
-NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk.BibItemPasteboardType";
-NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
+NSString *BDSKPasteboardTypePublications = @"edu.ucsd.mmccrack.bibdesk.pasteboard.publications";
 
 NSString *BDSKDocumentPublicationsKey = @"publications";
+
+// pasteboard type from Reference Miner, determined using Pasteboard Peeker
+#define BDSKReferenceMinerStringPboardType @"CorePasteboardFlavorType 0x57454253"
 
 // private keys used for storing window information in xattrs
 #define BDSKMainWindowExtendedAttributeKey @"net.sourceforge.bibdesk.BDSKDocumentWindowAttributes"
@@ -223,7 +225,6 @@ static NSOperationQueue *metadataCacheQueue = nil;
         previousSortKey = nil;
         tmpSortKey = nil;
         sortGroupsKey = nil;
-        currentGroupField = nil;
         docFlags.sortDescending = NO;
         docFlags.previousSortDescending = NO;
         docFlags.tmpSortDescending = NO;
@@ -312,7 +313,6 @@ static NSOperationQueue *metadataCacheQueue = nil;
     BDSKDESTROY(previousSortKey);
     BDSKDESTROY(tmpSortKey);
     BDSKDESTROY(sortGroupsKey);
-    BDSKDESTROY(currentGroupField);
     BDSKDESTROY(searchGroupViewController);
     BDSKDESTROY(webGroupViewController);
     BDSKDESTROY(searchIndexes);
@@ -508,11 +508,12 @@ static NSOperationQueue *metadataCacheQueue = nil;
     sortGroupsKey = [[xattrDefaults objectForKeyOrDefaultValue:BDSKSortGroupsKey] retain];
     docFlags.sortGroupsDescending = [xattrDefaults boolForKeyOrDefaultValue:BDSKSortGroupsDescendingKey];
     // don't use setter, because we don't want to change the prefs here, and the value should be nil at this point
-    currentGroupField = [[xattrDefaults objectForKeyOrDefaultValue:BDSKCurrentGroupFieldKey] copy];
-    [[groups categoryParent] setName:[NSString isEmptyString:currentGroupField] ? NSLocalizedString(@"FIELD", @"source list group row title") : [currentGroupField uppercaseString]];
+    NSArray *currentGroupFields = [xattrDefaults objectForKeyOrDefaultValue:BDSKCurrentGroupFieldsKey];
+    for (NSString *groupField in currentGroupFields)
+        [groups addCategoryParent:[[[BDSKCategoryParentGroup alloc] initWithKey:groupField] autorelease]];
     
     [tableView setDoubleAction:@selector(editPubOrOpenURLAction:)];
-    NSArray *dragTypes = [NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSColorPboardType, nil];
+    NSArray *dragTypes = [NSArray arrayWithObjects:BDSKPasteboardTypePublications, (NSString *)kUTTypeURL, (NSString *)kUTTypeFileURL, NSFilenamesPboardType, NSURLPboardType, NSPasteboardTypeString, NSPasteboardTypeColor, nil];
     [tableView registerForDraggedTypes:dragTypes];
     [groupOutlineView registerForDraggedTypes:dragTypes];
     
@@ -564,7 +565,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
     
     // The UI update from setPublications is too early when loading a new document
     [self updateSmartGroupsCount];
-    [self updateCategoryGroupsPreservingSelection:NO];
+    [self updateCategoryGroups:nil];
     
     [saveTextEncodingPopupButton setEncoding:BDSKNoStringEncoding];
     
@@ -576,7 +577,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
     
     NSArray *groupsToExpand = [xattrDefaults objectForKey:BDSKDocumentGroupsToExpandKey];
     for (BDSKParentGroup *parent in groups) {
-        if (parent != [groups libraryParent] && (groupsToExpand == nil || [groupsToExpand containsObject:NSStringFromClass([parent class])]))
+        if (parent != [groups libraryParent] && (groupsToExpand == nil || [groupsToExpand containsObject:[parent identifier]]))
             [groupOutlineView expandItem:parent];
     }
     // make sure the groups are sorted and have their sort descriptors set
@@ -729,7 +730,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
         if (NO == [self hasWebGroupsSelected])
             [dictionary setDouble:[splitView fraction] forKey:BDSKMainTableSplitViewFractionKey];
         [dictionary setDouble:docState.lastWebViewFraction forKey:BDSKWebViewFractionKey];
-        [dictionary setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
+        //[dictionary setObject:[self currentGroupFields] forKey:BDSKCurrentGroupFieldsKey];
         
         // we can't just use -documentStringEncoding, because that may be different for SaveTo
         if (encoding != BDSKNoStringEncoding)
@@ -769,10 +770,10 @@ static NSOperationQueue *metadataCacheQueue = nil;
         NSMutableArray *groupsToExpand = [NSMutableArray array];
         for (BDSKParentGroup *parent in groups) {
             if (parent != [groups libraryParent] && [groupOutlineView isItemExpanded:parent])
-                [groupsToExpand addObject:NSStringFromClass([parent class])];
+                [groupsToExpand addObject:[parent identifier]];
             
         }
-        [dictionary setObject:groupsToExpand forKey:BDSKDocumentGroupsToExpandKey];
+        [dictionary removeObjectForKey:BDSKDocumentGroupsToExpandKey];
         
         NSError *error;
         
@@ -1047,6 +1048,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSInvocation *invocation = [info objectForKey:@"callback"];
     
     if (didSave) {
+        NSFileManager *fm = [NSFileManager defaultManager];
         NSStringEncoding encoding = NSUTF8StringEncoding;
         if ([self needsEncodingForType:typeName]) {
             encoding = [self encodingForSaving];
@@ -1058,7 +1060,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         // set com.apple.TextEncoding for other apps
         NSString *UTI = [[NSWorkspace sharedWorkspace] typeOfFile:[saveTargetURL path] error:NULL];
         if (UTI && [[NSWorkspace sharedWorkspace] type:UTI conformsToType:(id)kUTTypePlainText])
-            [[NSFileManager defaultManager] setAppleStringEncoding:encoding atPath:[saveTargetURL path] error:NULL];
+            [fm setAppleStringEncoding:encoding atPath:[saveTargetURL path] error:NULL];
         
         if (docState.currentSaveOperationType == NSSaveToOperation) {
             
@@ -1067,7 +1069,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             if(selectedTemplate){
                 NSURL *destDirURL = [saveTargetURL URLByDeletingLastPathComponent];
                 for (NSURL *accessoryURL in [selectedTemplate accessoryFileURLs])
-                    [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
+                    [fm copyItemAtURL:accessoryURL toURL:[destDirURL URLByAppendingPathComponent:[accessoryURL lastPathComponent]] error:NULL];
             }
             
         } else if (docState.currentSaveOperationType == NSSaveOperation || docState.currentSaveOperationType == NSSaveAsOperation) {
@@ -1552,7 +1554,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         if(isOK && ([[groups staticGroups] count] > 0)){
             hasData = YES;
             isOK = [outputData appendDataFromString:@"\n\n@comment{BibDesk Static Groups{\n" encoding:encoding error:&error] &&
-                   [outputData appendStringData:[groups serializedGroupsDataOfType:BDSKStaticGroupType] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
+                   [outputData appendUTF8StringData:[groups serializedGroupsDataOfType:BDSKStaticGroupType] encoding:groupsEncoding error:&error] &&
                    [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
             if(NO == isOK){
                 if ([error isMutable] == NO) error = [[error mutableCopy] autorelease];
@@ -1562,7 +1564,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         if(isOK && ([[groups smartGroups] count] > 0)){
             hasData = YES;
             isOK = [outputData appendDataFromString:@"\n\n@comment{BibDesk Smart Groups{\n" encoding:encoding error:&error] &&
-                   [outputData appendStringData:[groups serializedGroupsDataOfType:BDSKSmartGroupType] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
+                   [outputData appendUTF8StringData:[groups serializedGroupsDataOfType:BDSKSmartGroupType] encoding:groupsEncoding error:&error] &&
                    [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
             if(NO == isOK){
                 if ([error isMutable] == NO) error = [[error mutableCopy] autorelease];
@@ -1572,7 +1574,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         if(isOK && ([[groups URLGroups] count] > 0)){
             hasData = YES;
             isOK = [outputData appendDataFromString:@"\n\n@comment{BibDesk URL Groups{\n" encoding:encoding error:&error] &&
-                   [outputData appendStringData:[groups serializedGroupsDataOfType:BDSKURLGroupType] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
+                   [outputData appendUTF8StringData:[groups serializedGroupsDataOfType:BDSKURLGroupType] encoding:groupsEncoding error:&error] &&
                    [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
             if(NO == isOK){
                 if ([error isMutable] == NO) error = [[error mutableCopy] autorelease];
@@ -1582,7 +1584,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         if(isOK && ([[groups scriptGroups] count] > 0)){
             hasData = YES;
             isOK = [outputData appendDataFromString:@"\n\n@comment{BibDesk Script Groups{\n" encoding:encoding error:&error] &&
-                   [outputData appendStringData:[groups serializedGroupsDataOfType:BDSKScriptGroupType] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
+                   [outputData appendUTF8StringData:[groups serializedGroupsDataOfType:BDSKScriptGroupType] encoding:groupsEncoding error:&error] &&
                    [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
             if(NO == isOK){
                 if ([error isMutable] == NO) error = [[error mutableCopy] autorelease];
@@ -1615,17 +1617,19 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 - (NSData *)LTBDataAndReturnError:(NSError **)error{
     NSPasteboard *pboard = [NSPasteboard pasteboardWithUniqueName];
-    [pboardHelper declareType:NSStringPboardType dragCopyType:BDSKLTBDragCopyType forItems:[self publicationsForSaving] forPasteboard:pboard];
-    NSString *ltbString = [pboard stringForType:NSStringPboardType];
-    [pboardHelper clearPromisedTypesForPasteboard:pboard];
-	if(ltbString == nil){
+    [pboard clearContents];
+    [pboardHelper writeObjects:nil items:[self publicationsForSaving] forDragCopyType:BDSKLTBDragCopyType toPasteboard:pboard];
+    NSArray *ltbStrings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+    [pboard clearContents]; // this will clear the pasteboard helper for this pasteboard
+    [pboardHelper clearPromisedTypesForPasteboard:pboard]; // just to be sure
+	if([ltbStrings count] == 0){
         if (error)
             *error = [NSError localErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to run TeX processes for these publications", @"Error description")];
 		return nil;
     }
     
     NSMutableString *s = [NSMutableString stringWithString:@"\\documentclass{article}\n\\usepackage{amsrefs}\n\\begin{document}\n\n"];
-	[s appendString:ltbString];
+	[s appendString:[ltbStrings objectAtIndex:0]];
 	[s appendString:@"\n\\end{document}\n"];
     
     NSStringEncoding encoding = [self encodingForSaving];
@@ -1851,7 +1855,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if (wasLoaded) {
         [self setSearchString:@""];
         [self updateSmartGroupsCount];
-        [self updateCategoryGroupsPreservingSelection:YES];
+        [self updateCategoryGroups:nil];
         [self sortGroupsByKey:nil]; // resort
 		[tableView deselectAll:self]; // clear before resorting
 		[self redoSearch]; // redo the search
@@ -2103,130 +2107,100 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 #pragma mark -
 #pragma mark New publications from pasteboard
 
-- (NSArray *)publicationsForFiles:(NSArray *)filenames {
-    NSMutableArray *newPubs = [NSMutableArray arrayWithCapacity:[filenames count]];
-	NSURL *url = nil;
-    	
-	for (NSString *fnStr in filenames) {
-        fnStr = [fnStr stringByStandardizingPath];
-		if(url = [NSURL fileURLWithPath:fnStr]){
-            NSError *xerror = nil;
-            BibItem *newBI = nil;
-            
-            // most reliable metadata should be our private EA
-            if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKReadExtendedAttributesKey]){
-                NSData *btData = [[SKNExtendedAttributeManager sharedNoSplitManager] extendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" atPath:fnStr traverseLink:NO error:&xerror];
-                if(btData){
-                    NSString *btString = [[NSString alloc] initWithData:btData encoding:NSUTF8StringEncoding];
-                    BOOL isPartialData;
-                    NSArray *items = [BDSKBibTeXParser itemsFromString:btString owner:self isPartialData:&isPartialData error:&xerror];
-                    newBI = isPartialData ? nil : [items firstObject];
-                    [btString release];
-                }
-            }
-            
-			// GJ try parsing pdf to extract info that is then used to get a PubMed record
-			if(newBI == nil && [[[NSWorkspace sharedWorkspace] typeOfFile:[[fnStr stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL] isEqualToUTI:(NSString *)kUTTypePDF]){
-                if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTermKey])
-                    newBI = [BibItem itemByParsingPDFFile:fnStr];			
-                // fall back on the least reliable metadata source (hidden pref)
-                if(newBI == nil && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldUsePDFMetadataKey])
-                    newBI = [BibItem itemWithPDFMetadataFromURL:url];
-			}
-            if(newBI == nil)
-                newBI = [[[BibItem alloc] init] autorelease];
-            
-            [newBI addFileForURL:url autoFile:NO runScriptHook:NO];
-			[newPubs addObject:newBI];
-		}
-	}
-	
-	return newPubs;
-}
-
-- (NSArray *)publicationsForURL:(NSURL *)aURL title:(NSString *)aTitle {
-    NSDictionary *pubFields = [NSDictionary dictionaryWithObjectsAndKeys:[[NSDate date] dateDescription], @"Lastchecked", aTitle, BDSKTitleString, nil];
-    NSArray *files = [NSArray arrayWithObjects:[BDSKLinkedFile linkedFileWithURL:aURL delegate:nil], nil];
-    BibItem *newBI = [[BibItem alloc] initWithType:@"webpage" citeKey:nil pubFields:pubFields files:files isNew:YES];
-    NSArray *pubs = [NSArray arrayWithObject:newBI];
-    [newBI release];
+- (BibItem *)publicationForFileURL:(NSURL *)fileURL {
+    NSError *xerror = nil;
+    BibItem *newBI = nil;
     
-	return pubs;
-}
-
-// sniff the contents of each file, returning them in an array of BibItems, while unparseable files are added to the mutable array passed as a parameter
-- (NSArray *)extractPublicationsFromFiles:(NSArray *)filenames unparseableFiles:(NSArray **)unparseableFiles verbose:(BOOL)verbose error:(NSError **)outError {
-    NSMutableArray *array = [NSMutableArray array];
-    NSMutableArray *unparseableFilesArray = nil;
-    BDSKStringType type = BDSKUnknownStringType;
+    fileURL = [fileURL URLByStandardizingPath];
     
-    // some common types that people might use as attachments; we don't need to sniff these
-    NSSet *unreadableTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"pdf", @"ps", @"eps", @"doc", @"htm", @"textClipping", @"webloc", @"html", @"rtf", @"tiff", @"tif", @"png", @"jpg", @"jpeg", nil];
-    
-    for (NSString *fileName in filenames) {
-        type = BDSKUnknownStringType;
-        
-        // we /can/ create a string from these (usually), but there's no point in wasting the memory
-        
-        NSString *theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:[[fileName stringByStandardizingPath] stringByResolvingSymlinksInPath] error:NULL];
-        if ([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.bdsksearch"]) {
-            NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfFile:fileName];
-            Class aClass = NSClassFromString([dictionary objectForKey:@"class"]);
-            BDSKSearchGroup *group = [[[(aClass ?: [BDSKSearchGroup class]) alloc] initWithDictionary:dictionary] autorelease];
-            if(group)
-                [groups addSearchGroup:group];
-        } else {
-            NSError *parseError = nil;
-            BOOL isPartialData = NO;
-            NSArray *contentArray = nil;
-            
-            if ([unreadableTypes containsObject:[fileName pathExtension]] == NO) {
-        
-                // try to create a string
-                NSString *contentString = [[NSString alloc] initWithContentsOfFile:fileName guessedEncoding:[self documentStringEncoding]];
-                
-                if (contentString != nil) {
-                    if ([theUTI isEqualToUTI:@"org.tug.tex.bibtex"])
-                        type = BDSKBibTeXStringType;
-                    else if([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.ris"])
-                        type = BDSKRISStringType;
-                    else
-                        type = [contentString contentStringType];
-                    
-                    if (type != BDSKUnknownStringType) {
-                        contentArray = [BDSKStringParser itemsFromString:contentString ofType:type owner:self isPartialData:&isPartialData error:&parseError];
-                        
-                        if (isPartialData) {
-                            if ([parseError isLocalErrorWithCode:kBDSKParserIgnoredFrontMatter]) {
-                                if (verbose) [self presentError:parseError];
-                                parseError = nil;
-                            } else if([parseError isLocalErrorWithCode:kBDSKBibTeXParserFailed]) {
-                                if (verbose == NO || [self presentError:parseError] == NO)
-                                    contentArray = nil;
-                            }
-                        }
-                    }
-                    
-                    [contentString release];
-                }
-            }
-            if (contentArray) {
-                // forward any temporaryCiteKey warning
-                if (parseError && outError) *outError = parseError;
-                [array addObjectsFromArray:contentArray];
-            } else if (unparseableFiles) {
-                // unable to parse or find valid type, we link the file and can ignore the error
-                if (unparseableFilesArray == nil)
-                    unparseableFilesArray = [NSMutableArray array];
-                [unparseableFilesArray addObject:fileName];
-            }
+    // most reliable metadata should be our private EA
+    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKReadExtendedAttributesKey]){
+        NSData *btData = [[SKNExtendedAttributeManager sharedNoSplitManager] extendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" atPath:[fileURL path] traverseLink:NO error:&xerror];
+        if(btData){
+            NSString *btString = [[NSString alloc] initWithData:btData encoding:NSUTF8StringEncoding];
+            BOOL isPartialData;
+            NSArray *items = [BDSKBibTeXParser itemsFromString:btString owner:self isPartialData:&isPartialData error:&xerror];
+            newBI = isPartialData ? nil : [items firstObject];
+            [btString release];
         }
     }
     
-    if (unparseableFiles)
-        *unparseableFiles = unparseableFilesArray;
+    // GJ try parsing pdf to extract info that is then used to get a PubMed record
+    if(newBI == nil && [[[NSWorkspace sharedWorkspace] typeOfFile:[[[fileURL URLByStandardizingPath] URLByResolvingSymlinksInPath] path] error:NULL] isEqualToUTI:(NSString *)kUTTypePDF]){
+        if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTermKey])
+            newBI = [BibItem itemByParsingPDFAtURL:fileURL];			
+        // fall back on the least reliable metadata source (hidden pref)
+        if(newBI == nil && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldUsePDFMetadataKey])
+            newBI = [BibItem itemWithPDFMetadataFromURL:fileURL];
+    }
     
-    return array;
+    if(newBI == nil)
+        newBI = [[[BibItem alloc] init] autorelease];
+    
+    [newBI addFileForURL:fileURL autoFile:NO runScriptHook:NO];
+	
+	return newBI;
+}
+
+- (BibItem *)publicationForURL:(NSURL *)aURL title:(NSString *)aTitle {
+    NSDictionary *pubFields = [NSDictionary dictionaryWithObjectsAndKeys:[[NSDate date] dateDescription], @"Lastchecked", aTitle, BDSKTitleString, nil];
+    NSArray *files = [NSArray arrayWithObjects:[BDSKLinkedFile linkedFileWithURL:aURL delegate:nil], nil];
+    return [[[BibItem alloc] initWithType:@"webpage" citeKey:nil pubFields:pubFields files:files isNew:YES] autorelease];
+}
+
+// sniff the contents of each file, returning them in an array of BibItems, while unparseable files are added to the mutable array passed as a parameter
+- (NSArray *)extractPublicationsFromFileURL:(NSURL *)fileURL verbose:(BOOL)verbose error:(NSError **)outError {
+    BDSKStringType type = BDSKUnknownStringType;
+    
+    // some common types that people might use as attachments; we don't need to sniff these
+    // we /can/ create a string from these (usually), but there's no point in wasting the memory
+    NSSet *unreadableTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"pdf", @"ps", @"eps", @"doc", @"htm", @"textClipping", @"webloc", @"html", @"rtf", @"tiff", @"tif", @"png", @"jpg", @"jpeg", nil];
+    
+    NSError *parseError = nil;
+    BOOL isPartialData = NO;
+    NSArray *contentArray = nil;
+    
+    if ([unreadableTypes containsObject:[fileURL pathExtension]] == NO) {
+
+        // try to create a string
+        NSString *contentString = [[NSString alloc] initWithContentsOfFile:[fileURL path] guessedEncoding:[self documentStringEncoding]];
+        
+        if (contentString != nil) {
+            NSString *theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:[[[fileURL URLByStandardizingPath] URLByResolvingSymlinksInPath] path] error:NULL];
+            if ([theUTI isEqualToUTI:@"org.tug.tex.bibtex"])
+                type = BDSKBibTeXStringType;
+            else if([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.ris"])
+                type = BDSKRISStringType;
+            else
+                type = [contentString contentStringType];
+            
+            if (type != BDSKUnknownStringType) {
+                contentArray = [BDSKStringParser itemsFromString:contentString ofType:type owner:self isPartialData:&isPartialData error:&parseError];
+                
+                if (isPartialData) {
+                    if ([parseError isLocalErrorWithCode:kBDSKParserIgnoredFrontMatter]) {
+                        if (verbose) [self presentError:parseError];
+                        parseError = nil;
+                    } else if([parseError isLocalErrorWithCode:kBDSKBibTeXParserFailed]) {
+                        if (verbose == NO) {
+                            contentArray = nil;
+                        } else {
+                            if ([self presentError:parseError] == NO)
+                                contentArray = nil;
+                            parseError = nil;
+                        }
+                    }
+                }
+            }
+            
+            [contentString release];
+        }
+    }
+    
+    // forward any temporaryCiteKey warning
+    if (parseError && outError) *outError = parseError;
+    
+    return contentArray;
 }
 
 - (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)shouldSelect edit:(BOOL)shouldEdit {
@@ -2292,51 +2266,57 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
 }
 
-- (NSArray *)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)shouldSelect verbose:(BOOL)verbose error:(NSError **)outError{
-	// these are the types we support, the order here is important!
-    NSString *type = [pb availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
+- (NSArray *)addPublicationsFromPasteboard:(NSPasteboard *)pboard selectLibrary:(BOOL)shouldSelect verbose:(BOOL)verbose error:(NSError **)outError{
     NSArray *newPubs = nil;
-    NSArray *newFilePubs = nil;
-    NSArray *newFiles = nil;
-    NSURL *newURL = nil;
+    NSMutableArray *newFilePubs = nil;
 	NSError *error = nil;
     BOOL isPartialData = NO;
     NSString *temporaryCiteKey = nil;
     BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
     
-    if([type isEqualToString:BDSKBibItemPboardType]){
-        NSData *pbData = [pb dataForType:BDSKBibItemPboardType];
+    if ([pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]]) {
+        [pboard types];
+        NSData *pbData = [pboard dataForType:BDSKPasteboardTypePublications];
 		newPubs = [BibItem publicationsFromArchivedData:pbData macroResolver:[self macroResolver]];
-    }else if([type isEqualToString:BDSKReferenceMinerStringPboardType]){
-        NSString *pbString = [pb stringForType:NSStringPboardType]; 	
-        // sniffing the string for RIS is broken because RefMiner puts junk at the beginning
-		newPubs = [BDSKStringParser itemsFromString:pbString ofType:BDSKReferenceMinerStringType owner:self isPartialData:&isPartialData error:&error];
-    }else if([type isEqualToString:NSStringPboardType]){
-        NSString *pbString = [pb stringForType:NSStringPboardType]; 	
-        // sniff the string to see what its type is
-		newPubs = [BDSKStringParser itemsFromString:pbString ofType:BDSKUnknownStringType owner:self isPartialData:&isPartialData error:&error];
-    }else if([type isEqualToString:NSFilenamesPboardType]){
-		NSArray *pbArray = [pb propertyListForType:NSFilenamesPboardType]; // we will get an array
-        // try this first, in case these files are a type we can open
-        newPubs = [self extractPublicationsFromFiles:pbArray unparseableFiles:&newFiles verbose:verbose error:&error];
-    }else if([type isEqualToString:BDSKWeblocFilePboardType]){
-        newURL = [NSURL URLWithString:[pb stringForType:BDSKWeblocFilePboardType]]; 	
-    }else if([type isEqualToString:NSURLPboardType]){
-        newURL = [NSURL URLFromPasteboard:pb]; 	
-	}else{
-        // errors are key, value
-        error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Did not find anything appropriate on the pasteboard", @"Error description")];
-	}
-    
-    if(newURL){
-		if([newURL isFileURL])
-            newFiles = [NSArray arrayWithObject:[newURL path]];
-        else
-            newPubs = [self publicationsForURL:newURL title:[WebView URLTitleFromPasteboard:pb]];
-    }
-    if([newFiles count]){
-        newFilePubs = [self publicationsForFiles:newFiles];
-        newPubs = newPubs ? [newPubs arrayByAddingObjectsFromArray:newFilePubs]: newFilePubs;
+    } else {
+        NSArray *newURLs = [pboard readURLs];
+        if ([newURLs count] > 0) {
+            NSMutableArray *newURLPubs = [NSMutableArray array];
+            NSArray *titles = [pboard readURLNames];
+            if ([titles count] != [newURLs count])
+                titles = nil;
+            for (NSURL *newURL in newURLs) {
+                if ([newURL isFileURL]) {
+                    NSArray *parsedItems = [self extractPublicationsFromFileURL:newURL verbose:verbose error:&error];
+                    if ([parsedItems count] > 0) {
+                        [newURLPubs addObjectsFromArray:parsedItems];
+                    } else {
+                        BibItem *item = [self publicationForFileURL:newURL];
+                        if (newFilePubs == nil)
+                            newFilePubs = [NSMutableArray array];
+                        [newURLPubs addObject:item];
+                        [newFilePubs addObject:item];
+                    }
+                } else {
+                    [newURLPubs addObject:[self publicationForURL:newURL title:[titles objectAtIndex:[newURLs indexOfObject:newURL]]]];
+                }
+            }
+            if ([newURLPubs count] > 0)
+                newPubs = newURLPubs;
+        } else {
+            NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+            if ([strings count] > 0) {
+                NSString *string = [strings componentsJoinedByString:@"\n\n"];
+                BDSKStringType stringType = BDSKUnknownStringType;
+                // sniffing the string for RIS is broken because RefMiner puts junk at the beginning
+                if ([pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKReferenceMinerStringPboardType, nil]])
+                    stringType = BDSKReferenceMinerStringType;
+                newPubs = [BDSKStringParser itemsFromString:string ofType:stringType owner:self isPartialData:&isPartialData error:&error];
+            } else {
+                // errors are key, value
+                error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Did not find anything appropriate on the pasteboard", @"Error description")];
+            }
+        }
     }
     
     if([error isLocalErrorWithCode:kBDSKHadMissingCiteKeys]) {

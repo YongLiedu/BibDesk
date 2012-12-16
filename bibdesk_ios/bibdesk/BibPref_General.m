@@ -46,7 +46,6 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
 
 
 @interface BibPref_General (Private)
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)updateUpdaterUI;
 - (void)updateEmailTemplateUI;
 - (void)updateStartupBehaviorUI;
@@ -151,25 +150,17 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
     [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
     [openPanel setCanChooseDirectories:NO];
     [openPanel setAllowsMultipleSelection:NO];
-    [openPanel beginSheetForDirectory:nil 
-								 file:nil 
-								types:[NSArray arrayWithObject:@"bib"] 
-					   modalForWindow:[[self view] window] 
-						modalDelegate:self 
-					   didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
-						  contextInfo:NULL];
-}
-
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSFileHandlingPanelCancelButton)
-        return;
-    
-    BDAlias *alias = [BDAlias aliasWithURL:[sheet URL]];
-    
-    [sud setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
-    [sud setObject:[NSNumber numberWithInteger:3] forKey:BDSKStartupBehaviorKey];
-    [self updateDefaultBibFileUI];
-    [self updateStartupBehaviorUI];
+    [openPanel setAllowedFileTypes:[NSArray arrayWithObjects:@"bib", nil]];
+    [openPanel beginSheetModalForWindow:[[self view] window] completionHandler:^(NSInteger result){
+        if (result == NSFileHandlingPanelOKButton) {
+            BDAlias *alias = [BDAlias aliasWithURL:[openPanel URL]];
+            
+            [sud setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
+            [sud setObject:[NSNumber numberWithInteger:3] forKey:BDSKStartupBehaviorKey];
+            [self updateDefaultBibFileUI];
+            [self updateStartupBehaviorUI];
+        }
+    }];
 }
 
 - (IBAction)changeEmailTemplate:(id)sender{

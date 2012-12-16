@@ -225,8 +225,8 @@
         }
     }
     
-    [pboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, nil] owner:nil];
-    [pboard setString:string forType:NSStringPboardType];
+    [pboard clearContents];
+    [pboard writeObjects:[NSArray arrayWithObjects:string, nil]];
     
     return YES;
 }
@@ -235,8 +235,8 @@
 
 - (BOOL)tokenField:(NSTokenField *)tokenField writeRepresentedObjects:(NSArray *)objects toPasteboard:(NSPasteboard *)pboard {
     if (objects) {
-        [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-        [pboard setString:[objects componentsJoinedByString:@" "] forType:NSStringPboardType];
+        [pboard clearContents];
+        [pboard writeObjects:[NSArray arrayWithObjects:[objects componentsJoinedByString:@" "], nil]];
         return YES;
     }
     return NO;

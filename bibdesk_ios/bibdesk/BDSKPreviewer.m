@@ -47,7 +47,6 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKCollapsibleView.h"
-#import "BDSKAsynchronousDOServer.h"
 #import "BDSKDocumentController.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSPrintOperation_BDSKExtensions.h"
@@ -60,56 +59,6 @@ enum {
     BDSKPreviewerTabIndexRTF,
     BDSKPreviewerTabIndexLog,
 };
-
-
-@interface BDSKPreviewTask : NSObject {
-    NSString *bibTeXString;
-    NSArray *citeKeys;
-    NSInteger generatedTypes;
-}
-+ (id)previewTaskWithBibTeXString:(NSString *)aString citeKeys:(NSArray *)aKeys generatedTypes:(NSInteger)aTypes;
-- (id)initWithBibTeXString:(NSString *)aString citeKeys:(NSArray *)aKeys generatedTypes:(NSInteger)aTypes;
-- (NSString *)bibTeXString;
-- (NSArray *)citeKeys;
-- (NSInteger)generatedTypes;
-@end
-
-#pragma mark -
-
-@protocol BDSKPreviewerServerThread <BDSKAsyncDOServerThread>
-- (oneway void)processNextTask;
-@end
-
-@protocol BDSKPreviewerServerMainThread <BDSKAsyncDOServerMainThread>
-- (void)serverFinishedWithResult:(BOOL)success;
-@end
-
-@protocol BDSKPreviewerServerDelegate <NSObject>
-@optional
-- (void)server:(BDSKPreviewerServer *)server finishedWithResult:(BOOL)success;
-@end
-
-@interface BDSKPreviewerServer : BDSKAsynchronousDOServer {
-    BDSKTeXTask *texTask;
-    id<BDSKPreviewerServerDelegate> delegate;
-    NSString *bibString;
-    NSRecursiveLock *nextTaskLock;
-    BDSKPreviewTask *nextTask;
-    volatile int32_t isProcessing;
-    volatile int32_t notifyWhenDone;
-}
-
-- (id<BDSKPreviewerServerDelegate>)delegate;
-- (void)setDelegate:(id<BDSKPreviewerServerDelegate>)newDelegate;
-- (BDSKTeXTask *)texTask;
-- (void)runTeXTaskInBackgroundWithInfo:(BDSKPreviewTask *)previewTask;
-
-@end
-
-#pragma mark -
-
-@interface BDSKPreviewer (BDSKPreviewerServerDelegate) <BDSKPreviewerServerDelegate>
-@end
 
 @implementation BDSKPreviewer
 
@@ -134,8 +83,8 @@ static BDSKPreviewer *sharedPreviewer = nil;
         // otherwise a document's previewer might mess up the window position of the shared previewer
         [self setShouldCascadeWindows:NO];
         
-        server = [[BDSKPreviewerServer alloc] init];
-        [server setDelegate:self];
+        texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibpreview" synchronous:NO];
+        [texTask setDelegate:self];
     }
     return self;
 }
@@ -225,11 +174,11 @@ static BDSKPreviewer *sharedPreviewer = nil;
 	if(previewState == BDSKShowingPreviewState){
         NSInteger tabIndex = [tabView indexOfTabViewItem:[tabView selectedTabViewItem]];
         if(tabIndex == BDSKPreviewerTabIndexPDF)
-            path = [[server texTask] PDFFilePath];
+            path = [texTask PDFFilePath];
         else if(tabIndex == BDSKPreviewerTabIndexRTF)
-            path = [[server texTask] RTFFilePath];
+            path = [texTask RTFFilePath];
         else
-            path = [[server texTask] logFilePath];
+            path = [texTask logFilePath];
     }
     [[self window] setRepresentedFilename:path ?: @""];
 }
@@ -401,7 +350,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 		else
 			message = NSLocalizedString(@"***** ERROR:  unable to create preview *****\n\nsee the logs in the TeX Preview window", @"Preview message");
 		
-        logString = [[server texTask] logFileString] ?: NSLocalizedString(@"Unable to read log file from TeX run.", @"Preview message");
+        logString = [texTask logFileString] ?: NSLocalizedString(@"Unable to read log file from TeX run.", @"Preview message");
         
 		pdfData = [self PDFData];
         if(success == NO || pdfData == nil){
@@ -479,21 +428,20 @@ static BDSKPreviewer *sharedPreviewer = nil;
 }
 
 - (void)updateWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys{
+    [texTask cancel];
     
 	if([NSString isEmptyString:bibStr]){
 		// reset, also removes any waiting tasks from the nextTask
         [self displayPreviewsForState:BDSKEmptyPreviewState success:YES];
-        // clean the server
-        [server runTeXTaskInBackgroundWithInfo:nil];
     } else {
 		// this will start the spinning wheel
         [self displayPreviewsForState:BDSKWaitingPreviewState success:YES];
         // run the tex task in the background
-        [server runTeXTaskInBackgroundWithInfo:[BDSKPreviewTask previewTaskWithBibTeXString:bibStr citeKeys:citeKeys generatedTypes:generatedTypes]];
+        [texTask runWithBibTeXString:bibStr citeKeys:citeKeys generatedTypes:generatedTypes];
 	}	
 }
 
-- (void)server:(BDSKPreviewerServer *)server finishedWithResult:(BOOL)success{
+- (void)texTask:(BDSKTeXTask *)texTask finishedWithResult:(BOOL)success{
     // ignore this task if we finished a task that was running when the previews were reset
 	if(previewState != BDSKEmptyPreviewState) {
         // if we didn't have success, the drawing method will show the log file
@@ -506,19 +454,19 @@ static BDSKPreviewer *sharedPreviewer = nil;
 - (NSData *)PDFData{
 	if(previewState != BDSKShowingPreviewState || [self isVisible] == NO)
         return nil;
-    return [[server texTask] PDFData];
+    return [texTask PDFData];
 }
 
 - (NSData *)RTFData{
 	if(previewState != BDSKShowingPreviewState || [self isVisible] == NO)
         return nil;
-    return [[server texTask] RTFData];
+    return [texTask RTFData];
 }
 
 - (NSString *)LaTeXString{
 	if(previewState != BDSKShowingPreviewState || [self isVisible] == NO)
         return nil;
-    return [[server texTask] LaTeXString];
+    return [texTask LaTeXString];
 }
 
 #pragma mark Cleanup
@@ -542,186 +490,18 @@ static BDSKPreviewer *sharedPreviewer = nil;
 		[[NSUserDefaults standardUserDefaults] setDouble:scaleFactor forKey:BDSKPreviewRTFScaleFactorKey];
     
     // make sure we don't process anything else; the TeX task will take care of its own cleanup
-    [server stopDOServer];
-    [server release];
-    server = nil;
+    [texTask terminate];
+    BDSKDESTROY(texTask);
 }
 
 - (void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     // make sure we don't process anything else; the TeX task will take care of its own cleanup
-    [server stopDOServer];
-    BDSKDESTROY(server);
+    [texTask terminate];
+    BDSKDESTROY(texTask);
     [pdfView release];
     [[rtfPreviewView enclosingScrollView] release];
     [super dealloc];
 }
-
-@end
-
-#pragma mark -
-
-@implementation BDSKPreviewerServer
-
-- (id)init;
-{
-    self = [super init];
-    if (self) {
-        texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibpreview"];
-        delegate = nil;
-        bibString = nil;
-        nextTaskLock = [NSRecursiveLock new];
-        nextTask = nil;
-        isProcessing = 0;
-        notifyWhenDone = 0;
-        [self startDOServerSync];
-    }
-    return self;
-}
-
-- (void)dealloc;
-{
-    BDSKDESTROY(texTask);
-    BDSKDESTROY(nextTaskLock);
-    BDSKDESTROY(nextTask);
-    [super dealloc];
-}
-
-- (void)serverDidFinish{
-    [bibString release];
-    bibString = nil;
-    [texTask terminate];
-}
-
-// superclass overrides
-
-- (Protocol *)protocolForServerThread { return @protocol(BDSKPreviewerServerThread); }
-
-- (Protocol *)protocolForMainThread { return @protocol(BDSKPreviewerServerMainThread); }
-
-// main thread API
-
-- (id<BDSKPreviewerServerDelegate>)delegate { return delegate; }
-
-- (void)setDelegate:(id<BDSKPreviewerServerDelegate>)newDelegate { delegate = newDelegate; }
-
-- (BDSKTeXTask *)texTask{
-    return texTask;
-}
-
-- (void)runTeXTaskInBackgroundWithInfo:(BDSKPreviewTask *)previewTask{
-    [nextTaskLock lock];
-    [nextTask release];
-    nextTask = [previewTask retain];
-    [nextTaskLock unlock];
-    if(previewTask){
-        // If it's still working, we don't have to do anything; sending too many of these messages just replaces nextTask until the port starts dropping them.
-        OSMemoryBarrier();
-        if(isProcessing == 0)
-            [[self serverOnServerThread] processNextTask];
-        // start sending task finished messages to the previewer
-        OSAtomicCompareAndSwap32Barrier(0, 1, &notifyWhenDone);
-    }else{
-        // don't notify the previewer of any pending task results; it might be better if the previewer learned to ignore the messages?
-        OSAtomicCompareAndSwap32Barrier(1, 0, &notifyWhenDone);
-    }
-}
-
-// Server thread protocol
-
-- (oneway void)processNextTask{
-    OSAtomicCompareAndSwap32Barrier(0, 1, &isProcessing);
-    
-    BDSKPreviewTask *previewTask = nil;
-    [nextTaskLock lock];
-    NSDate *distantFuture = [NSDate distantFuture];
-    NSRunLoop *rl = [NSRunLoop currentRunLoop];
-    
-    do { 
-        // we're only interested in the latest addition to the nextTask
-        previewTask = nextTask;
-        // get rid of the nextTask, then allow the main thread to keep putting strings in it
-        nextTask = nil;
-        [nextTaskLock unlock];
-        
-        BOOL success = YES;
-        if (previewTask) {
-            BOOL didRun = YES;
-            if ([texTask isProcessing]) {
-                // poll the runloop while the task is still running
-                do {
-                    didRun = [rl runMode:NSDefaultRunLoopMode beforeDate:distantFuture];
-                } while (didRun && [texTask isProcessing]);
-                
-                // get the latest string; the nextTask may have changed while we waited for this task to finish (doesn't seem to be the case in practice)
-                [nextTaskLock lock];
-                if (nextTask) {
-                    [previewTask release];
-                    previewTask = nextTask;
-                    nextTask = nil;
-                }
-                [nextTaskLock unlock];
-            }
-            // previous task is done, so we can start a new one
-            success = [texTask runWithBibTeXString:[previewTask bibTeXString] citeKeys:[previewTask citeKeys] generatedTypes:[previewTask generatedTypes]];
-            [previewTask release];
-        }
-        
-        // always lock going into the top of the loop for checking count
-        [nextTaskLock lock];
-        
-        // Don't notify the main thread until we've processed all of the entries in the nextTask
-        OSMemoryBarrier();
-        if (1 == notifyWhenDone && nextTask == nil) {
-            // If the main thread is blocked on the nextTaskLock, we're hosed because it can't service the DO port!
-            [nextTaskLock unlock];
-            [[self serverOnMainThread] serverFinishedWithResult:success];
-            [nextTaskLock lock];
-        }
-        OSMemoryBarrier();
-    } while (1 == notifyWhenDone && nextTask);
-
-    // swap, then unlock, so if a potential caller is blocking on the lock, they know to call processNextTask
-    OSAtomicCompareAndSwap32Barrier(1, 0, &isProcessing);
-    [nextTaskLock unlock];
-}
-
-// Main thread protocol
-
-// If this message is sent oneway, there's no guarantee that any results exist when it's delivered, since some other task could have stomped on the files by that time, and the success variable would be stale.
-- (void)serverFinishedWithResult:(BOOL)success{
-    if([delegate respondsToSelector:@selector(server:finishedWithResult:)])
-        [delegate server:self finishedWithResult:success];
-}
-
-@end
-
-#pragma mark -
-
-@implementation BDSKPreviewTask
-
-+ (id)previewTaskWithBibTeXString:(NSString *)aString citeKeys:(NSArray *)aKeys generatedTypes:(NSInteger)aTypes {
-    return [[[self alloc] initWithBibTeXString:aString citeKeys:aKeys generatedTypes:aTypes] autorelease];
-}
-
-- (id)initWithBibTeXString:(NSString *)aString citeKeys:(NSArray *)aKeys generatedTypes:(NSInteger)aTypes {
-    self = [super init];
-    if (self) {
-        bibTeXString = [aString copy];
-        citeKeys = [aKeys copy];
-        generatedTypes = aTypes;
-    }
-    return self;
-}
-
-- (void)dealloc {
-    BDSKDESTROY(bibTeXString);
-    BDSKDESTROY(citeKeys);
-    [super dealloc];
-}
-
-- (NSString *)bibTeXString { return bibTeXString; }
-- (NSArray *)citeKeys { return citeKeys; }
-- (NSInteger)generatedTypes { return generatedTypes; }
 
 @end

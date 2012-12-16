@@ -47,6 +47,7 @@
 #import "BDSKDocumentController.h"
 #import "NSSet_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
+#import "NSPasteboard_BDSKExtensions.h"
 
 
 @implementation BDSKServiceProvider
@@ -152,26 +153,15 @@ static id sharedServiceProvider = nil;
 - (void)completeCitationFromSelection:(NSPasteboard *)pboard
                              userData:(NSString *)userData
                                 error:(NSString **)error{
-    NSString *pboardString;
-    NSArray *types;
-    NSSet *items;
-    BDSKTemplate *template = [BDSKTemplate templateForCiteService];
-    BDSKPRECONDITION(nil != template && ([template templateFormat] & BDSKPlainTextTemplateFormat));
+    NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
     
-    types = [pboard types];
-    if (![types containsObject:NSStringPboardType]) {
-        *error = NSLocalizedString(@"Error: couldn't complete text.",
-                                   @"Error description for Service");
-        return;
-    }
-    pboardString = [pboard stringForType:NSStringPboardType];
-    if (!pboardString) {
+    if ([strings count] == 0) {
         *error = NSLocalizedString(@"Error: couldn't complete text.",
                                    @"Error description for Service");
         return;
     }
 
-    NSDictionary *searchConstraints = [self constraintsFromString:pboardString];
+    NSDictionary *searchConstraints = [self constraintsFromString:[strings objectAtIndex:0]];
     
     if(searchConstraints == nil){
         *error = NSLocalizedString(@"Error: invalid search constraints.",
@@ -179,15 +169,15 @@ static id sharedServiceProvider = nil;
         return;
     }        
 
-    items = [self itemsMatchingSearchConstraints:searchConstraints];
+    NSSet *items = [self itemsMatchingSearchConstraints:searchConstraints];
     
     if([items count] > 0){
+        BDSKTemplate *template = [BDSKTemplate templateForCiteService];
+        BDSKPRECONDITION(nil != template && ([template templateFormat] & BDSKPlainTextTemplateFormat));
         NSString *fileTemplate = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:[items allObjects]];
         
-        types = [NSArray arrayWithObject:NSStringPboardType];
-        [pboard declareTypes:types owner:nil];
-
-        [pboard setString:fileTemplate forType:NSStringPboardType];
+        [pboard clearContents];
+        [pboard writeObjects:[NSArray arrayWithObjects:fileTemplate, nil]];
     }
     return;
 }
@@ -195,26 +185,15 @@ static id sharedServiceProvider = nil;
 - (void)completeTextBibliographyFromSelection:(NSPasteboard *)pboard
                                      userData:(NSString *)userData
                                         error:(NSString **)error{
-    NSString *pboardString;
-    NSArray *types;
-    NSSet *items;
-    BDSKTemplate *template = [BDSKTemplate templateForTextService];
-    BDSKPRECONDITION(nil != template && ([template templateFormat] & BDSKPlainTextTemplateFormat));
+    NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
     
-    types = [pboard types];
-    if (![types containsObject:NSStringPboardType]) {
-        *error = NSLocalizedString(@"Error: couldn't complete text.",
-                                   @"Error description for Service");
-        return;
-    }
-    pboardString = [pboard stringForType:NSStringPboardType];
-    if (!pboardString) {
+    if ([strings count] == 0) {
         *error = NSLocalizedString(@"Error: couldn't complete text.",
                                    @"Error description for Service");
         return;
     }
 
-    NSDictionary *searchConstraints = [self constraintsFromString:pboardString];
+    NSDictionary *searchConstraints = [self constraintsFromString:[strings objectAtIndex:0]];
     
     if(searchConstraints == nil){
         *error = NSLocalizedString(@"Error: invalid search constraints.",
@@ -222,15 +201,15 @@ static id sharedServiceProvider = nil;
         return;
     }        
 
-    items = [self itemsMatchingSearchConstraints:searchConstraints];
+    NSSet *items = [self itemsMatchingSearchConstraints:searchConstraints];
     
     if([items count] > 0){
+        BDSKTemplate *template = [BDSKTemplate templateForTextService];
+        BDSKPRECONDITION(nil != template && ([template templateFormat] & BDSKPlainTextTemplateFormat));
         NSString *fileTemplate = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:[items allObjects]];
         
-        types = [NSArray arrayWithObject:NSStringPboardType];
-        [pboard declareTypes:types owner:nil];
-
-        [pboard setString:fileTemplate forType:NSStringPboardType];
+        [pboard clearContents];
+        [pboard writeObjects:[NSArray arrayWithObjects:fileTemplate, nil]];
     }
     return;
 }
@@ -238,26 +217,15 @@ static id sharedServiceProvider = nil;
 - (void)completeRichBibliographyFromSelection:(NSPasteboard *)pboard
                                      userData:(NSString *)userData
                                         error:(NSString **)error{
-    NSString *pboardString;
-    NSArray *types;
-    NSSet *items;
-    BDSKTemplate *template = [BDSKTemplate templateForRTFService];
-    BDSKPRECONDITION(nil != template && [template templateFormat] == BDSKRTFTemplateFormat);
+    NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
     
-    types = [pboard types];
-    if (![types containsObject:NSStringPboardType]) {
-        *error = NSLocalizedString(@"Error: couldn't complete text.",
-                                   @"Error description for Service");
-        return;
-    }
-    pboardString = [pboard stringForType:NSStringPboardType];
-    if (!pboardString) {
+    if ([strings count] == 0) {
         *error = NSLocalizedString(@"Error: couldn't complete text.",
                                    @"Error description for Service");
         return;
     }
 
-    NSDictionary *searchConstraints = [self constraintsFromString:pboardString];
+    NSDictionary *searchConstraints = [self constraintsFromString:[strings objectAtIndex:0]];
     
     if(searchConstraints == nil){
         *error = NSLocalizedString(@"Error: invalid search constraints.",
@@ -265,17 +233,16 @@ static id sharedServiceProvider = nil;
         return;
     }        
 
-    items = [self itemsMatchingSearchConstraints:searchConstraints];
+    NSSet *items = [self itemsMatchingSearchConstraints:searchConstraints];
     
     if([items count] > 0){
+        BDSKTemplate *template = [BDSKTemplate templateForRTFService];
+        BDSKPRECONDITION(nil != template && [template templateFormat] == BDSKRTFTemplateFormat);
         NSDictionary *docAttributes = nil;
         NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:[items allObjects] documentAttributes:&docAttributes];
-        NSData *pboardData = [fileTemplate RTFFromRange:NSMakeRange(0, [fileTemplate length]) documentAttributes:docAttributes];
         
-        types = [NSArray arrayWithObject:NSRTFPboardType];
-        [pboard declareTypes:types owner:nil];
-
-        [pboard setData:pboardData forType:NSRTFPboardType];
+        [pboard clearContents];
+        [pboard writeObjects:[NSArray arrayWithObjects:fileTemplate, nil]];
     }
     return;
 }
@@ -284,37 +251,37 @@ static id sharedServiceProvider = nil;
                              userData:(NSString *)userData
                                 error:(NSString **)error{
 
-    NSArray *types = [pboard types];
-    if (![types containsObject:NSStringPboardType]) {
+    NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+    
+    if ([strings count] == 0) {
         *error = NSLocalizedString(@"Error: couldn't complete text.",
                                    @"Error description for Service");
         return;
     }
-    NSString *pboardString = [pboard stringForType:NSStringPboardType];
+    
+    NSString *pboardString = [strings objectAtIndex:0];
     NSSet *items = [self itemsMatchingCiteKey:pboardString];
     
     // if no matches, we'll return the original string unchanged
-    if ([items count]) {
+    if ([items count])
         pboardString = [[[[items allObjects] valueForKey:@"citeKey"] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)] componentsJoinedByString:@", "];
-    }
     
-    types = [NSArray arrayWithObject:NSStringPboardType];
-    [pboard declareTypes:types owner:nil];
-    [pboard setString:pboardString forType:NSStringPboardType];
+    [pboard clearContents];
+    [pboard writeObjects:[NSArray arrayWithObjects:pboardString, nil]];
 }
 
 - (void)showPubWithKey:(NSPasteboard *)pboard
 			  userData:(NSString *)userData
 				 error:(NSString **)error{	
-    NSArray *types = [pboard types];
-    if (![types containsObject:NSStringPboardType]) {
+    NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+    
+    if ([strings count] == 0) {
         *error = NSLocalizedString(@"Error: couldn't complete text.",
                                    @"Error description for Service");
         return;
     }
-    NSString *pboardString = [pboard stringForType:NSStringPboardType];
-
-    NSSet *items = [self itemsMatchingCiteKey:pboardString];
+    
+    NSSet *items = [self itemsMatchingCiteKey:[strings objectAtIndex:0]];
 	
     for (BibItem *item in items) {   
         // these should all be items belonging to a BibDocument, see remark before itemsMatchingSearchConstraints:
@@ -365,10 +332,33 @@ static id sharedServiceProvider = nil;
         // create a new document if we don't have one, or else this method appears to fail mysteriosly (since the error isn't displayed)
         doc = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:NULL];
     }
-    NSURL *theURL = [NSURL URLFromPasteboardAnyType:pboard];
-    if (theURL) {
-        [doc openURL:theURL];
+    
+    NSArray *theURLs = [pboard readURLs];
+    NSURL *theURL = nil;
+    
+    if ([theURLs count] > 0) {
+        theURL = [theURLs objectAtIndex:0];
+    } else {
+        NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+        for (NSString *string in strings) {
+            if ([string rangeOfString:@"://"].length) {
+                if ([string hasPrefix:@"<"] && [string hasSuffix:@">"])
+                    string = [string substringWithRange:NSMakeRange(1, [string length] - 2)];
+                theURL = [NSURL URLWithString:string];
+                if (theURL == nil)
+                    theURL = [NSURL URLWithString:[string stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+            }
+            if (theURL == nil) {
+                if ([string hasPrefix:@"~"])
+                    string = [string stringByExpandingTildeInPath];
+                if ([[NSFileManager defaultManager] fileExistsAtPath:string])
+                    theURL = [NSURL fileURLWithPath:string];
+            }
+            if (theURL) break;
+        }
     }
+    if (theURL)
+        [doc openURL:theURL];
 }
 
 @end

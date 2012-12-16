@@ -39,8 +39,9 @@
 */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKTeXTask.h"
 
-@class PDFView, BDSKZoomablePDFView, BDSKTeXTask, BDSKOverlayPanel, BDSKPreviewerServer;
+@class PDFView, BDSKZoomablePDFView, BDSKTeXTask, BDSKOverlayPanel, BDSKTeXTask;
 
 enum {
 	BDSKUnknownPreviewState = -1,
@@ -55,7 +56,7 @@ typedef NSInteger BDSKPreviewState;
     @abstract TeX task manager and preview window controller
     @discussion ...
 */
-@interface BDSKPreviewer : NSWindowController {
+@interface BDSKPreviewer : NSWindowController <BDSKTeXTaskDelegate> {
     IBOutlet BDSKZoomablePDFView *pdfView;
     IBOutlet NSTextView *rtfPreviewView;
     IBOutlet NSTextView *logView;
@@ -65,9 +66,9 @@ typedef NSInteger BDSKPreviewState;
     IBOutlet NSImageView *warningImageView;
     IBOutlet NSView *warningView;
     
-    BDSKPreviewerServer *server;
     BDSKPreviewState previewState;
     NSInteger generatedTypes;
+    BDSKTeXTask *texTask;
 }
 
 /*!

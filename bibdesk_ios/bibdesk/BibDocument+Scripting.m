@@ -66,6 +66,7 @@
 #import "BDSKServerInfo.h"
 #import "BDSKBibTeXParser.h"
 #import "NSString_BDSKExtensions.h"
+#import "BDSKTemplate.h"
 
 
 @implementation BibDocument (Scripting)
@@ -79,52 +80,26 @@
 	NSDictionary *args = [command evaluatedArguments];
     id fileURL = [args objectForKey:@"File"];
     id fileType = [args objectForKey:@"FileType"];
-    if ([fileType isEqualToString:@"BibTeX"]) {
-        fileType = BDSKBibTeXDocumentType;
+    NSString *normalizedFileType = nil;
+    if ([fileType isEqualToString:@"BibTeX"])
+        normalizedFileType = BDSKBibTeXDocumentType;
+    else if ([fileType isEqualToString:@"Minimal BibTeX"])
+        normalizedFileType = BDSKMinimalBibTeXDocumentType;
+    else if ([fileType isEqualToString:@"RIS"])
+        normalizedFileType = BDSKRISDocumentType;
+    if (normalizedFileType) {
         NSMutableDictionary *arguments = [[command arguments] mutableCopy];
-        [arguments setObject:fileType forKey:@"FileType"];
-        [command setArguments:arguments];
-        [arguments release];
-    } else if ([fileType isEqualToString:@"Minimal BibTeX"]) {
-        fileType = BDSKMinimalBibTeXDocumentType;
-        NSMutableDictionary *arguments = [[command arguments] mutableCopy];
-        [arguments setObject:fileType forKey:@"FileType"];
-        [command setArguments:arguments];
-        [arguments release];
-    } else if ([fileType isEqualToString:@"RIS"]) {
-        fileType = BDSKRISDocumentType;
-        NSMutableDictionary *arguments = [[command arguments] mutableCopy];
-        [arguments setObject:fileType forKey:@"FileType"];
+        [arguments setObject:normalizedFileType forKey:@"FileType"];
         [command setArguments:arguments];
         [arguments release];
     }
-    if (fileURL) {
-        if ([fileURL isKindOfClass:[NSURL class]] == NO) {
-            [command setScriptErrorNumber:NSArgumentsWrongScriptError];
-            [command setScriptErrorString:@"The file is not a file or alias."];
-        } else {
-            NSArray *fileExtensions = [[NSDocumentController sharedDocumentController] fileExtensionsFromType:fileType ?: [self fileType]];
-            NSString *extension = [[fileURL path] pathExtension];
-            if (extension == nil) {
-                extension = [fileExtensions objectAtIndex:0];
-                fileURL = [NSURL fileURLWithPath:[[fileURL path] stringByAppendingPathExtension:extension]];
-            }
-            if ([fileExtensions containsObject:[extension lowercaseString]] == NO) {
-                [command setScriptErrorNumber:NSArgumentsWrongScriptError];
-                [command setScriptErrorString:[NSString stringWithFormat:@"Invalid file extension for this file type."]];
-            } else if (fileType) {
-                [self saveToURL:fileURL ofType:fileType forSaveOperation:NSSaveToOperation delegate:nil didSaveSelector:NULL contextInfo:NULL];
-            } else {
-                [self saveToURL:fileURL ofType:[self fileType] forSaveOperation:NSSaveAsOperation delegate:nil didSaveSelector:NULL contextInfo:NULL];
-            }
-        }
-    } else if (fileType) {
-        [command setScriptErrorNumber:NSArgumentsWrongScriptError];
-        [command setScriptErrorString:@"Missing file argument."];
-    } else {
-        return [super handleSaveScriptCommand:command];
+    if (fileType && [[[BDSKTemplate templateForStyle:fileType] fileExtension] isCaseInsensitiveEqual:[fileURL pathExtension]]) {
+        NSMutableDictionary *arguments = [[command arguments] mutableCopy];
+        [arguments setObject:[fileURL URLByDeletingPathExtension] forKey:@"File"];
+        [command setArguments:arguments];
+        [arguments release];
     }
-    return nil;
+    return [super handleSaveScriptCommand:command];
 }
 
 - (id)newScriptingObjectOfClass:(Class)class forValueForKey:(NSString *)key withContentsValue:(id)contentsValue properties:(NSDictionary *)properties {
@@ -487,15 +462,19 @@
 }
 
 - (BDSKCategoryGroup *)valueInFieldGroupsWithName:(NSString *)name {
-    if ([[self currentGroupField] isPersonField]) {
-        BibAuthor *fuzzyName = [NSString isEmptyString:name] ? [BibAuthor emptyAuthor] : [BibAuthor authorWithName:name];
-        for (BDSKCategoryGroup *group in [groups categoryGroups])
-            if ([[group name] fuzzyEqual:fuzzyName])
-                return group;
-    } else {
-        for (BDSKCategoryGroup *group in [groups categoryGroups])
-            if ([[group name] isCaseInsensitiveEqual:name])
-                return group;
+    BibAuthor *fuzzyName = nil;
+    for (BDSKCategoryParentGroup *parent in [groups categoryParents]) {
+        if ([[parent key] isPersonField]) {
+            if (fuzzyName == nil)
+                fuzzyName = [NSString isEmptyString:name] ? [BibAuthor emptyAuthor] : [BibAuthor authorWithName:name];
+            for (BDSKCategoryGroup *group in [parent categoryGroups])
+                if ([[group name] fuzzyEqual:fuzzyName])
+                    return group;
+        } else {
+            for (BDSKCategoryGroup *group in [parent categoryGroups])
+                if ([[group name] isCaseInsensitiveEqual:name])
+                    return group;
+        }
     }
     return nil;
 }

@@ -280,14 +280,11 @@ enum {
         
     } else if ([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.bdsksearch"]) {
         
-        NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfURL:absoluteURL];
-        Class aClass = NSClassFromString([dictionary objectForKey:@"class"]);
-        if (aClass == Nil) aClass = [BDSKSearchGroup class];
-        BDSKSearchGroup *group = [[aClass alloc] initWithDictionary:dictionary];
+        BDSKSearchGroup *group = [[BDSKSearchGroup alloc] initWithURL:absoluteURL];
         
         if (nil == group) {
             if (outError) *outError = [NSError localErrorWithCode:kBDSKPropertyListDeserializationFailed localizedDescription:NSLocalizedString(@"Unable to read this file as a search group property list", @"error when opening search group file")];
-            NSLog(@"Unable to instantiate BDSKSearchGroup of class %@", [dictionary objectForKey:@"class"]);
+            NSLog(@"Unable to instantiate BDSKSearchGroup from URL %@", absoluteURL);
             // make sure we return nil
             document = nil;
             

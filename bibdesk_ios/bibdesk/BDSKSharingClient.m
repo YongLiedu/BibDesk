@@ -456,11 +456,10 @@ typedef struct _BDSKSharingClientFlags {
         if([proxyData length] != 0){
             if([proxyData mightBeCompressed])
                 proxyData = [proxyData decompressedData];
-            NSString *errorString = nil;
-            archive = [NSPropertyListSerialization propertyListFromData:proxyData mutabilityOption:NSPropertyListImmutable format:NULL errorDescription:&errorString];
-            if(errorString != nil){
-                NSString *errorStr = [NSString stringWithFormat:@"Error reading shared data: %@", errorString];
-                [errorString release];
+            NSError *error = nil;
+            archive = [NSPropertyListSerialization propertyListWithData:proxyData options:NSPropertyListImmutable format:NULL error:&error];
+            if(error != nil){
+                NSString *errorStr = [NSString stringWithFormat:@"Error reading shared data: %@", error];
                 @throw errorStr;
             }
         }
@@ -474,7 +473,9 @@ typedef struct _BDSKSharingClientFlags {
         [self setErrorMessage:NSLocalizedString(@"Failed to retrieve publications", @"")];
         
         // this posts a notification that the publications of the client changed, forcing a redisplay of the table cell
-        [client performSelectorOnMainThread:@selector(setArchivedPublicationsAndMacros:) withObject:nil waitUntilDone:NO];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [client setArchivedPublicationsAndMacros:nil];
+        });
         // the client will reset the isRetriving flag when the data is set
     }
     @finally{

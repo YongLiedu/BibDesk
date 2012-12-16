@@ -421,6 +421,7 @@ static char BDSKTableViewFontDefaultsObservationContext;
             NSPasteboard *pboard = [NSPasteboard pasteboardWithUniqueName];
             if ([[self dataSource] tableView:self writeRowsWithIndexes:[self selectedRowIndexes] toPasteboard:pboard])
                 [[self dataSource] tableView:self pasteFromPasteboard:pboard];
+            [pboard clearContents];
         }
     } else
         NSBeep();

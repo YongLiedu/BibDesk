@@ -43,6 +43,7 @@
 #import "BDSKFieldEditor.h"
 #import "BDSKDragTextField.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "NSPasteboard_BDSKExtensions.h"
 
 @implementation BDSKScriptGroupSheetController
 
@@ -75,7 +76,7 @@
 }
 
 - (void)awakeFromNib {
-    [pathField registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
+    [pathField registerForDraggedTypes:[NSArray arrayWithObjects:(NSString *)kUTTypeFileURL, NSFilenamesPboardType, nil]];
 }
 
 - (NSString *)windowNibName {
@@ -136,13 +137,6 @@
     [super dismiss:sender];
 }
 
-- (void)chooseScriptPathPanelDidEnd:(NSOpenPanel *)oPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSFileHandlingPanelOKButton) {
-        NSURL *url = [[oPanel URLs] firstObject];
-        [self setPath:[url path]];
-    }
-}
-
 // open panel delegate method
 - (BOOL)panel:(id)sender shouldShowFilename:(NSString *)filename {
     return ([[NSWorkspace sharedWorkspace] isAppleScriptFileAtPath:filename] || [[NSFileManager defaultManager] isExecutableFileAtPath:filename] || [[NSWorkspace sharedWorkspace] isFolderAtPath:filename]);
@@ -156,12 +150,12 @@
     [oPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
     [oPanel setDelegate:self];
     
-    [oPanel beginSheetForDirectory:nil 
-                              file:nil 
-                    modalForWindow:[self window]
-                     modalDelegate:self 
-                    didEndSelector:@selector(chooseScriptPathPanelDidEnd:returnCode:contextInfo:) 
-                       contextInfo:nil];
+    [oPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        if (result == NSFileHandlingPanelOKButton) {
+            NSURL *url = [[oPanel URLs] firstObject];
+            [self setPath:[url path]];
+        }
+    }];
 }
 
 - (BDSKScriptGroup *)group {
@@ -218,7 +212,7 @@
     if (anObject == pathField) {
         if (dragFieldEditor == nil) {
             dragFieldEditor = [[BDSKFieldEditor alloc] init];
-            [(BDSKFieldEditor *)dragFieldEditor registerForDelegatedDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
+            [(BDSKFieldEditor *)dragFieldEditor registerForDelegatedDraggedTypes:[NSArray arrayWithObjects:(NSString *)kUTTypeFileURL, NSFilenamesPboardType, nil]];
         }
         return dragFieldEditor;
     }
@@ -227,23 +221,21 @@
 
 - (NSDragOperation)dragTextField:(BDSKDragTextField *)textField validateDrop:(id <NSDraggingInfo>)sender {
     NSPasteboard *pboard = [sender draggingPasteboard];
-	NSString *dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
+    BOOL canRead = [pboard canReadFileURLOfTypes:nil];
     
-    return dragType ? NSDragOperationEvery : NSDragOperationNone;
+    return canRead ? NSDragOperationEvery : NSDragOperationNone;
 }
 
 - (BOOL)dragTextField:(BDSKDragTextField *)textField acceptDrop:(id <NSDraggingInfo>)sender {
     NSPasteboard *pboard = [sender draggingPasteboard];
+    NSArray *fileURLs = [pboard readFileURLsOfTypes:nil];
     
-    if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]]) {
-        NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
-        if ([fileNames count]) {
-            NSString *thePath = [[fileNames objectAtIndex:0] stringByExpandingTildeInPath];
-            NSString *message = nil;
-            if ([self isValidScriptFileAtPath:thePath error:&message]) {
-                [self setPath:thePath];
-                return YES;
-            }
+    if ([fileURLs count] > 0) {
+        NSString *thePath = [[fileURLs objectAtIndex:0] path];
+        NSString *message = nil;
+        if ([self isValidScriptFileAtPath:thePath error:&message]) {
+            [self setPath:thePath];
+            return YES;
         }
     }
     return NO;

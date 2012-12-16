@@ -54,6 +54,7 @@
 #import "NSParagraphStyle_BDSKExtensions.h"
 #import "NSInvocation_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "NSPasteboard_BDSKExtensions.h"
 
 #define BDSKShouldLogFilesAddedToMatchingSearchIndexKey @"BDSKShouldLogFilesAddedToMatchingSearchIndex"
 
@@ -73,10 +74,6 @@ static CGFloat GROUP_ROW_HEIGHT = 24.0;
 - (NSArray *)copyTreeNodesWithCurrentPublications;
 - (void)doSearch;
 - (void)makeNewIndex;
-
-// only use from main thread
-- (void)updateProgressIndicatorWithNumber:(NSNumber *)val;
-- (void)indexingFinished;
 
 // entry point to the searching/matching; acquire indexingLock first
 - (void)indexFiles:(NSArray *)absoluteURLs;
@@ -101,9 +98,8 @@ static id sharedInstance = nil;
     if (self) {
         matches = [[NSMutableArray alloc] init];
         searchIndex = NULL;
-        indexingLock = [[NSLock alloc] init];
         currentPublications = nil;
-        _matchFlags.shouldAbortThread = 0;
+        _matchFlags.shouldAbort = 0;
     }
     return self;
 }
@@ -112,8 +108,8 @@ static id sharedInstance = nil;
 
 - (void)dealloc
 {
+    BDSKDISPATCHDESTROY(group);
     BDSKDESTROY(matches);
-    BDSKDESTROY(indexingLock);
     BDSKCFDESTROY(searchIndex);
     [super dealloc];
 }
@@ -129,7 +125,7 @@ static id sharedInstance = nil;
     
     [outlineView setDoubleAction:@selector(openAction:)];
     [outlineView setTarget:self];
-    [outlineView registerForDraggedTypes:[NSArray arrayWithObject:NSURLPboardType]];
+    [outlineView registerForDraggedTypes:[NSArray arrayWithObjects:(NSString *)kUTTypeFileURL, NSFilenamesPboardType, nil]];
     [progressIndicator setUsesThreadedAnimation:YES];
     [abortButton setEnabled:NO];
     [statusField setStringValue:@""];
@@ -203,22 +199,26 @@ static id sharedInstance = nil;
     [[self window] makeKeyAndOrderFront:self];
     [abortButton setEnabled:YES];
     [progressIndicator startAnimation:nil];
-
-    OSAtomicCompareAndSwap32Barrier(0, 1, &_matchFlags.shouldAbortThread);
     
-    // block if necessary until the thread aborts
-    [indexingLock lock];
+    // wait for the current aborted block is finished
+    if (group) {
+        OSAtomicCompareAndSwap32Barrier(0, 1, &_matchFlags.shouldAbort);
+        dispatch_group_wait(group, DISPATCH_TIME_FOREVER); 
+    } else {
+        group = dispatch_group_create();
+    }
     
     [matches removeAllObjects];
     [outlineView reloadData];
-
-    // okay to set pubs here, since we have the lock
-    [self setCurrentPublications:pubs];
-    OSAtomicCompareAndSwap32Barrier(1, 0, &_matchFlags.shouldAbortThread);
-    [NSThread detachNewThreadSelector:@selector(indexFiles:) toTarget:self withObject:absoluteURLs];
     
-    // the first thing the thread will do is block until it acquires the lock, so let it go
-    [indexingLock unlock];
+    // okay to set pubs here, since there is no async block
+    [self setCurrentPublications:pubs];
+    
+    OSAtomicCompareAndSwap32Barrier(1, 0, &_matchFlags.shouldAbort);
+    
+    dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [self indexFiles:absoluteURLs];
+    });
 }
 
 - (IBAction)openAction:(id)sender;
@@ -234,21 +234,18 @@ static id sharedInstance = nil;
 
 - (IBAction)abort:(id)sender;
 {
-    if (false == OSAtomicCompareAndSwap32Barrier(0, 1, &_matchFlags.shouldAbortThread))
+    if (false == OSAtomicCompareAndSwap32Barrier(0, 1, &_matchFlags.shouldAbort))
         NSBeep();
     [abortButton setEnabled:NO];
     [progressIndicator stopAnimation:nil];
 }
 
-- (void)configSheetDidEnd:(BDSKFileMatchConfigController *)config returnCode:(NSInteger)code contextInfo:(void *)context;
-{
-    [self matchFiles:[config files] withPublications:[config publications]];
-}
-
 - (IBAction)configure:(id)sender;
 {
     BDSKFileMatchConfigController *config = [[[BDSKFileMatchConfigController alloc] init] autorelease];
-    [config beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:@selector(configSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+    [config beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        [self matchFiles:[config files] withPublications:[config publications]];
+    }];
 }
 
 #pragma mark Outline view drag-and-drop
@@ -257,8 +254,8 @@ static id sharedInstance = nil;
 {
     id item = [items lastObject];
     if ([item isLeaf]) {
-        [pboard declareTypes:[NSArray arrayWithObject:NSURLPboardType] owner:nil];
-        [[item valueForKey:@"fileURL"] writeToPasteboard:pboard];
+        [pboard clearContents];
+        [pboard writeObjects:[NSArray arrayWithObjects:[item valueForKey:@"fileURL"], nil]];
         return YES;
     }
     return NO;
@@ -266,7 +263,8 @@ static id sharedInstance = nil;
 
 - (NSDragOperation)outlineView:(NSOutlineView*)olv validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(NSInteger)idx;
 {
-    if ([[info draggingSource] isEqual:outlineView] && [item isLeaf] == NO) {
+    NSPasteboard *pboard = [info draggingPasteboard];
+    if ([[info draggingSource] isEqual:outlineView] && [item isLeaf] == NO && [pboard canReadFileURLOfTypes:nil]) {
         [olv setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex];
         return NSDragOperationLink;
     }
@@ -275,13 +273,13 @@ static id sharedInstance = nil;
 
 - (BOOL)outlineView:(NSOutlineView*)olv acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(NSInteger)idx;
 {
-    NSArray *types = [[info draggingPasteboard] types];
-    NSURL *fileURL = ([types containsObject:NSURLPboardType] ? [NSURL URLFromPasteboard:[info draggingPasteboard]] : nil);
-    if (nil == fileURL)
+    NSPasteboard *pboard = [info draggingPasteboard];
+    NSArray *fileURLs = [pboard readFileURLsOfTypes:nil];
+    if ([fileURLs count] == 0)
         return NO;
     
     BibItem *pub = [item valueForKey:@"pub"];
-    [pub addFileForURL:fileURL autoFile:NO runScriptHook:YES];
+    [pub addFileForURL:[fileURLs objectAtIndex:0] autoFile:NO runScriptHook:YES];
     [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     return YES;
 }
@@ -443,10 +441,10 @@ static void normalizeScoresForItem(BDSKTreeNode *parent, CGFloat maxScore)
 - (void)doSearch;
 {
     // get the root nodes array on the main thread, since it uses BibItem methods
-    NSArray *treeNodes = nil;
-    NSInvocation *invocation = [NSInvocation invocationWithTarget:self selector:@selector(copyTreeNodesWithCurrentPublications)];
-    [invocation performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
-    [invocation getReturnValue:&treeNodes];
+    __block NSArray *treeNodes = nil;
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        treeNodes = [self copyTreeNodesWithCurrentPublications];
+    });
     [treeNodes autorelease];
     
     BDSKPOSTCONDITION([treeNodes count]);
@@ -454,15 +452,17 @@ static void normalizeScoresForItem(BDSKTreeNode *parent, CGFloat maxScore)
     NSParameterAssert(NULL != searchIndex);
     SKIndexFlush(searchIndex);
 
-    [self performSelectorOnMainThread:@selector(updateProgressIndicatorWithNumber:) withObject:[NSNumber numberWithDouble:(1.0)] waitUntilDone:NO];
-    [statusField performSelectorOnMainThread:@selector(setStringValue:) withObject:[NSLocalizedString(@"Searching document", @"") stringByAppendingEllipsis] waitUntilDone:NO];
-
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [progressIndicator setDoubleValue:(1.0)];
+        [statusField setStringValue:[NSLocalizedString(@"Searching document", @"") stringByAppendingEllipsis]];
+    });
+    
     double val = 0;
     double max = [treeNodes count];
     
     for (BDSKTreeNode *node in treeNodes) {
     
-        if (_matchFlags.shouldAbortThread) break;
+        if (_matchFlags.shouldAbort) break;
         
         NSAutoreleasePool *pool = [NSAutoreleasePool new];
         
@@ -521,16 +521,22 @@ static void normalizeScoresForItem(BDSKTreeNode *parent, CGFloat maxScore)
         [sortDescriptors release];
         
         val++;
-        [outlineView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
-        [self performSelectorOnMainThread:@selector(updateProgressIndicatorWithNumber:) withObject:[NSNumber numberWithDouble:(val/max)] waitUntilDone:NO];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [outlineView reloadData];
+            [progressIndicator setDoubleValue:(val/max)];
+        });
         [pool release];
     }
     
-    if (0 == _matchFlags.shouldAbortThread) {
-        [self performSelectorOnMainThread:@selector(updateProgressIndicatorWithNumber:) withObject:[NSNumber numberWithDouble:(1.0)] waitUntilDone:NO];
-        [statusField performSelectorOnMainThread:@selector(setStringValue:) withObject:NSLocalizedString(@"Search complete!", @"") waitUntilDone:NO];
+    if (0 == _matchFlags.shouldAbort) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [progressIndicator setDoubleValue:(1.0)];
+            [statusField setStringValue:NSLocalizedString(@"Search complete!", @"")];
+        });
     } else {
-        [statusField performSelectorOnMainThread:@selector(setStringValue:) withObject:NSLocalizedString(@"Search aborted.", @"") waitUntilDone:NO];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [statusField setStringValue:NSLocalizedString(@"Search aborted.", @"")];
+        });
     }
 }
 
@@ -552,37 +558,24 @@ static void normalizeScoresForItem(BDSKTreeNode *parent, CGFloat maxScore)
     CFRelease(indexData);
 }   
 
-- (void)updateProgressIndicatorWithNumber:(NSNumber *)val;
-{
-    [progressIndicator setDoubleValue:[val doubleValue]];
-}
-
-- (void)indexingFinished
-{
-    [abortButton setEnabled:NO];
-    [progressIndicator stopAnimation:nil];
-}
-
 - (void)indexFiles:(NSArray *)absoluteURLs;
 {    
-    NSAutoreleasePool *threadPool = [NSAutoreleasePool new];
-    
-    [indexingLock lock];
-    
     // empty out a previous index (if any)
     [self makeNewIndex];
     
     double val = 0;
     double max = [absoluteURLs count];
     
-    [self performSelectorOnMainThread:@selector(updateProgressIndicatorWithNumber:) withObject:[NSNumber numberWithDouble:(0.0)] waitUntilDone:NO];
-    [statusField performSelectorOnMainThread:@selector(setStringValue:) withObject:[NSLocalizedString(@"Indexing files", @"") stringByAppendingEllipsis] waitUntilDone:NO];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [progressIndicator setDoubleValue:0.0];
+        [statusField setStringValue:[NSLocalizedString(@"Indexing files", @"") stringByAppendingEllipsis]];
+    });
     
     // some HTML files cause a deadlock or crash in -[NSHTMLReader _loadUsingLibXML2] rdar://problem/4988303 (fixed in 10.5)
     BOOL shouldLog = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldLogFilesAddedToMatchingSearchIndexKey];
     
     for (NSURL *url in absoluteURLs) {
-        if (_matchFlags.shouldAbortThread) break;
+        if (_matchFlags.shouldAbort) break;
         
         SKDocumentRef doc = SKDocumentCreateWithURL((CFURLRef)url);
         
@@ -594,23 +587,29 @@ static void normalizeScoresForItem(BDSKTreeNode *parent, CGFloat maxScore)
             CFRelease(doc);
         }
         // forcing a redisplay at every step is ok since adding documents to the index is pretty slow
-        val++;      
-        [self performSelectorOnMainThread:@selector(updateProgressIndicatorWithNumber:) withObject:[NSNumber numberWithDouble:(val/max)] waitUntilDone:NO];
+        val++;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [progressIndicator setDoubleValue:(val/max)];
+        });
     }
     
-    if (0 == _matchFlags.shouldAbortThread) {
-        [self performSelectorOnMainThread:@selector(updateProgressIndicatorWithNumber:) withObject:[NSNumber numberWithDouble:(1.0)] waitUntilDone:NO];
-        [statusField performSelectorOnMainThread:@selector(setStringValue:) withObject:NSLocalizedString(@"Indexing complete!", @"") waitUntilDone:NO];
+    if (0 == _matchFlags.shouldAbort) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [progressIndicator setDoubleValue:(1.0)];
+            [statusField setStringValue:NSLocalizedString(@"Indexing complete!", @"")];
+        });
         [self doSearch];
     } else {
-        [statusField performSelectorOnMainThread:@selector(setStringValue:) withObject:NSLocalizedString(@"Indexing aborted.", @"") waitUntilDone:NO];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [statusField setStringValue:NSLocalizedString(@"Indexing aborted.", @"")];
+        });
     }
 
     // disable the stop button and progress animation
-    [self performSelectorOnMainThread:@selector(indexingFinished) withObject:nil waitUntilDone:YES];
-    
-    [indexingLock unlock];
-    [threadPool release];
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        [abortButton setEnabled:NO];
+        [progressIndicator stopAnimation:nil];
+    });
 }
 
 @end

@@ -197,7 +197,7 @@ NSString *BDSKFileContentSearchSortDescriptorKey = @"BDSKFileContentSearchSortDe
 
 NSString *BDSKScriptHooksKey = @"Script Hooks";
 NSString *BDSKGroupFieldsKey = @"BDSKGroupFieldsKey";
-NSString *BDSKCurrentGroupFieldKey = @"BDSKCurrentGroupFieldKey";
+NSString *BDSKCurrentGroupFieldsKey = @"BDSKCurrentGroupFieldsKey";
 NSString *BDSKDefaultGroupFieldSeparatorKey = @"BDSKDefaultGroupFieldSeparatorKey";
 NSString *BDSKGroupFieldSeparatorCharactersKey = @"BDSKGroupFieldSeparatorCharactersKey";
 NSString *BDSKDefaultArrayJoinStringKey = @"BDSKDefaultArrayJoinString";
@@ -328,6 +328,7 @@ NSString *BDSKFileSearchIndexInfoChangedNotification = @"BDSKFileSearchIndexInfo
 NSString *BDSKEncodingsListChangedNotification = @"BDSKEncodingsListChangedNotification";
 NSString *BDSKTemporaryFileMigrationNotification = @"BDSKTemporaryFileMigrationNotification";
 NSString *BDSKFlagsChangedNotification = @"BDSKFlagsChangedNotification";
+NSString *BDSKOrphanedFilesFinderFinishedNotification = @"BDSKOrphanedFilesFinderFinishedNotification";
 
 #pragma mark Exception name strings
 

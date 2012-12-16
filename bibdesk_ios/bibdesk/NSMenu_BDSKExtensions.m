@@ -164,10 +164,10 @@ static id sharedOpenWithController = nil;
     [openPanel setCanChooseDirectories:NO];
     [openPanel setAllowsMultipleSelection:NO];
     [openPanel setPrompt:NSLocalizedString(@"Choose Viewer", @"Prompt for Choose panel")];
+    [openPanel setDirectoryURL:[NSURL fileURLWithPath:[[NSFileManager defaultManager] applicationsDirectory]]];
+    [openPanel setAllowedFileTypes:[NSArray arrayWithObjects:@"app", nil]];
     
-    NSInteger rv = [openPanel runModalForDirectory:[[NSFileManager defaultManager] applicationsDirectory] 
-                                        file:nil 
-                                       types:[NSArray arrayWithObjects:@"app", nil]];
+    NSInteger rv = [openPanel runModal];
     if(NSFileHandlingPanelOKButton == rv)
         [[NSWorkspace sharedWorkspace] openURL:aURL withApplicationURL:[[openPanel URLs] firstObject]];
 }

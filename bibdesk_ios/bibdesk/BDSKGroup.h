@@ -105,6 +105,13 @@
 - (BOOL)isParent;
 
 /*!
+	@method isCategoryParent
+	@abstract Boolean, returns whether the receiver is a category parent group. 
+	@discussion -
+*/
+- (BOOL)isCategoryParent;
+
+/*!
 	@method isStatic
 	@abstract Boolean, returns whether the receiver is a static group. 
 	@discussion -

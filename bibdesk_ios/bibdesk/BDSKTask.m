@@ -531,7 +531,7 @@ static char *__BDSKCopyFileSystemRepresentation(NSString *str)
             }
             else {
 
-                NSLog(@"Not posting NSTaskDidTerminateNotification for deallocated task %p", internal->_task);
+                //NSLog(@"Not posting NSTaskDidTerminateNotification for deallocated task %p", internal->_task);
 
                 // delete this event to make sure we don't get anything else
                 internal->_event.flags = EV_DELETE;

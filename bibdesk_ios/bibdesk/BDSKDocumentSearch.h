@@ -46,6 +46,7 @@
     volatile int32_t isSearching;
     BOOL shouldStop;
     NSString *currentSearchString; 
+    dispatch_queue_t queue;
     
     // main thread access only
     NSArray *previouslySelectedPublications;

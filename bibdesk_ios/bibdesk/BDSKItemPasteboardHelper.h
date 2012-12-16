@@ -49,7 +49,7 @@
 
 @class BDSKTeXTask;
 
-@interface BDSKItemPasteboardHelper : NSObject <BDSKTeXTaskDelegate> {
+@interface BDSKItemPasteboardHelper : NSObject <BDSKTeXTaskDelegate, NSPasteboardItemDataProvider> {
     NSMutableDictionary *promisedPboardTypes;
     BDSKTeXTask *texTask;
     id<BDSKItemPasteboardHelperDelegate> delegate;
@@ -58,12 +58,7 @@
 - (id<BDSKItemPasteboardHelperDelegate>)delegate;
 - (void)setDelegate:(id<BDSKItemPasteboardHelperDelegate>)newDelegate;
 
-- (void)declareType:(NSString *)type dragCopyType:(NSInteger)dragCopyType forItems:(NSArray *)items forPasteboard:(NSPasteboard *)pboard;
-- (void)addTypes:(NSArray *)newTypes forPasteboard:(NSPasteboard *)pboard;
-- (BOOL)setString:(NSString *)string forType:(NSString *)type forPasteboard:(NSPasteboard *)pboard;
-- (BOOL)setData:(NSData *)data forType:(NSString *)type forPasteboard:(NSPasteboard *)pboard;
-- (BOOL)setPropertyList:(id)propertyList forType:(NSString *)type forPasteboard:(NSPasteboard *)pboard;
-- (BOOL)setURLs:(NSArray *)URLs forType:(NSString *)type forPasteboard:(NSPasteboard *)pboard;
+- (void)writeObjects:(NSArray *)objects items:(NSArray *)items forDragCopyType:(NSInteger)dragCopyType toPasteboard:(NSPasteboard *)pboard;
 
 - (NSArray *)promisedItemsForPasteboard:(NSPasteboard *)pboard;
 - (void)clearPromisedTypesForPasteboard:(NSPasteboard *)pboard;

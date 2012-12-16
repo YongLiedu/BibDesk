@@ -233,6 +233,7 @@
 		CEAC48510A96589A00B8DF43 /* BDSKTemplatedTextCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CEAC484F0A96589A00B8DF43 /* BDSKTemplatedTextCommand.m */; };
 		CEAC51570A97730800B8DF43 /* BDSKExportUsingTemplateCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CEAC51550A97730800B8DF43 /* BDSKExportUsingTemplateCommand.m */; };
 		CEAE613F097FF60A000B618C /* BDSKJSTORParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CEAE613D097FF60A000B618C /* BDSKJSTORParser.m */; };
+		CEB2A71C16401085001A9D6A /* BibDesk.help in Resources */ = {isa = PBXBuildFile; fileRef = CEB2A6E316401085001A9D6A /* BibDesk.help */; };
 		CEB34C300F5D48B40037E086 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = CEB34C2F0F5D48B40037E086 /* dsa_pub.pem */; };
 		CEB34C490F5D49BD0037E086 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEB34BA20F5CB2CC0037E086 /* Sparkle.framework */; };
 		CEB34C4A0F5D49D40037E086 /* Sparkle.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = CEB34BA20F5CB2CC0037E086 /* Sparkle.framework */; };
@@ -292,6 +293,8 @@
 		CEBB8D8809C8B0D90074C79E /* Font.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEBB8D8709C8B0D90074C79E /* Font.tiff */; };
 		CEBC676F0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEBC676D0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m */; };
 		CEC1CEA80F51D2CE00D18921 /* BDSKReadWriteLock.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC1CEA60F51D2CE00D18921 /* BDSKReadWriteLock.m */; };
+		CEC46E301629743200B51A9D /* NSPasteboard_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CEC46E2E1629743200B51A9D /* NSPasteboard_BDSKExtensions.h */; };
+		CEC46E311629743200B51A9D /* NSPasteboard_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC46E2F1629743200B51A9D /* NSPasteboard_BDSKExtensions.m */; };
 		CEC7CDE10F6725890051794E /* BDSKFilePathCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC7CDDF0F6725890051794E /* BDSKFilePathCell.m */; };
 		CED65AB70906BCC6003EED90 /* BDSKScriptHook.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */; };
 		CED65AB90906BCC6003EED90 /* BDSKScriptHookManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65AB50906BCC6003EED90 /* BDSKScriptHookManager.m */; };
@@ -337,8 +340,6 @@
 		CEEFE6C20B0403E700668BB0 /* BDSKGroupsArray.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEFE6C00B0403E700668BB0 /* BDSKGroupsArray.m */; };
 		CEF1817F0CEB702000716E85 /* Bookmarks.plist in Resources */ = {isa = PBXBuildFile; fileRef = CEF1817E0CEB701F00716E85 /* Bookmarks.plist */; };
 		CEF181BD0CEB711700716E85 /* Bookmarks.plist in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = CEF1817E0CEB701F00716E85 /* Bookmarks.plist */; };
-		CEF1D6B2117F015A0069E249 /* BibDeskHelp in Resources */ = {isa = PBXBuildFile; fileRef = CEF1D682117F015A0069E249 /* BibDeskHelp */; };
-		CEF1D6B5117F018C0069E249 /* bibdesk.texi in Resources */ = {isa = PBXBuildFile; fileRef = CEF1D6B3117F018C0069E249 /* bibdesk.texi */; };
 		CEF1D6BC117F01C60069E249 /* applehelp.init in Resources */ = {isa = PBXBuildFile; fileRef = CEF1D6BA117F01C60069E249 /* applehelp.init */; };
 		CEF1D6BD117F01C60069E249 /* postprocess-nontitle.py in Resources */ = {isa = PBXBuildFile; fileRef = CEF1D6BB117F01C60069E249 /* postprocess-nontitle.py */; };
 		CEF2EEE70F3462A900A7989E /* NSColor_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */; };
@@ -377,7 +378,6 @@
 		CEFF6D4210C14D7D006CFC80 /* BDSKExternalGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFF6D4010C14D7D006CFC80 /* BDSKExternalGroup.m */; };
 		EF902DA60F12410300E5DE14 /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE30758095000C3F701 /* AGRegex.framework */; };
 		EF902DA70F12410300E5DE14 /* BTParse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9ABEC9E086E11B500741FC5 /* BTParse.framework */; };
-		F900CD0A0A8EA97D005C3A0F /* UKDirectoryEnumerator.m in Sources */ = {isa = PBXBuildFile; fileRef = F900CD080A8EA97D005C3A0F /* UKDirectoryEnumerator.m */; };
 		F9022C1D0758013E00C3F701 /* BDAlias.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C1C0758013E00C3F701 /* BDAlias.m */; };
 		F9022C4A0758027800C3F701 /* BDSKCiteKeyFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C390758027800C3F701 /* BDSKCiteKeyFormatter.m */; };
 		F9022C4B0758027800C3F701 /* BDSKConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C3B0758027800C3F701 /* BDSKConverter.m */; };
@@ -501,7 +501,6 @@
 		F9BE68380B80F94000B2597C /* BDSKFileMatchConfigController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9BE68360B80F94000B2597C /* BDSKFileMatchConfigController.m */; };
 		F9BF481F0BD69F700071094F /* MODS2MARC21slim.xsl in Resources */ = {isa = PBXBuildFile; fileRef = F9BF481E0BD69F6F0071094F /* MODS2MARC21slim.xsl */; };
 		F9C50D8B0EA3A2D6009FE098 /* BDSKTask.m in Sources */ = {isa = PBXBuildFile; fileRef = F9C50D890EA3A2D6009FE098 /* BDSKTask.m */; };
-		F9CEFCBC0A90090B00A0E54E /* BDSKOrphanedFileServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */; };
 		F9D0E5370BF92768001C6C22 /* BDSKMODSParser.m in Sources */ = {isa = PBXBuildFile; fileRef = F9D0E5350BF92768001C6C22 /* BDSKMODSParser.m */; };
 		F9DB895D08A54BBA00CB3D53 /* BDSKTeXTask.m in Sources */ = {isa = PBXBuildFile; fileRef = F9DB895B08A54BBA00CB3D53 /* BDSKTeXTask.m */; };
 		F9DCEA50094B7D1100AEE662 /* BDSKTextWithIconCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F9DCEA4E094B7D1100AEE662 /* BDSKTextWithIconCell.m */; };
@@ -512,7 +511,6 @@
 		F9E07C9009202345007BCDD4 /* BibDocument_Search.m in Sources */ = {isa = PBXBuildFile; fileRef = F9E07C8E09202345007BCDD4 /* BibDocument_Search.m */; };
 		F9E0BCB40895ACC9005E5FAA /* BibPref_Display.m in Sources */ = {isa = PBXBuildFile; fileRef = F9E0BCB20895ACC9005E5FAA /* BibPref_Display.m */; };
 		F9E43AD808AD8BDB00A0354B /* BDSKErrorObjectController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9E43AD608AD8BDB00A0354B /* BDSKErrorObjectController.m */; };
-		F9E5F6D90A96ABF1004A6D79 /* BDSKFile.m in Sources */ = {isa = PBXBuildFile; fileRef = F9E5F6D80A96ABF1004A6D79 /* BDSKFile.m */; };
 		F9EF21B708B1572600AAC9A9 /* BDSKScrollableTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF21B308B1572500AAC9A9 /* BDSKScrollableTextField.m */; };
 		F9EF21B908B1572600AAC9A9 /* BDSKScrollableTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF21B508B1572500AAC9A9 /* BDSKScrollableTextFieldCell.m */; };
 		F9EF94E60D15FE7400314058 /* BDSKFileMigrationController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF94E40D15FE7400314058 /* BDSKFileMigrationController.m */; };
@@ -520,7 +518,6 @@
 		F9F5ECD20AE5E7C8007EBB31 /* BDSKURLGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F5ECD00AE5E7C8007EBB31 /* BDSKURLGroup.m */; };
 		F9F78CD507D5320D004B68AF /* BDSKStringEncodingManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F78CD307D5320D004B68AF /* BDSKStringEncodingManager.m */; };
 		F9FD63DD0A61B87800F9871B /* NSMenu_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9FD63DB0A61B87800F9871B /* NSMenu_BDSKExtensions.m */; };
-		FEF508F214D9D8740063BD3F /* version.texi in Resources */ = {isa = PBXBuildFile; fileRef = CEF1D6B4117F018C0069E249 /* version.texi */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1219,6 +1216,7 @@
 		CEAC51550A97730800B8DF43 /* BDSKExportUsingTemplateCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKExportUsingTemplateCommand.m; sourceTree = "<group>"; };
 		CEAE613C097FF60A000B618C /* BDSKJSTORParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKJSTORParser.h; sourceTree = "<group>"; };
 		CEAE613D097FF60A000B618C /* BDSKJSTORParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKJSTORParser.m; sourceTree = "<group>"; };
+		CEB2A6E316401085001A9D6A /* BibDesk.help */ = {isa = PBXFileReference; lastKnownFileType = folder; path = BibDesk.help; sourceTree = "<group>"; };
 		CEB34B980F5CB2CC0037E086 /* Sparkle.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Sparkle.xcodeproj; path = vendorsrc/andymatuschak/Sparkle/Sparkle.xcodeproj; sourceTree = "<group>"; };
 		CEB34C2F0F5D48B40037E086 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
 		CEB34C3F0F5D496A0037E086 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1339,6 +1337,8 @@
 		CEC1CEA60F51D2CE00D18921 /* BDSKReadWriteLock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKReadWriteLock.m; sourceTree = "<group>"; };
 		CEC3158A0F24D0B9008D2C75 /* BDSKRichTextForCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKRichTextForCommand.h; sourceTree = "<group>"; };
 		CEC3158B0F24D0B9008D2C75 /* BDSKRichTextForCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKRichTextForCommand.m; sourceTree = "<group>"; };
+		CEC46E2E1629743200B51A9D /* NSPasteboard_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSPasteboard_BDSKExtensions.h; sourceTree = "<group>"; };
+		CEC46E2F1629743200B51A9D /* NSPasteboard_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSPasteboard_BDSKExtensions.m; sourceTree = "<group>"; };
 		CEC7CDDE0F6725890051794E /* BDSKFilePathCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFilePathCell.h; sourceTree = "<group>"; };
 		CEC7CDDF0F6725890051794E /* BDSKFilePathCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFilePathCell.m; sourceTree = "<group>"; };
 		CED65AB20906BCC6003EED90 /* BDSKScriptHook.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKScriptHook.h; sourceTree = "<group>"; };
@@ -1386,9 +1386,6 @@
 		CEEFE6C00B0403E700668BB0 /* BDSKGroupsArray.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKGroupsArray.m; sourceTree = "<group>"; };
 		CEEFE6C10B0403E700668BB0 /* BDSKGroupsArray.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKGroupsArray.h; sourceTree = "<group>"; };
 		CEF1817E0CEB701F00716E85 /* Bookmarks.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Bookmarks.plist; sourceTree = "<group>"; };
-		CEF1D683117F015A0069E249 /* English */ = {isa = PBXFileReference; lastKnownFileType = folder; name = English; path = English.lproj/BibDeskHelp; sourceTree = "<group>"; };
-		CEF1D6B3117F018C0069E249 /* bibdesk.texi */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = bibdesk.texi; path = English.lproj/BibDeskHelp/bibdesk.texi; sourceTree = "<group>"; };
-		CEF1D6B4117F018C0069E249 /* version.texi */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = version.texi; path = English.lproj/BibDeskHelp/version.texi; sourceTree = "<group>"; };
 		CEF1D6BA117F01C60069E249 /* applehelp.init */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = applehelp.init; path = BibDeskHelp/applehelp.init; sourceTree = "<group>"; };
 		CEF1D6BB117F01C60069E249 /* postprocess-nontitle.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; name = "postprocess-nontitle.py"; path = "BibDeskHelp/postprocess-nontitle.py"; sourceTree = "<group>"; };
 		CEF2EEE40F3462A900A7989E /* NSColor_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSColor_BDSKExtensions.h; sourceTree = "<group>"; };
@@ -1458,8 +1455,6 @@
 		CEFF6D4010C14D7D006CFC80 /* BDSKExternalGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKExternalGroup.m; sourceTree = "<group>"; };
 		EF168DDD0F11325B002F4D9F /* UnitTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnitTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EF168DDE0F11325B002F4D9F /* UnitTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "UnitTests-Info.plist"; sourceTree = "<group>"; };
-		F900CD070A8EA97D005C3A0F /* UKDirectoryEnumerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UKDirectoryEnumerator.h; sourceTree = "<group>"; };
-		F900CD080A8EA97D005C3A0F /* UKDirectoryEnumerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UKDirectoryEnumerator.m; sourceTree = "<group>"; };
 		F9022C1B0758013E00C3F701 /* BDAlias.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDAlias.h; sourceTree = "<group>"; };
 		F9022C1C0758013E00C3F701 /* BDAlias.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDAlias.m; sourceTree = "<group>"; };
 		F9022C380758027800C3F701 /* BDSKCiteKeyFormatter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCiteKeyFormatter.h; sourceTree = "<group>"; };
@@ -1707,8 +1702,6 @@
 		F9C7D4000BE9280F00D65C7F /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/Preferences.strings; sourceTree = "<group>"; };
 		F9C7D4090BE9285500D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = French; path = French.lproj/Credits.rtf; sourceTree = SOURCE_ROOT; };
 		F9C7D40A0BE9285500D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = French; path = French.lproj/ReadMe.rtf; sourceTree = "<group>"; };
-		F9CEFCB90A90090B00A0E54E /* BDSKOrphanedFileServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKOrphanedFileServer.h; sourceTree = "<group>"; };
-		F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKOrphanedFileServer.m; sourceTree = "<group>"; };
 		F9D0E5340BF92768001C6C22 /* BDSKMODSParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKMODSParser.h; sourceTree = "<group>"; };
 		F9D0E5350BF92768001C6C22 /* BDSKMODSParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKMODSParser.m; sourceTree = "<group>"; };
 		F9DAC7A00A0A95BC0099117E /* BDSKPreferenceController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPreferenceController.h; sourceTree = "<group>"; };
@@ -1730,8 +1723,6 @@
 		F9E0BCB20895ACC9005E5FAA /* BibPref_Display.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BibPref_Display.m; sourceTree = "<group>"; };
 		F9E43AD508AD8BDB00A0354B /* BDSKErrorObjectController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKErrorObjectController.h; sourceTree = "<group>"; };
 		F9E43AD608AD8BDB00A0354B /* BDSKErrorObjectController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKErrorObjectController.m; sourceTree = "<group>"; };
-		F9E5F6D80A96ABF1004A6D79 /* BDSKFile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFile.m; sourceTree = "<group>"; };
-		F9E5F6DC0A96AC01004A6D79 /* BDSKFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFile.h; sourceTree = "<group>"; };
 		F9E6C5970999323D00A8B97D /* BDSKStringParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStringParser.h; sourceTree = "<group>"; };
 		F9EF21B208B1572500AAC9A9 /* BDSKScrollableTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScrollableTextField.h; sourceTree = "<group>"; };
 		F9EF21B308B1572500AAC9A9 /* BDSKScrollableTextField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScrollableTextField.m; sourceTree = "<group>"; };
@@ -1856,8 +1847,6 @@
 			children = (
 				CEF1D6BA117F01C60069E249 /* applehelp.init */,
 				CEF1D6BB117F01C60069E249 /* postprocess-nontitle.py */,
-				CEF1D6B3117F018C0069E249 /* bibdesk.texi */,
-				CEF1D6B4117F018C0069E249 /* version.texi */,
 			);
 			name = "Help Sources";
 			sourceTree = "<group>";
@@ -1908,7 +1897,7 @@
 			children = (
 				F9BF481E0BD69F6F0071094F /* MODS2MARC21slim.xsl */,
 				F9022DDA0758089500C3F701 /* Images */,
-				CEF1D682117F015A0069E249 /* BibDeskHelp */,
+				CEB2A6E316401085001A9D6A /* BibDesk.help */,
 				CEB5D58E1072AE350001C135 /* AddFieldSheet.xib */,
 				CEB5D5901072AE350001C135 /* AutoFile.xib */,
 				CEB5D5921072AE350001C135 /* AutoFileProgress.xib */,
@@ -2054,7 +2043,6 @@
 		CE220FE20A91BF86002CEFB8 /* Third Party Sources */ = {
 			isa = PBXGroup;
 			children = (
-				CE3E4A090E75BA1A0014C328 /* ukdirectoryenumerator */,
 				CE3E4A070E75B9910014C328 /* BDAlias */,
 				CE3E4A080E75B9F20014C328 /* Ken Ferry */,
 				3B91DD3C1622254B0088206D /* ISI wsdl2objc */,
@@ -2189,6 +2177,7 @@
 				CE0EB4420DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.m */,
 				CE3402730E014B3800A7FFE6 /* NSNumber_BDSKExtensions.m */,
 				CE8C731D0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m */,
+				CEC46E2F1629743200B51A9D /* NSPasteboard_BDSKExtensions.m */,
 				CE564D240AECBA5B002F0A24 /* NSScanner_BDSKExtensions.m */,
 				CE117D220D7047A4005BFCEB /* NSScriptClassDescription_BDSKExtensions.m */,
 				F9022C9F0758038000C3F701 /* NSString_BDSKExtensions.m */,
@@ -2264,7 +2253,6 @@
 				F97198C20DADD32F00CA57AA /* BDSKDBLPWebServices.m */,
 				CE0B3B3A1292E1A500BA05EB /* BDSKErrorObject.m */,
 				CE3263C3128806C3000040EC /* BDSKFieldCollection.m */,
-				F9E5F6D80A96ABF1004A6D79 /* BDSKFile.m */,
 				F925352808FDFAE40045D563 /* BDSKFileSearchResult.m */,
 				CE38FB8B091D94A100BCB69D /* BDSKFilter.m */,
 				CEEFE6C00B0403E700668BB0 /* BDSKGroupsArray.m */,
@@ -2328,7 +2316,6 @@
 				CE3B5E7B09CEDE470017D339 /* BDSKMacroResolver.m */,
 				CE8DAD8E1098976400896F69 /* BDSKMetadataCacheOperation.m */,
 				CEE50486104D662500636237 /* BDSKNotesSearchIndex.m */,
-				F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */,
 				CEC1CEA60F51D2CE00D18921 /* BDSKReadWriteLock.m */,
 				CED65AB50906BCC6003EED90 /* BDSKScriptHookManager.m */,
 				CEFE21301259E6CB00DAD553 /* BDSKSearchGroupServerManager.m */,
@@ -2420,15 +2407,6 @@
 			);
 			name = "Ken Ferry";
 			path = kenferry;
-			sourceTree = "<group>";
-		};
-		CE3E4A090E75BA1A0014C328 /* ukdirectoryenumerator */ = {
-			isa = PBXGroup;
-			children = (
-				F900CD070A8EA97D005C3A0F /* UKDirectoryEnumerator.h */,
-				F900CD080A8EA97D005C3A0F /* UKDirectoryEnumerator.m */,
-			);
-			path = ukdirectoryenumerator;
 			sourceTree = "<group>";
 		};
 		CE7DC8D00E0952BA00D6D76D /* Products */ = {
@@ -2673,7 +2651,6 @@
 				CE9F853E0956A2C50073FCAD /* BDSKFieldEditor.h */,
 				F9022C440758027800C3F701 /* BDSKFieldNameFormatter.h */,
 				CEF7295409CC88AB00802D48 /* BDSKFieldSheetController.h */,
-				F9E5F6DC0A96AC01004A6D79 /* BDSKFile.h */,
 				F9252E2008F60D170045D563 /* BDSKFileContentSearchController.h */,
 				F9B88D960B7D14B700D5D42C /* BDSKFileMatcher.h */,
 				F9BE68370B80F94000B2597C /* BDSKFileMatchConfigController.h */,
@@ -2735,7 +2712,6 @@
 				CEF71AD80B91BBCB003A2771 /* BDSKNotesWindowController.h */,
 				CE2F056611B517E9001B0AE0 /* BDSKOpenAccessoryViewController.h */,
 				CE22E1CB0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.h */,
-				F9CEFCB90A90090B00A0E54E /* BDSKOrphanedFileServer.h */,
 				CE62E0BD0F4C4A5500BDF01E /* BDSKOutlineView.h */,
 				F941B7E808AA574200F04ECD /* BDSKOverlayWindow.h */,
 				CE1EF2910F8E0D54004E7AE8 /* BDSKParentGroup.h */,
@@ -2891,6 +2867,7 @@
 				CE3402720E014B3800A7FFE6 /* NSNumber_BDSKExtensions.h */,
 				CE8C731C0B0CA6C500E31E5A /* NSObject_BDSKExtensions.h */,
 				CE6C04420BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.h */,
+				CEC46E2E1629743200B51A9D /* NSPasteboard_BDSKExtensions.h */,
 				CE7611500EA49B6E00301E45 /* NSPrintOperation_BDSKExtensions.h */,
 				CE564D230AECBA5B002F0A24 /* NSScanner_BDSKExtensions.h */,
 				CE117D210D7047A4005BFCEB /* NSScriptClassDescription_BDSKExtensions.h */,
@@ -3007,6 +2984,7 @@
 				3B91DD4F162225850088206D /* USGlobals.h in Headers */,
 				3B91DD51162225850088206D /* WOKMWSAuthenticateService.h in Headers */,
 				3B91DD53162225850088206D /* WokSearchService.h in Headers */,
+				CEC46E301629743200B51A9D /* NSPasteboard_BDSKExtensions.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3388,15 +3366,13 @@
 				CEFA8E0310C7E9250034C14B /* Overflow.tiff in Resources */,
 				CEFE71771129A91E0018CD74 /* ServicesMenu.strings in Resources */,
 				CE1782FC1158EFCB00B2EBDF /* BookmarkSheet.xib in Resources */,
-				CEF1D6B2117F015A0069E249 /* BibDeskHelp in Resources */,
-				CEF1D6B5117F018C0069E249 /* bibdesk.texi in Resources */,
 				CEF1D6BC117F01C60069E249 /* applehelp.init in Resources */,
 				CEF1D6BD117F01C60069E249 /* postprocess-nontitle.py in Resources */,
 				CE2F057211B51FA7001B0AE0 /* BDSKOpenAccessoryView.xib in Resources */,
 				CEF52DD8126C7869006E904B /* WebGroupDownloads.html in Resources */,
 				CE0928D613FFC1D7008A6A69 /* Scroller_Divider_Lion.tiff in Resources */,
 				CE0928D813FFC1DC008A6A69 /* Scroller_Background_Lion.tiff in Resources */,
-				FEF508F214D9D8740063BD3F /* version.texi in Resources */,
+				CEB2A71C16401085001A9D6A /* BibDesk.help in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3428,17 +3404,17 @@
 			inputPaths = (
 				"$(SRCROOT)/BibDeskHelp/applehelp.init",
 				"$(SRCROOT)/BibDeskHelp/postprocess-nontitle.py",
-				"$(SRCROOT)/English.lproj/BibDeskHelp/bibdesk.texi",
-				"$(SRCROOT)/English.lproj/BibDeskHelp/version.texi",
+				"$(SRCROOT)/BibDesk.help/Contents/Resources/English.lproj/bibdesk.texi",
+				"$(SRCROOT)/BibDesk.help/Contents/Resources/English.lproj/version.texi",
 			);
 			name = "Run Script: Build Help";
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/BibDeskHelp/English.lproj/BibDeskHelp/BibDeskHelp.html",
-				"$(DERIVED_FILE_DIR)/BibDeskHelp/English.lproj/BibDeskHelp/BibDeskHelp.helpindex",
+				"$(DERIVED_FILE_DIR)/BibDeskHelp/English.lproj/BibDeskHelp.html",
+				"$(DERIVED_FILE_DIR)/BibDeskHelp/English.lproj/BibDeskHelp.helpindex",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "HELP_NAME=\"BibDeskHelp\"\n\nLOC_LANGS=(English)\n\nINPUT=\"${HELP_NAME}/bibdesk.texi\"\nTOOLS=\"${HELP_NAME}\"\nDEST=\"${HELP_NAME}\"\nPREFIX=\"${HELP_NAME}\"\n\nHELP_INDEXER=\"${SYSTEM_DEVELOPER_UTILITIES_DIR}/Help Indexer.app/Contents/MacOS/Help Indexer\"\n\nTARGET=\"${DERIVED_FILE_DIR}/${HELP_NAME}\"\n\ncd \"${SOURCE_ROOT}\"\n\n[ -d \"${TARGET}\" ] || /bin/mkdir -p \"${TARGET}\";\n\nfor LANG in ${LOC_LANGS[*]}; do\n\tLOC_TARGET=\"${TARGET}/${LANG}.lproj/${DEST}\";\n\t[ -d \"${LOC_TARGET}\" ] && /bin/rm -rf \"${LOC_TARGET}\"/* || /bin/mkdir -p \"${LOC_TARGET}\";\n\t\n\techo \"*** Creating help files in ${LOC_TARGET} ***\";\n\t\"${TOOLS}/texi2html\" \"${LANG}.lproj/${INPUT}\" --init-file=\"${TOOLS}/applehelp.init\" --prefix=\"${PREFIX}\" --output=\"${LOC_TARGET}\" --split=node --nonumber && \\\n\tpython \"${TOOLS}/postprocess-nontitle.py\" \"${LOC_TARGET}/${PREFIX}_\"*.html;\n\t\n\techo \"*** Indexing help in ${LOC_TARGET} ***\";\n\tif [ \"${LANG}\" = \"French\" ]; then STOPWORDS=\"fr\";\n\telif [ \"${LANG}\" = \"German\" ]; then STOPWORDS=\"de\";\n\telif [ \"${LANG}\" = \"Hungarian\" ]; then STOPWORDS=\"hu\";\n\telif [ \"${LANG}\" = \"Italian\" ]; then STOPWORDS=\"it\";\n\telif [ \"${LANG}\" = \"Spanish\" ]; then STOPWORDS=\"es\";\n\telif [ \"${LANG}\" = \"Swedish\" ]; then STOPWORDS=\"sv\";\n\telse LANG=\"en\";\n\tfi;\n\tif [ -x /usr/bin/hiutil ]; then\n\t\t/usr/bin/hiutil -Cagf \"${LOC_TARGET}/${HELP_NAME}.helpindex\" -s \"${STOPWORDS}\" -m \"${MINTERMLENGTH}\" \"${LOC_TARGET}\";\n\telif [ -x \"${HELP_INDEXER}\" ]; then\n\t\t\"${HELP_INDEXER}\" \"${LOC_TARGET}\" -ShowProgress NO -LogStyle 2 -IndexAnchors YES -TigerIndexing YES -GenerateSummaries YES -Stopwords \"${STOPWORDS}\" -MinTermLength \"${MINTERMLENGTH}\";\n\tfi;\ndone;\n";
+			shellScript = "HELP_NAME=\"BibDeskHelp\"\n\nINPUT=\"bibdesk.texi\"\nSOURCE=\"${SOURCE_ROOT}/BibDesk.help/Contents/Resources\"\nTOOLS=\"${SOURCE_ROOT}/${HELP_NAME}\"\nPREFIX=\"${HELP_NAME}\"\nTARGET=\"${DERIVED_FILE_DIR}/${HELP_NAME}\"\n\ncd \"${SOURCE}\"\n\n[ -d \"${TARGET}\" ] || /bin/mkdir -p \"${TARGET}\";\n\nfor LOC_DIR in *.lproj; do\n\tLOC_TARGET=\"${TARGET}/${LOC_DIR}\";\n\t[ -d \"${LOC_TARGET}\" ] && /bin/rm -rf \"${LOC_TARGET}\"/* || /bin/mkdir -p \"${LOC_TARGET}\";\n\t\n\techo \"*** Creating help files in ${LOC_TARGET} ***\";\n\t\"${TOOLS}/texi2html\" \"${SOURCE}/${LOC_DIR}/${INPUT}\" --init-file=\"${TOOLS}/applehelp.init\" --prefix=\"${PREFIX}\" --output=\"${LOC_TARGET}\" --split=node --nonumber && \\\n\tpython \"${TOOLS}/postprocess-nontitle.py\" \"${LOC_TARGET}/${PREFIX}_\"*.html;\n\t\n\techo \"*** Indexing help in ${LOC_TARGET} ***\";\n\tif [ \"${LOC_DIR}\" = \"French.lproj\" ]; then STOPWORDS=\"fr\";\n\telif [ \"${LOC_DIR}\" = \"German.lproj\" ]; then STOPWORDS=\"de\";\n\telif [ \"${LOC_DIR}\" = \"Hungarian.lproj\" ]; then STOPWORDS=\"hu\";\n\telif [ \"${LOC_DIR}\" = \"Italian.lproj\" ]; then STOPWORDS=\"it\";\n\telif [ \"${LOC_DIR}\" = \"Spanish.lproj\" ]; then STOPWORDS=\"es\";\n\telif [ \"${LOC_DIR}\" = \"Swedish.lproj\" ]; then STOPWORDS=\"sv\";\n\telse STOPWORDS=\"en\";\n\tfi;\n\t/usr/bin/hiutil -Cagf \"${LOC_TARGET}/${PREFIX}.helpindex\" -s \"${STOPWORDS}\" -m \"${MINTERMLENGTH}\" \"${LOC_TARGET}\";\ndone;\n";
 		};
 		CEF834480C7750F000A3AD51 /* Run Script: Copy Help */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3446,17 +3422,15 @@
 			files = (
 			);
 			inputPaths = (
-				"$(DERIVED_FILE_DIR)/BibDeskHelp/English.lproj/BibDeskHelp/BibDeskHelp.html",
+				"$(DERIVED_FILE_DIR)/BibDeskHelp/English.lproj/BibDeskHelp.html",
 			);
 			name = "Run Script: Copy Help";
 			outputPaths = (
-				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/English.lproj/BibDeskHelp/BibDeskHelp.html",
-				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/French.lproj/BibDeskHelp",
-				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/German.lproj/BibDeskHelp",
+				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/BibDesk.help/Contents/Resources/English.lproj/BibDeskHelp.html",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "HELP_NAME=\"BibDeskHelp\"\n\nSOURCE=\"${DERIVED_FILE_DIR}/${HELP_NAME}\";\nTARGET=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\";\nDEST=\"${HELP_NAME}\"\n\ncd \"${TARGET}\"\n\nfor LOC_DIR in *.lproj; do\n\tLOC_SOURCE=\"${SOURCE}/${LOC_DIR}/${DEST}\";\n\tLOC_TARGET=\"${TARGET}/${LOC_DIR}/${DEST}\";\n\tif [ -d \"${LOC_SOURCE}\" ]; then\n\t\techo \"*** Copying help files from ${LOC_SOURCE} to ${LOC_TARGET} ***\";\n\t\t/bin/rm -rf \"${LOC_TARGET}/\"*.html;\n\t\t/bin/cp -Rf \"${LOC_SOURCE}/\"*.html \"${LOC_TARGET}\";\n\t\t[ -f \"${LOC_SOURCE}/${HELP_NAME}.helpindex\" ] && \\\n\t\t\t/bin/cp -f \"${LOC_SOURCE}/${HELP_NAME}.helpindex\" \"${LOC_TARGET}\";\n\telse\n\t\techo \"*** Linking help files from ${LOC_TARGET} to ${TARGET}/English.lproj/${DEST} ***\";\n\t\t( cd \"${LOC_DIR}\"; /bin/rm -rf \"${DEST}\"; /bin/ln -fFs ../English.lproj/\"${DEST}\"; )\n\tfi;\ndone;\n";
+			shellScript = "HELP_NAME=\"BibDeskHelp\"\n\nSOURCE=\"${DERIVED_FILE_DIR}/${HELP_NAME}\";\nTARGET=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/BibDesk.help/Contents/Resources\";\n\ncd \"${TARGET}\"\n\nfor LOC_DIR in *.lproj; do\n\tLOC_SOURCE=\"${SOURCE}/${LOC_DIR}\";\n\tLOC_TARGET=\"${TARGET}/${LOC_DIR}\";\n\tif [ -d \"${LOC_SOURCE}\" ]; then\n\t\techo \"*** Copying help files from ${LOC_SOURCE} to ${LOC_TARGET} ***\";\n\t\t/bin/rm -rf \"${LOC_TARGET}/\"*.html;\n\t\t/bin/cp -Rf \"${LOC_SOURCE}/\"*.html \"${LOC_TARGET}\";\n\t\t[ -f \"${LOC_SOURCE}/${HELP_NAME}.helpindex\" ] && \\\n\t\t\t/bin/cp -f \"${LOC_SOURCE}/${HELP_NAME}.helpindex\" \"${LOC_TARGET}\";\n\tfi;\ndone;\n";
 		};
 		EF168DDB0F11325B002F4D9F /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3680,10 +3654,7 @@
 				CE6775170A8506A7003CFC58 /* NSDictionary_BDSKExtensions.m in Sources */,
 				CE95A57C0A88883300334DFA /* BDSKReadMeController.m in Sources */,
 				CE22E1CE0A8CCF9D002CEFB8 /* BDSKOrphanedFilesFinder.m in Sources */,
-				F900CD0A0A8EA97D005C3A0F /* UKDirectoryEnumerator.m in Sources */,
-				F9CEFCBC0A90090B00A0E54E /* BDSKOrphanedFileServer.m in Sources */,
 				CEAC48510A96589A00B8DF43 /* BDSKTemplatedTextCommand.m in Sources */,
-				F9E5F6D90A96ABF1004A6D79 /* BDSKFile.m in Sources */,
 				CEAC51570A97730800B8DF43 /* BDSKExportUsingTemplateCommand.m in Sources */,
 				CE35DCEA0A99B1A700029B66 /* BDSKErrorEditor.m in Sources */,
 				CE15C0D80AA5B9A3002C555F /* BDSKErrorManager.m in Sources */,
@@ -3861,6 +3832,7 @@
 				3B91DD50162225850088206D /* USGlobals.m in Sources */,
 				3B91DD52162225850088206D /* WOKMWSAuthenticateService.m in Sources */,
 				3B91DD54162225850088206D /* WokSearchService.m in Sources */,
+				CEC46E311629743200B51A9D /* NSPasteboard_BDSKExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4538,14 +4510,6 @@
 			name = TextImport.xib;
 			sourceTree = "<group>";
 		};
-		CEF1D682117F015A0069E249 /* BibDeskHelp */ = {
-			isa = PBXVariantGroup;
-			children = (
-				CEF1D683117F015A0069E249 /* English */,
-			);
-			name = BibDeskHelp;
-			sourceTree = "<group>";
-		};
 		CEF52DD6126C7869006E904B /* WebGroupDownloads.html */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -4667,7 +4631,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 2671;
+				CURRENT_PROJECT_VERSION = 2732;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -4676,7 +4640,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 2671;
+				CURRENT_PROJECT_VERSION = 2732;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;

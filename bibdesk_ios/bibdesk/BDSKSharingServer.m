@@ -92,12 +92,14 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 #pragma mark -
 
-// private protocol for inter-thread messaging
+// private protocols for inter-thread messaging
+
 @protocol BDSKSharingServerLocalThread <BDSKAsyncDOServerThread>
-
 - (oneway void)notifyClientsOfChange;
-- (oneway void)mainThreadServerDidSetup:(BOOL)success;
+@end
 
+@protocol BDSKSharingServerMainThread <BDSKAsyncDOServerMainThread>
+- (oneway void)localThreadServerDidSetup:(BOOL)success;
 @end
 
 #pragma mark -
@@ -584,7 +586,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKClientConnectionsChangedNotification object:nil];
 }
 
-- (void)mainThreadServerDidSetup:(BOOL)success
+- (oneway void)localThreadServerDidSetup:(BOOL)success
 {
     [sharingServer server:(BDSKSharingDOServer *)self didSetup:success];
 }
@@ -594,6 +596,8 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 #pragma mark | DO Server
 
 - (Protocol *)protocolForServerThread { return @protocol(BDSKSharingServerLocalThread); }
+
+- (Protocol *)protocolForMainThread { return @protocol(BDSKSharingServerMainThread); }
 
 - (void)serverDidSetup
 {
@@ -617,7 +621,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         // the callback from the delegate should stop the DO server, and may try again with a different name
     }
     @finally {
-        [[self serverOnMainThread] mainThreadServerDidSetup:success];
+        [[self serverOnMainThread] localThreadServerDidSetup:success];
     }
 }
 
@@ -646,7 +650,9 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     }
     [remoteClients removeAllObjects];
     [self setNumberOfConnections:0];
-    [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self notifyClientConnectionsChanged];
+    });
     
     NSPort *port = [[NSSocketPortNameServer sharedInstance] portForName:sharingName];
     [[NSSocketPortNameServer sharedInstance] removePortForName:sharingName];
@@ -700,7 +706,9 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     NSDictionary *clientInfo = [NSDictionary dictionaryWithObjectsAndKeys:clientObject, @"object", version, @"version", nil];
     [remoteClients setObject:clientInfo forKey:identifier];
     [self setNumberOfConnections:[remoteClients count]];
-    [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self notifyClientConnectionsChanged];
+    });
 }
 
 #pragma mark | BDSKSharingServer
@@ -713,7 +721,9 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     [self setNumberOfConnections:[remoteClients count]];
     [[proxyObject connectionForProxy] invalidate];
     [proxyObject release];
-    [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self notifyClientConnectionsChanged];
+    });
 }
 
 - (oneway void)notifyClientsOfChange;
@@ -734,7 +744,8 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     }
 }
 
-- (void)getPublicationsAndMacros:(NSMutableDictionary *)pubsAndMacros {
+- (NSDictionary *)copyArchivedPublicationsAndMacros {
+    NSMutableDictionary *pubsAndMacros = [[NSMutableDictionary alloc] init];
     NSMutableSet *allPubs = (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKBibItemEqualitySetCallBacks);
     NSMutableDictionary *allMacros = [[NSMutableDictionary alloc] init];
     for (BibDocument *doc in [NSApp orderedDocuments]) {
@@ -742,29 +753,30 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         [allMacros addEntriesFromDictionary:[[doc macroResolver] macroDefinitions]];
     }
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:[allPubs allObjects]];
-    if ([data length])
-        [pubsAndMacros setObject:data forKey:@"publications"];
-    data = [NSKeyedArchiver archivedDataWithRootObject:allMacros];
-    if ([data length])
-        [pubsAndMacros setObject:data forKey:@"macros"];
+    if ([data length]) {
+        [pubsAndMacros setObject:data forKey:BDSKSharedArchivedDataKey];
+        data = [NSKeyedArchiver archivedDataWithRootObject:allMacros];
+        if ([data length])
+            [pubsAndMacros setObject:data forKey:BDSKSharedArchivedMacroDataKey];
+    }
     [allPubs release];
     [allMacros release];
+    return pubsAndMacros;
 }
 
 - (bycopy NSData *)archivedSnapshotOfPublications
 {
-    NSMutableDictionary *pubsAndMacros = [[NSMutableDictionary alloc] init];
-    [self performSelectorOnMainThread:@selector(getPublicationsAndMacros:) withObject:pubsAndMacros waitUntilDone:YES];
-    NSData *dataToSend = [pubsAndMacros objectForKey:@"publications"];
-    NSData *macroDataToSend = [pubsAndMacros objectForKey:@"macros"];
+    __block NSDictionary *pubsAndMacros = nil;
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        pubsAndMacros = [self copyArchivedPublicationsAndMacros];
+    });
     
-    if(dataToSend != nil){
-        NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:dataToSend, BDSKSharedArchivedDataKey, macroDataToSend, BDSKSharedArchivedMacroDataKey, nil];
-        NSString *errorString = nil;
-        dataToSend = [NSPropertyListSerialization dataFromPropertyList:dictionary format:NSPropertyListBinaryFormat_v1_0 errorDescription:&errorString];
-        if(errorString != nil){
-            NSLog(@"Error serializing publications for sharing: %@", errorString);
-            [errorString release];
+    NSData *dataToSend = nil;
+    if ([pubsAndMacros objectForKey:BDSKSharedArchivedDataKey]) {
+        NSError *error = nil;
+        dataToSend = [NSPropertyListSerialization dataWithPropertyList:pubsAndMacros format:NSPropertyListBinaryFormat_v1_0 options:0 error:&error];
+        if(error != nil){
+            NSLog(@"Error serializing publications for sharing: %@", error);
         } else {
             // Omni's bzip2 method caused a hang when I tried it, but -compressedData produced a 50% size decrease
             @try{ dataToSend = [dataToSend compressedData]; }

@@ -181,14 +181,6 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
     [self updatePapersFolderUI];
 }
 
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-	if (returnCode == NSFileHandlingPanelOKButton) {
-		NSString *path = [[sheet filenames] objectAtIndex: 0];
-		[sud setObject:[path stringByAbbreviatingWithTildeInPath] forKey:BDSKPapersFolderPathKey];
-	}
-	[self updatePapersFolderUI];
-}
-
 - (IBAction)choosePapersFolderLocationAction:(id)sender{
 	NSOpenPanel *openPanel = [NSOpenPanel openPanel];
 	[openPanel setAllowsMultipleSelection:NO];
@@ -197,13 +189,13 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	[openPanel setCanCreateDirectories:YES];
 	[openPanel setResolvesAliases:NO];
     [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
-    [openPanel beginSheetForDirectory:nil 
-								 file:nil
-								types:nil
-					   modalForWindow:[[self view] window] 
-						modalDelegate:self 
-					   didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
-						  contextInfo:NULL];
+    [openPanel beginSheetModalForWindow:[[self view] window] completionHandler:^(NSInteger result){
+        if (result == NSFileHandlingPanelOKButton) {
+            NSString *path = [[[openPanel URLs] objectAtIndex:0] path];
+            [sud setObject:[path stringByAbbreviatingWithTildeInPath] forKey:BDSKPapersFolderPathKey];
+        }
+        [self updatePapersFolderUI];
+    }];
 }
 
 - (IBAction)papersFolderLocationAction:(id)sender{
@@ -459,9 +451,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
     
     BOOL isDir;
     // we want to return the original value if it's valid, not the expanded path; the action method should expand it
-    NSString *pathString = [string stringByStandardizingPath];
-    @try{ pathString = [[NSFileManager defaultManager] resolveAliasesInPath:pathString]; }
-    @catch (id e) { NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [e respondsToSelector:@selector(name)] ? [e name] : e, pathString); }
+    NSString *pathString = [[NSFileManager defaultManager] resolveAliasesInPath:string];
     if([[NSFileManager defaultManager] fileExistsAtPath:pathString isDirectory:&isDir] == NO){
         if(error)
             *error = [NSString stringWithFormat:NSLocalizedString(@"The directory \"%@\" does not exist.", @"Error description"), pathString];

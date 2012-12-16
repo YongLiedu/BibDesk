@@ -1547,18 +1547,13 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 - (NSDictionary *)searchIndexInfo{
     NSURL *aURL;
-    FSRef fileRef;
-    Boolean isFolder, wasAliased;
     
     // create an array of all local-URLs this object could have
     NSMutableArray *urls = [[NSMutableArray alloc] initWithCapacity:5];
     for (BDSKLinkedFile *file in [self localFiles]) {
-        if ((aURL = [file URL])) {
-            // SearchKit cannot handle alias files, so we resolve those
-            if (CFURLGetFSRef((CFURLRef)aURL, &fileRef) && noErr == FSResolveAliasFileWithMountFlags(&fileRef, TRUE, &isFolder, &wasAliased, kResolveAliasFileNoUI) && wasAliased)
-                aURL = [(id)CFURLCreateFromFSRef(CFGetAllocator((CFURLRef)aURL), &fileRef) autorelease];
+        // SearchKit cannot handle alias files, so we resolve those
+        if ((aURL = [[file URL] fileURLByResolvingAliases]))
             [urls addObject:aURL];
-        }
     }
     
     NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[self identifierURL], @"identifierURL", urls, @"urls", nil];
@@ -2671,7 +2666,7 @@ static void addFilesToArray(const void *value, void *context)
 
 - (NSURL *)localFileURLForField:(NSString *)field{
     
-    NSURL *localURL = nil, *resolvedURL = nil;
+    NSURL *localURL = nil;
     NSString *localURLFieldValue = [self valueOfField:field inherit:NO];
     
     if ([NSString isEmptyString:localURLFieldValue]) return nil;
@@ -2697,10 +2692,11 @@ static void addFilesToArray(const void *value, void *context)
     
     // resolve aliases in the containing dir, as most NSFileManager methods do not follow them, and NSWorkspace can't open aliases
 	// we don't resolve the last path component if it's an alias, as this is used in auto file, which should move the alias rather than the target file 
-    // if the path to the file does not exist resolvedURL is nil, so we return the unresolved path
+    // if the path to the file does not exist resolvedParentURL is nil, so we return the unresolved path
 #if BDSK_OS_X
-    if ((resolvedURL = [localURL fileURLByResolvingAliasesBeforeLastPathComponent]))
-        localURL = resolvedURL;
+    NSURL *resolvedParentURL = [[localURL URLByDeletingLastPathComponent] fileURLByResolvingAliases];
+    if (resolvedParentURL)
+        localURL = [resolvedParentURL URLByAppendingPathComponent:[localURL lastPathComponent]];
 #endif
     
     return localURL;

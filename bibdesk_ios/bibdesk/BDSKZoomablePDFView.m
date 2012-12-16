@@ -105,65 +105,55 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.0, 0.1, 0.2, 0.25, 0.35, 0.5, 
 // override so we can put the entire document on the pasteboard if there is no selection
 - (void)copy:(id)sender;
 {
-    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    [pboard declareTypes:[NSArray arrayWithObjects:NSPDFPboardType, NSStringPboardType, NSRTFPboardType, nil] owner:nil];
-    
-    PDFSelection *theSelection = [self currentSelection];
-    if(!theSelection)
-        theSelection = [[self document] selectionForEntireDocument];
+    PDFSelection *theSelection = [self currentSelection] ?: [[self document] selectionForEntireDocument];
     NSAttributedString *attrString = [theSelection attributedString];
-    
-    [pboard setData:[[self document] dataRepresentation] forType:NSPDFPboardType];
-    [pboard setString:[attrString string] forType:NSStringPboardType];
-    [pboard setData:[attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil] forType:NSRTFPboardType];
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+    NSPasteboardItem *item = [[[NSPasteboardItem alloc] init] autorelease];
+    [item setData:[[self document] dataRepresentation] forType:NSPasteboardTypePDF];
+    [pboard clearContents];
+    [pboard writeObjects:[NSArray arrayWithObjects:attrString, item, nil]];
 }
 
 - (void)copyAsPDF:(id)sender;
 {
-    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    [pboard declareTypes:[NSArray arrayWithObjects:NSPDFPboardType, nil] owner:nil];
-    [pboard setData:[[self document] dataRepresentation] forType:NSPDFPboardType];
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+    [pboard clearContents];
+    [pboard setData:[[self document] dataRepresentation] forType:NSPasteboardTypePDF];
 }
 
 - (void)copyAsText:(id)sender;
 {
-    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    [pboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, NSRTFPboardType, nil] owner:nil];
-    
-    PDFSelection *theSelection = [self currentSelection];
-    if(!theSelection)
-        theSelection = [[self document] selectionForEntireDocument];
+    PDFSelection *theSelection = [self currentSelection] ?: [[self document] selectionForEntireDocument];
     NSAttributedString *attrString = [theSelection attributedString];
-    
-    [pboard setString:[attrString string] forType:NSStringPboardType];
-    [pboard setData:[attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil] forType:NSRTFPboardType];
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+    [pboard clearContents];
+    [pboard writeObjects:[NSArray arrayWithObjects:attrString, nil]];
 }
 
 - (void)copyPDFPage:(id)sender;
 {
-    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    [pboard declareTypes:[NSArray arrayWithObjects:NSPDFPboardType, nil] owner:self];
-    [pboard setData:[[self currentPage] dataRepresentation] forType:NSPDFPboardType];
-}
-
-- (void)saveDocumentSheetDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode  contextInfo:(void  *)contextInfo;
-{
-    NSError *error = nil;
-    if(returnCode == NSFileHandlingPanelOKButton){
-        // -[PDFDocument writeToURL:] returns YES even if you don't have write permission, so we'll use NSData rdar://problem/4475062
-        NSData *data = [[self document] dataRepresentation];
-        
-        if([data writeToURL:[sheet URL] options:NSAtomicWrite error:&error] == NO){
-            [sheet orderOut:nil];
-            [self presentError:error];
-        }
-    }
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+    [pboard clearContents];
+    [pboard setData:[[self currentPage] dataRepresentation] forType:NSPasteboardTypePDF];
 }
     
 - (void)saveDocumentAs:(id)sender;
 {
     NSString *name = [[[self document] documentURL] lastPathComponent];
-    [[NSSavePanel savePanel] beginSheetForDirectory:nil file:(name ?: NSLocalizedString(@"Untitled.pdf", @"Default file name for saved PDF")) modalForWindow:[self window] modalDelegate:self didEndSelector:@selector(saveDocumentSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+    NSSavePanel *savePanel = [NSSavePanel savePanel];
+    [savePanel setNameFieldStringValue:name ?: NSLocalizedString(@"Untitled.pdf", @"Default file name for saved PDF")];
+    [savePanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        if(result == NSFileHandlingPanelOKButton){
+            // -[PDFDocument writeToURL:] returns YES even if you don't have write permission, so we'll use NSData rdar://problem/4475062
+            NSError *error = nil;
+            NSData *data = [[self document] dataRepresentation];
+            
+            if([data writeToURL:[savePanel URL] options:NSDataWritingAtomic error:&error] == NO){
+                [savePanel orderOut:nil];
+                [self presentError:error];
+            }
+        }
+    }];
 }
 
 - (void)doActualSize:(id)sender;

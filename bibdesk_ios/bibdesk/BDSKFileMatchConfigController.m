@@ -37,6 +37,8 @@
 #import "BDSKTextWithIconCell.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "NSPasteboard_BDSKExtensions.h"
+
 
 @implementation BDSKFileMatchConfigController
 
@@ -61,54 +63,32 @@
     [super dealloc];
 }
 
-static BOOL fileURLIsVisible(NSURL *fileURL)
-{
-    OSStatus err;
-    FSRef fileRef;
-    err = CFURLGetFSRef((CFURLRef)fileURL, &fileRef) ? noErr : fnfErr;
-    CFBooleanRef isInvisible;
-    BOOL isVisible = YES;
-    
-    if (noErr == err)
-        err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemIsInvisible, (CFTypeRef *)&isInvisible);
-    
-    if (noErr == err) {
-        isVisible = (CFBooleanGetValue(isInvisible) == FALSE);
-        CFRelease(isInvisible);
-    }
-    return isVisible;
-}
-
-- (NSArray *)URLsFromPathsAndDirectories:(NSArray *)filesAndDirectories
+- (NSArray *)URLsFromURLsAndDirectories:(NSArray *)filesAndDirectories
 {
     NSMutableArray *URLs = [NSMutableArray arrayWithCapacity:[filesAndDirectories count]];
-    BOOL isDir;
+    NSNumber *isDir;
+    NSNumber *isPackage;
     NSFileManager *fm = [NSFileManager defaultManager];
-    for (NSString *path in filesAndDirectories) {
+    for (NSURL *aURL in filesAndDirectories) {
+        isDir = isPackage = nil;
+        [aURL getResourceValue:&isDir forKey:NSURLIsDirectoryKey error:NULL];
+        [aURL getResourceValue:&isPackage forKey:NSURLIsPackageKey error:NULL];
         // presumably the file exists, since it arrived here because of drag-and-drop or the open panel, but we handle directories specially
-        if (([fm fileExistsAtPath:path isDirectory:&isDir])) {
-            // if not a directory, or it's a package, add it immediately
-            if (NO == isDir || [[NSWorkspace sharedWorkspace] isFilePackageAtPath:path]) {
-                [URLs addObject:[NSURL fileURLWithPath:path]];
-            } else {
-                // shallow directory traversal: only add the (non-folder) contents of a folder that was dropped, since an arbitrarily deep traversal would have performance issues for file listing and for the search kit indexing
-                for (NSString *relPath in [fm contentsOfDirectoryAtPath:path error:NULL]) {
-                    // directoryContentsAtPath returns relative paths with the starting directory as base
-                    NSString *subpath = [path stringByAppendingPathComponent:relPath];
-                    NSURL *fileURL = [NSURL fileURLWithPath:subpath];
-                    [fm fileExistsAtPath:subpath isDirectory:&isDir];
-                    if (fileURLIsVisible(fileURL) && NO == isDir || [[NSWorkspace sharedWorkspace] isFilePackageAtPath:subpath])
-                        [URLs addObject:fileURL];
-                }
+        // if not a directory, or it's a package, add it immediately
+        if (NO == [isDir boolValue] || [isPackage boolValue]) {
+            [URLs addObject:aURL];
+        } else {
+            // shallow directory traversal: only add the (non-folder) contents of a folder that was dropped, since an arbitrarily deep traversal would have performance issues for file listing and for the search kit indexing
+            for (NSURL *fileURL in [fm contentsOfDirectoryAtURL:aURL includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsHiddenFiles error:NULL]) {
+                isDir = isPackage = nil;
+                [fileURL getResourceValue:&isDir forKey:NSURLIsDirectoryKey error:NULL];
+                [fileURL getResourceValue:&isPackage forKey:NSURLIsPackageKey error:NULL];
+                if (NO == [isDir boolValue] || [isPackage boolValue])
+                    [URLs addObject:fileURL];
             }
         }
     }
     return URLs;
-}
-
-- (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-	if (returnCode == NSFileHandlingPanelOKButton)
-		[[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[self URLsFromPathsAndDirectories:[panel filenames]]];
 }
 
 - (IBAction)addRemove:(id)sender;
@@ -119,7 +99,10 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
         [openPanel setAllowsMultipleSelection:YES];
         [openPanel setCanChooseDirectories:YES];
         [openPanel setPrompt:NSLocalizedString(@"Choose", @"")];
-        [openPanel beginSheetForDirectory:nil file:nil types:nil modalForWindow:[self window] modalDelegate:self didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+        [openPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+            if (result == NSFileHandlingPanelOKButton)
+                [[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[self URLsFromURLsAndDirectories:[openPanel URLs]]];
+        }];
         
     } else { // remove
         
@@ -148,7 +131,7 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
 - (void)windowDidLoad
 {
     [self handleDocumentAddRemove:nil];
-    [fileTableView registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
+    [fileTableView registerForDraggedTypes:[NSArray arrayWithObjects:(NSString *)kUTTypeFileURL, NSFilenamesPboardType, nil]];
     [addRemoveButton setEnabled:[fileTableView numberOfSelectedRows] > 0 forSegment:1];
 }
 
@@ -201,31 +184,47 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
     return useOrphanedFiles;
 }
 
+- (void)orphanedFilesFinderFinished:(NSNotification *)note{
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:BDSKOrphanedFilesFinderFinishedNotification object:[BDSKOrphanedFilesFinder sharedFinder]];
+    if (useOrphanedFiles)
+        [[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[[BDSKOrphanedFilesFinder sharedFinder] orphanedFiles]];
+}
+
 - (void)setUseOrphanedFiles:(BOOL)flag;
 {
     useOrphanedFiles = flag;
-    if (flag)
-        [[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[[BDSKOrphanedFilesFinder sharedFinder] orphanedFiles]];
-    else
-        [[self mutableArrayValueForKey:@"files"] removeObjectsInArray:[[BDSKOrphanedFilesFinder sharedFinder] orphanedFiles]];
+    BDSKOrphanedFilesFinder *finder = [BDSKOrphanedFilesFinder sharedFinder];
+    if (flag) {
+        if ([finder wasLaunched] == NO) {
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(orphanedFilesFinderFinished:) name:BDSKOrphanedFilesFinderFinishedNotification object:finder];
+            [finder showWindow:nil];
+        } else {
+            [[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[finder orphanedFiles]];
+        }
+    }
+    else {
+        [[self mutableArrayValueForKey:@"files"] removeObjectsInArray:[finder orphanedFiles]];
+    }
 }
     
 - (NSString *)windowNibName { return @"FileMatcherConfigSheet"; }
 
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op
 {
-    [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
-    return NSDragOperationLink;
+    NSPasteboard *pboard = [info draggingPasteboard];
+    if ([pboard canReadFileURLOfTypes:nil]) {
+        [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
+        return NSDragOperationLink;
+    }
+    return NSDragOperationNone;
 }
 
 - (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op;
 {
     NSPasteboard *pboard = [info draggingPasteboard];
-    NSArray *types = [pboard types];
-    if ([types containsObject:NSFilenamesPboardType]) {
-        NSArray *newFiles = [pboard propertyListForType:NSFilenamesPboardType];
-        if ([newFiles count])
-            [[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[self URLsFromPathsAndDirectories:newFiles]];
+    NSArray *fileURLs = [pboard readFileURLsOfTypes:nil];
+    if ([fileURLs count] > 0) {
+        [[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[self URLsFromURLsAndDirectories:fileURLs]];
         return YES;
     }
     return NO;

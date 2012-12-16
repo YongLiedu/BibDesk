@@ -45,7 +45,6 @@
 - (NSAppleEventDescriptor *)aeDescriptorValue;
 
 - (NSURL *)fileURLByResolvingAliases;
-- (NSURL *)fileURLByResolvingAliasesBeforeLastPathComponent;
 #endif
 
 + (NSURL *)URLWithStringByNormalizingPercentEscapes:(NSString *)string;
@@ -55,8 +54,6 @@
 
 #if BDSK_OS_X
 - (NSComparisonResult)UTICompare:(NSURL *)other;
-
-+ (NSURL *)URLFromPasteboardAnyType:(NSPasteboard *)pasteboard;
 
 - (NSArray *)SkimNotes;
 - (NSString *)textSkimNotes;

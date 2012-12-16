@@ -39,23 +39,12 @@
 #import "BDSKDocumentSearch.h"
 #import "BibDocument.h"
 #import "BibItem.h"
-#import "NSInvocation_BDSKExtensions.h"
 #import <libkern/OSAtomic.h>
 
 #define IDENTIFIERS_KEY @"identifiers"
 #define SCORES_KEY @"scores"
 
 @implementation BDSKDocumentSearch
-
-static NSOperationQueue *searchQueue = nil;
-
-+ (void)initialize
-{
-    if (nil == searchQueue) {
-        searchQueue = [NSOperationQueue new];
-        [searchQueue setMaxConcurrentOperationCount:1];
-    }
-}
 
 - (id)initWithDelegate:(id)aDelegate {
     self = [super init];
@@ -67,7 +56,7 @@ static NSOperationQueue *searchQueue = nil;
         currentSearchString = nil;
         previouslySelectedPublications = nil;
         previousScrollPositionAsPercentage = NSZeroPoint;
-        
+        queue = dispatch_queue_create("edu.ucsd.cs.mmccrack.bibdesk.queue.BDSKDocumentSearch", NULL);
     }
     return self;
 }
@@ -79,6 +68,7 @@ static NSOperationQueue *searchQueue = nil;
 // owner should have already sent -terminate; sending it from -dealloc causes resurrection
 - (void)dealloc
 {
+    BDSKDISPATCHDESTROY(queue);
     delegate = nil;
     BDSKDESTROY(currentSearchString);
     BDSKDESTROY(previouslySelectedPublications);
@@ -98,10 +88,9 @@ static NSOperationQueue *searchQueue = nil;
 
 - (void)cancelSearch;
 {
-    // make sure this is performed on the queue thread
-    NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(_cancelSearch) object:nil];
-    [searchQueue addOperation:op];
-    [op release];
+    dispatch_async(queue, ^{
+        [self _cancelSearch];    
+    });
 }
 
 - (void)terminate;
@@ -119,21 +108,6 @@ static NSOperationQueue *searchQueue = nil;
     return 1 == isSearching;
 }
 
-- (void)invokeFoundCallback:(NSDictionary *)info
-{
-    [delegate search:self foundIdentifiers:[info objectForKey:IDENTIFIERS_KEY] normalizedScores:[info objectForKey:SCORES_KEY]];
-}
-
-- (void)invokeFinishedCallback
-{
-    [delegate searchDidStop:self];
-} 
-
-- (void)invokeStartedCallback
-{
-    [delegate searchDidStart:self];
-} 
-
 #define SEARCH_BUFFER_MAX 1024
 
 static inline NSDictionary *normalizedScores(NSDictionary *originalScores, CGFloat maxScore)
@@ -149,11 +123,11 @@ static inline NSDictionary *normalizedScores(NSDictionary *originalScores, CGFlo
 
 - (void)backgroundSearchForString:(NSString *)searchString index:(SKIndexRef)skIndex
 {
-    NSAutoreleasePool *pool = [NSAutoreleasePool new];
-    
     OSAtomicCompareAndSwap32Barrier(0, 1, &isSearching);
-    [self performSelectorOnMainThread:@selector(invokeStartedCallback) withObject:nil waitUntilDone:YES];
-
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        [delegate searchDidStart:self];
+    });
+    
     // note that the add/remove methods flush the index, so we don't have to do it again
     NSParameterAssert(NULL == search);
     search = SKSearchCreate(skIndex, (CFStringRef)searchString, kSKSearchOptionDefault);
@@ -199,8 +173,10 @@ static inline NSDictionary *normalizedScores(NSDictionary *originalScores, CGFlo
         }
 
         if (keepGoing) {
-            NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:foundURLSet, IDENTIFIERS_KEY, normalizedScores(originalScores, maxScore), SCORES_KEY, nil];
-            [self performSelectorOnMainThread:@selector(invokeFoundCallback:) withObject:info waitUntilDone:YES];
+            NSDictionary *theScores = normalizedScores(originalScores, maxScore);
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                [delegate search:self foundIdentifiers:foundURLSet normalizedScores:theScores];
+            });
         }
                 
         @synchronized(self) {
@@ -209,10 +185,10 @@ static inline NSDictionary *normalizedScores(NSDictionary *originalScores, CGFlo
         
     } while (keepGoing && NULL != search && more);
     
-    [self performSelectorOnMainThread:@selector(invokeFinishedCallback) withObject:nil waitUntilDone:YES];
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        [delegate searchDidStop:self];
+    });
     [self _cancelSearch];
-    
-    [pool release];
 }
 
 - (NSArray *)previouslySelectedPublications { return previouslySelectedPublications; }
@@ -234,12 +210,9 @@ static inline NSDictionary *normalizedScores(NSDictionary *originalScores, CGFlo
         [self cancelSearch];
     
     // always queue a search, since the index content may be changing (in case of a search group)
-    NSInvocation *invocation = [NSInvocation invocationWithTarget:self selector:@selector(backgroundSearchForString:index:)];
-    [invocation setArgument:&searchString atIndex:2];
-    [invocation setArgument:&skIndex atIndex:3];
-    NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithInvocation:invocation];
-    [searchQueue addOperation:op];
-    [op release];
+    dispatch_async(queue, ^{
+        [self backgroundSearchForString:searchString index:skIndex];
+    });
 }
 
 @end

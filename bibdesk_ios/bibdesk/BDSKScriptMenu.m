@@ -55,11 +55,15 @@
     FSEventStreamRef streamRef;
     NSArray *scriptFolders;
     NSArray *sortDescriptors;
+    BOOL menuNeedsUpdate;
 }
 
 + (id)sharedController;
 
 - (NSMenu *)scriptMenu;
+
+- (BOOL)menuNeedsUpdate;
+- (void)setMenuNeedsUpdate:(BOOL)flag;
 
 - (void)executeScript:(id)sender;
 - (void)openScript:(id)sender;
@@ -68,8 +72,6 @@
 
 
 @implementation BDSKScriptMenuController
-
-static BOOL menuNeedsUpdate = NO;
 
 + (id)sharedController {
     static BDSKScriptMenuController *sharedController = nil;
@@ -95,7 +97,7 @@ static NSArray *scriptFolderPaths() {
 }
 
 static void fsevents_callback(FSEventStreamRef streamRef, void *clientCallBackInfo, int numEvents, const char *const eventPaths[], const FSEventStreamEventFlags *eventMasks, const uint64_t *eventIDs) {
-    menuNeedsUpdate = YES;
+    [(id)clientCallBackInfo setMenuNeedsUpdate:YES];
 }
 
 - (void)handleApplicationWillTerminateNotification:(NSNotification *)notification {
@@ -133,10 +135,12 @@ static void fsevents_callback(FSEventStreamRef streamRef, void *clientCallBackIn
             scriptFolders = [folders copy];
             sortDescriptors = [[NSArray alloc] initWithObjects:[[[NSSortDescriptor alloc] initWithKey:FILENAME_KEY ascending:YES selector:@selector(localizedCaseInsensitiveNumericCompare:)] autorelease], nil];
             
+            FSEventStreamContext context = {0, (void *)self, NULL, NULL, NULL};
+            
             if ([scriptFolders count]) {
                 streamRef = FSEventStreamCreate(kCFAllocatorDefault,
                                                 (FSEventStreamCallback)&fsevents_callback, // callback
-                                                NULL, // context
+                                                &context, // context
                                                 (CFArrayRef)scriptFolders, // pathsToWatch
                                                 kFSEventStreamEventIdSinceNow, // sinceWhen
                                                 1.0, // latency
@@ -158,6 +162,10 @@ static void fsevents_callback(FSEventStreamRef streamRef, void *clientCallBackIn
 }    
 
 - (NSMenu *)scriptMenu { return scriptMenu; }
+
+- (BOOL)menuNeedsUpdate { return menuNeedsUpdate; }
+
+- (void)setMenuNeedsUpdate:(BOOL)flag { menuNeedsUpdate = flag; }
 
 - (NSArray *)directoryContentsAtPath:(NSString *)path recursionDepth:(NSInteger)recursionDepth
 {

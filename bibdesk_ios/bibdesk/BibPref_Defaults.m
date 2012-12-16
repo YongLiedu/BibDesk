@@ -48,6 +48,7 @@
 #import "BDSKTableView.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
+#import "NSPasteboard_BDSKExtensions.h"
 
 // this corresponds with the menu item order in the nib
 enum {
@@ -193,7 +194,7 @@ static NSSet *alwaysDisabledFields = nil;
     BDSKFieldNameFormatter *fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
     [[[[defaultFieldsTableView tableColumns] objectAtIndex:0] dataCell] setFormatter:fieldNameFormatter];
     [fieldNameFormatter release];
-    [globalMacroFilesTableView registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
+    [globalMacroFilesTableView registerForDraggedTypes:[NSArray arrayWithObjects:(NSString *)kUTTypeFileURL, NSFilenamesPboardType, nil]];
     
     NSWorkspace *sws = [NSWorkspace sharedWorkspace];
     NSArray *pdfViewers = [sws editorAndViewerNamesAndBundleIDsForPathExtension:@"pdf"];
@@ -417,24 +418,29 @@ static NSSet *alwaysDisabledFields = nil;
 - (BOOL)tableView:(NSTableView *)tableView acceptDrop:(id <NSDraggingInfo> )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op{
     if (tableView != globalMacroFilesTableView) 
         return NO;
+    
     NSPasteboard *pboard = [info draggingPasteboard];
-    if([pboard availableTypeFromArray:[NSArray arrayWithObject:NSFilenamesPboardType]] == nil)
+    NSArray *fileURLs = [pboard readFileURLsOfTypes:nil];
+    
+    if ([fileURLs count] > 0) {
+        NSFileManager *fm = [NSFileManager defaultManager];
+        
+        for (NSURL *fileURL in fileURLs) {
+            NSString *file = [fileURL path];
+            NSString *extension = [file pathExtension];
+            if ([fm fileExistsAtPath:[file stringByStandardizingPath]] == NO ||
+                ([extension isCaseInsensitiveEqual:@"bib"] == NO && [extension isCaseInsensitiveEqual:@"bst"] == NO))
+                continue;
+            [globalMacroFiles addObject:file];
+        }
+        [sud setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
+        
+        [globalMacroFilesTableView reloadData];
+        
+        return YES;
+    } else {
         return NO;
-    NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
-    NSFileManager *fm = [NSFileManager defaultManager];
-    
-    for (NSString *file in fileNames) {
-        NSString *extension = [file pathExtension];
-        if ([fm fileExistsAtPath:[file stringByStandardizingPath]] == NO ||
-            ([extension isCaseInsensitiveEqual:@"bib"] == NO && [extension isCaseInsensitiveEqual:@"bst"] == NO))
-            continue;
-        [globalMacroFiles addObject:file];
     }
-    [sud setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
-    
-    [globalMacroFilesTableView reloadData];
-    
-    return YES;
 }
 
 #pragma mark TableView Delegate methods
@@ -526,46 +532,10 @@ static NSSet *alwaysDisabledFields = nil;
 }
 
 - (IBAction)showTypeInfoEditor:(id)sender{
-	[[BDSKTypeInfoEditor sharedTypeInfoEditor] beginSheetModalForWindow:[[self view] window]];
+	[[BDSKTypeInfoEditor sharedTypeInfoEditor] beginSheetModalForWindow:[[self view] window] completionHandler:nil];
 }
 
 #pragma mark default viewer
-
-- (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(NSInteger)returnCode contextInfo:(void  *)contextInfo{
-    NSString *bundleID;
-    if (returnCode == NSFileHandlingPanelOKButton)
-        bundleID = [[NSBundle bundleWithPath:[panel filename]] bundleIdentifier];
-    else
-        bundleID = [[sud dictionaryForKey:BDSKDefaultViewersKey] objectForKey:@"pdf"];
-    
-    if([bundleID length]){
-        NSInteger i, iMax = [pdfViewerPopup numberOfItems] - 2;
-        
-        for(i = 2; i < iMax; i++){
-            if([[[pdfViewerPopup itemAtIndex:i] representedObject] isEqualToString:bundleID]){
-                [pdfViewerPopup selectItemAtIndex:i];
-                break;
-            }
-        }
-        if(i == iMax){
-            NSString *appPath = [[NSWorkspace sharedWorkspace] absolutePathForAppBundleWithIdentifier:bundleID];
-            NSString *name = [[appPath lastPathComponent] stringByDeletingPathExtension];
-            [pdfViewerPopup insertItemWithTitle:name atIndex:2];
-            [[pdfViewerPopup itemAtIndex:2] setRepresentedObject:bundleID];
-            [(NSMenuItem *)[pdfViewerPopup itemAtIndex:2] setImageAndSize:[[NSWorkspace sharedWorkspace] iconForFile:appPath]];
-            [pdfViewerPopup selectItemAtIndex:2];
-        }
-    }else{
-        [pdfViewerPopup selectItemAtIndex:0];
-    }
-    NSMutableDictionary *defaultViewers = [[sud dictionaryForKey:BDSKDefaultViewersKey] mutableCopy];
-    if ([bundleID length])
-        [defaultViewers setObject:bundleID forKey:@"pdf"];
-    else
-        [defaultViewers removeObjectForKey:@"pdf"];
-    [sud setObject:defaultViewers forKey:BDSKDefaultViewersKey];
-    [defaultViewers release];
-}
 
 - (IBAction)changeDefaultPDFViewer:(id)sender{
     if([sender indexOfSelectedItem] == [sender numberOfItems] - 1){
@@ -573,14 +543,43 @@ static NSSet *alwaysDisabledFields = nil;
         [openPanel setCanChooseDirectories:NO];
         [openPanel setAllowsMultipleSelection:NO];
         [openPanel setPrompt:NSLocalizedString(@"Choose Viewer", @"Prompt for Choose panel")];
-        
-        [openPanel beginSheetForDirectory:[[NSFileManager defaultManager] applicationsDirectory] 
-                                     file:nil 
-                                    types:[NSArray arrayWithObjects:@"app", nil]
-                           modalForWindow:[[self view] window]
-                            modalDelegate:self
-                           didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:)
-                              contextInfo:NULL];
+        [openPanel setDirectoryURL:[NSURL fileURLWithPath:[[NSFileManager defaultManager] applicationsDirectory]]];
+        [openPanel setAllowedFileTypes:[NSArray arrayWithObjects:@"app", nil]];
+        [openPanel beginSheetModalForWindow:[[self view] window] completionHandler:^(NSInteger result){
+            NSString *bundleID;
+            if (result == NSFileHandlingPanelOKButton)
+                bundleID = [[NSBundle bundleWithURL:[openPanel URL]] bundleIdentifier];
+            else
+                bundleID = [[sud dictionaryForKey:BDSKDefaultViewersKey] objectForKey:@"pdf"];
+            
+            if([bundleID length]){
+                NSInteger i, iMax = [pdfViewerPopup numberOfItems] - 2;
+                
+                for(i = 2; i < iMax; i++){
+                    if([[[pdfViewerPopup itemAtIndex:i] representedObject] isEqualToString:bundleID]){
+                        [pdfViewerPopup selectItemAtIndex:i];
+                        break;
+                    }
+                }
+                if(i == iMax){
+                    NSString *appPath = [[NSWorkspace sharedWorkspace] absolutePathForAppBundleWithIdentifier:bundleID];
+                    NSString *name = [[appPath lastPathComponent] stringByDeletingPathExtension];
+                    [pdfViewerPopup insertItemWithTitle:name atIndex:2];
+                    [[pdfViewerPopup itemAtIndex:2] setRepresentedObject:bundleID];
+                    [(NSMenuItem *)[pdfViewerPopup itemAtIndex:2] setImageAndSize:[[NSWorkspace sharedWorkspace] iconForFile:appPath]];
+                    [pdfViewerPopup selectItemAtIndex:2];
+                }
+            }else{
+                [pdfViewerPopup selectItemAtIndex:0];
+            }
+            NSMutableDictionary *defaultViewers = [[sud dictionaryForKey:BDSKDefaultViewersKey] mutableCopy];
+            if ([bundleID length])
+                [defaultViewers setObject:bundleID forKey:@"pdf"];
+            else
+                [defaultViewers removeObjectForKey:@"pdf"];
+            [sud setObject:defaultViewers forKey:BDSKDefaultViewersKey];
+            [defaultViewers release];
+        }];
     }else{
         NSString *bundleID = [[sender selectedItem] representedObject];
         NSMutableDictionary *defaultViewers = [[sud dictionaryForKey:BDSKDefaultViewersKey] mutableCopy];
@@ -599,7 +598,7 @@ static NSSet *alwaysDisabledFields = nil;
 	if (!macroWC){
 		macroWC = [[BDSKMacroWindowController alloc] initWithMacroResolver:[BDSKMacroResolver defaultMacroResolver]];
 	}
-	[macroWC beginSheetModalForWindow:[[self view] window]];
+	[macroWC beginSheetModalForWindow:[[self view] window] completionHandler:nil];
 }
 
 - (IBAction)showMacroFileWindow:(id)sender{
@@ -615,15 +614,6 @@ static NSSet *alwaysDisabledFields = nil;
     [NSApp endSheet:globalMacroFileSheet];
 }
 
-- (void)addGlobalMacroFilePanelDidEnd:(NSOpenPanel *)openPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if(returnCode == NSFileHandlingPanelCancelButton)
-        return;
-    
-    [globalMacroFiles addNonDuplicateObjectsFromArray:[openPanel filenames]];
-    [globalMacroFilesTableView reloadData];
-    [sud setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
-}
-
 - (IBAction)addRemoveGlobalMacroFile:(id)sender{
     if ([sender selectedSegment] == 0) { // add
         
@@ -632,14 +622,17 @@ static NSSet *alwaysDisabledFields = nil;
         [openPanel setResolvesAliases:NO];
         [openPanel setCanChooseDirectories:NO];
         [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
-
-        [openPanel beginSheetForDirectory:@"/usr" 
-                                     file:nil 
-                                    types:[NSArray arrayWithObjects:@"bib", @"bst", nil] 
-                           modalForWindow:globalMacroFileSheet
-                            modalDelegate:self 
-                           didEndSelector:@selector(addGlobalMacroFilePanelDidEnd:returnCode:contextInfo:) 
-                              contextInfo:nil];
+        [openPanel setDirectoryURL:[NSURL fileURLWithPath:@"/usr"]];
+        [openPanel setAllowedFileTypes:[NSArray arrayWithObjects:@"bib", @"bst", nil]];
+        
+        [openPanel beginSheetModalForWindow:globalMacroFileSheet completionHandler:^(NSInteger result){
+            if(result == NSFileHandlingPanelCancelButton)
+                return;
+            
+            [globalMacroFiles addNonDuplicateObjectsFromArray:[[openPanel URLs] valueForKey:@"path"]];
+            [globalMacroFilesTableView reloadData];
+            [sud setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
+        }];
         
     } else { // remove
         

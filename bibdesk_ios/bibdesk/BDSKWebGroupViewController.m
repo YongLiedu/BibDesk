@@ -51,6 +51,7 @@
 #import "NSImage_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
+#import "NSPasteboard_BDSKExtensions.h"
 
 #define MAX_HISTORY 50
 #define BACK_SEGMENT_INDEX 0
@@ -94,7 +95,7 @@
     rect.size.height += 1.0;
     [urlField setFrame:rect];
     
-    [urlField registerForDraggedTypes:[NSArray arrayWithObjects:NSURLPboardType, BDSKWeblocFilePboardType, nil]];
+    [urlField registerForDraggedTypes:[NSArray arrayWithObjects:(NSString *)kUTTypeURL, (NSString *)kUTTypeFileURL, NSURLPboardType, NSFilenamesPboardType, nil]];
     
     [[urlField button] setTarget:self];
     [[urlField button] setAction:@selector(stopOrReloadAction:)];
@@ -219,7 +220,7 @@
     if (anObject == urlField) {
         if (fieldEditor == nil) {
             fieldEditor = [[BDSKFieldEditor alloc] init];
-            [(BDSKFieldEditor *)fieldEditor registerForDelegatedDraggedTypes:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil]];
+            [(BDSKFieldEditor *)fieldEditor registerForDelegatedDraggedTypes:[NSArray arrayWithObjects:(NSString *)kUTTypeURL, (NSString *)kUTTypeFileURL, NSURLPboardType, NSFilenamesPboardType, nil]];
         }
         return fieldEditor;
 	}
@@ -228,21 +229,17 @@
 
 - (NSDragOperation)dragTextField:(BDSKDragTextField *)textField validateDrop:(id <NSDraggingInfo>)sender {
     if ([sender draggingSource] != textField && 
-        [[sender draggingPasteboard] availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil]])
+        [[sender draggingPasteboard] canReadURL])
         return NSDragOperationEvery;
     return NSDragOperationNone;
 }
 
 - (BOOL)dragTextField:(BDSKDragTextField *)textField acceptDrop:(id <NSDraggingInfo>)sender {
     NSPasteboard *pboard = [sender draggingPasteboard];
-	NSString *dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil]];
-    NSString *urlString = nil;
+    NSArray *urls = [pboard readURLs];
     
-    if ([dragType isEqualToString:NSURLPboardType])
-        urlString = [[NSURL URLFromPasteboard:pboard] absoluteString];
-    else if ([dragType isEqualToString:BDSKWeblocFilePboardType])
-        urlString = [pboard stringForType:BDSKWeblocFilePboardType];
-    if (urlString) {
+    if ([urls count] > 0) {
+        NSString *urlString = [[urls objectAtIndex:0] absoluteString];
         [textField setStringValue:urlString];
         if ([textField currentEditor])
             [[textField currentEditor] setSelectedRange:NSMakeRange([urlString length], 0)];
@@ -255,9 +252,8 @@
 - (BOOL)addressTextField:(BDSKAddressTextField *)textField writeDataToPasteboard:(NSPasteboard *)pboard {
     NSURL *url = [[self webView] URL];
     if (url) {
-        [pboard declareTypes:[NSArray arrayWithObjects:NSURLPboardType, BDSKWeblocFilePboardType, nil] owner:nil];
-        [url writeToPasteboard:pboard];
-        [pboard setString:[url absoluteString] forType:BDSKWeblocFilePboardType];
+        [pboard clearContents];
+        [pboard writeObjects:[NSArray arrayWithObjects:url, nil]];
         return YES;
     }
     return NO;

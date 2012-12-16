@@ -92,14 +92,14 @@ enum {
     self = [super initWithWindowNibName:@"BDSKFindPanel"];
     if (self) {
 		NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSFindPboard];
-		NSString *availableType = [pboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
+        NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
         
 		findFieldEditor = nil;
 		
 		findHistory = [[NSMutableArray alloc] initWithCapacity:MAX_HISTORY_COUNT == NSNotFound ? 10 : MAX_HISTORY_COUNT];
 		replaceHistory = [[NSMutableArray alloc] initWithCapacity:MAX_HISTORY_COUNT == NSNotFound ? 10 : MAX_HISTORY_COUNT];
         
-		findString = [((availableType == nil)? @"" : [pboard stringForType:NSStringPboardType]) copy];
+		findString = [([strings count] == 0 ? @"" : [strings objectAtIndex:0]) copy];
         replaceString = [@"" retain];
         searchType = FCTextualSearch;
         searchScope = FCContainsSearch;
@@ -292,8 +292,8 @@ enum {
 		[self insertObject:newFindString inFindHistoryAtIndex:0];
 		
 		NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSFindPboard];
-		[pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-		[pboard setString:findString forType:NSStringPboardType];
+		[pboard clearContents];
+		[pboard writeObjects:[NSArray arrayWithObjects:findString, nil]];
     }
 }
 

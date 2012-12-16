@@ -96,7 +96,6 @@
 - (void)prepare{
     NSRect fieldsFrame = [fieldsControl frame];
     NSRect oldPromptFrame = [promptField frame];
-    [promptField setStringValue:(prompt)? prompt : @""];
     [promptField sizeToFit];
     NSRect newPromptFrame = [promptField frame];
     CGFloat dw = NSWidth(newPromptFrame) - NSWidth(oldPromptFrame);
@@ -105,9 +104,9 @@
     [fieldsControl setFrame:fieldsFrame];
 }
 
-- (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo {
+- (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler {
     [self prepare];
-    [super beginSheetModalForWindow:window modalDelegate:delegate didEndSelector:didEndSelector contextInfo:contextInfo];
+    [super beginSheetModalForWindow:window completionHandler:handler];
 }
 
 - (IBAction)dismiss:(id)sender{
@@ -228,9 +227,7 @@
     NSRect oldPromptFrame = [promptField frame];
     NSRect replaceFieldsFrame = [replaceFieldsComboBox frame];
     NSRect oldReplacePromptFrame = [replacePromptField frame];
-    [promptField setStringValue:(prompt)? prompt : @""];
     [promptField sizeToFit];
-    [replacePromptField setStringValue:replacePrompt ?: @""];
     [replacePromptField sizeToFit];
     NSRect newPromptFrame = [promptField frame];
     NSRect newReplacePromptFrame = [replacePromptField frame];

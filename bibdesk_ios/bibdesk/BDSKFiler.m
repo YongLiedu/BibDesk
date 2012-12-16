@@ -84,7 +84,7 @@ static BDSKFiler *sharedFiler = nil;
         papersFolderPath = [fm resolveAliasesInPath:papersFolderPath];
         exists = [fm fileExistsAtPath:papersFolderPath isDirectory:&isDir];
         if (exists == NO)
-            isDir = exists = [fm createPathToFile:[papersFolderPath stringByAppendingPathComponent:@"0"] attributes:nil];
+            isDir = exists = [fm createDirectoryAtPath:papersFolderPath withIntermediateDirectories:YES attributes:nil error:NULL];
         
         if (exists == NO || isDir == NO) {
             // The directory isn't there or isn't a directory, so pop up an alert.

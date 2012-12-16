@@ -45,8 +45,8 @@
 #define REQUIRED_KEY @"required"
 #define OPTIONAL_KEY @"optional"
 
-#define BDSKTypeInfoRowsPboardType @"BDSKTypeInfoRowsPboardType"
-#define BDSKTypeInfoPboardType     @"BDSKTypeInfoPboardType"
+#define BDSKPasteboardTypeInfoRows @"edu.ucsd.mmccrack.bibdesk.pasteboard.type-info-rows"
+#define BDSKPasteboardTypeInfo     @"edu.ucsd.mmccrack.bibdesk.pasteboard.type-info"
 
 static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
@@ -75,9 +75,9 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 - (void)awakeFromNib
 {
     // we want to be able to reorder the items
-	[typeTableView registerForDraggedTypes:[NSArray arrayWithObject:BDSKTypeInfoRowsPboardType]];
-    [requiredTableView registerForDraggedTypes:[NSArray arrayWithObject:BDSKTypeInfoRowsPboardType]];
-    [optionalTableView registerForDraggedTypes:[NSArray arrayWithObject:BDSKTypeInfoRowsPboardType]];
+	[typeTableView registerForDraggedTypes:[NSArray arrayWithObject:BDSKPasteboardTypeInfoRows]];
+    [requiredTableView registerForDraggedTypes:[NSArray arrayWithObject:BDSKPasteboardTypeInfoRows]];
+    [optionalTableView registerForDraggedTypes:[NSArray arrayWithObject:BDSKPasteboardTypeInfoRows]];
 	
     BDSKFieldNameFormatter *fieldNameFormatter = [[[BDSKFieldNameFormatter alloc] init] autorelease];
     BDSKTypeNameFormatter *typeNameFormatter = [[[BDSKTypeNameFormatter alloc] init] autorelease];
@@ -538,12 +538,11 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 // used by OmniAppKit category methods
 - (void)tableView:(NSTableView *)tv pasteFromPasteboard:(NSPasteboard *)pboard {
-    NSArray *pbtypes = [pboard types];
-    if ([tv isEqual:typeTableView] && [pbtypes containsObject:BDSKTypeInfoPboardType]) {
-        NSArray *newTypes = [pboard propertyListForType:BDSKTypeInfoPboardType];
+    if ([tv isEqual:typeTableView] && [[pboard types] containsObject:BDSKPasteboardTypeInfo]) {
+        NSArray *newTypes = [pboard propertyListForType:BDSKPasteboardTypeInfo];
         NSString *newType = nil;
         
-        for (NSDictionary *aType in [pboard propertyListForType:BDSKTypeInfoPboardType]) {
+        for (NSDictionary *aType in newTypes) {
             // append "copy" here instead of in the loop
             NSString *name = [[aType objectForKey:@"name"] stringByAppendingString:@"-copy"];
             newType = name;
@@ -567,16 +566,17 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 }
 
 - (BOOL)tableViewCanPasteFromPasteboard:(NSTableView *)tv {
-    return [tv isEqual:typeTableView];
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+    return [tv isEqual:typeTableView] && [pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypeInfo, nil]];
 }
 
 #pragma mark NSTableView dragging
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard {
 	// we only drag our own rows
-	[pboard declareTypes: [NSArray arrayWithObjects:BDSKTypeInfoRowsPboardType, BDSKTypeInfoPboardType, nil] owner:nil];
+	[pboard clearContents];
 	// write the rows to the pasteboard
-	[pboard setData:[NSKeyedArchiver archivedDataWithRootObject:rowIndexes] forType:BDSKTypeInfoRowsPboardType];
+	[pboard setData:[NSKeyedArchiver archivedDataWithRootObject:rowIndexes] forType:BDSKPasteboardTypeInfoRows];
     if ([tv isEqual:typeTableView] && [rowIndexes count]) {
         NSMutableArray *newTypes = [NSMutableArray array];
         NSUInteger row = [rowIndexes firstIndex];
@@ -588,16 +588,22 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
             [newTypes addObject:aType];
             row = [rowIndexes indexGreaterThanIndex:row];
         }
-        [pboard setPropertyList:newTypes forType:BDSKTypeInfoPboardType];
+        [pboard setPropertyList:newTypes forType:BDSKPasteboardTypeInfo];
     }
 	return YES;
 }
 
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op {
-	if ([info draggingSource] != tv) {// we don't allow dragging between tables, as we want to keep default types in the same place
+	NSPasteboard *pboard = [info draggingPasteboard];
+    
+    if ([info draggingSource] != tv) {// we don't allow dragging between tables, as we want to keep default types in the same place
 		if ([info draggingSource] == typeTableView || tv == typeTableView || [self canEditType:currentType] == NO)
             return NSDragOperationNone;
 	}
+    
+    if (NO == [pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypeInfoRows, nil]]) {
+        return NSDragOperationNone;
+    }
     
 	if (row == -1) // redirect drops on the table to the first item
 		[tv setDropRow:0 dropOperation:NSTableViewDropAbove];
@@ -612,7 +618,12 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 - (BOOL)tableView:(NSTableView *)tv acceptDrop:(id <NSDraggingInfo> )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op {
 	NSPasteboard *pboard = [info draggingPasteboard];
-	NSIndexSet *rowIndexes = [NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:BDSKTypeInfoRowsPboardType]];
+    
+    if (NO == [[pboard types] containsObject:BDSKPasteboardTypeInfoRows]) {
+        return NO;
+    }
+    
+	NSIndexSet *rowIndexes = [NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:BDSKPasteboardTypeInfoRows]];
     NSIndexSet *insertIndexes;
     NSTableView *sourceTv = [info draggingSource];
 	

@@ -2,26 +2,26 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="8.00">
 	<data>
 		<int key="IBDocument.SystemTarget">1060</int>
-		<string key="IBDocument.SystemVersion">12B19</string>
-		<string key="IBDocument.InterfaceBuilderVersion">2549</string>
-		<string key="IBDocument.AppKitVersion">1187</string>
-		<string key="IBDocument.HIToolboxVersion">624.00</string>
+		<string key="IBDocument.SystemVersion">10K549</string>
+		<string key="IBDocument.InterfaceBuilderVersion">1306</string>
+		<string key="IBDocument.AppKitVersion">1038.36</string>
+		<string key="IBDocument.HIToolboxVersion">461.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
-			<string key="NS.object.0">2549</string>
+			<string key="NS.object.0">1306</string>
 		</object>
 		<array key="IBDocument.IntegratedClassDependencies">
 			<string>NSCustomObject</string>
-			<string>NSCustomView</string>
-			<string>NSDrawer</string>
-			<string>NSScrollView</string>
-			<string>NSScroller</string>
-			<string>NSSegmentedCell</string>
-			<string>NSSegmentedControl</string>
-			<string>NSTableColumn</string>
-			<string>NSTableView</string>
 			<string>NSTextField</string>
+			<string>NSScrollView</string>
 			<string>NSTextFieldCell</string>
+			<string>NSScroller</string>
+			<string>NSSegmentedControl</string>
+			<string>NSSegmentedCell</string>
+			<string>NSCustomView</string>
+			<string>NSTableColumn</string>
+			<string>NSDrawer</string>
+			<string>NSTableView</string>
 		</array>
 		<array key="IBDocument.PluginDependencies">
 			<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -93,7 +93,6 @@
 							<int key="NSTrackingMode">2</int>
 							<int key="NSSegmentStyle">6</int>
 						</object>
-						<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 					</object>
 					<object class="NSScrollView" id="357941803">
 						<reference key="NSNextResponder" ref="1067513711"/>
@@ -109,8 +108,6 @@
 										<string key="NSFrameSize">{87, 193}</string>
 										<reference key="NSSuperview" ref="457447600"/>
 										<bool key="NSEnabled">YES</bool>
-										<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
-										<bool key="NSControlAllowsExpansionToolTips">YES</bool>
 										<object class="_NSCornerView" key="NSCornerView">
 											<nil key="NSNextResponder"/>
 											<int key="NSvFlags">256</int>
@@ -191,7 +188,6 @@
 										<int key="NSDraggingSourceMaskForNonLocal">0</int>
 										<bool key="NSAllowsTypeSelect">NO</bool>
 										<int key="NSTableViewDraggingDestinationStyle">1</int>
-										<int key="NSTableViewGroupRowStyle">1</int>
 									</object>
 								</array>
 								<string key="NSFrame">{{1, 1}, {87, 193}}</string>
@@ -214,7 +210,6 @@
 								<int key="NSvFlags">256</int>
 								<string key="NSFrame">{{88, 1}, {11, 193}}</string>
 								<reference key="NSSuperview" ref="357941803"/>
-								<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 								<int key="NSsFlags">256</int>
 								<reference key="NSTarget" ref="357941803"/>
 								<string key="NSAction">_doScroller:</string>
@@ -225,7 +220,6 @@
 								<int key="NSvFlags">-2147483392</int>
 								<string key="NSFrame">{{-100, -100}, {273, 11}}</string>
 								<reference key="NSSuperview" ref="357941803"/>
-								<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 								<int key="NSsFlags">257</int>
 								<reference key="NSTarget" ref="357941803"/>
 								<string key="NSAction">_doScroller:</string>
@@ -235,14 +229,11 @@
 						<string key="NSFrame">{{0, 25}, {100, 195}}</string>
 						<reference key="NSSuperview" ref="1067513711"/>
 						<reference key="NSNextKeyView" ref="457447600"/>
-						<int key="NSsFlags">133138</int>
+						<int key="NSsFlags">18</int>
 						<reference key="NSVScroller" ref="794701556"/>
 						<reference key="NSHScroller" ref="568343027"/>
 						<reference key="NSContentView" ref="457447600"/>
 						<bytes key="NSScrollAmts">QSAAAEEgAABBkAAAQZAAAA</bytes>
-						<double key="NSMinMagnification">0.25</double>
-						<double key="NSMaxMagnification">4</double>
-						<double key="NSMagnification">1</double>
 					</object>
 					<object class="NSTextField" id="95904413">
 						<reference key="NSNextResponder" ref="1067513711"/>
@@ -264,7 +255,6 @@
 							</object>
 							<reference key="NSTextColor" ref="44336386"/>
 						</object>
-						<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 					</object>
 				</array>
 				<string key="NSFrameSize">{100, 286}</string>
@@ -294,30 +284,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
-						<string key="label">addRemoveButton</string>
-						<reference key="source" ref="281049894"/>
-						<reference key="destination" ref="161634919"/>
-					</object>
-					<int key="connectionID">52</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
-						<string key="label">addRemoveCustomCiteString:</string>
-						<reference key="source" ref="281049894"/>
-						<reference key="destination" ref="161634919"/>
-					</object>
-					<int key="connectionID">53</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">view</string>
-						<reference key="source" ref="281049894"/>
-						<reference key="destination" ref="1067513711"/>
-					</object>
-					<int key="connectionID">54</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
 						<string key="label">contentView</string>
 						<reference key="source" ref="320990869"/>
 						<reference key="destination" ref="1067513711"/>
@@ -339,6 +305,30 @@
 						<reference key="destination" ref="281049894"/>
 					</object>
 					<int key="connectionID">37</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">addRemoveButton</string>
+						<reference key="source" ref="281049894"/>
+						<reference key="destination" ref="161634919"/>
+					</object>
+					<int key="connectionID">52</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">addRemoveCustomCiteString:</string>
+						<reference key="source" ref="281049894"/>
+						<reference key="destination" ref="161634919"/>
+					</object>
+					<int key="connectionID">53</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">view</string>
+						<reference key="source" ref="281049894"/>
+						<reference key="destination" ref="1067513711"/>
+					</object>
+					<int key="connectionID">54</int>
 				</object>
 			</array>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -472,6 +462,7 @@
 				<string key="49.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<boolean value="YES" key="49.IBShouldRemoveOnLegacySave"/>
 				<string key="50.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<integer value="0" key="51.IBNSSegmentedControlInspectorSelectedSegmentMetadataKey"/>
 				<string key="51.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<integer value="0" key="51.IBSegmentedControlInspectorSelectedSegmentMetadataKey"/>
 			</dictionary>
@@ -637,7 +628,7 @@
 		</object>
 		<object class="NSMutableDictionary" key="IBDocument.PluginDeclaredDependencyDefaults">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin.macosx</string>
-			<integer value="1050" key="NS.object.0"/>
+			<real value="1070" key="NS.object.0"/>
 		</object>
 		<object class="NSMutableDictionary" key="IBDocument.PluginDeclaredDevelopmentDependencies">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin.InterfaceBuilder3</string>

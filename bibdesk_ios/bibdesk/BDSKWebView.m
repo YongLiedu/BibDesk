@@ -140,7 +140,7 @@
 	NSURL *theURL = [[datasource request] URL];
 	NSString *name = [datasource pageTitle] ?: [theURL lastPathComponent];
     if (theURL)
-        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:[theURL absoluteString] proposedName:name modalForWindow:[self window]];
+        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithURL:theURL proposedName:name modalForWindow:[self window]];
 }
 
 - (void)bookmarkLink:(id)sender {
@@ -148,7 +148,7 @@
 	NSURL *theURL = [element objectForKey:WebElementLinkURLKey];
 	NSString *name = [element objectForKey:WebElementLinkLabelKey] ?: [theURL lastPathComponent];
     if (theURL)
-        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:[theURL absoluteString] proposedName:name modalForWindow:[self window]];
+        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithURL:theURL proposedName:name modalForWindow:[self window]];
 }
 
 - (void)revealLink:(id)sender {
@@ -455,7 +455,9 @@
     filename = [[NSFileManager defaultManager] uniqueFilePathWithName:filename atPath:downloadsDir];
     if (showingPanel) {
         NSSavePanel *savePanel = [NSSavePanel savePanel];
-        NSInteger returnCode = [savePanel runModalForDirectory:downloadsDir file:[filename lastPathComponent]];
+        [savePanel setDirectoryURL:[NSURL fileURLWithPath:downloadsDir]];
+        [savePanel setNameFieldStringValue:[filename lastPathComponent]];
+        NSInteger returnCode = [savePanel runModal];
         if (returnCode == NSFileHandlingPanelCancelButton)
             return;
         filename = [savePanel filename];

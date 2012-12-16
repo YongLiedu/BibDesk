@@ -83,9 +83,6 @@
 - (void)setupTypeUI;
 - (void)setType:(NSString *)type;
 
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
-- (void)urlSheetDidEnd:(BDSKURLSheetController *)urlSheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
-- (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)autoDiscoverFromFrameAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)autoDiscoverFromStringAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 
@@ -172,7 +169,7 @@
     [sourceBox retain];
     [webViewView retain];
 	
-    [itemTableView registerForDraggedTypes:[NSArray arrayWithObject:NSStringPboardType]];
+    [itemTableView registerForDraggedTypes:[NSArray arrayWithObject:NSPasteboardTypeString]];
     [itemTableView setDoubleAction:@selector(addTextToCurrentFieldAction:)];
     
     [self setWindowFrameAutosaveName:BDSKTextImportControllerFrameAutosaveName];
@@ -203,7 +200,7 @@
 
 #pragma mark Calling the main sheet
 
-- (void)beginSheetForURL:(NSURL *)aURL modalForWindow:(NSWindow *)aWindow modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo {
+- (void)beginSheetForURL:(NSURL *)aURL modalForWindow:(NSWindow *)aWindow completionHandler:(void (^)(NSInteger result))handler {
     // make sure we loaded the nib
     [self window];
     if (aURL == nil) {
@@ -214,7 +211,11 @@
 		[self setShowingWebView:YES];
         [webView setURL:aURL];
     }
-    [self beginSheetModalForWindow:aWindow modalDelegate:delegate didEndSelector:didEndSelector contextInfo:contextInfo];
+    [super beginSheetModalForWindow:aWindow completionHandler:handler];
+}
+
+- (void)beginSheetModalForWindow:(NSWindow *)aWindow completionHandler:(void (^)(NSInteger result))handler {
+    [self beginSheetForURL:nil modalForWindow:aWindow completionHandler:handler];
 }
 
 #pragma mark Actions
@@ -302,24 +303,39 @@
 
 - (IBAction)importFromWebAction:(id)sender{
 	BDSKURLSheetController *urlSheetController = [[[BDSKURLSheetController alloc] init] autorelease];
-    [urlSheetController beginSheetModalForWindow:[self window]
-                                   modalDelegate:self
-                                  didEndSelector:@selector(urlSheetDidEnd:returnCode:contextInfo:)
-                                     contextInfo:NULL];
+    [urlSheetController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        if(result == NSOKButton){
+            // setup webview and load page
+            
+            [self setShowingWebView:YES];
+            
+            NSURL *url = [urlSheetController URL];
+            
+            if(url == nil){
+                [[urlSheetController window] orderOut:nil];
+                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error", @"Message in alert dialog when error occurs")
+                                                 defaultButton:nil
+                                               alternateButton:nil
+                                                   otherButton:nil
+                                     informativeTextWithFormat:NSLocalizedString(@"Mac OS X does not recognize this as a valid URL.  Please re-enter the address and try again.", @"Informative text in alert dialog")];
+                [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+            } else {        
+                [webView setURL:url];
+            }
+        }        
+    }];
 }
 
 - (IBAction)importFromFileAction:(id)sender{
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:NO];
     [oPanel setCanChooseDirectories:NO];
+    [oPanel setAllowedFileTypes:[NSAttributedString textTypes]];
 
-    [oPanel beginSheetForDirectory:nil 
-                              file:nil 
-							 types:[NSAttributedString textTypes]
-                    modalForWindow:[self window]
-                     modalDelegate:self 
-                    didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
-                       contextInfo:nil];
+    [oPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        if(result == NSFileHandlingPanelOKButton)
+            [self loadFromFileURL:[[oPanel URLs] lastObject]];
+    }];
 }
 
 - (IBAction)openBookmark:(id)sender{
@@ -338,32 +354,27 @@
 	}
 }
 
-- (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-	NSString *newField = [addFieldController field];
-    newField = [newField fieldName];
-    
-    if(newField == nil || [fields containsObject:newField])
-        return;
-    
-    NSInteger row = [fields count];
-    
-    [fields addObject:newField];
-    [itemTableView reloadData];
-    [itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-    [itemTableView editColumn:2 row:row withEvent:nil select:YES];
-}
-
 - (IBAction)addField:(id)sender{
     BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
     NSArray *currentFields = [[self publication] allFieldNames];
     NSArray *fieldNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObject:BDSKCrossrefString] excluding:currentFields];
     
-    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:",@"Label for adding field")
-                                                                                              fieldsArray:fieldNames];
-	[addFieldController beginSheetModalForWindow:[self window]
-                                   modalDelegate:self
-                                  didEndSelector:@selector(addFieldSheetDidEnd:returnCode:contextInfo:)
-                                     contextInfo:NULL];
+    BDSKAddFieldSheetController *addFieldController = [[[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:",@"Label for adding field")
+                                                                                               fieldsArray:fieldNames] autorelease];
+	[addFieldController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        NSString *newField = [addFieldController field];
+        newField = [newField fieldName];
+        
+        if(newField == nil || [fields containsObject:newField] || result == NSCancelButton)
+            return;
+        
+        NSInteger row = [fields count];
+        
+        [fields addObject:newField];
+        [itemTableView reloadData];
+        [itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+        [itemTableView editColumn:2 row:row withEvent:nil select:YES];
+    }];
     [addFieldController release];
 }
 
@@ -424,15 +435,23 @@
 
     NSSavePanel *sPanel = [NSSavePanel savePanel];
     if (![extension isEqualToString:@""]) 
-		[sPanel setRequiredFileType:extension];
+		[sPanel setAllowedFileTypes:[NSArray arrayWithObjects:extension, nil]];
     [sPanel setCanCreateDirectories:YES];
+    [sPanel setNameFieldStringValue:fileName];
 
-    [sPanel beginSheetForDirectory:nil 
-                              file:fileName 
-                    modalForWindow:[self window]
-                     modalDelegate:self 
-                    didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:) 
-                       contextInfo:nil];
+    [sPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        if (result == NSFileHandlingPanelOKButton) {
+            NSURL *fileURL = [NSURL fileURLWithPath:[sPanel filename]];
+            if ([[[[webView mainFrame] dataSource] data] writeToURL:fileURL atomically:YES]) {
+                [[self publication] addFileForURL:fileURL autoFile:YES runScriptHook:NO];
+                [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+            } else {
+                NSLog(@"Could not write downloaded file.");
+            }
+        }
+
+        [itemTableView reloadData];
+    }]; 
 }
 
 - (void)downloadLinkedFileAsLocalUrl:(id)sender{
@@ -695,51 +714,6 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     [fields addNonDuplicateObjectsFromArray:[NSArray arrayWithObjects:BDSKAbstractString, BDSKAnnoteString, nil]];
 }
 
-#pragma mark Sheet callbacks
-	
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if(returnCode == NSFileHandlingPanelOKButton)
-        [self loadFromFileURL:[[sheet URLs] lastObject]];
-}
-
-- (void)urlSheetDidEnd:(BDSKURLSheetController *)urlSheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if(returnCode == NSOKButton){
-		// setup webview and load page
-        
-		[self setShowingWebView:YES];
-        
-        NSURL *url = [urlSheetController URL];
-        
-        if(url == nil){
-            [[urlSheetController window] orderOut:nil];
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error", @"Message in alert dialog when error occurs")
-                                             defaultButton:nil
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"Mac OS X does not recognize this as a valid URL.  Please re-enter the address and try again.", @"Informative text in alert dialog")];
-            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-        } else {        
-            [webView setURL:url];
-        }
-    }        
-}
-
-- (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    
-	if (returnCode == NSFileHandlingPanelOKButton) {
-		if ([[[[webView mainFrame] dataSource] data] writeToFile:[sheet filename] atomically:YES]) {
-			NSURL *fileURL = [NSURL fileURLWithPath:[sheet filename]];
-			
-            [[self publication] addFileForURL:fileURL autoFile:YES runScriptHook:NO];
-            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-		} else {
-			NSLog(@"Could not write downloaded file.");
-		}
-    }
-
-    [itemTableView reloadData];
-}
-
 #pragma mark Page loading methods
 
 - (void)setLoading:(BOOL)loading{
@@ -926,12 +900,13 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
    
 	NSSavePanel *sPanel = [NSSavePanel savePanel];
     if (NO == [extension isEqualToString:@""]) 
-		[sPanel setRequiredFileType:extension];
+		[sPanel setAllowedFileTypes:[NSArray arrayWithObjects:extension, nil]];
     [sPanel setAllowsOtherFileTypes:YES];
     [sPanel setCanSelectHiddenExtension:YES];
+    [sPanel setNameFieldStringValue:filename];
 	
     // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
-    NSInteger returnCode = [sPanel runModalForDirectory:nil file:filename];
+    NSInteger returnCode = [sPanel runModal];
     if (returnCode == NSFileHandlingPanelOKButton) {
         [download setDestination:[sPanel filename] allowOverwrite:YES];
     } else {
@@ -1199,18 +1174,20 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 
 // This method is used by NSTableView to determine a valid drop target.  Based on the mouse position, the table view will suggest a proposed drop location.  This method must return a value that indicates which dragging operation the data source will perform.  The data source may "re-target" a drop if desired by calling setDropRow:dropOperation: and returning something other than NSDragOperationNone.  One may choose to re-target for various reasons (eg. for better visual feedback when inserting into a sorted position).
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op{
-    if(op ==  NSTableViewDropOn)
+    NSPasteboard *pboard = [info draggingPasteboard];
+    if ([pboard canReadObjectForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]] &&
+        op ==  NSTableViewDropOn)
         return NSDragOperationCopy;
-    else return NSDragOperationNone;
+    return NSDragOperationNone;
 }
 
 // This method is called when the mouse is released over a table view that previously decided to allow a drop via the validateDrop method.  The data source should incorporate the data from the dragging pasteboard at this time.
 - (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op{
-    NSPasteboard *pb = [info draggingPasteboard];
-    NSString *pbType = [pb availableTypeFromArray:[NSArray arrayWithObjects:NSStringPboardType, nil]];
-    if ([NSStringPboardType isEqualToString:pbType]){
+    NSPasteboard *pboard = [info draggingPasteboard];
+    NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+    if ([strings count] > 0) {
 
-        NSString *value = [pb stringForType:NSStringPboardType];
+        NSString *value = [strings objectAtIndex:0];
         NSString *key = [fields objectAtIndex:row];
         NSString *oldValue = [[self publication] valueOfField:key];
         
@@ -1233,26 +1210,28 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 
 - (void)tableView:(NSTableView *)tv pasteFromPasteboard:(NSPasteboard *)pboard{
 	NSInteger idx = [tv selectedRow];
-	NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
-	
-	if (type && idx != -1) {
-        NSString *selKey = [fields objectAtIndex:idx];
-        NSString *string = [pboard stringForType:NSStringPboardType];
-        NSString *oldValue = [[self publication] valueOfField:selKey];
+    if (idx != -1) {
+        NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
+        if ([strings count] > 0) {
         
-        if(([NSEvent standardModifierFlags] & NSControlKeyMask) != 0 && 
-           [NSString isEmptyString:oldValue] == NO && 
-           [selKey isSingleValuedField] == NO){
+            NSString *selKey = [fields objectAtIndex:idx];
+            NSString *string = [strings objectAtIndex:0];
+            NSString *oldValue = [[self publication] valueOfField:selKey];
             
-            NSString *separator;
-            if([selKey isPersonField])
-                separator = @" and ";
-            else
-                separator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
-            string = [NSString stringWithFormat:@"%@%@%@", oldValue, separator, string];
+            if(([NSEvent standardModifierFlags] & NSControlKeyMask) != 0 && 
+               [NSString isEmptyString:oldValue] == NO && 
+               [selKey isSingleValuedField] == NO){
+                
+                NSString *separator;
+                if([selKey isPersonField])
+                    separator = @" and ";
+                else
+                    separator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+                string = [NSString stringWithFormat:@"%@%@%@", oldValue, separator, string];
+            }
+            
+            [self recordChangingField:selKey toValue:string];
         }
-        
-        [self recordChangingField:selKey toValue:string];
     }
 }
 

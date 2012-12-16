@@ -431,30 +431,6 @@ static unsigned char hexDecodeTable[256] =
 	return [NSData dataWithData:compressed];
 }
 
-- (void)_writeToPipeInBackground:(NSPipe *)aPipe
-{
-    NSAutoreleasePool *pool = [NSAutoreleasePool new];
-    @try {
-        [[aPipe fileHandleForWriting] writeData:self];
-    }
-    @catch (id exception) {
-        NSLog(@"caught exception writing %ld bytes to pipe (%@)", (long)[self length], exception);
-    }
-    [[aPipe fileHandleForWriting] closeFile];
-    [pool release];
-}
-
-- (FILE *)openReadStream
-{    
-    (void) signal(SIGPIPE, SIG_IGN);
-    NSPipe *aPipe = [NSPipe pipe];
-    [NSThread detachNewThreadSelector:@selector(_writeToPipeInBackground:) toTarget:self withObject:aPipe];
-    int fd = [[aPipe fileHandleForReading] fileDescriptor];
-    NSParameterAssert(-1 != fd);
-    // caller will block on this until we write to it
-    return (-1 == fd) ? NULL : fdopen(fd, "r");
-}
-
 #if BDSK_OS_X
 + (id)scriptingRtfWithDescriptor:(NSAppleEventDescriptor *)descriptor {
     return [descriptor data];
@@ -514,24 +490,20 @@ static unsigned char hexDecodeTable[256] =
     return YES;
 }
 
-- (BOOL)appendStringData:(NSData *)data convertedFromUTF8ToEncoding:(NSStringEncoding)encoding error:(NSError **)error{
-    return [self appendStringData:data convertedFromEncoding:NSUTF8StringEncoding toEncoding:encoding error:error];
-}
-
-- (BOOL)appendStringData:(NSData *)data convertedFromEncoding:(NSStringEncoding)fromEncoding toEncoding:(NSStringEncoding)toEncoding error:(NSError **)error{
+- (BOOL)appendUTF8StringData:(NSData *)data encoding:(NSStringEncoding)encoding error:(NSError **)error{
     BOOL success = YES;
-    if(fromEncoding == toEncoding){
+    if(NSUTF8StringEncoding == encoding){
         [self appendData:data];
     }else{
-        NSString *string = [[NSString alloc] initWithData:data encoding:fromEncoding];
+        NSString *string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
         if(nil == string){
             if(error != NULL){
-                *error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert data to string with encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:toEncoding]]];
-                [*error setValue:[NSNumber numberWithUnsignedInteger:toEncoding] forKey:NSStringEncodingErrorKey];
+                *error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert data to string with encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]]];
+                [*error setValue:[NSNumber numberWithUnsignedInteger:encoding] forKey:NSStringEncodingErrorKey];
             }
             return NO;
         }
-        success = [self appendDataFromString:string encoding:toEncoding error:error];
+        success = [self appendDataFromString:string encoding:encoding error:error];
         [string release];
     }
     return success;

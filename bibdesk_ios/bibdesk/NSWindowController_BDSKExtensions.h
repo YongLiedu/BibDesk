@@ -48,8 +48,7 @@
 - (void)setWindowFrameAutosaveNameOrCascade:(NSString *)name;
 - (void)setWindowFrameAutosaveNameOrCascade:(NSString *)name setFrame:(NSRect)frameRect;
 
-- (void)beginSheetModalForWindow:(NSWindow *)window;
-- (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
+- (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
 
 - (IBAction)dismiss:(id)sender;
 

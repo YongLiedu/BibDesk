@@ -51,7 +51,6 @@
  */
 - (BOOL)openURL:(NSURL *)fileURL withSearchString:(NSString *)searchString;
 
-- (BOOL)openLinkedFile:(NSString *)fullPath;
 - (BOOL)openLinkedURL:(NSURL *)aURL;
 - (BOOL)openURL:(NSURL *)aURL withApplicationURL:(NSURL *)applicationURL;
 

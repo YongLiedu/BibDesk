@@ -73,10 +73,9 @@ typedef struct _BDSKSearchIndexFlags
     
     BDSKReadWriteLock *rwLock;
     
-    NSMutableArray *notificationQueue;
-    NSConditionLock *noteLock;
-    NSThread *notificationThread;
-    NSConditionLock *setupLock;
+    dispatch_queue_t queue;
+    dispatch_queue_t lockQueue;
+    
     BDSKSearchIndexFlags flags;
     double progressValue;
     CFAbsoluteTime lastUpdateTime;

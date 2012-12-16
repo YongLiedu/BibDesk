@@ -49,11 +49,11 @@ typedef NSInteger BDSKBookmarkType;
     BDSKBookmark *parent;
 }
 
-+ (id)bookmarkWithUrlString:(NSString *)aUrlString name:(NSString *)aName;
++ (id)bookmarkWithURL:(NSURL *)aURL name:(NSString *)aName;
 + (id)bookmarkFolderWithName:(NSString *)aName;
 + (id)bookmarkSeparator;
 
-- (id)initWithUrlString:(NSString *)aUrlString name:(NSString *)aName;
+- (id)initWithURL:(NSURL *)aURL name:(NSString *)aName;
 - (id)initFolderWithChildren:(NSArray *)aChildren name:(NSString *)aName;
 - (id)initFolderWithName:(NSString *)aName;
 - (id)initRootWithChildren:(NSArray *)aChildren;
@@ -65,9 +65,7 @@ typedef NSInteger BDSKBookmarkType;
 - (BDSKBookmarkType)bookmarkType;
 
 - (NSURL *)URL;
-
-- (NSString *)urlString;
-- (void)setUrlString:(NSString *)newUrlString;
+- (void)setURL:(NSURL *)newURL;
 
 - (NSString *)name;
 - (void)setName:(NSString *)newName;

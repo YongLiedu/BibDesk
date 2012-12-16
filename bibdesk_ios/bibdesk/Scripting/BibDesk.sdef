@@ -35,10 +35,10 @@
 
 		<command name="save" code="coresave" description="Save a document.">
 			<direct-parameter type="specifier" description="The document(s) or window(s) to save."/>
-			<parameter name="in" code="kfil" type="file" optional="yes" description="The file in which to save the document. If this is supplied, works as Save As or Export.">
+			<parameter name="in" code="kfil" type="file" optional="yes" description="The file in which to save the document.">
 				<cocoa key="File"/>
 			</parameter>
-			<parameter name="as" code="fltp" type="text" optional="yes" description="The file format to use. If this is supplied, works as Export.">
+			<parameter name="as" code="fltp" type="text" optional="yes" description="The file format to use.">
 				<cocoa key="FileType"/>
 			</parameter>
 		</command>

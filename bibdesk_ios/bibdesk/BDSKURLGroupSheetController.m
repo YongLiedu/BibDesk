@@ -44,6 +44,8 @@
 #import "BDSKFieldEditor.h"
 #import "BDSKDragTextField.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "NSURL_BDSKExtensions.h"
+#import "NSPasteboard_BDSKExtensions.h"
 
 @implementation BDSKURLGroupSheetController
 
@@ -73,7 +75,7 @@
 }
 
 - (void)awakeFromNib {
-    [urlField registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
+    [urlField registerForDraggedTypes:[NSArray arrayWithObjects:(NSString *)kUTTypeURL, (NSString *)kUTTypeFileURL, NSFilenamesPboardType, NSURLPboardType, nil]];
 }
 
 - (NSString *)windowNibName {
@@ -110,25 +112,18 @@
     [super dismiss:sender];
 }
 
-- (void)chooseURLPanelDidEnd:(NSOpenPanel *)oPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSOKButton) {
-        NSURL *url = [[oPanel URLs] firstObject];
-        [self setUrlString:[url absoluteString]];
-    }
-}
-
 - (IBAction)chooseURL:(id)sender {
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:NO];
     [oPanel setResolvesAliases:NO];
     [oPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
     
-    [oPanel beginSheetForDirectory:nil 
-                              file:nil 
-                    modalForWindow:[self window]
-                     modalDelegate:self 
-                    didEndSelector:@selector(chooseURLPanelDidEnd:returnCode:contextInfo:) 
-                       contextInfo:nil];
+    [oPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+        if (result == NSOKButton) {
+            NSURL *url = [[oPanel URLs] firstObject];
+            [self setUrlString:[url absoluteString]];
+        }
+    }];
 }
 
 - (BDSKURLGroup *)group {
@@ -171,34 +166,24 @@
 - (id)windowWillReturnFieldEditor:(NSWindow *)sender toObject:(id)anObject {
 	if (dragFieldEditor == nil) {
 		dragFieldEditor = [[BDSKFieldEditor alloc] init];
-		[(BDSKFieldEditor *)dragFieldEditor registerForDelegatedDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
+		[(BDSKFieldEditor *)dragFieldEditor registerForDelegatedDraggedTypes:[NSArray arrayWithObjects:(NSString *)kUTTypeURL, (NSString *)kUTTypeFileURL, NSURLPboardType, NSFilenamesPboardType, nil]];
 	}
 	return dragFieldEditor;
 }
 
 - (NSDragOperation)dragTextField:(BDSKDragTextField *)textField validateDrop:(id <NSDraggingInfo>)sender {
     NSPasteboard *pboard = [sender draggingPasteboard];
-	NSString *dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
+	BOOL canRead = [pboard canReadURL];
     
-    return dragType ? NSDragOperationEvery : NSDragOperationNone;
+    return canRead ? NSDragOperationEvery : NSDragOperationNone;
 }
 
 - (BOOL)dragTextField:(BDSKDragTextField *)textField acceptDrop:(id <NSDraggingInfo>)sender {
     NSPasteboard *pboard = [sender draggingPasteboard];
-	NSString *dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
-    NSURL *url = nil;
+	NSArray *urls = [pboard readURLs];
     
-    if ([dragType isEqualToString:NSFilenamesPboardType]) {
-        NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
-        if ([fileNames count])
-            url = [NSURL fileURLWithPath:[[fileNames objectAtIndex:0] stringByExpandingTildeInPath]]; 
-    } else if ([dragType isEqualToString:NSURLPboardType]) {
-        url = [NSURL URLFromPasteboard:pboard];
-    } else if ([dragType isEqualToString:BDSKWeblocFilePboardType]) {
-        url = [NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]];
-    }
-    if (url) {
-        [self setUrlString:[url absoluteString]];
+    if ([urls count] > 0) {
+        [self setUrlString:[urls objectAtIndex:0]];
         return YES;
     }
     return NO;

@@ -89,9 +89,7 @@ extern NSString *BDSKAtomDocumentType;
 extern NSString *BDSKArchiveDocumentType;
 
 // Some pasteboard types used by the document for dragging and copying.
-extern NSString* BDSKReferenceMinerStringPboardType; // pasteboard type from Reference Miner, determined using Pasteboard Peeker
-extern NSString *BDSKBibItemPboardType;
-extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc files
+extern NSString *BDSKPasteboardTypePublications;
 
 extern NSString *BDSKDocumentPublicationsKey;
 
@@ -128,7 +126,6 @@ extern NSString *BDSKDocumentPublicationsKey;
     IBOutlet NSPopUpButton *groupAddButton;
     IBOutlet BDSKCollapsibleView *groupButtonView;
     IBOutlet NSMenu *groupFieldMenu;
-	NSString *currentGroupField;
     NSMapTable *groupSpinners;
     
 #pragma mark Side preview variables
@@ -368,7 +365,7 @@ extern NSString *BDSKDocumentPublicationsKey;
 /* Paste related methods */
 - (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)shouldSelect edit:(BOOL)shouldEdit;
 - (NSArray *)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)select verbose:(BOOL)verbose error:(NSError **)error;
-- (NSArray *)extractPublicationsFromFiles:(NSArray *)filenames unparseableFiles:(NSArray **)unparseableFiles verbose:(BOOL)verbose error:(NSError **)error;
+- (NSArray *)extractPublicationsFromFileURL:(NSURL *)fileURL verbose:(BOOL)verbose error:(NSError **)outError;
 
 // Private methods
 

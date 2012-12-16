@@ -54,8 +54,6 @@
 #define DOWNLOADS_SPECIFIER @"downloads"
 #define FILEICON_SPECIFIER  @"fileicon:"
 #define HELP_SPECIFIER      @"help"
-#define HELP_DIRECTORY      @"BibDeskHelp"
-#define HELP_START_FILE     @"BibDeskHelp.html"
 
 NSString *BDSKBibDeskScheme = @"bibdesk";
 
@@ -103,7 +101,7 @@ NSString *BDSKBibDeskScheme = @"bibdesk";
         NSData *data = [self HTMLDataUsingTemplateFile:@"WebGroupDownloads" usingObject:[BDSKDownloadManager sharedManager]];
         [self loadData:data MIMEType:@"text/html"];
     } else if ([resourceSpecifier hasCaseInsensitivePrefix:FILEICON_SPECIFIER]) {
-        NSString *extension = [resourceSpecifier substringFromIndex:[FILEICON_SPECIFIER length]];
+        NSString *extension = [[resourceSpecifier substringFromIndex:[FILEICON_SPECIFIER length]] stringByReplacingPercentEscapes];
         NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFileType:extension];
         [self loadData:[icon TIFFRepresentation] MIMEType:@"image/tiff"];
     } else if ([HELP_SPECIFIER isCaseInsensitiveEqual:[[resourceSpecifier pathComponents] firstObject]]) {
@@ -116,12 +114,14 @@ NSString *BDSKBibDeskScheme = @"bibdesk";
         [response release];
         [redirectRequest release];
     } else if ([HELP_SPECIFIER isCaseInsensitiveEqual:[theURL host]]) {
+        NSString *helpBookFolder = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleHelpBookFolder"];
+        NSBundle *helpBundle = [NSBundle bundleWithURL:[[NSBundle mainBundle] URLForResource:helpBookFolder withExtension:nil]];
         NSString *path = [theURL path];
         if ([path hasPrefix:@"/"])
             path = [path substringFromIndex:1];
         if ([path length] == 0)
-            path = HELP_START_FILE;
-        path = [[NSBundle mainBundle] pathForResource:[[path lastPathComponent] stringByDeletingPathExtension] ofType:[path pathExtension] inDirectory:[HELP_DIRECTORY stringByAppendingPathComponent:[path stringByDeletingLastPathComponent]]];
+            path = [helpBundle objectForInfoDictionaryKey:@"HPDBookAccessPath"];
+        path = [helpBundle pathForResource:[[path lastPathComponent] stringByDeletingPathExtension] ofType:[path pathExtension] inDirectory:[path stringByDeletingLastPathComponent]];
         if (path) {
             NSData *data = [NSData dataWithContentsOfFile:path];
             NSString *theUTI = [[NSWorkspace sharedWorkspace] typeOfFile:path error:NULL];

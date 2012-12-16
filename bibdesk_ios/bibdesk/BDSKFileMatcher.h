@@ -51,10 +51,10 @@
     
     NSMutableArray *matches;
     SKIndexRef searchIndex;
-    NSLock *indexingLock;
     NSArray *currentPublications;
+    dispatch_group_t group;
     struct __matchFlags {
-        int32_t shouldAbortThread;
+        int32_t shouldAbort;
     } _matchFlags;
     
 }

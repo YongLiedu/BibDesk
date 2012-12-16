@@ -46,7 +46,7 @@
 
 #define BDSKSearchBookmarksWindowFrameAutosaveName @"BDSKSearchBookmarksWindow"
 
-#define BDSKSearchBookmarkRowsPboardType @"BDSKSearchBookmarkRowsPboardType"
+#define BDSKPasteboardTypeSearchBookmarkRows @"edu.ucsd.mmccrack.bibdesk.pasteboard.search-bookmark-rows"
 
 #define BDSKSearchBookmarksToolbarIdentifier                    @"BDSKSearchBookmarksToolbarIdentifier"
 #define BDSKSearchBookmarksNewFolderToolbarItemIdentifier       @"BDSKSearchBookmarksNewFolderToolbarItemIdentifier"
@@ -110,7 +110,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
     [self setupToolbar];
     [self setWindowFrameAutosaveName:BDSKSearchBookmarksWindowFrameAutosaveName];
     [outlineView setAutoresizesOutlineColumn:NO];
-    [outlineView registerForDraggedTypes:[NSArray arrayWithObject:BDSKSearchBookmarkRowsPboardType]];
+    [outlineView registerForDraggedTypes:[NSArray arrayWithObject:BDSKPasteboardTypeSearchBookmarkRows]];
 }
 
 - (BDSKSearchBookmark *)bookmarkRoot {
@@ -348,8 +348,8 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 - (BOOL)outlineView:(NSOutlineView *)ov writeItems:(NSArray *)items toPasteboard:(NSPasteboard *)pboard {
     if (pboard == [NSPasteboard pasteboardWithName:NSDragPboard]) {
         [self setDraggedBookmarks:minimumCoverForBookmarks(items)];
-        [pboard declareTypes:[NSArray arrayWithObjects:BDSKSearchBookmarkRowsPboardType, nil] owner:nil];
-        [pboard setData:[NSData data] forType:BDSKSearchBookmarkRowsPboardType];
+        [pboard clearContents];
+        [pboard setData:[NSData data] forType:BDSKPasteboardTypeSearchBookmarkRows];
         return YES;
     }
     return NO;
@@ -357,9 +357,8 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 
 - (NSDragOperation)outlineView:(NSOutlineView *)ov validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(NSInteger)idx {
     NSPasteboard *pboard = [info draggingPasteboard];
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKSearchBookmarkRowsPboardType, nil]];
-    
-    if (type) {
+    if ([info draggingSource] == ov && 
+        [pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypeSearchBookmarkRows, nil]]) {
         if (idx == NSOutlineViewDropOnItemIndex) {
             if ([item bookmarkType] == BDSKSearchBookmarkTypeFolder && [outlineView isItemExpanded:item]) {
                 [ov setDropItem:item dropChildIndex:0];
@@ -376,9 +375,9 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 
 - (BOOL)outlineView:(NSOutlineView *)ov acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(NSInteger)idx {
     NSPasteboard *pboard = [info draggingPasteboard];
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKSearchBookmarkRowsPboardType, nil]];
     
-    if (type) {
+    if ([info draggingSource] == ov && 
+        [pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypeSearchBookmarkRows, nil]]) {
         if (item == nil) item = bookmarkRoot;
         
         [self endEditing];

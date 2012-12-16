@@ -115,12 +115,11 @@
                     if (path) {
                         NSMutableDictionary *metadata = [docInfo mutableCopy];
                         [metadata addEntriesFromDictionary:anItem];
-                        NSString *errString = nil;
-                        NSData *data = [NSPropertyListSerialization dataFromPropertyList:metadata format:plistFormat errorDescription:&errString];
+                        NSError *err = nil;
+                        NSData *data = [NSPropertyListSerialization dataWithPropertyList:metadata format:plistFormat options:0 error:&err];
                         [metadata release];
                         if (nil == data) {
-                            error = [NSError localErrorWithCode:kBDSKPropertyListSerializationFailed localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to save metadata cache file for item with cite key \"%@\".  The error was \"%@\"", @"Error description"), citeKey, errString]];
-                            [errString release];
+                            error = [NSError localErrorWithCode:kBDSKPropertyListSerializationFailed localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to save metadata cache file for item with cite key \"%@\".  The error was \"%@\"", @"Error description"), citeKey, [err localizedDescription]]];
                             @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to create cache file for %@", anItem] userInfo:nil];
                         } else if (NO == [data writeToFile:path options:NSAtomicWrite error:&error]) {
                             @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to create cache file for %@", anItem] userInfo:nil];

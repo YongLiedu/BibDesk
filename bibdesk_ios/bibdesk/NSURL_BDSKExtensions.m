@@ -62,10 +62,9 @@
 - (NSAppleEventDescriptor *)aeDescriptorValue {
     NSAppleEventDescriptor *resultDesc = nil;
     
-    NSData *data = (NSData *)CFURLCreateData(nil, (CFURLRef)self, kCFStringEncodingUTF8, true);
+    NSData *data = [[self absoluteString] dataUsingEncoding:NSUTF8StringEncoding];
     if (data)
         resultDesc = [NSAppleEventDescriptor descriptorWithDescriptorType:typeFileURL data:data];
-    [data release];
     
     return resultDesc;
 }
@@ -74,10 +73,11 @@
 /* This could as easily have been implemented in the NSFileManager category, but it mainly uses CFURL (and Carbon File Manager) functionality.  Omni has a method in their NSFileManager category that does the same thing, but it assumes PATH_MAX*4 for a max path length, uses malloc instead of NSZoneMalloc, uses path buffers instead of string/URL objects, uses some unnecessary autoreleases, and will resolve aliases on remote volumes.  Of course, it's also been debugged more thoroughly than my version. */
 
 #if BDSK_OS_X
-CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
+- (NSURL *)fileURLByResolvingAliases
 {
-    NSCParameterAssert([(NSURL *)fileURL isFileURL]);
+    NSCParameterAssert([self isFileURL]);
     
+    CFURLRef fileURL = (CFURLRef)self;
     FSRef fileRef;
     OSErr err;
     Boolean isFolder, wasAliased;
@@ -136,7 +136,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
         while (idx--) {
             
             oldURL = fileURL;
-            fileURL = CFURLCreateCopyAppendingPathComponent(allocator, fileURL, CFArrayGetValueAtIndex(strippedComponents, idx), isFolder);
+            fileURL = CFURLCreateCopyAppendingPathComponent(allocator, fileURL, CFArrayGetValueAtIndex(strippedComponents, idx), idx > 0);
             CFRelease(oldURL);
             
             if (CFURLGetFSRef(fileURL, &fileRef) == FALSE) {
@@ -160,40 +160,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     }
     CFRelease(strippedComponents);
     
-    return fileURL;
-}
-
-- (NSURL *)fileURLByResolvingAliases
-{
-    return [(NSURL *)BDCopyFileURLResolvingAliases((CFURLRef)self) autorelease];
-}
-
-- (NSURL *)fileURLByResolvingAliasesBeforeLastPathComponent;
-{
-    CFURLRef theURL = (CFURLRef)self;
-    CFStringRef lastPathComponent = CFURLCopyLastPathComponent((CFURLRef)theURL);
-    CFAllocatorRef allocator = CFGetAllocator(theURL);
-    CFURLRef newURL = CFURLCreateCopyDeletingLastPathComponent(allocator,(CFURLRef)theURL);
-    
-    if(newURL == NULL){
-        if (lastPathComponent) CFRelease(lastPathComponent);
-        return nil;
-    }
-    
-    theURL = BDCopyFileURLResolvingAliases(newURL);
-    if (newURL) CFRelease(newURL);
-    
-    if(theURL == nil){
-        if (lastPathComponent) CFRelease(lastPathComponent);
-        return nil;
-    }
-    
-    // non-last path components have to be folders, right?
-    newURL = CFURLCreateCopyAppendingPathComponent(allocator, (CFURLRef)theURL, lastPathComponent, FALSE);
-    if (lastPathComponent) CFRelease(lastPathComponent);
-    if (theURL) CFRelease(theURL);
-    
-    return [(id)newURL autorelease];
+    return [(NSURL *)fileURL autorelease];
 }
 #endif
 
@@ -253,31 +220,6 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     if (nil == otherUTI)
         return NSOrderedAscending;
     return [selfUTI caseInsensitiveCompare:otherUTI];
-}
-
-// This routine copied from Skim.app NSURL_SKExtensions.h, originally written by Christiaan Hofman
-+ (NSURL *)URLFromPasteboardAnyType:(NSPasteboard *)pasteboard {
-    NSString *pboardType = [pasteboard availableTypeFromArray:[NSArray arrayWithObjects:NSURLPboardType, NSStringPboardType, nil]];
-    NSURL *theURL = nil;
-    if ([pboardType isEqualToString:NSURLPboardType]) {
-        theURL = [NSURL URLFromPasteboard:pasteboard];
-    } else if ([pboardType isEqualToString:NSStringPboardType]) {
-        NSString *string = [[pasteboard stringForType:NSStringPboardType] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        if ([string rangeOfString:@"://"].length) {
-            if ([string hasPrefix:@"<"] && [string hasSuffix:@">"])
-                string = [string substringWithRange:NSMakeRange(1, [string length] - 2)];
-            theURL = [NSURL URLWithString:string];
-            if (theURL == nil)
-                theURL = [NSURL URLWithString:[string stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
-        }
-        if (theURL == nil) {
-            if ([string hasPrefix:@"~"])
-                string = [string stringByExpandingTildeInPath];
-            if ([[NSFileManager defaultManager] fileExistsAtPath:string])
-                theURL = [NSURL fileURLWithPath:string];
-        }
-    }
-    return theURL;
 }
 
 #pragma mark Skim Notes
