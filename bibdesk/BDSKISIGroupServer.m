@@ -73,7 +73,7 @@ static NSString *ISIURLFieldName = nil;
 
 static NSArray *publicationInfosWithISIXMLString(NSString *xmlString);
 static NSArray *publicationInfosWithISICitedReferences(NSArray *citedReferences);
-static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs, NSString *fieldName);
+//static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs, NSString *fieldName);
 static NSArray *publicationsFromData(NSData *data);
 
 // private protocols for inter-thread messaging
