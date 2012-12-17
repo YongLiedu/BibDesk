@@ -202,7 +202,7 @@ static BOOL is_leap_year(unsigned year) {
   const unsigned char *ch = (const unsigned char *)[str UTF8String];
   
   NSRange range = { 0U, 0U };
-  const unsigned char *start_of_date;
+  const unsigned char *start_of_date = NULL;
   if(strict && isspace(*ch)) {
     range.location = NSNotFound;
     isValidDate = NO;
