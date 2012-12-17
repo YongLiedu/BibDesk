@@ -44,9 +44,8 @@
 - (id)init {
     self = [super init];
     if (self) {
-        NSMapTableOptions options = NSMapTableStrongMemory | NSMapTableObjectPointerPersonality;
-        mapTable = [[NSMapTable alloc] initWithKeyOptions:options valueOptions:options capacity:0];
-        inverseMapTable = [[NSMapTable alloc] initWithKeyOptions:options valueOptions:options capacity:0];
+        mapTable = [[NSMapTable alloc] initWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory capacity:0];
+        inverseMapTable = [[NSMapTable alloc] initWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory capacity:0];
     }
     return self;
 }
