@@ -58,7 +58,7 @@ static NSImage *unlockedIcon = nil;
     return [NSImage imageNamed:NSImageNameBonjour];
 }
 
-static inline NSImage *createBadgedIcon(NSImage *icon, NSString *badgeName) {
+static NSImage *createBadgedIcon(NSImage *icon, NSString *badgeName) {
     NSRect iconRect = NSMakeRect(0.0, 0.0, 32.0, 32.0);
     NSRect badgeRect = NSMakeRect(20.0, 0.0, 12.0, 16.0);
     NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
