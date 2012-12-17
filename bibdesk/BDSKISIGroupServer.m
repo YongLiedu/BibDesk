@@ -860,7 +860,7 @@ static NSArray *publicationInfosWithISICitedReferences(NSArray *citedReferences)
     
     return pubs;
 }
-
+/*
 static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs, NSString *fieldName)
 {
     NSMutableArray *outPubs = [NSMutableArray arrayWithCapacity:[targetPubs count]];
@@ -883,7 +883,7 @@ static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs,
     
     return outPubs;
 }
-
+*/
 static NSArray *publicationsFromData(NSData *data) {
     if (!data) return [NSArray array];
     NSArray *pubInfos = [NSKeyedUnarchiver unarchiveObjectWithData:data];
