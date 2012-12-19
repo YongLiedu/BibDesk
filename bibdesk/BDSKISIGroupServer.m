@@ -284,6 +284,7 @@ static NSArray *publicationsFromData(NSData *data);
         
         // perform WS query to get count of results; don't pass zero for record numbers, although it's not clear what the values mean in this context
         NSString *resultString = nil;
+        NSString *errorString = nil;
         
         WokSearchService_editionDesc *edition = [[[WokSearchService_editionDesc alloc] init] autorelease];
         edition.collection = WOS_DB_ID;
@@ -319,7 +320,7 @@ static NSArray *publicationsFromData(NSData *data);
         
         WokSearchServiceSoapBinding *binding = [WokSearchService WokSearchServiceSoapBinding];
         [binding addCookie:sessionCookie];
-        binding.logXMLInOut = NO;
+        //binding.logXMLInOut = YES;
         
         // ISI seems to return all fields, so the below aren't currently needed
         //NSString *fields = @"doctype authors bib_vol pub_url source_title source_abbrev item_title bib_issue bib_pages keywords abstract source_series article_nos bib_date publisher pub_address issue_ed times_cited get_parent ut refs ";
@@ -342,7 +343,9 @@ static NSArray *publicationsFromData(NSData *data);
                 response = [binding searchUsingParameters:searchRequest];
                 responseBodyParts = response.bodyParts;
                 for (id bodyPart in responseBodyParts) {
-                    if ([bodyPart isKindOfClass:[WokSearchService_searchResponse class]]) {
+                    if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+                        errorString = ((SOAPFault *)bodyPart).simpleFaultString;
+                    } else if ([bodyPart isKindOfClass:[WokSearchService_searchResponse class]]) {
                         searchResponse = bodyPart;
                         fullRecordSearchResults = searchResponse.return_;
                         availableResultsLocal = fullRecordSearchResults.recordsFound.integerValue;
@@ -361,7 +364,9 @@ static NSArray *publicationsFromData(NSData *data);
                 response = [binding citedReferencesUsingParameters:citedReferencesRequest];
                 responseBodyParts = response.bodyParts;
                 for (id bodyPart in responseBodyParts) {
-                    if ([bodyPart isKindOfClass:[WokSearchService_citedReferencesResponse class]]) {
+                    if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+                        errorString = ((SOAPFault *)bodyPart).simpleFaultString;
+                    } else if ([bodyPart isKindOfClass:[WokSearchService_citedReferencesResponse class]]) {
                         citedReferencesResponse = bodyPart;
                         citedReferencesSearchResults = citedReferencesResponse.return_;
                         availableResultsLocal = citedReferencesSearchResults.recordsFound.integerValue;
@@ -380,7 +385,9 @@ static NSArray *publicationsFromData(NSData *data);
                 response = [binding citingArticlesUsingParameters:citingArticlesRequest];
                 responseBodyParts = response.bodyParts;
                 for (id bodyPart in responseBodyParts) {
-                    if ([bodyPart isKindOfClass:[WokSearchService_citingArticlesResponse class]]) {
+                    if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+                        errorString = ((SOAPFault *)bodyPart).simpleFaultString;
+                    } else if ([bodyPart isKindOfClass:[WokSearchService_citingArticlesResponse class]]) {
                         citingArticlesResponse = bodyPart;
                         fullRecordSearchResults = citingArticlesResponse.return_;
                         availableResultsLocal = fullRecordSearchResults.recordsFound.integerValue;
@@ -399,7 +406,9 @@ static NSArray *publicationsFromData(NSData *data);
                 response = [binding relatedRecordsUsingParameters:relatedRecordsRequest];
                 responseBodyParts = response.bodyParts;
                 for (id bodyPart in responseBodyParts) {
-                    if ([bodyPart isKindOfClass:[WokSearchService_relatedRecordsResponse class]]) {
+                    if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+                        errorString = ((SOAPFault *)bodyPart).simpleFaultString;
+                    } else if ([bodyPart isKindOfClass:[WokSearchService_relatedRecordsResponse class]]) {
                         relatedRecordsResponse = bodyPart;
                         fullRecordSearchResults = relatedRecordsResponse.return_;
                         availableResultsLocal = fullRecordSearchResults.recordsFound.integerValue;
@@ -421,7 +430,9 @@ static NSArray *publicationsFromData(NSData *data);
                 response = [binding retrieveByIdUsingParameters:retrieveByIdRequest];
                 responseBodyParts = response.bodyParts;
                 for (id bodyPart in responseBodyParts) {
-                    if ([bodyPart isKindOfClass:[WokSearchService_retrieveByIdResponse class]]) {
+                    if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+                        errorString = ((SOAPFault *)bodyPart).simpleFaultString;
+                    } else if ([bodyPart isKindOfClass:[WokSearchService_retrieveByIdResponse class]]) {
                         retrieveByIdResponse = bodyPart;
                         fullRecordSearchResults = retrieveByIdResponse.return_;
                         availableResultsLocal = fullRecordSearchResults.recordsFound.integerValue;
@@ -433,7 +444,11 @@ static NSArray *publicationsFromData(NSData *data);
         if (nil == fullRecordSearchResults && nil == citedReferencesSearchResults) {
             OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
             // we already know that a connection can be made, so we likely don't have permission to read this edition or database
-            [self setErrorMessage:NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.")];
+            if (errorString) {
+                [self setErrorMessage:[NSString stringWithFormat:NSLocalizedString(@"ISI Search Error: %@", "ISI Search Error Format"), errorString]];
+            } else {
+                [self setErrorMessage:NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.")];
+            }
         }
         
         NSInteger numResults = MIN(availableResultsLocal - fetchedResultsLocal, MAX_RESULTS);
