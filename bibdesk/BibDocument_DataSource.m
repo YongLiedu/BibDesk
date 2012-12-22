@@ -1291,19 +1291,14 @@
     BOOL isDragFromMainTable = [source isEqual:tableView];
     BOOL isDragFromGroupTable = [source isEqual:groupOutlineView];
     BOOL isDragFromDrawer = [source isEqual:[drawerController tableView]];
-    BOOL isDragFromExternalGroups = (isDragFromGroupTable || isDragFromMainTable) && docFlags.dragFromExternalGroups;
-    BOOL shouldSelect = NO;
     
-    if (isDragFromExternalGroups) {
+    if ((isDragFromGroupTable || isDragFromMainTable) && docFlags.dragFromExternalGroups)
         pubs = [self addPublicationsFromPasteboard:pboard selectLibrary:NO verbose:YES error:NULL];
-    } else if (isDragFromMainTable) {
+    else if (isDragFromMainTable)
         // we already have these publications, so we just want to add them to the group, not the document
         pubs = [pboardHelper promisedItemsForPasteboard:pboard];
-        shouldSelect = [item isParent];
-    } else if (isDragFromGroupTable == NO && isDragFromDrawer == NO) {
-        pubs = [self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL];
-        shouldSelect = [item isParent] || [[self selectedGroups] containsObject:item];
-    }
+    else if (isDragFromGroupTable == NO && isDragFromDrawer == NO)
+        pubs = [self addPublicationsFromPasteboard:pboard selectLibrary:([item isParent] == NO && [[self selectedGroups] containsObject:item] == NO) verbose:YES error:NULL];
     
     if ([pubs count] == 0)
         return NO;
@@ -1328,16 +1323,12 @@
         [auths release];
         [keywords release];
         [groups addStaticGroup:(BDSKStaticGroup *)item];
+        [self selectGroup:item];
     }
     
     // add to the group we're dropping on, /not/ the currently selected group; no need to add to all pubs group, though
-    if ([item isParent] == NO && [item isEqual:[groups libraryGroup]] == NO) {
-        
+    if ([item isEqual:[groups libraryGroup]] == NO)
         [self addPublications:pubs toGroup:item];
-        // Reselect if necessary, or we default to selecting the all publications group (which is really annoying when creating a new pub by dropping a PDF on a group).
-        if (shouldSelect)
-            [self selectGroup:item];
-    }
     
     return YES;
 }
