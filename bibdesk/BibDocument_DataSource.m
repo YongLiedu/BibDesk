@@ -1291,14 +1291,18 @@
     BOOL isDragFromMainTable = [source isEqual:tableView];
     BOOL isDragFromGroupTable = [source isEqual:groupOutlineView];
     BOOL isDragFromDrawer = [source isEqual:[drawerController tableView]];
+    BOOL isDragFromExternalGroups = (isDragFromGroupTable || isDragFromMainTable) && docFlags.dragFromExternalGroups;
+    BOOL shouldSelect = NO;
     
-    if ((isDragFromGroupTable || isDragFromMainTable) && docFlags.dragFromExternalGroups) {
+    if (isDragFromExternalGroups) {
         pubs = [self addPublicationsFromPasteboard:pboard selectLibrary:NO verbose:YES error:NULL];
     } else if (isDragFromMainTable) {
         // we already have these publications, so we just want to add them to the group, not the document
         pubs = [pboardHelper promisedItemsForPasteboard:pboard];
+        shouldSelect = [item isParent];
     } else if (isDragFromGroupTable == NO && isDragFromDrawer == NO) {
         pubs = [self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL];
+        shouldSelect = [item isParent] || [[self selectedGroups] containsObject:item];
     }
     
     if ([pubs count] == 0)
@@ -1331,7 +1335,7 @@
         
         [self addPublications:pubs toGroup:item];
         // Reselect if necessary, or we default to selecting the all publications group (which is really annoying when creating a new pub by dropping a PDF on a group).
-        if ([[self selectedGroups] containsObject:item] == NO && docFlags.dragFromExternalGroups == NO)
+        if (shouldSelect)
             [self selectGroup:item];
     }
     
