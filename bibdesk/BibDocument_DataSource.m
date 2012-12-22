@@ -1315,20 +1315,21 @@
             [keywords intersectSet:[pub groupsForField:BDSKKeywordsString]];
         }
         
-        item = [[[BDSKStaticGroup alloc] init] autorelease];
+        BDSKStaticGroup *group = [[[BDSKStaticGroup alloc] init] autorelease];
         if ([auths count])
-            [(BDSKStaticGroup *)item setName:[[auths anyObject] displayName]];
+            [group setName:[[auths anyObject] displayName]];
         else if ([keywords count])
-            [(BDSKStaticGroup *)item setName:[keywords anyObject]];
+            [group setName:[keywords anyObject]];
         [auths release];
         [keywords release];
-        [groups addStaticGroup:(BDSKStaticGroup *)item];
-        [self selectGroup:item];
-    }
-    
-    // add to the group we're dropping on, /not/ the currently selected group; no need to add to all pubs group, though
-    if ([item isEqual:[groups libraryGroup]] == NO)
+        [group addPublicationsFromArray:pubs];
+        [groups addStaticGroup:group];
+        [[self undoManager] setActionName:NSLocalizedString(@"Add Group", @"Undo action name")];
+        [self selectGroup:group];
+    }  else if ([item isEqual:[groups libraryGroup]] == NO) {
+        // add to the group we're dropping on, /not/ the currently selected group; no need to add to all pubs group, though
         [self addPublications:pubs toGroup:item];
+    }
     
     return YES;
 }
