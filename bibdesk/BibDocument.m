@@ -619,9 +619,17 @@ static NSOperationQueue *metadataCacheQueue = nil;
 	return YES;
 }
 
-// this is needed for the BDSKOwner protocol
+// the following 3 are needed for the BDSKOwner protocol
 - (NSUndoManager *)undoManager {
     return [super undoManager];
+}
+
+- (NSURL *)fileURL {
+    return [super fileURL];
+}
+
+- (BOOL)isDocument{
+    return YES;
 }
 
 - (BOOL)isMainDocument {
@@ -2632,15 +2640,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     [self updateFileViews];
     [self updatePreviews];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentFileURLDidChangeNotification object:self];
-}
-
-// avoid warning for BDSKOwner protocol conformance
-- (NSURL *)fileURL {
-    return [super fileURL];
-}
-
-- (BOOL)isDocument{
-    return YES;
 }
 
 @end
