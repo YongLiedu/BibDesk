@@ -1,8 +1,8 @@
 //
-//  BDSKAppDelegate.h
+//  BDSKSettingsTableViewController.h
 //  BibDesk
 //
-//  Created by Colin A. Smith on 3/3/12.
+//  Created by Colin Smith on 12/16/12.
 /*
  This software is Copyright (c) 2012-2012
  Colin A. Smith. All rights reserved.
@@ -38,18 +38,16 @@
 
 #import <UIKit/UIKit.h>
 
-#import <DropboxSDK/DropboxSDK.h>
+@protocol BDSKSettingsTableViewControllerDelegate <NSObject>
 
-@interface BDSKAppDelegate : UIResponder <UIApplicationDelegate, DBSessionDelegate> {
+- (void)settingsTableViewControllerDone;
 
-    NSInteger _networkActivityIndicatorCount;
-}
+@end
 
-@property (strong, nonatomic) UIWindow *window;
-@property (readonly) BOOL dropboxLinked;
+@interface BDSKSettingsTableViewController : UITableViewController
 
-- (void)toggleDropboxLink;
-- (void)showNetworkActivityIndicator;
-- (void)hideNetworkActivityIndicator;
+@property(assign) id<BDSKSettingsTableViewControllerDelegate> delegate;
+
+- (IBAction)doneButton:(id)sender;
 
 @end

@@ -43,11 +43,12 @@
 #import "BDSKDropboxStore.h"
 #import "BDSKGroupTableViewController.h"
 #import "BDSKPDFTableViewController.h"
+#import "BDSKSettingsTableViewController.h"
 #import <DropboxSDK/DropboxSDK.h>
 
 #import "BibDocument.h"
 
-@interface BDSKMasterViewController () {
+@interface BDSKMasterViewController () <BDSKSettingsTableViewControllerDelegate>  {
     NSMutableArray *_objects;
     BOOL _pdfsVisible;
     id _dropboxBibDocumentChangedObserver;
@@ -89,15 +90,6 @@
 
     _pdfsVisible = [dropboxStore.linkedFilePaths count] != 0;
     [dropboxStore addObserver:self forKeyPath:@"linkedFilePaths" options:0 context:nil];
-
-    BDSKAppDelegate *appDelegate = (BDSKAppDelegate *)[[UIApplication sharedApplication] delegate];
-
-    NSString *title = appDelegate.dropboxLinked ? @"Logout" : @"Login";
-    UIBarButtonItem *dropboxButton = [[UIBarButtonItem alloc] initWithTitle:title style:UIBarButtonItemStylePlain target:appDelegate action:@selector(toggleDropboxLink)];
-    self.navigationItem.leftBarButtonItem = dropboxButton;
-    [dropboxButton release];
-    
-    [appDelegate addObserver:self forKeyPath:@"dropboxLinked" options:NSKeyValueObservingOptionNew context:nil];
     
     [self updateRefreshButton];
     
@@ -114,8 +106,6 @@
 {
     [super viewDidUnload];
     // Release any retained subviews of the main view.
-    BDSKAppDelegate *appDelegate = (BDSKAppDelegate *)[[UIApplication sharedApplication] delegate];
-    [appDelegate removeObserver:self forKeyPath:@"dropboxLinked"];
     BDSKDropboxStore *dropboxStore = [BDSKDropboxStore sharedStore];
     [dropboxStore removeObserver:self forKeyPath:@"bibFileNames"];
     [dropboxStore removeObserver:self forKeyPath:@"linkedFilePaths"];
@@ -251,7 +241,20 @@
     
         BDSKPDFTableViewController *viewController = segue.destinationViewController;
         viewController.fileStore = dropboxStore;
+    
+    } else if ([[segue identifier] isEqualToString:@"settings"]) {
+    
+        UIViewController *viewController = segue.destinationViewController;
+        if ([viewController isKindOfClass:[UINavigationController class]]) {
+            viewController = ((UINavigationController *)viewController).viewControllers[0];
+        }
+        ((BDSKSettingsTableViewController *)viewController).delegate = self;
     }
+}
+
+- (void)settingsTableViewControllerDone {
+
+    [self dismissModalViewControllerAnimated:YES];
 }
 
 - (void)updateRefreshButton {
@@ -293,13 +296,7 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
 
-    if (keyPath == @"dropboxLinked") {
-    
-        BOOL linked = [(NSNumber *)[change objectForKey:NSKeyValueChangeNewKey] boolValue];
-        self.navigationItem.leftBarButtonItem.title = linked ? @"Logout" : @"Login";
-        [self updateRefreshButton];
-    
-    } else if (keyPath == @"isSyncing") {
+    if (keyPath == @"isSyncing") {
     
         [self updateRefreshButton];
     

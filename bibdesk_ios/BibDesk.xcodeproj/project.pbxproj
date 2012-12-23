@@ -27,6 +27,7 @@
 		3B2A554B150A67B2008A5F35 /* BibDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B97CE05150A5C7A00B82077 /* BibDocument.m */; };
 		3B2A554F150B3C8E008A5F35 /* BDSKGroupTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B2A554E150B3C8E008A5F35 /* BDSKGroupTableViewController.m */; };
 		3B2A5552150B88F1008A5F35 /* BDSKPubTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B2A5551150B88F1008A5F35 /* BDSKPubTableViewController.m */; };
+		3B34CE9A167E2862006143C9 /* BDSKSettingsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B34CE99167E2862006143C9 /* BDSKSettingsTableViewController.m */; };
 		3B3C59161508BF5400961DA4 /* BDSKCFCallBacks.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B3C59151508BF5400961DA4 /* BDSKCFCallBacks.m */; };
 		3B3C59191508BF7B00961DA4 /* BDSKCompletionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B3C59181508BF7B00961DA4 /* BDSKCompletionManager.m */; };
 		3B3C591B1508BFC400961DA4 /* BDSKConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B3C591A1508BFC400961DA4 /* BDSKConverter.m */; };
@@ -148,6 +149,8 @@
 		3B2A554E150B3C8E008A5F35 /* BDSKGroupTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKGroupTableViewController.m; sourceTree = "<group>"; };
 		3B2A5550150B88F0008A5F35 /* BDSKPubTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPubTableViewController.h; sourceTree = "<group>"; };
 		3B2A5551150B88F1008A5F35 /* BDSKPubTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPubTableViewController.m; sourceTree = "<group>"; };
+		3B34CE98167E2862006143C9 /* BDSKSettingsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSettingsTableViewController.h; sourceTree = "<group>"; };
+		3B34CE99167E2862006143C9 /* BDSKSettingsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSettingsTableViewController.m; sourceTree = "<group>"; };
 		3B3C59151508BF5400961DA4 /* BDSKCFCallBacks.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKCFCallBacks.m; sourceTree = "<group>"; };
 		3B3C59181508BF7B00961DA4 /* BDSKCompletionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKCompletionManager.m; sourceTree = "<group>"; };
 		3B3C591A1508BFC400961DA4 /* BDSKConverter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = BDSKConverter.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
@@ -473,6 +476,8 @@
 				3B5CF0C11503F978006AD43D /* BDSKPDFTableViewController.m */,
 				3BBB1353150245A700F61870 /* BDSKDetailViewController.h */,
 				3BBB1354150245A700F61870 /* BDSKDetailViewController.m */,
+				3B34CE98167E2862006143C9 /* BDSKSettingsTableViewController.h */,
+				3B34CE99167E2862006143C9 /* BDSKSettingsTableViewController.m */,
 			);
 			name = Controllers;
 			sourceTree = "<group>";
@@ -760,6 +765,7 @@
 				3BC33669163D70E100F359BD /* BDSKDropboxStore.m in Sources */,
 				3BBC08AE16470ADF0020450D /* BDSKExternalLinkedFile.m in Sources */,
 				3BCF2C55164D556C00EBC9A5 /* BDSKBibDeskURLHandler.m in Sources */,
+				3B34CE9A167E2862006143C9 /* BDSKSettingsTableViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -103,7 +103,13 @@
                             <outlet property="delegate" destination="19" id="21"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Bibliographies" id="40"/>
+                    <navigationItem key="navigationItem" title="Bibliographies" id="40">
+                        <barButtonItem key="leftBarButtonItem" title="Settings" id="KkY-jL-MP6">
+                            <connections>
+                                <segue destination="pCX-a8-5hS" kind="push" identifier="settings" id="DPm-wg-gkQ"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <segue destination="e7U-hW-oh6" kind="push" identifier="allPDFFiles" id="SV4-XA-8lT"/>
                         <segue destination="V4M-S5-o2H" kind="push" identifier="documentGroups" id="IsD-JV-hMN"/>
@@ -156,6 +162,42 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Ys4-Na-ZIK" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1402" y="-167"/>
+        </scene>
+        <!--Settings Table View Controller - Settings-->
+        <scene sceneID="uUj-Fy-dSB">
+            <objects>
+                <tableViewController id="pCX-a8-5hS" customClass="BDSKSettingsTableViewController" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="singleLineEtched" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" id="bGM-IL-ps4">
+                        <rect key="frame" x="0.0" y="64" width="320" height="704"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                        <simulatedOrientationMetrics key="simulatedOrientationMetrics" orientation="landscapeRight"/>
+                        <prototypes>
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ToggleDropboxLinkCell" textLabel="VVI-si-jCm" style="IBUITableViewCellStyleDefault" id="BQb-ZX-7N9">
+                                <rect key="frame" x="0.0" y="34" width="320" height="46"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                                    <rect key="frame" x="10" y="1" width="300" height="43"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <label opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="left" text="Title" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="VVI-si-jCm">
+                                            <rect key="frame" x="10" y="0.0" width="280" height="43"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
+                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <color key="highlightedColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                        </label>
+                                    </subviews>
+                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                </view>
+                            </tableViewCell>
+                        </prototypes>
+                    </tableView>
+                    <navigationItem key="navigationItem" title="Settings" id="CpE-qN-FXg"/>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="gty-87-js5" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1402" y="741"/>
         </scene>
         <!--Group Table View Controller-->
         <scene sceneID="zFY-Ss-SQS">
@@ -316,6 +358,12 @@
         </class>
         <class className="BDSKPubTableViewController" superclassName="UITableViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/BDSKPubTableViewController.h"/>
+        </class>
+        <class className="BDSKSettingsTableViewController" superclassName="UITableViewController">
+            <source key="sourceIdentifier" type="project" relativePath="./Classes/BDSKSettingsTableViewController.h"/>
+            <relationships>
+                <relationship kind="action" name="doneButton:"/>
+            </relationships>
         </class>
     </classes>
     <simulatedMetricsContainer key="defaultSimulatedMetrics">

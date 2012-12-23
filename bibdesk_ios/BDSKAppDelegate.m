@@ -149,15 +149,13 @@
 - (void)toggleDropboxLink {
 
     if (!self.dropboxLinked) {
-        [[DBSession sharedSession] linkFromController:self.window.rootViewController];
+        UIViewController *topmostViewController = self.window.rootViewController;
+        while (topmostViewController.presentedViewController) {
+            topmostViewController = topmostViewController.presentedViewController;
+        }
+        [[DBSession sharedSession] linkFromController:topmostViewController];
     } else {
-            [[DBSession sharedSession] unlinkAll];
-            [[[[UIAlertView alloc] 
-                 initWithTitle:@"Account Unlinked!" message:@"Your dropbox account has been unlinked" 
-                 delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil]
-                autorelease]
-             show];
-        
+        [[DBSession sharedSession] unlinkAll];
         [self setDropboxLinked:NO];
     }
 }
