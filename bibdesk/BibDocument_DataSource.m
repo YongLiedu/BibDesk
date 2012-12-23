@@ -1315,14 +1315,14 @@
             [keywords intersectSet:[pub groupsForField:BDSKKeywordsString]];
         }
         
-        BDSKStaticGroup *group = [[[BDSKStaticGroup alloc] init] autorelease];
-        if ([auths count])
-            [group setName:[[auths anyObject] displayName]];
-        else if ([keywords count])
-            [group setName:[keywords anyObject]];
+        NSString *name = NSLocalizedString(@"Group", @"Default group name");
+        if ([auths count] > 0)
+            name = [[auths anyObject] displayName];
+        else if ([keywords count] > 0)
+            name = [keywords anyObject];
+        BDSKStaticGroup *group = [[[BDSKStaticGroup alloc] initWithName:name publications:pubs] autorelease];
         [auths release];
         [keywords release];
-        [group addPublicationsFromArray:pubs];
         [groups addStaticGroup:group];
         [[self undoManager] setActionName:NSLocalizedString(@"Add Group", @"Undo action name")];
         [self selectGroup:group];
