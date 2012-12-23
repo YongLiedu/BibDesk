@@ -445,7 +445,7 @@ static NSArray *publicationsFromData(NSData *data);
             OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
             // we already know that a connection can be made, so we likely don't have permission to read this edition or database
             if (errorString) {
-                [self setErrorMessage:[NSString stringWithFormat:NSLocalizedString(@"ISI Search Error: %@", "ISI Search Error Format"), errorString]];
+                [self setErrorMessage:errorString];
             } else {
                 [self setErrorMessage:NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.")];
             }
