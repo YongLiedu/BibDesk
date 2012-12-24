@@ -152,6 +152,7 @@ static id sharedController = nil;
         frame = [[pane view] frame];
         frame.origin = NSMakePoint(floor(0.5 * (width - NSWidth(frame))), controlHeight);
         [[pane view] setFrame:frame];
+        [[pane view] setAutoresizingMask:NSViewMaxYMargin];
     }
     
     [self changeContentView:iconView display:NO];
