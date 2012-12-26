@@ -43,6 +43,7 @@
 #import "BDSKOverlayWindow.h"
 #import "BDSKVersionNumber.h"
 #import <Sparkle/Sparkle.h>
+#import "NSViewAnimation_BDSKExtensions.h"
 
 #define BDSKPreferencesWindowFrameAutosaveName @"BDSKPreferencesWindow"
 
@@ -69,7 +70,7 @@
 - (void)loadPreferences;
 - (void)loadPanes;
 - (BDSKPreferenceIconView *)iconView;
-- (void)changeContentView:(NSView *)view display:(BOOL)display;
+- (void)changeContentView:(NSView *)view from:(NSView *)oldView display:(BOOL)display;
 - (void)updateSearchAndShowAll:(BOOL)showAll;
 @end
 
@@ -155,7 +156,7 @@ static id sharedController = nil;
         [[pane view] setAutoresizingMask:NSViewMaxYMargin];
     }
     
-    [self changeContentView:iconView display:NO];
+    [self changeContentView:iconView from:nil display:NO];
     
     overlay = [[BDSKOverlayWindow alloc] initWithContentRect:[[self window] contentRectForFrameRect:[[self window] frame]] styleMask:[[self window] styleMask] backing:[[self window] backingType] defer:YES];
     [overlay setReleasedWhenClosed:NO];
@@ -348,6 +349,7 @@ static id sharedController = nil;
         BDSKPreferencePane *pane = [self paneForIdentifier:identifier];
         BDSKPreferencePane *oldPane = [self selectedPane];
         NSView *view = pane ? [pane view] : [self iconView];
+        NSView *oldView = oldPane ? [oldPane view] : [self iconView];
         if ((pane || [identifier isEqualToString:@""]) && view) {
             if ([[[self window] firstResponder] isKindOfClass:[NSText class]] && [(NSView *)[[self window] firstResponder] isDescendantOf:[oldPane view]])
                 [[self window] makeFirstResponder:nil];
@@ -357,7 +359,7 @@ static id sharedController = nil;
                 [oldPane willUnselect];
                 [pane willSelect];
                 [[self window] setTitle:pane ? [self localizedTitleForIdentifier:identifier] : [self defaultWindowTitle]];
-                [self changeContentView:view display:[[self window] isVisible]];
+                [self changeContentView:view from:oldView display:[[self window] isVisible]];
                 [oldPane didUnselect];
                 [pane didSelect];
                 [self setSelectedPaneIdentifier:identifier];
@@ -611,17 +613,15 @@ static id sharedController = nil;
     return iconView;
 }
 
-- (void)changeContentView:(NSView *)view display:(BOOL)display {
+- (void)endAnimation {
+    [[[self window] contentView] setWantsLayer:NO];
+    [[self window] recalculateKeyViewLoop];
+}
+
+- (void)changeContentView:(NSView *)view from:(NSView *)oldView display:(BOOL)display {
     NSWindow *window = [self window];
     NSView *contentView = [window contentView];
     
-    [[contentView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    if ([view isEqual:[self iconView]] == NO) {
-        [contentView addSubview:controlView];
-        [overlay remove];
-    }
-    [contentView addSubview:view];
-	
     NSRect contentRect = [window contentRectForFrameRect:[[self window] frame]];
     CGFloat contentHeight = NSMaxY([view frame]);
     contentRect.origin.y = NSMaxY(contentRect) - contentHeight;
@@ -637,9 +637,35 @@ static id sharedController = nil;
         contentRect.origin.y = NSMinY(screenRect);
     if (NSMaxY(contentRect) > NSMaxY(screenRect))
         contentRect.origin.y = NSMaxY(screenRect) - NSHeight(contentRect);
-        
-	[window setFrame:contentRect display:display animate:display];
-    [window recalculateKeyViewLoop];
+    
+    if ([oldView isEqual:[self iconView]])
+        [overlay remove];
+	
+    if (display && [NSViewAnimation defaultAnimationTimeInterval] > 0.0) {
+        NSTimeInterval duration = [[self window] animationResizeTime:contentRect];
+        [contentView setWantsLayer:YES];
+        [contentView displayIfNeeded];
+        [NSAnimationContext beginGrouping];
+        [[NSAnimationContext currentContext] setDuration:duration];
+        if ([view isEqual:[self iconView]])
+            [[controlView animator] removeFromSuperview];
+        else if ([oldView isEqual:[self iconView]])
+            [[contentView animator] addSubview:controlView];
+        [[contentView animator] replaceSubview:oldView with:view];
+        [[window animator] setFrame:contentRect display:YES];
+        [NSAnimationContext endGrouping];
+        [self performSelector:@selector(endAnimation) withObject:nil afterDelay:duration];
+	} else {
+        if ([view isEqual:[self iconView]])
+            [controlView removeFromSuperview];
+        else if ([oldView isEqual:[self iconView]])
+            [contentView addSubview:controlView];
+        // don't use replaceSubview:with: because oldView can be nil here
+        [oldView removeFromSuperview];
+        [contentView addSubview:view];
+        [window setFrame:contentRect display:NO];
+        [window recalculateKeyViewLoop];
+    }
 }
 
 - (void)updateSearchAndShowAll:(BOOL)showAll {
