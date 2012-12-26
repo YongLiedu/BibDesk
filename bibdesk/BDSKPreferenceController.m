@@ -642,7 +642,7 @@ static id sharedController = nil;
         [overlay remove];
 	
     if (display && [NSViewAnimation defaultAnimationTimeInterval] > 0.0) {
-        NSTimeInterval duration = [[self window] animationResizeTime:contentRect];
+        NSTimeInterval duration = [window animationResizeTime:contentRect];
         [contentView setWantsLayer:YES];
         [contentView displayIfNeeded];
         [NSAnimationContext beginGrouping];
