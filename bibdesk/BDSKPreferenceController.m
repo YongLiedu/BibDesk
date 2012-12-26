@@ -641,8 +641,9 @@ static id sharedController = nil;
     if ([oldView isEqual:[self iconView]])
         [overlay remove];
 	
-    if (display && [NSViewAnimation defaultAnimationTimeInterval] > 0.0) {
-        NSTimeInterval duration = [window animationResizeTime:contentRect];
+    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
+    if (display && duration > 0.0) {
+        duration = fmax(duration, [window animationResizeTime:contentRect]);
         [contentView setWantsLayer:YES];
         [contentView displayIfNeeded];
         [NSAnimationContext beginGrouping];
