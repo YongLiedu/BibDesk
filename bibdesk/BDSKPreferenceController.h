@@ -54,7 +54,6 @@
     NSMutableDictionary *records;
     NSMutableDictionary *panes;
     NSString *selectedPaneIdentifier;
-    NSString *delayedPaneIdentifier;
     NSMutableDictionary *toolbarItems;
     NSString *helpBookName;
     NSMutableDictionary *identifierSearchTerms;
@@ -83,8 +82,6 @@
 - (id)selectedPane;
 
 - (void)selectPaneWithIdentifier:(NSString *)identifier;
-
-- (void)replyToShouldUnselect:(BOOL)shouldUnselect;
 
 - (NSString *)titleForCategory:(NSString *)category;
 - (NSString *)localizedTitleForCategory:(NSString *)category;

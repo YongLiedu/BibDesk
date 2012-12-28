@@ -337,15 +337,8 @@ static id sharedController = nil;
     return [paneID length] ? [self paneForIdentifier:paneID] : nil;
 }
 
-- (void)setDelayedPaneIdentifier:(NSString *)identifier {
-    if (identifier != delayedPaneIdentifier) {
-        [delayedPaneIdentifier release];
-        delayedPaneIdentifier = [identifier retain];
-    }
-}
-
-- (void)selectPaneWithIdentifier:(NSString *)identifier force:(BOOL)force {
-    if ([identifier isEqualToString:[self selectedPaneIdentifier]] == NO && (force || delayedPaneIdentifier == nil)) {
+- (void)selectPaneWithIdentifier:(NSString *)identifier {
+    if ([identifier isEqualToString:[self selectedPaneIdentifier]] == NO) {
         BDSKPreferencePane *pane = [self paneForIdentifier:identifier];
         BDSKPreferencePane *oldPane = [self selectedPane];
         NSView *view = pane ? [pane view] : [self iconView];
@@ -353,9 +346,7 @@ static id sharedController = nil;
         if ((pane || [identifier isEqualToString:@""]) && view) {
             if ([[[self window] firstResponder] isKindOfClass:[NSText class]] && [(NSView *)[[self window] firstResponder] isDescendantOf:[oldPane view]])
                 [[self window] makeFirstResponder:nil];
-            BDSKPreferencePaneUnselectReply shouldUnselect = [[self window] attachedSheet] ? BDSKPreferencePaneUnselectCancel : (force == NO && oldPane) ? [oldPane shouldUnselect]  : BDSKPreferencePaneUnselectNow;
-            [self setDelayedPaneIdentifier:nil];
-            if (shouldUnselect == BDSKPreferencePaneUnselectNow) {
+            if ([[self window] attachedSheet] == nil) {
                 [oldPane willUnselect];
                 [pane willSelect];
                 [[self window] setTitle:pane ? [self localizedTitleForIdentifier:identifier] : [self defaultWindowTitle]];
@@ -367,21 +358,9 @@ static id sharedController = nil;
                 [helpButton setHidden:(helpBookName == nil || [pane helpAnchor] == nil) && [pane helpURL] == nil];
                 [revertButton setEnabled:[[pane initialValues] count] > 0];
                 [self updateSearchAndShowAll:NO];
-            } else if (shouldUnselect == BDSKPreferencePaneUnselectLater) {
-                [self setDelayedPaneIdentifier:identifier];
             }
         }
     }
-}
-
-- (void)selectPaneWithIdentifier:(NSString *)identifier {
-    [self selectPaneWithIdentifier:identifier force:NO];
-}
-
-- (void)replyToShouldUnselect:(BOOL)shouldUnselect {
-    if (shouldUnselect && delayedPaneIdentifier)
-        [self selectPaneWithIdentifier:delayedPaneIdentifier force:YES];
-    [self setDelayedPaneIdentifier:nil];
 }
 
 - (NSString *)localizedString:(NSString *)string {

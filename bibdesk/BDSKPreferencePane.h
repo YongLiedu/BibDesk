@@ -38,13 +38,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-enum {
-    BDSKPreferencePaneUnselectCancel,
-    BDSKPreferencePaneUnselectNow,
-    BDSKPreferencePaneUnselectLater
-};
-typedef NSInteger BDSKPreferencePaneUnselectReply;
-
 @class BDSKPreferenceController, BDSKPreferenceRecord;
 
 @interface BDSKPreferencePane : NSViewController {
@@ -78,8 +71,6 @@ typedef NSInteger BDSKPreferencePaneUnselectReply;
 - (void)willSelect;
 - (void)didSelect;
 
-// if this returns BDSKPreferencePaneUnselectLater, -replyToShouldUnselect: should be called when this is resolved
-- (BDSKPreferencePaneUnselectReply)shouldUnselect;
 - (void)willUnselect;
 - (void)didUnselect;
 

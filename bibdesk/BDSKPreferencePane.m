@@ -109,7 +109,6 @@
 - (void)willSelect {}
 - (void)didSelect {}
 
-- (BDSKPreferencePaneUnselectReply)shouldUnselect { return BDSKPreferencePaneUnselectNow; }
 - (void)willUnselect {}
 - (void)didUnselect {}
 
