@@ -206,14 +206,3 @@
 }
 
 @end
-
-
-@implementation BDSKPreferenceController (BDSKFontExtension)
-
-- (void)changeFont:(id)sender{
-    if ([[self selectedPane] respondsToSelector:@selector(changeFont:)])
-        [(id)[self selectedPane] performSelector:@selector(changeFont:) withObject:sender];
-}
-
-@end
-

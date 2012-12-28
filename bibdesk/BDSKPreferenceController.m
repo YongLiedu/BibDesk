@@ -198,6 +198,10 @@ static id sharedController = nil;
     return [NSString stringWithFormat:NSLocalizedString(@"%@ Preferences", @""), [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"]];
 }
 
+- (NSResponder *)nextResponder {
+    return [self selectedPane];
+}
+
 #pragma mark Actions
 
 - (void)revertPaneSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
