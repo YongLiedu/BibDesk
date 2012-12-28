@@ -198,10 +198,6 @@ static id sharedController = nil;
     return [NSString stringWithFormat:NSLocalizedString(@"%@ Preferences", @""), [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"]];
 }
 
-- (NSResponder *)nextResponder {
-    return [self selectedPane];
-}
-
 #pragma mark Actions
 
 - (void)revertPaneSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
@@ -358,6 +354,7 @@ static id sharedController = nil;
                 [oldPane didUnselect];
                 [pane didSelect];
                 [self setSelectedPaneIdentifier:identifier];
+                [self setNextResponder:pane];
                 [[[self window] toolbar] setSelectedItemIdentifier:pane ? identifier : BDSKPreferencesToolbarShowAllItemIdentifier];
                 [helpButton setHidden:(helpBookName == nil || [pane helpAnchor] == nil) && [pane helpURL] == nil];
                 [revertButton setEnabled:[[pane initialValues] count] > 0];
