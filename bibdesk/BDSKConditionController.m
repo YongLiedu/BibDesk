@@ -44,8 +44,8 @@
 #import "NSInvocation_BDSKExtensions.h"
 #import "BDSKFieldNameFormatter.h"
 
-#define BDSKBooleanValueTransformerName @"BDSKBooleanValueTransformer"
-#define BDSKTriStateValueTransformerName @"BDSKTriStateValueTransformer"
+#define BDSKBooleanValueTransformerName @"BDSKBooleanFromString"
+#define BDSKTriStateValueTransformerName @"BDSKTriStateFromString"
 
 static char BDSKConditionControllerObservationContext;
 
