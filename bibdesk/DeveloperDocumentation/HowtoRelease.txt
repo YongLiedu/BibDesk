@@ -17,6 +17,9 @@ How To Release BibDesk
 - tag the source using `svn copy -m "Tag for release" https://bibdesk.svn.sourceforge.net/svnroot/bibdesk/trunk https://bibdesk.svn.sourceforge.net/svnroot/bibdesk/tags/REL_1_x_x` where REL_1_x_x is the new version number
 
 - recompile the "BibDesk" target in Release configuration
+  - Users of XCode 4.5.2: build in Archive configuration
+  - Be sure that "OS X deployment target" is set to OS X 10.6
+    This is the default value; this is noted here in case it's unclear
 
 - build the "DiskImage" target, which should drop a disk image and an (partial) appcast XML on your desktop
 
