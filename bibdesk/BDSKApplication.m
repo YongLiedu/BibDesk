@@ -38,7 +38,7 @@
 
 #import "BDSKApplication.h"
 #import "BibDocument.h"
-#import "BDAlias.h"
+#import "BDSKAlias.h"
 
 
 @implementation BDSKApplication
@@ -47,7 +47,7 @@
     NSArray *fileURLs = [[[NSDocumentController sharedDocumentController] documents] valueForKeyPath:@"@distinctUnionOfObjects.fileURL"];
     NSMutableArray *array = [NSMutableArray arrayWithCapacity:[fileURLs count]];
     for (NSURL *fileURL in fileURLs){
-        NSData *data = [[BDAlias aliasWithURL:fileURL] aliasData];
+        NSData *data = [[BDSKAlias aliasWithURL:fileURL] data];
         [array addObject:[NSDictionary dictionaryWithObjectsAndKeys:[fileURL path], @"fileName", data, @"_BDAlias", nil]];
     }
     [[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKLastOpenFileNamesKey];

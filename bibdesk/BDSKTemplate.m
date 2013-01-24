@@ -37,7 +37,7 @@
  */
 
 #import "BDSKTemplate.h"
-#import "BDAlias.h"
+#import "BDSKAlias.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSCharacterSet_BDSKExtensions.h"
@@ -531,13 +531,12 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 - (void)setRepresentedFileURL:(NSURL *)aURL;
 {
     BDSKASSERT([self isLeaf]);
-    BDAlias *alias = nil;
-    alias = [[BDAlias alloc] initWithURL:aURL];
+    BDSKAlias *alias = [[BDSKAlias alloc] initWithURL:aURL];
     
     if (alias) {
         NSString *name = [aURL lastPathComponent];
         
-        [self setValue:[alias aliasData] forKey:BDSKTemplateAliasString];
+        [self setValue:[alias data] forKey:BDSKTemplateAliasString];
         
         [self setValue:[[aURL path] stringByAbbreviatingWithTildeInPath] forKey:BDSKTemplateFilePathString];
         
@@ -562,7 +561,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 - (NSURL *)representedFileURL;
 {
     BDSKASSERT([self isLeaf]);
-    BDAlias *alias = [[BDAlias alloc] initWithData:[self valueForKey:BDSKTemplateAliasString]];
+    BDSKAlias *alias = [[BDSKAlias alloc] initWithData:[self valueForKey:BDSKTemplateAliasString]];
     NSURL *theURL = [alias fileURLNoUI];
     [alias release];
     if (theURL == nil) {

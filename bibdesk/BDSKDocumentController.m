@@ -40,7 +40,7 @@
 #import "BibDocument.h"
 #import "NSTask_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
-#import "BDAlias.h"
+#import "BDSKAlias.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKTemplate.h"
 #import "NSString_BDSKExtensions.h"
@@ -254,18 +254,22 @@ enum {
     if ([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.bdskcache"]) {
         
         NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfURL:absoluteURL];
-        BDAlias *fileAlias = [BDAlias aliasWithData:[dictionary valueForKey:@"FileAlias"]];
+        BDSKAlias *fileAlias = [BDSKAlias aliasWithData:[dictionary valueForKey:@"FileAlias"]];
         // if the alias didn't work, let's see if we have a filepath key...
-        NSString *fullPath = [fileAlias fullPath] ?: [dictionary valueForKey:@"net_sourceforge_bibdesk_owningfilepath"];
+        NSURL *fileURL = [fileAlias fileURL];
         
-        if (fullPath == nil) {
+        if (fileURL == nil) {
+            NSString *path = [dictionary valueForKey:@"net_sourceforge_bibdesk_owningfilepath"];
+            if (path)
+                fileURL = [NSURL fileURLWithPath:path];
+        }
+        
+        if (fileURL == nil) {
             if(outError != nil) 
                 *outError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to find the file associated with this item.", @"Error description"), NSLocalizedDescriptionKey, nil]];
             return nil;
         }
             
-        NSURL *fileURL = [NSURL fileURLWithPath:fullPath];
-        
         // use a local variable in case it wasn't passed in, so we can always log this failure
         NSError *error;
         document = [super openDocumentWithContentsOfURL:fileURL display:displayDocument error:&error];

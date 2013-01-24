@@ -39,7 +39,7 @@
 #import "BDSKMetadataCacheOperation.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
-#import "BDAlias.h"
+#import "BDSKAlias.h"
 #import <libkern/OSAtomic.h>
 
 #define BDSKUseXMLSpotlightCacheKey @"BDSKUseXMLSpotlightCache"
@@ -93,13 +93,13 @@
             @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to build metadata cache for document at path \"%@\"", docPath] userInfo:nil];
         }
         
-        BDAlias *alias = [[BDAlias alloc] initWithURL:documentURL];
+        BDSKAlias *alias = [[BDSKAlias alloc] initWithURL:documentURL];
         if (alias == nil) {
             error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to create an alias for this document.", @"Error description"), NSLocalizedDescriptionKey, docPath, NSFilePathErrorKey, nil]];
             @throw [NSException exceptionWithName:NSObjectNotAvailableException reason:[NSString stringWithFormat:@"Unable to get an alias for file %@", docPath] userInfo:nil];
         }
         
-        NSDictionary *docInfo = [NSDictionary dictionaryWithObjectsAndKeys:docPath, @"net_sourceforge_bibdesk_owningfilepath", [alias aliasData], @"FileAlias", nil];
+        NSDictionary *docInfo = [NSDictionary dictionaryWithObjectsAndKeys:docPath, @"net_sourceforge_bibdesk_owningfilepath", [alias data], @"FileAlias", nil];
         
         [alias release];
         

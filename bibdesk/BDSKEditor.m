@@ -40,7 +40,7 @@
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
 #import "BibDocument_DataSource.h"
-#import "BDAlias.h"
+#import "BDSKAlias.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKComplexString.h"
 #import "BDSKScriptHookManager.h"
@@ -639,8 +639,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 }
 
 - (void)addLinkedFileFromMenuItem:(NSMenuItem *)sender{
-	NSString *path = [sender representedObject];
-    NSURL *aURL = [NSURL fileURLWithPath:path];
+	NSURL *aURL = [sender representedObject];
     [publication addFileForURL:aURL autoFile:YES runScriptHook:YES];
     [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
@@ -1323,7 +1322,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 			NSMenuItem *item = [menu addItemWithTitle:[filePath lastPathComponent]
                                                action:@selector(addLinkedFileFromMenuItem:)
                                         keyEquivalent:@""];
-			[item setRepresentedObject:filePath];
+			[item setRepresentedObject:[NSURL fileURLWithPath:filePath]];
 			[item setImageAndSize:[[NSWorkspace sharedWorkspace] iconForFile:filePath]];
 		}
 	}
@@ -1341,11 +1340,12 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 	
 	for (NSDictionary *itemDict in historyArray) {
 		NSString *URLString = [itemDict objectForKey:@"DownloadEntryURL"];
-		if (![NSString isEmptyString:URLString] && [NSURL URLWithString:URLString]) {
+        NSURL *aURL;
+		if (![NSString isEmptyString:URLString] && (aURL = [NSURL URLWithString:URLString])) {
 			NSMenuItem *item = [menu addItemWithTitle:URLString
                                                action:@selector(addRemoteURLFromMenuItem:)
                                         keyEquivalent:@""];
-			[item setRepresentedObject:URLString];
+			[item setRepresentedObject:aURL];
 			[item setImageAndSize:[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kInternetLocationGenericIcon)]];
 		}
 	}
@@ -1357,17 +1357,17 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 
 - (void)updatePreviewRecentDocumentsMenu:(NSMenu *)menu{
     // get all of the items from the Apple menu (works on 10.4, anyway), and build a set of the file paths for easy comparison as strings
-    NSMutableArray *globalRecentPaths = [[NSMutableArray alloc] initWithCapacity:10];
+    NSMutableArray *globalRecentURLs = [[NSMutableArray alloc] initWithCapacity:10];
     NSDictionary *itemDict;
     NSData *aliasData;
-    NSString *filePath;
-    BDAlias *alias;
+    NSURL *fileURL;
+    BDSKAlias *alias;
     
     if (LSSharedFileListCreate != WEAK_NULL) {
         
         LSSharedFileListRef fileList = LSSharedFileListCreate(kCFAllocatorDefault, kLSSharedFileListRecentDocumentItems, NULL);
         if (NULL == fileList) {
-            [globalRecentPaths release];
+            [globalRecentURLs release];
             return;
         }
         UInt32 seed;
@@ -1382,7 +1382,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
                 LSSharedFileListItemRef item = (void *)CFArrayGetValueAtIndex(fileListItems, idx);
                 CFURLRef itemURL;
                 if (noErr != LSSharedFileListItemResolve(item, 0, &itemURL, NULL))
-                    [globalRecentPaths addObject:[(NSURL *)itemURL path]];
+                    [globalRecentURLs addObject:(NSURL *)itemURL];
             }
             CFRelease(fileListItems);
         }
@@ -1395,17 +1395,17 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         
         for (itemDict in globalItems) {
             aliasData = [itemDict objectForKey:@"Alias"];
-            alias = [[BDAlias alloc] initWithData:aliasData];
-            filePath = [alias fullPathNoUI];
-            if(filePath)
-                [globalRecentPaths addObject:filePath];
+            alias = [[BDSKAlias alloc] initWithData:aliasData];
+            fileURL = [alias fileURLNoUI];
+            if(fileURL)
+                [globalRecentURLs addObject:fileURL];
             [alias release];
         }
         
     }
     
     // now get all of the recent items from the default PDF viewer; this does not include items opened since the viewer's last launch, unfortunately, regardless of the call to CFPreferencesSynchronize
-    NSMutableArray *previewRecentPaths = [[NSMutableArray alloc] initWithCapacity:10];
+    NSMutableArray *previewRecentURLs = [[NSMutableArray alloc] initWithCapacity:10];
     
     CFURLRef appURL;
     NSString *appIdentifier = nil;
@@ -1422,10 +1422,10 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     if (tmpArray) {
         for (itemDict in (NSArray *)tmpArray) {
             aliasData = [[itemDict objectForKey:@"_NSLocator"] objectForKey:@"_NSAlias"];
-            alias = [[BDAlias alloc] initWithData:aliasData];
-            filePath = [alias fullPathNoUI];
-            if(filePath)
-                [previewRecentPaths addObject:filePath];
+            alias = [[BDSKAlias alloc] initWithData:aliasData];
+            fileURL = [alias fileURLNoUI];
+            if(fileURL)
+                [previewRecentURLs addObject:fileURL];
             [alias release];
         }
         
@@ -1438,39 +1438,39 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     [menu removeAllItems];
     
     // now add all of the items from Preview, which are most likely what we want
-    for (filePath in previewRecentPaths) {
-        if([[NSFileManager defaultManager] fileExistsAtPath:filePath]){
-            fileName = [filePath lastPathComponent];            
+    for (fileURL in previewRecentURLs) {
+        if([[NSFileManager defaultManager] objectExistsAtFileURL:fileURL]){
+            fileName = [fileURL lastPathComponent];            
             item = [menu addItemWithTitle:fileName
                                    action:@selector(addLinkedFileFromMenuItem:)
                             keyEquivalent:@""];
-            [item setRepresentedObject:filePath];
-            [item setImageAndSize:[[NSWorkspace sharedWorkspace] iconForFile:filePath]];
+            [item setRepresentedObject:fileURL];
+            [item setImageAndSize:[[NSWorkspace sharedWorkspace] iconForFile:[fileURL path]]];
         }
     }
     
     // add a separator between Preview and global recent items, unless Preview has never been used
-    if ([previewRecentPaths count])
+    if ([previewRecentURLs count])
         [menu addItem:[NSMenuItem separatorItem]];
 
     // now add all of the items that /were not/ in Preview's recent items path; this works for files opened from Preview's open panel, as well as from the Finder
-    for (filePath in globalRecentPaths) {
+    for (fileURL in globalRecentURLs) {
         
-        if(![previewRecentPaths containsObject:filePath] && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
-            fileName = [filePath lastPathComponent];            
+        if(![previewRecentURLs containsObject:fileURL] && [[NSFileManager defaultManager] objectExistsAtFileURL:fileURL]){
+            fileName = [fileURL lastPathComponent];            
             item = [menu addItemWithTitle:fileName
                                    action:@selector(addLinkedFileFromMenuItem:)
                             keyEquivalent:@""];
-            [item setRepresentedObject:filePath];
-            [item setImageAndSize:[[NSWorkspace sharedWorkspace] iconForFile:filePath]];
+            [item setRepresentedObject:fileURL];
+            [item setImageAndSize:[[NSWorkspace sharedWorkspace] iconForFile:[fileURL path]]];
         }
     }  
     
-    if ([globalRecentPaths count] == 0)
+    if ([globalRecentURLs count] == 0)
         [menu addItemWithTitle:NSLocalizedString(@"No Recent Documents", @"Menu item title") action:NULL keyEquivalent:@""];
     
-    [globalRecentPaths release];
-    [previewRecentPaths release];
+    [globalRecentURLs release];
+    [previewRecentURLs release];
 }
 
 - (NSMenu *)recentDownloadsMenu{
@@ -1483,7 +1483,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         item = [menu addItemWithTitle:[filePath lastPathComponent]
                                action:@selector(addLinkedFileFromMenuItem:)
                         keyEquivalent:@""];
-        [item setRepresentedObject:filePath];
+        [item setRepresentedObject:[NSURL fileURLWithPath:filePath]];
         [item setImageAndSize:[[NSWorkspace sharedWorkspace] iconForFile:filePath]];
     }
     

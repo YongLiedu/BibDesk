@@ -45,7 +45,7 @@
 #import "BDSKStringConstants.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKConverter.h"
-#import "BDAlias.h"
+#import "BDSKAlias.h"
 #import "BDSKFormatParser.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKFiler.h"

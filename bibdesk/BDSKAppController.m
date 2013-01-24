@@ -50,7 +50,7 @@
 #import "BibDocument_Actions.h"
 #import "BibItem.h"
 #import "BDSKFormatParser.h"
-#import "BDAlias.h"
+#import "BDSKAlias.h"
 #import "BDSKErrorObjectController.h"
 #import "BDSKServiceProvider.h"
 #import "BDSKCompletionServer.h"
@@ -256,9 +256,9 @@ static void fixLegacyTableColumnIdentifiers()
     // legacy pref key removed prior to release of 1.3.1 (stored path instead of alias)
     NSString *filePath = [sud objectForKey:@"Default Bib File"];
     if(filePath) {
-        BDAlias *alias = [BDAlias aliasWithPath:filePath];
+        BDSKAlias *alias = [BDSKAlias aliasWithURL:[NSURL fileURLWithPath:filePath]];
         if(alias)
-            [sud setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
+            [sud setObject:[alias data] forKey:BDSKDefaultBibFileAliasKey];
         [sud removeObjectForKey:@"Default Bib File"];
     }
     
@@ -371,9 +371,9 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         case BDSKStartupOpenDefaultFile:
             {
                 NSData *data = [sud objectForKey:BDSKDefaultBibFileAliasKey];
-                BDAlias *alias = nil;
+                BDSKAlias *alias = nil;
                 if([data length])
-                    alias = [BDAlias aliasWithData:data];
+                    alias = [BDSKAlias aliasWithData:data];
                 NSURL *fileURL = [alias fileURL];
                 if(fileURL && NO == fileIsInTrash(fileURL))
                     [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:fileURL display:YES error:NULL];
@@ -384,7 +384,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
                 NSArray *files = [sud objectForKey:BDSKLastOpenFileNamesKey];
                 NSURL *fileURL;
                 for (NSDictionary *dict in files){ 
-                    fileURL = [[BDAlias aliasWithData:[dict objectForKey:@"_BDAlias"]] fileURL] ?: [NSURL fileURLWithPath:[dict objectForKey:@"fileName"]];
+                    fileURL = [[BDSKAlias aliasWithData:[dict objectForKey:@"_BDAlias"]] fileURL] ?: [NSURL fileURLWithPath:[dict objectForKey:@"fileName"]];
                     if(fileURL)
                         [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:fileURL display:YES error:NULL];
                 }
