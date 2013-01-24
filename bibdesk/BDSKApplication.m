@@ -44,11 +44,11 @@
 @implementation BDSKApplication
 
 - (IBAction)terminate:(id)sender {
-    NSArray *fileNames = [[[NSDocumentController sharedDocumentController] documents] valueForKeyPath:@"@distinctUnionOfObjects.fileName"];
-    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[fileNames count]];
-    for (NSString *fileName in fileNames){
-        NSData *data = [[BDAlias aliasWithPath:fileName] aliasData];
-        [array addObject:[NSDictionary dictionaryWithObjectsAndKeys:fileName, @"fileName", data, @"_BDAlias", nil]];
+    NSArray *fileURLs = [[[NSDocumentController sharedDocumentController] documents] valueForKeyPath:@"@distinctUnionOfObjects.fileURL"];
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[fileURLs count]];
+    for (NSURL *fileURL in fileURLs){
+        NSData *data = [[BDAlias aliasWithURL:fileURL] aliasData];
+        [array addObject:[NSDictionary dictionaryWithObjectsAndKeys:[fileURL path], @"fileName", data, @"_BDAlias", nil]];
     }
     [[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKLastOpenFileNamesKey];
     
