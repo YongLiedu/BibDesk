@@ -1306,7 +1306,6 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 
 - (void)updateSafariRecentDownloadsMenu:(NSMenu *)menu{
 	NSArray *historyArray = [self safariDownloadHistory];
-		
     NSFileManager *fileManager = [NSFileManager defaultManager];
     
     [menu removeAllItems];
@@ -1327,7 +1326,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 		}
 	}
     
-    if ([historyArray count] == 0) {
+    if ([menu numberOfItems] == 0) {
         [menu addItemWithTitle:NSLocalizedString(@"No Recent Downloads", @"Menu item title") action:NULL keyEquivalent:@""];
     }
 }
@@ -1350,7 +1349,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 		}
 	}
     
-    if ([historyArray count] == 0) {
+    if ([menu numberOfItems] == 0) {
         [menu addItemWithTitle:NSLocalizedString(@"No Recent Downloads", @"Menu item title") action:NULL keyEquivalent:@""];
     }
 }
@@ -1466,7 +1465,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         }
     }  
     
-    if ([globalRecentURLs count] == 0)
+    if ([menu numberOfItems] == 0)
         [menu addItemWithTitle:NSLocalizedString(@"No Recent Documents", @"Menu item title") action:NULL keyEquivalent:@""];
     
     [globalRecentURLs release];
