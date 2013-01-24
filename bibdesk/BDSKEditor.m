@@ -1406,17 +1406,12 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     // now get all of the recent items from the default PDF viewer; this does not include items opened since the viewer's last launch, unfortunately, regardless of the call to CFPreferencesSynchronize
     NSMutableArray *previewRecentURLs = [[NSMutableArray alloc] initWithCapacity:10];
     
-    CFURLRef appURL;
-    NSString *appIdentifier = nil;
-    
-    if (noErr == LSGetApplicationForInfo('PDF ', kLSUnknownCreator, CFSTR("pdf"), kLSRolesEditor | kLSRolesViewer, NULL, &appURL)) {
-        appIdentifier = [[NSBundle bundleWithPath:[(NSURL *)appURL path]] bundleIdentifier];
-        CFRelease(appURL);
-    }
-    if (appIdentifier == nil)
-        appIdentifier = @"com.apple.Preview";
+    NSArray *appIDs = (NSArray *)LSCopyAllRoleHandlersForContentType(kUTTypePDF, kLSRolesEditor | kLSRolesViewer);
+    NSString *appIdentifier = [appIDs count] ? [appIDs objectAtIndex:0] : @"com.apple.Preview";
     
     CFArrayRef tmpArray = CFPreferencesCopyAppValue(CFSTR("NSRecentDocumentRecords"), (CFStringRef)appIdentifier);
+    
+    [appIDs release];
     
     if (tmpArray) {
         for (itemDict in (NSArray *)tmpArray) {
