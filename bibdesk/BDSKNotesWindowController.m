@@ -93,6 +93,9 @@
         [splitView setAutosaveName:nil];
     }
     
+    [outlineView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:YES];
+    [outlineView setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
+    
     [tokenField setTokenizingCharacterSet:[NSCharacterSet whitespaceCharacterSet]];
 }
 

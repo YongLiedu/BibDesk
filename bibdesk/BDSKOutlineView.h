@@ -61,8 +61,6 @@
 - (void)outlineView:(NSOutlineView *)anOutlineView duplicateItems:(NSArray *)items; // defaults to copy+paste
 - (BOOL)outlineView:(NSOutlineView *)anOutlineView canDuplicateItems:(NSArray *)items;
 
-- (NSDragOperation)outlineView:(NSOutlineView *)anOutlineView draggingSourceOperationMaskForLocal:(BOOL)flag;
-
 - (NSImage *)outlineView:(NSOutlineView *)anOutlineView dragImageForItems:(NSArray *)items;
 
 - (void)outlineView:(NSOutlineView *)anOutlineView concludeDragOperation:(NSDragOperation)operation;

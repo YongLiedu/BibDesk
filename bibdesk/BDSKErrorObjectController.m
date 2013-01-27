@@ -102,7 +102,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     return self;
 }
 
-- (void)awakeFromNib;
+- (void)windowDidLoad;
 {
     [self setWindowFrameAutosaveName:BDSKErrorPanelFrameAutosaveName];
     
@@ -115,6 +115,9 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     }
     
     [errorTableView setDoubleAction:@selector(gotoError:)];
+    
+    [errorTableView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:YES];
+    [errorTableView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:NO];
     
     [errorsController setFilterManager:[BDSKErrorManager allItemsErrorManager]];
     [errorsController setHideWarnings:NO];
@@ -445,10 +448,6 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     [pboard clearContents];
     [pboard writeObjects:[NSArray arrayWithObjects:s, nil]];
     return YES;
-}
-
-- (NSDragOperation)tableView:(NSTableView *)aTableView draggingSourceOperationMaskForLocal:(BOOL)flag {
-    return NSDragOperationEvery;
 }
 
 @end

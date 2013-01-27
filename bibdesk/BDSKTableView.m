@@ -427,15 +427,6 @@ static char BDSKTableViewFontDefaultsObservationContext;
         NSBeep();
 }
 
-- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)flag {
-    if ([[self dataSource] respondsToSelector:@selector(tableView:draggingSourceOperationMaskForLocal:)])
-        return [[self dataSource] tableView:self draggingSourceOperationMaskForLocal:flag];
-    else if (flag)
-        return NSDragOperationEvery;
-    else
-        return NSDragOperationNone;        
-}
-
 - (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation {
     [super draggedImage:anImage endedAt:aPoint operation:operation];
 	

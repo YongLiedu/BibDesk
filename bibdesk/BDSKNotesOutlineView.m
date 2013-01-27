@@ -161,10 +161,6 @@
     }
 }
 
-- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
-    return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
-}
-
 - (id <BDSKNotesOutlineViewDelegate>)delegate { return (id <BDSKNotesOutlineViewDelegate>)[super delegate]; }
 - (void)setDelegate:(id <BDSKNotesOutlineViewDelegate>)newDelegate { [super setDelegate:newDelegate]; }
 

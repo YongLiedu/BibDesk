@@ -69,6 +69,8 @@
     NSSize drawerSize = [drawer contentSize];
     drawerSize.width = 100.0;
     [drawer setContentSize:drawerSize];
+    [tableView setDraggingSourceOperationMask:NSDragOperationNone forLocal:YES];
+    [tableView setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
 }
 
 - (NSTableView *)tableView{
@@ -161,10 +163,6 @@
 
 - (void)tableView:(NSTableView *)tv concludeDragOperation:(NSDragOperation)operation{
 	[document clearPromisedDraggedItems];
-}
-
-- (NSDragOperation)tableView:(NSTableView *)tv draggingSourceOperationMaskForLocal:(BOOL)isLocal{
-    return isLocal ? NSDragOperationNone : NSDragOperationCopy;
 }
 
 - (NSImage *)tableView:(NSTableView *)tv dragImageForRowsWithIndexes:(NSIndexSet *)dragRows{

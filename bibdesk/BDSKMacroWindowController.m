@@ -128,6 +128,9 @@
     NSSortDescriptor *sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
     [arrayController setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];
     
+    [tableView setDraggingSourceOperationMask:NSDragOperationCopy forLocal:YES];
+    [tableView setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
+    
     NSTableColumn *tc = [tableView tableColumnWithIdentifier:MACRO_COLUMNID];
     [[tc dataCell] setFormatter:[[[MacroKeyFormatter alloc] init] autorelease]];
     if(isEditable)
@@ -721,10 +724,6 @@
 @end
 
 @implementation BDSKMacroTableView
-
-- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
-    return NSDragOperationCopy;
-}
 
 - (void)awakeFromNib{
     BDSKTypeSelectHelper *aTypeSelectHelper = [[BDSKTypeSelectHelper alloc] init];

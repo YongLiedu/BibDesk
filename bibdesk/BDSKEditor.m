@@ -178,6 +178,9 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
     if (editorFlags.isEditable)
         [tableView setDoubleAction:@selector(raiseChangeFieldName:)];
     
+    [tableView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:YES];
+    [tableView setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
+    
     [bibTypeButton setEnabled:editorFlags.isEditable];
     [addFieldButton setEnabled:editorFlags.isEditable];
     

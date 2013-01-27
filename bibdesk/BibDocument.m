@@ -516,6 +516,10 @@ static NSOperationQueue *metadataCacheQueue = nil;
     NSArray *dragTypes = [NSArray arrayWithObjects:BDSKPasteboardTypePublications, (NSString *)kUTTypeURL, (NSString *)kUTTypeFileURL, NSFilenamesPboardType, NSURLPboardType, NSPasteboardTypeString, NSPasteboardTypeColor, nil];
     [tableView registerForDraggedTypes:dragTypes];
     [groupOutlineView registerForDraggedTypes:dragTypes];
+    [tableView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:YES];
+    [tableView setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
+    [groupOutlineView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:YES];
+    [groupOutlineView setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
     
     [[sideFileView enclosingScrollView] setBackgroundColor:[sideFileView backgroundColor]];
     [bottomFileView setBackgroundColor:[[NSColor controlAlternatingRowBackgroundColors] lastObject]];

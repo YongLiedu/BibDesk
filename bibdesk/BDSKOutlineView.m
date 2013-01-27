@@ -420,15 +420,6 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
         NSBeep();
 }
 
-- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)flag {
-    if ([[self dataSource] respondsToSelector:@selector(outlineView:draggingSourceOperationMaskForLocal:)])
-        return [[self dataSource] outlineView:self draggingSourceOperationMaskForLocal:flag];
-    else if (flag)
-        return NSDragOperationEvery;
-    else
-        return NSDragOperationNone;        
-}
-
 - (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation {
     [super draggedImage:anImage endedAt:aPoint operation:operation];
 	

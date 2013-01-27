@@ -468,13 +468,6 @@
 	[pboardHelper clearPromisedTypesForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
 }
 
-- (NSDragOperation)tableView:(NSTableView *)tv draggingSourceOperationMaskForLocal:(BOOL)isLocal{
-    if (tv == tableView) {
-        return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
-    }
-    return NSDragOperationNone;
-}
-
 - (NSImage *)tableView:(NSTableView *)tv dragImageForRowsWithIndexes:(NSIndexSet *)dragRows{
     if (tv == tableView) {
         return [self dragImageForPromisedItemsUsingCiteString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey]];
@@ -1147,10 +1140,6 @@
 
 - (void)outlineView:(NSOutlineView *)ov concludeDragOperation:(NSDragOperation)operation {
     [self clearPromisedDraggedItems];
-}
-
-- (NSDragOperation)outlineView:(NSOutlineView *)ov draggingSourceOperationMaskForLocal:(BOOL)isLocal {
-    return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
 }
 
 - (NSImage *)outlineView:(NSOutlineView *)ov dragImageForItems:(NSArray *)items{ 

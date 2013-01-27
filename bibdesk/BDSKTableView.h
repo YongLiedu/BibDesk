@@ -63,8 +63,6 @@
 - (void)tableView:(NSTableView *)aTableView duplicateRowsWithIndexes:(NSIndexSet *)rowIndexes; // defaults to copy+paste
 - (BOOL)tableView:(NSTableView *)aTableView canDuplicateRowsWithIndexes:(NSIndexSet *)rowIndexes;
 
-- (NSDragOperation)tableView:(NSTableView *)aTableView draggingSourceOperationMaskForLocal:(BOOL)flag;
-
 - (NSImage *)tableView:(NSTableView *)aTableView dragImageForRowsWithIndexes:(NSIndexSet *)dragRows;
 
 - (void)tableView:(NSTableView *)aTableView concludeDragOperation:(NSDragOperation)operation;

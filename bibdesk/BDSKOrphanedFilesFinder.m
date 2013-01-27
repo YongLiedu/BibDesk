@@ -95,11 +95,13 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     return self;
 }
 
-- (void)awakeFromNib{
+- (void)windowDidLoad{
     [self setWindowFrameAutosaveName:BDSKOrphanedFilesWindowFrameAutosaveName];
     [tableView setDoubleAction:@selector(showFile:)];
     [tableView setFontNamePreferenceKey:BDSKOrphanedFilesTableViewFontNameKey];
     [tableView setFontSizePreferenceKey:BDSKOrphanedFilesTableViewFontSizeKey];
+    [tableView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:YES];
+    [tableView setDraggingSourceOperationMask:NSDragOperationCopy | NSDragOperationDelete forLocal:NO];
     [progressIndicator setUsesThreadedAnimation:YES];
 }
 
@@ -302,10 +304,6 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     [pboard clearContents];
     [pboard writeObjects:[draggedFiles valueForKey:@"fileURL"]];
     return YES;
-}
-
-- (NSDragOperation)tableView:(NSTableView *)tv draggingSourceOperationMaskForLocal:(BOOL)isLocal{
-    return isLocal ? NSDragOperationEvery : NSDragOperationCopy | NSDragOperationDelete;
 }
 
 - (void)tableView:(NSTableView *)tv concludeDragOperation:(NSDragOperation)operation{
