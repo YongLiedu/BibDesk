@@ -1,0 +1,396 @@
+{
+    casing = (
+        {
+            displayName = "None";
+            key = "<None>";
+        },
+        {
+            displayName = "Capitalized";
+            key = capitalizedString;
+        },
+        {
+            displayName = "Lowercase";
+            key = lowercaseString;
+        },
+        {
+            displayName = "Uppercase";
+            key = uppercaseString;
+        },
+        {
+            displayName = "Uppercase First";
+            key = uppercaseFirst;
+        },
+        {
+            displayName = "Lowercase First";
+            key = lowercaseFirst;
+        },
+        {
+            displayName = "Title Capitalize";
+            key = titleCapitalizedString;
+        }
+    );
+    cleaning = (
+        {
+            displayName = "None";
+            key = "<None>";
+        },
+        {
+            displayName = "Remove TeX";
+            key = stringByRemovingTeX;
+        },
+        {
+            displayName = "Remove curly braces";
+            key = stringByRemovingCurlyBraces;
+        },
+        {
+            displayName = "Remove surrounding spaces";
+            key = stringByRemovingSurroundingWhitespace;
+        },
+        {
+            displayName = "Collapse spaces";
+            key = stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace;
+        },
+        {
+            displayName = "Remove spaces";
+            key = stringByRemovingWhitespace;
+        },
+        {
+            displayName = "Remove newlines";
+            key = stringByRemovingReturns;
+        },
+        {
+            displayName = "TeXify";
+            key = stringByTeXifyingString;
+        },
+        {
+            displayName = "DeteXify";
+            key = stringByDeTeXifyingString;
+        },
+        {
+            displayName = "HTML escape";
+            key = htmlString;
+        },
+        {
+            displayName = "XML escape";
+            key = xmlString;
+        },
+        {
+            displayName = "CSV escape";
+            key = csvString;
+        },
+        {
+            displayName = "TSV escape";
+            key = tsvString;
+        }
+    );
+    appending = (
+        {
+            displayName = "None";
+            key = "<None>";
+        },
+        {
+            displayName = "Append space";
+            key = stringByAppendingSpaceIfNotEmpty;
+        },
+        {
+            displayName = "Append double space";
+            key = stringByAppendingDoubleSpaceIfNotEmpty;
+        },
+        {
+            displayName = "Append comma and space";
+            key = stringByAppendingCommaAndSpaceIfNotEmpty;
+        },
+        {
+            displayName = "Append period and space";
+            key = stringByAppendingFullStopAndSpaceIfNotEmpty;
+        },
+        {
+            displayName = "Append comma";
+            key = stringByAppendingCommaIfNotEmpty;
+        },
+        {
+            displayName = "Append period";
+            key = stringByAppendingFullStopIfNotEmpty;
+        },
+        {
+            displayName = "Prepend space";
+            key = stringByPrependingSpaceIfNotEmpty;
+        },
+        {
+            displayName = "Prepend comma and space";
+            key = stringByPrependingCommaAndSpaceIfNotEmpty;
+        },
+        {
+            displayName = "Prepend period and space";
+            key = stringByPrependingFullStopAndSpaceIfNotEmpty;
+        },
+        {
+            displayName = "Parenthesize";
+            key = parenthesizedStringIfNotEmpty;
+        },
+        {
+            displayName = "Surround with space";
+            key = stringBySurroundingWithSpacesIfNotEmpty;
+        }
+    );
+    urlFormat = (
+        {
+            displayName = "URL";
+            key = "absoluteString";
+        },
+        {
+            displayName = "Path";
+            key = "path";
+        },
+        {
+            displayName = "File name";
+            key = "path.lastPathComponent";
+        },
+        {
+            displayName = "Container path";
+            key = "path.stringByDeletingLastPathComponent";
+        },
+        {
+            displayName = "Path extension";
+            key = "path.pathExtension";
+        },
+        {
+            displayName = "Tilde abbreviated path";
+            key = "path.stringByAbbreviatingWithTildeInPath";
+        },
+        {
+            displayName = "Path without extension";
+            key = "path.stringByDeletingPathExtension";
+        },
+        {
+            displayName = "File name without extension";
+            key = "path.lastPathComponent.stringByDeletingPathExtension";
+        },
+        {
+            displayName = "Resolved path";
+            key = "path.stringByResolvingSymlinksInPath";
+        },
+        {
+            displayName = "Standardized path";
+            key = "path.stringByStandardizingPath";
+        },
+        {
+            displayName = "Normalized path";
+            key = "path.stringByNormalizingPath";
+        }
+    );
+    nameStyle = (
+        {
+            displayName = "First Middle von Last, Jr";
+            key = name;
+        },
+        {
+            displayName = "von Last, Jr, First Middle";
+            key = normalizedName;
+        },
+        {
+            displayName = "F. M. von Last, Jr";
+            key = abbreviatedName;
+        },
+        {
+            displayName = "von Last, Jr, F. M.";
+            key = abbreviatedNormalizedName;
+        },
+        {
+            displayName = "von Last FM Jr";
+            key = unpunctuatedAbbreviatedNormalizedName;
+        },
+        {
+            displayName = "von Last, Jr";
+            key = fullLastName;
+        },
+        {
+            displayName = "Last";
+            key = lastName;
+        }
+    );
+    joinStyle = (
+        {
+            displayName = "A, B, C";
+            key = "@componentsJoinedByComma";
+        },
+        {
+            displayName = "A, B, and C";
+            key = "@componentsJoinedByCommaAndAnd";
+        },
+        {
+            displayName = "A, B, & C";
+            key = "@componentsJoinedByCommaAndAmpersand";
+        },
+        {
+            displayName = "A and B and C";
+            key = "@componentsJoinedByAnd";
+        },
+        {
+            displayName = "A; B; C";
+            key = "@componentsJoinedBySemicolon";
+        },
+        {
+            displayName = "A/B/C";
+            key = "@componentsJoinedByForwardSlash";
+        },
+        {
+            displayName = "Default separator";
+            key = "@componentsJoinedByDefaultJoinString";
+        },
+        {
+            displayName = "A; A et al.";
+            key = "@componentsWithEtAlAfterOne";
+        },
+        {
+            displayName = "A and B; A et al.";
+            key = "@componentsJoinedByAndWithSingleEtAlAfterTwo";
+        },
+        {
+            displayName = "A, B, and C; A et al.";
+            key = "@componentsJoinedByCommaAndAndWithSingleEtAlAfterThree";
+        },
+        {
+            displayName = "A and B; A, B, et al.";
+            key = "@componentsJoinedByAndWithEtAlAfterTwo";
+        },
+        {
+            displayName = "A, B, and C; A, B, C, et al.";
+            key = "@componentsJoinedByCommaAndAndWithEtAlAfterThree";
+        },
+        {
+            displayName = "A & B; A et al.";
+            key = "@componentsJoinedByAmpersandWithSingleEtAlAfterTwo";
+        },
+        {
+            displayName = "A, B, C, D, & E; A et al.";
+            key = "@componentsJoinedByCommaAndAmpersandWithSingleEtAlAfterFive";
+        },
+        {
+            displayName = "A, …, E, & F; A, …, F, et al.";
+            key = "@componentsJoinedByCommaAndAmpersandWithEtAlAfterSix";
+        },
+        {
+            displayName = "A, …, E, F; A, …, F, et al.";
+            key = "@componentsJoinedByCommaWithEtAlAfterSix";
+        },
+        {
+            displayName = "First name only";
+            key = "@firstObject";
+        }
+    );
+    linkedFileFormat = (
+        {
+            displayName = "URL";
+            key = "URL.absoluteString";
+        },
+        {
+            displayName = "Path";
+            key = "path";
+        },
+        {
+            displayName = "File name";
+            key = "path.lastPathComponent";
+        },
+        {
+            displayName = "Container path";
+            key = "path.stringByDeletingLastPathComponent";
+        },
+        {
+            displayName = "Path extension";
+            key = "path.pathExtension";
+        },
+        {
+            displayName = "Tilde abbreviated path";
+            key = "path.stringByAbbreviatingWithTildeInPath";
+        },
+        {
+            displayName = "Path without extension";
+            key = "path.stringByDeletingPathExtension";
+        },
+        {
+            displayName = "File name without extension";
+            key = "path.lastPathComponent.stringByDeletingPathExtension";
+        },
+        {
+            displayName = "Resolved path";
+            key = "path.stringByResolvingSymlinksInPath";
+        },
+        {
+            displayName = "Standardized path";
+            key = "path.stringByStandardizingPath";
+        },
+        {
+            displayName = "Normalized path";
+            key = "path.stringByNormalizingPath";
+        }
+    );
+    linkedFileJoinStyle = (
+        {
+            displayName = "A, B, C";
+            key = "@componentsJoinedByComma";
+        },
+        {
+            displayName = "First only";
+            key = "@firstObject";
+        }
+    );
+    dateFormat = (
+        {
+            displayName = "Standard";
+            key = "description";
+        },
+        {
+            displayName = "Default";
+            key = "dateDescription";
+        },
+        {
+            displayName = "Long Default";
+            key = "longDateDescription";
+        },
+        {
+            displayName = "Medium Default";
+            key = "mediumDateDescription";
+        },
+        {
+            displayName = "Short Default";
+            key = "shortDateDescription";
+        },
+        {
+            displayName = "RSS";
+            key = "rssDescription";
+        }
+    );
+    counterStyle = (
+        {
+            displayName = "Number";
+            key = "<None>";
+        },
+        {
+            displayName = "Roman";
+            key = "romanNumeralValue";
+        },
+        {
+            displayName = "Alpha";
+            key = "alphaCounterValue";
+        },
+        {
+            displayName = "Greek";
+            key = "greekCounterValue";
+        }
+    );
+    counterCasing = (
+        {
+            displayName = "Lowercase";
+            key = "<None>";
+        },
+        {
+            displayName = "Uppercase";
+            key = uppercaseString;
+        },
+        {
+            displayName = "Capitalized";
+            key = capitalizedString;
+        }
+    );
+}

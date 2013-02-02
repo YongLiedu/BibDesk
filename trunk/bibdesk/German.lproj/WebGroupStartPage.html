@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<!-- Localize title -->
+	<title>BibDesk Web Group</title>
+	<style type="text/css">
+		* { margin: 0px; padding: 0px; }
+		body { font-family: "Lucida Grande"; font-size: 13px; padding: 1em; }
+		.right { text-align: right; display: block; float: right; margin-left: 1em; }
+		.text, .columns { max-width: 50em; margin: auto; }
+		.columns { margin-top: 1em; }
+		.column { width: 33.3333%; float: left; display: block; }
+		.column.c1>* { margin-right: .66em;}
+		.column.c2>* { margin: 0em 0.33em; }
+		.column.c3>* { margin-left: .66em; }		
+		.column h2 { font-size: 13px; background: #ccc; padding: 0.5em 0.66em;}
+		.column ul { background: #eee; border: 1px solid #ccc; list-style-type: none; line-height: 1.66em;}
+		.column ul a {display:block; padding: 0em 0.66em; }
+		.column ul li:first-child a { padding-top: 0.5em; }
+		.column ul li:last-child a { padding-bottom: 0.5em; }
+		.column p { padding: 0.5em 0.66em; margin-top: 0.5em; }
+		a { text-decoration: none; }
+		a:hover { text-decoration: underline; }
+		a:active { color: #900; }
+		a:visited { color: #909; }
+	</style>
+	</head>
+	<body>
+	
+		<div class="text">
+			<div class="right">
+<!-- Localize text -->
+				<a href="help:anchor=Web-Group bookID=edu.ucsd.cs.mmccrack.bibdesk.help">[Help]</a><br />
+				<a href="bibdesk:downloads">[Downloads]</a>
+			</div>
+<!-- Localize text -->
+			BibDesk recognises bibliographic information on some web pages and processes them for easy searching and single-click import. Supported sites and formats: 
+		</div>
+		
+		<div class="columns">
+		<div class="column c1">
+<!-- Localize text and title -->
+			<h2 title="These sites are fully accessible for anyone.">Free Sites</h2>
+			<ul>
+			<$publicParserInfos>
+			<li><a href="<$address/>" title="<$description/>"><$name/></a></li>
+			</$publicParserInfos>
+			</ul>
+		</div>
+		
+		<div class="column c2">
+<!-- Localize text and title -->
+			<h2 title="These sites require a subscription by you or your institution to access their full content. A subset of the content may be available to everybody.">Subscription Sites</h2>
+			<ul>
+			<$subscriptionParserInfos>
+			<li><a href="<$address/>" title="<$description/>"><$name/></a></li>
+			</$subscriptionParserInfos>
+			</ul>
+		</div>
+		
+		<div class="column c3">
+<!-- Localize text and title -->
+			<h2 title="Formats which can be embedded in web pages and extracted from there.">General formats</h2>
+			<ul>
+			<$genericParserInfos>
+			<li><a href="<$address/>" title="<$description/>"><$name/></a></li>
+			</$genericParserInfos>
+			</ul>
+		</div>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,198 @@
+# -*-perl-*-
+
+# HTML 3.2 - ouch!
+$DOCTYPE = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN" "http://www.w3.org/TR/html32/loose.dtd">';
+$FRAMESET_DOCTYPE = $DOCTYPE;
+$USE_ISO = 0;
+$things_map{'oe'} = '&#156;';
+$things_map{'OE'} = '&#140;';
+$things_map{'ue'} = '&#252;';
+$things_map{'UE'} = '&#220;';
+$things_map{'dots'} = '<small>...</small>';
+$things_map{'enddots'} = '<small>....</small>';
+$things_map{'euro'} = 'Euro';
+$style_map{'sansserif'} = {};
+# &quot; is not in html 3.2
+sub t2h_html32_protect_text($)
+{
+   my $text = shift;
+   $text =~ s/&/&amp;/g;
+   $text =~ s/</&lt;/g;
+   $text =~ s/>/&gt;/g;
+   #$text =~ s/\"/&quot;/g;
+   return $text;
+}
+
+# a heading
+sub t2h_html32_heading($)
+{
+    my $element = shift;
+    my $text = $element->{'text'};
+    my $level = $element->{'level'};
+    my $tag_level = $element->{'tag_level'};
+    if (!$element->{'node'} && !$NUMBER_SECTIONS)
+	{
+        $text = $element->{'name'};
+	}
+    if (($tag_level eq "chapter") || ($tag_level eq "section") || ($tag_level eq "subsection") || ($tag_level eq "appendix"))
+    {
+        $text = "<img src=\"gfx/BibDeskIcon.png\" alt=\"BibDesk\"> " . $text;
+    }
+    return "<h$level class=\"$tag_level\"> $text</h$level>$node\n";
+}
+
+# a preformatted section
+sub t2h_html32_preformatted($$$)
+{
+    my $text = shift;
+    my $pre_style = shift;
+    my $class = shift;
+
+    return '' if ($text eq '');
+    return "<pre>$text</pre>";
+}
+
+
+# a simple menu entry ref in case we aren't in a standard menu context
+sub t2h_html32_foot_section($)
+{
+    my $lines = shift;
+    unshift (@$lines, "<hr>\n", "<h3>Footnotes</h3>\n");
+    return $lines; 
+}
+# a whole menu
+sub t2h_html32_menu($)
+{
+    my $text = shift;
+    if ($text =~ /\S/)
+    {
+        return "<table border=\"0\" cellspacing=\"0\">\n" 
+        . $text . "</table>\n";
+    }
+}
+
+
+#$summary_letter    = \&t2h_html32_summary_letter;
+$protect_text      = \&t2h_html32_protect_text;
+$heading           = \&t2h_html32_heading;
+$preformatted      = \&t2h_html32_preformatted;
+$menu              = \&t2h_html32_menu;
+$foot_section      = \&t2h_html32_foot_section;
+#$cartouche         = \&t2h_html32_cartouche;
+#$listoffloats      = \&t2h_html32_listoffloats;
+#$float             = \&t2h_html32_float;
+
+# External stylesheet:
+$CSS_LINES = "<link href=\"sty/bibdeskhelp.css\" rel=\"stylesheet\" media=\"all\" />";
+
+#@CHAPTER_BUTTONS = @MISC_BUTTONS;
+
+
+# horizontal rules
+$SMALL_RULE = '';
+$DEFAULT_RULE = '';
+$MIDDLE_RULE = '';
+$BIG_RULE = '';
+
+$print_page_foot = \&appleHelp_print_page_foot;
+
+$DO_CONTENTS = 1;
+$SECTION_NAVIGATION = 0;
+
+$simple_map{'*'} = '<br/>';
+
+$image = \&appleHelp_image;
+
+sub appleHelp_image{
+   my $file = shift;
+   my $base = shift;
+   my $preformatted = shift;
+   my $file_name = shift;
+   return "[ $base ]" if ($preformatted);
+   return "<img src=\"$file_name\" alt=\"$base\">";
+}
+
+$index_entry_label = \&appleHelp_index_entry_label;
+
+sub appleHelp_index_entry_label{
+
+    $id = shift;
+    $was_pre = shift;
+    $lin = shift;
+    $anchor_str = "<a name=\"$id\"></a>";
+    $label_str = "<META name=\"keywords\" content=\"$lin\">";
+    $anchor_str .= $label_str;
+    $anchor_str .= "\n" if $was_pre;
+    print "FOUND" if $was_pre;
+    return $anchor_str;
+}
+
+$print_page_foot = \&appleHelp_print_page_foot;
+
+sub appleHelp_print_page_foot{
+    $fh = shift;
+    print $fh <<EOT;
+<p>
+$PRE_BODY_CLOSE
+</p>
+</body>
+</html>
+EOT
+}
+
+$print_head_navigation = \&appleHelp_print_no_navigation;
+
+sub appleHelp_print_no_navigation{
+    my $fh = shift;
+    my $buttons = shift;
+    my $vertical = shift;
+}
+
+$print_Top_header = \&appleHelp_print_Top_header;
+$print_Top_head = \&appleHelp_print_Top_head;
+
+sub appleHelp_print_Top_header($$)
+{
+    my $fh = shift;
+    my $do_page_head = shift;
+    &$print_Top_head($fh) if ($do_page_head);
+}
+
+sub appleHelp_print_Top_head($)
+{
+    my $fh = shift;
+    my $longtitle = "$Texi2HTML::THISDOC{'title_unformatted'}";
+    $longtitle .= ": $Texi2HTML::UNFORMATTED{'This'}" if exists $Texi2HTML::UNFORMATTED{'This'};
+    #my $longtitle = "$Texi2HTML::THISDOC{'title_no_texi'}";
+    #$longtitle .= ": $Texi2HTML::NO_TEXI{'This'}" if exists $Texi2HTML::NO_TEXI{'This'};
+    my $description = $DOCUMENT_DESCRIPTION;
+    $description = $longtitle if (!defined($description));
+    $description = "<meta name=\"description\" content=\"$description\">" if
+         ($description ne '');
+    $description = $Texi2HTML::THISDOC{'documentdescription'} if (defined($Texi2HTML::THISDOC{'documentdescription'}));
+    my $encoding = '';
+    $encoding = "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=$ENCODING\">" if (defined($ENCODING) and ($ENCODING ne ''));
+    print $fh <<EOT;
+$DOCTYPE
+<html>
+$Texi2HTML::THISDOC{'copying'}<!-- Created on $Texi2HTML::THISDOC{today} by $Texi2HTML::THISDOC{program} -->
+<!--
+$Texi2HTML::THISDOC{program_authors}
+-->
+<head>
+<title>$longtitle</title>
+
+$description
+<meta name="keywords" content="$longtitle">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="$Texi2HTML::THISDOC{program}">
+<meta name="robots" content="anchors">
+$encoding
+$CSS_LINES
+</head>
+
+<body $BODYTEXT>
+$AFTER_BODY_OPEN
+EOT
+}

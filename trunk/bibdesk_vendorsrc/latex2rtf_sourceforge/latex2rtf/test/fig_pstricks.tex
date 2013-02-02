@@ -1,0 +1,29 @@
+\documentclass{article}
+
+\usepackage{pstricks-add}
+
+\begin{document}
+
+\psset{xunit=0.5cm,yunit=0.5cm,linecolor=red}
+\newpsstyle{graphstyle}{linecolor=green}
+\newpsstyle{plotstyle}{linewidth=3pt}
+
+\begin{pspicture}(-10,-5)(10,5)
+  \psplot{-10}{10}{x 180 mul 3.1416 div sin}
+  \psaxes(0,0)(-10,-5)(10,5)
+\end{pspicture}
+
+\vspace{1cm}
+
+\begin{pspicture}(-10,-5)(10,5)
+  \psplot[algebraic]{-10}{10}{sin(x)}
+  \psaxes(0,0)(-10,-5)(10,5)
+\end{pspicture}
+
+\psset{algebraic}
+
+\begin{psgraph}[ticksize=0,labels=none](0,0)(-10,-5)(10,5){.5\textwidth}{!}
+  \psplot[linecolor=blue]{-10}{10}{cos(x)}
+\end{psgraph}
+
+\end{document}

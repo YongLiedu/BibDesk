@@ -1,0 +1,246 @@
+﻿/* last word of abbreviated bytes string if no abbreviation is necessary
+   resizing byte formatter - this word is separate because of a bug in NSNumberFormatter */
+
+" bytes" = "octets";
+
+/* resizing bytes formatter bytes format */
+"#,##0" = "# ##0";
+
+/* resizing bytes formatter gigabytes format */
+"#,##0.0 GB" = "# ##0,0 Go";
+
+/* resizing bytes formatter kilobytes format */
+"#,##0.0 kB" = "# ##0,0 ko";
+
+/* resizing bytes formatter megabytes format */
+"#,##0.0 MB" = "# ##0,0 Mo";
+
+/* resizing bytes formatter petabytes format */
+"#,##0.0 PB" = "# ##0,0 Po";
+
+/* resizing bytes formatter terabytes format */
+"#,##0.0 TB" = "# ##0,0 To";
+
+/* format string for color with brightness description
+   format string for color with saturation description */
+
+"%@ %@" = "%1$@ %2$@";
+
+/* preferences panel title format */
+"%@ Preferences" = "Préférences %@";
+
+/* format string for color with saturation and brightness descriptions */
+"%@, %@ %@" = "%1$@, %2$@ %3$@";
+
+/* Scripts menu item */
+"About the Scripts Menu" = "À propos du menu Script";
+
+/* script execute error message
+   script loading error message */
+
+"AppleScript reported the following error:\n%@" = "AppleScript a détecté l'erreur suivante :\n%@";
+
+/* autosize all columns contextual menu item */
+"Auto Size All Columns" = "Taille auto de toutes les colonnes";
+
+/* autosize column contextual menu item */
+"Auto Size Column" = "Taille auto de la colonne";
+
+/* word comparing color brightnesss */
+"Bright" = "Lumineux";
+
+/* alert panel button */
+"Cancel" = "Annuler";
+
+/* Date picker window title */
+"Choose Date" = "Choisir la date";
+
+/* informative text for reset-to-defaults alert */
+"Choosing Reset will restore all settings (including options not in this Preferences window, such as window sizes and toolbars) to the state they were in when %@ was first installed." = "En choisissant Restaurer, tous les paramètres (incluant les options qui ne sont pas dans les Préférences, comme la taille et la barre d'outils des fenêtres) seront restaurés en l'état de la première installation d'%@.";
+
+/* informative text for reset-to-defaults alert */
+"Choosing Reset will restore all settings in all preference panes to the state they were in when %@ was first installed." = "Choisir Par défaut va restaurer tous les paramètres de tous les panneaux de préférences en l'état de la première installation d'%@.";
+
+/* informative text for reset-to-defaults alert */
+"Choosing Reset will restore all settings in this pane to the state they were in when %@ was first installed." = "Choisir Restaurer va restaurer tous les paramètres de ce panneau en l'état de la première installation d'%@.";
+
+/* color list name */
+"Classic Crayons" = "Crayons Classiques";
+
+/* name of completely transparent color */
+"Clear" = "Transparent";
+
+/* workflow execution exception format string */
+"Couldn't launch Automator Launcher.app.  LSOpenFromURLSpec returned %d" = "Impossible de lancer Automator.app. LSOpenFromURLSpec a renvoyé %d";
+
+/* workflow execution exception format string */
+"Couldn't locate Automator Launcher.app." = "Impossible de trouver Automator.app.";
+
+/* generic color name for custom colors */
+"Custom" = "Personnalisé";
+
+/* undo action name for cutting outline view items */
+"Cut" = "Couper";
+
+/* word comparing color brightnesss */
+"Dark" = "Foncé";
+
+/* word comparing color saturations */
+"Deep" = "Profond";
+
+/* undo action name for drag operations in outline view */
+"Drag Operation" = "Glisser/Déposer";
+
+/* script error panel button */
+"Edit Script" = "Modifier le script";
+
+/* internet config error */
+"Error editing InternetConfig preferences for key %@: %@" = "Erreur lors de l'édition des préférences d'InternetConfig pour la clé %1$@ : %2$@";
+
+/* internet config error */
+"Error opening InternetConfig for read-only access: %@" = "Erreur lors de l'ouverture d'InternetConfig pour un accès en lecture seule : %@";
+
+/* internet config error */
+"Error opening InternetConfig for read-write access: %@" = "Erreur lors de l'ouverture d'InternetConfig pour un accès en lecture-écriture : %@";
+
+/* internet config error */
+"Error reading InternetConfig preference for key %@: %@" = "Erreur lors de la lecture des préférences d'InternetConfig pour la clé %1$@ : %2$@";
+
+/* word comparing color saturations */
+"Faded" = "Insaturé";
+
+/* undo action name for grouping outline view items */
+"Group" = "Groupe";
+
+/* internet config error */
+"ICCountPref returned an error: %@" = "ICCountPref a retourné une erreur : %@";
+
+/* internet config error */
+"ICEnd returned an error: %@" = "ICEnd a retourné une erreur: %@";
+
+/* internet config error */
+"ICGetIndPref %d/%d returned an error: %@" = "ICGetIndPref %d/%d a retourné une erreur: %@";
+
+/* internet config error */
+"ICMapFilename returned an error for file %@: %@" = "ICMapFilename a retourné une erreur pour le fichier %1$@: %2$@";
+
+/* internet config error */
+"ICSetPref returned an error while setting key %@: %@" = "ICSetPref a retourné une erreur lors du réglage de la clé %@: %@";
+
+/* internet config error */
+"ICSetPref returned permissions when attempting setting key %@" = "ICSetPref a retourné une erreur d'autorisation en essayant de régler la clé %@";
+
+/* generic color name for pattern colors */
+"Image" = "Image";
+
+/* undo action name for indenting outline view items */
+"Indent" = "Retrait";
+
+/* word comparing color saturations */
+"Intense" = "Intense";
+
+/* launch services error */
+"Launch Services returned an error while opening URL %@: %@" = "Les Launch Services ont retourné une erreur lors de l'ouverture de l'URL %1$@ : %2$@";
+
+/* word comparing color brightnesss */
+"Light" = "Clair";
+
+/* preference bundle loading message format */
+"Loading %@..." = "Chargement de %@...";
+
+/* word comparing color saturations */
+"Mild" = "Moyen";
+
+/* word comparing color brightnesss */
+"Near-black" = "Presque-sombre";
+
+/* preferences panel button */
+"Next" = "Suivant";
+
+/* menu title */
+"No Actions Available" = "Aucune action disponible";
+
+/* how many pages in document format for scrollview */
+"of %d" = "de %d";
+
+/* word comparing color brightnesss */
+"Off-white" = "Grisâtre";
+
+/* script error panel button
+   unhandled exception panel button */
+
+"OK" = "OK";
+
+/* page prompt for multipage documents in scrollview */
+"Page" = "Page";
+
+/* color picker tool tip */
+"Pattern Color" = "Couleur du motif";
+
+/* preferences panel button */
+"Previous" = "Précédent";
+
+/* alert panel button
+   reset-to-defaults button title */
+
+"Reset" = "Réinitialiser";
+
+/* message text for reset-to-defaults alert */
+"Reset %@ preferences to their original values?" = "Restaurer les préférences %@ à leurs valeurs originales ?";
+
+/* reset-to-defaults button title */
+"Reset All" = "Tout réinitialiser";
+
+/* message text for reset-to-defaults alert */
+"Reset all preferences and other settings to their original values?" = "Restaurer toutes les préférences et les autres paramètres à leurs valeurs originales ?";
+
+/* message text for reset-to-defaults alert */
+"Reset all preferences to their original values?" = "Restaurer toutes les préférences à leurs valeurs originales ?";
+
+/* reset-to-defaults button tooltip */
+"Return all settings to default values" = "Ramener tous les paramètres à leurs valeurs par défaut";
+
+/* reset-to-defaults button tooltip */
+"Return settings in this pane to default values" = "Ramener tous les paramètres à leurs valeurs par défaut";
+
+/* word comparing color saturations */
+"Rich" = "Riche";
+
+/* default search mode menu item */
+"Search" = "Rechercher";
+
+/* context control tooltip */
+"Shortcuts for commonly used actions" = "Raccourcis pour les actions courantes";
+
+/* preferences panel button */
+"Show All" = "Tout Afficher";
+
+/* word comparing color brightnesss */
+"Smokey" = "Embrumé";
+
+/* Contents of popup in regular expression find options */
+"Subexpression #%d" = "Sous-expression #%d";
+
+/* script loading error message */
+"The following error was reported:\n%@" = "L'erreur suivante a été renvoyée :\n%@";
+
+/* script execute error */
+"The script '%@' could not complete." = "Le script '%@' n'a pas pu s'exécuter.";
+
+/* script loading error */
+"The script file '%@' could not be opened." = "Impossible d'ouvrir le fichier de script '%@'.";
+
+/* workflow execution error */
+"Unable to run workflow." = "Impossible d'exécuter la tâche.";
+
+/* undo action name for ungrouping outline view items */
+"Ungroup" = "Dégrouper";
+
+/* undo action name for unindenting outline view items */
+"Unindent" = "Annuler le retrait";
+
+/* word comparing color saturations */
+"Washed-out" = "Délavé";
+
+/* script loading error message */
+"workflow not found at %@" = "tâche introuvable à %@";

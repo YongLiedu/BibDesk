@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>Title</key>
+		<string>Google Scholar</string>
+		<key>Type</key>
+		<string>bookmark</string>
+		<key>URLString</key>
+		<string>http://scholar.google.com</string>
+	</dict>
+	<dict>
+		<key>Title</key>
+		<string>CiteULike</string>
+		<key>Type</key>
+		<string>bookmark</string>
+		<key>URLString</key>
+		<string>http://www.citeulike.org/</string>
+	</dict>
+	<dict>
+		<key>Title</key>
+		<string>HubMed</string>
+		<key>Type</key>
+		<string>bookmark</string>
+		<key>URLString</key>
+		<string>http://www.hubmed.org/</string>
+	</dict>
+	<dict>
+		<key>Title</key>
+		<string>ACM Portal</string>
+		<key>Type</key>
+		<string>bookmark</string>
+		<key>URLString</key>
+		<string>http://portal.acm.org/portal.cfm</string>
+	</dict>
+</array>
+</plist>

@@ -1,0 +1,795 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>identifier</key>
+		<string>edu.ucsd.cs.mmccrack.bibdesk.prefcategory.application</string>
+		<key>title</key>
+		<string>Application Preferences</string>
+		<key>panes</key>
+		<array>
+			<dict>
+				<key>identifier</key>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.prefpane.general</string>
+				<key>class</key>
+				<string>BibPref_General</string>
+				<key>nibName</key>
+				<string>BibPref_General</string>
+				<key>label</key>
+				<string>General [SHORT]</string>
+				<key>title</key>
+				<string>General [LONG]</string>
+				<key>icon</key>
+				<string>startup</string>
+				<key>helpAnchor</key>
+				<string>GeneralPreferences</string>
+				<key>initialValues</key>
+				<dict>
+					<key>BDSKAskToTrashFile</key>
+					<true/>
+					<key>BDSKAskToTrashFilesKey</key>
+					<true/>
+					<key>BDSKCiteseerHostKey</key>
+					<string>http://citeseer.ist.psu.edu/</string>
+					<key>BDSKCurrentGroupFieldsKey</key>
+					<array>
+						<string>Keywords</string>
+					</array>
+					<key>BDSKDefaultBibFileAliasKey</key>
+					<data></data>
+					<key>BDSKDefaultGroupFieldSeparatorKey</key>
+					<string>; </string>
+					<key>BDSKEmailTemplateKey</key>
+					<string></string>
+					<key>BDSKGroupFieldSeparatorCharactersKey</key>
+					<string>,:;</string>
+					<key>BDSKGroupFieldsKey</key>
+					<array>
+						<string>Keywords</string>
+						<string>Author</string>
+						<string>Journal</string>
+					</array>
+					<key>BDSKIntersectGroupsKey</key>
+					<false/>
+					<key>BDSKReadExtendedAttributesKey</key>
+					<false/>
+					<key>BDSKSearchGroupBookmarksKey</key>
+					<array>
+						<dict>
+							<key>database</key>
+							<string>pubmed</string>
+							<key>label</key>
+							<string>PubMed</string>
+							<key>name</key>
+							<string>PubMed</string>
+							<key>type</key>
+							<string>entrez</string>
+						</dict>
+						<dict>
+							<key>database</key>
+							<string>Voyager</string>
+							<key>host</key>
+							<string>z3950.loc.gov</string>
+							<key>label</key>
+							<string>Library of Congress</string>
+							<key>name</key>
+							<string>Library of Congress</string>
+							<key>options</key>
+							<dict>
+								<key>recordSyntax</key>
+								<string>US MARC</string>
+								<key>resultEncoding</key>
+								<string>marc-8</string>
+							</dict>
+							<key>port</key>
+							<string>7090</string>
+							<key>type</key>
+							<string>zoom</string>
+						</dict>
+						<dict>
+							<key>database</key>
+							<string>SCI</string>
+							<key>label</key>
+							<string>Web of Science SCI</string>
+							<key>name</key>
+							<string>Web of Science SCI</string>
+							<key>type</key>
+							<string>isi</string>
+						</dict>
+						<dict>
+							<key>database</key>
+							<string>Keywords</string>
+							<key>label</key>
+							<string>DBLP++ Keywords</string>
+							<key>name</key>
+							<string>DBLP++ Keywords</string>
+							<key>type</key>
+							<string>dblp</string>
+						</dict>
+					</array>
+					<key>BDSKSearchMenuTagKey</key>
+					<integer>0</integer>
+					<key>BDSKShouldShowWebGroup</key>
+					<true/>
+					<key>BDSKShouldUsePDFMetadata</key>
+					<false/>
+					<key>BDSKShouldUsePubMedMetadata</key>
+					<false/>
+					<key>BDSKShouldParsePDFToGeneratePubMedSearchTerm</key>
+					<true/>
+					<key>BDSKShouldWritePDFMetadata</key>
+					<false/>
+					<key>BDSKSpotlightVersionInfo</key>
+					<dict/>
+					<key>BDSKUpdateCheckIntervalKey</key>
+					<integer>1</integer>
+					<key>BDSKUpdateCheckLastDateKey</key>
+					<string></string>
+					<key>BDSKUpdateLatestNotifiedVersionKey</key>
+					<string></string>
+					<key>BDSKWarnOnCiteKeyChangeKey</key>
+					<true/>
+					<key>BDSKWarnOnDelete</key>
+					<true/>
+					<key>BDSKWarnOnRemovalFromGroupKey</key>
+					<true/>
+					<key>BDSKWarnOnRenameGroup</key>
+					<true/>
+					<key>BDSKEditorFormShouldAutoCompleteKey</key>
+					<true/>
+					<key>Check spelling continuously while editing</key>
+					<false/>
+					<key>Column Widths by Name</key>
+					<dict>
+						<key>1st Author</key>
+						<real>80</real>
+						<key>1st Author or Editor</key>
+						<real>80</real>
+						<key>2nd Author</key>
+						<real>80</real>
+						<key>2nd Author or Editor</key>
+						<real>80</real>
+						<key>3rd Author</key>
+						<real>80</real>
+						<key>3rd Author or Editor</key>
+						<real>80</real>
+						<key>BibTeX Type</key>
+						<real>55</real>
+						<key>Cite Key</key>
+						<real>85</real>
+						<key>Date</key>
+						<real>50</real>
+						<key>Item Number</key>
+						<real>33</real>
+						<key>Keywords</key>
+						<real>50</real>
+						<key>Local File</key>
+						<real>70</real>
+						<key>Local-Url</key>
+						<real>18</real>
+						<key>Publication Date</key>
+						<real>40</real>
+						<key>Rating</key>
+						<real>70</real>
+						<key>Read</key>
+						<real>30</real>
+						<key>Remote URL</key>
+						<real>70</real>
+						<key>Title</key>
+						<real>300</real>
+						<key>Url</key>
+						<real>23</real>
+					</dict>
+					<key>Current Publication Type String</key>
+					<string>article</string>
+					<key>Default Bib File</key>
+					<string></string>
+					<key>Last field for find and replace</key>
+					<string>Title</string>
+					<key>Last launched version number</key>
+					<string>0</string>
+					<key>Last Open FileNames</key>
+					<array/>
+					<key>NSToolbar Configuration OAPreferences</key>
+					<string></string>
+					<key>Open using filter command history</key>
+					<array/>
+					<key>Preview PDF Scale Factor</key>
+					<real>1</real>
+					<key>Preview RTF Scale Factor</key>
+					<real>1</real>
+					<key>Show Find Status Bar</key>
+					<true/>
+					<key>Show Status Bar</key>
+					<true/>
+					<key>Show Warnings in Error Panel</key>
+					<false/>
+					<key>Showing Preview</key>
+					<false/>
+					<key>Shown Column Names</key>
+					<array>
+						<string>Keywords</string>
+						<string>BibTeX Type</string>
+						<string>Cite Key</string>
+						<string>Title</string>
+						<string>Publication Date</string>
+						<string>1st Author</string>
+						<string>2nd Author</string>
+						<string>3rd Author</string>
+						<string>Local File</string>
+					</array>
+					<key>Snoop Drawer Content</key>
+					<integer>0</integer>
+					<key>Startup Behavior</key>
+					<integer>0</integer>
+					<key>View-by Field</key>
+					<string>Author</string>
+				</dict>
+				<key>searchTerms</key>
+				<array>
+					<string>Application launch</string>
+					<string>Check for updates</string>
+					<string>Save session</string>
+					<string>Open file by default</string>
+					<string>Edit, paste, drag and drop</string>
+					<string>Warnings</string>
+					<string>Groups</string>
+					<string>Mail, E-mail, Email, Template</string>
+				</array>
+			</dict>
+			<dict>
+				<key>identifier</key>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.prefpane.display</string>
+				<key>class</key>
+				<string>BibPref_Display</string>
+				<key>nibName</key>
+				<string>BibPref_Display</string>
+				<key>label</key>
+				<string>Display [SHORT]</string>
+				<key>title</key>
+				<string>Display [LONG]</string>
+				<key>icon</key>
+				<string>display</string>
+				<key>helpAnchor</key>
+				<string>DisplayPreferences</string>
+				<key>initialValues</key>
+				<dict>
+					<key>BDSKAuthorNameDisplayKey</key>
+					<integer>3</integer>
+					<key>BDSKBottomFileViewDisplayModeKey</key>
+					<integer>0</integer>
+					<key>BDSKBottomFileViewIconScaleKey</key>
+					<real>1</real>
+					<key>BDSKBottomPreviewDisplayKey</key>
+					<integer>0</integer>
+					<key>BDSKBottomPreviewDisplayTemplateKey</key>
+					<string>Default RTF template</string>
+					<key>BDSKEditorFileViewDisplayModeKey</key>
+					<integer>1</integer>
+					<key>BDSKEditorFileViewIconScaleKey</key>
+					<real>1</real>
+					<key>BDSKEditorFontNameKey</key>
+					<string>Helvetica</string>
+					<key>BDSKEditorFontSizeKey</key>
+					<real>0</real>
+					<key>BDSKFileContentSearchTableViewFontNameKey</key>
+					<string>LucidaGrande</string>
+					<key>BDSKFileContentSearchTableViewFontSizeKey</key>
+					<real>0</real>
+					<key>BDSKGroupTableViewFontNameKey</key>
+					<string>LucidaGrande</string>
+					<key>BDSKGroupTableViewFontSizeKey</key>
+					<real>11</real>
+					<key>BDSKHideGroupCount</key>
+					<false/>
+					<key>BDSKMainTableViewFontNameKey</key>
+					<string>LucidaGrande</string>
+					<key>BDSKMainTableViewFontSizeKey</key>
+					<real>0</real>
+					<key>BDSKOrphanedFilesTableViewFontNameKey</key>
+					<string>LucidaGrande</string>
+					<key>BDSKOrphanedFilesTableViewFontSizeKey</key>
+					<real>0</real>
+					<key>BDSKPersonTableViewFontNameKey</key>
+					<string>LucidaGrande</string>
+					<key>BDSKPersonTableViewFontSizeKey</key>
+					<real>0</real>
+					<key>BDSKSideFileViewDisplayModeKey</key>
+					<integer>1</integer>
+					<key>BDSKSideFileViewIconScaleKey</key>
+					<real>0</real>
+					<key>BDSKSidePreviewDisplayKey</key>
+					<integer>1</integer>
+					<key>BDSKSidePreviewDisplayTemplateKey</key>
+					<string>Default RTF template</string>
+					<key>BDSKSortGroupsDescendingKey</key>
+					<false/>
+					<key>BDSKSortGroupsKey</key>
+					<string>stringValue</string>
+					<key>Default table column sort order</key>
+					<false/>
+					<key>Default table column to sort new documents</key>
+					<string>Title</string>
+					<key>Maximum Number of Items in Preview Pane</key>
+					<integer>0</integer>
+					<key>Terms ignored when sorting</key>
+					<array/>
+				</dict>
+				<key>searchTerms</key>
+				<array>
+					<string>Sorting stop words</string>
+					<string>Fonts</string>
+					<string>Author and editor name display</string>
+					<string>Preview</string>
+					<string>Template, files, TeX</string>
+				</array>
+			</dict>
+			<dict>
+				<key>identifier</key>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.prefpane.cite</string>
+				<key>class</key>
+				<string>BibPref_Cite</string>
+				<key>nibName</key>
+				<string>BibPref_Cite</string>
+				<key>label</key>
+				<string>Citation [SHORT]</string>
+				<key>title</key>
+				<string>Citation [LONG]</string>
+				<key>icon</key>
+				<string>citation</string>
+				<key>helpAnchor</key>
+				<string>CitationPreferences</string>
+				<key>initialValues</key>
+				<dict>
+					<key>BDSKAlternateDragCopyTemplateKey</key>
+					<string></string>
+					<key>BDSKAlternateDragCopyTypeKey</key>
+					<integer>0</integer>
+					<key>BDSKDefaultDragCopyTemplateKey</key>
+					<string></string>
+					<key>BDSKDefaultDragCopyTypeKey</key>
+					<integer>1</integer>
+					<key>Citation End Bracket</key>
+					<string>}</string>
+					<key>Citation Start Bracket</key>
+					<string>{</string>
+					<key>Cite Prepend Tilde</key>
+					<false/>
+					<key>Cite String</key>
+					<string>cite</string>
+					<key>Custom CiteStrings</key>
+					<array>
+						<string>citet</string>
+						<string>citep</string>
+						<string>fullcite</string>
+						<string>citeyear</string>
+						<string>citeauthor</string>
+					</array>
+					<key>Edit on Paste</key>
+					<false/>
+					<key>Separate Cite</key>
+					<false/>
+				</dict>
+				<key>searchTerms</key>
+				<array>
+					<string>Drag and drop</string>
+					<string>Copy and paste</string>
+					<string>Cite command</string>
+					<string>Text formats</string>
+					<string>Cite key</string>
+					<string>Brackets</string>
+					<string>Tilde</string>
+					<string>Cite drawer</string>
+				</array>
+			</dict>
+			<dict>
+				<key>identifier</key>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.prefpane.TeX</string>
+				<key>class</key>
+				<string>BibPref_TeX</string>
+				<key>nibName</key>
+				<string>BibPref_TeX</string>
+				<key>label</key>
+				<string>Preview [SHORT]</string>
+				<key>title</key>
+				<string>Preview [LONG]</string>
+				<key>icon</key>
+				<string>preview</string>
+				<key>helpAnchor</key>
+				<string>PreviewPreferences</string>
+				<key>initialValues</key>
+				<dict>
+					<key>BibTeX Binary Path</key>
+					<string>/usr/texbin/bibtex</string>
+					<key>BibTeX Style</key>
+					<string>abbrv</string>
+					<key>Character encoding for TeX preview file</key>
+					<integer>1</integer>
+					<key>TeX Binary Path</key>
+					<string>/usr/texbin/pdflatex</string>
+					<key>Uses TeX</key>
+					<false/>
+				</dict>
+				<key>searchTerms</key>
+				<array>
+					<string>TeX</string>
+					<string>Path</string>
+					<string>BibTeX</string>
+					<string>PDFLaTeX</string>
+					<string>Style</string>
+					<string>Template</string>
+					<string>Encoding</string>
+					<string>Preview</string>
+				</array>
+			</dict>
+			<dict>
+				<key>identifier</key>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.prefpane.sharing</string>
+				<key>class</key>
+				<string>BibPref_Sharing</string>
+				<key>nibName</key>
+				<string>BibPref_Sharing</string>
+				<key>label</key>
+				<string>Sharing [SHORT]</string>
+				<key>title</key>
+				<string>Sharing [LONG]</string>
+				<key>icon</key>
+				<string>sharing</string>
+				<key>helpAnchor</key>
+				<string>SharingPreferences</string>
+				<key>initialValues</key>
+				<dict>
+					<key>BDSKBrowsingRequiresPasswordKey</key>
+					<false/>
+					<key>BDSKSharingNameKey</key>
+					<string></string>
+					<key>BDSKShouldLookForSharedFilesKey</key>
+					<false/>
+					<key>BDSKShouldShareFilesKey</key>
+					<false/>
+				</dict>
+				<key>searchTerms</key>
+				<array>
+					<string>File sharing</string>
+					<string>File browsing</string>
+					<string>Connect to server</string>
+					<string>Bonjour (Rendezvous)</string>
+					<string>Password</string>
+				</array>
+			</dict>
+		</array>
+	</dict>
+	<dict>
+		<key>identifier</key>
+		<string>edu.ucsd.cs.mmccrack.bibdesk.prefcategory.data</string>
+		<key>title</key>
+		<string>Data Preferences</string>
+		<key>panes</key>
+		<array>
+			<dict>
+				<key>identifier</key>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.prefpane.files</string>
+				<key>class</key>
+				<string>BibPref_Files</string>
+				<key>nibName</key>
+				<string>BibPref_Files</string>
+				<key>label</key>
+				<string>Files [SHORT]</string>
+				<key>title</key>
+				<string>Files [LONG]</string>
+				<key>icon</key>
+				<string>genericBibDocIcon</string>
+				<key>helpAnchor</key>
+				<string>FilesPreferences</string>
+				<key>initialValues</key>
+				<dict>
+					<key>BDSKAutosaveTimeIntervalKey</key>
+					<integer>300</integer>
+					<key>BDSKShouldAutosaveDocumentKey</key>
+					<false/>
+					<key>BDSKStringEncodingsKey</key>
+					<array/>
+					<key>Default string encoding for opening and saving</key>
+					<integer>4</integer>
+					<key>Load files in background</key>
+					<false/>
+					<key>Output Template File</key>
+					<string>~/Library/Application Support/BibDesk/template.txt</string>
+					<key>Save Annote and Abstract at End of Item</key>
+					<false/>
+					<key>Save normalized names in BibTeX files</key>
+					<false/>
+					<key>TeXify characters when saving or copying BibTeX</key>
+					<true/>
+					<key>Use Unicode BibTeX Parser</key>
+					<false/>
+					<key>Write template file when saving</key>
+					<true/>
+				</dict>
+				<key>searchTerms</key>
+				<array>
+					<string>Save files</string>
+					<string>Encoding (Unicode)</string>
+					<string>TeX accented characters</string>
+					<string>Custom conversions</string>
+					<string>Normalized author</string>
+					<string>Annote, abstract, RSS</string>
+					<string>Backup file time</string>
+					<string>Warnings and errors</string>
+				</array>
+			</dict>
+			<dict>
+				<key>identifier</key>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.prefpane.export</string>
+				<key>class</key>
+				<string>BibPref_Export</string>
+				<key>nibName</key>
+				<string>BibPref_Export</string>
+				<key>label</key>
+				<string>Templates [SHORT]</string>
+				<key>title</key>
+				<string>Templates [LONG]</string>
+				<key>icon</key>
+				<string>exportPrefs</string>
+				<key>helpAnchor</key>
+				<string>TemplatePreferences</string>
+				<key>initialValues</key>
+				<dict>
+					<key>BDSKDefaultArrayJoinStringKey</key>
+					<string>/</string>
+					<key>BDSKExportTemplateStyleKey</key>
+					<string>Default HTML template</string>
+					<key>BDSKExportTemplateTree</key>
+					<data></data>
+					<key>BDSKServiceTemplateTree</key>
+					<data></data>
+				</dict>
+				<key>searchTerms</key>
+				<array>
+					<string>HTML files</string>
+					<string>Templates</string>
+					<string>Text files</string>
+					<string>Export</string>
+					<string>Service</string>
+					<string>RTF files</string>
+					<string>RTFD files</string>
+					<string>Microsoft Word files</string>
+					<string>RSS files</string>
+					<string>Web pages</string>
+					<string>File formats</string>
+				</array>
+			</dict>
+			<dict>
+				<key>identifier</key>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.prefpane.defaults</string>
+				<key>class</key>
+				<string>BibPref_Defaults</string>
+				<key>nibName</key>
+				<string>BibPref_Defaults</string>
+				<key>label</key>
+				<string>Fields [SHORT]</string>
+				<key>title</key>
+				<string>Fields [LONG]</string>
+				<key>icon</key>
+				<string>defaults</string>
+				<key>helpAnchor</key>
+				<string>DefaultFieldsPreferences</string>
+				<key>initialValues</key>
+				<dict>
+					<key>BDSKAutomaticallyConvertURLFieldsKey</key>
+					<true/>
+					<key>BDSKDefaultViewersKey</key>
+					<dict/>
+					<key>BDSKGlobalMacroDefinitionsKey</key>
+					<dict/>
+					<key>BDSKGlobalMacroFilesKey</key>
+					<array/>
+					<key>BDSKRemoveConvertedLocalFileFieldsKey</key>
+					<false/>
+					<key>BDSKRemoveConvertedRemoteURLFieldsKey</key>
+					<false/>
+					<key>BDSKTableHeaderImages</key>
+					<dict/>
+					<key>BDSKTableHeaderTitles</key>
+					<dict/>
+					<key>Boolean fields</key>
+					<array>
+						<string>Read</string>
+					</array>
+					<key>Citation fields</key>
+					<array>
+						<string>Cited-By</string>
+						<string>Cites</string>
+					</array>
+					<key>Default Fields</key>
+					<array>
+						<string>Keywords</string>
+					</array>
+					<key>Local File Fields</key>
+					<array>
+						<string>Local-Url</string>
+					</array>
+					<key>Macro definitions from bib style file</key>
+					<dict/>
+					<key>Person fields</key>
+					<array>
+						<string>Author</string>
+						<string>Editor</string>
+					</array>
+					<key>Rating fields</key>
+					<array>
+						<string>Rating</string>
+					</array>
+					<key>Remote URL Fields</key>
+					<array>
+						<string>Url</string>
+						<string>Doi</string>
+						<string>Citeseerurl</string>
+					</array>
+					<key>Three state fields</key>
+					<array/>
+				</dict>
+				<key>searchTerms</key>
+				<array>
+					<string>Custom fields</string>
+					<string>Global macros</string>
+					<string>BibTeX</string>
+					<string>Types</string>
+					<string>Local, file, URL, boolean, person</string>
+					<string>Local PDF file viewer</string>
+				</array>
+			</dict>
+			<dict>
+				<key>identifier</key>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.prefpane.crossref</string>
+				<key>class</key>
+				<string>BibPref_Crossref</string>
+				<key>nibName</key>
+				<string>BibPref_Crossref</string>
+				<key>label</key>
+				<string>Crossref [SHORT]</string>
+				<key>title</key>
+				<string>Crossref [LONG]</string>
+				<key>icon</key>
+				<string>crossref</string>
+				<key>helpAnchor</key>
+				<string>CrossrefPreferences</string>
+				<key>initialValues</key>
+				<dict>
+					<key>Automatically Sort for Crossrefs</key>
+					<false/>
+					<key>Duplicate Booktitle for Crossref</key>
+					<false/>
+					<key>Overwrite Booktitle when Duplicating for Crossref</key>
+					<false/>
+					<key>Types for Duplicating Booktitle for Crossref</key>
+					<array>
+						<string>book</string>
+						<string>proceedings</string>
+						<string>periodical</string>
+						<string>manual</string>
+					</array>
+					<key>Warn on Editing Inherited Fields</key>
+					<true/>
+				</dict>
+				<key>searchTerms</key>
+				<array>
+					<string>Booktitle and title</string>
+					<string>Crossref</string>
+					<string>Sorting</string>
+					<string>Inherit</string>
+					<string>Duplicate</string>
+					<string>Types</string>
+					<string>Saving</string>
+					<string>Ordering</string>
+				</array>
+			</dict>
+			<dict>
+				<key>identifier</key>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.prefpane.citekey</string>
+				<key>class</key>
+				<string>BibPref_CiteKey</string>
+				<key>nibName</key>
+				<string>BibPref_CiteKey</string>
+				<key>label</key>
+				<string>Cite Key [SHORT]</string>
+				<key>title</key>
+				<string>Cite Key [LONG]</string>
+				<key>icon</key>
+				<string>key</string>
+				<key>helpAnchor</key>
+				<string>CiteKeyPreferences</string>
+				<key>initialValues</key>
+				<dict>
+					<key>Cite Key Autogenerate</key>
+					<false/>
+					<key>Cite Key Clean Braces or TeX</key>
+					<integer>2</integer>
+					<key>Cite Key Format</key>
+					<string>%a1:%Y%u2</string>
+					<key>Cite Key Format Preset</key>
+					<integer>1</integer>
+					<key>Cite Key Generate Lowercase</key>
+					<false/>
+				</dict>
+				<key>searchTerms</key>
+				<array>
+					<string>Auto generate</string>
+					<string>Format</string>
+					<string>Cite key</string>
+				</array>
+			</dict>
+			<dict>
+				<key>identifier</key>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.prefpane.autofile</string>
+				<key>class</key>
+				<string>BibPref_AutoFile</string>
+				<key>nibName</key>
+				<string>BibPref_AutoFile</string>
+				<key>label</key>
+				<string>AutoFile [SHORT]</string>
+				<key>title</key>
+				<string>AutoFile [LONG]</string>
+				<key>icon</key>
+				<string>autofile</string>
+				<key>helpAnchor</key>
+				<string>AutoFilePreferences</string>
+				<key>initialValues</key>
+				<dict>
+					<key>AutoFile uses relative path</key>
+					<false/>
+					<key>BDSKLocalFileCleanOptionKey</key>
+					<integer>2</integer>
+					<key>BDSKLocalFileFormatKey</key>
+					<string>%l%n0%e</string>
+					<key>BDSKLocalFileFormatPresetKey</key>
+					<integer>1</integer>
+					<key>BDSKLocalFileLowercaseKey</key>
+					<false/>
+					<key>BDSKWarnOnMoveFolderKey</key>
+					<true/>
+					<key>File papers into the papers folder automatically</key>
+					<false/>
+					<key>Path to the papers folder</key>
+					<string>~/Documents/Papers</string>
+				</dict>
+				<key>searchTerms</key>
+				<array>
+					<string>Papers folder</string>
+					<string>Format</string>
+					<string>Files</string>
+					<string>PDF</string>
+					<string>Documents</string>
+				</array>
+			</dict>
+			<dict>
+				<key>identifier</key>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.prefpane.ScriptHooks</string>
+				<key>class</key>
+				<string>BibPref_ScriptHooks</string>
+				<key>nibName</key>
+				<string>BibPref_ScriptHooks</string>
+				<key>label</key>
+				<string>Script Hooks [SHORT]</string>
+				<key>title</key>
+				<string>Script Hooks [LONG]</string>
+				<key>icon</key>
+				<string>scripthook</string>
+				<key>helpAnchor</key>
+				<string>ScriptHookPreferences</string>
+				<key>initialValues</key>
+				<dict>
+					<key>Script Hooks</key>
+					<dict/>
+				</dict>
+				<key>searchTerms</key>
+				<array>
+					<string>Script hook</string>
+					<string>AppleScript</string>
+				</array>
+			</dict>
+		</array>
+	</dict>
+</array>
+</plist>

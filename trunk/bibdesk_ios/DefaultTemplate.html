@@ -1,0 +1,59 @@
+<html>
+
+<head>
+
+<style type="text/css">
+html {
+    font-family:"Helvetica";
+    font-size: 14px;
+    -webkit-text-size-adjust: none;
+}
+.Title { font-weight: bold }
+.Journal { font-style: italic }
+</style>
+<meta name="viewport" content="initial-scale=1.0; user-scalable=0;" />
+</head>
+
+<body>
+
+<$publications>
+
+<p>
+
+<span class="Title"><$fields.Title.htmlString/></span><br />
+
+<span class="Author"><$authors.unpunctuatedAbbreviatedNormalizedName.@componentsJoinedByComma.htmlString/></span><br />
+
+<span class="Journal"><$fields.Journal.stringByAppendingFullStopIfNotEmpty/></span>
+<span class="Date"><$fields.Year/><$fields.Month?> <$fields.Month.capitalizedString/></$fields.Month?></span><$fields.Volume?>;
+<span class="Volume"><$fields.Volume/></span><$fields.Number?>(<span class="Number"><$fields.Number/></span>)</$fields.Number?><$fields.Pages?>:<span class="Pages"><$fields.Pages/></span></$fields.Pages?></$fields.Volume?>.
+
+<br />
+
+<remoteURLs>
+<span class="URL"><a href="<$URL.absoluteString/>"><$URL.absoluteString/></a></span><br />
+</remoteURLs>
+
+<$fields.Doi?>
+<span class="Doi">DOI: <a href="<$urls.Doi/>"><$fields.Doi/></a></span><br />
+</$fields.Doi?>
+
+<$fields.Isi?>
+<span class="Isi">ISI: <a href="<$urls.Isi-Url/>"><$fields.Isi/></a><$fields.Times-Cited?> (Times Cited: <$fields.Times-Cited/>)</$fields.Times-Cited?></span><br />
+</$fields.Isi?>
+
+<$fields.Pmid?>
+<span class="PMID">PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/<$fields.Pmid/>"><$fields.Pmid/></a></span><br />
+</$fields.Pmid?>
+
+<br />
+
+<$fields.Abstract.htmlString/>
+
+</p>
+
+</$publications>
+
+</body>
+
+</html>

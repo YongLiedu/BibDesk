@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<!-- Localize title -->
+	<title>Downloads</title>
+	<style type="text/css">
+		* { margin: 0px; padding: 0px; }
+		body { font-family: "Lucida Grande"; font-size: 13px; padding: 0px; }
+		h1 { font-size: 16px; margin: 10px; color: #999; }
+		.downloads { width: 100%; border-width: 0px 0px 1px 0px; border-spacing: 0px; border-style: solid; border-color: #999; }
+		.icon { margin: 2px; width: 32px; height: 32px; }
+		.source { font-size: 12px; margin-left: 1em; }
+		.status { font-size: 11px; }
+		.button { margin-right: 10px; float: right; }
+		.clear { margin: 10px; }
+		.prefs { font-size: 12px; }
+		.prefs input { margin: 0.5em 0.5em 0.5em 10px;  }
+		a { text-decoration: none; }
+		a:hover { text-decoration: underline; }
+		a:active { color: #900; }
+		a:visited { color: #909; }
+	</style>
+	<script language="javascript">
+
+function clearDownloads() {
+	downloads.clear();
+	location.reload();
+}
+
+function cancelDownload(id) {
+	downloads.cancel(id);
+	location.reload();
+}
+
+function removeDownload(id) {
+	downloads.remove(id);
+	location.reload();
+}
+
+function doLoad() {
+	var table = document.getElementById('downloads');
+	if (table) {
+		var rows = table.getElementsByTagName("tr");
+		for (i = 0; i < rows.length ; i++) {
+			if (i % 2 == 1) rows[i].style.backgroundColor = "#edf3fe";
+		}
+	}
+	setTimeout("location.reload()",5000);
+}
+
+	</script>
+	</head>
+	<body onload="doLoad()">
+	
+		<$downloads?>
+		<form>
+			<table class="downloads" id="downloads">
+				<$downloads>
+				<tr>
+					<td width="36">
+						<img class="icon" src="bibdesk:fileicon:<$fileURL?><$fileURL.pathExtension/><?$fileURL?><$URL.pathExtension/></$fileURL?>" />
+					</td>
+					<td>
+						<$fileURL?>
+						<a href="<$fileURL/>"><$fileName/></a>
+						<?$fileURL?>
+						<$fileName/>
+						</$fileURL?>
+<!-- Localize text -->
+						<a class="source" href="<$URL/>">(Source)</a>
+						<br />
+						<span class="status">
+<!-- Localize text -->
+						<$status=0?>Downloading<?$status=1?>Finished<?$status=2?>Failed</$status?>
+						</span>
+					</td>
+					<td>
+<!-- Localize values and titles -->
+						<$status=0?>
+						<input class="button" type="button" value="Cancel" title="Cancel download" onClick="cancelDownload(<$uniqueID/>)" />
+						<?$status?>
+						<input class="button" type="button" value="Remove" title="Remove download" onClick="removeDownload(<$uniqueID/>)" />
+						</$status?>
+					</td>
+				</tr>
+				</$downloads>
+			</table>
+<!-- Localize value and title -->
+			<input class="clear" type="button" value="Clear" title="Remove all finished and failed downloads" onClick="clearDownloads()" />
+		</form>
+		<?$downloads?>
+<!-- Localize text -->
+		<h1>No Downloads</h1>
+		</$downloads?>
+		<form class="prefs">
+<!-- Localize text -->
+		<input type="checkbox" onClick="downloads.removeFinishedDownloads = this.checked" <$removeFinishedDownloads?>checked</$removeFinishedDownloads?> />Automatically remove finished downloads<br />
+		<input type="checkbox" onClick="downloads.removeFailedDownloads = this.checked" <$removeFailedDownloads?>checked</$removeFailedDownloads?> />Automatically remove failed downloads
+		</form>
+		
+	</body>
+</html>
