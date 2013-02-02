@@ -144,6 +144,10 @@
     [super viewDidMoveToWindow];
 }
 
+- (void)setKeyboardFocusRingNeedsDisplayInRect:(NSRect)rect {
+    return [super setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
+}
+
 - (void)mouseDown:(NSEvent *)theEvent {
     if ([[self delegate] respondsToSelector:@selector(addressTextField:writeDataToPasteboard:)]) {
         NSRect iconRect = [[self cell] iconRectForBounds:[[self cell] adjustedFrame:[self bounds] inView:self]];
