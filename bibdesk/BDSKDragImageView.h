@@ -52,7 +52,6 @@
 
 @interface BDSKDragImageView : NSImageView {
 	id<BDSKDragImageViewDelegate> delegate;
-	BOOL highlight;
 } 
 
 - (id<BDSKDragImageViewDelegate>)delegate;

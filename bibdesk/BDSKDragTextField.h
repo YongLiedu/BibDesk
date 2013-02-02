@@ -47,9 +47,7 @@
 @end
 
 
-@interface BDSKDragTextField : NSTextField {
-    BOOL highlight;
-}
+@interface BDSKDragTextField : NSTextField
 - (id <BDSKDragTextFieldDelegate>)delegate;
 - (void)setDelegate:(id <BDSKDragTextFieldDelegate>)newDelegate;
 @end

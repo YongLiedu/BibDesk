@@ -42,42 +42,39 @@
 
 @implementation BDSKDragTextField
 
+- (void)drawDragHighlight {
+    [[self window] cacheImageInRect:[self convertRect:[self bounds] toView:nil]];
+    [self lockFocus];
+    [NSBezierPath drawHighlightInRect:[self bounds] radius:4.0 lineWidth:2.0 color:[NSColor alternateSelectedControlColor]];
+    [self unlockFocus];
+    [[self window] flushWindow];
+}
+
+- (void)clearDragHighlight {
+    [[self window] restoreCachedImage];
+    [[self window] flushWindow];
+}
+
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender{
     NSDragOperation dragOp = NSDragOperationNone;
 	if ([[self delegate] respondsToSelector:@selector(dragTextField:validateDrop:)])
 		dragOp = [[self delegate] dragTextField:self validateDrop:sender];
-	if (dragOp != NSDragOperationNone) {
-		highlight = YES;
-		[self setNeedsDisplay:YES];
-	}
+	if (dragOp != NSDragOperationNone)
+		[self drawDragHighlight];
 	return dragOp;
 }
 
 - (void)draggingExited:(id <NSDraggingInfo>)sender{
-    highlight = NO;
-	[self setNeedsDisplay:YES];
+	if ([[self delegate] respondsToSelector:@selector(dragTextField:acceptDrop:)])
+        [self clearDragHighlight];
 }
 
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender {
-    highlight = NO;
-	[self setNeedsDisplay:YES];
-	if ([[self delegate] respondsToSelector:@selector(dragTextField:acceptDrop:)])
+	if ([[self delegate] respondsToSelector:@selector(dragTextField:acceptDrop:)]) {
+        [self clearDragHighlight];
 		return [[self delegate] dragTextField:self acceptDrop:sender];
-	return NO;
-}
-
-- (void)drawRect:(NSRect)aRect {
-	[super drawRect:aRect];
-	
-	if (highlight) {
-        [NSGraphicsContext saveGraphicsState];
-        [NSBezierPath drawHighlightInRect:[self bounds] radius:4.0 lineWidth:2.0 color:[NSColor alternateSelectedControlColor]];
-        [NSGraphicsContext restoreGraphicsState];
 	}
-}
-
-- (void)setKeyboardFocusRingNeedsDisplayInRect:(NSRect)rect {
-    return [super setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
+    return NO;
 }
 
 #pragma mark Delegate
