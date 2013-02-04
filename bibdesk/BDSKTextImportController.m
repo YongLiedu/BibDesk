@@ -375,7 +375,6 @@
         [itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
         [itemTableView editColumn:2 row:row withEvent:nil select:YES];
     }];
-    [addFieldController release];
 }
 
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender{
