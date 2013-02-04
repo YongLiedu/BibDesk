@@ -1093,8 +1093,10 @@ static BOOL changingColors = NO;
     [oPanel setResolvesAliases:NO];
     [oPanel setCanChooseDirectories:YES];
     [oPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
-    [oPanel setDirectoryURL:[url URLByDeletingLastPathComponent]];
-    [oPanel setNameFieldStringValue:[url lastPathComponent]];
+    if (url) {
+        [oPanel setDirectoryURL:[url URLByDeletingLastPathComponent]];
+        [oPanel setNameFieldStringValue:[url lastPathComponent]];
+    }
     
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]) {
         NSButton *disableAutoFileButton = [[[NSButton alloc] init] autorelease];

@@ -600,8 +600,10 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     [oPanel setResolvesAliases:NO];
     [oPanel setCanChooseDirectories:YES];
     [oPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
-    [oPanel setDirectoryURL:[url URLByDeletingLastPathComponent]];
-    [oPanel setNameFieldStringValue:[url lastPathComponent]];
+    if (url) {
+        [oPanel setDirectoryURL:[url URLByDeletingLastPathComponent]];
+        [oPanel setNameFieldStringValue:[url lastPathComponent]];
+    }
     
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]) {
         if (disableAutoFileButton == nil) {
