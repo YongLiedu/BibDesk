@@ -644,7 +644,7 @@ static id sharedController = nil;
         // don't use replaceSubview:with: because oldView can be nil here
         [oldView removeFromSuperview];
         [contentView addSubview:view];
-        [window setFrame:contentRect display:NO];
+        [window setFrame:contentRect display:display];
         [window recalculateKeyViewLoop];
     }
 }
