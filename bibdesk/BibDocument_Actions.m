@@ -1430,7 +1430,7 @@ static BOOL changingColors = NO;
     NSPasteboard *pboard = [NSPasteboard generalPasteboard];
     BOOL isKnownFormat = [pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]];
     
-    if (isKnownFormat = NO) {
+    if (isKnownFormat == NO) {
         NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
         if ([strings count] > 0)
 			// sniff the string to see if we should add it directly
