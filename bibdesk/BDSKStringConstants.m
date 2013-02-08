@@ -129,7 +129,6 @@ NSString *BDSKSidePreviewDisplayKey = @"BDSKSidePreviewDisplayKey";
 NSString *BDSKSidePreviewDisplayTemplateKey = @"BDSKSidePreviewDisplayTemplateKey";
 
 NSString *BDSKPreviewPDFScaleFactorKey = @"Preview PDF Scale Factor";
-NSString *BDSKPreviewRTFScaleFactorKey = @"Preview RTF Scale Factor";
 NSString *BDSKPreviewLinkedFileScaleFactorKey = @"Preview Linked File Scale Factor";
 
 NSString *BDSKBottomPreviewScaleFactorKey = @"BDSKBottomPreviewScaleFactorKey";

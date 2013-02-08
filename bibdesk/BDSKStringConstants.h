@@ -92,7 +92,6 @@ extern NSString *BDSKBottomPreviewDisplayTemplateKey;
 extern NSString *BDSKSidePreviewDisplayKey;
 extern NSString *BDSKSidePreviewDisplayTemplateKey;
 extern NSString *BDSKPreviewPDFScaleFactorKey;
-extern NSString *BDSKPreviewRTFScaleFactorKey;
 extern NSString *BDSKBottomPreviewScaleFactorKey;
 extern NSString *BDSKSidePreviewScaleFactorKey;
 extern NSString *BDSKPreviewLinkedFileScaleFactorKey;

@@ -52,7 +52,6 @@ enum {
 	BDSKGeneratedLTBMask = 1 << 0,
 	BDSKGeneratedLaTeXMask = 1 << 1,
 	BDSKGeneratedPDFMask = 1 << 2,
-	BDSKGeneratedRTFMask = 1 << 3,
 };
 
 @interface BDSKTeXSubTask : BDSKTask {
@@ -75,7 +74,6 @@ enum {
 - (NSString *)bibFilePath;
 - (NSString *)bblFilePath;
 - (NSString *)pdfFilePath;
-- (NSString *)rtfFilePath;
 - (NSString *)logFilePath;
 - (NSString *)blgFilePath;
 - (NSString *)auxFilePath;
@@ -240,10 +238,6 @@ static double runLoopTimeout = 30;
         
         // tasks are launched from the end of pendingTasks, so we add them in opposite order
         if (flag >= BDSKGeneratePDF) {
-            if (flag >= BDSKGenerateRTF) {
-                // latex2rtf
-                [pendingTasks addObject:[self taskForGeneratedType:BDSKGeneratedRTFMask]];
-            }
             // pdflatex
             [pendingTasks addObject:[self taskForGeneratedType:BDSKGeneratedPDFMask]];
             // pdflatex
@@ -317,10 +311,6 @@ static double runLoopTimeout = 30;
     return [self hasPDFData] ? [NSData dataWithContentsOfFile:[texPath pdfFilePath]] : nil;
 }
 
-- (NSData *)RTFData{
-    return [self hasRTFData] ? [NSData dataWithContentsOfFile:[texPath rtfFilePath]] : nil;
-}
-
 - (NSString *)logFilePath{
     return [texPath logFilePath];
 }
@@ -337,10 +327,6 @@ static double runLoopTimeout = 30;
     return [self hasPDFData] ? [texPath pdfFilePath] : nil;
 }
 
-- (NSString *)RTFFilePath{
-    return [self hasRTFData] ? [texPath rtfFilePath] : nil;
-}
-
 - (BOOL)hasLTB{
     return 0 != (generatedDataMask & BDSKGeneratedLTBMask);
 }
@@ -351,10 +337,6 @@ static double runLoopTimeout = 30;
 
 - (BOOL)hasPDFData{
     return 0 != (generatedDataMask & BDSKGeneratedPDFMask);
-}
-
-- (BOOL)hasRTFData{
-    return 0 != (generatedDataMask & BDSKGeneratedRTFMask);
 }
 
 - (BOOL)isProcessing{
@@ -465,7 +447,7 @@ static double runLoopTimeout = 30;
 }
 
 - (void)removeFilesFromPreviousRun{
-    NSArray *filesToRemove = [NSArray arrayWithObjects:[texPath blgFilePath], [texPath logFilePath], [texPath bblFilePath], [texPath auxFilePath], [texPath pdfFilePath], [texPath rtfFilePath], nil];
+    NSArray *filesToRemove = [NSArray arrayWithObjects:[texPath blgFilePath], [texPath logFilePath], [texPath bblFilePath], [texPath auxFilePath], [texPath pdfFilePath], nil];
     NSFileManager *fm = [NSFileManager defaultManager];
     
     for (NSString *path in filesToRemove)
@@ -476,12 +458,7 @@ static double runLoopTimeout = 30;
     NSString *binPath = nil;
     NSArray *arguments = nil;
     
-    if (type & BDSKGeneratedRTFMask) {
-        // This task runs latex2rtf on our tex file to generate tmpbib.rtf
-        binPath = [[NSBundle mainBundle] pathForResource:@"latex2rtf" ofType:nil];
-        // the arguments: it needs -P "path" which is the path to the cfg files in the app wrapper
-        arguments = [NSArray arrayWithObjects:@"-P", [[NSBundle mainBundle] sharedSupportPath], [texPath baseNameWithoutExtension], nil];
-    } else if (type & (BDSKGeneratedLaTeXMask | BDSKGeneratedLTBMask)) {
+    if (type & (BDSKGeneratedLaTeXMask | BDSKGeneratedLTBMask)) {
         // This task runs bibtex on our bib file 
         NSString *command = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKBibTeXBinPathKey];
         binPath = [BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:command];
@@ -582,7 +559,6 @@ static double runLoopTimeout = 30;
 - (NSString *)bibFilePath { return [fullPathWithoutExtension stringByAppendingPathExtension:@"bib"]; }
 - (NSString *)bblFilePath { return [fullPathWithoutExtension stringByAppendingPathExtension:@"bbl"]; }
 - (NSString *)pdfFilePath { return [fullPathWithoutExtension stringByAppendingPathExtension:@"pdf"]; }
-- (NSString *)rtfFilePath { return [fullPathWithoutExtension stringByAppendingPathExtension:@"rtf"]; }
 - (NSString *)logFilePath { return [fullPathWithoutExtension stringByAppendingPathExtension:@"log"]; }
 - (NSString *)blgFilePath { return [fullPathWithoutExtension stringByAppendingPathExtension:@"blg"]; }
 - (NSString *)auxFilePath { return [fullPathWithoutExtension stringByAppendingPathExtension:@"aux"]; }

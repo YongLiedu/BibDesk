@@ -472,7 +472,6 @@
 		F963E45B0A1D828100695DDC /* BDSKTreeNode.m in Sources */ = {isa = PBXBuildFile; fileRef = F963E42B0A1D7ADD00695DDC /* BDSKTreeNode.m */; };
 		F963E45D0A1D828200695DDC /* BibPref_Export.m in Sources */ = {isa = PBXBuildFile; fileRef = F963E4360A1D7B3600695DDC /* BibPref_Export.m */; };
 		F96F11970AAF4FD100815D06 /* NSData_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F96F11950AAF4FD100815D06 /* NSData_BDSKExtensions.m */; };
-		F9704FF10E6118080050F475 /* latex2rtf in Resources */ = {isa = PBXBuildFile; fileRef = F90B13010C298FC900144F1B /* latex2rtf */; };
 		F97073B00911592000526FC8 /* NSWorkspace_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F97073AE0911592000526FC8 /* NSWorkspace_BDSKExtensions.m */; };
 		F97198C40DADD32F00CA57AA /* BDSKDBLPGroupServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F97198C00DADD32F00CA57AA /* BDSKDBLPGroupServer.m */; };
 		F97198C60DADD32F00CA57AA /* BDSKDBLPWebServices.m in Sources */ = {isa = PBXBuildFile; fileRef = F97198C20DADD32F00CA57AA /* BDSKDBLPWebServices.m */; };
@@ -624,20 +623,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 8D1107260486CEB800E47090;
 			remoteInfo = BibDesk;
-		};
-		F90B13000C298FC900144F1B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F90B12F90C298FC900144F1B /* latex2rtf.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 8DD76FB20486AB0100D96B5E;
-			remoteInfo = latex2rtf;
-		};
-		F90B13040C29900200144F1B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F90B12F90C298FC900144F1B /* latex2rtf.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 8DD76FA90486AB0100D96B5E;
-			remoteInfo = latex2rtf;
 		};
 		F911D6B30CFE8E420009C77B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1561,7 +1546,6 @@
 		F9025DC80969AD2C008A551C /* NSCharacterSet_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSCharacterSet_BDSKExtensions.m; sourceTree = "<group>"; };
 		F9025F2E0969D66F008A551C /* CFString_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CFString_BDSKExtensions.h; sourceTree = "<group>"; };
 		F9025F2F0969D66F008A551C /* CFString_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CFString_BDSKExtensions.m; sourceTree = "<group>"; };
-		F90B12F90C298FC900144F1B /* latex2rtf.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = latex2rtf.xcodeproj; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/latex2rtf.xcodeproj; sourceTree = "<group>"; };
 		F90C4ACB0C7395FB0035DD50 /* BDSKSciFinderParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSciFinderParser.h; sourceTree = "<group>"; };
 		F90C4ACC0C7395FB0035DD50 /* BDSKSciFinderParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSciFinderParser.m; sourceTree = "<group>"; };
 		F90C64040AC62B7B008B2DDA /* BDSKShellCommandFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKShellCommandFormatter.h; sourceTree = "<group>"; };
@@ -2551,14 +2535,6 @@
 			path = Images;
 			sourceTree = "<group>";
 		};
-		F90B12FA0C298FC900144F1B /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				F90B13010C298FC900144F1B /* latex2rtf */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		F911D6A90CFE8E420009C77B /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -2927,7 +2903,6 @@
 				F911D6A80CFE8E420009C77B /* FileView.xcodeproj */,
 				F9ABECF2086E142100741FC5 /* BTParse.xcodeproj */,
 				CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */,
-				F90B12F90C298FC900144F1B /* latex2rtf.xcodeproj */,
 				F95CC0C6087F53AE002C5694 /* BibImporter.xcodeproj */,
 				F98C6FC80CDD30A2002FCAD8 /* QuickLook-BibDesk.xcodeproj */,
 				CEB34B980F5CB2CC0037E086 /* Sparkle.xcodeproj */,
@@ -3008,7 +2983,6 @@
 				CE94C0DC10A8F2AC002634D2 /* PBXTargetDependency */,
 				CEFC1F870F6AD7A800B2AEE6 /* PBXTargetDependency */,
 				CEB34C4C0F5D49F80037E086 /* PBXTargetDependency */,
-				F90B13050C29900200144F1B /* PBXTargetDependency */,
 				F9EF0CE20B4EFC8F00A1F282 /* PBXTargetDependency */,
 				CEEBA83F0D749CC9000204B8 /* PBXTargetDependency */,
 			);
@@ -3075,10 +3049,6 @@
 				{
 					ProductGroup = F911D6A90CFE8E420009C77B /* Products */;
 					ProjectRef = F911D6A80CFE8E420009C77B /* FileView.xcodeproj */;
-				},
-				{
-					ProductGroup = F90B12FA0C298FC900144F1B /* Products */;
-					ProjectRef = F90B12F90C298FC900144F1B /* latex2rtf.xcodeproj */;
 				},
 				{
 					ProductGroup = F98C6FC90CDD30A2002FCAD8 /* Products */;
@@ -3171,13 +3141,6 @@
 			remoteRef = CEDB9BC70E2F405F0057FD09 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		F90B13010C298FC900144F1B /* latex2rtf */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = latex2rtf;
-			remoteRef = F90B13000C298FC900144F1B /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		F911D6B40CFE8E420009C77B /* FileView.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
@@ -3241,7 +3204,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F9704FF10E6118080050F475 /* latex2rtf in Resources */,
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				F9022CEE0758050E00C3F701 /* Credits.rtf in Resources */,
 				CE2941050A7F8F2900A46D05 /* ReadMe.rtf in Resources */,
@@ -3870,11 +3832,6 @@
 			isa = PBXTargetDependency;
 			target = 8D1107260486CEB800E47090 /* BibDesk */;
 			targetProxy = EF168E280F113753002F4D9F /* PBXContainerItemProxy */;
-		};
-		F90B13050C29900200144F1B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = latex2rtf;
-			targetProxy = F90B13040C29900200144F1B /* PBXContainerItemProxy */;
 		};
 		F9AF562C0BEA4160009B16D5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

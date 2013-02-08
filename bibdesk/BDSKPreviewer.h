@@ -58,7 +58,6 @@ typedef NSInteger BDSKPreviewState;
 */
 @interface BDSKPreviewer : NSWindowController <BDSKTeXTaskDelegate> {
     IBOutlet BDSKZoomablePDFView *pdfView;
-    IBOutlet NSTextView *rtfPreviewView;
     IBOutlet NSTextView *logView;
     IBOutlet NSTabView *tabView;
     IBOutlet NSProgressIndicator *progressIndicator;
@@ -67,7 +66,6 @@ typedef NSInteger BDSKPreviewState;
     IBOutlet NSView *warningView;
     
     BDSKPreviewState previewState;
-    NSInteger generatedTypes;
     BDSKTeXTask *texTask;
 }
 
@@ -79,16 +77,10 @@ typedef NSInteger BDSKPreviewState;
 + (BDSKPreviewer *)sharedPreviewer;
 
 - (PDFView *)pdfView;
-- (NSTextView *)textView;
 - (BDSKOverlayPanel *)progressOverlay;
 
 - (CGFloat)PDFScaleFactor;
 - (void)setPDFScaleFactor:(CGFloat)scaleFactor;
-- (CGFloat)RTFScaleFactor;
-- (void)setRTFScaleFactor:(CGFloat)scaleFactor;
-
-- (NSInteger)generatedTypes;
-- (void)setGeneratedTypes:(NSInteger)newGeneratedTypes;
 
 - (BOOL)isVisible;
 - (void)handleMainDocumentDidChangeNotification:(NSNotification *)notification;
@@ -130,14 +122,6 @@ typedef NSInteger BDSKPreviewState;
 		or there are updates waiting. This should be thread safe. 
 */
 - (NSData *)PDFData;
-
-/*!
-    @method     RTFData
-    @abstract   Returns the RTF data in the preview if it is valid. Otherwise returns nil.
-    @discussion Any data is considered invalid if the previews were reset, our window is not visible, 
-		or there are updates waiting. This should be thread safe. 
-*/
-- (NSData *)RTFData;
 
 /*!
     @method     LaTeXString

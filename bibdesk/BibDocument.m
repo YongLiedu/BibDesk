@@ -770,10 +770,8 @@ static NSOperationQueue *metadataCacheQueue = nil;
         [dictionary setDouble:[(BDSKZoomableTextView *)bottomPreviewTextView scaleFactor] forKey:BDSKBottomPreviewScaleFactorKey];
         [dictionary setDouble:[(BDSKZoomableTextView *)sidePreviewTextView scaleFactor] forKey:BDSKSidePreviewScaleFactorKey];
         
-        if(previewer){
+        if(previewer)
             [dictionary setDouble:[previewer PDFScaleFactor] forKey:BDSKPreviewPDFScaleFactorKey];
-            [dictionary setDouble:[previewer RTFScaleFactor] forKey:BDSKPreviewRTFScaleFactorKey];
-        }
         
         if(fileSearchController){
             [dictionary setObject:[fileSearchController sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
