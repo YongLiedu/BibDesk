@@ -78,7 +78,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
         // it corresponds to the last drawing item added to the mainQueue
         previewState = BDSKUnknownPreviewState;
         
-        generatedTypes = BDSKGenerateRTF;
+        generatedTypes = BDSKGeneratePDF;
         
         // otherwise a document's previewer might mess up the window position of the shared previewer
         [self setShouldCascadeWindows:NO];
