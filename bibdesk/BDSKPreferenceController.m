@@ -122,15 +122,17 @@ static id sharedController = nil;
 
 // windowDidLoad comes after the window is already moved onscreen, I think that's wrong
 - (void)windowDidLoad {
+    NSWindow *window = [self window];
+    
     [self loadPanes];
     
     [self setupToolbar];
-    [[self window] setShowsToolbarButton:NO];
+    [window setShowsToolbarButton:NO];
     // we need to do this because we want to restore the top position, otherwise the bottom position will be restored
     [self setWindowFrameAutosaveName:BDSKPreferencesWindowFrameAutosaveName];
-    [[self window] setFrameUsingName:BDSKPreferencesWindowFrameAutosaveName force:YES];
+    [window setFrameUsingName:BDSKPreferencesWindowFrameAutosaveName force:YES];
     
-    [[self window] setTitle:[self defaultWindowTitle]];
+    [window setTitle:[self defaultWindowTitle]];
     
     iconView = [[BDSKPreferenceIconView alloc] initWithPreferenceController:self];
     [iconView setAction:@selector(iconViewShowPane:)];
@@ -139,15 +141,16 @@ static id sharedController = nil;
     CGFloat width = NSWidth([iconView frame]);
     for (BDSKPreferencePane *pane in [panes objectEnumerator])
         width = fmax(width, NSWidth([[pane view] frame]));
-    NSRect frame = [[self window] frame];
+    NSRect frame = [window frame];
     frame.size.width = width;
-    [[self window] setFrame:frame display:NO];
+    [window setFrame:frame display:NO];
     frame = [iconView frame];
     frame.size.width = width;
     [iconView setFrame:frame];
     frame = [controlView frame];
     frame.size.width = width;
     [controlView setFrame:frame];
+    [iconView setAutoresizingMask:NSViewMaxYMargin];
     CGFloat controlHeight = NSHeight([controlView frame]);
     for (BDSKPreferencePane *pane in [panes objectEnumerator]) {
         frame = [[pane view] frame];
@@ -158,7 +161,7 @@ static id sharedController = nil;
     
     [self changeContentView:iconView from:nil display:NO];
     
-    overlay = [[BDSKOverlayWindow alloc] initWithContentRect:[[self window] contentRectForFrameRect:[[self window] frame]] styleMask:[[self window] styleMask] backing:[[self window] backingType] defer:YES];
+    overlay = [[BDSKOverlayWindow alloc] initWithContentRect:[window contentRectForFrameRect:[window frame]] styleMask:[window styleMask] backing:[window backingType] defer:YES];
     [overlay setReleasedWhenClosed:NO];
     BDSKSpotlightView *spotlightView = [[BDSKSpotlightView alloc] initFlipped:[iconView isFlipped]];
     [spotlightView setDelegate:self];
@@ -343,19 +346,20 @@ static id sharedController = nil;
         BDSKPreferencePane *oldPane = [self selectedPane];
         NSView *view = pane ? [pane view] : [self iconView];
         NSView *oldView = oldPane ? [oldPane view] : [self iconView];
+        NSWindow *window = [self window];
         if ((pane || [identifier isEqualToString:@""]) && view) {
-            if ([[[self window] firstResponder] isKindOfClass:[NSText class]] && [(NSView *)[[self window] firstResponder] isDescendantOf:[oldPane view]])
-                [[self window] makeFirstResponder:nil];
-            if ([[self window] attachedSheet] == nil) {
+            if ([[window firstResponder] isKindOfClass:[NSText class]] && [(NSView *)[window firstResponder] isDescendantOf:[oldPane view]])
+                [window makeFirstResponder:nil];
+            if ([window attachedSheet] == nil) {
                 [oldPane willUnselect];
                 [pane willSelect];
-                [[self window] setTitle:pane ? [self localizedTitleForIdentifier:identifier] : [self defaultWindowTitle]];
-                [self changeContentView:view from:oldView display:[[self window] isVisible]];
+                [window setTitle:pane ? [self localizedTitleForIdentifier:identifier] : [self defaultWindowTitle]];
+                [self changeContentView:view from:oldView display:[window isVisible]];
                 [oldPane didUnselect];
                 [pane didSelect];
                 [self setSelectedPaneIdentifier:identifier];
                 [self setNextResponder:pane];
-                [[[self window] toolbar] setSelectedItemIdentifier:pane ? identifier : BDSKPreferencesToolbarShowAllItemIdentifier];
+                [[window toolbar] setSelectedItemIdentifier:pane ? identifier : BDSKPreferencesToolbarShowAllItemIdentifier];
                 [helpButton setHidden:(helpBookName == nil || [pane helpAnchor] == nil) && [pane helpURL] == nil];
                 [revertButton setEnabled:[[pane initialValues] count] > 0];
                 [self updateSearchAndShowAll:NO];
@@ -602,7 +606,7 @@ static id sharedController = nil;
     NSWindow *window = [self window];
     NSView *contentView = [window contentView];
     
-    NSRect contentRect = [window contentRectForFrameRect:[[self window] frame]];
+    NSRect contentRect = [window contentRectForFrameRect:[window frame]];
     CGFloat contentHeight = NSMaxY([view frame]);
     contentRect.origin.y = NSMaxY(contentRect) - contentHeight;
     contentRect.size.height = contentHeight;
