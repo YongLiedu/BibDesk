@@ -106,16 +106,6 @@ typedef NSInteger BDSKPreviewState;
 - (void)displayPreviewsForState:(BDSKPreviewState)state success:(BOOL)success;
 
 /*!
-    @method     PDFDataWithString:color:
-    @abstract   Converts the given string into PDF data, applying the given color to the entire range of the string.  This method is not thread safe.
-    @discussion (comprehensive description)
-    @param      string (description)
-    @param      color (description)
-    @result     (description)
-*/
-- (NSData *)PDFDataWithString:(NSString *)string color:(NSColor *)color;
-
-/*!
     @method     PDFData
     @abstract   Returns the PDF data in the preview if it is valid. Otherwise returns nil.
     @discussion Any data is considered invalid if the previews were reset, our window is not visible, 

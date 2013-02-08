@@ -59,6 +59,8 @@ enum {
     BDSKPreviewerTabIndexLog,
 };
 
+static NSData *createPDFDataWithStringAndColor(NSString *string, NSColor *color);
+
 @implementation BDSKPreviewer
 
 static BDSKPreviewer *sharedPreviewer = nil;
@@ -135,7 +137,11 @@ static BDSKPreviewer *sharedPreviewer = nil;
     }
         
     // empty document to avoid problem when zoom is set to auto
-    PDFDocument *pdfDoc = [[[PDFDocument alloc] initWithData:[self PDFDataWithString:@"" color:nil]] autorelease];
+    static NSData *emptyPDFData = nil;
+    if (emptyPDFData == nil)
+        emptyPDFData = createPDFDataWithStringAndColor(@"", nil);
+    
+    PDFDocument *pdfDoc = [[[PDFDocument alloc] initWithData:emptyPDFData] autorelease];
     [pdfView setDocument:pdfDoc];
     
     [pdfView setDisplaysPageBreaks:NO];
@@ -248,29 +254,6 @@ static BDSKPreviewer *sharedPreviewer = nil;
 
 #pragma mark Drawing methods
 
-- (NSData *)PDFDataWithString:(NSString *)string color:(NSColor *)color{
-    NSRect rect = NSMakeRect(0.0, 0.0, 612.0, 792.0);
-    NSTextView *textView = [[NSTextView alloc] initWithFrame:rect];
-    [textView setVerticallyResizable:YES];
-    [textView setHorizontallyResizable:NO];
-    [textView setTextContainerInset:NSMakeSize(20.0, 20.0)];
-    
-    NSTextStorage *textStorage = [textView textStorage];
-    [textStorage beginEditing];
-    if (string)
-        [[textStorage mutableString] setString:string];
-    [textStorage addAttribute:NSFontAttributeName value:[NSFont userFontOfSize:0.0] range:NSMakeRange(0, [textStorage length])];
-    if (color)
-        [textStorage addAttribute:NSForegroundColorAttributeName value:color range:NSMakeRange(0, [textStorage length])];
-    [textStorage endEditing];
-	
-    NSData *data = [textView dataWithPDFInsideRect:rect];
-    
-    [textView release];
-    
-    return data;
-}
-
 - (void)displayPreviewsForState:(BDSKPreviewState)state success:(BOOL)success{
 
     NSAssert2([NSThread isMainThread], @"-[%@ %@] must be called from the main thread!", [self class], NSStringFromSelector(_cmd));
@@ -294,9 +277,9 @@ static BDSKPreviewer *sharedPreviewer = nil;
 	
     [warningView setHidden:success];
     
-    NSString *message = nil;
     NSString *logString = @"";
     NSData *pdfData = nil;
+	static NSData *errorMessagePDFData = nil;
 	static NSData *emptyMessagePDFData = nil;
 	static NSData *generatingMessagePDFData = nil;
 	
@@ -321,28 +304,27 @@ static BDSKPreviewer *sharedPreviewer = nil;
 			[errorString appendString:logString];
             logString = [errorString autorelease];
             
-            if(pdfData == nil)
-                pdfData = [self PDFDataWithString:NSLocalizedString(@"***** ERROR:  unable to create preview *****\n\nsee the logs in the TeX Preview window", @"Preview message") color:[NSColor redColor]];
+            if(pdfData == nil) {
+                if (errorMessagePDFData)
+                    errorMessagePDFData = createPDFDataWithStringAndColor(NSLocalizedString(@"***** ERROR:  unable to create preview *****\n\nsee the logs in the TeX Preview window", @"Preview message"), [NSColor redColor]);
+                pdfData = errorMessagePDFData;
+            }
 		}
         
 	}else if(state == BDSKEmptyPreviewState){
 		
-		message = NSLocalizedString(@"No items are selected.", @"Preview message");
-		
         logString = @"";
         
 		if (emptyMessagePDFData == nil)
-			emptyMessagePDFData = [[self PDFDataWithString:message color:[NSColor grayColor]] retain];
+			emptyMessagePDFData = createPDFDataWithStringAndColor(NSLocalizedString(@"No items are selected.", @"Preview message"), [NSColor grayColor]);
 		pdfData = emptyMessagePDFData;
 		
 	}else if(state == BDSKWaitingPreviewState){
 		
-		message = [NSLocalizedString(@"Generating preview", @"Preview message") stringByAppendingEllipsis];
-		
         logString = @"";
         
 		if (generatingMessagePDFData == nil)
-			generatingMessagePDFData = [[self PDFDataWithString:message color:[NSColor grayColor]] retain];
+			generatingMessagePDFData = createPDFDataWithStringAndColor([NSLocalizedString(@"Generating preview", @"Preview message") stringByAppendingEllipsis], [NSColor grayColor]);
 		pdfData = generatingMessagePDFData;
 		
 	}
@@ -436,3 +418,27 @@ static BDSKPreviewer *sharedPreviewer = nil;
 }
 
 @end
+
+
+static NSData *createPDFDataWithStringAndColor(NSString *string, NSColor *color) {
+    NSRect rect = NSMakeRect(0.0, 0.0, 612.0, 792.0);
+    NSTextView *textView = [[NSTextView alloc] initWithFrame:rect];
+    [textView setVerticallyResizable:YES];
+    [textView setHorizontallyResizable:NO];
+    [textView setTextContainerInset:NSMakeSize(20.0, 20.0)];
+    
+    NSTextStorage *textStorage = [textView textStorage];
+    [textStorage beginEditing];
+    if (string)
+        [[textStorage mutableString] setString:string];
+    [textStorage addAttribute:NSFontAttributeName value:[NSFont userFontOfSize:0.0] range:NSMakeRange(0, [textStorage length])];
+    if (color)
+        [textStorage addAttribute:NSForegroundColorAttributeName value:color range:NSMakeRange(0, [textStorage length])];
+    [textStorage endEditing];
+	
+    NSData *data = [textView dataWithPDFInsideRect:rect];
+    
+    [textView release];
+    
+    return [data retain];
+}
