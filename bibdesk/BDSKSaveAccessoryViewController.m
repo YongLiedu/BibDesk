@@ -63,6 +63,13 @@
 
 - (void)addSaveFormatPopUpButton:(NSPopUpButton *)popup {
     NSRect popupFrame = [saveTextEncodingPopupButton frame];
+    CGFloat dw = NSWidth([popup frame]) - NSWidth(popupFrame);
+    if (dw > 0.0) {
+        NSRect viewFrame = [exportAccessoryView frame];
+        viewFrame.size.width += dw;
+        [exportAccessoryView setFrame:viewFrame];
+        popupFrame.size.width += dw;
+    }
     popupFrame.origin.y = SAVE_FORMAT_POPUP_OFFSET;
     [popup setFrame:popupFrame];
     [exportAccessoryView addSubview:popup];
