@@ -46,7 +46,7 @@
 
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray, BDSKGroupsArray;
 @class AGRegex, BDSKMacroResolver;
-@class BDSKEditor, BDSKMacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController, BDSKCustomCiteDrawerController, BDSKSearchGroupViewController;
+@class BDSKEditor, BDSKMacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController, BDSKCustomCiteDrawerController, BDSKSearchGroupViewController, BDSKSaveAccessoryViewController;
 @class BDSKStatusBar, BDSKButtonBar, BDSKMainTableView, BDSKGroupOutlineView, BDSKGradientView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredView, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FVFileView;
 @class BDSKWebGroupViewController;
 @class BDSKItemSearchIndexes, BDSKNotesSearchIndex, BDSKFileMigrationController, BDSKDocumentSearch;
@@ -181,12 +181,8 @@ extern NSString *BDSKDocumentPublicationsKey;
 
 #pragma mark Accessory view variables
 
-    IBOutlet NSView *saveAccessoryView;
-    IBOutlet NSView *exportAccessoryView;
-    IBOutlet BDSKEncodingPopUpButton *saveTextEncodingPopupButton;
-    IBOutlet NSButton *exportSelectionCheckButton;
-    NSPopUpButton *saveFormatPopupButton;
-    
+    BDSKSaveAccessoryViewController *saveAccessoryController;
+
 #pragma mark Publications and Groups variables
 
     BDSKPublicationsArray *publications;  // holds all the publications

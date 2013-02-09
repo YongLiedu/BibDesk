@@ -126,6 +126,7 @@
 #import "NSSplitView_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
 #import "NSPasteboard_BDSKExtensions.h"
+#import "BDSKSaveAccessoryViewController.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -571,8 +572,6 @@ static NSOperationQueue *metadataCacheQueue = nil;
     [self updateSmartGroupsCount];
     [self updateCategoryGroups:nil];
     
-    [saveTextEncodingPopupButton setEncoding:BDSKNoStringEncoding];
-    
     // this shouldn't be necessary
     [documentWindow recalculateKeyViewLoop];
     [documentWindow makeFirstResponder:tableView];
@@ -977,35 +976,24 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if([super prepareSavePanel:savePanel] == NO)
         return NO;
     
+    saveAccessoryController = [[BDSKSaveAccessoryViewController alloc] init];
+    
     if(NSSaveToOperation == docState.currentSaveOperationType){
-        NSView *accessoryView = [savePanel accessoryView];
-        BDSKASSERT(accessoryView != nil);
-        BDSKASSERT(saveFormatPopupButton == nil);
-        saveFormatPopupButton = popUpButtonSubview(accessoryView);
+        NSPopUpButton *saveFormatPopupButton = popUpButtonSubview([savePanel accessoryView]);
         BDSKASSERT(saveFormatPopupButton != nil);
-        NSRect savFrame = [saveAccessoryView frame];
-        NSRect exportFrame = [exportAccessoryView frame];
-        savFrame.origin = NSMakePoint(0.0, SAVE_ENCODING_VIEW_OFFSET);
-        [saveAccessoryView setFrame:savFrame];
-        exportFrame.size.width = NSWidth(savFrame);
-        [exportAccessoryView setFrame:exportFrame];
-        [exportAccessoryView addSubview:saveAccessoryView];
-        NSRect popupFrame = [saveTextEncodingPopupButton frame];
-        popupFrame.origin.y = SAVE_FORMAT_POPUP_OFFSET;
-        [saveFormatPopupButton setFrame:popupFrame];
-        [exportAccessoryView addSubview:saveFormatPopupButton];
-        [savePanel setAccessoryView:exportAccessoryView];
+        [saveAccessoryController addSaveFormatPopUpButton:saveFormatPopupButton];
+        [savePanel setAccessoryView:[saveAccessoryController exportAccessoryView]];
     }else{
-        [savePanel setAccessoryView:saveAccessoryView];
+        [savePanel setAccessoryView:[saveAccessoryController saveAccessoryView]];
     }
     
     // set the popup to reflect the document's present string encoding
-    [saveTextEncodingPopupButton setEncoding:[self documentStringEncoding]];
-    [saveTextEncodingPopupButton setEnabled:YES];
+    [saveAccessoryController setSaveTextEncoding:[self documentStringEncoding]];
+    [saveAccessoryController setSaveTextEncodingPopupButtonEnabled:YES];
     
-    [exportSelectionCheckButton setState:NSOffState];
+    [saveAccessoryController setExportSelection:NO];
     if(NSSaveToOperation == docState.currentSaveOperationType)
-        [exportSelectionCheckButton setEnabled:[self numberOfSelectedPubs] > 0 || [self hasLibraryGroupSelected] == NO];
+        [saveAccessoryController setExportSelectionCheckButtonEnabled:[self numberOfSelectedPubs] > 0 || [self hasLibraryGroupSelected] == NO];
     
     return YES;
 }
@@ -1016,13 +1004,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 // this is a private method, the action of the file format poup
 - (void)changeSaveType:(id)sender{
-    [saveTextEncodingPopupButton setEnabled:[self needsEncodingForType:[[sender selectedItem] representedObject]]];
     if ([NSDocument instancesRespondToSelector:@selector(changeSaveType:)])
         [super changeSaveType:sender];
+    [saveAccessoryController setSaveTextEncodingPopupButtonEnabled:[self needsEncodingForType:[self fileTypeFromLastRunSavePanel]]];
 }
 
 - (NSArray *)publicationsForSaving {
-    if (docState.currentSaveOperationType != NSSaveToOperation || [exportSelectionCheckButton state] != NSOnState)
+    if (docState.currentSaveOperationType != NSSaveToOperation || [saveAccessoryController exportSelection] == NO)
         return publications;
     else if ([self numberOfSelectedPubs] == 0)
         return groupedPublications;
@@ -1034,10 +1022,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSStringEncoding encoding = 0;
     
     // export operations need their own encoding
-    if (NSSaveToOperation == docState.currentSaveOperationType)
-        encoding = [saveTextEncodingPopupButton encoding] != BDSKNoStringEncoding ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
-    else if (NSSaveAsOperation == docState.currentSaveOperationType && [saveTextEncodingPopupButton encoding] != BDSKNoStringEncoding)
-        encoding = [saveTextEncodingPopupButton encoding];
+    if (saveAccessoryController)
+        encoding = [saveAccessoryController saveTextEncoding];
+    else if (NSSaveToOperation == docState.currentSaveOperationType)
+        encoding = [BDSKStringEncodingManager defaultEncoding];
     else
         encoding = [self documentStringEncoding];
     
@@ -1116,13 +1104,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
     
     BDSKDESTROY(saveTargetURL);
-    
-    // reset the encoding popup so we know when it wasn't shown to the user next time
-    [saveTextEncodingPopupButton setEncoding:BDSKNoStringEncoding];
-    // in case we saved using the panel, we should reset that
-    [exportSelectionCheckButton setState:NSOffState];
-    [saveFormatPopupButton removeFromSuperview];
-    saveFormatPopupButton = nil;
+    BDSKDESTROY(saveAccessoryController);
     
     if (invocation) {
         [invocation setArgument:&doc atIndex:2];
