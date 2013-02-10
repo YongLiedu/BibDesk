@@ -39,7 +39,6 @@
 #import "BibPref_Export.h"
 #import "BDSKStringConstants.h"
 #import "BDSKTypeManager.h"
-#import "BDSKAlias.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKTemplate.h"
 #import "BDSKAppController.h"
