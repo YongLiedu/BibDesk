@@ -83,9 +83,9 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
 
 - (void)updateDefaultBibFileUI {
     NSData *aliasData = [sud objectForKey:BDSKDefaultBibFileAliasKey];
-    BDSKAlias *alias;
-    if([aliasData length] && (alias = [BDSKAlias aliasWithData:aliasData]))
-        [defaultBibFileTextField setStringValue:[[[alias fileURL] path] stringByAbbreviatingWithTildeInPath]];
+    NSString *path;
+    if ([aliasData length] && (path = [[[[BDSKAlias aliasWithData:aliasData] fileURL] path] stringByAbbreviatingWithTildeInPath]))
+        [defaultBibFileTextField setStringValue:path];
     else
         [defaultBibFileTextField setStringValue:@""];
 }
