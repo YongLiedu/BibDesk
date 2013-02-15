@@ -636,7 +636,10 @@ static id sharedController = nil;
             [[controlView animator] removeFromSuperview];
         else if ([oldView isEqual:[self iconView]])
             [[contentView animator] addSubview:controlView];
-        [[contentView animator] replaceSubview:oldView with:view];
+        if ([oldView superview])
+            [[contentView animator] replaceSubview:oldView with:view];
+        else
+            [[contentView animator] addSubview:view];
         [[window animator] setFrame:contentRect display:YES];
         [NSAnimationContext endGrouping];
         [self performSelector:@selector(endAnimation) withObject:nil afterDelay:duration];
