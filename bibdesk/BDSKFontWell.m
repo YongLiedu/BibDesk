@@ -351,7 +351,7 @@
         [NSGraphicsContext restoreGraphicsState];
     }
     
-    if ([self refusesFirstResponder] == NO && [NSApp isActive] && [[controlView window] isKeyWindow] && [[controlView window] firstResponder] == controlView) {
+    if ([self showsFirstResponder]) {
         [NSGraphicsContext saveGraphicsState];
         NSSetFocusRingStyle(NSFocusRingOnly);
         NSRectFill(frame);
