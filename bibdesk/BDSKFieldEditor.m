@@ -50,8 +50,8 @@
 
 @implementation BDSKFieldEditor
 
-- (id)init {
-    self = [super initWithFrame:NSZeroRect];
+- (id)initWithFrame:(NSRect)frameRect textContainer:(NSTextContainer *)aTextContainer {
+    self = [super initWithFrame:NSZeroRect textContainer:aTextContainer];
     if (self) {
 		[self setFieldEditor:YES];
 		delegatedDraggedTypes = nil;
