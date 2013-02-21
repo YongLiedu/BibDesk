@@ -121,7 +121,7 @@
 
 @implementation BDSKAddFieldSheetController
 
-- (void)awakeFromNib{
+- (void)windowDidLoad{
     BDSKFieldNameFormatter *formatter = [[[BDSKFieldNameFormatter alloc] init] autorelease];
     [formatter setKnownFieldNames:[self fieldsArray]];
 	[fieldsControl setFormatter:formatter];
@@ -178,7 +178,7 @@
     [super dealloc];
 }
 
-- (void)awakeFromNib{
+- (void)windowDidLoad{
     BDSKFieldNameFormatter *formatter = [[[BDSKFieldNameFormatter alloc] init] autorelease];
     [formatter setKnownFieldNames:[self replaceFieldsArray]];
 	[replaceFieldsComboBox setFormatter:formatter];
