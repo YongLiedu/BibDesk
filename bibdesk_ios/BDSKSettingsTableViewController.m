@@ -39,6 +39,7 @@
 #import "BDSKSettingsTableViewController.h"
 
 #import "BDSKAppDelegate.h"
+#import "BDSKDropboxStore.h"
 
 @interface BDSKSettingsTableViewController ()
 
@@ -59,6 +60,8 @@
 
     BDSKAppDelegate *appDelegate = (BDSKAppDelegate *)[[UIApplication sharedApplication] delegate];
     [appDelegate removeObserver:self forKeyPath:@"dropboxLinked"];
+    BDSKDropboxStore *dropboxStore = [BDSKDropboxStore sharedStore];
+    [dropboxStore removeObserver:self forKeyPath:@"dropboxBibFilePath"];
     [super dealloc];
 }
 
@@ -68,6 +71,8 @@
 
     BDSKAppDelegate *appDelegate = (BDSKAppDelegate *)[[UIApplication sharedApplication] delegate];
     [appDelegate addObserver:self forKeyPath:@"dropboxLinked" options:NSKeyValueObservingOptionNew context:nil];
+    BDSKDropboxStore *dropboxStore = [BDSKDropboxStore sharedStore];
+    [dropboxStore addObserver:self forKeyPath:@"dropboxBibFilePath" options:NSKeyValueObservingOptionNew context:nil];
 }
 
 - (void)didReceiveMemoryWarning
@@ -87,7 +92,10 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
-    if (section == 0) return 1;
+    if (section == 0) {
+        BDSKAppDelegate *appDelegate = (BDSKAppDelegate *)[[UIApplication sharedApplication] delegate];
+        return appDelegate.dropboxLinked ? 2 : 1;
+    }
     
     return 0;
 }
@@ -100,16 +108,29 @@
     
         if (indexPath.row == 0) {
         
-            static NSString *CellIdentifier = @"ToggleDropboxLinkCell";
-            cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
+            static NSString *ToggleDropboxLinkCellIdentifier = @"ToggleDropboxLinkCell";
+            cell = [tableView dequeueReusableCellWithIdentifier:ToggleDropboxLinkCellIdentifier];
         
             BDSKAppDelegate *appDelegate = (BDSKAppDelegate *)[[UIApplication sharedApplication] delegate];
 
             cell.textLabel.text = appDelegate.dropboxLinked ? @"Unlink from Dropbox" : @"Link to Dropbox";
+        
+        } else if (indexPath.row == 1) {
+        
+            static NSString *BibPathCellIdentifier = @"BibPathCell";
+            cell = [tableView dequeueReusableCellWithIdentifier:BibPathCellIdentifier];
+            
+            BDSKDropboxStore *dropboxStore = [BDSKDropboxStore sharedStore];
+            
+            if (dropboxStore.dropboxBibFilePath) {
+                NSString *text = dropboxStore.dropboxBibFilePath;
+                if (text.length > 1) text = [text substringFromIndex:1];
+                cell.detailTextLabel.text = text;
+            } else {
+                cell.detailTextLabel.text = @"None";
+            }
         }
     }
-    
-    // Configure the cell...
     
     return cell;
 }
@@ -181,9 +202,27 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
 
-    if (keyPath == @"dropboxLinked") {
+    if ([keyPath isEqualToString:@"dropboxLinked"]) {
     
-        [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
+        BDSKAppDelegate *appDelegate = (BDSKAppDelegate *)[[UIApplication sharedApplication] delegate];
+        
+        [self.tableView beginUpdates];
+        NSArray *dropboxIndexPaths = @[[NSIndexPath indexPathForRow:1 inSection:0]];
+        if (appDelegate.dropboxLinked) {
+            [self.tableView insertRowsAtIndexPaths:dropboxIndexPaths withRowAnimation:UITableViewRowAnimationAutomatic];
+        } else {
+            [self.tableView deleteRowsAtIndexPaths:dropboxIndexPaths withRowAnimation:UITableViewRowAnimationAutomatic];
+        }
+        [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]] withRowAnimation:UITableViewRowAnimationFade];
+        [self.tableView endUpdates];
+    
+    } else if ([keyPath isEqualToString:@"dropboxBibFilePath"]) {
+    
+        BDSKAppDelegate *appDelegate = (BDSKAppDelegate *)[[UIApplication sharedApplication] delegate];
+        
+        if (appDelegate.dropboxLinked) {
+            [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:1 inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
+        }
     }
 }
 

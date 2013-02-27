@@ -296,15 +296,15 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
 
-    if (keyPath == @"isSyncing") {
+    if ([keyPath isEqualToString:@"isSyncing"]) {
     
         [self updateRefreshButton];
     
-    } else if (keyPath == @"bibFileNames") {
+    } else if ([keyPath isEqualToString:@"bibFileNames"]) {
     
         [(UITableView *)self.view reloadData];
     
-    } else if (keyPath == @"linkedFilePaths") {
+    } else if ([keyPath isEqualToString:@"linkedFilePaths"]) {
     
         BDSKDropboxStore *dropboxStore = [BDSKDropboxStore sharedStore];
         if ([dropboxStore.linkedFilePaths count]) {

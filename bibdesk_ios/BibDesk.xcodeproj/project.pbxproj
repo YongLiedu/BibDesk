@@ -94,6 +94,7 @@
 		3BDF392B150E58280023EC36 /* IconPad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3BDF392A150E58280023EC36 /* IconPad@2x.png */; };
 		3BDF396E150E98F70023EC36 /* BTParse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BDF396D150E98F70023EC36 /* BTParse.framework */; };
 		3BDF3970150E98FC0023EC36 /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BDF396F150E98FC0023EC36 /* AGRegex.framework */; };
+		3BFE969C168768900096B0B5 /* BDSKBibFilePathsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BFE969B168768900096B0B5 /* BDSKBibFilePathsTableViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -249,6 +250,8 @@
 		3BDF392A150E58280023EC36 /* IconPad@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "IconPad@2x.png"; sourceTree = "<group>"; };
 		3BDF396D150E98F70023EC36 /* BTParse.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BTParse.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/BibDesk-cpvsyxqrqdqrvfghemcnjbpqxgaf/Build/Products/Debug-iphoneos/BTParse.framework"; sourceTree = "<group>"; };
 		3BDF396F150E98FC0023EC36 /* AGRegex.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AGRegex.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/BibDesk-cpvsyxqrqdqrvfghemcnjbpqxgaf/Build/Products/Debug-iphoneos/AGRegex.framework"; sourceTree = "<group>"; };
+		3BFE969A168768900096B0B5 /* BDSKBibFilePathsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKBibFilePathsTableViewController.h; sourceTree = "<group>"; };
+		3BFE969B168768900096B0B5 /* BDSKBibFilePathsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKBibFilePathsTableViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -478,6 +481,8 @@
 				3BBB1354150245A700F61870 /* BDSKDetailViewController.m */,
 				3B34CE98167E2862006143C9 /* BDSKSettingsTableViewController.h */,
 				3B34CE99167E2862006143C9 /* BDSKSettingsTableViewController.m */,
+				3BFE969A168768900096B0B5 /* BDSKBibFilePathsTableViewController.h */,
+				3BFE969B168768900096B0B5 /* BDSKBibFilePathsTableViewController.m */,
 			);
 			name = Controllers;
 			sourceTree = "<group>";
@@ -766,6 +771,7 @@
 				3BBC08AE16470ADF0020450D /* BDSKExternalLinkedFile.m in Sources */,
 				3BCF2C55164D556C00EBC9A5 /* BDSKBibDeskURLHandler.m in Sources */,
 				3B34CE9A167E2862006143C9 /* BDSKSettingsTableViewController.m in Sources */,
+				3BFE969C168768900096B0B5 /* BDSKBibFilePathsTableViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

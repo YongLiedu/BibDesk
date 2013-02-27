@@ -58,6 +58,8 @@ static BDSKDropboxStore *sharedDropboxStore = nil;
 
     DBRestClient *_restClient;
     NSMutableDictionary *_pathMetadata;
+    NSMutableDictionary *_allBibFilePaths;
+    NSString *_dropboxBibFilePath;
     BDKSDropboxSyncStage _syncStage;
     NSMutableArray *_bibFilesToDownload;
     NSMutableSet *_bibFileNamesToOpen;
@@ -85,8 +87,10 @@ static BDSKDropboxStore *sharedDropboxStore = nil;
     BOOL automatic = NO;
     if ([theKey isEqualToString:@"syncing"]) {
         automatic = NO;
+    } if ([theKey isEqualToString:@"allBibFilePaths"]) {
+        automatic = NO;
     } else {
-        automatic=[super automaticallyNotifiesObserversForKey:theKey];
+        automatic = [super automaticallyNotifiesObserversForKey:theKey];
     }
     return automatic;
 }
@@ -147,12 +151,8 @@ static BDSKDropboxStore *sharedDropboxStore = nil;
 
         _restClient = nil;
         _pathMetadata = [[NSMutableDictionary alloc] init];
-        _drobboxBibFilePath = @"/";
-#if TARGET_IPHONE_SIMULATOR
-        _drobboxBibFilePath = @"/PapersSimulator";
-#else
-        _drobboxBibFilePath = @"/Papers";
-#endif
+        _allBibFilePaths = nil;
+        _dropboxBibFilePath = [[NSUserDefaults standardUserDefaults] stringForKey:@"BDSKDropboxBibFilePathKey"];
         _bibFilesToDownload = [[NSMutableArray alloc] init];
         _bibFileNamesToOpen = [[NSMutableSet alloc] init];
         _linkedFilePaths = [[NSMutableSet alloc] init];
@@ -171,7 +171,7 @@ static BDSKDropboxStore *sharedDropboxStore = nil;
 
     [_restClient release];
     [_pathMetadata release];
-    [_drobboxBibFilePath release];
+    [_dropboxBibFilePath release];
     [_bibFilesToDownload release];
     [_bibFileNamesToOpen release];
     [_linkedFilePaths release];
@@ -217,19 +217,19 @@ NSString *BDSKRemoveParentReferencesFromPath(NSString *path) {
 
 - (NSString *)pathForLinkedFilePath:(NSString *)relativePath relativeToBibFileName:(NSString *)bibFileName {
 
-    NSString *relativeDropboxBibFilePath = [_drobboxBibFilePath substringFromIndex:1];
+    NSString *relativeDropboxBibFilePath = [_dropboxBibFilePath substringFromIndex:1];
 
-    return BDSKRemoveParentReferencesFromPath([[relativeDropboxBibFilePath stringByAppendingPathComponent:relativePath] stringByStandardizingPath]);
+    return BDSKRemoveParentReferencesFromPath([[relativeDropboxBibFilePath stringByAppendingPathComponent:relativePath] stringByStandardizingPath]).precomposedStringWithCompatibilityMapping;
 }
 
 - (NSString *)bibFilePathForDropboxPath:(NSString *)path {
 
-    return [path substringFromIndex:_drobboxBibFilePath.length+1];
+    return [path substringFromIndex:_dropboxBibFilePath.length+1];
 }
 
 - (NSString *)dropboxPathForBibFilePath:(NSString *)path {
 
-    return [_drobboxBibFilePath stringByAppendingPathComponent:path];
+    return [_dropboxBibFilePath stringByAppendingPathComponent:path];
 }
 
 - (NSString *)linkedFilePathForDropboxPath:(NSString *)path {
@@ -240,6 +240,23 @@ NSString *BDSKRemoveParentReferencesFromPath(NSString *path) {
 - (NSString *)dropboxPathForLinkedFilePath:(NSString *)path {
 
     return [@"/" stringByAppendingPathComponent:path];
+}
+
+#pragma mark - Properties
+
+- (NSString *)dropboxBibFilePath {
+
+    return _dropboxBibFilePath;
+}
+
+- (void)setDropboxBibFilePath:(NSString *)dropboxBibFilePath {
+
+    NSString *oldPath = _dropboxBibFilePath;
+    _dropboxBibFilePath = [dropboxBibFilePath retain];
+    [oldPath release];
+    
+    [[NSUserDefaults standardUserDefaults] setObject:dropboxBibFilePath forKey:@"BDSKDropboxBibFilePathKey"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 #pragma mark - DBRestClient Interface
@@ -318,6 +335,54 @@ NSString *BDSKRemoveParentReferencesFromPath(NSString *path) {
     }
 }
 
+- (void)restClient:(DBRestClient*)restClient loadedSearchResults:(NSArray*)results forPath:(NSString*)path keyword:(NSString*)keyword {
+
+    [self processBibFileSearchResults:results];
+}
+
+- (void)restClient:(DBRestClient*)restClient searchFailedWithError:(NSError*)error {
+
+    [self processBibFileSearchResults:nil];
+}
+
+
+#pragma mark - Dropbox Searching
+
+- (void)updateAllBibFilePaths {
+
+    [self willChangeValueForKey:@"allBibFilePaths"];
+    [_allBibFilePaths release];
+    _allBibFilePaths = nil;
+    [self didChangeValueForKey:@"allBibFilePaths"];
+    
+    [self.restClient searchPath:@"/" forKeyword:@".bib"];
+}
+
+- (void)processBibFileSearchResults:(NSArray *)results {
+
+    NSMutableDictionary *allBibFilePaths = [[NSMutableDictionary alloc] init];
+    
+    for (DBMetadata *bibFileMetadata in results) {
+    
+        NSString* extension = [[bibFileMetadata.path pathExtension] lowercaseString];
+        NSString* noExtension = [bibFileMetadata.path stringByDeletingPathExtension];
+        if (!bibFileMetadata.isDirectory && [_bibFileExtensions indexOfObject:extension] != NSNotFound && ![noExtension hasSuffix:@"(Autosaved)"]) {
+            NSString *dirPath = [bibFileMetadata.path stringByDeletingLastPathComponent];
+            NSMutableArray *bibNames = [allBibFilePaths objectForKey:dirPath];
+            if (!bibNames) {
+                bibNames = [NSMutableArray array];
+                [allBibFilePaths setObject:bibNames forKey:dirPath];
+            }
+            [bibNames addObject:[bibFileMetadata.path lastPathComponent]];
+        }
+    }
+    
+    [self willChangeValueForKey:@"allBibFilePaths"];
+    [_allBibFilePaths release];
+    _allBibFilePaths = allBibFilePaths;
+    [self didChangeValueForKey:@"allBibFilePaths"];
+}
+
 
 #pragma mark - Dropbox Synchronization
 
@@ -339,7 +404,7 @@ NSString *BDSKRemoveParentReferencesFromPath(NSString *path) {
         if (!isDirectory && [_bibFileExtensions indexOfObject:extension] != NSNotFound) {
             
             BDSKBibFile *newFile = [[BDSKBibFile alloc] init];
-            newFile.path = filename;
+            newFile.path = filename.precomposedStringWithCompatibilityMapping;
             
             NSLog(@"Adding Local BibFile: %@", newFile.path);
             
@@ -383,7 +448,7 @@ NSString *BDSKRemoveParentReferencesFromPath(NSString *path) {
         } else {
         
             BDSKExternalLinkedFile *newFile = [[BDSKExternalLinkedFile alloc] init];
-            newFile.path = [directoryPath stringByAppendingPathComponent:filename];
+            newFile.path = [directoryPath stringByAppendingPathComponent:filename].precomposedStringWithCompatibilityMapping;
             
             //NSLog(@"Adding Local LinkedFile: %@", newFile.path);
             
@@ -433,9 +498,9 @@ NSString *BDSKRemoveParentReferencesFromPath(NSString *path) {
 
 - (void) startBibFileMetadata {
 
-    DBMetadata *metadata = [_pathMetadata objectForKey:_drobboxBibFilePath];
+    DBMetadata *metadata = [_pathMetadata objectForKey:_dropboxBibFilePath];
     NSString *hash = metadata.hash;
-    [self.restClient loadMetadata:_drobboxBibFilePath withHash:hash];
+    [self.restClient loadMetadata:_dropboxBibFilePath withHash:hash];
     [self setSyncStage:bibFileMetadata];
 }
 
@@ -467,7 +532,7 @@ NSString *BDSKRemoveParentReferencesFromPath(NSString *path) {
             }
             
             BDSKBibFile *newBibFile = [[BDSKBibFile alloc] init];
-            newBibFile.path = bibFilePath;
+            newBibFile.path = bibFilePath.precomposedStringWithCompatibilityMapping;
             newBibFile.lastModifiedDate = child.lastModifiedDate;
             newBibFile.totalBytes = child.totalBytes;
             
@@ -553,10 +618,10 @@ NSString *BDSKRemoveParentReferencesFromPath(NSString *path) {
     
         NSLog(@"Updating Linked Files for BibFile: %@", bibFileName);
         for (NSString *path in bibDocument.linkedFilePaths) {
-            [_linkedFilePaths addObject:[self pathForLinkedFilePath:path relativeToBibFileName:bibFileName]];
+            [_linkedFilePaths addObject:[self pathForLinkedFilePath:path relativeToBibFileName:bibFileName].precomposedStringWithCompatibilityMapping];
         }
         for (NSString *path in bibDocument.linkedFilePathsToStore) {
-            [_linkedFilePathsToStore addObject:[self pathForLinkedFilePath:path relativeToBibFileName:bibFileName]];
+            [_linkedFilePathsToStore addObject:[self pathForLinkedFilePath:path relativeToBibFileName:bibFileName].precomposedStringWithCompatibilityMapping];
         }
         //NSLog(@"Linked Files %@", _linkedFilePaths);
         [_bibFileNamesToOpen removeObject:bibFileName];
@@ -675,7 +740,7 @@ NSString *BDSKRemoveParentReferencesFromPath(NSString *path) {
             }
             
             BDSKExternalLinkedFile *newLinkedFile = [[BDSKExternalLinkedFile alloc] init];
-            newLinkedFile.path = linkedFilePath;
+            newLinkedFile.path = linkedFilePath.precomposedStringWithCompatibilityMapping;
             newLinkedFile.lastModifiedDate = child.lastModifiedDate;
             newLinkedFile.totalBytes = child.totalBytes;
             newLinkedFile.availability = Downloadable;

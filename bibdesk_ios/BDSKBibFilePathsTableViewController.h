@@ -1,8 +1,8 @@
 //
-//  BDSKDropboxStore.h
+//  BDSKBibFilePathsTableViewController.h
 //  BibDesk
 //
-//  Created by Colin Smith on 10/28/12.
+//  Created by Colin Smith on 12/23/12.
 /*
  This software is Copyright (c) 2012-2012
  Colin A. Smith. All rights reserved.
@@ -36,18 +36,8 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKFileStore.h"
+#import <UIKit/UIKit.h>
 
-@interface BDSKDropboxStore : BDSKFileStore
-
-+ (BDSKDropboxStore *)sharedStore;
-
-- (void)updateAllBibFilePaths;
-- (void)addLocalFiles;
-- (void)startSync;
-
-@property (readonly) NSDictionary *allBibFilePaths;
-@property (retain) NSString *dropboxBibFilePath;
-@property (readonly) BOOL isSyncing;
+@interface BDSKBibFilePathsTableViewController : UITableViewController
 
 @end
