@@ -68,6 +68,7 @@ static BDSKDropboxStore *sharedDropboxStore = nil;
     NSMutableSet *_linkedFilePathsFound;
     NSMutableArray *_linkedFileDirectoriesToFetch;
     NSMutableArray *_linkedFilesToDownload;
+    NSUInteger _singleFileErrorCount;
     NSArray *_bibFileExtensions;
 }
 
@@ -329,6 +330,12 @@ NSString *BDSKRemoveParentReferencesFromPath(NSString *path) {
     } else if (_syncStage == linkedFileDownload) {
     
         NSLog(@"Error Downloading LinkedFile: %@", [error localizedDescription]);
+        _singleFileErrorCount++;
+        if (_singleFileErrorCount <= 5) {
+            NSLog(@"Retrying Download of LinkedFile: Attempt %i", _singleFileErrorCount);
+            [self startOrContinueLinkedFileDownload];
+            return;
+        }
 
         [self setSyncStage:none];
     
@@ -720,6 +727,7 @@ NSString *BDSKRemoveParentReferencesFromPath(NSString *path) {
             }
         }
     
+        _singleFileErrorCount = 0;
         [self startOrContinueLinkedFileDownload];
     }
 }
@@ -813,6 +821,7 @@ NSString *BDSKRemoveParentReferencesFromPath(NSString *path) {
     
     [_linkedFilesToDownload removeObjectAtIndex:0];
     
+    _singleFileErrorCount = 0;
     [self startOrContinueLinkedFileDownload];
 }
 
