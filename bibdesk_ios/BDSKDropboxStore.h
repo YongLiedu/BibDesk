@@ -45,6 +45,7 @@
 - (void)updateAllBibFilePaths;
 - (void)addLocalFiles;
 - (void)startSync;
+- (void)cancelSync;
 
 @property (readonly) NSDictionary *allBibFilePaths;
 @property (retain) NSString *dropboxBibFilePath;

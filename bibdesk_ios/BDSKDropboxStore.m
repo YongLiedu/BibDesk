@@ -506,6 +506,15 @@ NSString *BDSKRemoveParentReferencesFromPath(NSString *path) {
     }
 }
 
+- (void)cancelSync {
+
+    if (self.isSyncing) {
+    
+        [self.restClient cancelAllRequests];
+        [self setSyncStage:none];
+    }
+}
+
 - (void) startBibFileMetadata {
 
     DBMetadata *metadata = [_pathMetadata objectForKey:_dropboxBibFilePath];

@@ -264,6 +264,7 @@
 
     if (dropboxStore.isSyncing) {
 
+        /*
         UIActivityIndicatorViewStyle activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
         
         //NSLog(@"Navigation Bar Style: %i", self.navigationController.navigationBar.barStyle);
@@ -276,6 +277,11 @@
         [activityIndicator startAnimating];
         [refreshButton release];
         [activityIndicator release];
+        */
+        
+        UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(cancel)];
+        self.navigationItem.rightBarButtonItem = cancelButton;
+        [cancelButton release];
     
     } else if (appDelegate.dropboxLinked) {
     
@@ -292,6 +298,11 @@
 - (void)refresh {
 
     [[BDSKDropboxStore sharedStore] startSync];
+}
+
+- (void)cancel {
+
+    [[BDSKDropboxStore sharedStore] cancelSync];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
