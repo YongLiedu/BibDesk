@@ -473,10 +473,13 @@ NSString *BDSKRemoveParentReferencesFromPath(NSString *path) {
         [self willChangeValueForKey:@"isSyncing"];
         _syncStage = syncStage;
         [self didChangeValueForKey:@"isSyncing"];
+        BDSKAppDelegate *appDelegate = (BDSKAppDelegate *)[UIApplication sharedApplication].delegate;
         if (_syncStage == none) {
-            [(BDSKAppDelegate *)[UIApplication sharedApplication].delegate hideNetworkActivityIndicator];
+            [appDelegate hideNetworkActivityIndicator];
+            [appDelegate enableIdleTimer];
         } else {
-            [(BDSKAppDelegate *)[UIApplication sharedApplication].delegate showNetworkActivityIndicator];
+            [appDelegate showNetworkActivityIndicator];
+            [appDelegate disableIdleTimer];
         }
     } else {
         _syncStage = syncStage;

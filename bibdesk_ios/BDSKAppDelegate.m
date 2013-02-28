@@ -45,6 +45,8 @@
 @interface BDSKAppDelegate () {
     NSString *relinkUserId;
     BOOL _dropboxLinked;
+    NSInteger _networkActivityIndicatorCount;
+    NSInteger _idleTimerDisabledCount;
 }
 
 - (void)setDropboxLinked:(BOOL)linked;
@@ -233,6 +235,29 @@
     
     if (_networkActivityIndicatorCount < 0) {
         NSLog(@"Unbalanced BDSKAppDelegate Network Activity Indicator Calls");
+    }
+}
+
+#pragma mark -
+#pragma mark Idle Timer methods
+
+- (void)disableIdleTimer {
+
+    _idleTimerDisabledCount += 1;
+
+    [UIApplication sharedApplication].idleTimerDisabled = YES;
+}
+
+- (void)enableIdleTimer {
+
+    _idleTimerDisabledCount -= 1;
+
+    if (_idleTimerDisabledCount <= 0) {
+        [UIApplication sharedApplication].idleTimerDisabled = NO;
+    }
+    
+    if (_idleTimerDisabledCount < 0) {
+        NSLog(@"Unbalanced BDSKAppDelegate Idle Timer Calls");
     }
 }
 
