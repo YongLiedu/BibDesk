@@ -57,6 +57,7 @@ static BDSKDropboxStore *sharedDropboxStore = nil;
 @interface BDSKDropboxStore () <DBRestClientDelegate> {
 
     DBRestClient *_restClient;
+    UIBackgroundTaskIdentifier _backgroundTaskIdentifier;
     NSMutableDictionary *_pathMetadata;
     NSMutableDictionary *_allBibFilePaths;
     NSString *_dropboxBibFilePath;
@@ -484,6 +485,7 @@ NSString *BDSKRemoveParentReferencesFromPath(NSString *path) {
         if (_syncStage == none) {
             [appDelegate hideNetworkActivityIndicator];
             [appDelegate enableIdleTimer];
+            [[UIApplication sharedApplication] endBackgroundTask:_backgroundTaskIdentifier];
         } else {
             [appDelegate showNetworkActivityIndicator];
             [appDelegate disableIdleTimer];
@@ -502,6 +504,9 @@ NSString *BDSKRemoveParentReferencesFromPath(NSString *path) {
 
     if (!self.isSyncing) {
     
+        _backgroundTaskIdentifier = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
+            [self cancelSync];
+        }];
         [self startBibFileMetadata];
     }
 }
