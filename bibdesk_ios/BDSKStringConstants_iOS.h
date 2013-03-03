@@ -39,6 +39,7 @@
 # pragma mark User default keys
 
 extern NSString *BDSKDropboxBibFilePathKey;
+extern NSString *BDSKDropboxLinkedFilesContentOffset;
 
 #pragma mark Notification name strings
 

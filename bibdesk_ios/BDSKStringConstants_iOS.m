@@ -41,6 +41,7 @@
 # pragma mark User default keys
 
 NSString *BDSKDropboxBibFilePathKey = @"BDSKDropboxBibFilePathKey";
+NSString *BDSKDropboxLinkedFilesContentOffset = @"BDSKDropboxLinkedFilesContentOffset";
 
 #pragma mark Notification name strings
 

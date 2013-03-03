@@ -130,7 +130,7 @@
     
     NSDictionary *defaults = @{
         BDSKGroupFieldSeparatorCharactersKey: @",:;",
-        BDSKDropboxBibFilePathKey:  @"/"
+        BDSKDropboxBibFilePathKey: @"/"
     };
     [sud registerDefaults:defaults];
 }

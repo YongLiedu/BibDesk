@@ -92,6 +92,13 @@
 
     [super viewWillAppear:animated];
     self.navigationItem.title = @"Linked Files";
+    
+    NSDictionary *contentOffsetDict = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDropboxLinkedFilesContentOffset];
+    if (contentOffsetDict) {
+        CGPoint contentOffset;
+        CGPointMakeWithDictionaryRepresentation((CFDictionaryRef)contentOffsetDict, &contentOffset);
+        self.tableView.contentOffset = contentOffset;
+    }
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -101,6 +108,20 @@
     } else {
         return YES;
     }
+}
+
+#pragma mark - Scroll view delegate
+
+- (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset {
+
+    NSDictionary *contentOffsetDict = (NSDictionary *)CGPointCreateDictionaryRepresentation(*targetContentOffset);
+    [[NSUserDefaults standardUserDefaults] setObject:contentOffsetDict forKey:BDSKDropboxLinkedFilesContentOffset];
+}
+
+- (void)scrollViewDidScrollToTop:(UIScrollView *)scrollView {
+
+    NSDictionary *contentOffsetDict = (NSDictionary *)CGPointCreateDictionaryRepresentation(self.tableView.contentOffset);
+    [[NSUserDefaults standardUserDefaults] setObject:contentOffsetDict forKey:BDSKDropboxLinkedFilesContentOffset];
 }
 
 #pragma mark - Table view data source
