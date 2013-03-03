@@ -44,6 +44,7 @@
 #import "BDSKGroupsArray.h"
 #import "BDSKSmartGroup.h"
 #import "BDSKStaticGroup.h"
+#import "BDSKStringConstants_iOS.h"
 
 @interface BDSKGroupTableViewController () {
 
@@ -311,7 +312,7 @@
 
 - (void)handleBibDocumentChangedNotification:(NSNotification *)notification {
 
-    if ([[notification.userInfo objectForKey:@"bibFileName"] isEqual:self.bibFileName]) {
+    if ([[notification.userInfo objectForKey:BDSKBibDocumentChangedNotificationBibFileNameKey] isEqual:self.bibFileName]) {
         if (self.document) {
             [self.tableView reloadData];
             [self updateActivityIndicator];
@@ -323,12 +324,12 @@
 
 - (void)registerForNotifications {
 
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBibDocumentChangedNotification:) name:@"BDSKBibDocumentChanged" object:self.fileStore];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBibDocumentChangedNotification:) name:BDSKBibDocumentChangedNotification object:self.fileStore];
 }
 
 - (void)unregisterForNotifications {
 
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"BDSKBibDocumentChanged" object:self.fileStore];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:BDSKBibDocumentChangedNotification object:self.fileStore];
 }
 
 @end

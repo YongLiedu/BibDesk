@@ -44,6 +44,7 @@
 #import "BDSKGroupTableViewController.h"
 #import "BDSKPDFTableViewController.h"
 #import "BDSKSettingsTableViewController.h"
+#import "BDSKStringConstants_iOS.h"
 #import <DropboxSDK/DropboxSDK.h>
 
 #import "BibDocument.h"
@@ -95,7 +96,7 @@
     
     [dropboxStore addObserver:self forKeyPath:@"isSyncing" options:0 context:nil];
     
-    [[NSNotificationCenter defaultCenter] addObserverForName:@"BDSKBibDocumentChanged" object:dropboxStore queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+    [[NSNotificationCenter defaultCenter] addObserverForName:BDSKBibDocumentChangedNotification object:dropboxStore queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
         [(UITableView *)self.view reloadData];
     }];
     

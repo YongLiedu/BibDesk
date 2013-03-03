@@ -38,10 +38,11 @@
 
 #import "BDSKFileStore.h"
 
-#import "BDSKDropboxStore.h"
-#import "BibDocument.h"
 #import "BDSKBibFile.h"
+#import "BDSKDropboxStore.h"
 #import "BDSKExternalLinkedFile.h"
+#import "BDSKStringConstants_iOS.h"
+#import "BibDocument.h"
 
 @interface BDSKFileStore () {
 
@@ -219,13 +220,18 @@
 
 - (void)notifyBibDocumentChanged:(NSString *)bibFileName {
 
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"BDSKBibDocumentChanged" object:self userInfo:@{ @"bibFileName": bibFileName }];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocumentChangedNotification object:self userInfo:@{
+        BDSKBibDocumentChangedNotificationBibFileNameKey: bibFileName
+    }];
 }
 
 
 - (void)notifyLinkedFileChanged:(NSString *)linkedFilePath newContents:(BOOL)newContents {
 
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"BDSKLinkedFileChanged" object:self userInfo:@{ @"linkedFilePath": linkedFilePath, @"newContents": [NSNumber numberWithBool:newContents] }];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKLinkedFileChangedNotification object:self userInfo:@{
+        BDSKLinkedFileChangedNotificationLinkedFilePathKey: linkedFilePath,
+        BDSKLinkedFileChangedNotificationNewContentsKey: [NSNumber numberWithBool:newContents]
+    }];
 }
 
 #pragma mark - Subclass Support

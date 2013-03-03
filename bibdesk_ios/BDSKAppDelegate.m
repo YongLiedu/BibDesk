@@ -40,6 +40,8 @@
 
 #import <DBSessionInit/DBSessionInit.h>
 #import "BDSKDropboxStore.h"
+#import "BDSKStringConstants.h"
+#import "BDSKStringConstants_iOS.h"
 #import "BDSKTypeManager.h"
 
 @interface BDSKAppDelegate () {
@@ -65,10 +67,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
-    
-    NSDictionary *defaults = [NSDictionary dictionaryWithObjectsAndKeys:@",:;", BDSKGroupFieldSeparatorCharactersKey, @"/", @"BDSKDropboxBibFilePathKey", nil];
-    [sud registerDefaults:defaults];
+    [self registerDefaults];
     
     // Override point for customization after application launch.
     _networkActivityIndicatorCount = 0;
@@ -86,6 +85,8 @@
     _dropboxLinked = [[DBSession sharedSession] isLinked];
     
     [[BDSKDropboxStore sharedStore] addLocalFiles];
+
+    NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
     
     // enforce Author and Editor as person fields
     NSArray *personFields = [sud stringArrayForKey:BDSKPersonFieldsKey];
@@ -121,6 +122,17 @@
     }
     
     return NO;
+}
+
+- (void)registerDefaults {
+
+    NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
+    
+    NSDictionary *defaults = @{
+        BDSKGroupFieldSeparatorCharactersKey: @",:;",
+        BDSKDropboxBibFilePathKey:  @"/"
+    };
+    [sud registerDefaults:defaults];
 }
 
 - (BOOL)dropboxLinked {

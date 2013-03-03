@@ -41,6 +41,7 @@
 #import "BibDocument.h"
 #import "BDSKFileStore.h"
 #import "BDSKPublicationsArray.h"
+#import "BDSKStringConstants_iOS.h"
 
 @interface BDSKBibDeskURLHandler () {
 
@@ -135,7 +136,7 @@
         
         if (fileStore) {
         
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBibDocumentChangedNotification:) name:@"BDSKBibDocumentChanged" object:fileStore];
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBibDocumentChangedNotification:) name:BDSKBibDocumentChangedNotification object:fileStore];
         
             [self loadBibItems];
             return;
@@ -182,7 +183,7 @@
 
 - (void)handleBibDocumentChangedNotification:(NSNotification *)notification {
     
-    NSString *bibFileName = [notification.userInfo objectForKey:@"bibFileName"];
+    NSString *bibFileName = [notification.userInfo objectForKey:BDSKBibDocumentChangedNotificationBibFileNameKey];
 
     if ([bibFileName isEqualToString:self.bibFileName]) {
 

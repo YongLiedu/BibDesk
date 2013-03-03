@@ -40,6 +40,7 @@
 
 #import "BDSKAppDelegate.h"
 #import "BDSKFileStore.h"
+#import "BDSKStringConstants_iOS.h"
 
 @interface BDSKPDFTableViewController ()
 
@@ -76,7 +77,7 @@
  
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleLinkedFileChangedNotification:) name:@"BDSKLinkedFileChanged" object:fileStore];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleLinkedFileChangedNotification:) name:BDSKLinkedFileChangedNotification object:fileStore];
 }
 
 - (void)viewDidUnload

@@ -43,6 +43,7 @@
 #import "BDSKAppDelegate.h"
 #import "BDSKBibFile.h"
 #import "BDSKExternalLinkedFile.h"
+#import "BDSKStringConstants_iOS.h"
 
 typedef enum {
     none,
@@ -154,7 +155,7 @@ static BDSKDropboxStore *sharedDropboxStore = nil;
         _restClient = nil;
         _pathMetadata = [[NSMutableDictionary alloc] init];
         _allBibFilePaths = nil;
-        _dropboxBibFilePath = [[NSUserDefaults standardUserDefaults] stringForKey:@"BDSKDropboxBibFilePathKey"];
+        _dropboxBibFilePath = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKDropboxBibFilePathKey];
         _bibFilesToDownload = [[NSMutableArray alloc] init];
         _bibFileNamesToOpen = [[NSMutableSet alloc] init];
         _linkedFilePaths = [[NSMutableSet alloc] init];
@@ -163,7 +164,7 @@ static BDSKDropboxStore *sharedDropboxStore = nil;
         _linkedFileDirectoriesToFetch = [[NSMutableArray alloc] init];
         _linkedFilesToDownload = [[NSMutableArray alloc] init];
         _bibFileExtensions = [[NSArray alloc] initWithObjects:@"bib", nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBibDocumentChangedNotification:) name:@"BDSKBibDocumentChanged" object:self];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBibDocumentChangedNotification:) name:BDSKBibDocumentChangedNotification object:self];
     }
     
     return self;
@@ -184,7 +185,7 @@ static BDSKDropboxStore *sharedDropboxStore = nil;
     [_bibFileExtensions release];
     [_bibFileRootPath release];
     [_linkedFileRootPath release];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"BDSKBibDocumentChanged" object:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:BDSKBibDocumentChangedNotification object:self];
 
     [super dealloc];
 }
@@ -257,7 +258,7 @@ NSString *BDSKRemoveParentReferencesFromPath(NSString *path) {
     _dropboxBibFilePath = [dropboxBibFilePath retain];
     [oldPath release];
     
-    [[NSUserDefaults standardUserDefaults] setObject:dropboxBibFilePath forKey:@"BDSKDropboxBibFilePathKey"];
+    [[NSUserDefaults standardUserDefaults] setObject:dropboxBibFilePath forKey:BDSKDropboxBibFilePathKey];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
@@ -656,7 +657,7 @@ NSString *BDSKRemoveParentReferencesFromPath(NSString *path) {
 
     if (_syncStage == bibFileDownload) {
     
-        NSString *bibFileName = [notification.userInfo objectForKey:@"bibFileName"];
+        NSString *bibFileName = [notification.userInfo objectForKey:BDSKBibDocumentChangedNotificationBibFileNameKey];
         [self updateLinkedFilePathsForBibFileName:bibFileName];
         
         if (_bibFilesToDownload.count == 0 && _bibFileNamesToOpen.count == 0) {
