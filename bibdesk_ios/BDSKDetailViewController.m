@@ -74,6 +74,7 @@
     [_htmlText release];
     [_linkedFileLocalPaths release];
     [_webViews release];
+    [_segmentedControl release];
     [_urlHandler release];
     [_displayedURL release];
     [_displayedFile release];
@@ -94,12 +95,15 @@
 
 - (void)setDisplayedURL:(NSURL *)displayedURL {
 
+    [_displayedFile release];
+    _displayedFile = nil;
     self.urlHandler = [BDSKBibDeskURLHandler urlHandlerWithURL:displayedURL delegate:self];
     [self.urlHandler startLoad];
 }
 
 - (void)setDisplayedFile:(NSString *)newDisplayedFile
 {
+    [_linkedFileLocalPaths removeAllObjects];
     [newDisplayedFile retain];
     [_displayedFile release];
     _displayedFile = newDisplayedFile;
@@ -136,6 +140,7 @@
         }
         
         UIBarButtonItem *barButtonItem = nil;
+        [_segmentedControl release];
         _segmentedControl = nil;
             
         if (_linkedFileLocalPaths.count) {
@@ -169,8 +174,6 @@
             }
             
             barButtonItem = [[UIBarButtonItem alloc] initWithCustomView:_segmentedControl];
-            
-            [_segmentedControl release];
         }
         
         [self showWebViewAtIndex:0];
