@@ -229,8 +229,8 @@
         scriptGroupCount = 0;
         searchGroupCount = 0;
         if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKNoInitialWebGroupKey] == NO) {
-            webGroupCount = 1;
 #if BDSK_OS_X
+            webGroupCount = 1;
             BDSKWebGroup *webGroup = [[BDSKWebGroup alloc] init];
             [self insertChild:webGroup atIndex:0];
             [webGroup release];
