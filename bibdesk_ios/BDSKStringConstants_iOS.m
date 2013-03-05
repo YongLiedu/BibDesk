@@ -38,6 +38,10 @@
 
 #import "BDSKStringConstants_iOS.h"
 
+# pragma mark iCloud key-value store keys
+
+NSString *BDSKLinkedFileDisplayedRectsKey = @"BDSKLinkedFileDisplayedRectsKey";
+
 # pragma mark User default keys
 
 NSString *BDSKDropboxBibFilePathKey = @"BDSKDropboxBibFilePathKey";

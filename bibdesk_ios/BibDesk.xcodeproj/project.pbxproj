@@ -184,6 +184,7 @@
 		3B5CF0FB1504CCE3006AD43D /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		3B5CF0FD1504CD2E006AD43D /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon@2x.png"; sourceTree = "<group>"; };
 		3B5CF1031504CDD9006AD43D /* iTunesArtwork */ = {isa = PBXFileReference; lastKnownFileType = file; path = iTunesArtwork; sourceTree = "<group>"; };
+		3B6829AA16E4FC4900038F38 /* BibDesk.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = BibDesk.entitlements; path = BibDesk/BibDesk.entitlements; sourceTree = "<group>"; };
 		3B79CF071509176400E9C5F5 /* BDSKRuntime.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKRuntime.m; sourceTree = "<group>"; };
 		3B79CF0D15091A7A00E9C5F5 /* BDSKTreeNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTreeNode.m; sourceTree = "<group>"; };
 		3B79CF0F15091B0200E9C5F5 /* BDSKVersionNumber.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKVersionNumber.m; sourceTree = "<group>"; };
@@ -550,6 +551,7 @@
 				3BBB134D150245A700F61870 /* MainStoryboard_iPad.storyboard */,
 				3BBB1340150245A700F61870 /* BibDesk-Info.plist */,
 				3BBB1341150245A700F61870 /* InfoPlist.strings */,
+				3B6829AA16E4FC4900038F38 /* BibDesk.entitlements */,
 				3BCF2C57164DA27800EBC9A5 /* DefaultTemplate.html */,
 			);
 			name = Resources;
@@ -876,6 +878,7 @@
 		3BBB1359150245A700F61870 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = BibDesk/BibDesk.entitlements;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
@@ -897,6 +900,7 @@
 		3BBB135A150245A700F61870 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = BibDesk/BibDesk.entitlements;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",

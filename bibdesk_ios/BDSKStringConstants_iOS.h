@@ -36,6 +36,10 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+# pragma mark iCloud key-value store keys
+
+extern NSString *BDSKLinkedFileDisplayedRectsKey;
+
 # pragma mark User default keys
 
 extern NSString *BDSKDropboxBibFilePathKey;

@@ -59,6 +59,7 @@
 
 - (NSString *)localPathForBibFilePath:(NSString *)path;
 - (NSString *)localPathForLinkedFilePath:(NSString *)path;
+- (NSURL *)urlForLinkedFilePath:(NSString *)path;
 - (NSString *)pathForLinkedFilePath:(NSString *)relativePath relativeToBibFileName:(NSString *)bibFileName;
 
 // only for access by subclasses

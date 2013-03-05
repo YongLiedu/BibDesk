@@ -129,6 +129,14 @@
     return nil;
 }
 
+- (NSURL *)urlForLinkedFilePath:(NSString *)path {
+
+    NSString *urlPath = [@"/LinkedFiles" stringByAppendingPathComponent:path];
+    NSURL *url = [[[NSURL alloc] initWithScheme:@"bibdesk" host:[self.class storeName] path:urlPath] autorelease];
+    
+    return url;
+}
+
 - (NSString *)pathForLinkedFilePath:(NSString *)relativePath relativeToBibFileName:(NSString *)bibFileName {
 
     return nil;
