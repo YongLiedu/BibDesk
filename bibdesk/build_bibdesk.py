@@ -34,7 +34,7 @@
 import os, sys
 import subprocess
 import tempfile
-import glob
+from glob import glob
 import shutil
 from getpass import getuser
 import datetime
@@ -79,6 +79,20 @@ SERVER_PATH = os.path.expanduser("~/Dropbox/Public/BibDesk")
 
 # path for error logging (log is e-mailed in case of failure)
 LOG_PATH=os.path.join(TEMP_DIR, "build_bibdesk_py.log")
+
+# clear out from any previous run; now leave these overnight
+# in case of failure, but build code assumes otherwise
+if os.path.exists(LOG_PATH):
+    os.unlink(LOG_PATH)
+    
+# previous day's image(s) are also left over
+old_images = os.path.join(TEMP_DIR, "BibDesk*.dmg")
+for img in old_images:
+    try:
+        os.unlink(img)
+    except Exception, e:
+        with open(LOG_PATH, "a", -1) as logfile:
+            logfile.write("failed to delete %s with exception %s\n" % (img, e))
 
 # for error reporting when the script fails
 EMAIL_ADDRESS="amaxwell@mac.com"
@@ -176,7 +190,7 @@ def disableLocalizations(pathToApplicationBundle):
         os.mkdir(disabledResourcesPath)
 
     resourcesPath = os.path.join(pathToApplicationBundle, "Contents", "Resources")    
-    allLocalizations = glob.glob(resourcesPath + "/*.lproj")
+    allLocalizations = glob(resourcesPath + "/*.lproj")
     
     logFile = open(LOG_PATH, "a")
     
