@@ -44,14 +44,12 @@
 #import "BDSKHighlightingPopUpButton.h"
 
 
-@interface NSResponder (BDSKGesturesPrivate)
-- (void)magnifyWithEvent:(NSEvent *)theEvent;
-- (void)beginGestureWithEvent:(NSEvent *)theEvent;
-- (void)endGestureWithEvent:(NSEvent *)theEvent;
-@end
+@interface BDSKZoomablePDFView (BDSKPrivate)
 
-@interface NSEvent (BDSKGesturesPrivate)
-- (CGFloat)magnification;
+- (void)makeScalePopUpButton;
+- (void)scalePopUpAction:(id)sender;
+- (void)setScaleFactor:(CGFloat)factor adjustPopup:(BOOL)flag;
+
 @end
 
 @implementation BDSKZoomablePDFView

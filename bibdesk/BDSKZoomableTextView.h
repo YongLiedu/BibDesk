@@ -45,10 +45,8 @@
     CGFloat pinchZoomFactor;
 }
 
-- (void)scalePopUpAction:(id)sender;
 - (CGFloat)scaleFactor;
 - (void)setScaleFactor:(CGFloat)factor;
-- (void)setScaleFactor:(CGFloat)factor adjustPopup:(BOOL)flag;
 
 - (IBAction)zoomToActualSize:(id)sender;
 - (IBAction)zoomIn:(id)sender;
@@ -56,8 +54,6 @@
 - (BOOL)canZoomToActualSize;
 - (BOOL)canZoomIn;
 - (BOOL)canZoomOut;
-
-- (void)makeScalePopUpButton;
 
 - (IBAction)printSelection:(id)sender;
 
