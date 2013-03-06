@@ -390,19 +390,6 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
     return [[self documentView] enclosingScrollView];
 }
 
-- (void)setScrollerSize:(NSControlSize)controlSize;
-{
-    NSScrollView *scrollView = [[self documentView] enclosingScrollView];
-    [scrollView setHasHorizontalScroller:YES];
-    [scrollView setHasVerticalScroller:YES];
-    [[scrollView horizontalScroller] setControlSize:controlSize];
-    [[scrollView verticalScroller] setControlSize:controlSize];
-	if(scalePopUpButton){
-		[[scalePopUpButton cell] setControlSize:controlSize];
-        [scalePopUpButton setFont:[NSFont toolTipsFontOfSize: BDSKScaleMenuFontSize - controlSize]];
-	}
-}
-
 #pragma mark Gestures
 
 - (void)beginGestureWithEvent:(NSEvent *)theEvent {

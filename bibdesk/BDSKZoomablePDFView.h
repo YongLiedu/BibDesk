@@ -48,7 +48,6 @@
 - (void)setScaleFactor:(CGFloat)factor adjustPopup:(BOOL)flag;
 - (void)scalePopUpAction:(id)sender;
 - (NSScrollView *)scrollView;
-- (void)setScrollerSize:(NSControlSize)controlSize;
 - (void)makeScalePopUpButton;
 
 - (IBAction)printSelection:(id)sender;
