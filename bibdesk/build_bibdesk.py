@@ -86,7 +86,7 @@ if os.path.exists(LOG_PATH):
     os.unlink(LOG_PATH)
     
 # previous day's image(s) are also left over
-old_images = os.path.join(TEMP_DIR, "BibDesk*.dmg")
+old_images = glob(os.path.join(TEMP_DIR, "BibDesk*.dmg"))
 for img in old_images:
     try:
         os.unlink(img)
