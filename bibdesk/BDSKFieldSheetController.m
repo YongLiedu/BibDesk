@@ -304,6 +304,16 @@
     replaceFieldsFrame.origin.x += dw;
     [fieldsControl setFrame:fieldsFrame];
     [replaceFieldsComboBox setFrame:replaceFieldsFrame];
+    
+    CGFloat buttonX = NSMaxX([okButton frame]);
+    for (NSButton *button in [NSArray arrayWithObjects:okButton, cancelButton, nil]) {
+        [button sizeToFit];
+        NSRect buttonFrame = [button frame];
+        buttonFrame.size.width = fmin(MAX_BUTTON_WIDTH, fmax(MIN_BUTTON_WIDTH, NSWidth(buttonFrame) + EXTRA_BUTTON_WIDTH));
+        buttonX -= NSWidth(buttonFrame);
+        buttonFrame.origin.x = buttonX;
+        [button setFrame:buttonFrame];
+    }
 }
 
 @end
