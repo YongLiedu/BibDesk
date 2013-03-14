@@ -60,7 +60,7 @@
 							<object class="NSButtonCell" key="NSCell" id="937902715">
 								<int key="NSCellFlags">67239424</int>
 								<int key="NSCellFlags2">137887744</int>
-								<string key="NSContents">Modifier</string>
+								<string key="NSContents"/>
 								<object class="NSFont" key="NSSupport" id="502397460">
 									<string key="NSName">LucidaGrande</string>
 									<double key="NSSize">13</double>
@@ -91,7 +91,7 @@
 							<object class="NSButtonCell" key="NSCell" id="452666490">
 								<int key="NSCellFlags">67239424</int>
 								<int key="NSCellFlags2">137887744</int>
-								<string key="NSContents">Annuler</string>
+								<string key="NSContents"/>
 								<reference key="NSSupport" ref="502397460"/>
 								<reference key="NSControlView" ref="249912516"/>
 								<int key="NSButtonFlags">-2038284033</int>
@@ -113,7 +113,7 @@
 							<object class="NSTextFieldCell" key="NSCell" id="165409645">
 								<int key="NSCellFlags">67239424</int>
 								<int key="NSCellFlags2">71303168</int>
-								<string key="NSContents">Nom du champ à changer :</string>
+								<string key="NSContents"/>
 								<reference key="NSSupport" ref="502397460"/>
 								<reference key="NSControlView" ref="680369600"/>
 								<object class="NSColor" key="NSBackgroundColor" id="186931145">
@@ -201,7 +201,7 @@
 							<object class="NSTextFieldCell" key="NSCell" id="955060952">
 								<int key="NSCellFlags">67239424</int>
 								<int key="NSCellFlags2">71303168</int>
-								<string key="NSContents">Nouveau nom de champ :</string>
+								<string key="NSContents"/>
 								<reference key="NSSupport" ref="502397460"/>
 								<reference key="NSControlView" ref="490563453"/>
 								<reference key="NSBackgroundColor" ref="186931145"/>
@@ -332,6 +332,7 @@
 					<string>replaceFieldsArray</string>
 					<string>replaceField</string>
 					<string>defaultButtonTitle</string>
+					<string>cancelButtonTitle</string>
 				</object>
 				<bool key="NSEditable">YES</bool>
 				<object class="_NSManagedProxy" key="_NSManagedProxy"/>
@@ -590,6 +591,22 @@
 					</object>
 					<int key="connectionID">99</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">title: selection.cancelButtonTitle</string>
+						<reference key="source" ref="249912516"/>
+						<reference key="destination" ref="838903787"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="249912516"/>
+							<reference key="NSDestination" ref="838903787"/>
+							<string key="NSLabel">title: selection.cancelButtonTitle</string>
+							<string key="NSBinding">title</string>
+							<string key="NSKeyPath">selection.cancelButtonTitle</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">100</int>
+				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<object class="NSArray" key="orderedObjects">
@@ -847,7 +864,7 @@
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">99</int>
+			<int key="maxID">100</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">

@@ -49,7 +49,8 @@
         field = nil;
         [self setPrompt:promptString];
         [self setFieldsArray:fields];
-        [self setDefaultButtonTitle:@""];
+        [self setDefaultButtonTitle:NSLocalizedString(@"OK", @"Button title")];
+        [self setCancelButtonTitle:NSLocalizedString(@"Cancel", @"Button title")];
     }
     return self;
 }
@@ -57,6 +58,7 @@
 - (void)dealloc {
     BDSKDESTROY(prompt);
     BDSKDESTROY(defaultButtonTitle);
+    BDSKDESTROY(cancelButtonTitle);
     BDSKDESTROY(fieldsArray);
     BDSKDESTROY(field);
     [super dealloc];
@@ -106,6 +108,17 @@
     }
 }
 
+- (NSString *)cancelButtonTitle{
+    return cancelButtonTitle;
+}
+
+- (void)setCancelButtonTitle:(NSString *)title{
+    if (cancelButtonTitle != title) {
+        [cancelButtonTitle release];
+        cancelButtonTitle = [title retain];
+    }
+}
+
 #define MIN_BUTTON_WIDTH 82.0
 #define MAX_BUTTON_WIDTH 100.0
 #define EXTRA_BUTTON_WIDTH 12.0
@@ -120,16 +133,15 @@
     fieldsFrame.origin.x += dw;
     [fieldsControl setFrame:fieldsFrame];
     
-    CGFloat buttonRight = NSMaxX([okButton frame]);
-    [okButton sizeToFit];
-    NSRect buttonFrame = [okButton frame];
-    buttonFrame.size.width = fmin(MAX_BUTTON_WIDTH, fmax(MIN_BUTTON_WIDTH, NSWidth(buttonFrame) + EXTRA_BUTTON_WIDTH));
-    buttonRight -= NSWidth(buttonFrame);
-    buttonFrame.origin.x = buttonRight;
-    [okButton setFrame:buttonFrame];
-    buttonFrame = [cancelButton frame];
-    buttonRight -= NSWidth(buttonFrame);
-    [cancelButton setFrame:buttonFrame];
+    CGFloat buttonX = NSMaxX([okButton frame]);
+    for (NSButton *button in [NSArray arrayWithObjects:okButton, cancelButton, nil]) {
+        [button sizeToFit];
+        NSRect buttonFrame = [button frame];
+        buttonFrame.size.width = fmin(MAX_BUTTON_WIDTH, fmax(MIN_BUTTON_WIDTH, NSWidth(buttonFrame) + EXTRA_BUTTON_WIDTH));
+        buttonX -= NSWidth(buttonFrame);
+        buttonFrame.origin.x = buttonX;
+        [button setFrame:buttonFrame];
+    }
 }
 
 - (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler {

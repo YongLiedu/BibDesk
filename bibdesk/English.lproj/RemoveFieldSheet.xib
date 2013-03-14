@@ -55,7 +55,7 @@
 							<object class="NSButtonCell" key="NSCell" id="630810908">
 								<int key="NSCellFlags">67108864</int>
 								<int key="NSCellFlags2">137887744</int>
-								<string key="NSContents">Remove</string>
+								<string key="NSContents"/>
 								<object class="NSFont" key="NSSupport" id="392986313">
 									<string key="NSName">LucidaGrande</string>
 									<double key="NSSize">13</double>
@@ -86,7 +86,7 @@
 							<object class="NSButtonCell" key="NSCell" id="94812528">
 								<int key="NSCellFlags">67108864</int>
 								<int key="NSCellFlags2">137887744</int>
-								<string key="NSContents">Cancel</string>
+								<string key="NSContents"/>
 								<reference key="NSSupport" ref="392986313"/>
 								<reference key="NSControlView" ref="96535860"/>
 								<int key="NSButtonFlags">-2038284288</int>
@@ -108,7 +108,7 @@
 							<object class="NSTextFieldCell" key="NSCell" id="886906539">
 								<int key="NSCellFlags">67108864</int>
 								<int key="NSCellFlags2">4194304</int>
-								<string key="NSContents">Name of field to remove:</string>
+								<string key="NSContents"/>
 								<reference key="NSSupport" ref="392986313"/>
 								<reference key="NSControlView" ref="937014296"/>
 								<object class="NSColor" key="NSBackgroundColor">
@@ -200,6 +200,7 @@
 					<string>fieldsArray</string>
 					<string>prompt</string>
 					<string>defaultButtonTitle</string>
+					<string>cancelButtonTitle</string>
 				</array>
 				<bool key="NSEditable">YES</bool>
 				<object class="_NSManagedProxy" key="_NSManagedProxy"/>
@@ -392,6 +393,22 @@
 					</object>
 					<int key="connectionID">61</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">title: selection.cancelButtonTitle</string>
+						<reference key="source" ref="96535860"/>
+						<reference key="destination" ref="657134807"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="96535860"/>
+							<reference key="NSDestination" ref="657134807"/>
+							<string key="NSLabel">title: selection.cancelButtonTitle</string>
+							<string key="NSBinding">title</string>
+							<string key="NSKeyPath">selection.cancelButtonTitle</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">62</int>
+				</object>
 			</array>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<array key="orderedObjects">
@@ -541,7 +558,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">61</int>
+			<int key="maxID">62</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">

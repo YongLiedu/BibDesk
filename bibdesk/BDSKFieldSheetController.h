@@ -47,6 +47,7 @@
     IBOutlet NSTextField *promptField;
     NSString *prompt;
     NSString *defaultButtonTitle;
+    NSString *cancelButtonTitle;
     NSArray *fieldsArray;
     NSString *field;
 }
@@ -55,12 +56,18 @@
 
 - (NSString *)field;
 - (void)setField:(NSString *)newField;
+
 - (NSArray *)fieldsArray;
 - (void)setFieldsArray:(NSArray *)array;
+
 - (NSString *)prompt;
 - (void)setPrompt:(NSString *)promptString;
+
 - (NSString *)defaultButtonTitle;
 - (void)setDefaultButtonTitle:(NSString *)title;
+
+- (NSString *)cancelButtonTitle;
+- (void)setCancelButtonTitle:(NSString *)title;
 
 @end
 
@@ -82,8 +89,10 @@
 
 - (NSString *)replaceField;
 - (void)setReplaceField:(NSString *)newField;
+
 - (NSArray *)replaceFieldsArray;
 - (void)setReplaceFieldsArray:(NSArray *)array;
+
 - (NSString *)replacePrompt;
 - (void)setReplacePrompt:(NSString *)promptString;
 
