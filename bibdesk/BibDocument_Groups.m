@@ -1206,6 +1206,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     } else {
         BDSKRemoveFieldSheetController *chooseFieldController = [[[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field:", @"Label for choosing group field")
                                                                                                             fieldsArray:currentGroupFields] autorelease];
+        [chooseFieldController setDefaultButtonTitle:NSLocalizedString(@"Change", @"Button title")];
         [chooseFieldController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
             NSString *groupField = [chooseFieldController field];
             if(result == NSCancelButton || [NSString isEmptyString:groupField])

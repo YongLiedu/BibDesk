@@ -320,6 +320,7 @@
 					<string>prompt</string>
 					<string>replaceFieldsArray</string>
 					<string>replaceField</string>
+					<string>defaultButtonTitle</string>
 				</array>
 				<bool key="NSEditable">YES</bool>
 				<object class="_NSManagedProxy" key="_NSManagedProxy"/>
@@ -561,6 +562,22 @@
 					</object>
 					<int key="connectionID">90</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">title: selection.defaultButtonTitle</string>
+						<reference key="source" ref="211059315"/>
+						<reference key="destination" ref="838903787"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="211059315"/>
+							<reference key="NSDestination" ref="838903787"/>
+							<string key="NSLabel">title: selection.defaultButtonTitle</string>
+							<string key="NSBinding">title</string>
+							<string key="NSKeyPath">selection.defaultButtonTitle</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">99</int>
+				</object>
 			</array>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<array key="orderedObjects">
@@ -742,7 +759,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">98</int>
+			<int key="maxID">99</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">

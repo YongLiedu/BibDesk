@@ -49,12 +49,14 @@
         field = nil;
         [self setPrompt:promptString];
         [self setFieldsArray:fields];
+        [self setDefaultButtonTitle:@""];
     }
     return self;
 }
 
 - (void)dealloc {
     BDSKDESTROY(prompt);
+    BDSKDESTROY(defaultButtonTitle);
     BDSKDESTROY(fieldsArray);
     BDSKDESTROY(field);
     [super dealloc];
@@ -93,6 +95,21 @@
     }
 }
 
+- (NSString *)defaultButtonTitle{
+    return defaultButtonTitle;
+}
+
+- (void)setDefaultButtonTitle:(NSString *)title{
+    if (defaultButtonTitle != title) {
+        [defaultButtonTitle release];
+        defaultButtonTitle = [title retain];
+    }
+}
+
+#define MIN_BUTTON_WIDTH 82.0
+#define MAX_BUTTON_WIDTH 100.0
+#define EXTRA_BUTTON_WIDTH 12.0
+
 - (void)prepare{
     NSRect fieldsFrame = [fieldsControl frame];
     NSRect oldPromptFrame = [promptField frame];
@@ -102,6 +119,17 @@
     fieldsFrame.size.width -= dw;
     fieldsFrame.origin.x += dw;
     [fieldsControl setFrame:fieldsFrame];
+    
+    CGFloat buttonRight = NSMaxX([okButton frame]);
+    [okButton sizeToFit];
+    NSRect buttonFrame = [okButton frame];
+    buttonFrame.size.width = fmin(MAX_BUTTON_WIDTH, fmax(MIN_BUTTON_WIDTH, NSWidth(buttonFrame) + EXTRA_BUTTON_WIDTH));
+    buttonRight -= NSWidth(buttonFrame);
+    buttonFrame.origin.x = buttonRight;
+    [okButton setFrame:buttonFrame];
+    buttonFrame = [cancelButton frame];
+    buttonRight -= NSWidth(buttonFrame);
+    [cancelButton setFrame:buttonFrame];
 }
 
 - (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler {
@@ -120,6 +148,14 @@
 
 
 @implementation BDSKAddFieldSheetController
+
+- (id)initWithPrompt:(NSString *)promptString fieldsArray:(NSArray *)fields{
+    self = [super initWithPrompt:promptString fieldsArray:fields];
+    if (self) {
+        [self setDefaultButtonTitle:NSLocalizedString(@"Add", @"Button title")];
+    }
+    return self;
+}
 
 - (void)windowDidLoad{
     BDSKFieldNameFormatter *formatter = [[[BDSKFieldNameFormatter alloc] init] autorelease];
@@ -140,6 +176,14 @@
 
 
 @implementation BDSKRemoveFieldSheetController
+
+- (id)initWithPrompt:(NSString *)promptString fieldsArray:(NSArray *)fields{
+    self = [super initWithPrompt:promptString fieldsArray:fields];
+    if (self) {
+        [self setDefaultButtonTitle:NSLocalizedString(@"Remove", @"Button title")];
+    }
+    return self;
+}
 
 - (NSString *)windowNibName{
     return @"RemoveFieldSheet";
@@ -167,6 +211,7 @@
         field = nil;
         [self setReplacePrompt:newPromptString];
         [self setReplaceFieldsArray:newFields];
+        [self setDefaultButtonTitle:NSLocalizedString(@"Change", @"Button title")];
     }
     return self;
 }

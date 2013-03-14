@@ -46,6 +46,7 @@
     IBOutlet NSButton *cancelButton;
     IBOutlet NSTextField *promptField;
     NSString *prompt;
+    NSString *defaultButtonTitle;
     NSArray *fieldsArray;
     NSString *field;
 }
@@ -58,6 +59,8 @@
 - (void)setFieldsArray:(NSArray *)array;
 - (NSString *)prompt;
 - (void)setPrompt:(NSString *)promptString;
+- (NSString *)defaultButtonTitle;
+- (void)setDefaultButtonTitle:(NSString *)title;
 
 @end
 
