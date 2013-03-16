@@ -713,9 +713,10 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     fieldNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObject:BDSKCrossrefString] excluding:currentFields];
     
     if ([self commitEditing]) {
-        BDSKAddFieldSheetController *addFieldController = [[[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:", @"Label for adding field") fieldsArray:fieldNames] autorelease];
+        BDSKFieldSheetController *addFieldController = [BDSKFieldSheetController fieldSheetControllerWithChoosableFields:fieldNames
+                                                                                 label:NSLocalizedString(@"Name of field to add:", @"Label for adding field")];
         [addFieldController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
-            NSString *newField = [addFieldController field];
+            NSString *newField = [addFieldController chosenField];
             if(result == NSCancelButton || newField == nil)
                 return;
             
@@ -751,21 +752,20 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 		prompt = NSLocalizedString(@"No fields to remove", @"Label when no field to remove");
 	}
     
-    BDSKRemoveFieldSheetController *removeFieldController = [[[BDSKRemoveFieldSheetController alloc] initWithPrompt:prompt fieldsArray:removableFields] autorelease];
+    BDSKFieldSheetController *removeFieldController = [BDSKFieldSheetController fieldSheetControllerWithSelectableFields:removableFields
+                                                                                label:prompt];
     NSInteger selectedRow = [tableView clickedOrSelectedRow];
     NSString *selectedField = selectedRow == -1 ? nil : [fields objectAtIndex:selectedRow];
     BOOL didValidate = YES;
     if([removableFields containsObject:selectedField]){
-        [removeFieldController setField:selectedField];
+        [removeFieldController setSelectedField:selectedField];
         // if we don't deselect this cell, we can't remove it from the form
         didValidate = [self commitEditing];
     }
-    
-	[removableFields release];
 	
     if (didValidate) {
         [removeFieldController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
-            NSString *oldField = [removeFieldController field];
+            NSString *oldField = [removeFieldController selectedField];
             NSString *oldValue = [[[publication valueOfField:oldField inherit:NO] retain] autorelease];
             
             if (result == NSOKButton && oldField != nil && [removableFields count]) {
@@ -784,6 +784,8 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
             }
         }];
     }
+    
+	[removableFields release];
 }
 
 - (void)raiseChangeFieldSheetForField:(NSString *)field{
@@ -808,20 +810,20 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         return;
     }
     
-    BDSKChangeFieldSheetController *changeFieldController = [[[BDSKChangeFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to change:", @"Label for changing field name")
-                                                                                                        fieldsArray:fields
-                                                                                                      replacePrompt:NSLocalizedString(@"New field name:", @"Label for changing field name")
-                                                                                                 replaceFieldsArray:fieldNames] autorelease];
+    BDSKFieldSheetController *changeFieldController = [BDSKFieldSheetController fieldSheetControllerWithSelectableFields:fields
+                                                                                label:NSLocalizedString(@"Name of field to change:", @"Label for changing field name")
+                                                                                choosableFields:fieldNames
+                                                                                label:NSLocalizedString(@"New field name:", @"Label for changing field name")];
     if (field == nil)
         field = [tableView selectedRow] == -1 ? nil : [fields objectAtIndex:[tableView selectedRow]];
     
     BDSKASSERT(field == nil || [fields containsObject:field]);
     if (field)
-        [changeFieldController setField:field];
+        [changeFieldController setSelectedField:field];
     
 	[changeFieldController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
-        NSString *oldField = [changeFieldController field];
-        NSString *newField = [changeFieldController replaceField];
+        NSString *oldField = [changeFieldController selectedField];
+        NSString *newField = [changeFieldController chosenField];
         NSString *oldValue = [[[publication valueOfField:oldField inherit:NO] retain] autorelease];
         NSInteger autoGenerateStatus = 0;
         

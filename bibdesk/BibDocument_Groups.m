@@ -800,10 +800,10 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCrossrefString, nil]
                                               excluding:[[[typeMan invalidGroupFieldsSet] allObjects] arrayByAddingObjectsFromArray:groupFields]];
     
-    BDSKAddFieldSheetController *addFieldController = [[[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of group field:", @"Label for adding group field")
-                                                                                               fieldsArray:colNames] autorelease];
+    BDSKFieldSheetController *addFieldController = [BDSKFieldSheetController fieldSheetControllerWithChoosableFields:colNames
+                                                                             label:NSLocalizedString(@"Name of group field:", @"Label for adding group field")];
 	[addFieldController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
-        NSString *newGroupField = [addFieldController field];
+        NSString *newGroupField = [addFieldController chosenField];
         if(result == NSCancelButton || newGroupField == nil)
             return; // the user canceled
         
@@ -833,10 +833,10 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 - (IBAction)removeGroupFieldAction:(id)sender{
 	NSArray *groupFields = [[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey];
-    BDSKRemoveFieldSheetController *removeFieldController = [[[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field to remove:", @"Label for removing group field")
-                                                                                                        fieldsArray:groupFields] autorelease];
+    BDSKFieldSheetController *removeFieldController = [BDSKFieldSheetController fieldSheetControllerWithSelectableFields:groupFields
+                                                                                label:NSLocalizedString(@"Group field to remove:", @"Label for removing group field")];
 	[removeFieldController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
-        NSString *oldGroupField = [removeFieldController field];
+        NSString *oldGroupField = [removeFieldController selectedField];
         if(result == NSCancelButton || [NSString isEmptyString:oldGroupField])
             return;
         
@@ -1204,11 +1204,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     } else if ([currentGroupFields count] == 1) {
         [self editNewCategoryGroupWithSelectionForGroupField:[currentGroupFields lastObject]];
     } else {
-        BDSKRemoveFieldSheetController *chooseFieldController = [[[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field:", @"Label for choosing group field")
-                                                                                                            fieldsArray:currentGroupFields] autorelease];
-        [chooseFieldController setDefaultButtonTitle:NSLocalizedString(@"Change", @"Button title")];
+        BDSKFieldSheetController *chooseFieldController = [BDSKFieldSheetController fieldSheetControllerWithSelectableFields:currentGroupFields
+                                                                                    label:NSLocalizedString(@"Group field:", @"Label for choosing group field")];
+        [chooseFieldController setDefaultButtonTitle:NSLocalizedString(@"Choose", @"Button title")];
         [chooseFieldController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
-            NSString *groupField = [chooseFieldController field];
+            NSString *groupField = [chooseFieldController selectedField];
             if(result == NSCancelButton || [NSString isEmptyString:groupField])
                 return;
             

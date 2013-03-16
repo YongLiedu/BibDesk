@@ -359,10 +359,10 @@
     NSArray *currentFields = [[self publication] allFieldNames];
     NSArray *fieldNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObject:BDSKCrossrefString] excluding:currentFields];
     
-    BDSKAddFieldSheetController *addFieldController = [[[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:",@"Label for adding field")
-                                                                                               fieldsArray:fieldNames] autorelease];
+    BDSKFieldSheetController *addFieldController = [BDSKFieldSheetController fieldSheetControllerWithChoosableFields:fieldNames
+                                                                             label:NSLocalizedString(@"Name of field to add:",@"Label for adding field")];
 	[addFieldController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
-        NSString *newField = [addFieldController field];
+        NSString *newField = [addFieldController chosenField];
         newField = [newField fieldName];
         
         if(newField == nil || [fields containsObject:newField] || result == NSCancelButton)

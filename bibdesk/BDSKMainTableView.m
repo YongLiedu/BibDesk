@@ -627,9 +627,10 @@ enum {
     NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKPubDateString, BDSKDateAddedString, BDSKDateModifiedString, BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKLastAuthorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKAuthorEditorString, BDSKLastAuthorEditorString, BDSKItemNumberString, BDSKContainerString, BDSKCrossrefString, BDSKLocalFileString, BDSKRemoteURLString, BDSKColorLabelString, nil]
                                               excluding:[self tableColumnIdentifiers]];
     
-    BDSKAddFieldSheetController *addFieldController = [[[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of column to add:", @"Label for adding column") fieldsArray:colNames] autorelease];
+    BDSKFieldSheetController *addFieldController = [BDSKFieldSheetController fieldSheetControllerWithChoosableFields:colNames
+                                                                             label:NSLocalizedString(@"Name of column to add:", @"Label for adding column")];
 	[addFieldController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
-        NSString *newColumnName = [addFieldController field];
+        NSString *newColumnName = [addFieldController chosenField];
         if (newColumnName && result == NSOKButton) {
             [self insertTableColumnWithIdentifier:newColumnName atIndex:[self numberOfColumns]];
             [[NSUserDefaults standardUserDefaults] setObject:[[[self tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString] forKey:BDSKShownColsNamesKey];

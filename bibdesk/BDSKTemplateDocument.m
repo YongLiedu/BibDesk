@@ -748,11 +748,11 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
 
 - (IBAction)addField:(id)sender {
     NSArray *allFields = [[BDSKTypeManager sharedManager] allFieldNamesIncluding:nil excluding:nil];
-    BDSKAddFieldSheetController *addFieldController = [[[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Field:", @"Label for adding a field for a template")
-                                                                                               fieldsArray:allFields] autorelease];
+    BDSKFieldSheetController *addFieldController = [BDSKFieldSheetController fieldSheetControllerWithChoosableFields:allFields
+                                                                             label:NSLocalizedString(@"Field:", @"Label for adding a field for a template")];
 	[addFieldController beginSheetModalForWindow:[self windowForSheet] completionHandler:^(NSInteger result){
         if (result == NSOKButton) {
-            NSArray *tokens = [self tokensForFields:[NSArray arrayWithObjects:[addFieldController field], nil]];
+            NSArray *tokens = [self tokensForFields:[NSArray arrayWithObjects:[addFieldController chosenField], nil]];
             [self setDefaultTokens:[[self defaultTokens] arrayByAddingObjectsFromArray:tokens]];
             [defaultTokenField setObjectValue:[self defaultTokens]];
             [self updateTokenFields];

@@ -41,59 +41,48 @@
 @interface BDSKFieldSheetController : NSWindowController
 {
     IBOutlet NSObjectController *objectController;
-    IBOutlet NSControl *fieldsControl;
-    IBOutlet NSButton *okButton;
+    IBOutlet NSPopUpButton *selectedFieldPopUpButton;
+    IBOutlet NSComboBox *chosenFieldComboBox;
+    IBOutlet NSTextField *selectedFieldLabelField;
+    IBOutlet NSTextField *chosenFieldLabelField;
+    IBOutlet NSButton *defaultButton;
     IBOutlet NSButton *cancelButton;
-    IBOutlet NSTextField *promptField;
-    NSString *prompt;
+    NSString *selectedField;
+    NSString *selectedFieldLabel;
+    NSArray *selectableFields;
+    NSString *chosenField;
+    NSString *chosenFieldLabel;
+    NSArray *choosableFields;
     NSString *defaultButtonTitle;
     NSString *cancelButtonTitle;
-    NSArray *fieldsArray;
-    NSString *field;
 }
 
-- (id)initWithPrompt:(NSString *)prompt fieldsArray:(NSArray *)fields;
++ (id)fieldSheetControllerWithSelectableFields:(NSArray *)selectableFields label:(NSString *)selectedFieldLabel choosableFields:(NSArray *)choosableFields label:(NSString *)chosenFieldLabel;
++ (id)fieldSheetControllerWithSelectableFields:(NSArray *)selectableFields label:(NSString *)selectedFieldLabel;
++ (id)fieldSheetControllerWithChoosableFields:(NSArray *)choosableFields label:(NSString *)chosenFieldLabel;
 
-- (NSString *)field;
-- (void)setField:(NSString *)newField;
+- (NSString *)selectedField;
+- (void)setSelectedField:(NSString *)newField;
 
-- (NSArray *)fieldsArray;
-- (void)setFieldsArray:(NSArray *)array;
+- (NSString *)selectedFieldLabel;
+- (void)setSelectedFieldLabel:(NSString *)newLabel;
 
-- (NSString *)prompt;
-- (void)setPrompt:(NSString *)promptString;
+- (NSArray *)selectableFields;
+- (void)setSelectableFields:(NSArray *)array;
+
+- (NSString *)chosenField;
+- (void)setChosenField:(NSString *)newField;
+
+- (NSString *)chosenFieldLabel;
+- (void)setChosenFieldLabel:(NSString *)newLabel;
+
+- (NSArray *)choosableFields;
+- (void)setChoosableFields:(NSArray *)array;
 
 - (NSString *)defaultButtonTitle;
 - (void)setDefaultButtonTitle:(NSString *)title;
 
 - (NSString *)cancelButtonTitle;
 - (void)setCancelButtonTitle:(NSString *)title;
-
-@end
-
-@interface BDSKAddFieldSheetController : BDSKFieldSheetController
-@end
-
-@interface BDSKRemoveFieldSheetController : BDSKFieldSheetController
-@end
-
-@interface BDSKChangeFieldSheetController : BDSKRemoveFieldSheetController {
-    IBOutlet NSComboBox *replaceFieldsComboBox;
-    IBOutlet NSTextField *replacePromptField;
-    NSString *replacePrompt;
-    NSArray *replaceFieldsArray;
-    NSString *replaceField;
-}
-
-- (id)initWithPrompt:(NSString *)promptString fieldsArray:(NSArray *)fields replacePrompt:(NSString *)newPromptString replaceFieldsArray:(NSArray *)newFields;
-
-- (NSString *)replaceField;
-- (void)setReplaceField:(NSString *)newField;
-
-- (NSArray *)replaceFieldsArray;
-- (void)setReplaceFieldsArray:(NSArray *)array;
-
-- (NSString *)replacePrompt;
-- (void)setReplacePrompt:(NSString *)promptString;
 
 @end
