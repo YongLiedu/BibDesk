@@ -667,7 +667,7 @@
     }
     
     NSScanner *scanner = [NSScanner scannerWithString:auxString];
-    NSString *key = nil;
+    NSString *keys = nil;
     NSArray *items = nil;
     NSMutableArray *selItems = [NSMutableArray array];
     
@@ -675,9 +675,12 @@
     
     do {
         if ([scanner scanString:command intoString:NULL] &&
-            [scanner scanUpToString:@"}" intoString:&key] &&
-            (items = [publications allItemsForCiteKey:key]))
-            [selItems addObjectsFromArray:items];
+            [scanner scanUpToString:@"}" intoString:&keys]) {
+            for (NSString *key in [keys componentsSeparatedByString:@","]) {
+                if ((items = [publications allItemsForCiteKey:key]))
+                    [selItems addObjectsFromArray:[publications allItemsForCiteKey:key]];
+            }
+        }
         [scanner scanUpToCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
         [scanner scanCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
     } while ([scanner isAtEnd] == NO);
