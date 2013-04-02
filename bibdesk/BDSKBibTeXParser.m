@@ -488,12 +488,11 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
     CFAllocatorRef allocator = CFAllocatorGetDefault();
     
     CFStringInlineBuffer inlineBuffer;
-    CFMutableStringRef mutableString = CFStringCreateMutable(allocator, 0);
+    CFMutableStringRef mutableString = NULL;
     CFIndex idx, braceDepth = 0;
     CFStringRef name;
     CFIndex nameLen;
     UniChar ch;
-    Boolean shouldAppend = FALSE;
     
     CFMutableArrayRef mutableArray = CFArrayCreateMutable(allocator, iMax, &kCFTypeArrayCallBacks);
     
@@ -511,23 +510,30 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
                 braceDepth--;
         }
         // if we had an unbalanced string last time, we need to keep appending to the mutable string; likewise, we want to append this name to the mutable string if braces are still unbalanced
-        if(shouldAppend || braceDepth != 0){
-            if(BDIsEmptyString(mutableString) == FALSE)
+        if(mutableString != NULL || braceDepth != 0){
+            if(mutableString != NULL)
                 CFStringAppend(mutableString, CFSTR(" and "));
+            else
+                mutableString = CFStringCreateMutable(allocator, 0);
             CFStringAppend(mutableString, name);
-            shouldAppend = TRUE;
+            if (braceDepth == 0) {
+                // braces balanced, so append the combined value, and reset the mutable string
+                CFArrayAppendValue(mutableArray, mutableString);
+                CFRelease(mutableString);
+                mutableString = NULL;
+                // this also indicate not to append next time unless the next name has unbalanced braces in its own right
+            }
         } else {
             // braces balanced, so append the value, and reset the mutable string
             CFArrayAppendValue(mutableArray, name);
-            CFStringReplaceAll(mutableString, CFSTR(""));
-            // don't append next time unless the next name has unbalanced braces in its own right
-            shouldAppend = FALSE;
         }
     }
     
-    if(BDIsEmptyString(mutableString) == FALSE)
+    if(mutableString != NULL) {
         CFArrayAppendValue(mutableArray, mutableString);
-    CFRelease(mutableString);
+        CFRelease(mutableString);
+        mutableString = NULL;
+    }
     
     // returning NULL will signify our error condition
     if(braceDepth != 0){
