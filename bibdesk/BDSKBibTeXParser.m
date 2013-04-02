@@ -494,14 +494,17 @@ __BDCreateArrayOfNames(CFStringRef namesString)
     CFStringRef name;
     UniChar ch;
     CFIndex startIndex = 0, currentIndex = 0, currentLength;
-    const CFRange *currentRange;
+    CFRange currentRange;
     CFStringRef substring;
     
     CFMutableArrayRef array = CFArrayCreateMutable(allocator, iMax + 1, &kCFTypeArrayCallBacks);
     
-    for(i = 0; i < iMax; i++){
-        currentRange = CFArrayGetValueAtIndex(separatorRanges, i);
-        currentLength = currentRange->location - currentIndex;
+    for(i = 0; i < iMax + 1; i++){
+        if (i == iMax)
+            currentRange = CFRangeMake(length, 0);
+        else
+            currentRange = *(CFRange *)CFArrayGetValueAtIndex(separatorRanges, i);
+        currentLength = currentRange.location - currentIndex;
         CFStringInitInlineBuffer(namesString, &inlineBuffer, CFRangeMake(currentIndex, currentLength));
 
         // check for balanced braces in this substring (including braces from a previous substring)
@@ -513,11 +516,11 @@ __BDCreateArrayOfNames(CFStringRef namesString)
                 braceDepth--;
         }
         
-        currentIndex = currentRange->location + currentRange->length;
+        currentIndex = currentRange.location + currentRange.length;
         
         if(braceDepth == 0){
             // braces balanced, so append the last name we found and reset the startIndex
-            name = CFStringCreateWithSubstring(allocator, namesString, CFRangeMake(startIndex, currentRange->location - startIndex));
+            name = CFStringCreateWithSubstring(allocator, namesString, CFRangeMake(startIndex, currentRange.location - startIndex));
             CFArrayAppendValue(array, name);
             CFRelease(name);
             startIndex = currentIndex;
@@ -530,12 +533,6 @@ __BDCreateArrayOfNames(CFStringRef namesString)
     if(braceDepth != 0){
         CFRelease(array);
         array = NULL;
-    }else if(startIndex == 0){
-        CFArrayAppendValue(array, namesString);
-    }else{
-        name = CFStringCreateWithSubstring(allocator, namesString, CFRangeMake(startIndex, length - startIndex));
-        CFArrayAppendValue(array, name);
-        CFRelease(name);
     }
     
     return array;
