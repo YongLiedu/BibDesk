@@ -670,12 +670,12 @@ CFStringRef __BDXMLCreateStringInCFEncoding(CFStringRef sourceString, CFStringEn
 #pragma mark API
 
 // Copied from CFString.c (CF368.25) with the addition of a single parameter for specifying comparison options (e.g. case-insensitive).
-CFArrayRef BDStringCreateArrayBySeparatingStringsWithOptions(CFAllocatorRef allocator, CFStringRef string, CFStringRef separatorString, CFOptionFlags compareOptions)
+CFArrayRef BDStringCreateComponentsBySeparatingByAnd(CFAllocatorRef allocator, CFStringRef string)
 {
     CFArrayRef separatorRanges;
     CFIndex length = CFStringGetLength(string);
 
-    if (!(separatorRanges = CFStringCreateArrayWithFindResults(allocator, string, separatorString, CFRangeMake(0, length), compareOptions))) {
+    if (!(separatorRanges = CFStringCreateArrayWithFindResults(allocator, string, CFSTR(" and "), CFRangeMake(0, length), kCFCompareCaseInsensitive))) {
         return CFArrayCreate(allocator, (const void**)&string, 1, & kCFTypeArrayCallBacks);
     } else {
         CFIndex idx;

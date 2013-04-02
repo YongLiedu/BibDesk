@@ -396,7 +396,6 @@ An inline buffer is used for speed in accessing each character.
     @result     (description)
 */
 
-- (NSArray *)componentsSeparatedByStringCaseInsensitive:(NSString *)separator;
 - (NSArray *)componentsSeparatedByAnd;
 - (NSArray *)componentsSeparatedByComma;
 

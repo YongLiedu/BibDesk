@@ -37,7 +37,7 @@
  */
 #import <Cocoa/Cocoa.h>
 
-extern CFArrayRef BDStringCreateArrayBySeparatingStringsWithOptions(CFAllocatorRef allocator, CFStringRef string, CFStringRef separatorString, CFOptionFlags compareOptions);
+CFArrayRef BDStringCreateComponentsBySeparatingByAnd(CFAllocatorRef allocator, CFStringRef string);
 // supposed to be used only for ASCII-only character sets
 extern CFStringRef BDStringCreateByCollapsingAndTrimmingCharactersInSet(CFAllocatorRef allocator, CFStringRef string, CFCharacterSetRef charSet);
 extern CFStringRef BDStringCreateByNormalizingWhitespaceAndNewlines(CFAllocatorRef allocator, CFStringRef string);

@@ -2893,7 +2893,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         if([value rangeOfCharacterFromSet:acSet].length)
 			groupArray = [value componentsSeparatedByCharactersInSet:acSet trimWhitespace:YES];
         else 
-            groupArray = [value componentsSeparatedByStringCaseInsensitive:@" and "];
+            groupArray = [value componentsSeparatedByAnd];
         
 		mutableGroupSet = [[NSMutableSet alloc] initForCaseInsensitiveStrings];
         [mutableGroupSet addObjectsFromArray:groupArray];
