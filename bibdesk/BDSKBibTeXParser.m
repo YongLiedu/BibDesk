@@ -479,69 +479,66 @@ static NSString *stringWithoutComments(NSString *string) {
 }
 
 static CFArrayRef
-__BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
+__BDCreateArrayOfNames(CFStringRef namesString)
 {
-    CFIndex i, iMax = CFArrayGetCount(names);
-    if(iMax <= 1)
-        return CFRetain(names);
-    
     CFAllocatorRef allocator = CFAllocatorGetDefault();
+    CFIndex length = CFStringGetLength(namesString);
+    CFArrayRef separatorRanges = CFStringCreateArrayWithFindResults(allocator, namesString, CFSTR(" and "), CFRangeMake(0, length), kCFCompareCaseInsensitive);
     
+    if(separatorRanges == NULL)
+        return CFArrayCreate(allocator, (const void**)&namesString, 1, & kCFTypeArrayCallBacks);
+    
+    CFIndex i, iMax = CFArrayGetCount(separatorRanges);
     CFStringInlineBuffer inlineBuffer;
-    CFMutableStringRef mutableString = NULL;
     CFIndex idx, braceDepth = 0;
     CFStringRef name;
-    CFIndex nameLen;
     UniChar ch;
+    CFIndex startIndex = 0, currentIndex = 0, currentLength;
+    const CFRange *currentRange;
+    CFStringRef substring;
     
-    CFMutableArrayRef mutableArray = CFArrayCreateMutable(allocator, iMax, &kCFTypeArrayCallBacks);
+    CFMutableArrayRef array = CFArrayCreateMutable(allocator, iMax + 1, &kCFTypeArrayCallBacks);
     
     for(i = 0; i < iMax; i++){
-        name = CFArrayGetValueAtIndex(names, i);
-        nameLen = CFStringGetLength(name);
-        CFStringInitInlineBuffer(name, &inlineBuffer, CFRangeMake(0, nameLen));
+        currentRange = CFArrayGetValueAtIndex(separatorRanges, i);
+        currentLength = currentRange->location - currentIndex;
+        CFStringInitInlineBuffer(namesString, &inlineBuffer, CFRangeMake(currentIndex, currentLength));
 
-        // check for balanced braces in this name (including braces from a previous name)
-        for(idx = 0; idx < nameLen; idx++){
+        // check for balanced braces in this substring (including braces from a previous substring)
+        for(idx = 0; idx < currentLength; idx++){
             ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, idx);
             if(ch == '{')
                 braceDepth++;
             else if(ch == '}')
                 braceDepth--;
         }
-        // if we had an unbalanced string last time, we need to keep appending to the mutable string; likewise, we want to append this name to the mutable string if braces are still unbalanced
-        if(mutableString != NULL || braceDepth != 0){
-            if(mutableString != NULL)
-                CFStringAppend(mutableString, CFSTR(" and "));
-            else
-                mutableString = CFStringCreateMutable(allocator, 0);
-            CFStringAppend(mutableString, name);
-            if (braceDepth == 0) {
-                // braces balanced, so append the combined value, and reset the mutable string
-                CFArrayAppendValue(mutableArray, mutableString);
-                CFRelease(mutableString);
-                mutableString = NULL;
-                // this also indicate not to append next time unless the next name has unbalanced braces in its own right
-            }
-        } else {
-            // braces balanced, so append the value, and reset the mutable string
-            CFArrayAppendValue(mutableArray, name);
+        
+        currentIndex = currentRange->location + currentRange->length;
+        
+        if(braceDepth == 0){
+            // braces balanced, so append the last name we found and reset the startIndex
+            name = CFStringCreateWithSubstring(allocator, namesString, CFRangeMake(startIndex, currentRange->location - startIndex));
+            CFArrayAppendValue(array, name);
+            CFRelease(name);
+            startIndex = currentIndex;
         }
     }
     
-    if(mutableString != NULL) {
-        CFArrayAppendValue(mutableArray, mutableString);
-        CFRelease(mutableString);
-        mutableString = NULL;
-    }
+    CFRelease(separatorRanges);
     
     // returning NULL will signify our error condition
     if(braceDepth != 0){
-        CFRelease(mutableArray);
-        mutableArray = NULL;
+        CFRelease(array);
+        array = NULL;
+    }else if(startIndex == 0){
+        CFArrayAppendValue(array, namesString);
+    }else{
+        name = CFStringCreateWithSubstring(allocator, namesString, CFRangeMake(startIndex, length - startIndex));
+        CFArrayAppendValue(array, name);
+        CFRelease(name);
     }
     
-    return mutableArray;
+    return array;
 }
 
 + (NSArray *)authorsFromBibtexString:(NSString *)aString withPublication:(BibItem *)pub forField:(NSString *)field{
@@ -552,22 +549,18 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
         return authors;
 
     // This is equivalent to btparse's bt_split_list(str, "and", "BibTex Name", 0, ""), but avoids UTF8String conversion
-    CFArrayRef array = BDStringCreateArrayBySeparatingStringsWithOptions(CFAllocatorGetDefault(), (CFStringRef)aString, CFSTR(" and "), kCFCompareCaseInsensitive);
-    
     // check brace depth; corporate authors such as {Someone and Someone Else, Inc} use braces, so this parsing is BibTeX-specific, rather than general string handling
-    CFArrayRef names = __BDCreateArrayOfNamesByCheckingBraceDepth(array);
+    CFArrayRef names = __BDCreateArrayOfNames((CFStringRef)aString);
     
     // shouldn't ever see this case as far as I know, as long as we're using btparse
     if(names == NULL){
         [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
-        [BDSKErrorObject reportErrorMessage:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unbalanced braces in author names:", @"Error description"), [(id)array description]] forFile:nil line:-1];
+        [BDSKErrorObject reportErrorMessage:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unbalanced braces in author names:", @"Error description"), aString] forFile:nil line:-1];
         [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForPublication:pub];
-        CFRelease(array);
 
         // @@ return the empty array or nil?
         return authors;
     }
-    CFRelease(array);
     
     CFIndex i = 0, iMax = CFArrayGetCount(names);
     BibAuthor *anAuthor;
