@@ -243,7 +243,7 @@ static void fsevents_callback(FSEventStreamRef streamRef, void *clientCallBackIn
 			
 			[self updateSubmenu:submenu withScripts:folderContent];
 		} else {
-			NSString *showScriptName = [NSString stringWithFormat:NSLocalizedString(@"Show %@", @"menu item title"), scriptName];
+			NSString *showScriptName = [NSString stringWithFormat:NSLocalizedString(@"Show \"%@\"", @"menu item title"), scriptName];
             
 			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:scriptName action:@selector(executeScript:) keyEquivalent:@""];
 			[item setTarget:self];
