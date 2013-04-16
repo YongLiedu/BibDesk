@@ -65,7 +65,7 @@ static NSString *BDSKWebLocalizedString = nil;
     // register for bibdesk: protocol, so we can display a help page on start
 	[NSURLProtocol registerClass:[BDSKBibDeskProtocol class]];
 	[WebView registerURLSchemeAsLocal:BDSKBibDeskScheme];	
-    [WebView setMIMETypesShownAsHTML:[[WebView MIMETypesShownAsHTML] arrayByAddingObjectsFromArray:[NSArray arrayWithObjects:@"application/x-bibtex", @"application/x-research-info-systems", nil]]];
+    [WebView setMIMETypesShownAsHTML:[[WebView MIMETypesShownAsHTML] arrayByAddingObjectsFromArray:[NSArray arrayWithObjects:@"application/x-bibtex", @"application/x-research-info-systems", @"application/x-endnote-refer", nil]]];
 }
 
 - (id)init {
@@ -191,7 +191,7 @@ static NSString *BDSKWebLocalizedString = nil;
     if ([newPubs count] == 0) {
         WebDataSource *dataSource = [frame dataSource];
         NSString *MIMEType = [[dataSource mainResource] MIMEType];
-        if ([MIMEType isEqualToString:@"text/plain"]) { 
+        if ([MIMEType isEqualToString:@"text/plain"] || [MIMEType isEqualToString:@"application/x-bibdesk"] || [MIMEType isEqualToString:@"application/x-research-info-systems"] || [MIMEType isEqualToString:@"application/x-endnote-refer"]) { 
             NSString *string = [[dataSource representation] documentSource];
             if(string == nil) {
                 NSString *encodingName = [dataSource textEncodingName];
