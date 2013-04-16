@@ -65,6 +65,7 @@ static NSString *BDSKWebLocalizedString = nil;
     // register for bibdesk: protocol, so we can display a help page on start
 	[NSURLProtocol registerClass:[BDSKBibDeskProtocol class]];
 	[WebView registerURLSchemeAsLocal:BDSKBibDeskScheme];	
+    [WebView setMIMETypesShownAsHTML:[[WebView MIMETypesShownAsHTML] arrayByAddingObjectsFromArray:[NSArray arrayWithObjects:@"application/x-bibtex", @"application/x-research-info-systems", nil]]];
 }
 
 - (id)init {
