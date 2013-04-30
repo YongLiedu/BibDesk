@@ -702,7 +702,7 @@ IHRvIG1hbmFnZSB5b3VyIGJpYmxpb2dyYXBoaWVzLApTb3VyY2VGb3JnZSwgMTo5NiwgMTEgMjAwNC4<
 										</object>
 										<object class="NSMenuItem" id="682066438">
 											<reference key="NSMenu" ref="797291204"/>
-											<string key="NSTitle">Titel [Anzahl von Worten|</string>
+											<string key="NSTitle">Titel [Anzahl von Worten]</string>
 											<string key="NSKeyEquiv"/>
 											<int key="NSKeyEquivModMask">1048576</int>
 											<int key="NSMnemonicLoc">2147483647</int>
@@ -957,7 +957,7 @@ IHRvIG1hbmFnZSB5b3VyIGJpYmxpb2dyYXBoaWVzLApTb3VyY2VGb3JnZSwgMTo5NiwgMTEgMjAwNC4<
 									<int key="NSTag">1</int>
 									<int key="NSButtonFlags">1211912448</int>
 									<int key="NSButtonFlags2">0</int>
-									<object class="NSCustomResource" key="NSNormalImage" id="1009656247">
+									<object class="NSCustomResource" key="NSNormalImage" id="239530223">
 										<string key="NSClassName">NSImage</string>
 										<string key="NSResourceName">NSRadioButton</string>
 									</object>
@@ -980,7 +980,7 @@ IHRvIG1hbmFnZSB5b3VyIGJpYmxpb2dyYXBoaWVzLApTb3VyY2VGb3JnZSwgMTo5NiwgMTEgMjAwNC4<
 									<int key="NSTag">2</int>
 									<int key="NSButtonFlags">1211912448</int>
 									<int key="NSButtonFlags2">0</int>
-									<reference key="NSNormalImage" ref="1009656247"/>
+									<reference key="NSNormalImage" ref="239530223"/>
 									<reference key="NSAlternateImage" ref="910089596"/>
 									<string key="NSAlternateContents"/>
 									<string key="NSKeyEquivalent"/>
@@ -995,7 +995,7 @@ IHRvIG1hbmFnZSB5b3VyIGJpYmxpb2dyYXBoaWVzLApTb3VyY2VGb3JnZSwgMTo5NiwgMTEgMjAwNC4<
 									<reference key="NSControlView" ref="701311102"/>
 									<int key="NSButtonFlags">1211912448</int>
 									<int key="NSButtonFlags2">0</int>
-									<reference key="NSNormalImage" ref="1009656247"/>
+									<reference key="NSNormalImage" ref="239530223"/>
 									<reference key="NSAlternateImage" ref="910089596"/>
 									<string key="NSAlternateContents"/>
 									<int key="NSPeriodicDelay">400</int>
@@ -1013,7 +1013,7 @@ IHRvIG1hbmFnZSB5b3VyIGJpYmxpb2dyYXBoaWVzLApTb3VyY2VGb3JnZSwgMTo5NiwgMTEgMjAwNC4<
 								<reference key="NSSupport" ref="133577604"/>
 								<int key="NSButtonFlags">1211912448</int>
 								<int key="NSButtonFlags2">0</int>
-								<reference key="NSNormalImage" ref="1009656247"/>
+								<reference key="NSNormalImage" ref="239530223"/>
 								<reference key="NSAlternateImage" ref="910089596"/>
 								<string key="NSAlternateContents"/>
 								<int key="NSPeriodicDelay">400</int>
