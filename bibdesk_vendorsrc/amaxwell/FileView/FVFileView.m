@@ -4293,7 +4293,7 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
 - (NSRect)screenRectForIconElement:(FVAccessibilityIconElement *)element {
     NSRect rect = NSZeroRect;
     NSUInteger r, c;
-    if ([self _getGridRow:&r column:&c ofIndex:[element index]]) {
+    if ([element index] < [_orderedURLs count] && [self _getGridRow:&r column:&c ofIndex:[element index]]) {
         rect = [self _rectOfIconInRow:r column:c];
         rect = [self convertRect:rect toView:nil];
         rect.origin = [[self window] convertBaseToScreen:rect.origin];
@@ -4307,6 +4307,8 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
 
 - (void)setSelected:(BOOL)selected forIconElement:(FVAccessibilityIconElement *)element {
     NSUInteger i = [element index];
+    if (i >= [_orderedURLs count])
+        return;
     if (selected) {
         [self _setSelectionIndexes:[NSIndexSet indexSetWithIndex:i]];
     } else if ([[self selectionIndexes] containsIndex:i]) {
@@ -4318,7 +4320,8 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
 }
 
 - (void)openIconElement:(FVAccessibilityIconElement *)element {
-    [self _openURLs:[NSArray arrayWithObjects:[self URLAtIndex:[element index]], nil]];
+    if ([element index] < [_orderedURLs count])
+        [self _openURLs:[NSArray arrayWithObjects:[self URLAtIndex:[element index]], nil]];
 }
 
 @end
