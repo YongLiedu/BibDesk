@@ -79,7 +79,7 @@
         VI = Volume; 
     }; 
     BibTeXFieldNamesForRISTags = {
-        AB = Annote; 
+        AB = Abstract; 
         AD = Address; 
         A1 = Author;
         A2 = Author;
@@ -98,7 +98,6 @@
         KW = Keywords; 
         L1 = "Local-Url"; 
         N1 = Annote; 
-        N2 = Abstract; 
         PB = Publisher; 
         PY = Year; 
         RP = Status; 
@@ -449,7 +448,7 @@
         url = {self = ("web site"); }; 
     }; 
     RISTagsForBibTeXFieldNames = {
-        Abstract = N2; 
+        Abstract = AB; 
         Address = AD; 
         Annote = N1; 
         Author = AU; 
