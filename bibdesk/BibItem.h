@@ -240,14 +240,6 @@ enum {
 - (NSArray *)pubAuthorsInheriting:(BOOL)inherit;
 
 /*!
-    @method     pubAuthorsAsStrings
-    @abstract   Returns an array of normalized names for the publications authors.
-    @discussion (comprehensive description)
-    @result     (description)
-*/
-- (NSArray *)pubAuthorsAsStrings;
-
-/*!
     @method     pubAuthorsForDisplay
     @abstract   Returns authors in a string form, according to the user's display preferences.
     @discussion (comprehensive description)

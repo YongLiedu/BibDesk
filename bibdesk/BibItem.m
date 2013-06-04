@@ -741,10 +741,6 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     return [self peopleArrayForField:BDSKAuthorString inherit:inherit];
 }
 
-- (NSArray *)pubAuthorsAsStrings{
-    return [[self pubAuthors] valueForKey:@"normalizedName"];
-}
-
 - (NSString *)pubAuthorsForDisplay{
     return [self peopleStringForDisplayFromField:BDSKAuthorString];
 }
@@ -1550,7 +1546,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     // this is what shows up in search results
     [info setObject:value ?: @"Unknown" forKey:(NSString *)kMDItemDisplayName];
 
-    [info setObject:[self pubAuthorsAsStrings] forKey:(NSString *)kMDItemAuthors];
+    [info setObject:[[self pubAuthorsOrEditors] valueForKey:@"normalizedName"] forKey:(NSString *)kMDItemAuthors];
 
     if(value = [[self valueOfField:BDSKAbstractString] stringByRemovingTeX])
         [info setObject:value forKey:(NSString *)kMDItemDescription];
