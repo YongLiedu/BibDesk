@@ -85,8 +85,8 @@
 
 #define WEB_URL @"http://bibdesk.sourceforge.net/"
 #define WIKI_URL @"http://sourceforge.net/apps/mediawiki/bibdesk/"
-#define BUG_TRACKER_URL @"http://sourceforge.net/tracker/?group_id=61487&atid=497423"
-#define RFE_TRACKER_URL @"http://sourceforge.net/tracker/?group_id=61487&atid=497426"
+#define BUG_TRACKER_URL @"http://sourceforge.net/p/bibdesk/bugs/"
+#define RFE_TRACKER_URL @"http://sourceforge.net/p/bibdesk/feature-requests/"
 
 #define BDSKUpdateCheckIntervalKey @"BDSKUpdateCheckIntervalKey"
 
