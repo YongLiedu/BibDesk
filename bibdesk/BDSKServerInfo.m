@@ -169,6 +169,8 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
         isEqual = isEqualOrBothNil([self host], [other host]) && 
                   isEqualOrBothNil([self port], [(BDSKServerInfo *)other port]) && 
                   (isEqualOrBothNil([self options], [(BDSKServerInfo *)other options]) || ([[self options] count] == 0 && [[(BDSKServerInfo *)other options] count] == 0));
+    else if ([self isISI])
+        isEqual = (isEqualOrBothNil([self options], [(BDSKServerInfo *)other options]) || ([[self options] count] == 0 && [[(BDSKServerInfo *)other options] count] == 0));
     return isEqual;
 }
 
@@ -178,6 +180,8 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
         hash += [[self host] hash] + [[self port] hash] + [[self password] hash];
         if ([options count])
             hash += [[self options] hash];
+    } else if ([self isISI] && [options count] > 0) {
+        hash += [[self options] hash];
     }
     return hash;
 }
@@ -191,7 +195,7 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
         [info setValue:[self host] forKey:HOST_KEY];
         [info setValue:[self port] forKey:PORT_KEY];
         [info setValue:[self options] forKey:OPTIONS_KEY];
-    } else if ([[self options] count] > 0) {
+    } else if ([self isISI] && [[self options] count] > 0) {
         [info setValue:[self options] forKey:OPTIONS_KEY];
     }
     return info;
@@ -275,6 +279,7 @@ static NSSet *optionsSet = nil;
             if (port == nil)
                 [self setPort:DEFAULT_PORT];
         }
+        [options removeAllObjects];
     }
 }
 

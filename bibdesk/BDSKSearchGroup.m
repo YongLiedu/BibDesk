@@ -178,7 +178,7 @@ NSString *BDSKSearchGroupURLScheme = @"x-bdsk-search";
             [dictionary setValue:aHost forKey:@"host"];
             [dictionary setValue:aPort forKey:@"port"];
             [dictionary setValue:options forKey:@"options"];
-        } else if ([options count] > 0) {
+        } else if ([aType isEqualToString:BDSKSearchGroupISI] && [options count] > 0) {
             [dictionary setValue:options forKey:@"options"];
         }
     }
