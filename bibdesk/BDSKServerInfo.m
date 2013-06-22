@@ -88,7 +88,7 @@
         if ([self isEntrez] || [self isISI] || [self isDBLP]) {
             host = nil;
             port = nil;
-            options = nil;
+            options = [opts count] > 0 ? [opts mutableCopy] : nil;
         } else if ([self isZoom]) {
             host = [aHost copy];
             port = [aPort copy];
@@ -190,6 +190,8 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
     if ([self isZoom]) {
         [info setValue:[self host] forKey:HOST_KEY];
         [info setValue:[self port] forKey:PORT_KEY];
+        [info setValue:[self options] forKey:OPTIONS_KEY];
+    } else if ([[self options] count] > 0) {
         [info setValue:[self options] forKey:OPTIONS_KEY];
     }
     return info;

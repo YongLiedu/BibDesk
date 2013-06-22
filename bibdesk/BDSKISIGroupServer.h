@@ -57,5 +57,4 @@ typedef struct _BDSKISIGroupFlags {
     NSHTTPCookie *sessionCookie;
 }
 - (void)setErrorMessage:(NSString *)newErrorMessage;
-- (void)authenticate;
 @end

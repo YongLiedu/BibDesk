@@ -84,7 +84,11 @@ static NSArray *publicationsFromData(NSData *data);
 @end
 
 @protocol BDSKISIGroupServerLocalThread <BDSKAsyncDOServerThread>
-- (oneway void)downloadWithSearchTerm:(NSString *)searchTerm database:(NSString *)database;
+- (oneway void)downloadWithSearchTerm:(NSString *)searchTerm database:(NSString *)database options:(NSDictionary *)options;
+@end
+
+@interface BDSKISIGroupServer (BDSKPrivate)
+- (void)authenticateWithOptions:(NSDictionary *)options;
 @end
 
 @implementation BDSKISIGroupServer
@@ -174,7 +178,7 @@ static NSArray *publicationsFromData(NSData *data);
         OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
         
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.isRetrieving);
-        [[self serverOnServerThread] downloadWithSearchTerm:aSearchTerm database:[[self serverInfo] database]];
+        [[self serverOnServerThread] downloadWithSearchTerm:aSearchTerm database:[[self serverInfo] database] options:[[self serverInfo] options]];
         
     } else {
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
@@ -241,7 +245,7 @@ static NSArray *publicationsFromData(NSData *data);
 #pragma mark Server thread
 
 // @@ currently limited to topic search; need to figure out UI for other search types (mixing search types will require either NSTokenField or raw text string entry)
-- (oneway void)downloadWithSearchTerm:(NSString *)searchTerm database:(NSString *)database;
+- (oneway void)downloadWithSearchTerm:(NSString *)searchTerm database:(NSString *)database options:(NSDictionary *)options;
 {    
     NSArray *pubs = nil;
     enum operationTypes { search, citedReferences, citingArticles, relatedRecords, retrieveById } operation = search;
@@ -272,7 +276,7 @@ static NSArray *publicationsFromData(NSData *data);
         
         // authenticate if necessary
         if (!sessionCookie) {
-            [self authenticate];
+            [self authenticateWithOptions:options];
             if (!sessionCookie) {
                 OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
                 OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
@@ -553,12 +557,12 @@ static NSArray *publicationsFromData(NSData *data);
     [[self serverOnMainThread] addPublicationsToGroup:data];
 }
 
-- (void)authenticate {
+- (void)authenticateWithOptions:(NSDictionary *)options {
 
     WOKMWSAuthenticateServiceSoapBinding *binding = [WOKMWSAuthenticateService WOKMWSAuthenticateServiceSoapBinding];
     //binding.logXMLInOut = YES;
-    binding.authUsername = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKISIUsernameKey];
-    binding.authPassword = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKISIPasswordKey];
+    binding.authUsername = [options objectForKey:@"username"] ?: [[NSUserDefaults standardUserDefaults] stringForKey:BDSKISIUsernameKey];
+    binding.authPassword = [options objectForKey:@"password"] ?: [[NSUserDefaults standardUserDefaults] stringForKey:BDSKISIPasswordKey];
     
     WOKMWSAuthenticateService_authenticate *request = [[[WOKMWSAuthenticateService_authenticate alloc] init] autorelease];
     
