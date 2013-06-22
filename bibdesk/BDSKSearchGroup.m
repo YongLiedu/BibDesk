@@ -367,17 +367,16 @@ NSString *BDSKSearchGroupURLScheme = @"x-bdsk-search";
     BDSKServerInfo *serverInfo = [self serverInfo];
     NSString *password = [serverInfo password];
     NSString *username = [serverInfo username];
-    if ([serverInfo isZoom]) {
-        if (username) {
-            [string appendString:[username stringByAddingPercentEscapesIncludingReserved]];
-            if (password)
-                [string appendFormat:@":%@", [password stringByAddingPercentEscapesIncludingReserved]];
-           [string appendString:@"@"];
-        }
-        [string appendFormat:@"%@:%@", [[serverInfo host] stringByAddingPercentEscapesIncludingReserved], [serverInfo port]];
-    } else {
-        [string appendString:[serverInfo type]];
+    if (username) {
+        [string appendString:[username stringByAddingPercentEscapesIncludingReserved]];
+        if (password)
+            [string appendFormat:@":%@", [password stringByAddingPercentEscapesIncludingReserved]];
+       [string appendString:@"@"];
     }
+    if ([serverInfo isZoom])
+        [string appendFormat:@"%@:%@", [[serverInfo host] stringByAddingPercentEscapesIncludingReserved], [serverInfo port]];
+    else
+        [string appendString:[serverInfo type]];
     [string appendFormat:@"/%@", [[serverInfo database] stringByAddingPercentEscapesIncludingReserved]];
     [string appendFormat:@";%@", [[serverInfo name] stringByAddingPercentEscapesIncludingReserved]];
     if ([serverInfo isZoom]) {
