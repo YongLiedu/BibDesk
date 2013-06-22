@@ -62,6 +62,10 @@
     return [NSSet setWithObjects:@"type", nil];
 }
 
++ (NSSet *)keyPathsForValuesAffectingZoomOrISI {
+    return [NSSet setWithObjects:@"type", nil];
+}
+
 - (id)init {
     return [self initWithGroup:nil];
 }
@@ -357,6 +361,8 @@
 - (BOOL)isEditable { return isEditable; }
 
 - (BOOL)isZoom { return [serverInfo isZoom]; }
+
+- (BOOL)isZoomOrISI { return [serverInfo isZoom] || [serverInfo isISI]; }
 
 - (BDSKSearchGroup *)group { return group; }
 
