@@ -57,8 +57,6 @@
 #define BDSKDisableISITitleCasingKey @"BDSKDisableISITitleCasing"
 #define BDSKISISourceXMLTagPriorityKey @"BDSKISISourceXMLTagPriority"
 #define BDSKISIURLFieldNameKey @"BDSKISIURLFieldName"
-#define BDSKISIUsernameKey @"BDSKISIUsername"
-#define BDSKISIPasswordKey @"BDSKISIPassword"
 
 #define DefaultISIURLFieldName @"ISI URL"
 
@@ -561,8 +559,8 @@ static NSArray *publicationsFromData(NSData *data);
 
     WOKMWSAuthenticateServiceSoapBinding *binding = [WOKMWSAuthenticateService WOKMWSAuthenticateServiceSoapBinding];
     //binding.logXMLInOut = YES;
-    binding.authUsername = [options objectForKey:@"username"] ?: [[NSUserDefaults standardUserDefaults] stringForKey:BDSKISIUsernameKey];
-    binding.authPassword = [options objectForKey:@"password"] ?: [[NSUserDefaults standardUserDefaults] stringForKey:BDSKISIPasswordKey];
+    binding.authUsername = [options objectForKey:@"username"];
+    binding.authPassword = [options objectForKey:@"password"];
     
     WOKMWSAuthenticateService_authenticate *request = [[[WOKMWSAuthenticateService_authenticate alloc] init] autorelease];
     
