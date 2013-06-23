@@ -278,8 +278,10 @@ static NSSet *optionsSet = nil;
                 [self setHost:DEFAULT_HOST];
             if (port == nil)
                 [self setPort:DEFAULT_PORT];
+            [self setOptions:[NSDictionary dictionary]];
+        } else {
+            [self setOptions:nil];
         }
-        [options removeAllObjects];
     }
 }
 
