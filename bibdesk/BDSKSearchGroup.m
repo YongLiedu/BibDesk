@@ -365,9 +365,9 @@ NSString *BDSKSearchGroupURLScheme = @"x-bdsk-search";
 - (NSURL *)bdsksearchURL {
     NSMutableString *string = [NSMutableString stringWithFormat:@"%@://", BDSKSearchGroupURLScheme];
     BDSKServerInfo *serverInfo = [self serverInfo];
-    NSString *password = [serverInfo password];
     NSString *username = [serverInfo username];
     if (username) {
+        NSString *password = [serverInfo password];
         [string appendString:[username stringByAddingPercentEscapesIncludingReserved]];
         if (password)
             [string appendFormat:@":%@", [password stringByAddingPercentEscapesIncludingReserved]];
@@ -380,13 +380,15 @@ NSString *BDSKSearchGroupURLScheme = @"x-bdsk-search";
     [string appendFormat:@"/%@", [[serverInfo database] stringByAddingPercentEscapesIncludingReserved]];
     [string appendFormat:@";%@", [[serverInfo name] stringByAddingPercentEscapesIncludingReserved]];
     if ([serverInfo isZoom]) {
+        BOOL first = YES;
         for (NSString *key in [serverInfo options]) {
             NSString *value = [[serverInfo options] objectForKey:key];
             if ([key isEqualToString:@"removeDiacritics"])
                 value = [serverInfo removeDiacritics] ? @"1" : @"0";
             else if (username && ([key isEqualToString:@"username"] || [key isEqualToString:@"password"]))
                 continue;
-            [string appendFormat:@"&%@=%@", key, [value stringByAddingPercentEscapesIncludingReserved]];
+            [string appendFormat:first ? @"?%@=%@" : @"&%@=%@", key, [value stringByAddingPercentEscapesIncludingReserved]];
+            first = NO;
         }
     }
     return [NSURL URLWithString:string];
