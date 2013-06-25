@@ -221,7 +221,7 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 
 - (BOOL)removeDiacritics { return [[[self options] objectForKey:REMOVEDIACRITICS_KEY] boolValue]; }
 
-- (NSDictionary *)options { return [self isZoom] ? [[options copy] autorelease] : nil; }
+- (NSDictionary *)options { return [self isZoom] || [options count] > 0 ? [[options copy] autorelease] : nil; }
 
 - (BOOL)isEntrez { return [[self type] isEqualToString:BDSKSearchGroupEntrez]; }
 - (BOOL)isZoom { return [[self type] isEqualToString:BDSKSearchGroupZoom]; }
