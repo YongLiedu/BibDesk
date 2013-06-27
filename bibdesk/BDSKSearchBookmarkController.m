@@ -459,7 +459,13 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 }
 
 - (BOOL)outlineView:(NSOutlineView *)ov shouldEditTableColumn:(NSTableColumn *)tableColumn item:(id)item {
-    return [[tableColumn identifier] isEqualToString:@"label"] && [item bookmarkType] != BDSKSearchBookmarkTypeSeparator;
+    if ([[tableColumn identifier] isEqualToString:@"label"]) {
+        return [item bookmarkType] != BDSKSearchBookmarkTypeSeparator;
+    } else if ([[tableColumn identifier] isEqualToString:@"server"]) {
+        if ([item bookmarkType] == BDSKSearchBookmarkTypeBookmark)
+            [self editBookmark:nil];
+    }
+    return NO;
 }
 
 - (void)outlineView:(NSOutlineView *)ov deleteItems:(NSArray *)items {
