@@ -56,6 +56,7 @@
 - (IBAction)insertBookmarkFolder:(id)sender;
 - (IBAction)insertBookmarkSeparator:(id)sender;
 - (IBAction)deleteBookmark:(id)sender;
+- (IBAction)editBookmark:(id)sender;
 
 - (void)saveBookmarks;
 

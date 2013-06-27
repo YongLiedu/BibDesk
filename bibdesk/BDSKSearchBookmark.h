@@ -65,6 +65,7 @@ typedef NSInteger BDSKSearchBookmarkType;
 - (BDSKSearchBookmarkType)bookmarkType;
 
 - (NSDictionary *)info;
+- (void)setInfo:(NSDictionary *)newInfo;
 
 - (NSString *)label;
 - (void)setLabel:(NSString *)newLabel;

@@ -38,11 +38,14 @@
 
 #import "BDSKSearchBookmarkController.h"
 #import "BDSKSearchBookmark.h"
+#import "BDSKServerInfo.h"
+#import "BDSKSearchGroupSheetController.h"
 #import "BDSKStringConstants.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKOutlineView.h"
 #import "BDSKTextWithIconCell.h"
 #import "BDSKSeparatorCell.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 #define BDSKSearchBookmarksWindowFrameAutosaveName @"BDSKSearchBookmarksWindow"
 
@@ -52,9 +55,11 @@
 #define BDSKSearchBookmarksNewFolderToolbarItemIdentifier       @"BDSKSearchBookmarksNewFolderToolbarItemIdentifier"
 #define BDSKSearchBookmarksNewSeparatorToolbarItemIdentifier    @"BDSKSearchBookmarksNewSeparatorToolbarItemIdentifier"
 #define BDSKSearchBookmarksDeleteToolbarItemIdentifier          @"BDSKSearchBookmarksDeleteToolbarItemIdentifier"
+#define BDSKSearchBookmarksEditToolbarItemIdentifier            @"BDSKSearchBookmarksEditToolbarItemIdentifier"
 
 #define CHILDREN_KEY @"children"
 #define LABEL_KEY    @"label"
+#define INFO_KEY     @"info"
 
 static char BDSKSearchBookmarkPropertiesObservationContext;
 
@@ -111,6 +116,8 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
     [self setWindowFrameAutosaveName:BDSKSearchBookmarksWindowFrameAutosaveName];
     [outlineView setAutoresizesOutlineColumn:NO];
     [outlineView registerForDraggedTypes:[NSArray arrayWithObject:BDSKPasteboardTypeSearchBookmarkRows]];
+    [outlineView setDoubleAction:@selector(editBookmark:)];
+    [outlineView setTarget:self];
 }
 
 - (BDSKSearchBookmark *)bookmarkRoot {
@@ -196,6 +203,29 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     [outlineView delete:sender];
 }
 
+- (IBAction)editBookmark:(id)sender {
+    NSInteger rowIndex = [[outlineView selectedRowIndexes] lastIndex];
+    if (rowIndex != NSNotFound) {
+        BDSKSearchBookmark *selectedItem = [outlineView itemAtRow:rowIndex];
+        if ([selectedItem bookmarkType] == BDSKSearchBookmarkTypeBookmark) {
+            NSDictionary *oldInfo = [selectedItem info];
+            BDSKServerInfo *serverInfo = [[[BDSKServerInfo alloc] initWithDictionary:oldInfo] autorelease];
+            BDSKSearchGroupSheetController *sheetController = [[BDSKSearchGroupSheetController alloc] initWithServerInfo:serverInfo];
+            [sheetController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+                if (result == NSOKButton) {
+                    NSMutableDictionary *info = [[[sheetController serverInfo] dictionaryValue] mutableCopy];
+                    [info setValue:[oldInfo valueForKey:@"search term"] forKey:@"search term"];
+                    [info setValue:[oldInfo valueForKey:@"history"] forKey:@"history"];
+                    [info setValue:[oldInfo valueForKey:@"class"] forKey:@"class"];
+                    [selectedItem setInfo:info];
+                    [info release];
+                }
+            }];
+            [sheetController release];
+        }
+    }
+}
+
 - (void)endEditing {
     if ([outlineView editedRow] && [[self window] makeFirstResponder:outlineView] == NO)
         [[self window] endEditingFor:nil];
@@ -217,6 +247,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     for (BDSKSearchBookmark *bm in newBookmarks) {
         if ([bm bookmarkType] != BDSKSearchBookmarkTypeSeparator) {
             [bm addObserver:self forKeyPath:LABEL_KEY options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKSearchBookmarkPropertiesObservationContext];
+            [bm addObserver:self forKeyPath:INFO_KEY options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKSearchBookmarkPropertiesObservationContext];
             if ([bm bookmarkType] == BDSKSearchBookmarkTypeFolder) {
                 [bm addObserver:self forKeyPath:CHILDREN_KEY options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&BDSKSearchBookmarkPropertiesObservationContext];
                 [self startObservingBookmarks:[bm children]];
@@ -229,6 +260,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     for (BDSKSearchBookmark *bm in oldBookmarks) {
         if ([bm bookmarkType] != BDSKSearchBookmarkTypeSeparator) {
             [bm removeObserver:self forKeyPath:LABEL_KEY];
+            [bm removeObserver:self forKeyPath:INFO_KEY];
             if ([bm bookmarkType] == BDSKSearchBookmarkTypeFolder) {
                 [bm removeObserver:self forKeyPath:CHILDREN_KEY];
                 [self stopObservingBookmarks:[bm children]];
@@ -273,6 +305,8 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
                     [[[self undoManager] prepareWithInvocationTarget:self] setChildren:oldValue ofBookmark:bookmark];
                 } else if ([keyPath isEqualToString:LABEL_KEY]) {
                     [[[self undoManager] prepareWithInvocationTarget:bookmark] setLabel:oldValue];
+                } else if ([keyPath isEqualToString:INFO_KEY]) {
+                    [[[self undoManager] prepareWithInvocationTarget:bookmark] setInfo:oldValue];
                 }
                 break;
             case NSKeyValueChangeInsertion:
@@ -488,6 +522,16 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     [toolbarItems setObject:item forKey:BDSKSearchBookmarksDeleteToolbarItemIdentifier];
     [item release];
     
+    item = [[NSToolbarItem alloc] initWithItemIdentifier:BDSKSearchBookmarksDeleteToolbarItemIdentifier];
+    [item setLabel:NSLocalizedString(@"Edit", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"Edit", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"Edit Selected Items", @"Tool tip message")];
+    [item setImage:[NSImage imageNamed:@"editdoc"]];
+    [item setTarget:self];
+    [item setAction:@selector(editBookmark:)];
+    [toolbarItems setObject:item forKey:BDSKSearchBookmarksEditToolbarItemIdentifier];
+    [item release];
+    
     // Attach the toolbar to the window
     [[self window] setToolbar:toolbar];
 }
@@ -511,6 +555,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
         BDSKSearchBookmarksNewFolderToolbarItemIdentifier, 
         BDSKSearchBookmarksNewSeparatorToolbarItemIdentifier, 
 		BDSKSearchBookmarksDeleteToolbarItemIdentifier, 
+		BDSKSearchBookmarksEditToolbarItemIdentifier, 
         NSToolbarFlexibleSpaceItemIdentifier, 
 		NSToolbarSpaceItemIdentifier, 
 		NSToolbarSeparatorItemIdentifier, 
@@ -519,7 +564,8 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 
 - (BOOL)validateToolbarItem:(NSToolbarItem *)toolbarItem {
     NSString *identifier = [toolbarItem itemIdentifier];
-    if ([identifier isEqualToString:BDSKSearchBookmarksDeleteToolbarItemIdentifier]) {
+    if ([identifier isEqualToString:BDSKSearchBookmarksDeleteToolbarItemIdentifier] ||
+        [identifier isEqualToString:BDSKSearchBookmarksEditToolbarItemIdentifier]) {
         return [outlineView numberOfSelectedRows] > 0;
     } else {
         return YES;
