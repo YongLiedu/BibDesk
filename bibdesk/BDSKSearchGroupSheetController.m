@@ -67,17 +67,16 @@
 }
 
 - (id)init {
-    return [self initWithGroup:nil];
+    return [self initWithServerInfo:nil];
 }
 
-- (id)initWithGroup:(BDSKSearchGroup *)aGroup;
-{
+- (id)initWithServerInfo:(BDSKServerInfo *)aServerInfo {
     self = [super init];
     if (self) {
-        group = [aGroup retain];
         undoManager = nil;
         
-        serverInfo = group ? [[group serverInfo] mutableCopy] : [[BDSKServerInfo defaultServerInfoWithType:BDSKSearchGroupEntrez] mutableCopy];
+        serverInfo = [aServerInfo mutableCopy] ?: [[BDSKServerInfo defaultServerInfoWithType:BDSKSearchGroupEntrez] mutableCopy];
+        originalServerInfo = [aServerInfo retain];
         
         isCustom = NO;
         isEditable = NO;
@@ -88,9 +87,9 @@
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    BDSKDESTROY(group);
     BDSKDESTROY(undoManager);
     BDSKDESTROY(serverInfo);
+    BDSKDESTROY(originalServerInfo);
     BDSKDESTROY(serverView);
     [super dealloc];
 }
@@ -156,8 +155,8 @@
     NSString *name = nil;
     NSArray *servers = [[BDSKSearchGroupServerManager sharedManager] servers];
     
-    if (group) {
-        NSUInteger idx = [servers indexOfObject:[group serverInfo]];
+    if (originalServerInfo) {
+        NSUInteger idx = [servers indexOfObject:originalServerInfo];
         if (idx != NSNotFound)
             name = [[servers objectAtIndex:idx] name];
     } else if ([servers count]) {
@@ -181,14 +180,6 @@
             NSBeep();
             return;
         }
-                
-        // we don't have a group, so create  a new one
-        if(group == nil){
-            group = [[BDSKSearchGroup alloc] initWithServerInfo:serverInfo searchTerm:nil];
-        }else{
-            [group setServerInfo:serverInfo];
-            [[group undoManager] setActionName:NSLocalizedString(@"Edit Search Group", @"Undo action name")];
-        }
     }
     
     [super dismiss:sender];
@@ -202,7 +193,7 @@
     [editButton setToolTip:NSLocalizedString(@"Edit the selected default server settings", @"Tool tip message")];
     
     if (i == [sender numberOfItems] - 1) {
-        [self setServerInfo:[group serverInfo] ?: [BDSKServerInfo defaultServerInfoWithType:[self type]]];
+        [self setServerInfo:originalServerInfo ?: [BDSKServerInfo defaultServerInfoWithType:[self type]]];
         if ([revealButton state] == NSOffState)
             [revealButton performClick:self];
         [self setCustom:YES];
@@ -363,8 +354,6 @@
 - (BOOL)isZoom { return [serverInfo isZoom]; }
 
 - (BOOL)isZoomOrISI { return [serverInfo isZoom] || [serverInfo isISI]; }
-
-- (BDSKSearchGroup *)group { return group; }
 
 - (BDSKServerInfo *)serverInfo { return serverInfo; }
 

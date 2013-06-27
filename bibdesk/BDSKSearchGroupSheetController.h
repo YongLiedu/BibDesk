@@ -38,12 +38,12 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKSearchGroup, BDSKServerInfo, BDSKMutableServerInfo, BDSKCollapsibleView;
+@class BDSKServerInfo, BDSKMutableServerInfo, BDSKCollapsibleView;
 
 @interface BDSKSearchGroupSheetController : NSWindowController {
-    BDSKSearchGroup *group;
     NSUndoManager *undoManager;
     BDSKMutableServerInfo *serverInfo;
+    BDSKServerInfo *originalServerInfo;
     
     BOOL isCustom;
     BOOL isEditable;
@@ -70,7 +70,7 @@
     IBOutlet NSObjectController *objectController;
 }
 
-- (id)initWithGroup:(BDSKSearchGroup *)aGroup;
+- (id)initWithServerInfo:(BDSKServerInfo *)aServerInfo;
 
 - (IBAction)selectPredefinedServer:(id)sender;
 - (IBAction)selectSyntax:(id)sender;
@@ -97,7 +97,6 @@
 - (void)setServerInfo:(BDSKServerInfo *)info;
 - (BDSKServerInfo *)serverInfo;
 
-- (BDSKSearchGroup *)group;
 - (IBAction)selectPredefinedServer:(id)sender;
 
 - (BOOL)commitEditing;

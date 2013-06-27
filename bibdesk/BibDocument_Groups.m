@@ -907,7 +907,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     BDSKSearchGroupSheetController *sheetController = [[[BDSKSearchGroupSheetController alloc] init] autorelease];
     [sheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
         if(result == NSOKButton){
-            BDSKGroup *group = [sheetController group];
+            BDSKGroup *group = [[BDSKSearchGroup alloc] initWithServerInfo:[sheetController serverInfo] searchTerm:nil];
             [groups addSearchGroup:(id)group];
             [groupOutlineView expandItem:[group parent]];
             NSInteger row = [groupOutlineView rowForItem:group];
@@ -1054,8 +1054,14 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         [sheetController beginSheetModalForWindow:documentWindow completionHandler:nil];
         [sheetController release];
 	} else if ([group isSearch]) {
-        BDSKSearchGroupSheetController *sheetController = [(BDSKSearchGroupSheetController *)[BDSKSearchGroupSheetController alloc] initWithGroup:(BDSKSearchGroup *)group];
-        [sheetController beginSheetModalForWindow:documentWindow completionHandler:nil];
+        BDSKSearchGroup *searchGroup = (BDSKSearchGroup *)group;
+        BDSKSearchGroupSheetController *sheetController = [(BDSKSearchGroupSheetController *)[BDSKSearchGroupSheetController alloc] initWithServerInfo:[searchGroup serverInfo]];
+        [sheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+            if (result == NSOKButton) {
+                [searchGroup setServerInfo:[sheetController serverInfo]];
+                [[searchGroup undoManager] setActionName:NSLocalizedString(@"Edit Search Group", @"Undo action name")];
+            }
+        }];
         [sheetController release];
 	}
 }
