@@ -522,10 +522,10 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     [toolbarItems setObject:item forKey:BDSKSearchBookmarksDeleteToolbarItemIdentifier];
     [item release];
     
-    item = [[NSToolbarItem alloc] initWithItemIdentifier:BDSKSearchBookmarksDeleteToolbarItemIdentifier];
+    item = [[NSToolbarItem alloc] initWithItemIdentifier:BDSKSearchBookmarksEditToolbarItemIdentifier];
     [item setLabel:NSLocalizedString(@"Edit", @"Toolbar item label")];
     [item setPaletteLabel:NSLocalizedString(@"Edit", @"Toolbar item label")];
-    [item setToolTip:NSLocalizedString(@"Edit Selected Items", @"Tool tip message")];
+    [item setToolTip:NSLocalizedString(@"Edit Selected Item", @"Tool tip message")];
     [item setImage:[NSImage imageNamed:@"editdoc"]];
     [item setTarget:self];
     [item setAction:@selector(editBookmark:)];
@@ -564,9 +564,10 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 
 - (BOOL)validateToolbarItem:(NSToolbarItem *)toolbarItem {
     NSString *identifier = [toolbarItem itemIdentifier];
-    if ([identifier isEqualToString:BDSKSearchBookmarksDeleteToolbarItemIdentifier] ||
-        [identifier isEqualToString:BDSKSearchBookmarksEditToolbarItemIdentifier]) {
+    if ([identifier isEqualToString:BDSKSearchBookmarksDeleteToolbarItemIdentifier]) {
         return [outlineView numberOfSelectedRows] > 0;
+    } else if ([identifier isEqualToString:BDSKSearchBookmarksEditToolbarItemIdentifier]) {
+        return [outlineView numberOfSelectedRows] == 1 && [[[outlineView selectedItems] lastObject] bookmarkType] == BDSKSearchBookmarkTypeBookmark;
     } else {
         return YES;
     }
