@@ -495,7 +495,6 @@ __BDCreateArrayOfNames(CFStringRef namesString)
     UniChar ch;
     CFIndex startIndex = 0, currentIndex = 0, currentLength;
     CFRange currentRange;
-    CFStringRef substring;
     
     CFMutableArrayRef array = CFArrayCreateMutable(allocator, iMax + 1, &kCFTypeArrayCallBacks);
     
