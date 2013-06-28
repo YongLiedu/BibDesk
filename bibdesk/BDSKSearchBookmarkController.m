@@ -116,7 +116,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
     [self setWindowFrameAutosaveName:BDSKSearchBookmarksWindowFrameAutosaveName];
     [outlineView setAutoresizesOutlineColumn:NO];
     [outlineView registerForDraggedTypes:[NSArray arrayWithObject:BDSKPasteboardTypeSearchBookmarkRows]];
-    [outlineView setDoubleAction:@selector(editBookmark:)];
+    [outlineView setDoubleAction:@selector(editAction:)];
     [outlineView setTarget:self];
 }
 
@@ -203,7 +203,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     [outlineView delete:sender];
 }
 
-- (IBAction)editBookmark:(id)sender {
+- (IBAction)editAction:(id)sender {
     NSInteger rowIndex = [[outlineView selectedRowIndexes] lastIndex];
     if (rowIndex != NSNotFound) {
         BDSKSearchBookmark *selectedItem = [outlineView itemAtRow:rowIndex];
@@ -229,6 +229,13 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
 - (void)endEditing {
     if ([outlineView editedRow] && [[self window] makeFirstResponder:outlineView] == NO)
         [[self window] endEditingFor:nil];
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
+    if ([menuItem action] == @selector(editAction:)) {
+        return [outlineView numberOfSelectedRows] == 1 && [[[outlineView selectedItems] lastObject] bookmarkType] == BDSKSearchBookmarkTypeBookmark;
+    }
+    return YES;
 }
 
 #pragma mark Undo support
@@ -463,7 +470,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
         return [item bookmarkType] != BDSKSearchBookmarkTypeSeparator;
     } else if ([[tableColumn identifier] isEqualToString:@"server"]) {
         if ([item bookmarkType] == BDSKSearchBookmarkTypeBookmark)
-            [self editBookmark:nil];
+            [self editAction:nil];
     }
     return NO;
 }
@@ -534,7 +541,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     [item setToolTip:NSLocalizedString(@"Edit Selected Item", @"Tool tip message")];
     [item setImage:[NSImage imageNamed:@"editdoc"]];
     [item setTarget:self];
-    [item setAction:@selector(editBookmark:)];
+    [item setAction:@selector(editAction:)];
     [toolbarItems setObject:item forKey:BDSKSearchBookmarksEditToolbarItemIdentifier];
     [item release];
     
