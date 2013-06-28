@@ -38,27 +38,26 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKURLGroup, BDSKDragTextField, BDSKFieldEditor;
+@class BDSKDragTextField, BDSKFieldEditor;
 
 @interface BDSKURLGroupSheetController : NSWindowController
 {
     IBOutlet BDSKDragTextField *urlField;
     IBOutlet NSObjectController *objectController;
-    BDSKURLGroup *group;
     NSString *urlString;
     NSUndoManager *undoManager;
     BDSKFieldEditor *dragFieldEditor;
     CFArrayRef editors;
 }
 
-- (id)initWithGroup:(BDSKURLGroup *)aGroup;
+- (id)initWithURL:(NSURL *)aURL;
 
 - (IBAction)chooseURL:(id)sender;
 
-- (BDSKURLGroup *)group;
-
 - (NSString *)urlString;
 - (void)setUrlString:(NSString *)newUrlString;
+
+- (NSURL *)URL;
 
 - (BOOL)commitEditing;
 

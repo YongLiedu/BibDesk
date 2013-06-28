@@ -38,28 +38,27 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKScriptGroup, BDSKDragTextField, BDSKFieldEditor;
+@class BDSKDragTextField, BDSKFieldEditor;
 
 @interface BDSKScriptGroupSheetController : NSWindowController <NSOpenSavePanelDelegate>
 {
     IBOutlet BDSKDragTextField *pathField;
     IBOutlet NSObjectController *objectController;
-    BDSKScriptGroup *group;
     NSString *path;
     NSString *arguments;
-    NSInteger type;
     NSUndoManager *undoManager;
     BDSKFieldEditor *dragFieldEditor;
 }
 
-- (id)initWithGroup:(BDSKScriptGroup *)aGroup;
-
-- (BDSKScriptGroup *)group;
+- (id)initWithPath:(NSString *)aPath arguments:(NSString *)anArguments;
 
 - (NSString *)path;
 - (void)setPath:(NSString *)newPath;
+
 - (NSString *)arguments;
 - (void)setArguments:(NSString *)newArguments;
+
+- (NSInteger)type;
 
 - (IBAction)chooseScriptPath:(id)sender;
 
