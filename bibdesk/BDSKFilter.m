@@ -55,11 +55,15 @@
 	return self;
 }
 
-- (id)initWithConditions:(NSArray *)newConditions {
+- (id)initWithConditions:(NSArray *)aConditions {
+    return [self initWithConditions:aConditions conjunction:BDSKAnd];
+}
+
+- (id)initWithConditions:(NSArray *)aConditions conjunction:(BDSKConjunction)aConjunction {
     self = [super init];
     if (self) {
-		conditions = [[NSMutableArray alloc] initWithArray:newConditions copyItems:YES];
-		conjunction = BDSKAnd;
+		conditions = [[NSMutableArray alloc] initWithArray:aConditions copyItems:YES];
+		conjunction = aConjunction;
 		group = nil;
 	}
 	return self;

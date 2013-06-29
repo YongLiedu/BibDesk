@@ -875,7 +875,9 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	BDSKFilterController *filterController = [[[BDSKFilterController alloc] init] autorelease];
     [filterController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
         if(result == NSOKButton){
-            BDSKSmartGroup *group = [[BDSKSmartGroup alloc] initWithFilter:[filterController filter]];
+            BDSKFilter *filter = [[BDSKFilter alloc] initWithConditions:[filterController conditions] conjunction:[filterController conjunction]];
+            BDSKSmartGroup *group = [[BDSKSmartGroup alloc] initWithFilter:filter];
+            [filter release];
             [groups addSmartGroup:group];
             [self editGroupWithoutWarning:group];
             [group release];
@@ -1043,7 +1045,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	if ([group isSmart]) {
 		BDSKFilter *filter = [(BDSKSmartGroup *)group filter];
 		BDSKFilterController *filterController = [[BDSKFilterController alloc] initWithFilter:filter];
-        [filterController beginSheetModalForWindow:documentWindow completionHandler:nil];
+        [filterController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+            [filter setConditions:[filterController conditions]];
+            [filter setConjunction:[filterController conjunction]];
+            [[filter undoManager] setActionName:NSLocalizedString(@"Edit Smart Group", @"Undo action name")];
+        }];
         [filterController release];
 	} else if ([group isCategory]) {
         // this must be a person field

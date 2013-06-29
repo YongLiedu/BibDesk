@@ -48,14 +48,12 @@
 	IBOutlet NSTextField *messageStartTextField;
 	IBOutlet NSTextField *messageEndTextField;
 	NSMutableArray *conditionControllers;
-	BDSKFilter *filter;
 	BDSKConjunction conjunction;
     NSUndoManager *undoManager;
 }
 
 - (id)initWithFilter:(BDSKFilter *)aFilter;
 - (void)updateUI;
-- (BDSKFilter *)filter;
 - (void)insertNewConditionAfter:(BDSKConditionController *)aConditionController;
 - (void)insertConditionController:(BDSKConditionController *)newController atIndex:(NSUInteger)index;
 - (void)removeConditionController:(BDSKConditionController *)aConditionController;
@@ -64,6 +62,7 @@
 - (NSArray *)conditionControllers;
 - (BDSKConjunction)conjunction;
 - (void)setConjunction:(BDSKConjunction)newConjunction;
+- (NSArray *)conditions;
 
 - (void)discardEditing;
 - (BOOL)commitEditing;
