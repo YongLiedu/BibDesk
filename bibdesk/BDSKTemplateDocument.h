@@ -38,11 +38,12 @@
 
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKUndoManager.h"
 
 extern NSString *BDSKTextTemplateDocumentType;
 extern NSString *BDSKRichTextTemplateDocumentType;
 
-@protocol BDSKTokenFieldDelegate <NSTokenFieldDelegate>
+@protocol BDSKTokenFieldDelegate <NSTokenFieldDelegate, BDSKUndoManagerDelegate>
 @optional
 - (void)tokenField:(NSTokenField *)tokenField textViewDidChangeSelection:(NSTextView *)textView;
 @end

@@ -56,12 +56,12 @@
     [super dealloc];
 }
 
-- (id)delegate
+- (id<BDSKUndoManagerDelegate>)delegate
 {
 	return delegate;
 }
 
-- (void)setDelegate:(id)newDelegate
+- (void)setDelegate:(id<BDSKUndoManagerDelegate>)newDelegate
 {
 	delegate = newDelegate;
 }
@@ -69,7 +69,7 @@
 - (void)undo
 {
 	if (delegate && [delegate respondsToSelector:@selector(undoManagerShouldUndoChange:)] && 
-		![delegate undoManagerShouldUndoChange:self]) {
+		NO == [delegate undoManagerShouldUndoChange:self]) {
 		return;
 	}
 	[super undo];

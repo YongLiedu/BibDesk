@@ -46,10 +46,10 @@
 
 
 @interface BDSKUndoManager : NSUndoManager {
-	id delegate;
+	id<BDSKUndoManagerDelegate> delegate;
 }
 
-- (id)delegate;
-- (void)setDelegate:(id)newDelegate;
+- (id<BDSKUndoManagerDelegate>)delegate;
+- (void)setDelegate:(id<BDSKUndoManagerDelegate>)newDelegate;
 
 @end
