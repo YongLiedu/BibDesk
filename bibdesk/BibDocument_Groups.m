@@ -90,6 +90,7 @@
 #import "BDSKBookmarkController.h"
 #import "NSPasteboard_BDSKExtensions.h"
 #import "NSTableView_BDSKExtensions.h"
+#import "NSWorkspace_BDSKExtensions.h"
 
 
 @implementation BibDocument (Groups)
@@ -1063,9 +1064,10 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         BDSKScriptGroupSheetController *sheetController = [(BDSKScriptGroupSheetController *)[BDSKScriptGroupSheetController alloc] initWithPath:[scriptGroup scriptPath] arguments:[scriptGroup scriptArguments]];
         [sheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
             if (result == NSOKButton) {
-                [scriptGroup setScriptPath:[sheetController path]];
+                NSString *path = [sheetController path];
+                [scriptGroup setScriptPath:path];
                 [scriptGroup setScriptArguments:[sheetController arguments]];
-                [scriptGroup setScriptType:[sheetController type]];
+                [scriptGroup setScriptType:[[NSWorkspace sharedWorkspace] isAppleScriptFileAtPath:path] ? BDSKAppleScriptType: BDSKShellScriptType];
                 [[self undoManager] setActionName:NSLocalizedString(@"Edit Script Group", @"Undo action name")];
             }
         }];

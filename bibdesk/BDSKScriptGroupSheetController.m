@@ -37,7 +37,6 @@
  */
 
 #import "BDSKScriptGroupSheetController.h"
-#import "BDSKScriptGroup.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKFieldEditor.h"
@@ -161,10 +160,6 @@
         [arguments release];
         arguments = [newArguments retain];
     }
-}
-
-- (NSInteger)type {
-    return [[NSWorkspace sharedWorkspace] isAppleScriptFileAtPath:path] ? BDSKAppleScriptType: BDSKShellScriptType;
 }
 
 #pragma mark NSEditor

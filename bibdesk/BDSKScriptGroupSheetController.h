@@ -58,8 +58,6 @@
 - (NSString *)arguments;
 - (void)setArguments:(NSString *)newArguments;
 
-- (NSInteger)type;
-
 - (IBAction)chooseScriptPath:(id)sender;
 
 - (BOOL)commitEditing;
