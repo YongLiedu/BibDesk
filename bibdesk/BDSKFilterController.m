@@ -116,20 +116,23 @@
 }
 
 - (IBAction)dismiss:(id)sender {
-    if ([sender tag] == NSOKButton && [self commitEditing]) {
-        
-        NSMutableArray *conditions = [NSMutableArray arrayWithCapacity:[conditionControllers count]];
-        
-        for (BDSKConditionController *controller in conditionControllers)
-            [conditions addObject:[controller condition]];
-        // remove the dummy condition
-        [conditions removeObject:[NSNull null]];
-        [filter setConditions:conditions];
-        [filter setConjunction:[self conjunction]];
-        
-        [[filter undoManager] setActionName:NSLocalizedString(@"Edit Smart Group", @"Undo action name")];
-	}
-    
+    if ([sender tag] == NSOKButton) {
+        if ([self commitEditing]) {
+            NSMutableArray *conditions = [NSMutableArray arrayWithCapacity:[conditionControllers count]];
+            
+            for (BDSKConditionController *controller in conditionControllers)
+                [conditions addObject:[controller condition]];
+            // remove the dummy condition
+            [conditions removeObject:[NSNull null]];
+            [filter setConditions:conditions];
+            [filter setConjunction:[self conjunction]];
+            
+            [[filter undoManager] setActionName:NSLocalizedString(@"Edit Smart Group", @"Undo action name")];
+        } else {
+            NSBeep();
+            return;
+        }
+    }
     [super dismiss:sender];
 }
 
