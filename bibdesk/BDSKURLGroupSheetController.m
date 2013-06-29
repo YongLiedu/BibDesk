@@ -80,12 +80,9 @@
 }
 
 - (IBAction)dismiss:(id)sender {
-    if ([sender tag] == NSOKButton) {
-        
-        if ([self commitEditing] == NO) {
-            NSBeep();
-            return;
-        }
+    if ([sender tag] == NSOKButton && [self commitEditing] == NO) {
+        NSBeep();
+        return;
     }
     
     [objectController setContent:nil];
