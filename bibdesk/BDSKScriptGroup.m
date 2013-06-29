@@ -81,10 +81,9 @@
     return self;
 }
 
-- (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(NSInteger)type;
+- (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments;
 {
-    self = [self initWithName:nil scriptPath:path scriptArguments:arguments scriptType:type];
-    return self;
+    return [self initWithName:nil scriptPath:path scriptArguments:arguments scriptType:[[NSWorkspace sharedWorkspace] isAppleScriptFileAtPath:path] ? BDSKAppleScriptType : BDSKShellScriptType];
 }
 
 - (void)commonInit {

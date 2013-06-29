@@ -58,7 +58,7 @@ enum {
     NSData *stdoutData;
 }
 
-- (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(NSInteger)type;
+- (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments;
 - (id)initWithName:(NSString *)aName scriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(NSInteger)type;
 
 - (NSString *)scriptPath;

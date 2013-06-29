@@ -118,7 +118,7 @@
             [mutableProperties removeObjectForKey:@"scriptURL"];
             [mutableProperties removeObjectForKey:@"scriptingScriptArguments"];
             properties = mutableProperties;
-            group = [[BDSKScriptGroup alloc] initWithName:nil scriptPath:path scriptArguments:arguments scriptType:[[NSWorkspace sharedWorkspace] isAppleScriptFileAtPath:path] ? BDSKAppleScriptType : BDSKShellScriptType];
+            group = [[BDSKScriptGroup alloc] initWithScriptPath:path scriptArguments:arguments];
         } else if ([class isSubclassOfClass:[BDSKSearchGroup class]]) {
             NSString *aType = [properties objectForKey:@"scriptingServerType"] ?: BDSKSearchGroupEntrez;
             group = [[BDSKSearchGroup alloc] initWithServerInfo:[BDSKServerInfo defaultServerInfoWithType:aType] searchTerm:nil];

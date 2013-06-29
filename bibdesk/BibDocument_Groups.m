@@ -989,7 +989,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     BDSKScriptGroupSheetController *sheetController = [[[BDSKScriptGroupSheetController alloc] init] autorelease];
     [sheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
         if(result == NSOKButton){
-            BDSKScriptGroup *group = [[BDSKScriptGroup alloc] initWithScriptPath:[sheetController path] scriptArguments:[sheetController arguments] scriptType:[sheetController type]];
+            BDSKScriptGroup *group = [[BDSKScriptGroup alloc] initWithScriptPath:[sheetController path] scriptArguments:[sheetController arguments]];
             [groups addScriptGroup:group];
             [group publications];
             [self editGroupWithoutWarning:group];
