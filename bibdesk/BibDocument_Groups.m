@@ -1054,7 +1054,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         [sheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
             if (result == NSOKButton) {
                 [urlGroup setURL:[sheetController URL]];
-                [[urlGroup undoManager] setActionName:NSLocalizedString(@"Edit External File Group", @"Undo action name")];
+                [[self undoManager] setActionName:NSLocalizedString(@"Edit External File Group", @"Undo action name")];
             }
         }];
         [sheetController release];
@@ -1066,7 +1066,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
                 [scriptGroup setScriptPath:[sheetController path]];
                 [scriptGroup setScriptArguments:[sheetController arguments]];
                 [scriptGroup setScriptType:[sheetController type]];
-                [[scriptGroup undoManager] setActionName:NSLocalizedString(@"Edit Script Group", @"Undo action name")];
+                [[self undoManager] setActionName:NSLocalizedString(@"Edit Script Group", @"Undo action name")];
             }
         }];
         [sheetController release];
@@ -1076,8 +1076,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         [sheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
             if (result == NSOKButton) {
                 [searchGroup setServerInfo:[sheetController serverInfo]];
-                [[searchGroup undoManager] setActionName:NSLocalizedString(@"Edit Search Group", @"Undo action name")];
-            }
+             }
         }];
         [sheetController release];
 	}

@@ -321,7 +321,6 @@ NSString *BDSKSearchGroupURLScheme = @"x-bdsk-search";
 
 - (void)setServerInfo:(BDSKServerInfo *)info;
 {
-    [(BDSKSearchGroup *)[[self undoManager] prepareWithInvocationTarget:self] setServerInfo:[self serverInfo]];
     if ([[info type] isEqualToString:[server type]] == NO)
         [self resetServerWithInfo:info];
     else
