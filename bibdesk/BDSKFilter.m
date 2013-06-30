@@ -49,14 +49,10 @@
 - (id)init {
 	BDSKCondition *condition = [[BDSKCondition alloc] init];
 	NSArray *newConditions = [[NSArray alloc] initWithObjects:condition, nil];
-	self = [self initWithConditions:newConditions];
+	self = [self initWithConditions:newConditions conjunction:BDSKAnd];
 	[condition release];
 	[newConditions release];
 	return self;
-}
-
-- (id)initWithConditions:(NSArray *)aConditions {
-    return [self initWithConditions:aConditions conjunction:BDSKAnd];
 }
 
 - (id)initWithConditions:(NSArray *)aConditions conjunction:(BDSKConjunction)aConjunction {
@@ -78,15 +74,14 @@
 		[newConditions addObject:condition];
 		[condition release];
 	}
+    // we need at least one condition
+	if ([newConditions count] == 0) {
+        condition = [[BDSKCondition alloc] init];
+        [newConditions addObject:condition];
+        [condition release];
+    }
 	
-	if ([newConditions count] > 0)
-		self = [self initWithConditions:newConditions];
-	else
-		self = [self init];
-	if (self) {
-		conjunction = [[dictionary objectForKey:@"conjunction"] integerValue];
-	}
-	return self;
+    return [self initWithConditions:newConditions conjunction:[[dictionary objectForKey:@"conjunction"] integerValue]];
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
@@ -112,9 +107,7 @@
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
-	BDSKFilter *copy = [[BDSKFilter allocWithZone:aZone] initWithConditions:[self conditions]];
-	[copy setConjunction:[self conjunction]];
-	return copy;
+	return [[BDSKFilter allocWithZone:aZone] initWithConditions:[self conditions] conjunction:[self conjunction]];
 }
 
 - (NSString *)description {

@@ -54,7 +54,6 @@ typedef NSUInteger BDSKConjunction;
 	NSUndoManager *undoManager;
 }
 
-- (id)initWithConditions:(NSArray *)newConditions;
 - (id)initWithConditions:(NSArray *)aConditions conjunction:(BDSKConjunction)aConjunction;
 - (id)initWithDictionary:(NSDictionary *)dictionary;
 
