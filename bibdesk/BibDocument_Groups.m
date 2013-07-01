@@ -1046,9 +1046,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 		BDSKFilter *filter = [(BDSKSmartGroup *)group filter];
 		BDSKFilterController *filterController = [[BDSKFilterController alloc] initWithFilter:filter];
         [filterController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
-            [filter setConditions:[filterController conditions]];
-            [filter setConjunction:[filterController conjunction]];
-            [[filter undoManager] setActionName:NSLocalizedString(@"Edit Smart Group", @"Undo action name")];
+            if (result == NSOKButton) {
+                [filter setConditions:[filterController conditions]];
+                [filter setConjunction:[filterController conjunction]];
+                [[filter undoManager] setActionName:NSLocalizedString(@"Edit Smart Group", @"Undo action name")];
+            }
         }];
         [filterController release];
 	} else if ([group isCategory]) {
