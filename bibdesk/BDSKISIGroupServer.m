@@ -237,7 +237,10 @@ static NSArray *publicationsFromData(NSData *data);
 - (void)addPublicationsToGroup:(bycopy NSData *)data;
 {
     BDSKASSERT([NSThread isMainThread]);
-    [group addPublications:publicationsFromData(data)];
+    [NSString setMacroResolverForUnarchiving:[group macroResolver]];
+    NSArray *pubs = publicationsFromData(data);
+    [NSString setMacroResolverForUnarchiving:nil];
+    [group addPublications:pubs];
 }
 
 #pragma mark Server thread
