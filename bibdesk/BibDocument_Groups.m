@@ -1086,7 +1086,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         [sheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
             if (result == NSOKButton) {
                 [searchGroup setServerInfo:[sheetController serverInfo]];
-             }
+            }
         }];
         [sheetController release];
 	}
