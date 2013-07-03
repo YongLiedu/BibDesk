@@ -55,6 +55,7 @@
 #import "NSInvocation_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSPasteboard_BDSKExtensions.h"
+#import "NSEvent_BDSKExtensions.h"
 
 #define BDSKShouldLogFilesAddedToMatchingSearchIndexKey @"BDSKShouldLogFilesAddedToMatchingSearchIndex"
 
@@ -65,6 +66,9 @@ static CGFloat GROUP_ROW_HEIGHT = 24.0;
 @interface BDSKCenteredTextFieldCell : NSTextFieldCell
 @end
 @interface BDSKBoldShadowFormatter : BDSKTextWithIconFormatter
+@end
+
+@interface BDSKTreeNode (BDSKQuickLook) <QLPreviewItem>
 @end
 
 @interface BDSKFileMatcher (Private)
@@ -248,6 +252,18 @@ static id sharedInstance = nil;
     }];
 }
 
+- (IBAction)previewAction:(id)sender
+{
+    [outlineView togglePreviewPanel:sender];
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
+    if ([menuItem action] == @selector(previewAction:)) {
+        return [[outlineView selectedRowIndexes] count] > 0;
+    }
+    return YES;
+}
+
 #pragma mark Outline view drag-and-drop
 
 - (BOOL)outlineView:(NSOutlineView *)olv writeItems:(NSArray*)items toPasteboard:(NSPasteboard*)pboard;
@@ -335,6 +351,11 @@ static id sharedInstance = nil;
     }
 }
 
+- (void)outlineViewSelectionDidChange:(NSNotification *)notification {
+    if ([QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible] && [[QLPreviewPanel sharedPreviewPanel] dataSource] == self)
+        [[QLPreviewPanel sharedPreviewPanel] reloadData];
+}
+
 #pragma mark Outline view datasource
 
 - (id)outlineView:(NSOutlineView *)ov child:(NSInteger)idx ofItem:(id)item;
@@ -366,6 +387,51 @@ static id sharedInstance = nil;
 - (id)outlineView:(NSOutlineView *)ov persistentObjectForItem:(id)item
 {
     return [NSKeyedArchiver archivedDataWithRootObject:item];
+}
+
+#pragma mark Quick Look Panel Support
+
+- (BOOL)acceptsPreviewPanelControl:(QLPreviewPanel *)panel {
+    return YES;
+}
+
+- (void)beginPreviewPanelControl:(QLPreviewPanel *)panel {
+    [panel setDelegate:self];
+    [panel setDataSource:self];
+}
+
+- (void)endPreviewPanelControl:(QLPreviewPanel *)panel {
+}
+
+- (NSInteger)numberOfPreviewItemsInPreviewPanel:(QLPreviewPanel *)panel {
+    return [[outlineView selectedRowIndexes] count];
+}
+
+- (id <QLPreviewItem>)previewPanel:(QLPreviewPanel *)panel previewItemAtIndex:(NSInteger)anIndex {
+    return [[outlineView selectedItems] objectAtIndex:anIndex];
+}
+
+- (NSRect)previewPanel:(QLPreviewPanel *)panel sourceFrameOnScreenForPreviewItem:(id <QLPreviewItem>)item {
+    NSInteger row = [outlineView rowForItem:item];
+    NSRect iconRect = NSZeroRect;
+    if (item != nil && row != -1) {
+        iconRect = [(BDSKTextWithIconCell *)[outlineView preparedCellAtColumn:0 row:row] iconRectForBounds:[outlineView frameOfCellAtColumn:0 row:row]];
+        if (NSIntersectsRect([outlineView visibleRect], iconRect)) {
+            iconRect = [outlineView convertRectToBase:iconRect];
+            iconRect.origin = [[self window] convertBaseToScreen:iconRect.origin];
+        } else {
+            iconRect = NSZeroRect;
+        }
+    }
+    return iconRect;
+}
+
+- (BOOL)previewPanel:(QLPreviewPanel *)panel handleEvent:(NSEvent *)event {
+    if ([event type] == NSKeyDown) {
+        [outlineView keyDown:event];
+        return YES;
+    }
+    return NO;
 }
 
 @end
@@ -614,6 +680,18 @@ static void normalizeScoresForItem(BDSKTreeNode *parent, CGFloat maxScore)
 
 @end
 
+@implementation BDSKTreeNode (BDSKQuickLook)
+
+- (NSURL *)previewItemURL {
+    return [self valueForKey:@"fileURL"];
+}
+
+- (NSString *)previewItemTitle {
+    return [self valueForKey:BDSKTextWithIconStringKey];
+}
+
+@end
+
 /* Returning an attributed string on a per-cell basis is easier than drawing a custom cell for each row, since we'd then have to handle the string drawing.  This way NSTextFieldCell still does all the rendering for us.  Color doesn't seem to work correctly for some reason, though.
 */
 
@@ -754,6 +832,21 @@ static NSDictionary *attributes = nil;
     [self lockFocus];
     [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:2.0 color:[NSColor whiteColor]];
     [self unlockFocus];
+}
+
+- (void)keyDown:(NSEvent *)theEvent {
+    if ([theEvent firstCharacter] == ' ' && [theEvent deviceIndependentModifierFlags] == 0) {
+        [self togglePreviewPanel:nil];
+    } else {
+        [super keyDown:theEvent];
+    }
+}
+
+- (IBAction)togglePreviewPanel:(id)sender {
+    if ([QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible])
+        [[QLPreviewPanel sharedPreviewPanel] orderOut:nil];
+    else
+        [[QLPreviewPanel sharedPreviewPanel] makeKeyAndOrderFront:nil];
 }
 
 @end

@@ -56,6 +56,8 @@
 #import "NSPasteboard_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import <libkern/OSAtomic.h>
+#import "BDSKFilePathCell.h"
+#import "NSEvent_BDSKExtensions.h"
 
 #define BDSKOrphanedFilesWindowFrameAutosaveName @"BDSKOrphanedFilesWindow"
 
@@ -207,6 +209,18 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     [statusField setStringValue:message];
 }    
 
+- (IBAction)previewAction:(id)sender
+{
+    [tableView togglePreviewPanel:sender];
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
+    if ([menuItem action] == @selector(previewAction:)) {
+        return [[tableView selectedRowIndexes] count] > 0;
+    }
+    return YES;
+}
+
 #pragma mark Accessors
  
 - (NSArray *)orphanedFiles {
@@ -333,12 +347,61 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     return [image dragImageWithCount:[fileURLs count]];
 }
 
+- (void)tableViewSelectionDidChange:(NSNotification *)notification {
+    if ([QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible] && [[QLPreviewPanel sharedPreviewPanel] dataSource] == self)
+        [[QLPreviewPanel sharedPreviewPanel] reloadData];
+}
+
 #pragma mark Contextual menu
 
 - (void)menuNeedsUpdate:(NSMenu *)menu {
     [menu removeAllItems];
     if (menu == [tableView menu] && [tableView clickedRow] != -1)
         [menu addItemsFromMenu:contextMenu];
+}
+#pragma mark Quick Look Panel Support
+
+- (BOOL)acceptsPreviewPanelControl:(QLPreviewPanel *)panel {
+    return YES;
+}
+
+- (void)beginPreviewPanelControl:(QLPreviewPanel *)panel {
+    [panel setDelegate:self];
+    [panel setDataSource:self];
+}
+
+- (void)endPreviewPanelControl:(QLPreviewPanel *)panel {
+}
+
+- (NSInteger)numberOfPreviewItemsInPreviewPanel:(QLPreviewPanel *)panel {
+    return [[tableView selectedRowIndexes] count];
+}
+
+- (id <QLPreviewItem>)previewPanel:(QLPreviewPanel *)panel previewItemAtIndex:(NSInteger)anIndex {
+    return [[[arrayController arrangedObjects] objectsAtIndexes:[tableView selectedRowIndexes]] objectAtIndex:anIndex];
+}
+
+- (NSRect)previewPanel:(QLPreviewPanel *)panel sourceFrameOnScreenForPreviewItem:(id <QLPreviewItem>)item {
+    NSUInteger row = [[arrayController arrangedObjects] indexOfObject:item];
+    NSRect iconRect = NSZeroRect;
+    if (item != nil && row != NSNotFound) {
+        iconRect = [(BDSKFilePathCell *)[tableView preparedCellAtColumn:0 row:row] iconRectForBounds:[tableView frameOfCellAtColumn:0 row:row]];
+        if (NSIntersectsRect([tableView visibleRect], iconRect)) {
+            iconRect = [tableView convertRectToBase:iconRect];
+            iconRect.origin = [[self window] convertBaseToScreen:iconRect.origin];
+        } else {
+            iconRect = NSZeroRect;
+        }
+    }
+    return iconRect;
+}
+
+- (BOOL)previewPanel:(QLPreviewPanel *)panel handleEvent:(NSEvent *)event {
+    if ([event type] == NSKeyDown) {
+        [tableView keyDown:event];
+        return YES;
+    }
+    return NO;
 }
 
 @end
@@ -481,6 +544,13 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 @end
 
+@interface NSURL (BDSKQuickLook) <QLPreviewItem>
+@end
+
+@implementation NSURL (BDSKQuickLook)
+- (NSURL *)previewItemURL { return self; }
+@end
+
 #pragma mark -
 #pragma mark Array controller subclass for searching
 
@@ -568,3 +638,23 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 @end
+
+@implementation BDSKOrphanedFilesTableView
+
+- (void)keyDown:(NSEvent *)theEvent {
+    if ([theEvent firstCharacter] == ' ' && [theEvent deviceIndependentModifierFlags] == 0) {
+        [self togglePreviewPanel:nil];
+    } else {
+        [super keyDown:theEvent];
+    }
+}
+
+- (IBAction)togglePreviewPanel:(id)sender {
+    if ([QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible])
+        [[QLPreviewPanel sharedPreviewPanel] orderOut:nil];
+    else
+        [[QLPreviewPanel sharedPreviewPanel] makeKeyAndOrderFront:nil];
+}
+
+@end
+

@@ -37,11 +37,12 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import <Quartz/Quartz.h>
 #import "BDSKOutlineView.h"
 
 @class BDSKGroupingOutlineView;
 
-@interface BDSKFileMatcher : NSWindowController <NSOutlineViewDelegate, NSOutlineViewDataSource>
+@interface BDSKFileMatcher : NSWindowController <NSOutlineViewDelegate, NSOutlineViewDataSource, QLPreviewPanelDataSource, QLPreviewPanelDelegate>
 {
     IBOutlet BDSKGroupingOutlineView *outlineView;
     IBOutlet NSProgressIndicator *progressIndicator;
@@ -75,4 +76,5 @@
     NSColor *topColor;
     NSColor *bottomColor;
 }
+- (IBAction)togglePreviewPanel:(id)sender;
 @end

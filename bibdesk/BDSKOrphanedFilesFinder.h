@@ -37,11 +37,13 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import <Quartz/Quartz.h>
+#import "BDSKTableView.h"
 
-@class BDSKOrphanedFilesArrayController, BDSKTableView;
+@class BDSKOrphanedFilesArrayController, BDSKOrphanedFilesTableView;
 
-@interface BDSKOrphanedFilesFinder : NSWindowController <NSTableViewDelegate, NSTableViewDataSource> {
-    IBOutlet BDSKTableView *tableView;
+@interface BDSKOrphanedFilesFinder : NSWindowController <NSTableViewDelegate, NSTableViewDataSource, QLPreviewPanelDataSource, QLPreviewPanelDelegate> {
+    IBOutlet BDSKOrphanedFilesTableView *tableView;
     IBOutlet NSButton *refreshButton;
     IBOutlet BDSKOrphanedFilesArrayController *arrayController;
     IBOutlet NSProgressIndicator *progressIndicator;
@@ -93,4 +95,8 @@
 - (IBAction)showMatches:(id)sender;
 - (IBAction)hideMatches:(id)sender;
 
+@end
+
+@interface BDSKOrphanedFilesTableView : BDSKTableView
+- (IBAction)togglePreviewPanel:(id)sender;
 @end
