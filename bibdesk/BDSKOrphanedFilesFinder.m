@@ -211,7 +211,10 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (IBAction)previewAction:(id)sender
 {
-    [tableView togglePreviewPanel:sender];
+    if ([QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible])
+        [[QLPreviewPanel sharedPreviewPanel] orderOut:nil];
+    else
+        [[QLPreviewPanel sharedPreviewPanel] makeKeyAndOrderFront:nil];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
@@ -351,6 +354,12 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     if ([QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible] && [[QLPreviewPanel sharedPreviewPanel] dataSource] == self)
         [[QLPreviewPanel sharedPreviewPanel] reloadData];
 }
+
+- (void)tableViewInsertSpace:(NSTableView *)aTableView {
+    [self previewAction:nil];
+}
+
+- (void)tableViewInsertShiftSpace:(NSTableView *)aTableView {}
 
 #pragma mark Contextual menu
 
@@ -638,23 +647,3 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 @end
-
-@implementation BDSKOrphanedFilesTableView
-
-- (void)keyDown:(NSEvent *)theEvent {
-    if ([theEvent firstCharacter] == ' ' && [theEvent deviceIndependentModifierFlags] == 0) {
-        [self togglePreviewPanel:nil];
-    } else {
-        [super keyDown:theEvent];
-    }
-}
-
-- (IBAction)togglePreviewPanel:(id)sender {
-    if ([QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible])
-        [[QLPreviewPanel sharedPreviewPanel] orderOut:nil];
-    else
-        [[QLPreviewPanel sharedPreviewPanel] makeKeyAndOrderFront:nil];
-}
-
-@end
-

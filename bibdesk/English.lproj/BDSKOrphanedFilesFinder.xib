@@ -1048,7 +1048,7 @@
 					</object>
 				</object>
 				<string key="8.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
-				<string key="9.CustomClassName">BDSKOrphanedFilesTableView</string>
+				<string key="9.CustomClassName">BDSKTableView</string>
 				<string key="9.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="92.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="95.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -1155,7 +1155,7 @@
 						<string key="progressIndicator">NSProgressIndicator</string>
 						<string key="refreshButton">NSButton</string>
 						<string key="statusField">NSTextField</string>
-						<string key="tableView">BDSKOrphanedFilesTableView</string>
+						<string key="tableView">BDSKTableView</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
 						<object class="IBToOneOutletInfo" key="arrayController">
@@ -1184,14 +1184,9 @@
 						</object>
 						<object class="IBToOneOutletInfo" key="tableView">
 							<string key="name">tableView</string>
-							<string key="candidateClassName">BDSKOrphanedFilesTableView</string>
+							<string key="candidateClassName">BDSKTableView</string>
 						</object>
 					</dictionary>
-					<reference key="sourceIdentifier" ref="532012816"/>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">BDSKOrphanedFilesTableView</string>
-					<string key="superclassName">BDSKTableView</string>
 					<reference key="sourceIdentifier" ref="532012816"/>
 				</object>
 				<object class="IBPartialClassDescription">
@@ -2190,7 +2185,7 @@
 			<real value="3200" key="NS.object.0"/>
 		</object>
 		<bool key="IBDocument.PluginDeclaredDependenciesTrackSystemTargetVersion">YES</bool>
-		<nil key="IBDocument.LastKnownRelativeProjectPath"/>
+		<string key="IBDocument.LastKnownRelativeProjectPath">../Bibdesk.xcodeproj</string>
 		<int key="IBDocument.defaultPropertyAccessControl">3</int>
 		<dictionary class="NSMutableDictionary" key="IBDocument.LastKnownImageSizes">
 			<string key="NSMenuCheckmark">{9, 8}</string>

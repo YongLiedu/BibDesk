@@ -252,9 +252,12 @@ static id sharedInstance = nil;
     }];
 }
 
-- (IBAction)previewAction:(id)sender
+- (IBAction)previewAction:(id)sender;
 {
-    [outlineView togglePreviewPanel:sender];
+    if ([QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible])
+        [[QLPreviewPanel sharedPreviewPanel] orderOut:nil];
+    else
+        [[QLPreviewPanel sharedPreviewPanel] makeKeyAndOrderFront:nil];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
@@ -351,10 +354,18 @@ static id sharedInstance = nil;
     }
 }
 
+#pragma mark Outline view delegate
+
 - (void)outlineViewSelectionDidChange:(NSNotification *)notification {
     if ([QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible] && [[QLPreviewPanel sharedPreviewPanel] dataSource] == self)
         [[QLPreviewPanel sharedPreviewPanel] reloadData];
 }
+
+- (void)outlineViewInsertSpace:(NSOutlineView *)anOutlineView {
+    [self previewAction:nil];
+}
+
+- (void)outlineViewInsertShiftSpace:(NSOutlineView *)anOutlineView {}
 
 #pragma mark Outline view datasource
 
@@ -832,21 +843,6 @@ static NSDictionary *attributes = nil;
     [self lockFocus];
     [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:2.0 color:[NSColor whiteColor]];
     [self unlockFocus];
-}
-
-- (void)keyDown:(NSEvent *)theEvent {
-    if ([theEvent firstCharacter] == ' ' && [theEvent deviceIndependentModifierFlags] == 0) {
-        [self togglePreviewPanel:nil];
-    } else {
-        [super keyDown:theEvent];
-    }
-}
-
-- (IBAction)togglePreviewPanel:(id)sender {
-    if ([QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible])
-        [[QLPreviewPanel sharedPreviewPanel] orderOut:nil];
-    else
-        [[QLPreviewPanel sharedPreviewPanel] makeKeyAndOrderFront:nil];
 }
 
 @end

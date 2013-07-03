@@ -43,6 +43,8 @@
 @optional
 
 - (void)outlineViewInsertNewline:(NSOutlineView *)anOutlineView;
+- (void)outlineViewInsertSpace:(NSOutlineView *)anOutlineView;
+- (void)outlineViewInsertShiftSpace:(NSOutlineView *)anOutlineView;
 
 - (NSArray *)outlineView:(NSOutlineView *)anOutlineView typeSelectHelperSelectionStrings:(BDSKTypeSelectHelper *)aTypeSelectHelper;
 - (void)outlineView:(NSOutlineView *)anOutlineView typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString;

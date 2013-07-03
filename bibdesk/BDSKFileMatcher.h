@@ -65,6 +65,7 @@
 - (IBAction)openAction:(id)sender;
 - (IBAction)abort:(id)sender;
 - (IBAction)configure:(id)sender;
+- (IBAction)previewAction:(id)sender;
 
 @end
 
@@ -76,5 +77,4 @@
     NSColor *topColor;
     NSColor *bottomColor;
 }
-- (IBAction)togglePreviewPanel:(id)sender;
 @end
