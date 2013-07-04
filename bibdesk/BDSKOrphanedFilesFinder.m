@@ -553,13 +553,6 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 @end
 
-@interface NSURL (BDSKQuickLook) <QLPreviewItem>
-@end
-
-@implementation NSURL (BDSKQuickLook)
-- (NSURL *)previewItemURL { return self; }
-@end
-
 #pragma mark -
 #pragma mark Array controller subclass for searching
 
