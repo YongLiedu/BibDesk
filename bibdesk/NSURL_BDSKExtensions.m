@@ -482,8 +482,7 @@
                     points = [NSMutableArray array];
                 }
             }
-            [note setValue:nil forKey:@"quadrilateralPoints"];
-            [note setValue:pathList forKey:@"pointLists"];
+            [note setValue:pathList forKey:@"quadrilateralPoints"];
         }
         if ((value = [note objectForKey:@"pointLists"])) {
             NSMutableArray *pathList = [NSMutableArray array];
