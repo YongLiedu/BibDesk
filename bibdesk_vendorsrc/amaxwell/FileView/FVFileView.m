@@ -174,7 +174,6 @@ typedef NSInteger NSScrollerStyle;
 - (void)_getDisplayName:(NSString **)name andLabel:(NSUInteger *)label forURL:(NSURL *)aURL;
 - (NSSize)_paddingForScale:(CGFloat)scale;
 - (void)_recalculateGridSize;
-- (void)_notifyAccessibilityUpdateWithOldCount:(NSUInteger)oldCount;
 - (void)_reloadIcons;
 - (void)_resetViewLayout;
 - (void)_resetTrackingRectsAndToolTips;
@@ -897,10 +896,8 @@ typedef NSInteger NSScrollerStyle;
         [_contentBinding release];
         _contentBinding = nil;
         
-        NSUInteger oldCount = [_orderedURLs count];
         [self setIconURLs:nil];
         [self reloadIcons];
-        [self _notifyAccessibilityUpdateWithOldCount:oldCount];
         [self setSelectionIndexes:[NSIndexSet indexSet]];
     }
     else {
@@ -948,9 +945,7 @@ typedef NSInteger NSScrollerStyle;
             if (transformer)
                 observedArray = [transformer transformedValue:observedArray];
             
-            NSUInteger oldCount = [_orderedURLs count];
             [self setIconURLs:observedArray];
-            [self _notifyAccessibilityUpdateWithOldCount:oldCount];
             [self reloadIcons];
         }
     }
@@ -1685,21 +1680,11 @@ static inline bool __equal_timespecs(const struct timespec *ts1, const struct ti
     }
 }
 
-- (void)_notifyAccessibilityUpdateWithOldCount:(NSUInteger)oldCount {
-    NSUInteger i = oldCount, iMax = [_orderedURLs count];
-    while (i-- > 0)
-        NSAccessibilityPostNotification([FVAccessibilityIconElement elementWithIndex:i parent:self], NSAccessibilityUIElementDestroyedNotification);
-    for (i = 0; i < iMax; i++)
-        NSAccessibilityPostNotification([FVAccessibilityIconElement elementWithIndex:i parent:self], NSAccessibilityCreatedNotification);
-}
-
 - (void)_reloadIcons;
 {
     BOOL isBound = nil != _contentBinding;
-    BOOL oldCount = 0;
     
     if (NO == isBound) {
-        oldCount = [_orderedURLs count];
         if (nil == _orderedURLs)
             _orderedURLs = [[NSMutableArray alloc] init];
         else
@@ -1751,9 +1736,6 @@ static inline bool __equal_timespecs(const struct timespec *ts1, const struct ti
         if (_orderedSubtitles)
             insertObjectAtIndex(_orderedSubtitles, insertSel, subtitleAtIndex(_dataSource, subtitleSel, self, i), i);
     }  
-    
-    if (isBound == NO)
-        [self _notifyAccessibilityUpdateWithOldCount:oldCount];
 }
 
 - (void)reloadIcons;
