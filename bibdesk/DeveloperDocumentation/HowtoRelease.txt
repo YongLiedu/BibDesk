@@ -14,7 +14,7 @@ How To Release BibDesk
 
 - commit changes
 
-- tag the source using `svn copy -m "Tag for release" svn+ssh://USER@svn.code.sf.net/p/bibdesk/svn/trunk https://USER@svn.code.sf.net/p/bibdesk/svn/tags/REL_1_x_x` where REL_1_x_x is the new version number and USER is your sf.net user name
+- tag the source using `svn copy -m "Tag for release" ^/trunk ^/tags/REL_1_x_x` where REL_1_x_x is the new version number and USER is your sf.net user name
 
 - recompile the "BibDesk" target in Release configuration
   - Users of XCode 4.5.2+: build in Archive configuration
