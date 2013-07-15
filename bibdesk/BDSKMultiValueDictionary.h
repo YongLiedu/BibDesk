@@ -74,8 +74,6 @@
 - (id)initWithCaseInsensitiveKeys:(BOOL)caseInsensitive;
 
 - (NSArray *)allObjectsForKey:(id)key;
-- (id)firstObjectForKey:(id)key;
-- (id)lastObjectForKey:(id)key;
 - (void)addObject:(id)object forKey:(id)key;
 - (void)removeObject:(id)object forKey:(id)key;
 - (void)removeAllObjectsForKey:(id)key;

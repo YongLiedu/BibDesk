@@ -103,14 +103,6 @@ static NSUInteger caseInsensitiveStringHash(const void *item, NSUInteger (*size)
     return [mapTable objectForKey:key];
 }
 
-- (id)firstObjectForKey:(id)key {
-    return [[self allObjectsForKey:key] objectAtIndex:0];
-}
-
-- (id)lastObjectForKey:(id)key {
-    return [[self allObjectsForKey:key] lastObject];
-}
-
 - (void)addObject:(id)object forKey:(id)key {
     NSMutableArray *array = [mapTable objectForKey:key];
     if (array) {
