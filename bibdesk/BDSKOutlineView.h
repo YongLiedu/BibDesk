@@ -99,6 +99,8 @@
 - (void)scrollToBeginningOfDocument:(id)sender;
 - (void)scrollToEndOfDocument:(id)sender;
 - (void)insertNewline:(id)sender;
+- (void)insertSpace:(id)sender;
+- (void)insertShiftSpace:(id)sender;
 
 - (void)delete:(id)sender;
 - (void)copy:(id)sender;
