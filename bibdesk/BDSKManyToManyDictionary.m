@@ -60,12 +60,8 @@
     return [mapTable description];
 }
 
-- (NSMapTable *)_mapTable:(BOOL)inverse {
-    return inverse ? inverseMapTable : mapTable;
-}
-
 - (NSMutableSet *)_setForValue:(id)aValue inverse:(BOOL)inverse create:(BOOL)create {
-    NSMapTable *map = [self _mapTable:inverse];
+    NSMapTable *map = inverse ? inverseMapTable : mapTable;
     NSMutableSet *value = (NSMutableSet *)[map objectForKey:aValue];
 
     if (create && value == nil) {
