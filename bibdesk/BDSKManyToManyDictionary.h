@@ -48,7 +48,7 @@
 - (NSUInteger)objectCount;
 - (NSUInteger)countForKey:(id)aKey;
 - (NSUInteger)countForObject:(id)anObject;
-- (NSSet *)allObjectsForKey:(id)aKey;
+- (NSSet *)objectsForKey:(id)aKey;
 - (NSSet *)allKeysForObject:(id)anObject;
 - (id)anyObjectForKey:(id)aKey;
 - (id)anyKeyForObject:(id)anObject;

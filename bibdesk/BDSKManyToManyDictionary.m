@@ -88,7 +88,7 @@
     return [[self _setForValue:anObject inverse:YES create:NO] count];
 }
 
-- (NSSet *)allObjectsForKey:(id)aKey {
+- (NSSet *)objectsForKey:(id)aKey {
     return [self _setForValue:aKey inverse:NO create:NO];
 }
 

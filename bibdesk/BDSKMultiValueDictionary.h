@@ -73,7 +73,7 @@
 - (id)init;
 - (id)initWithCaseInsensitiveKeys:(BOOL)caseInsensitive;
 
-- (NSArray *)allObjectsForKey:(id)key;
+- (NSArray *)objectsForKey:(id)key;
 - (void)addObject:(id)object forKey:(id)key;
 - (void)removeObject:(id)object forKey:(id)key;
 - (void)removeAllObjectsForKey:(id)key;

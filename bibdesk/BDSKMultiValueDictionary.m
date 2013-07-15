@@ -99,7 +99,7 @@ static NSUInteger caseInsensitiveStringHash(const void *item, NSUInteger (*size)
     [super dealloc];
 }
 
-- (NSArray *)allObjectsForKey:(id)key {
+- (NSArray *)objectsForKey:(id)key {
     return [mapTable objectForKey:key];
 }
 

@@ -209,7 +209,7 @@
 	if ([NSString isEmptyString:key]) 
 		return nil;
     
-	NSArray *items = [itemsForCiteKeys allObjectsForKey:key];
+	NSArray *items = [itemsForCiteKeys objectsForKey:key];
 	
 	if ([items count] == 0)
 		return nil;
@@ -221,13 +221,13 @@
 {
 	NSArray *items = nil;
     if ([NSString isEmptyString:key] == NO) 
-		items = [itemsForCiteKeys allObjectsForKey:key];
+		items = [itemsForCiteKeys objectsForKey:key];
     return items ?: [NSArray array];
 }
 
 - (BOOL)citeKeyIsUsed:(NSString *)key byItemOtherThan:(BibItem *)anItem;
 {
-    NSArray *items = [itemsForCiteKeys allObjectsForKey:key];
+    NSArray *items = [itemsForCiteKeys objectsForKey:key];
     
 	if ([items count] > 1)
 		return YES;

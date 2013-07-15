@@ -174,7 +174,7 @@
 - (NSSet *)identifierURLsForURL:(NSURL *)theURL
 {
     [rwLock lockForReading];
-    NSSet *set = [[[identifierURLs allObjectsForKey:theURL] copy] autorelease];
+    NSSet *set = [[[identifierURLs objectsForKey:theURL] copy] autorelease];
     [rwLock unlock];
     return set;
 }
