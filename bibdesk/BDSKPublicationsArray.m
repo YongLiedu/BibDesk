@@ -37,15 +37,26 @@
  */
 
 #import "BDSKPublicationsArray.h"
-#import "BDSKMultiValueDictionary.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
 #import "NSString_BDSKExtensions.h"
+#import "CFString_BDSKExtensions.h"
+
+
+static BOOL caseInsensitiveStringEqual(const void *item1, const void *item2, NSUInteger (*size)(const void *item)) {
+    return CFStringCompare(item1, item2, kCFCompareCaseInsensitive | kCFCompareNonliteral) == kCFCompareEqualTo;
+}
+
+static NSUInteger caseInsensitiveStringHash(const void *item, NSUInteger (*size)(const void *item)) {
+    return BDCaseInsensitiveStringHash(item);
+}
 
 
 @interface BDSKPublicationsArray (Private)
-- (void)addToItemsForCiteKeys:(BibItem *)item;
-- (void)removeFromItemsForCiteKeys:(BibItem *)item;
+- (void)addItem:(BibItem *)item forCiteKey:(NSString *)key;
+- (void)removeItem:(BibItem *)item forCiteKey:(NSString *)key;
+- (void)addItem:(BibItem *)item;
+- (void)removeItem:(BibItem *)item;
 - (void)updateFileOrder;
 @end
 
@@ -56,14 +67,7 @@
 
 - (id)init;
 {
-    self = [super init];
-    if (self) {
-        NSZone *zone = [self zone];
-        publications = [[NSMutableArray allocWithZone:zone] init];
-        itemsForCiteKeys = [[BDSKMultiValueDictionary allocWithZone:zone] initWithCaseInsensitiveKeys:YES];
-        itemsForIdentifierURLs = [[NSMutableDictionary allocWithZone:zone] init];
-    }
-    return self;
+    return [self initWithArray:nil];
 }
 
 // custom initializers should be explicitly defined in concrete subclasses to be supported, we should not rely on inheritance
@@ -73,11 +77,17 @@
     if (self) {
         NSZone *zone = [self zone];
         publications = [[NSMutableArray allocWithZone:zone] initWithArray:anArray];
-        itemsForCiteKeys = [[BDSKMultiValueDictionary allocWithZone:zone] initWithCaseInsensitiveKeys:YES];
         itemsForIdentifierURLs = [[NSMutableDictionary allocWithZone:zone] init];
-        for (BibItem *pub in publications)
-            [self addToItemsForCiteKeys:pub];
-        [self updateFileOrder];
+        NSPointerFunctions *keyPointerFunctions = [NSPointerFunctions pointerFunctionsWithOptions:NSPointerFunctionsStrongMemory | NSPointerFunctionsObjectPersonality];
+        [keyPointerFunctions setIsEqualFunction:&caseInsensitiveStringEqual];
+        [keyPointerFunctions setHashFunction:&caseInsensitiveStringHash];
+        NSPointerFunctions *valuePointerFunctions = [NSPointerFunctions pointerFunctionsWithOptions:NSPointerFunctionsStrongMemory | NSPointerFunctionsObjectPersonality];
+        itemsForCiteKeys = [[NSMapTable allocWithZone:zone] initWithKeyPointerFunctions:keyPointerFunctions valuePointerFunctions:valuePointerFunctions capacity:0];
+        if ([anArray count]) {
+            for (BibItem *pub in publications)
+                [self addItem:pub];
+            [self updateFileOrder];
+        }
     }
     return self;
 }
@@ -112,14 +122,14 @@
 - (void)addObject:(id)anObject;
 {
     [publications addObject:anObject];
-    [self addToItemsForCiteKeys:anObject];
+    [self addItem:anObject];
     [anObject setFileOrder:[NSNumber numberWithInteger:[publications count]]];
 }
 
 - (void)insertObject:(id)anObject atIndex:(NSUInteger)idx;
 {
     [publications insertObject:anObject atIndex:idx];
-    [self addToItemsForCiteKeys:anObject];
+    [self addItem:anObject];
     [self updateFileOrder];
 }
 
@@ -127,14 +137,14 @@
 {
     id lastObject = [publications lastObject];
     if(lastObject){
-        [self removeFromItemsForCiteKeys:lastObject];
+        [self removeItem:lastObject];
         [publications removeLastObject];
     }
 }
 
 - (void)removeObjectAtIndex:(NSUInteger)idx;
 {
-    [self removeFromItemsForCiteKeys:[publications objectAtIndex:idx]];
+    [self removeItem:[publications objectAtIndex:idx]];
     [publications removeObjectAtIndex:idx];
     [self updateFileOrder];
 }
@@ -143,9 +153,9 @@
 {
     BibItem *oldObject = [publications objectAtIndex:idx];
     [anObject setFileOrder:[oldObject fileOrder]];
-    [self removeFromItemsForCiteKeys:oldObject];
+    [self removeItem:oldObject];
     [publications replaceObjectAtIndex:idx withObject:anObject];
-    [self addToItemsForCiteKeys:anObject];
+    [self addItem:anObject];
 }
 
 - (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state objects:(id *)stackbuf count:(NSUInteger)len {
@@ -168,20 +178,20 @@
 - (void)addObjectsFromArray:(NSArray *)otherArray{
     [publications addObjectsFromArray:otherArray];
     for (BibItem *pub in publications)
-        [self addToItemsForCiteKeys:pub];
+        [self addItem:pub];
     [self updateFileOrder];
 }
 
 - (void)insertObjects:(NSArray *)objects atIndexes:(NSIndexSet *)indexes{
     [publications insertObjects:objects atIndexes:indexes];
     for (BibItem *pub in [publications objectsAtIndexes:indexes])
-        [self addToItemsForCiteKeys:pub];
+        [self addItem:pub];
     [self updateFileOrder];
 }
 
 - (void)removeObjectsAtIndexes:(NSIndexSet *)indexes{
     for (BibItem *pub in [publications objectsAtIndexes:indexes])
-        [self removeFromItemsForCiteKeys:pub];
+        [self removeItem:pub];
     [publications removeObjectsAtIndexes:indexes];
     [self updateFileOrder];
 }
@@ -200,8 +210,8 @@
 
 - (void)changeCiteKey:(NSString *)oldKey toCiteKey:(NSString *)newKey forItem:(BibItem *)anItem;
 {
-    [itemsForCiteKeys removeObject:anItem forKey:oldKey];
-    [itemsForCiteKeys addObject:anItem forKey:newKey];
+    [self removeItem:anItem forCiteKey:oldKey];
+    [self addItem:anItem forCiteKey:newKey];
 }
 
 - (BibItem *)itemForCiteKey:(NSString *)key;
@@ -209,7 +219,7 @@
 	if ([NSString isEmptyString:key]) 
 		return nil;
     
-	NSArray *items = [itemsForCiteKeys objectsForKey:key];
+	NSArray *items = [itemsForCiteKeys objectForKey:key];
 	
 	if ([items count] == 0)
 		return nil;
@@ -221,13 +231,13 @@
 {
 	NSArray *items = nil;
     if ([NSString isEmptyString:key] == NO) 
-		items = [itemsForCiteKeys objectsForKey:key];
+		items = [itemsForCiteKeys objectForKey:key];
     return items ?: [NSArray array];
 }
 
 - (BOOL)citeKeyIsUsed:(NSString *)key byItemOtherThan:(BibItem *)anItem;
 {
-    NSArray *items = [itemsForCiteKeys objectsForKey:key];
+    NSArray *items = [itemsForCiteKeys objectForKey:key];
     
 	if ([items count] > 1)
 		return YES;
@@ -300,14 +310,33 @@
 
 @implementation BDSKPublicationsArray (Private)
 
-- (void)addToItemsForCiteKeys:(BibItem *)item;
-{
-    [itemsForCiteKeys addObject:item forKey:[item citeKey]];
+- (void)addItem:(BibItem *)item forCiteKey:(NSString *)key{
+    NSMutableArray *array = [itemsForCiteKeys objectForKey:key];
+    if (array) {
+        [array addObject:item];
+    } else {
+        array = [[NSMutableArray alloc] initWithObjects:item, nil];
+        [itemsForCiteKeys setObject:array forKey:key];
+        [array release];
+    }
+}
+
+- (void)removeItem:(BibItem *)item forCiteKey:(NSString *)key{
+    NSMutableArray *array = [itemsForCiteKeys objectForKey:key];
+    if (array) {
+        [array removeObject:item];
+        if ([array count] == 0)
+            [itemsForCiteKeys removeObjectForKey:key];
+    }
+}
+
+- (void)addItem:(BibItem *)item{
+    [self addItem:item forCiteKey:[item citeKey]];
     [itemsForIdentifierURLs setObject:item forKey:[item identifierURL]];
 }
 
-- (void)removeFromItemsForCiteKeys:(BibItem *)item{
-    [itemsForCiteKeys removeObject:item forKey:[item citeKey]];
+- (void)removeItem:(BibItem *)item{
+    [self removeItem:item forCiteKey:[item citeKey]];
     [itemsForIdentifierURLs removeObjectForKey:[item identifierURL]];
 }
 
