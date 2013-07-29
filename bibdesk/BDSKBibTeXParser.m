@@ -101,14 +101,14 @@ static void handleError(bt_error *err);
     BDSKINITIALIZE;
     parserLock = [[NSLock alloc] init];
     // do nothing in the case of a harmless lexical buffer warning, use BDSKErrorObject for other errors
-    bt_err_handlers[BTERR_NOTIFY] = NULL;
-    bt_err_handlers[BTERR_CONTENT] = handleError;
-    bt_err_handlers[BTERR_LEXWARN] = handleError;
-    bt_err_handlers[BTERR_USAGEWARN] = handleError;
-    bt_err_handlers[BTERR_LEXERR] = handleError;
-    bt_err_handlers[BTERR_SYNTAX] = handleError;
-    bt_err_handlers[BTERR_USAGEERR] = handleError;
-    bt_err_handlers[BTERR_INTERNAL] = handleError;
+    bt_set_error_handler(BTERR_NOTIFY, NULL);
+    bt_set_error_handler(BTERR_CONTENT, handleError);
+    bt_set_error_handler(BTERR_LEXWARN, handleError);
+    bt_set_error_handler(BTERR_USAGEWARN, handleError);
+    bt_set_error_handler(BTERR_LEXERR, handleError);
+    bt_set_error_handler(BTERR_SYNTAX, handleError);
+    bt_set_error_handler(BTERR_USAGEERR, handleError);
+    bt_set_error_handler(BTERR_INTERNAL, handleError);
 }
 
 static NSString *stringWithoutComments(NSString *string) {
