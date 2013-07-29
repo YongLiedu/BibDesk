@@ -243,8 +243,6 @@ typedef struct
 
 typedef void (*bt_err_handler) (bt_error *);
 
-extern bt_err_handler bt_err_handlers[NUM_ERRCLASSES];
-
 #if defined(__cplusplus__) || defined(__cplusplus) || defined(c_plusplus)
 extern "C" {
 #endif
@@ -305,6 +303,7 @@ void   bt_reset_error_counts (void);
 int    bt_get_error_count (bt_errclass errclass);
 int *  bt_get_error_counts (int *counts);
 ushort bt_error_status (int *saved_counts);
+void   bt_set_error_handler (bt_errclass errclass, bt_err_handler handler);
 
 /* macros.c */
 void bt_add_macro_value (AST *assignment, ushort options);

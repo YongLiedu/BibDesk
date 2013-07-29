@@ -343,3 +343,21 @@ ushort bt_error_status (int *saved_counts)
 
    return status;
 } /* bt_error_status () */
+
+
+/* ------------------------------------------------------------------------
+@NAME       : bt_set_error_handler
+@INPUT      : errclass
+              handler
+@OUTPUT     : 
+@RETURNS    : 
+@DESCRIPTION: Set an error handler for an error class.
+@GLOBALS    : 
+@CALLS      : 
+@CREATED    : 2013/07/29, CMH
+@MODIFIED   : 
+-------------------------------------------------------------------------- */
+void bt_set_error_handler (bt_errclass errclass, bt_err_handler handler)
+{
+   bt_err_handlers[errclass] = handler;
+}
