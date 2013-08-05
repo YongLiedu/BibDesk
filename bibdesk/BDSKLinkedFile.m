@@ -407,21 +407,6 @@ static Class BDSKLinkedFileClass = Nil;
     return relativePath;
 }
 
-- (void)setFileRef:(const FSRef *)newFileRef;
-{
-    if (fileRef != NULL) {
-        NSZoneFree([self zone], (void *)fileRef);
-        fileRef = NULL;
-    }
-    if (newFileRef != NULL) {
-        FSRef *newRef = (FSRef *)NSZoneMalloc([self zone], sizeof(FSRef));
-        if (newRef) {
-            bcopy(newFileRef, newRef, sizeof(FSRef));
-            fileRef = newRef;
-        }
-    }
-}
-
 - (const FSRef *)fileRef;
 {
     NSString *basePath = [delegate basePathForLinkedFile:self];
@@ -443,8 +428,13 @@ static Class BDSKLinkedFileClass = Nil;
             shouldUpdate = shouldUpdate && hasBaseRef && hasRef;
         }
         
-        if (hasRef)
-            [self setFileRef:&aRef];
+        if (hasRef) {
+            FSRef *newRef = (FSRef *)NSZoneMalloc([self zone], sizeof(FSRef));
+            if (newRef) {
+                bcopy(&aRef, newRef, sizeof(FSRef));
+                fileRef = newRef;
+            }
+        }
     } else if (relativePath == nil) {
         shouldUpdate = hasBaseRef;
     }
@@ -467,7 +457,7 @@ static Class BDSKLinkedFileClass = Nil;
     
     if (aURL == NULL && hadFileRef) {
         // fileRef was invalid, try to update it
-        [self setFileRef:NULL];
+        BDSKZONEDESTROY(fileRef);
         if ([self fileRef] != NULL)
             aURL = CFURLCreateFromFSRef(NULL, fileRef);
     }
@@ -541,7 +531,7 @@ static Class BDSKLinkedFileClass = Nil;
             CFRelease(aURL);
         } else {
             // the fileRef was invalid, reset it and update
-            [self setFileRef:NULL];
+            BDSKZONEDESTROY(fileRef);
             [self fileRef];
             if (fileRef == NULL) {
                 // this can happen after an auto file to a volume, as the file is actually not moved but copied
