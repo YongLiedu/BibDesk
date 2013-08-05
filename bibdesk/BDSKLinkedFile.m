@@ -69,7 +69,7 @@ static AliasHandle BDSKPathToAliasHandle(CFStringRef inPath, CFStringRef inBaseP
 
 - (id)initWithPath:(NSString *)aPath delegate:(id)aDelegate;
 
-- (const FSRef *)fileRef;
+- (void)updateFileRef;
 
 - (NSData *)aliasDataRelativeToPath:(NSString *)newBasePath;
 
@@ -325,7 +325,7 @@ static Class BDSKLinkedFileClass = Nil;
     if (self) {
         if (basePath)
             // this initalizes the FSRef and update the alias
-            [self fileRef];
+            [self updateFileRef];
     }
     return self;
 }
@@ -407,7 +407,7 @@ static Class BDSKLinkedFileClass = Nil;
     return relativePath;
 }
 
-- (const FSRef *)fileRef;
+- (void)updateFileRef;
 {
     NSString *basePath = [delegate basePathForLinkedFile:self];
     FSRef baseRef;
@@ -446,19 +446,22 @@ static Class BDSKLinkedFileClass = Nil;
             CFRelease(aURL);
         }
     }
-    
-    return fileRef;
 }
 
 - (NSURL *)URL;
 {
     BOOL hadFileRef = fileRef != NULL;
-    CFURLRef aURL = (hadFileRef || [self fileRef]) ? CFURLCreateFromFSRef(NULL, fileRef) : NULL;
+    
+    if (hadFileRef == NO)
+        [self updateFileRef];
+    
+    CFURLRef aURL = fileRef ? CFURLCreateFromFSRef(NULL, fileRef) : NULL;
     
     if (aURL == NULL && hadFileRef) {
         // fileRef was invalid, try to update it
         BDSKZONEDESTROY(fileRef);
-        if ([self fileRef] != NULL)
+        [self updateFileRef];
+        if (fileRef != NULL)
             aURL = CFURLCreateFromFSRef(NULL, fileRef);
     }
     BOOL changed = [(NSURL *)aURL isEqual:lastURL] == NO && (aURL != NULL || lastURL != nil);
@@ -484,15 +487,16 @@ static Class BDSKLinkedFileClass = Nil;
 {
     // make sure the fileRef is valid
     [self URL];
+    // not sure if this is still needed after the previous call, only does something when there was a valid fileRef, relativePath, and baseRef, then it updates
+    [self updateFileRef];
     
-    FSRef *fsRef = (FSRef *)[self fileRef];
     FSRef baseRef;
     AliasHandle anAlias = NULL;
     CFDataRef data = NULL;
     
-    if (fsRef) {
+    if (fileRef) {
         BOOL hasBaseRef = (basePath && BDSKPathToFSRef((CFStringRef)basePath, &baseRef));
-        anAlias = BDSKFSRefToAliasHandle(fsRef, hasBaseRef ? &baseRef : NULL);
+        anAlias = BDSKFSRefToAliasHandle(fileRef, hasBaseRef ? &baseRef : NULL);
     } else if (relativePath && basePath) {
         anAlias = BDSKPathToAliasHandle((CFStringRef)[basePath stringByAppendingPathComponent:relativePath], (CFStringRef)basePath);
     }
@@ -521,7 +525,7 @@ static Class BDSKLinkedFileClass = Nil;
     
     if (fileRef == NULL) {
         // this does the updating if possible
-        [self fileRef];
+        [self updateFileRef];
     } else {
         CFURLRef aURL = CFURLCreateFromFSRef(NULL, fileRef);
         if (aURL != NULL) {
@@ -532,17 +536,17 @@ static Class BDSKLinkedFileClass = Nil;
         } else {
             // the fileRef was invalid, reset it and update
             BDSKZONEDESTROY(fileRef);
-            [self fileRef];
+            [self updateFileRef];
             if (fileRef == NULL) {
                 // this can happen after an auto file to a volume, as the file is actually not moved but copied
                 AliasHandle anAlias = BDSKPathToAliasHandle((CFStringRef)aPath, (CFStringRef)basePath);
                 if (anAlias != NULL) {
                     AliasHandle saveAlias = alias;
                     alias = anAlias;
-                    [self fileRef];
+                    [self updateFileRef];
                     if (fileRef == NULL) {
                         alias = saveAlias;
-                        [self fileRef];
+                        [self updateFileRef];
                     } else {
                         BDSKDisposeAliasHandle(saveAlias);
                     }
@@ -559,10 +563,10 @@ static Class BDSKLinkedFileClass = Nil;
             if (anAlias != NULL) {
                 AliasHandle saveAlias = alias;
                 alias = anAlias;
-                [self fileRef];
+                [self updateFileRef];
                 if (fileRef == NULL) {
                     alias = saveAlias;
-                    [self fileRef];
+                    [self updateFileRef];
                 } else {
                     BDSKDisposeAliasHandle(saveAlias);
                 }
