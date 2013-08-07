@@ -410,7 +410,7 @@ static Class BDSKLinkedFileClass = Nil;
 {
     NSString *basePath = [delegate basePathForLinkedFile:self];
     FSRef baseRef;
-    Boolean hasBaseRef = basePath && BDSKPathToFSRef((CFStringRef)basePath, &baseRef);
+    Boolean hasBaseRef = BDSKPathToFSRef((CFStringRef)basePath, &baseRef);
     Boolean shouldUpdate = false;
     
     if (fileRef == NULL) {
@@ -494,7 +494,7 @@ static Class BDSKLinkedFileClass = Nil;
     CFDataRef data = NULL;
     
     if (fileRef) {
-        BOOL hasBaseRef = (basePath && BDSKPathToFSRef((CFStringRef)basePath, &baseRef));
+        BOOL hasBaseRef = BDSKPathToFSRef((CFStringRef)basePath, &baseRef);
         anAlias = BDSKFSRefToAliasHandle(fileRef, hasBaseRef ? &baseRef : NULL);
     } else if (relativePath && basePath) {
         anAlias = BDSKPathToAliasHandle((CFStringRef)[basePath stringByAppendingPathComponent:relativePath], (CFStringRef)basePath);
@@ -545,7 +545,7 @@ static Class BDSKLinkedFileClass = Nil;
         CFURLRef aURL = CFURLCreateFromFSRef(NULL, fileRef);
         if (aURL != NULL) {
             FSRef baseRef;
-            if (basePath && BDSKPathToFSRef((CFStringRef)basePath, &baseRef))
+            if (BDSKPathToFSRef((CFStringRef)basePath, &baseRef))
                 [self updateWithPath:[(NSURL *)aURL path] basePath:basePath baseRef:&baseRef];
             CFRelease(aURL);
         } else {
@@ -559,7 +559,7 @@ static Class BDSKLinkedFileClass = Nil;
     }
     if (aPath && [[self path] isEqualToString:aPath] == NO) {
         FSRef baseRef;
-        if (basePath && BDSKPathToFSRef((CFStringRef)basePath, &baseRef))
+        if (BDSKPathToFSRef((CFStringRef)basePath, &baseRef))
             [self updateWithPath:aPath basePath:basePath baseRef:&baseRef];
         else
             [self updateAliasWithPath:aPath basePath:basePath];
