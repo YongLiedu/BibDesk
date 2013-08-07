@@ -518,6 +518,22 @@ static Class BDSKLinkedFileClass = Nil;
     return [[NSKeyedArchiver archivedDataWithRootObject:dictionary] base64String];
 }
 
+- (void)updateAliasWithPath:(NSString *)aPath basePath:(NSString *)basePath {
+    AliasHandle anAlias = BDSKPathToAliasHandle((CFStringRef)aPath, (CFStringRef)basePath);
+    if (anAlias != NULL) {
+        AliasHandle saveAlias = alias;
+        alias = anAlias;
+        [self updateFileRef];
+        if (fileRef == NULL) {
+            BDSKDisposeAliasHandle(anAlias);
+            alias = saveAlias;
+            [self updateFileRef];
+        } else {
+            BDSKDisposeAliasHandle(saveAlias);
+        }
+    }
+}
+
 // this could be called when the document fileURL changes
 - (void)updateWithPath:(NSString *)aPath {
     NSString *basePath = [delegate basePathForLinkedFile:self];
@@ -536,42 +552,17 @@ static Class BDSKLinkedFileClass = Nil;
             // the fileRef was invalid, reset it and update
             BDSKZONEDESTROY(fileRef);
             [self updateFileRef];
-            if (fileRef == NULL && aPath) {
+            if (fileRef == NULL && aPath)
                 // this can happen after an auto file to a volume, as the file is actually not moved but copied
-                AliasHandle anAlias = BDSKPathToAliasHandle((CFStringRef)aPath, (CFStringRef)basePath);
-                if (anAlias != NULL) {
-                    AliasHandle saveAlias = alias;
-                    alias = anAlias;
-                    [self updateFileRef];
-                    if (fileRef == NULL) {
-                        alias = saveAlias;
-                        [self updateFileRef];
-                    } else {
-                        BDSKDisposeAliasHandle(saveAlias);
-                    }
-                }
-            }
+                [self updateAliasWithPath:aPath basePath:basePath];
         }
     }
     if (aPath && [[self path] isEqualToString:aPath] == NO) {
         FSRef baseRef;
-        if (basePath && BDSKPathToFSRef((CFStringRef)basePath, &baseRef)) {
+        if (basePath && BDSKPathToFSRef((CFStringRef)basePath, &baseRef))
             [self updateWithPath:aPath basePath:basePath baseRef:&baseRef];
-        } else {
-            AliasHandle anAlias = BDSKPathToAliasHandle((CFStringRef)aPath, (CFStringRef)basePath);
-            if (anAlias != NULL) {
-                AliasHandle saveAlias = alias;
-                alias = anAlias;
-                [self updateFileRef];
-                if (fileRef == NULL) {
-                    alias = saveAlias;
-                    [self updateFileRef];
-                } else {
-                    BDSKDisposeAliasHandle(saveAlias);
-                }
-                
-            }
-        }
+        else
+            [self updateAliasWithPath:aPath basePath:basePath];
     }
 }
 
