@@ -536,7 +536,7 @@ static Class BDSKLinkedFileClass = Nil;
             // the fileRef was invalid, reset it and update
             BDSKZONEDESTROY(fileRef);
             [self updateFileRef];
-            if (fileRef == NULL) {
+            if (fileRef == NULL && aPath) {
                 // this can happen after an auto file to a volume, as the file is actually not moved but copied
                 AliasHandle anAlias = BDSKPathToAliasHandle((CFStringRef)aPath, (CFStringRef)basePath);
                 if (anAlias != NULL) {
