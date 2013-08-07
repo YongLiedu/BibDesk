@@ -2497,7 +2497,7 @@ static void addFilesToArray(const void *value, void *context)
     [files insertObject:aFile atIndex:idx];
     [aFile setDelegate:self];
     if ([owner fileURL])
-        [aFile update];
+        [aFile updateWithPath:nil];
     
     [self noteFilesChanged:[aFile isFile]];
 }
@@ -3458,7 +3458,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     }
     
     if ([owner fileURL])
-        [files makeObjectsPerformSelector:@selector(update)];
+        [files makeObjectsPerformSelector:@selector(updateWithPath:) withObject:nil];
     
     NSUInteger unresolvedFileCount = [unresolvedFiles count], unresolvedURLCount = [unresolvedURLs count];
     

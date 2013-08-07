@@ -73,7 +73,6 @@
 - (void)setDelegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 - (id<BDSKLinkedFileDelegate>)delegate;
 
-- (void)update;
 - (void)updateWithPath:(NSString *)aPath;
 
 @end

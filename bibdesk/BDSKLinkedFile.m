@@ -183,7 +183,6 @@ static Class BDSKLinkedFileClass = Nil;
 
 - (BOOL)isFile { return NO; }
 
-- (void)update { [self updateWithPath:nil]; }
 - (void)updateWithPath:(NSString *)aPath {}
 
 - (NSString *)relativePath { return nil; }
