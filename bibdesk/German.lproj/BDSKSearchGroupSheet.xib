@@ -1352,29 +1352,6 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
-						<string key="label">enabled2: zoom</string>
-						<reference key="source" ref="589063444"/>
-						<reference key="destination" ref="753529048"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="589063444"/>
-							<reference key="NSDestination" ref="753529048"/>
-							<string key="NSLabel">enabled2: zoom</string>
-							<string key="NSBinding">enabled2</string>
-							<string key="NSKeyPath">zoom</string>
-							<dictionary key="NSOptions">
-								<integer value="-1" key="NSMultipleValuesPlaceholder"/>
-								<integer value="-1" key="NSNoSelectionPlaceholder"/>
-								<integer value="-1" key="NSNotApplicablePlaceholder"/>
-								<integer value="-1" key="NSNullPlaceholder"/>
-							</dictionary>
-							<reference key="NSPreviousConnector" ref="641251396"/>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">462</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
 						<string key="label">enabled: editable</string>
 						<reference key="source" ref="338091397"/>
 						<reference key="destination" ref="753529048"/>
@@ -1388,29 +1365,6 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 						</object>
 					</object>
 					<int key="connectionID">463</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">enabled2: zoom</string>
-						<reference key="source" ref="338091397"/>
-						<reference key="destination" ref="753529048"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="338091397"/>
-							<reference key="NSDestination" ref="753529048"/>
-							<string key="NSLabel">enabled2: zoom</string>
-							<string key="NSBinding">enabled2</string>
-							<string key="NSKeyPath">zoom</string>
-							<dictionary key="NSOptions">
-								<integer value="-1" key="NSMultipleValuesPlaceholder"/>
-								<integer value="-1" key="NSNoSelectionPlaceholder"/>
-								<integer value="-1" key="NSNotApplicablePlaceholder"/>
-								<integer value="-1" key="NSNullPlaceholder"/>
-							</dictionary>
-							<reference key="NSPreviousConnector" ref="890861913"/>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">464</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -2016,6 +1970,52 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 						</object>
 					</object>
 					<int key="connectionID">887</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled2: zoomOrISI</string>
+						<reference key="source" ref="589063444"/>
+						<reference key="destination" ref="753529048"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="589063444"/>
+							<reference key="NSDestination" ref="753529048"/>
+							<string key="NSLabel">enabled2: zoomOrISI</string>
+							<string key="NSBinding">enabled2</string>
+							<string key="NSKeyPath">zoomOrISI</string>
+							<dictionary key="NSOptions">
+								<integer value="-1" key="NSMultipleValuesPlaceholder"/>
+								<integer value="-1" key="NSNoSelectionPlaceholder"/>
+								<integer value="-1" key="NSNotApplicablePlaceholder"/>
+								<integer value="-1" key="NSNullPlaceholder"/>
+							</dictionary>
+							<reference key="NSPreviousConnector" ref="641251396"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">939</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled2: zoomOrISI</string>
+						<reference key="source" ref="338091397"/>
+						<reference key="destination" ref="753529048"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="338091397"/>
+							<reference key="NSDestination" ref="753529048"/>
+							<string key="NSLabel">enabled2: zoomOrISI</string>
+							<string key="NSBinding">enabled2</string>
+							<string key="NSKeyPath">zoomOrISI</string>
+							<dictionary key="NSOptions">
+								<integer value="-1" key="NSMultipleValuesPlaceholder"/>
+								<integer value="-1" key="NSNoSelectionPlaceholder"/>
+								<integer value="-1" key="NSNotApplicablePlaceholder"/>
+								<integer value="-1" key="NSNullPlaceholder"/>
+							</dictionary>
+							<reference key="NSPreviousConnector" ref="890861913"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">940</int>
 				</object>
 			</array>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -2831,7 +2831,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">938</int>
+			<int key="maxID">940</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
