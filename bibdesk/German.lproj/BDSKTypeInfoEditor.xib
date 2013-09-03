@@ -49,7 +49,7 @@
 				<int key="NSWindowBacking">2</int>
 				<string key="NSWindowRect">{{27, 325}, {589, 384}}</string>
 				<int key="NSWTFlags">1886912512</int>
-				<string key="NSWindowTitle">TypeInfo Editor</string>
+				<string key="NSWindowTitle">Typeninformation-Editor</string>
 				<string key="NSWindowClass">NSWindow</string>
 				<string key="NSViewClass">View</string>
 				<string key="NSWindowContentMinSize">{578, 170}</string>
