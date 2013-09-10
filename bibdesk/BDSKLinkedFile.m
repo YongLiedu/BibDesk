@@ -477,8 +477,10 @@ static Class BDSKLinkedFileClass = Nil;
 - (NSURL *)displayURL;
 {
     NSURL *displayURL = [self URL];
-    if (displayURL == nil && relativePath)
-        displayURL = [NSURL fileURLWithPath:relativePath];
+    if (displayURL == nil && relativePath) {
+        NSString *basePath = [delegate basePathForLinkedFile:self];
+        displayURL = basePath ? [NSURL URLWithString:relativePath relativeToURL:[NSURL fileURLWithPath:basePath]] : [NSURL fileURLWithPath:relativePath];
+    }
     return displayURL;
 }
 
