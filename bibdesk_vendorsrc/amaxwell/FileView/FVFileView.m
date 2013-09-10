@@ -4322,7 +4322,11 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
             else
                 _name = (NSString *)name;
         } else {
-            _name = [[[aURL absoluteString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] copyWithZone:[self zone]];
+            NSString *name = [aURL absoluteString];
+            NSRange range = [name rangeOfString:@"://"];
+            if (range.location != NSNotFound)
+                name = [name substringFromIndex:NSMaxRange(range)];
+            _name = [[name stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] copyWithZone:[self zone]];
         }
         _label = [FVFinderLabel finderLabelForURL:aURL];
     }
