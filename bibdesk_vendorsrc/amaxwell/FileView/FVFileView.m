@@ -1980,7 +1980,7 @@ static inline bool __equal_timespecs(const struct timespec *ts1, const struct ti
         imageRect.size.width = layerSize.width;
         CGContextClearRect(layerContext, NSRectToCGRect(imageRect));
         
-        [NSGraphicsContext saveGraphicsState];
+        NSGraphicsContext *savedContext = [[NSGraphicsContext currentContext] retain];
         NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:layerContext flipped:YES];
         [NSGraphicsContext setCurrentContext:nsContext];
         [nsContext saveGraphicsState];
@@ -1997,7 +1997,8 @@ static inline bool __equal_timespecs(const struct timespec *ts1, const struct ti
         [p setLineWidth:1.0];
         
         [nsContext restoreGraphicsState];
-        [NSGraphicsContext restoreGraphicsState];
+        [NSGraphicsContext setCurrentContext:savedContext];
+        [savedContext release];
     }
     // make sure we use source over for drawing the image
     CGContextSaveGState(drawingContext);
