@@ -171,7 +171,7 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
 
 - (NSArray *)categoryGroups{
     NSMutableArray *categoryGroups = [NSMutableArray array];
-    for (BDSKCategoryParentGroup *group in groups)
+    for (BDSKCategoryParentGroup *group in [self categoryParents])
         [categoryGroups addObjectsFromArray:[group categoryGroups]];
     return categoryGroups;
 }
