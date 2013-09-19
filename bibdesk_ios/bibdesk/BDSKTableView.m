@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 2/18/09.
 /*
- This software is Copyright (c) 2009-2012
+ This software is Copyright (c) 2009-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -425,15 +425,6 @@ static char BDSKTableViewFontDefaultsObservationContext;
         }
     } else
         NSBeep();
-}
-
-- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)flag {
-    if ([[self dataSource] respondsToSelector:@selector(tableView:draggingSourceOperationMaskForLocal:)])
-        return [[self dataSource] tableView:self draggingSourceOperationMaskForLocal:flag];
-    else if (flag)
-        return NSDragOperationEvery;
-    else
-        return NSDragOperationNone;        
 }
 
 - (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation {

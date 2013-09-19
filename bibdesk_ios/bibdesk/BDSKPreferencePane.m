@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 2/17/09.
 /*
- This software is Copyright (c) 2009-2012
+ This software is Copyright (c) 2009-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -109,7 +109,6 @@
 - (void)willSelect {}
 - (void)didSelect {}
 
-- (BDSKPreferencePaneUnselectReply)shouldUnselect { return BDSKPreferencePaneUnselectNow; }
 - (void)willUnselect {}
 - (void)didUnselect {}
 

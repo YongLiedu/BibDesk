@@ -4,7 +4,7 @@
 //
 //  Created by Michael McCracken on 4/13/05.
 /*
- This software is Copyright (c) 2005-2012
+ This software is Copyright (c) 2005-2013
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -359,10 +359,10 @@
     NSArray *currentFields = [[self publication] allFieldNames];
     NSArray *fieldNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObject:BDSKCrossrefString] excluding:currentFields];
     
-    BDSKAddFieldSheetController *addFieldController = [[[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:",@"Label for adding field")
-                                                                                               fieldsArray:fieldNames] autorelease];
+    BDSKFieldSheetController *addFieldController = [BDSKFieldSheetController fieldSheetControllerWithChoosableFields:fieldNames
+                                                                             label:NSLocalizedString(@"Name of field to add:",@"Label for adding field")];
 	[addFieldController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
-        NSString *newField = [addFieldController field];
+        NSString *newField = [addFieldController chosenField];
         newField = [newField fieldName];
         
         if(newField == nil || [fields containsObject:newField] || result == NSCancelButton)
@@ -375,7 +375,6 @@
         [itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
         [itemTableView editColumn:2 row:row withEvent:nil select:YES];
     }];
-    [addFieldController release];
 }
 
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender{

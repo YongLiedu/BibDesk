@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 11/1/06.
 /*
- This software is Copyright (c) 2006-2012
+ This software is Copyright (c) 2006-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -45,10 +45,8 @@
     CGFloat pinchZoomFactor;
 }
 
-- (void)scalePopUpAction:(id)sender;
 - (CGFloat)scaleFactor;
 - (void)setScaleFactor:(CGFloat)factor;
-- (void)setScaleFactor:(CGFloat)factor adjustPopup:(BOOL)flag;
 
 - (IBAction)zoomToActualSize:(id)sender;
 - (IBAction)zoomIn:(id)sender;
@@ -56,8 +54,6 @@
 - (BOOL)canZoomToActualSize;
 - (BOOL)canZoomIn;
 - (BOOL)canZoomOut;
-
-- (void)makeScalePopUpButton;
 
 - (IBAction)printSelection:(id)sender;
 

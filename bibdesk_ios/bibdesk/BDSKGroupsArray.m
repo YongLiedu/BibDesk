@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 11/10/06.
 /*
- This software is Copyright (c) 2006-2012
+ This software is Copyright (c) 2006-2013
  Christiaan Hofman. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -177,7 +177,7 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
 
 - (NSArray *)categoryGroups{
     NSMutableArray *categoryGroups = [NSMutableArray array];
-    for (BDSKCategoryParentGroup *group in groups)
+    for (BDSKCategoryParentGroup *group in [self categoryParents])
         [categoryGroups addObjectsFromArray:[group categoryGroups]];
     return categoryGroups;
 }

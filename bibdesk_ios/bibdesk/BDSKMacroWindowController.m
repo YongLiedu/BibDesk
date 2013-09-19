@@ -4,7 +4,7 @@
 //
 //  Created by Michael McCracken on 2/21/05.
 /*
- This software is Copyright (c) 2005-2012
+ This software is Copyright (c) 2005-2013
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -127,6 +127,9 @@
     
     NSSortDescriptor *sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
     [arrayController setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];
+    
+    [tableView setDraggingSourceOperationMask:NSDragOperationCopy forLocal:YES];
+    [tableView setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
     
     NSTableColumn *tc = [tableView tableColumnWithIdentifier:MACRO_COLUMNID];
     [[tc dataCell] setFormatter:[[[MacroKeyFormatter alloc] init] autorelease]];
@@ -721,10 +724,6 @@
 @end
 
 @implementation BDSKMacroTableView
-
-- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
-    return NSDragOperationCopy;
-}
 
 - (void)awakeFromNib{
     BDSKTypeSelectHelper *aTypeSelectHelper = [[BDSKTypeSelectHelper alloc] init];

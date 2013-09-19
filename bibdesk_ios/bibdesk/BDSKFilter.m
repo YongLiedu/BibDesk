@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 17/3/05.
 /*
- This software is Copyright (c) 2005-2012
+ This software is Copyright (c) 2005-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -49,17 +49,17 @@
 - (id)init {
 	BDSKCondition *condition = [[BDSKCondition alloc] init];
 	NSArray *newConditions = [[NSArray alloc] initWithObjects:condition, nil];
-	self = [self initWithConditions:newConditions];
+	self = [self initWithConditions:newConditions conjunction:BDSKAnd];
 	[condition release];
 	[newConditions release];
 	return self;
 }
 
-- (id)initWithConditions:(NSArray *)newConditions {
+- (id)initWithConditions:(NSArray *)aConditions conjunction:(BDSKConjunction)aConjunction {
     self = [super init];
     if (self) {
-		conditions = [[NSMutableArray alloc] initWithArray:newConditions copyItems:YES];
-		conjunction = BDSKAnd;
+		conditions = [[NSMutableArray alloc] initWithArray:aConditions copyItems:YES];
+		conjunction = aConjunction;
 		group = nil;
 	}
 	return self;
@@ -74,15 +74,14 @@
 		[newConditions addObject:condition];
 		[condition release];
 	}
+    // we need at least one condition
+	if ([newConditions count] == 0) {
+        condition = [[BDSKCondition alloc] init];
+        [newConditions addObject:condition];
+        [condition release];
+    }
 	
-	if ([newConditions count] > 0)
-		self = [self initWithConditions:newConditions];
-	else
-		self = [self init];
-	if (self) {
-		conjunction = [[dictionary objectForKey:@"conjunction"] integerValue];
-	}
-	return self;
+    return [self initWithConditions:newConditions conjunction:[[dictionary objectForKey:@"conjunction"] integerValue]];
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
@@ -108,9 +107,7 @@
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
-	BDSKFilter *copy = [[BDSKFilter allocWithZone:aZone] initWithConditions:[self conditions]];
-	[copy setConjunction:[self conjunction]];
-	return copy;
+	return [[BDSKFilter allocWithZone:aZone] initWithConditions:[self conditions] conjunction:[self conjunction]];
 }
 
 - (NSString *)description {

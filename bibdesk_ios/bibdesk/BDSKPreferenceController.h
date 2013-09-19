@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 05/04/06.
 /*
- This software is Copyright (c) 2006-2012
+ This software is Copyright (c) 2006-2013
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,6 @@
     NSMutableDictionary *records;
     NSMutableDictionary *panes;
     NSString *selectedPaneIdentifier;
-    NSString *delayedPaneIdentifier;
     NSMutableDictionary *toolbarItems;
     NSString *helpBookName;
     NSMutableDictionary *identifierSearchTerms;
@@ -83,8 +82,6 @@
 - (id)selectedPane;
 
 - (void)selectPaneWithIdentifier:(NSString *)identifier;
-
-- (void)replyToShouldUnselect:(BOOL)shouldUnselect;
 
 - (NSString *)titleForCategory:(NSString *)category;
 - (NSString *)localizedTitleForCategory:(NSString *)category;

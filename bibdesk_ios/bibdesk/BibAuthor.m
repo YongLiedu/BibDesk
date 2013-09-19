@@ -2,7 +2,7 @@
 
 //  Created by Michael McCracken on Wed Dec 19 2001.
 /*
- This software is Copyright (c) 2001-2012
+ This software is Copyright (c) 2001-2013
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,6 @@
 
 @interface BibAuthor (Private)
 
-- (void)splitName;
 - (void)setupNames;
 - (void)setupAbbreviatedNames;
 
@@ -111,7 +110,7 @@ static CFCharacterSetRef dashSet = NULL;
         
         originalName = [aName copy];
         // this does all the name parsing
-		[self splitName];
+		[self setupNames];
 	}
     
     return self;
@@ -150,7 +149,7 @@ static CFCharacterSetRef dashSet = NULL;
         publication = [coder decodeObjectForKey:@"publication"];
         originalName = [[coder decodeObjectForKey:@"name"] retain];
         // this should take care of the rest of the ivars
-        [self splitName];
+        [self setupNames];
     } else {
         [[super init] release];
         self = [[NSKeyedUnarchiver unarchiveObjectWithData:[coder decodeDataObject]] retain];
@@ -411,7 +410,7 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 
 @implementation BibAuthor (Private)
 
-- (void)splitName{
+- (void)setupNames{
     
     NSParameterAssert(originalName != nil);
     // @@ this is necessary because the hash method depends on the internal state of the object (which is itself necessary since we can have multiple author instances of the same author)
@@ -430,9 +429,6 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
     lastName = [[parts objectForKey:@"last"] copy];
     jrPart = [[parts objectForKey:@"jr"] copy];
     
-    [self setupNames];    
-}
-
 // This follows the recommendations from Oren Patashnik's btxdoc.tex:
 /*To summarize, BibTeX allows three possible forms for the name: 
 "First von Last" 
@@ -441,8 +437,6 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 You may almost always use the first form; you shouldn't if either there's a Jr part, or the Last part has multiple tokens but there's no von part. 
 */
 // Note that if there is only one word/token, it is the lastName, so that's assumed to always be there.
-
-- (void)setupNames{
     
     BDSKASSERT(name == nil);
     BDSKASSERT(fullLastName == nil);

@@ -2,7 +2,7 @@
 
 //  Created by Michael McCracken on Sun Jul 21 2002.
 /*
- This software is Copyright (c) 2002-2012
+ This software is Copyright (c) 2002-2013
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -399,7 +399,6 @@ An inline buffer is used for speed in accessing each character.
     @result     (description)
 */
 
-- (NSArray *)componentsSeparatedByStringCaseInsensitive:(NSString *)separator;
 - (NSArray *)componentsSeparatedByAnd;
 - (NSArray *)componentsSeparatedByComma;
 

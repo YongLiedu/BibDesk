@@ -5,7 +5,7 @@
 //  Created by Christiaan Hofman on 6/8/05.
 //
 /*
- This software is Copyright (c) 2005-2012
+ This software is Copyright (c) 2005-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,6 @@ enum {
 	BDSKGenerateLTB = 0,
 	BDSKGenerateLaTeX = 1,
 	BDSKGeneratePDF = 2,
-	BDSKGenerateRTF = 3,
 };
 
 @class BDSKTeXTask;
@@ -88,18 +87,15 @@ enum {
 - (NSString *)LTBString;
 - (NSString *)LaTeXString;
 - (NSData *)PDFData;
-- (NSData *)RTFData;
 
 - (NSString *)logFilePath;
 - (NSString *)LTBFilePath;
 - (NSString *)LaTeXFilePath;
 - (NSString *)PDFFilePath;
-- (NSString *)RTFFilePath;
 
 - (BOOL)hasLTB;
 - (BOOL)hasLaTeX;
 - (BOOL)hasPDFData;
-- (BOOL)hasRTFData;
 
 - (BOOL)isProcessing;
 

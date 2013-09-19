@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 05/04/06.
 /*
- This software is Copyright (c) 2006-2012
+ This software is Copyright (c) 2006-2013
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #import "BDSKOverlayWindow.h"
 #import "BDSKVersionNumber.h"
 #import <Sparkle/Sparkle.h>
+#import "NSViewAnimation_BDSKExtensions.h"
 
 #define BDSKPreferencesWindowFrameAutosaveName @"BDSKPreferencesWindow"
 
@@ -69,7 +70,7 @@
 - (void)loadPreferences;
 - (void)loadPanes;
 - (BDSKPreferenceIconView *)iconView;
-- (void)changeContentView:(NSView *)view display:(BOOL)display;
+- (void)changeContentView:(NSView *)view from:(NSView *)oldView display:(BOOL)display;
 - (void)updateSearchAndShowAll:(BOOL)showAll;
 @end
 
@@ -121,15 +122,17 @@ static id sharedController = nil;
 
 // windowDidLoad comes after the window is already moved onscreen, I think that's wrong
 - (void)windowDidLoad {
+    NSWindow *window = [self window];
+    
     [self loadPanes];
     
     [self setupToolbar];
-    [[self window] setShowsToolbarButton:NO];
+    [window setShowsToolbarButton:NO];
     // we need to do this because we want to restore the top position, otherwise the bottom position will be restored
     [self setWindowFrameAutosaveName:BDSKPreferencesWindowFrameAutosaveName];
-    [[self window] setFrameUsingName:BDSKPreferencesWindowFrameAutosaveName force:YES];
+    [window setFrameUsingName:BDSKPreferencesWindowFrameAutosaveName force:YES];
     
-    [[self window] setTitle:[self defaultWindowTitle]];
+    [window setTitle:[self defaultWindowTitle]];
     
     iconView = [[BDSKPreferenceIconView alloc] initWithPreferenceController:self];
     [iconView setAction:@selector(iconViewShowPane:)];
@@ -138,25 +141,27 @@ static id sharedController = nil;
     CGFloat width = NSWidth([iconView frame]);
     for (BDSKPreferencePane *pane in [panes objectEnumerator])
         width = fmax(width, NSWidth([[pane view] frame]));
-    NSRect frame = [[self window] frame];
+    NSRect frame = [window frame];
     frame.size.width = width;
-    [[self window] setFrame:frame display:NO];
+    [window setFrame:frame display:NO];
     frame = [iconView frame];
     frame.size.width = width;
     [iconView setFrame:frame];
     frame = [controlView frame];
     frame.size.width = width;
     [controlView setFrame:frame];
+    [iconView setAutoresizingMask:NSViewMaxYMargin];
     CGFloat controlHeight = NSHeight([controlView frame]);
     for (BDSKPreferencePane *pane in [panes objectEnumerator]) {
         frame = [[pane view] frame];
         frame.origin = NSMakePoint(floor(0.5 * (width - NSWidth(frame))), controlHeight);
         [[pane view] setFrame:frame];
+        [[pane view] setAutoresizingMask:NSViewMaxYMargin];
     }
     
-    [self changeContentView:iconView display:NO];
+    [self changeContentView:iconView from:nil display:NO];
     
-    overlay = [[BDSKOverlayWindow alloc] initWithContentRect:[[self window] contentRectForFrameRect:[[self window] frame]] styleMask:[[self window] styleMask] backing:[[self window] backingType] defer:YES];
+    overlay = [[BDSKOverlayWindow alloc] initWithContentRect:[window contentRectForFrameRect:[window frame]] styleMask:[window styleMask] backing:[window backingType] defer:YES];
     [overlay setReleasedWhenClosed:NO];
     BDSKSpotlightView *spotlightView = [[BDSKSpotlightView alloc] initFlipped:[iconView isFlipped]];
     [spotlightView setDelegate:self];
@@ -335,50 +340,32 @@ static id sharedController = nil;
     return [paneID length] ? [self paneForIdentifier:paneID] : nil;
 }
 
-- (void)setDelayedPaneIdentifier:(NSString *)identifier {
-    if (identifier != delayedPaneIdentifier) {
-        [delayedPaneIdentifier release];
-        delayedPaneIdentifier = [identifier retain];
-    }
-}
-
-- (void)selectPaneWithIdentifier:(NSString *)identifier force:(BOOL)force {
-    if ([identifier isEqualToString:[self selectedPaneIdentifier]] == NO && (force || delayedPaneIdentifier == nil)) {
+- (void)selectPaneWithIdentifier:(NSString *)identifier {
+    if ([identifier isEqualToString:[self selectedPaneIdentifier]] == NO) {
         BDSKPreferencePane *pane = [self paneForIdentifier:identifier];
         BDSKPreferencePane *oldPane = [self selectedPane];
         NSView *view = pane ? [pane view] : [self iconView];
+        NSView *oldView = oldPane ? [oldPane view] : [self iconView];
+        NSWindow *window = [self window];
         if ((pane || [identifier isEqualToString:@""]) && view) {
-            if ([[[self window] firstResponder] isKindOfClass:[NSText class]] && [(NSView *)[[self window] firstResponder] isDescendantOf:[oldPane view]])
-                [[self window] makeFirstResponder:nil];
-            BDSKPreferencePaneUnselectReply shouldUnselect = [[self window] attachedSheet] ? BDSKPreferencePaneUnselectCancel : (force == NO && oldPane) ? [oldPane shouldUnselect]  : BDSKPreferencePaneUnselectNow;
-            [self setDelayedPaneIdentifier:nil];
-            if (shouldUnselect == BDSKPreferencePaneUnselectNow) {
+            if ([[window firstResponder] isKindOfClass:[NSText class]] && [(NSView *)[window firstResponder] isDescendantOf:[oldPane view]])
+                [window makeFirstResponder:nil];
+            if ([window attachedSheet] == nil) {
                 [oldPane willUnselect];
                 [pane willSelect];
-                [[self window] setTitle:pane ? [self localizedTitleForIdentifier:identifier] : [self defaultWindowTitle]];
-                [self changeContentView:view display:[[self window] isVisible]];
+                [window setTitle:pane ? [self localizedTitleForIdentifier:identifier] : [self defaultWindowTitle]];
+                [self changeContentView:view from:oldView display:[window isVisible]];
                 [oldPane didUnselect];
                 [pane didSelect];
                 [self setSelectedPaneIdentifier:identifier];
-                [[[self window] toolbar] setSelectedItemIdentifier:pane ? identifier : BDSKPreferencesToolbarShowAllItemIdentifier];
+                [self setNextResponder:pane];
+                [[window toolbar] setSelectedItemIdentifier:pane ? identifier : BDSKPreferencesToolbarShowAllItemIdentifier];
                 [helpButton setHidden:(helpBookName == nil || [pane helpAnchor] == nil) && [pane helpURL] == nil];
                 [revertButton setEnabled:[[pane initialValues] count] > 0];
                 [self updateSearchAndShowAll:NO];
-            } else if (shouldUnselect == BDSKPreferencePaneUnselectLater) {
-                [self setDelayedPaneIdentifier:identifier];
             }
         }
     }
-}
-
-- (void)selectPaneWithIdentifier:(NSString *)identifier {
-    [self selectPaneWithIdentifier:identifier force:NO];
-}
-
-- (void)replyToShouldUnselect:(BOOL)shouldUnselect {
-    if (shouldUnselect && delayedPaneIdentifier)
-        [self selectPaneWithIdentifier:delayedPaneIdentifier force:YES];
-    [self setDelayedPaneIdentifier:nil];
 }
 
 - (NSString *)localizedString:(NSString *)string {
@@ -610,18 +597,16 @@ static id sharedController = nil;
     return iconView;
 }
 
-- (void)changeContentView:(NSView *)view display:(BOOL)display {
+- (void)endAnimation {
+    [[[self window] contentView] setWantsLayer:NO];
+    [[self window] recalculateKeyViewLoop];
+}
+
+- (void)changeContentView:(NSView *)view from:(NSView *)oldView display:(BOOL)display {
     NSWindow *window = [self window];
     NSView *contentView = [window contentView];
     
-    [[contentView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    if ([view isEqual:[self iconView]] == NO) {
-        [contentView addSubview:controlView];
-        [overlay remove];
-    }
-    [contentView addSubview:view];
-	
-    NSRect contentRect = [window contentRectForFrameRect:[[self window] frame]];
+    NSRect contentRect = [window contentRectForFrameRect:[window frame]];
     CGFloat contentHeight = NSMaxY([view frame]);
     contentRect.origin.y = NSMaxY(contentRect) - contentHeight;
     contentRect.size.height = contentHeight;
@@ -636,9 +621,39 @@ static id sharedController = nil;
         contentRect.origin.y = NSMinY(screenRect);
     if (NSMaxY(contentRect) > NSMaxY(screenRect))
         contentRect.origin.y = NSMaxY(screenRect) - NSHeight(contentRect);
-        
-	[window setFrame:contentRect display:display animate:display];
-    [window recalculateKeyViewLoop];
+    
+    if ([oldView isEqual:[self iconView]])
+        [overlay remove];
+	
+    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
+    if (display && duration > 0.0) {
+        duration = fmax(duration, [window animationResizeTime:contentRect]);
+        [contentView setWantsLayer:YES];
+        [contentView displayIfNeeded];
+        [NSAnimationContext beginGrouping];
+        [[NSAnimationContext currentContext] setDuration:duration];
+        if ([view isEqual:[self iconView]])
+            [[controlView animator] removeFromSuperview];
+        else if ([oldView isEqual:[self iconView]])
+            [[contentView animator] addSubview:controlView];
+        if ([oldView superview])
+            [[contentView animator] replaceSubview:oldView with:view];
+        else
+            [[contentView animator] addSubview:view];
+        [[window animator] setFrame:contentRect display:YES];
+        [NSAnimationContext endGrouping];
+        [self performSelector:@selector(endAnimation) withObject:nil afterDelay:duration];
+	} else {
+        if ([view isEqual:[self iconView]])
+            [controlView removeFromSuperview];
+        else if ([oldView isEqual:[self iconView]])
+            [contentView addSubview:controlView];
+        // don't use replaceSubview:with: because oldView can be nil here
+        [oldView removeFromSuperview];
+        [contentView addSubview:view];
+        [window setFrame:contentRect display:display];
+        [window recalculateKeyViewLoop];
+    }
 }
 
 - (void)updateSearchAndShowAll:(BOOL)showAll {

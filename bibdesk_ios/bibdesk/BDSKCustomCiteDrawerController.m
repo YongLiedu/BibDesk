@@ -3,7 +3,7 @@
 //
 //  Created by Christiaan Hofman on 11/15/2006.
 /*
- This software is Copyright (c) 2006-2012
+ This software is Copyright (c) 2006-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -69,6 +69,8 @@
     NSSize drawerSize = [drawer contentSize];
     drawerSize.width = 100.0;
     [drawer setContentSize:drawerSize];
+    [tableView setDraggingSourceOperationMask:NSDragOperationNone forLocal:YES];
+    [tableView setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
 }
 
 - (NSTableView *)tableView{
@@ -161,10 +163,6 @@
 
 - (void)tableView:(NSTableView *)tv concludeDragOperation:(NSDragOperation)operation{
 	[document clearPromisedDraggedItems];
-}
-
-- (NSDragOperation)tableView:(NSTableView *)tv draggingSourceOperationMaskForLocal:(BOOL)isLocal{
-    return isLocal ? NSDragOperationNone : NSDragOperationCopy;
 }
 
 - (NSImage *)tableView:(NSTableView *)tv dragImageForRowsWithIndexes:(NSIndexSet *)dragRows{

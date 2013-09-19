@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 05/18/06.
 /*
- This software is Copyright (c) 2006-2012
+ This software is Copyright (c) 2006-2013
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,6 @@
 #import "BibPref_Export.h"
 #import "BDSKStringConstants.h"
 #import "BDSKTypeManager.h"
-#import "BDAlias.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKTemplate.h"
 #import "BDSKAppController.h"

@@ -468,13 +468,6 @@
 	[pboardHelper clearPromisedTypesForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
 }
 
-- (NSDragOperation)tableView:(NSTableView *)tv draggingSourceOperationMaskForLocal:(BOOL)isLocal{
-    if (tv == tableView) {
-        return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
-    }
-    return NSDragOperationNone;
-}
-
 - (NSImage *)tableView:(NSTableView *)tv dragImageForRowsWithIndexes:(NSIndexSet *)dragRows{
     if (tv == tableView) {
         return [self dragImageForPromisedItemsUsingCiteString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey]];
@@ -674,7 +667,7 @@
     }
     
     NSScanner *scanner = [NSScanner scannerWithString:auxString];
-    NSString *key = nil;
+    NSString *keys = nil;
     NSArray *items = nil;
     NSMutableArray *selItems = [NSMutableArray array];
     
@@ -682,9 +675,12 @@
     
     do {
         if ([scanner scanString:command intoString:NULL] &&
-            [scanner scanUpToString:@"}" intoString:&key] &&
-            (items = [publications allItemsForCiteKey:key]))
-            [selItems addObjectsFromArray:items];
+            [scanner scanUpToString:@"}" intoString:&keys]) {
+            for (NSString *key in [keys componentsSeparatedByString:@","]) {
+                if ((items = [publications allItemsForCiteKey:key]))
+                    [selItems addObjectsFromArray:[publications allItemsForCiteKey:key]];
+            }
+        }
         [scanner scanUpToCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
         [scanner scanCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
     } while ([scanner isAtEnd] == NO);
@@ -1149,10 +1145,6 @@
     [self clearPromisedDraggedItems];
 }
 
-- (NSDragOperation)outlineView:(NSOutlineView *)ov draggingSourceOperationMaskForLocal:(BOOL)isLocal {
-    return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
-}
-
 - (NSImage *)outlineView:(NSOutlineView *)ov dragImageForItems:(NSArray *)items{ 
     return [self dragImageForPromisedItemsUsingCiteString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey]];
 }
@@ -1292,14 +1284,13 @@
     BOOL isDragFromGroupTable = [source isEqual:groupOutlineView];
     BOOL isDragFromDrawer = [source isEqual:[drawerController tableView]];
     
-    if ((isDragFromGroupTable || isDragFromMainTable) && docFlags.dragFromExternalGroups) {
+    if ((isDragFromGroupTable || isDragFromMainTable) && docFlags.dragFromExternalGroups)
         pubs = [self addPublicationsFromPasteboard:pboard selectLibrary:NO verbose:YES error:NULL];
-    } else if (isDragFromMainTable) {
+    else if (isDragFromMainTable)
         // we already have these publications, so we just want to add them to the group, not the document
         pubs = [pboardHelper promisedItemsForPasteboard:pboard];
-    } else if (isDragFromGroupTable == NO && isDragFromDrawer == NO) {
-        pubs = [self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL];
-    }
+    else if (isDragFromGroupTable == NO && isDragFromDrawer == NO)
+        pubs = [self addPublicationsFromPasteboard:pboard selectLibrary:([item isParent] == NO && [[self selectedGroups] containsObject:item] == NO) verbose:YES error:NULL];
     
     if ([pubs count] == 0)
         return NO;
@@ -1316,23 +1307,20 @@
             [keywords intersectSet:[pub groupsForField:BDSKKeywordsString]];
         }
         
-        item = [[[BDSKStaticGroup alloc] init] autorelease];
-        if ([auths count])
-            [(BDSKStaticGroup *)item setName:[[auths anyObject] displayName]];
-        else if ([keywords count])
-            [(BDSKStaticGroup *)item setName:[keywords anyObject]];
+        NSString *name = NSLocalizedString(@"Group", @"Default group name");
+        if ([auths count] > 0)
+            name = [[auths anyObject] displayName];
+        else if ([keywords count] > 0)
+            name = [keywords anyObject];
+        BDSKStaticGroup *group = [[[BDSKStaticGroup alloc] initWithName:name publications:pubs] autorelease];
         [auths release];
         [keywords release];
-        [groups addStaticGroup:(BDSKStaticGroup *)item];
-    }
-    
-    // add to the group we're dropping on, /not/ the currently selected group; no need to add to all pubs group, though
-    if ([item isParent] == NO && [item isEqual:[groups libraryGroup]] == NO) {
-        
+        [groups addStaticGroup:group];
+        [[self undoManager] setActionName:NSLocalizedString(@"Add Group", @"Undo action name")];
+        [self selectGroup:group];
+    }  else if ([item isEqual:[groups libraryGroup]] == NO) {
+        // add to the group we're dropping on, /not/ the currently selected group; no need to add to all pubs group, though
         [self addPublications:pubs toGroup:item];
-        // Reselect if necessary, or we default to selecting the all publications group (which is really annoying when creating a new pub by dropping a PDF on a group).
-        if ([[self selectedGroups] containsObject:item] == NO && docFlags.dragFromExternalGroups == NO)
-            [self selectGroup:item];
     }
     
     return YES;

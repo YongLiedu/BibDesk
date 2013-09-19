@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 10/14/06.
 /*
- This software is Copyright (c) 2006-2012
+ This software is Copyright (c) 2006-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -1093,8 +1093,10 @@ static BOOL changingColors = NO;
     [oPanel setResolvesAliases:NO];
     [oPanel setCanChooseDirectories:YES];
     [oPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
-    [oPanel setDirectoryURL:[url URLByDeletingLastPathComponent]];
-    [oPanel setNameFieldStringValue:[url lastPathComponent]];
+    if (url) {
+        [oPanel setDirectoryURL:[url URLByDeletingLastPathComponent]];
+        [oPanel setNameFieldStringValue:[url lastPathComponent]];
+    }
     
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]) {
         NSButton *disableAutoFileButton = [[[NSButton alloc] init] autorelease];
@@ -1428,7 +1430,7 @@ static BOOL changingColors = NO;
     NSPasteboard *pboard = [NSPasteboard generalPasteboard];
     BOOL isKnownFormat = [pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]];
     
-    if (isKnownFormat = NO) {
+    if (isKnownFormat == NO) {
         NSArray *strings = [pboard readObjectsForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
         if ([strings count] > 0)
 			// sniff the string to see if we should add it directly

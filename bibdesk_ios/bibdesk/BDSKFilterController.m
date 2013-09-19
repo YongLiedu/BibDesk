@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 17/3/05.
 /*
- This software is Copyright (c) 2005-2012
+ This software is Copyright (c) 2005-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -53,14 +53,30 @@
 	return self;
 }
 
-- (id)initWithFilter:(BDSKFilter *)aFilter
+- (id)initWithFilter:(BDSKFilter *)filter
 {
     self = [super init];
     if (self) {
-		filter = [aFilter retain];
 		conditionControllers = [[NSMutableArray alloc] initWithCapacity:[[filter conditions] count]];
 		conjunction = [filter conjunction];
         undoManager = nil;
+        
+        BOOL canRemove = ([[filter conditions] count] > 1);
+        BDSKConditionController *controller;
+        if ([[filter conditions] count]) {
+            for (BDSKCondition *condition in [filter conditions]) {
+                controller = [[BDSKConditionController alloc] initWithFilterController:self condition:[[condition copy] autorelease]];
+                [controller setCanRemove:canRemove];
+                [conditionControllers addObject:controller];
+                [controller release];
+            }
+        } else {
+            // add a dummy controller when there's no condition, so we have an add button
+            controller = [[BDSKConditionController alloc] initWithFilterController:self condition:nil];
+            [controller setCanRemove:NO];
+            [conditionControllers addObject:controller];
+            [controller release];
+        }
     }
     return self;
 }
@@ -68,7 +84,6 @@
 - (void)dealloc
 {
 	//NSLog(@"dealloc filterController");
-    BDSKDESTROY(filter);
     BDSKDESTROY(conditionControllers);
     BDSKDESTROY(undoManager);
     [super dealloc];
@@ -79,25 +94,8 @@
 }
 
 - (void)awakeFromNib {
-	BDSKConditionController *controller = nil;
-    BOOL canRemove = ([[filter conditions] count] > 1);
-	
-	[conditionControllers removeAllObjects];
-    if ([[filter conditions] count]) {
-        for (BDSKCondition *condition in [filter conditions]) {
-            controller = [[BDSKConditionController alloc] initWithFilterController:self condition:[[condition copy] autorelease]];
-            [controller setCanRemove:canRemove];
-            [conditionControllers addObject:[controller autorelease]];
-            [conditionsView addView:[controller view]];
-        }
-	} else {
-        // add a dummy controller when there's no condition, so we have an add button
-        controller = [[BDSKConditionController alloc] initWithFilterController:self condition:nil];
-        [controller setCanRemove:NO];
-        [conditionControllers addObject:[controller autorelease]];
+    for (BDSKConditionController *controller in conditionControllers)
         [conditionsView addView:[controller view]];
-    }
-    
 	[self updateUI];
 }
 
@@ -116,25 +114,11 @@
 }
 
 - (IBAction)dismiss:(id)sender {
-    if ([sender tag] == NSOKButton && [self commitEditing]) {
-        
-        NSMutableArray *conditions = [NSMutableArray arrayWithCapacity:[conditionControllers count]];
-        
-        for (BDSKConditionController *controller in conditionControllers)
-            [conditions addObject:[controller condition]];
-        // remove the dummy condition
-        [conditions removeObject:[NSNull null]];
-        [filter setConditions:conditions];
-        [filter setConjunction:[self conjunction]];
-        
-        [[filter undoManager] setActionName:NSLocalizedString(@"Edit Smart Group", @"Undo action name")];
-	}
-    
+    if ([sender tag] == NSOKButton && [self commitEditing] == NO) {
+        NSBeep();
+        return;
+    }
     [super dismiss:sender];
-}
-
-- (BDSKFilter *)filter {
-	return [[filter retain] autorelease];
 }
 
 - (void)insertNewConditionAfter:(BDSKConditionController *)aConditionController {
@@ -199,6 +183,17 @@
 - (void)setConjunction:(BDSKConjunction)newConjunction {
     [[[self undoManager] prepareWithInvocationTarget:self] setConjunction:conjunction];
 	conjunction = newConjunction;
+}
+
+- (NSArray *)conditions {
+    NSArray *conditions = [conditionControllers valueForKey:@"condition"];
+    if ([conditions containsObject:[NSNull null]]) {
+        // remove the dummy condition
+        NSMutableArray *tmpArray = [conditions mutableCopy];
+        [tmpArray removeObject:[NSNull null]];
+        conditions = [tmpArray autorelease];
+    }
+    return conditions;
 }
 
 #pragma mark NSEditor

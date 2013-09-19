@@ -707,7 +707,7 @@
 					<key>Cite Key Clean Braces or TeX</key>
 					<integer>2</integer>
 					<key>Cite Key Format</key>
-					<string>%a1:%Y%r2</string>
+					<string>%a1:%Y%u2</string>
 					<key>Cite Key Format Preset</key>
 					<integer>1</integer>
 					<key>Cite Key Generate Lowercase</key>

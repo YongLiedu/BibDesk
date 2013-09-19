@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 12/11/07.
 /*
- This software is Copyright (c) 2007-2012
+ This software is Copyright (c) 2007-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -183,10 +183,6 @@
     } else {
         return NO;
     }
-}
-
-- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
-    return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
 }
 
 // flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag

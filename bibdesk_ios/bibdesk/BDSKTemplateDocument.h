@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 10/8/07.
 /*
- This software is Copyright (c) 2007-2012
+ This software is Copyright (c) 2007-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -38,11 +38,12 @@
 
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKUndoManager.h"
 
 extern NSString *BDSKTextTemplateDocumentType;
 extern NSString *BDSKRichTextTemplateDocumentType;
 
-@protocol BDSKTokenFieldDelegate <NSTokenFieldDelegate>
+@protocol BDSKTokenFieldDelegate <NSTokenFieldDelegate, BDSKUndoManagerDelegate>
 @optional
 - (void)tokenField:(NSTokenField *)tokenField textViewDidChangeSelection:(NSTextView *)textView;
 @end

@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 11/12/07.
 /*
- This software is Copyright (c) 2007-2012
+ This software is Copyright (c) 2007-2013
  Christiaan Hofman. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -43,118 +43,16 @@
 #import "BDSKRuntime.h"
 #import "NSData_BDSKExtensions.h"
 
-#define WEAK_NULL NULL
 
 #if BDSK_OS_X
-static void BDSKDisposeAliasHandle(AliasHandle inAlias)
-{
-    if (inAlias != NULL)
-        DisposeHandle((Handle)inAlias);
-}
-
-static AliasHandle BDSKDataToAliasHandle(CFDataRef inData)
-{
-    CFIndex len;
-    Handle handle = NULL;
-    
-    if (inData != NULL) {
-        len = CFDataGetLength(inData);
-        handle = NewHandle(len);
-        
-        if ((handle != NULL) && (len > 0)) {
-            HLock(handle);
-            memmove((void *)*handle, (const void *)CFDataGetBytePtr(inData), len);
-            HUnlock(handle);
-        }
-    }
-    return (AliasHandle)handle;
-}
-
-static CFDataRef BDSKCopyAliasHandleToData(AliasHandle inAlias)
-{
-    Handle inHandle = (Handle)inAlias;
-    CFDataRef data = NULL;
-    CFIndex len;
-    SInt8 handleState;
-    
-    if (inHandle != NULL) {
-        len = GetHandleSize(inHandle);
-        handleState = HGetState(inHandle);
-        
-        HLock(inHandle);
-        
-        data = CFDataCreate(kCFAllocatorDefault, (const UInt8 *) *inHandle, len);
-        
-        HSetState(inHandle, handleState);
-    }
-    return data;
-}
-
-static const FSRef *BDSKBaseRefIfOnSameVolume(const FSRef *inBaseRef, const FSRef *inRef)
-{
-    FSCatalogInfo baseCatalogInfo, catalogInfo;
-    BOOL sameVolume = NO;
-    if (inBaseRef != NULL && inRef != NULL &&
-        noErr == FSGetCatalogInfo(inBaseRef, kFSCatInfoVolume, &baseCatalogInfo, NULL, NULL, NULL) &&
-        noErr == FSGetCatalogInfo(inRef, kFSCatInfoVolume, &catalogInfo, NULL, NULL, NULL))
-        sameVolume = baseCatalogInfo.volume == catalogInfo.volume;
-    return sameVolume ? inBaseRef : NULL;
-}
-
-static Boolean BDSKAliasHandleToFSRef(const AliasHandle inAlias, const FSRef *inBaseRef, FSRef *outRef, Boolean *shouldUpdate)
-{
-    OSStatus err = noErr;
-    short aliasCount = 1;
-    
-    // it would be preferable to search the (relative) path before the fileID, but than links to symlinks will always be resolved to the target
-    err = FSMatchAliasBulk(inBaseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst | kARMTryFileIDFirst, inAlias, &aliasCount, outRef, shouldUpdate, NULL, NULL);
-    
-    return noErr == err;
-}
-
-static AliasHandle BDSKFSRefToAliasHandle(const FSRef *inRef, const FSRef *inBaseRef)
-{
-    OSStatus err = noErr;
-    AliasHandle	alias = NULL;
-    
-    err = FSNewAlias(BDSKBaseRefIfOnSameVolume(inBaseRef, inRef), inRef, &alias);
-    
-    if (err != noErr) {
-        BDSKDisposeAliasHandle(alias);
-        alias = NULL;
-    }
-    
-    return alias;
-}
-
-static Boolean BDSKPathToFSRef(CFStringRef inPath, FSRef *outRef)
-{
-    OSStatus err = noErr;
-    
-    if (inPath == NULL)
-        err = fnfErr;
-    else
-        err = FSPathMakeRefWithOptions((UInt8 *)[(NSString *)inPath fileSystemRepresentation], kFSPathMakeRefDoNotFollowLeafSymlink, outRef, NULL); 
-    
-    return noErr == err;
-}
-
-static AliasHandle BDSKPathToAliasHandle(CFStringRef inPath, CFStringRef inBasePath)
-{
-    FSRef ref, baseRef;
-    AliasHandle alias = NULL;
-    
-    if (BDSKPathToFSRef(inPath, &ref)) {
-        if (inBasePath != NULL) {
-            if (BDSKPathToFSRef(inBasePath, &baseRef))
-                alias = BDSKFSRefToAliasHandle(&ref, &baseRef);
-        } else {
-            alias = BDSKFSRefToAliasHandle(&ref, NULL);
-        }
-    }
-    
-    return alias;
-}
+    static void BDSKDisposeAliasHandle(AliasHandle inAlias);
+    static AliasHandle BDSKDataToAliasHandle(CFDataRef inData);
+    static CFDataRef BDSKCopyAliasHandleToData(AliasHandle inAlias);
+    static const FSRef *BDSKBaseRefIfOnSameVolume(const FSRef *inBaseRef, const FSRef *inRef);
+    static Boolean BDSKAliasHandleToFSRef(const AliasHandle inAlias, const FSRef *inBaseRef, FSRef *outRef, Boolean *shouldUpdate);
+    static AliasHandle BDSKFSRefToAliasHandle(const FSRef *inRef, const FSRef *inBaseRef);
+    static Boolean BDSKPathToFSRef(CFStringRef inPath, FSRef *outRef);
+    static AliasHandle BDSKPathToAliasHandle(CFStringRef inPath, CFStringRef inBasePath);
 #endif
 
 // Private placeholder subclass
@@ -164,8 +62,7 @@ static AliasHandle BDSKPathToAliasHandle(CFStringRef inPath, CFStringRef inBaseP
 
 // Private concrete subclasses
 
-@interface BDSKLinkedAliasFile : BDSKLinkedFile
-{
+@interface BDSKLinkedAliasFile : BDSKLinkedFile {
 #if BDSK_OS_X
     AliasHandle alias;
     const FSRef *fileRef;
@@ -182,7 +79,7 @@ static AliasHandle BDSKPathToAliasHandle(CFStringRef inPath, CFStringRef inBaseP
 - (id)initWithPath:(NSString *)aPath delegate:(id)aDelegate;
 
 #if BDSK_OS_X
-- (const FSRef *)fileRef;
+- (void)updateFileRef;
 
 - (NSData *)aliasDataRelativeToPath:(NSString *)newBasePath;
 
@@ -297,7 +194,6 @@ static Class BDSKLinkedFileClass = Nil;
 
 - (BOOL)isFile { return NO; }
 
-- (void)update { [self updateWithPath:nil]; }
 - (void)updateWithPath:(NSString *)aPath {}
 
 - (NSString *)relativePath { return nil; }
@@ -454,7 +350,7 @@ static Class BDSKLinkedFileClass = Nil;
     if (self) {
         if (basePath)
             // this initalizes the FSRef and update the alias
-            [self fileRef];
+            [self updateFileRef];
     }
     return self;
 #else
@@ -544,26 +440,11 @@ static Class BDSKLinkedFileClass = Nil;
 }
 
 #if BDSK_OS_X
-- (void)setFileRef:(const FSRef *)newFileRef;
-{
-    if (fileRef != NULL) {
-        NSZoneFree([self zone], (void *)fileRef);
-        fileRef = NULL;
-    }
-    if (newFileRef != NULL) {
-        FSRef *newRef = (FSRef *)NSZoneMalloc([self zone], sizeof(FSRef));
-        if (newRef) {
-            bcopy(newFileRef, newRef, sizeof(FSRef));
-            fileRef = newRef;
-        }
-    }
-}
-
-- (const FSRef *)fileRef;
+- (void)updateFileRef;
 {
     NSString *basePath = [delegate basePathForLinkedFile:self];
     FSRef baseRef;
-    Boolean hasBaseRef = basePath && BDSKPathToFSRef((CFStringRef)basePath, &baseRef);
+    Boolean hasBaseRef = BDSKPathToFSRef((CFStringRef)basePath, &baseRef);
     Boolean shouldUpdate = false;
     
     if (fileRef == NULL) {
@@ -580,8 +461,13 @@ static Class BDSKLinkedFileClass = Nil;
             shouldUpdate = shouldUpdate && hasBaseRef && hasRef;
         }
         
-        if (hasRef)
-            [self setFileRef:&aRef];
+        if (hasRef) {
+            FSRef *newRef = (FSRef *)NSZoneMalloc([self zone], sizeof(FSRef));
+            if (newRef) {
+                bcopy(&aRef, newRef, sizeof(FSRef));
+                fileRef = newRef;
+            }
+        }
     } else if (relativePath == nil) {
         shouldUpdate = hasBaseRef;
     }
@@ -593,8 +479,6 @@ static Class BDSKLinkedFileClass = Nil;
             CFRelease(aURL);
         }
     }
-    
-    return fileRef;
 }
 #endif
 
@@ -602,12 +486,17 @@ static Class BDSKLinkedFileClass = Nil;
 {
 #if BDSK_OS_X
     BOOL hadFileRef = fileRef != NULL;
-    CFURLRef aURL = (hadFileRef || [self fileRef]) ? CFURLCreateFromFSRef(NULL, fileRef) : NULL;
+    
+    if (hadFileRef == NO)
+        [self updateFileRef];
+    
+    CFURLRef aURL = fileRef ? CFURLCreateFromFSRef(NULL, fileRef) : NULL;
     
     if (aURL == NULL && hadFileRef) {
         // fileRef was invalid, try to update it
-        [self setFileRef:NULL];
-        if ([self fileRef] != NULL)
+        BDSKZONEDESTROY(fileRef);
+        [self updateFileRef];
+        if (fileRef != NULL)
             aURL = CFURLCreateFromFSRef(NULL, fileRef);
     }
 #else
@@ -627,8 +516,10 @@ static Class BDSKLinkedFileClass = Nil;
 - (NSURL *)displayURL;
 {
     NSURL *displayURL = [self URL];
-    if (displayURL == nil && relativePath)
-        displayURL = [NSURL fileURLWithPath:relativePath];
+    if (displayURL == nil && relativePath) {
+        NSString *basePath = [delegate basePathForLinkedFile:self];
+        displayURL = basePath ? [NSURL URLWithString:relativePath relativeToURL:[NSURL fileURLWithPath:basePath]] : [NSURL fileURLWithPath:relativePath];
+    }
     return displayURL;
 }
 
@@ -637,15 +528,16 @@ static Class BDSKLinkedFileClass = Nil;
 #if BDSK_OS_X
     // make sure the fileRef is valid
     [self URL];
+    // not sure if this is still needed after the previous call, only does something when there was a valid fileRef, relativePath, and baseRef, then it updates
+    [self updateFileRef];
     
-    FSRef *fsRef = (FSRef *)[self fileRef];
     FSRef baseRef;
     AliasHandle anAlias = NULL;
     CFDataRef data = NULL;
     
-    if (fsRef) {
-        BOOL hasBaseRef = (basePath && BDSKPathToFSRef((CFStringRef)basePath, &baseRef));
-        anAlias = BDSKFSRefToAliasHandle(fsRef, hasBaseRef ? &baseRef : NULL);
+    if (fileRef) {
+        BOOL hasBaseRef = BDSKPathToFSRef((CFStringRef)basePath, &baseRef);
+        anAlias = BDSKFSRefToAliasHandle(fileRef, hasBaseRef ? &baseRef : NULL);
     } else if (relativePath && basePath) {
         anAlias = BDSKPathToAliasHandle((CFStringRef)[basePath stringByAppendingPathComponent:relativePath], (CFStringRef)basePath);
     }
@@ -672,6 +564,24 @@ static Class BDSKLinkedFileClass = Nil;
     return [[NSKeyedArchiver archivedDataWithRootObject:dictionary] base64String];
 }
 
+#if BDSK_OS_X
+- (void)updateAliasWithPath:(NSString *)aPath basePath:(NSString *)basePath {
+    AliasHandle anAlias = BDSKPathToAliasHandle((CFStringRef)aPath, (CFStringRef)basePath);
+    if (anAlias != NULL) {
+        AliasHandle saveAlias = alias;
+        alias = anAlias;
+        [self updateFileRef];
+        if (fileRef == NULL) {
+            BDSKDisposeAliasHandle(anAlias);
+            alias = saveAlias;
+            [self updateFileRef];
+        } else {
+            BDSKDisposeAliasHandle(saveAlias);
+        }
+    }
+}
+#endif
+
 // this could be called when the document fileURL changes
 - (void)updateWithPath:(NSString *)aPath {
 #if BDSK_OS_X    
@@ -679,54 +589,29 @@ static Class BDSKLinkedFileClass = Nil;
 
     if (fileRef == NULL) {
         // this does the updating if possible
-        [self fileRef];
+        [self updateFileRef];
     } else {
         CFURLRef aURL = CFURLCreateFromFSRef(NULL, fileRef);
         if (aURL != NULL) {
             FSRef baseRef;
-            if (basePath && BDSKPathToFSRef((CFStringRef)basePath, &baseRef))
+            if (BDSKPathToFSRef((CFStringRef)basePath, &baseRef))
                 [self updateWithPath:[(NSURL *)aURL path] basePath:basePath baseRef:&baseRef];
             CFRelease(aURL);
         } else {
             // the fileRef was invalid, reset it and update
-            [self setFileRef:NULL];
-            [self fileRef];
-            if (fileRef == NULL) {
+            BDSKZONEDESTROY(fileRef);
+            [self updateFileRef];
+            if (fileRef == NULL && aPath)
                 // this can happen after an auto file to a volume, as the file is actually not moved but copied
-                AliasHandle anAlias = BDSKPathToAliasHandle((CFStringRef)aPath, (CFStringRef)basePath);
-                if (anAlias != NULL) {
-                    AliasHandle saveAlias = alias;
-                    alias = anAlias;
-                    [self fileRef];
-                    if (fileRef == NULL) {
-                        alias = saveAlias;
-                        [self fileRef];
-                    } else {
-                        BDSKDisposeAliasHandle(saveAlias);
-                    }
-                }
-            }
+                [self updateAliasWithPath:aPath basePath:basePath];
         }
     }
     if (aPath && [[self path] isEqualToString:aPath] == NO) {
         FSRef baseRef;
-        if (basePath && BDSKPathToFSRef((CFStringRef)basePath, &baseRef)) {
+        if (BDSKPathToFSRef((CFStringRef)basePath, &baseRef))
             [self updateWithPath:aPath basePath:basePath baseRef:&baseRef];
-        } else {
-            AliasHandle anAlias = BDSKPathToAliasHandle((CFStringRef)aPath, (CFStringRef)basePath);
-            if (anAlias != NULL) {
-                AliasHandle saveAlias = alias;
-                alias = anAlias;
-                [self fileRef];
-                if (fileRef == NULL) {
-                    alias = saveAlias;
-                    [self fileRef];
-                } else {
-                    BDSKDisposeAliasHandle(saveAlias);
-                }
-                
-            }
-        }
+        else
+            [self updateAliasWithPath:aPath basePath:basePath];
     }
 #endif
 }
@@ -830,3 +715,119 @@ static Class BDSKLinkedFileClass = Nil;
 }
 
 @end
+
+#pragma mark -
+
+// File reference functions
+
+#if BDSK_OS_X
+static void BDSKDisposeAliasHandle(AliasHandle inAlias)
+{
+    if (inAlias != NULL)
+        DisposeHandle((Handle)inAlias);
+}
+
+static AliasHandle BDSKDataToAliasHandle(CFDataRef inData)
+{
+    CFIndex len;
+    Handle handle = NULL;
+    
+    if (inData != NULL) {
+        len = CFDataGetLength(inData);
+        handle = NewHandle(len);
+        
+        if ((handle != NULL) && (len > 0)) {
+            HLock(handle);
+            memmove((void *)*handle, (const void *)CFDataGetBytePtr(inData), len);
+            HUnlock(handle);
+        }
+    }
+    return (AliasHandle)handle;
+}
+
+static CFDataRef BDSKCopyAliasHandleToData(AliasHandle inAlias)
+{
+    Handle inHandle = (Handle)inAlias;
+    CFDataRef data = NULL;
+    CFIndex len;
+    SInt8 handleState;
+    
+    if (inHandle != NULL) {
+        len = GetHandleSize(inHandle);
+        handleState = HGetState(inHandle);
+        
+        HLock(inHandle);
+        
+        data = CFDataCreate(kCFAllocatorDefault, (const UInt8 *) *inHandle, len);
+        
+        HSetState(inHandle, handleState);
+    }
+    return data;
+}
+
+static const FSRef *BDSKBaseRefIfOnSameVolume(const FSRef *inBaseRef, const FSRef *inRef)
+{
+    FSCatalogInfo baseCatalogInfo, catalogInfo;
+    BOOL sameVolume = NO;
+    if (inBaseRef != NULL && inRef != NULL &&
+        noErr == FSGetCatalogInfo(inBaseRef, kFSCatInfoVolume, &baseCatalogInfo, NULL, NULL, NULL) &&
+        noErr == FSGetCatalogInfo(inRef, kFSCatInfoVolume, &catalogInfo, NULL, NULL, NULL))
+        sameVolume = baseCatalogInfo.volume == catalogInfo.volume;
+    return sameVolume ? inBaseRef : NULL;
+}
+
+static Boolean BDSKAliasHandleToFSRef(const AliasHandle inAlias, const FSRef *inBaseRef, FSRef *outRef, Boolean *shouldUpdate)
+{
+    OSStatus err = noErr;
+    short aliasCount = 1;
+    
+    // it would be preferable to search the (relative) path before the fileID, but than links to symlinks will always be resolved to the target
+    err = FSMatchAliasBulk(inBaseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst | kARMTryFileIDFirst, inAlias, &aliasCount, outRef, shouldUpdate, NULL, NULL);
+    
+    return noErr == err;
+}
+
+static AliasHandle BDSKFSRefToAliasHandle(const FSRef *inRef, const FSRef *inBaseRef)
+{
+    OSStatus err = noErr;
+    AliasHandle	alias = NULL;
+    
+    err = FSNewAlias(BDSKBaseRefIfOnSameVolume(inBaseRef, inRef), inRef, &alias);
+    
+    if (err != noErr) {
+        BDSKDisposeAliasHandle(alias);
+        alias = NULL;
+    }
+    
+    return alias;
+}
+
+static Boolean BDSKPathToFSRef(CFStringRef inPath, FSRef *outRef)
+{
+    OSStatus err = noErr;
+    
+    if (inPath == NULL)
+        err = fnfErr;
+    else
+        err = FSPathMakeRefWithOptions((UInt8 *)[(NSString *)inPath fileSystemRepresentation], kFSPathMakeRefDoNotFollowLeafSymlink, outRef, NULL); 
+    
+    return noErr == err;
+}
+
+static AliasHandle BDSKPathToAliasHandle(CFStringRef inPath, CFStringRef inBasePath)
+{
+    FSRef ref, baseRef;
+    AliasHandle alias = NULL;
+    
+    if (BDSKPathToFSRef(inPath, &ref)) {
+        if (inBasePath != NULL) {
+            if (BDSKPathToFSRef(inBasePath, &baseRef))
+                alias = BDSKFSRefToAliasHandle(&ref, &baseRef);
+        } else {
+            alias = BDSKFSRefToAliasHandle(&ref, NULL);
+        }
+    }
+    
+    return alias;
+}
+#endif

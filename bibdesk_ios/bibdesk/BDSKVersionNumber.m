@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 1/28/08.
 /*
- This software is Copyright (c) 2008-2012
+ This software is Copyright (c) 2008-2013
  Christiaan Hofman. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,21 @@
 
 #import "BDSKVersionNumber.h"
 
+#define VERSION_LONG            @"version"
+#define VERSION_SHORT           @"v"
+#define ALPHA_LONG              @"alpha"
+#define ALPHA_SHORT             @"a"
+#define BETA_LONG               @"beta"
+#define BETA_SHORT              @"b"
+#define DEVELOPMENT_LONG        @"development"
+#define DEVELOPMENT_SHORT       @"d"
+#define FINAL_LONG              @"final"
+#define FINAL_SHORT             @"f"
+#define RELEASE_CANDIDATE_LONG  @"release candidate"
+#define RELEASE_CANDIDATE_SHORT @"rc"
+#define SEPARATOR               @"."
+#define DASH                    @"-"
+#define EMPTY                   @""
 
 @implementation BDSKVersionNumber
 
@@ -75,13 +90,13 @@
         
         NSMutableString *mutableVersionString = [[NSMutableString alloc] init];
         NSScanner *scanner = [[NSScanner alloc] initWithString:versionString];
-        NSString *sep = @"";
+        NSString *sep = EMPTY;
         
         [scanner setCharactersToBeSkipped:[NSCharacterSet whitespaceCharacterSet]];
         
         // ignore a leading "version" or "v", possibly followed by "-"
-        if ([scanner scanString:@"version" intoString:NULL] || [scanner scanString:@"v" intoString:NULL])
-            [scanner scanString:@"-" intoString:NULL];
+        if ([scanner scanString:VERSION_LONG intoString:NULL] || [scanner scanString:VERSION_SHORT intoString:NULL])
+            [scanner scanString:DASH intoString:NULL];
         
         while ([scanner isAtEnd] == NO && sep != nil) {
             NSInteger component;
@@ -96,25 +111,25 @@
             
                 if ([scanner isAtEnd] == NO) {
                     sep = nil;
-                    if ([scanner scanString:@"." intoString:NULL] || [scanner scanString:@"-" intoString:NULL] || [scanner scanString:@"version" intoString:NULL] || [scanner scanString:@"v" intoString:NULL]) {
-                        sep = @".";
+                    if ([scanner scanString:SEPARATOR intoString:NULL] || [scanner scanString:DASH intoString:NULL] || [scanner scanString:VERSION_LONG intoString:NULL] || [scanner scanString:VERSION_SHORT intoString:NULL]) {
+                        sep = SEPARATOR;
                     }
                     if (releaseType == BDSKReleaseVersionType) {
-                        if ([scanner scanString:@"alpha" intoString:NULL] || [scanner scanString:@"a" intoString:NULL]) {
+                        if ([scanner scanString:ALPHA_LONG intoString:NULL] || [scanner scanString:ALPHA_SHORT intoString:NULL]) {
                             releaseType = BDSKAlphaVersionType;
-                            [mutableVersionString appendString:@"a"];
-                        } else if ([scanner scanString:@"beta" intoString:NULL] || [scanner scanString:@"b" intoString:NULL]) {
+                            [mutableVersionString appendString:ALPHA_SHORT];
+                        } else if ([scanner scanString:BETA_LONG intoString:NULL] || [scanner scanString:BETA_SHORT intoString:NULL]) {
                             releaseType = BDSKBetaVersionType;
-                            [mutableVersionString appendString:@"b"];
-                        } else if ([scanner scanString:@"development" intoString:NULL] || [scanner scanString:@"d" intoString:NULL]) {
+                            [mutableVersionString appendString:BETA_SHORT];
+                        } else if ([scanner scanString:DEVELOPMENT_LONG intoString:NULL] || [scanner scanString:DEVELOPMENT_SHORT intoString:NULL]) {
                             releaseType = BDSKDevelopmentVersionType;
-                            [mutableVersionString appendString:@"d"];
-                        } else if ([scanner scanString:@"final" intoString:NULL] || [scanner scanString:@"f" intoString:NULL]) {
+                            [mutableVersionString appendString:DEVELOPMENT_SHORT];
+                        } else if ([scanner scanString:FINAL_LONG intoString:NULL] || [scanner scanString:FINAL_SHORT intoString:NULL]) {
                             releaseType = BDSKReleaseCandidateVersionType;
-                            [mutableVersionString appendString:@"f"];
-                        } else if ([scanner scanString:@"release candidate" intoString:NULL] || [scanner scanString:@"rc" intoString:NULL]) {
+                            [mutableVersionString appendString:FINAL_SHORT];
+                        } else if ([scanner scanString:RELEASE_CANDIDATE_LONG intoString:NULL] || [scanner scanString:RELEASE_CANDIDATE_SHORT intoString:NULL]) {
                             releaseType = BDSKReleaseCandidateVersionType;
-                            [mutableVersionString appendString:@"rc"];
+                            [mutableVersionString appendString:RELEASE_CANDIDATE_SHORT];
                         }
                         
                         if (releaseType != BDSKReleaseVersionType) {
@@ -123,11 +138,11 @@
                             components = (NSInteger *)NSZoneRealloc(NSDefaultMallocZone(), components, sizeof(NSInteger) * componentCount);
                             components[componentCount - 1] = releaseType;
                             
-                            sep = @"";
+                            sep = EMPTY;
                             
                             // ignore a "." or "-"
-                            if ([scanner scanString:@"." intoString:NULL] == NO)
-                                [scanner scanString:@"-" intoString:NULL];
+                            if ([scanner scanString:SEPARATOR intoString:NULL] == NO)
+                                [scanner scanString:DASH intoString:NULL];
                         }
                     }
                 }

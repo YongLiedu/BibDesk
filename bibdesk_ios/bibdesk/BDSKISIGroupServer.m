@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 07/10/07.
 /*
- This software is Copyright (c) 2007-2012
+ This software is Copyright (c) 2007-2013
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -73,7 +73,7 @@ static NSString *ISIURLFieldName = nil;
 
 static NSArray *publicationInfosWithISIXMLString(NSString *xmlString);
 static NSArray *publicationInfosWithISICitedReferences(NSArray *citedReferences);
-static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs, NSString *fieldName);
+//static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs, NSString *fieldName);
 static NSArray *publicationsFromData(NSData *data);
 
 // private protocols for inter-thread messaging
@@ -82,7 +82,11 @@ static NSArray *publicationsFromData(NSData *data);
 @end
 
 @protocol BDSKISIGroupServerLocalThread <BDSKAsyncDOServerThread>
-- (oneway void)downloadWithSearchTerm:(NSString *)searchTerm database:(NSString *)database;
+- (oneway void)downloadWithSearchTerm:(NSString *)searchTerm database:(NSString *)database options:(NSDictionary *)options;
+@end
+
+@interface BDSKISIGroupServer (BDSKPrivate)
+- (void)authenticateWithOptions:(NSDictionary *)options;
 @end
 
 @implementation BDSKISIGroupServer
@@ -172,7 +176,7 @@ static NSArray *publicationsFromData(NSData *data);
         OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
         
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.isRetrieving);
-        [[self serverOnServerThread] downloadWithSearchTerm:aSearchTerm database:[[self serverInfo] database]];
+        [[self serverOnServerThread] downloadWithSearchTerm:aSearchTerm database:[[self serverInfo] database] options:[[self serverInfo] options]];
         
     } else {
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
@@ -233,13 +237,16 @@ static NSArray *publicationsFromData(NSData *data);
 - (void)addPublicationsToGroup:(bycopy NSData *)data;
 {
     BDSKASSERT([NSThread isMainThread]);
-    [group addPublications:publicationsFromData(data)];
+    [NSString setMacroResolverForUnarchiving:[group macroResolver]];
+    NSArray *pubs = publicationsFromData(data);
+    [NSString setMacroResolverForUnarchiving:nil];
+    [group addPublications:pubs];
 }
 
 #pragma mark Server thread
 
 // @@ currently limited to topic search; need to figure out UI for other search types (mixing search types will require either NSTokenField or raw text string entry)
-- (oneway void)downloadWithSearchTerm:(NSString *)searchTerm database:(NSString *)database;
+- (oneway void)downloadWithSearchTerm:(NSString *)searchTerm database:(NSString *)database options:(NSDictionary *)options;
 {    
     NSArray *pubs = nil;
     enum operationTypes { search, citedReferences, citingArticles, relatedRecords, retrieveById } operation = search;
@@ -270,7 +277,7 @@ static NSArray *publicationsFromData(NSData *data);
         
         // authenticate if necessary
         if (!sessionCookie) {
-            [self authenticate];
+            [self authenticateWithOptions:options];
             if (!sessionCookie) {
                 OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
                 OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
@@ -284,6 +291,7 @@ static NSArray *publicationsFromData(NSData *data);
         
         // perform WS query to get count of results; don't pass zero for record numbers, although it's not clear what the values mean in this context
         NSString *resultString = nil;
+        NSString *errorString = nil;
         
         WokSearchService_editionDesc *edition = [[[WokSearchService_editionDesc alloc] init] autorelease];
         edition.collection = WOS_DB_ID;
@@ -319,7 +327,7 @@ static NSArray *publicationsFromData(NSData *data);
         
         WokSearchServiceSoapBinding *binding = [WokSearchService WokSearchServiceSoapBinding];
         [binding addCookie:sessionCookie];
-        binding.logXMLInOut = NO;
+        //binding.logXMLInOut = YES;
         
         // ISI seems to return all fields, so the below aren't currently needed
         //NSString *fields = @"doctype authors bib_vol pub_url source_title source_abbrev item_title bib_issue bib_pages keywords abstract source_series article_nos bib_date publisher pub_address issue_ed times_cited get_parent ut refs ";
@@ -342,7 +350,9 @@ static NSArray *publicationsFromData(NSData *data);
                 response = [binding searchUsingParameters:searchRequest];
                 responseBodyParts = response.bodyParts;
                 for (id bodyPart in responseBodyParts) {
-                    if ([bodyPart isKindOfClass:[WokSearchService_searchResponse class]]) {
+                    if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+                        errorString = ((SOAPFault *)bodyPart).simpleFaultString;
+                    } else if ([bodyPart isKindOfClass:[WokSearchService_searchResponse class]]) {
                         searchResponse = bodyPart;
                         fullRecordSearchResults = searchResponse.return_;
                         availableResultsLocal = fullRecordSearchResults.recordsFound.integerValue;
@@ -361,7 +371,9 @@ static NSArray *publicationsFromData(NSData *data);
                 response = [binding citedReferencesUsingParameters:citedReferencesRequest];
                 responseBodyParts = response.bodyParts;
                 for (id bodyPart in responseBodyParts) {
-                    if ([bodyPart isKindOfClass:[WokSearchService_citedReferencesResponse class]]) {
+                    if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+                        errorString = ((SOAPFault *)bodyPart).simpleFaultString;
+                    } else if ([bodyPart isKindOfClass:[WokSearchService_citedReferencesResponse class]]) {
                         citedReferencesResponse = bodyPart;
                         citedReferencesSearchResults = citedReferencesResponse.return_;
                         availableResultsLocal = citedReferencesSearchResults.recordsFound.integerValue;
@@ -380,7 +392,9 @@ static NSArray *publicationsFromData(NSData *data);
                 response = [binding citingArticlesUsingParameters:citingArticlesRequest];
                 responseBodyParts = response.bodyParts;
                 for (id bodyPart in responseBodyParts) {
-                    if ([bodyPart isKindOfClass:[WokSearchService_citingArticlesResponse class]]) {
+                    if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+                        errorString = ((SOAPFault *)bodyPart).simpleFaultString;
+                    } else if ([bodyPart isKindOfClass:[WokSearchService_citingArticlesResponse class]]) {
                         citingArticlesResponse = bodyPart;
                         fullRecordSearchResults = citingArticlesResponse.return_;
                         availableResultsLocal = fullRecordSearchResults.recordsFound.integerValue;
@@ -399,7 +413,9 @@ static NSArray *publicationsFromData(NSData *data);
                 response = [binding relatedRecordsUsingParameters:relatedRecordsRequest];
                 responseBodyParts = response.bodyParts;
                 for (id bodyPart in responseBodyParts) {
-                    if ([bodyPart isKindOfClass:[WokSearchService_relatedRecordsResponse class]]) {
+                    if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+                        errorString = ((SOAPFault *)bodyPart).simpleFaultString;
+                    } else if ([bodyPart isKindOfClass:[WokSearchService_relatedRecordsResponse class]]) {
                         relatedRecordsResponse = bodyPart;
                         fullRecordSearchResults = relatedRecordsResponse.return_;
                         availableResultsLocal = fullRecordSearchResults.recordsFound.integerValue;
@@ -421,7 +437,9 @@ static NSArray *publicationsFromData(NSData *data);
                 response = [binding retrieveByIdUsingParameters:retrieveByIdRequest];
                 responseBodyParts = response.bodyParts;
                 for (id bodyPart in responseBodyParts) {
-                    if ([bodyPart isKindOfClass:[WokSearchService_retrieveByIdResponse class]]) {
+                    if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+                        errorString = ((SOAPFault *)bodyPart).simpleFaultString;
+                    } else if ([bodyPart isKindOfClass:[WokSearchService_retrieveByIdResponse class]]) {
                         retrieveByIdResponse = bodyPart;
                         fullRecordSearchResults = retrieveByIdResponse.return_;
                         availableResultsLocal = fullRecordSearchResults.recordsFound.integerValue;
@@ -433,7 +451,11 @@ static NSArray *publicationsFromData(NSData *data);
         if (nil == fullRecordSearchResults && nil == citedReferencesSearchResults) {
             OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
             // we already know that a connection can be made, so we likely don't have permission to read this edition or database
-            [self setErrorMessage:NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.")];
+            if (errorString) {
+                [self setErrorMessage:errorString];
+            } else {
+                [self setErrorMessage:NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.")];
+            }
         }
         
         NSInteger numResults = MIN(availableResultsLocal - fetchedResultsLocal, MAX_RESULTS);
@@ -536,10 +558,12 @@ static NSArray *publicationsFromData(NSData *data);
     [[self serverOnMainThread] addPublicationsToGroup:data];
 }
 
-- (void)authenticate {
+- (void)authenticateWithOptions:(NSDictionary *)options {
 
     WOKMWSAuthenticateServiceSoapBinding *binding = [WOKMWSAuthenticateService WOKMWSAuthenticateServiceSoapBinding];
     //binding.logXMLInOut = YES;
+    binding.authUsername = [options objectForKey:@"username"];
+    binding.authPassword = [options objectForKey:@"password"];
     
     WOKMWSAuthenticateService_authenticate *request = [[[WOKMWSAuthenticateService_authenticate alloc] init] autorelease];
     
@@ -860,7 +884,7 @@ static NSArray *publicationInfosWithISICitedReferences(NSArray *citedReferences)
     
     return pubs;
 }
-
+/*
 static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs, NSString *fieldName)
 {
     NSMutableArray *outPubs = [NSMutableArray arrayWithCapacity:[targetPubs count]];
@@ -883,7 +907,7 @@ static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs,
     
     return outPubs;
 }
-
+*/
 static NSArray *publicationsFromData(NSData *data) {
     if (!data) return [NSArray array];
     NSArray *pubInfos = [NSKeyedUnarchiver unarchiveObjectWithData:data];

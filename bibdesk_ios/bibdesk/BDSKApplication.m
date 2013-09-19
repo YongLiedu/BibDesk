@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 10/26/06.
 /*
- This software is Copyright (c) 2006-2012
+ This software is Copyright (c) 2006-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -38,17 +38,17 @@
 
 #import "BDSKApplication.h"
 #import "BibDocument.h"
-#import "BDAlias.h"
+#import "BDSKAlias.h"
 
 
 @implementation BDSKApplication
 
 - (IBAction)terminate:(id)sender {
-    NSArray *fileNames = [[[NSDocumentController sharedDocumentController] documents] valueForKeyPath:@"@distinctUnionOfObjects.fileName"];
-    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[fileNames count]];
-    for (NSString *fileName in fileNames){
-        NSData *data = [[BDAlias aliasWithPath:fileName] aliasData];
-        [array addObject:[NSDictionary dictionaryWithObjectsAndKeys:fileName, @"fileName", data, @"_BDAlias", nil]];
+    NSArray *fileURLs = [[[NSDocumentController sharedDocumentController] documents] valueForKeyPath:@"@distinctUnionOfObjects.fileURL"];
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[fileURLs count]];
+    for (NSURL *fileURL in fileURLs){
+        NSData *data = [[BDSKAlias aliasWithURL:fileURL] data];
+        [array addObject:[NSDictionary dictionaryWithObjectsAndKeys:[fileURL path], @"fileName", data, @"_BDAlias", nil]];
     }
     [[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKLastOpenFileNamesKey];
     

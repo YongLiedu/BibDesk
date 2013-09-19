@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 02/09/07.
 /*
- This software is Copyright (c) 2007-2012
+ This software is Copyright (c) 2007-2013
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,7 @@
 #import "NSInvocation_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSPasteboard_BDSKExtensions.h"
+#import "NSEvent_BDSKExtensions.h"
 
 #define BDSKShouldLogFilesAddedToMatchingSearchIndexKey @"BDSKShouldLogFilesAddedToMatchingSearchIndex"
 
@@ -65,6 +66,9 @@ static CGFloat GROUP_ROW_HEIGHT = 24.0;
 @interface BDSKCenteredTextFieldCell : NSTextFieldCell
 @end
 @interface BDSKBoldShadowFormatter : BDSKTextWithIconFormatter
+@end
+
+@interface BDSKTreeNode (BDSKQuickLook) <QLPreviewItem>
 @end
 
 @interface BDSKFileMatcher (Private)
@@ -248,6 +252,21 @@ static id sharedInstance = nil;
     }];
 }
 
+- (IBAction)previewAction:(id)sender;
+{
+    if ([QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible])
+        [[QLPreviewPanel sharedPreviewPanel] orderOut:nil];
+    else
+        [[QLPreviewPanel sharedPreviewPanel] makeKeyAndOrderFront:nil];
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
+    if ([menuItem action] == @selector(previewAction:)) {
+        return [[outlineView selectedRowIndexes] count] > 0;
+    }
+    return YES;
+}
+
 #pragma mark Outline view drag-and-drop
 
 - (BOOL)outlineView:(NSOutlineView *)olv writeItems:(NSArray*)items toPasteboard:(NSPasteboard*)pboard;
@@ -335,6 +354,19 @@ static id sharedInstance = nil;
     }
 }
 
+#pragma mark Outline view delegate
+
+- (void)outlineViewSelectionDidChange:(NSNotification *)notification {
+    if ([QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible] && [[QLPreviewPanel sharedPreviewPanel] dataSource] == self)
+        [[QLPreviewPanel sharedPreviewPanel] reloadData];
+}
+
+- (void)outlineViewInsertSpace:(NSOutlineView *)anOutlineView {
+    [self previewAction:nil];
+}
+
+- (void)outlineViewInsertShiftSpace:(NSOutlineView *)anOutlineView {}
+
 #pragma mark Outline view datasource
 
 - (id)outlineView:(NSOutlineView *)ov child:(NSInteger)idx ofItem:(id)item;
@@ -366,6 +398,51 @@ static id sharedInstance = nil;
 - (id)outlineView:(NSOutlineView *)ov persistentObjectForItem:(id)item
 {
     return [NSKeyedArchiver archivedDataWithRootObject:item];
+}
+
+#pragma mark Quick Look Panel Support
+
+- (BOOL)acceptsPreviewPanelControl:(QLPreviewPanel *)panel {
+    return YES;
+}
+
+- (void)beginPreviewPanelControl:(QLPreviewPanel *)panel {
+    [panel setDelegate:self];
+    [panel setDataSource:self];
+}
+
+- (void)endPreviewPanelControl:(QLPreviewPanel *)panel {
+}
+
+- (NSInteger)numberOfPreviewItemsInPreviewPanel:(QLPreviewPanel *)panel {
+    return [[outlineView selectedRowIndexes] count];
+}
+
+- (id <QLPreviewItem>)previewPanel:(QLPreviewPanel *)panel previewItemAtIndex:(NSInteger)anIndex {
+    return [[outlineView selectedItems] objectAtIndex:anIndex];
+}
+
+- (NSRect)previewPanel:(QLPreviewPanel *)panel sourceFrameOnScreenForPreviewItem:(id <QLPreviewItem>)item {
+    NSInteger row = [outlineView rowForItem:item];
+    NSRect iconRect = NSZeroRect;
+    if (item != nil && row != -1) {
+        iconRect = [(BDSKTextWithIconCell *)[outlineView preparedCellAtColumn:0 row:row] iconRectForBounds:[outlineView frameOfCellAtColumn:0 row:row]];
+        if (NSIntersectsRect([outlineView visibleRect], iconRect)) {
+            iconRect = [outlineView convertRectToBase:iconRect];
+            iconRect.origin = [[self window] convertBaseToScreen:iconRect.origin];
+        } else {
+            iconRect = NSZeroRect;
+        }
+    }
+    return iconRect;
+}
+
+- (BOOL)previewPanel:(QLPreviewPanel *)panel handleEvent:(NSEvent *)event {
+    if ([event type] == NSKeyDown) {
+        [outlineView keyDown:event];
+        return YES;
+    }
+    return NO;
 }
 
 @end
@@ -610,6 +687,18 @@ static void normalizeScoresForItem(BDSKTreeNode *parent, CGFloat maxScore)
         [abortButton setEnabled:NO];
         [progressIndicator stopAnimation:nil];
     });
+}
+
+@end
+
+@implementation BDSKTreeNode (BDSKQuickLook)
+
+- (NSURL *)previewItemURL {
+    return [self valueForKey:@"fileURL"];
+}
+
+- (NSString *)previewItemTitle {
+    return [self valueForKey:BDSKTextWithIconStringKey];
 }
 
 @end

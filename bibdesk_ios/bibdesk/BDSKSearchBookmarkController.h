@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 3/26/07.
 /*
- This software is Copyright (c) 2007-2012
+ This software is Copyright (c) 2007-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,7 @@
 - (IBAction)insertBookmarkFolder:(id)sender;
 - (IBAction)insertBookmarkSeparator:(id)sender;
 - (IBAction)deleteBookmark:(id)sender;
+- (IBAction)editAction:(id)sender;
 
 - (void)saveBookmarks;
 

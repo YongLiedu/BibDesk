@@ -4,7 +4,7 @@
 //
 //  Created by Michael McCracken on Sun Nov 16 2003.
 /*
- This software is Copyright (c) 2003-2012
+ This software is Copyright (c) 2003-2013
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -175,7 +175,7 @@
                 [newString release];
                 newString = collapsedWhitespaceString;
 			}
-        } else if([key isSingleValuedField] || [key isURLField]) {
+        } else if(([key isSingleValuedField] || [key isURLField]) && [key isEqualToString:BDSKAnnoteString] == NO && [key isEqualToString:BDSKAbstractString] == NO) {
             // for single valued and URL fields, create a new field name
             NSInteger i = 1;
             NSString *newKey = [key stringByAppendingFormat:@"%ld", (long)i];

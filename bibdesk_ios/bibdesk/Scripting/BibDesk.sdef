@@ -1568,7 +1568,7 @@
         
         <record-type name="note" code="Note"
             description="A Skim note.">
-            <property name="type" code="NTyp" type="text" access="r"
+            <property name="type" code="type" type="text" access="r"
                 description="The type of note.">
                 <cocoa key="type"/>
             </property>

@@ -2,7 +2,7 @@
 
 //  Created by Michael McCracken on Tue Jan 29 2002.
 /*
- This software is Copyright (c) 2002-2012
+ This software is Copyright (c) 2002-2013
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,6 @@ typedef NSInteger BDSKPreviewState;
 */
 @interface BDSKPreviewer : NSWindowController <BDSKTeXTaskDelegate> {
     IBOutlet BDSKZoomablePDFView *pdfView;
-    IBOutlet NSTextView *rtfPreviewView;
     IBOutlet NSTextView *logView;
     IBOutlet NSTabView *tabView;
     IBOutlet NSProgressIndicator *progressIndicator;
@@ -67,7 +66,6 @@ typedef NSInteger BDSKPreviewState;
     IBOutlet NSView *warningView;
     
     BDSKPreviewState previewState;
-    NSInteger generatedTypes;
     BDSKTeXTask *texTask;
 }
 
@@ -79,16 +77,10 @@ typedef NSInteger BDSKPreviewState;
 + (BDSKPreviewer *)sharedPreviewer;
 
 - (PDFView *)pdfView;
-- (NSTextView *)textView;
 - (BDSKOverlayPanel *)progressOverlay;
 
 - (CGFloat)PDFScaleFactor;
 - (void)setPDFScaleFactor:(CGFloat)scaleFactor;
-- (CGFloat)RTFScaleFactor;
-- (void)setRTFScaleFactor:(CGFloat)scaleFactor;
-
-- (NSInteger)generatedTypes;
-- (void)setGeneratedTypes:(NSInteger)newGeneratedTypes;
 
 - (BOOL)isVisible;
 - (void)handleMainDocumentDidChangeNotification:(NSNotification *)notification;
@@ -114,30 +106,12 @@ typedef NSInteger BDSKPreviewState;
 - (void)displayPreviewsForState:(BDSKPreviewState)state success:(BOOL)success;
 
 /*!
-    @method     PDFDataWithString:color:
-    @abstract   Converts the given string into PDF data, applying the given color to the entire range of the string.  This method is not thread safe.
-    @discussion (comprehensive description)
-    @param      string (description)
-    @param      color (description)
-    @result     (description)
-*/
-- (NSData *)PDFDataWithString:(NSString *)string color:(NSColor *)color;
-
-/*!
     @method     PDFData
     @abstract   Returns the PDF data in the preview if it is valid. Otherwise returns nil.
     @discussion Any data is considered invalid if the previews were reset, our window is not visible, 
 		or there are updates waiting. This should be thread safe. 
 */
 - (NSData *)PDFData;
-
-/*!
-    @method     RTFData
-    @abstract   Returns the RTF data in the preview if it is valid. Otherwise returns nil.
-    @discussion Any data is considered invalid if the previews were reset, our window is not visible, 
-		or there are updates waiting. This should be thread safe. 
-*/
-- (NSData *)RTFData;
 
 /*!
     @method     LaTeXString

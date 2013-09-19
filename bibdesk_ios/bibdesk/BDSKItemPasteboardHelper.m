@@ -3,7 +3,7 @@
 //
 //  Created by Christiaan Hofman on 13/10/06.
 /*
- This software is Copyright (c) 2006-2012
+ This software is Copyright (c) 2006-2013
  Christiaan Hofman. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #import "BibItem.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSPasteboard_BDSKExtensions.h"
+#import <Quartz/Quartz.h>
 
 
 @interface BDSKItemPasteboardHelper (Private)
@@ -176,8 +177,29 @@
             }else if([type isEqualToString:NSPasteboardTypeRTF]){
                 BDSKASSERT(dragCopyType == BDSKRTFDragCopyType);
                 NSData *data = nil;
-                if([texTask runWithBibTeXString:bibString citeKeys:citeKeys generatedTypes:BDSKGenerateRTF])
-                    data = [texTask RTFData];
+                if([texTask runWithBibTeXString:bibString citeKeys:citeKeys generatedTypes:BDSKGeneratePDF]) {
+                    data = [texTask PDFData];
+                    if (data) {
+                        PDFDocument *pdfDoc = [[PDFDocument alloc] initWithData:data];
+                        NSUInteger i, count = [pdfDoc pageCount];
+                        NSMutableAttributedString *attrString = [[NSMutableAttributedString alloc] init];
+                        [attrString beginEditing];
+                        for (i = 0; i < count; i++) {
+                            if (i > 0)
+                                [[attrString mutableString] appendString:@"\n"];
+                            // extra retain to work around an overrelease bug in 10.6
+                            NSAttributedString *pageString = [[[pdfDoc pageAtIndex:i] attributedString] retain];
+                            if (pageString)
+                                [attrString appendAttributedString:pageString];
+                            if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6)
+                                [pageString release];
+                        }
+                        [attrString endEditing];
+                        data = [attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil];
+                        [attrString release];
+                        [pdfDoc release];
+                    }
+                }
                 [item setData:data forType:NSPasteboardTypeRTF];
             }else if([type isEqualToString:NSPasteboardTypeString]){
                 BDSKASSERT(dragCopyType == BDSKLTBDragCopyType || dragCopyType == BDSKLaTeXDragCopyType);

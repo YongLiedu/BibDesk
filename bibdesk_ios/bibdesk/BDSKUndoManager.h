@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 14/12/04.
 /*
- This software is Copyright (c) 2004-2012
+ This software is Copyright (c) 2004-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -46,10 +46,10 @@
 
 
 @interface BDSKUndoManager : NSUndoManager {
-	id delegate;
+	id<BDSKUndoManagerDelegate> delegate;
 }
 
-- (id)delegate;
-- (void)setDelegate:(id)newDelegate;
+- (id<BDSKUndoManagerDelegate>)delegate;
+- (void)setDelegate:(id<BDSKUndoManagerDelegate>)newDelegate;
 
 @end

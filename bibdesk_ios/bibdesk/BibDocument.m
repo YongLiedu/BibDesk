@@ -2,7 +2,7 @@
 
 //  Created by Michael McCracken on Mon Dec 17 2001.
 /*
- This software is Copyright (c) 2001-2012
+ This software is Copyright (c) 2001-2013
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -126,6 +126,7 @@
 #import "NSSplitView_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
 #import "NSPasteboard_BDSKExtensions.h"
+#import "BDSKSaveAccessoryViewController.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -516,6 +517,10 @@ static NSOperationQueue *metadataCacheQueue = nil;
     NSArray *dragTypes = [NSArray arrayWithObjects:BDSKPasteboardTypePublications, (NSString *)kUTTypeURL, (NSString *)kUTTypeFileURL, NSFilenamesPboardType, NSURLPboardType, NSPasteboardTypeString, NSPasteboardTypeColor, nil];
     [tableView registerForDraggedTypes:dragTypes];
     [groupOutlineView registerForDraggedTypes:dragTypes];
+    [tableView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:YES];
+    [tableView setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
+    [groupOutlineView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:YES];
+    [groupOutlineView setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
     
     [[sideFileView enclosingScrollView] setBackgroundColor:[sideFileView backgroundColor]];
     [bottomFileView setBackgroundColor:[[NSColor controlAlternatingRowBackgroundColors] lastObject]];
@@ -567,8 +572,6 @@ static NSOperationQueue *metadataCacheQueue = nil;
     [self updateSmartGroupsCount];
     [self updateCategoryGroups:nil];
     
-    [saveTextEncodingPopupButton setEncoding:BDSKNoStringEncoding];
-    
     // this shouldn't be necessary
     [documentWindow recalculateKeyViewLoop];
     [documentWindow makeFirstResponder:tableView];
@@ -619,9 +622,17 @@ static NSOperationQueue *metadataCacheQueue = nil;
 	return YES;
 }
 
-// this is needed for the BDSKOwner protocol
+// the following 3 are needed for the BDSKOwner protocol
 - (NSUndoManager *)undoManager {
     return [super undoManager];
+}
+
+- (NSURL *)fileURL {
+    return [super fileURL];
+}
+
+- (BOOL)isDocument{
+    return YES;
 }
 
 - (BOOL)isMainDocument {
@@ -758,10 +769,8 @@ static NSOperationQueue *metadataCacheQueue = nil;
         [dictionary setDouble:[(BDSKZoomableTextView *)bottomPreviewTextView scaleFactor] forKey:BDSKBottomPreviewScaleFactorKey];
         [dictionary setDouble:[(BDSKZoomableTextView *)sidePreviewTextView scaleFactor] forKey:BDSKSidePreviewScaleFactorKey];
         
-        if(previewer){
+        if(previewer)
             [dictionary setDouble:[previewer PDFScaleFactor] forKey:BDSKPreviewPDFScaleFactorKey];
-            [dictionary setDouble:[previewer RTFScaleFactor] forKey:BDSKPreviewRTFScaleFactorKey];
-        }
         
         if(fileSearchController){
             [dictionary setObject:[fileSearchController sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
@@ -967,35 +976,24 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if([super prepareSavePanel:savePanel] == NO)
         return NO;
     
+    saveAccessoryController = [[BDSKSaveAccessoryViewController alloc] init];
+    
     if(NSSaveToOperation == docState.currentSaveOperationType){
-        NSView *accessoryView = [savePanel accessoryView];
-        BDSKASSERT(accessoryView != nil);
-        BDSKASSERT(saveFormatPopupButton == nil);
-        saveFormatPopupButton = popUpButtonSubview(accessoryView);
+        NSPopUpButton *saveFormatPopupButton = popUpButtonSubview([savePanel accessoryView]);
         BDSKASSERT(saveFormatPopupButton != nil);
-        NSRect savFrame = [saveAccessoryView frame];
-        NSRect exportFrame = [exportAccessoryView frame];
-        savFrame.origin = NSMakePoint(0.0, SAVE_ENCODING_VIEW_OFFSET);
-        [saveAccessoryView setFrame:savFrame];
-        exportFrame.size.width = NSWidth(savFrame);
-        [exportAccessoryView setFrame:exportFrame];
-        [exportAccessoryView addSubview:saveAccessoryView];
-        NSRect popupFrame = [saveTextEncodingPopupButton frame];
-        popupFrame.origin.y = SAVE_FORMAT_POPUP_OFFSET;
-        [saveFormatPopupButton setFrame:popupFrame];
-        [exportAccessoryView addSubview:saveFormatPopupButton];
-        [savePanel setAccessoryView:exportAccessoryView];
+        [saveAccessoryController addSaveFormatPopUpButton:saveFormatPopupButton];
+        [savePanel setAccessoryView:[saveAccessoryController exportAccessoryView]];
     }else{
-        [savePanel setAccessoryView:saveAccessoryView];
+        [savePanel setAccessoryView:[saveAccessoryController saveAccessoryView]];
     }
     
     // set the popup to reflect the document's present string encoding
-    [saveTextEncodingPopupButton setEncoding:[self documentStringEncoding]];
-    [saveTextEncodingPopupButton setEnabled:YES];
+    [saveAccessoryController setSaveTextEncoding:[self documentStringEncoding]];
+    [saveAccessoryController setSaveTextEncodingPopupButtonEnabled:YES];
     
-    [exportSelectionCheckButton setState:NSOffState];
+    [saveAccessoryController setExportSelection:NO];
     if(NSSaveToOperation == docState.currentSaveOperationType)
-        [exportSelectionCheckButton setEnabled:[self numberOfSelectedPubs] > 0 || [self hasLibraryGroupSelected] == NO];
+        [saveAccessoryController setExportSelectionCheckButtonEnabled:[self numberOfSelectedPubs] > 0 || [self hasLibraryGroupSelected] == NO];
     
     return YES;
 }
@@ -1006,13 +1004,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 // this is a private method, the action of the file format poup
 - (void)changeSaveType:(id)sender{
-    [saveTextEncodingPopupButton setEnabled:[self needsEncodingForType:[[sender selectedItem] representedObject]]];
     if ([NSDocument instancesRespondToSelector:@selector(changeSaveType:)])
         [super changeSaveType:sender];
+    [saveAccessoryController setSaveTextEncodingPopupButtonEnabled:[self needsEncodingForType:[self fileTypeFromLastRunSavePanel]]];
 }
 
 - (NSArray *)publicationsForSaving {
-    if (docState.currentSaveOperationType != NSSaveToOperation || [exportSelectionCheckButton state] != NSOnState)
+    if (docState.currentSaveOperationType != NSSaveToOperation || [saveAccessoryController exportSelection] == NO)
         return publications;
     else if ([self numberOfSelectedPubs] == 0)
         return groupedPublications;
@@ -1024,10 +1022,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSStringEncoding encoding = 0;
     
     // export operations need their own encoding
-    if (NSSaveToOperation == docState.currentSaveOperationType)
-        encoding = [saveTextEncodingPopupButton encoding] != BDSKNoStringEncoding ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
-    else if (NSSaveAsOperation == docState.currentSaveOperationType && [saveTextEncodingPopupButton encoding] != BDSKNoStringEncoding)
-        encoding = [saveTextEncodingPopupButton encoding];
+    if (saveAccessoryController)
+        encoding = [saveAccessoryController saveTextEncoding];
+    else if (NSSaveToOperation == docState.currentSaveOperationType)
+        encoding = [BDSKStringEncodingManager defaultEncoding];
     else
         encoding = [self documentStringEncoding];
     
@@ -1106,13 +1104,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
     
     BDSKDESTROY(saveTargetURL);
-    
-    // reset the encoding popup so we know when it wasn't shown to the user next time
-    [saveTextEncodingPopupButton setEncoding:BDSKNoStringEncoding];
-    // in case we saved using the panel, we should reset that
-    [exportSelectionCheckButton setState:NSOffState];
-    [saveFormatPopupButton removeFromSuperview];
-    saveFormatPopupButton = nil;
+    BDSKDESTROY(saveAccessoryController);
     
     if (invocation) {
         [invocation setArgument:&doc atIndex:2];
@@ -2628,19 +2620,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 - (void)setFileURL:(NSURL *)absoluteURL{ 
     [super setFileURL:absoluteURL];
     if (absoluteURL)
-        [[publications valueForKeyPath:@"@unionOfArrays.files"]  makeObjectsPerformSelector:@selector(update)];
+        [[publications valueForKeyPath:@"@unionOfArrays.files"]  makeObjectsPerformSelector:@selector(updateWithPath:) withObject:nil];
     [self updateFileViews];
     [self updatePreviews];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentFileURLDidChangeNotification object:self];
-}
-
-// avoid warning for BDSKOwner protocol conformance
-- (NSURL *)fileURL {
-    return [super fileURL];
-}
-
-- (BOOL)isDocument{
-    return YES;
 }
 
 @end

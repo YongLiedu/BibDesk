@@ -3,7 +3,7 @@
 //  Bibdesk
 //
 /*
- This software is Copyright (c) 2005-2012
+ This software is Copyright (c) 2005-2013
  Michael O. McCracken. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -90,6 +90,7 @@
 #import "BDSKBookmarkController.h"
 #import "NSPasteboard_BDSKExtensions.h"
 #import "NSTableView_BDSKExtensions.h"
+#import "NSWorkspace_BDSKExtensions.h"
 
 
 @implementation BibDocument (Groups)
@@ -800,10 +801,10 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCrossrefString, nil]
                                               excluding:[[[typeMan invalidGroupFieldsSet] allObjects] arrayByAddingObjectsFromArray:groupFields]];
     
-    BDSKAddFieldSheetController *addFieldController = [[[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of group field:", @"Label for adding group field")
-                                                                                               fieldsArray:colNames] autorelease];
+    BDSKFieldSheetController *addFieldController = [BDSKFieldSheetController fieldSheetControllerWithChoosableFields:colNames
+                                                                             label:NSLocalizedString(@"Name of group field:", @"Label for adding group field")];
 	[addFieldController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
-        NSString *newGroupField = [addFieldController field];
+        NSString *newGroupField = [addFieldController chosenField];
         if(result == NSCancelButton || newGroupField == nil)
             return; // the user canceled
         
@@ -833,10 +834,10 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 - (IBAction)removeGroupFieldAction:(id)sender{
 	NSArray *groupFields = [[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey];
-    BDSKRemoveFieldSheetController *removeFieldController = [[[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field to remove:", @"Label for removing group field")
-                                                                                                        fieldsArray:groupFields] autorelease];
+    BDSKFieldSheetController *removeFieldController = [BDSKFieldSheetController fieldSheetControllerWithSelectableFields:groupFields
+                                                                                label:NSLocalizedString(@"Group field to remove:", @"Label for removing group field")];
 	[removeFieldController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
-        NSString *oldGroupField = [removeFieldController field];
+        NSString *oldGroupField = [removeFieldController selectedField];
         if(result == NSCancelButton || [NSString isEmptyString:oldGroupField])
             return;
         
@@ -874,7 +875,9 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	BDSKFilterController *filterController = [[[BDSKFilterController alloc] init] autorelease];
     [filterController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
         if(result == NSOKButton){
-            BDSKSmartGroup *group = [[BDSKSmartGroup alloc] initWithFilter:[filterController filter]];
+            BDSKFilter *filter = [[BDSKFilter alloc] initWithConditions:[filterController conditions] conjunction:[filterController conjunction]];
+            BDSKSmartGroup *group = [[BDSKSmartGroup alloc] initWithFilter:filter];
+            [filter release];
             [groups addSmartGroup:group];
             [self editGroupWithoutWarning:group];
             [group release];
@@ -907,9 +910,10 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     BDSKSearchGroupSheetController *sheetController = [[[BDSKSearchGroupSheetController alloc] init] autorelease];
     [sheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
         if(result == NSOKButton){
-            BDSKGroup *group = [sheetController group];
-            [groups addSearchGroup:(id)group];
+            BDSKSearchGroup *group = [[BDSKSearchGroup alloc] initWithServerInfo:[sheetController serverInfo] searchTerm:nil];
+            [groups addSearchGroup:group];
             [groupOutlineView expandItem:[group parent]];
+            [group release];
             NSInteger row = [groupOutlineView rowForItem:group];
             if (row != -1)
                 [groupOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
@@ -973,10 +977,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     BDSKURLGroupSheetController *sheetController = [[[BDSKURLGroupSheetController alloc] init] autorelease];
     [sheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
         if(result == NSOKButton){
-            BDSKURLGroup *group = [sheetController group];
+            BDSKURLGroup *group = [[BDSKURLGroup alloc] initWithURL:[sheetController URL]];
             [groups addURLGroup:group];
             [group publications];
             [self editGroupWithoutWarning:group];
+            [group release];
             [[self undoManager] setActionName:NSLocalizedString(@"Add External File Group", @"Undo action name")];
             // updating of the tables is done when finishing the edit of the name
         }
@@ -987,10 +992,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     BDSKScriptGroupSheetController *sheetController = [[[BDSKScriptGroupSheetController alloc] init] autorelease];
     [sheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
         if(result == NSOKButton){
-            BDSKScriptGroup *group = [sheetController group];
+            BDSKScriptGroup *group = [[BDSKScriptGroup alloc] initWithScriptPath:[sheetController path] scriptArguments:[sheetController arguments]];
             [groups addScriptGroup:group];
             [group publications];
             [self editGroupWithoutWarning:group];
+            [group release];
             [[self undoManager] setActionName:NSLocalizedString(@"Add Script Group", @"Undo action name")];
             // updating of the tables is done when finishing the edit of the name
         }
@@ -1039,23 +1045,49 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	if ([group isSmart]) {
 		BDSKFilter *filter = [(BDSKSmartGroup *)group filter];
 		BDSKFilterController *filterController = [[BDSKFilterController alloc] initWithFilter:filter];
-        [filterController beginSheetModalForWindow:documentWindow completionHandler:nil];
+        [filterController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+            if (result == NSOKButton) {
+                [filter setConditions:[filterController conditions]];
+                [filter setConjunction:[filterController conjunction]];
+                [[filter undoManager] setActionName:NSLocalizedString(@"Edit Smart Group", @"Undo action name")];
+            }
+        }];
         [filterController release];
 	} else if ([group isCategory]) {
         // this must be a person field
         BDSKASSERT([[group name] isKindOfClass:[BibAuthor class]]);
 		[self showPerson:(BibAuthor *)[group name]];
 	} else if ([group isURL]) {
-        BDSKURLGroupSheetController *sheetController = [(BDSKURLGroupSheetController *)[BDSKURLGroupSheetController alloc] initWithGroup:(BDSKURLGroup *)group];
-        [sheetController beginSheetModalForWindow:documentWindow completionHandler:nil];
+        BDSKURLGroup *urlGroup = (BDSKURLGroup *)group;
+        BDSKURLGroupSheetController *sheetController = [(BDSKURLGroupSheetController *)[BDSKURLGroupSheetController alloc] initWithURL:[urlGroup URL]];
+        [sheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+            if (result == NSOKButton) {
+                [urlGroup setURL:[sheetController URL]];
+                [[self undoManager] setActionName:NSLocalizedString(@"Edit External File Group", @"Undo action name")];
+            }
+        }];
         [sheetController release];
 	} else if ([group isScript]) {
-        BDSKScriptGroupSheetController *sheetController = [(BDSKScriptGroupSheetController *)[BDSKScriptGroupSheetController alloc] initWithGroup:(BDSKScriptGroup *)group];
-        [sheetController beginSheetModalForWindow:documentWindow completionHandler:nil];
+        BDSKScriptGroup *scriptGroup = (BDSKScriptGroup *)group;
+        BDSKScriptGroupSheetController *sheetController = [(BDSKScriptGroupSheetController *)[BDSKScriptGroupSheetController alloc] initWithPath:[scriptGroup scriptPath] arguments:[scriptGroup scriptArguments]];
+        [sheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+            if (result == NSOKButton) {
+                NSString *path = [sheetController path];
+                [scriptGroup setScriptPath:path];
+                [scriptGroup setScriptArguments:[sheetController arguments]];
+                [scriptGroup setScriptType:[[NSWorkspace sharedWorkspace] isAppleScriptFileAtPath:path] ? BDSKAppleScriptType: BDSKShellScriptType];
+                [[self undoManager] setActionName:NSLocalizedString(@"Edit Script Group", @"Undo action name")];
+            }
+        }];
         [sheetController release];
 	} else if ([group isSearch]) {
-        BDSKSearchGroupSheetController *sheetController = [(BDSKSearchGroupSheetController *)[BDSKSearchGroupSheetController alloc] initWithGroup:(BDSKSearchGroup *)group];
-        [sheetController beginSheetModalForWindow:documentWindow completionHandler:nil];
+        BDSKSearchGroup *searchGroup = (BDSKSearchGroup *)group;
+        BDSKSearchGroupSheetController *sheetController = [(BDSKSearchGroupSheetController *)[BDSKSearchGroupSheetController alloc] initWithServerInfo:[searchGroup serverInfo]];
+        [sheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
+            if (result == NSOKButton) {
+                [searchGroup setServerInfo:[sheetController serverInfo]];
+            }
+        }];
         [sheetController release];
 	}
 }
@@ -1204,10 +1236,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     } else if ([currentGroupFields count] == 1) {
         [self editNewCategoryGroupWithSelectionForGroupField:[currentGroupFields lastObject]];
     } else {
-        BDSKRemoveFieldSheetController *chooseFieldController = [[[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field:", @"Label for choosing group field")
-                                                                                                            fieldsArray:currentGroupFields] autorelease];
+        BDSKFieldSheetController *chooseFieldController = [BDSKFieldSheetController fieldSheetControllerWithSelectableFields:currentGroupFields
+                                                                                    label:NSLocalizedString(@"Group field:", @"Label for choosing group field")];
+        [chooseFieldController setDefaultButtonTitle:NSLocalizedString(@"Choose", @"Button title")];
         [chooseFieldController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
-            NSString *groupField = [chooseFieldController field];
+            NSString *groupField = [chooseFieldController selectedField];
             if(result == NSCancelButton || [NSString isEmptyString:groupField])
                 return;
             

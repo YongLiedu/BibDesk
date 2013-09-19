@@ -1,7 +1,7 @@
 //  BibItem.m
 //  Created by Michael McCracken on Tue Dec 18 2001.
 /*
- This software is Copyright (c) 2001-2012
+ This software is Copyright (c) 2001-2013
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@
 #import "NSString_BDSKExtensions.h"
 #import "BDSKConverter.h"
 #if BDSK_OS_X
-    #import "BDAlias.h"
+    #import "BDSKAlias.h"
 #endif
 #import "BDSKFormatParser.h"
 #import "BDSKBibTeXParser.h"
@@ -767,10 +767,6 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 - (NSArray *)pubAuthorsInheriting:(BOOL)inherit{
     return [self peopleArrayForField:BDSKAuthorString inherit:inherit];
-}
-
-- (NSArray *)pubAuthorsAsStrings{
-    return [[self pubAuthors] valueForKey:@"normalizedName"];
 }
 
 - (NSString *)pubAuthorsForDisplay{
@@ -1588,7 +1584,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     // this is what shows up in search results
     [info setObject:value ?: @"Unknown" forKey:(NSString *)kMDItemDisplayName];
 
-    [info setObject:[self pubAuthorsAsStrings] forKey:(NSString *)kMDItemAuthors];
+    [info setObject:[[self pubAuthorsOrEditors] valueForKey:@"normalizedName"] forKey:(NSString *)kMDItemAuthors];
 
     if(value = [[self valueOfField:BDSKAbstractString] stringByRemovingTeX])
         [info setObject:value forKey:(NSString *)kMDItemDescription];
@@ -2544,7 +2540,7 @@ static void addFilesToArray(const void *value, void *context)
     [files insertObject:aFile atIndex:idx];
     [aFile setDelegate:self];
     if ([owner fileURL])
-        [aFile update];
+        [aFile updateWithPath:nil];
     
     [self noteFilesChanged:[aFile isFile]];
 }
@@ -2951,7 +2947,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         if([value rangeOfCharacterFromSet:acSet].length)
 			groupArray = [value componentsSeparatedByCharactersInSet:acSet trimWhitespace:YES];
         else 
-            groupArray = [value componentsSeparatedByStringCaseInsensitive:@" and "];
+            groupArray = [value componentsSeparatedByAnd];
         
 		mutableGroupSet = [[NSMutableSet alloc] initForCaseInsensitiveStrings];
         [mutableGroupSet addObjectsFromArray:groupArray];
@@ -3524,7 +3520,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     }
     
     if ([owner fileURL])
-        [files makeObjectsPerformSelector:@selector(update)];
+        [files makeObjectsPerformSelector:@selector(updateWithPath:) withObject:nil];
     
     NSUInteger unresolvedFileCount = [unresolvedFiles count], unresolvedURLCount = [unresolvedURLs count];
     

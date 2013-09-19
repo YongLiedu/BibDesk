@@ -4,7 +4,7 @@
 //
 //  Created by Douglas Stebila on 2/11/10.
 /*
- This software is Copyright (c) 2010-2012
+ This software is Copyright (c) 2010-2013
  Douglas Stebila. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
     if ((nil == [url host]) || 
-        (NO == [[[url host] lowercaseString] hasSuffix:@"www.springerlink.com"]) || 
+        (NO == [[[url host] lowercaseString] hasSuffix:@"www.link.springer.com"]) || 
 		(NO == [[[url path] lowercaseString] hasPrefix:@"/content/"])
 	) {
         return NO;
@@ -178,7 +178,7 @@
 + (NSDictionary *)parserInfo {
 	NSString *parserDescription = NSLocalizedString(@"SpringerLink portal.  Browsing and abstracts are free but full text requires a subscription.", @"Description for Springer site");
 	return [BDSKWebParser parserInfoWithName:@"SpringerLink" 
-                                     address:@"http://www.springerlink.com/" 
+                                     address:@"http://www.link.springer.com/" 
                                  description:parserDescription 
                                        feature:BDSKParserFeatureSubscription];
 }

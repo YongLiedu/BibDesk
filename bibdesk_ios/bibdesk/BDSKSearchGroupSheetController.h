@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 12/26/06.
 /*
- This software is Copyright (c) 2006-2012
+ This software is Copyright (c) 2006-2013
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -38,12 +38,12 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKSearchGroup, BDSKServerInfo, BDSKMutableServerInfo, BDSKCollapsibleView;
+@class BDSKServerInfo, BDSKMutableServerInfo, BDSKCollapsibleView;
 
 @interface BDSKSearchGroupSheetController : NSWindowController {
-    BDSKSearchGroup *group;
     NSUndoManager *undoManager;
     BDSKMutableServerInfo *serverInfo;
+    BDSKServerInfo *originalServerInfo;
     
     BOOL isCustom;
     BOOL isEditable;
@@ -70,7 +70,7 @@
     IBOutlet NSObjectController *objectController;
 }
 
-- (id)initWithGroup:(BDSKSearchGroup *)aGroup;
+- (id)initWithServerInfo:(BDSKServerInfo *)aServerInfo;
 
 - (IBAction)selectPredefinedServer:(id)sender;
 - (IBAction)selectSyntax:(id)sender;
@@ -86,6 +86,7 @@
 - (void)setEditable:(BOOL)flag;
 - (BOOL)isEditable;
 - (BOOL)isZoom;
+- (BOOL)isZoomOrISI;
 
 - (void)setType:(NSString *)newType;
 - (NSString *)type;
@@ -96,7 +97,6 @@
 - (void)setServerInfo:(BDSKServerInfo *)info;
 - (BDSKServerInfo *)serverInfo;
 
-- (BDSKSearchGroup *)group;
 - (IBAction)selectPredefinedServer:(id)sender;
 
 - (BOOL)commitEditing;

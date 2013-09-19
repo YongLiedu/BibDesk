@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 1/18/08.
 /*
- This software is Copyright (c) 2008-2012
+ This software is Copyright (c) 2008-2013
  Christiaan Hofman. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -44,9 +44,8 @@
 - (id)init {
     self = [super init];
     if (self) {
-        NSMapTableOptions options = NSMapTableStrongMemory | NSMapTableObjectPointerPersonality;
-        mapTable = [[NSMapTable alloc] initWithKeyOptions:options valueOptions:options capacity:0];
-        inverseMapTable = [[NSMapTable alloc] initWithKeyOptions:options valueOptions:options capacity:0];
+        mapTable = [[NSMapTable alloc] initWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory capacity:0];
+        inverseMapTable = [[NSMapTable alloc] initWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory capacity:0];
     }
     return self;
 }
@@ -61,13 +60,9 @@
     return [mapTable description];
 }
 
-- (NSMapTable *)_mapTable:(BOOL)inverse {
-    return inverse ? inverseMapTable : mapTable;
-}
-
 - (NSMutableSet *)_setForValue:(id)aValue inverse:(BOOL)inverse create:(BOOL)create {
-    NSMapTable *map = [self _mapTable:inverse];
-    NSMutableSet *value = (NSMutableSet *)[map valueForKey:aValue];
+    NSMapTable *map = inverse ? inverseMapTable : mapTable;
+    NSMutableSet *value = (NSMutableSet *)[map objectForKey:aValue];
 
     if (create && value == nil) {
         value = [[NSMutableSet alloc] init];
@@ -93,7 +88,7 @@
     return [[self _setForValue:anObject inverse:YES create:NO] count];
 }
 
-- (NSSet *)allObjectsForKey:(id)aKey {
+- (NSSet *)objectsForKey:(id)aKey {
     return [self _setForValue:aKey inverse:NO create:NO];
 }
 

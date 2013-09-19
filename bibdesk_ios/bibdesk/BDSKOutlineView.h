@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 2/18/09.
 /*
- This software is Copyright (c) 2009-2012
+ This software is Copyright (c) 2009-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,8 @@
 @optional
 
 - (void)outlineViewInsertNewline:(NSOutlineView *)anOutlineView;
+- (void)outlineViewInsertSpace:(NSOutlineView *)anOutlineView;
+- (void)outlineViewInsertShiftSpace:(NSOutlineView *)anOutlineView;
 
 - (NSArray *)outlineView:(NSOutlineView *)anOutlineView typeSelectHelperSelectionStrings:(BDSKTypeSelectHelper *)aTypeSelectHelper;
 - (void)outlineView:(NSOutlineView *)anOutlineView typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString;
@@ -60,8 +62,6 @@
 - (BOOL)outlineViewCanPasteFromPasteboard:(NSOutlineView *)anOutlineView;
 - (void)outlineView:(NSOutlineView *)anOutlineView duplicateItems:(NSArray *)items; // defaults to copy+paste
 - (BOOL)outlineView:(NSOutlineView *)anOutlineView canDuplicateItems:(NSArray *)items;
-
-- (NSDragOperation)outlineView:(NSOutlineView *)anOutlineView draggingSourceOperationMaskForLocal:(BOOL)flag;
 
 - (NSImage *)outlineView:(NSOutlineView *)anOutlineView dragImageForItems:(NSArray *)items;
 
@@ -99,6 +99,8 @@
 - (void)scrollToBeginningOfDocument:(id)sender;
 - (void)scrollToEndOfDocument:(id)sender;
 - (void)insertNewline:(id)sender;
+- (void)insertSpace:(id)sender;
+- (void)insertShiftSpace:(id)sender;
 
 - (void)delete:(id)sender;
 - (void)copy:(id)sender;

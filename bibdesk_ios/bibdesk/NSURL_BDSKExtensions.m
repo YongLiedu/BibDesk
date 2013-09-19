@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 12/19/05.
 /*
- This software is Copyright (c) 2005-2012
+ This software is Copyright (c) 2005-2013
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -475,6 +475,21 @@
         if ((value = [note objectForKey:@"image"])) {
             [note setValue:[NSAppleEventDescriptor descriptorWithDescriptorType:typeTIFF data:[value TIFFRepresentation]] forKey:@"image"];
         }
+        if ((value = [note objectForKey:@"pointLists"])) {
+            NSMutableArray *pathList = [NSMutableArray array];
+            for (NSArray *path in value) {
+                NSMutableArray *points = [NSMutableArray array];
+                for (NSString *pointString in path) {
+                    NSPoint nsPoint = NSPointFromString(pointString);
+                    Point qdPoint;
+                    qdPoint.h = round(nsPoint.x);
+                    qdPoint.v = round(nsPoint.y);
+                    [points addObject:[NSData dataWithBytes:&qdPoint length:sizeof(Point)]];
+                }
+                [pathList addObject:points];
+            }
+            [note setValue:pathList forKey:@"pointLists"];
+        }
         if ((value = [note objectForKey:@"quadrilateralPoints"])) {
             NSMutableArray *pathList = [NSMutableArray array];
             NSMutableArray *points = [NSMutableArray array];
@@ -490,21 +505,6 @@
                 }
             }
             [note setValue:nil forKey:@"quadrilateralPoints"];
-            [note setValue:pathList forKey:@"pointLists"];
-        }
-        if ((value = [note objectForKey:@"pointLists"])) {
-            NSMutableArray *pathList = [NSMutableArray array];
-            for (NSArray *path in value) {
-                NSMutableArray *points = [NSMutableArray array];
-                for (NSString *pointString in path) {
-                    NSPoint nsPoint = NSPointFromString(pointString);
-                    Point qdPoint;
-                    qdPoint.h = round(nsPoint.x);
-                    qdPoint.v = round(nsPoint.y);
-                    [points addObject:[NSData dataWithBytes:&qdPoint length:sizeof(Point)]];
-                }
-                [pathList addObject:points];
-            }
             [note setValue:pathList forKey:@"pointLists"];
         }
         [notes addObject:note];

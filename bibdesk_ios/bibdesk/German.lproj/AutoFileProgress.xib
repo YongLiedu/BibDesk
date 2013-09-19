@@ -69,7 +69,7 @@
 							<object class="NSTextFieldCell" key="NSCell" id="542846011">
 								<int key="NSCellFlags">67108864</int>
 								<int key="NSCellFlags2">138412032</int>
-								<string key="NSContents">Dateien bewegen...</string>
+								<string key="NSContents">Dateien bewegen…</string>
 								<object class="NSFont" key="NSSupport">
 									<string key="NSName">LucidaGrande</string>
 									<double key="NSSize">13</double>

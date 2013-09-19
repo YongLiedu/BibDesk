@@ -4,7 +4,7 @@
 //
 //  Created by Michael McCracken on Thu Nov 28 2002.
 /*
- This software is Copyright (c) 2002-2012
+ This software is Copyright (c) 2002-2013
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -109,14 +109,14 @@ static void handleError(bt_error *err);
     BDSKINITIALIZE;
     parserLock = [[NSLock alloc] init];
     // do nothing in the case of a harmless lexical buffer warning, use BDSKErrorObject for other errors
-    bt_err_handlers[BTERR_NOTIFY] = NULL;
-    bt_err_handlers[BTERR_CONTENT] = handleError;
-    bt_err_handlers[BTERR_LEXWARN] = handleError;
-    bt_err_handlers[BTERR_USAGEWARN] = handleError;
-    bt_err_handlers[BTERR_LEXERR] = handleError;
-    bt_err_handlers[BTERR_SYNTAX] = handleError;
-    bt_err_handlers[BTERR_USAGEERR] = handleError;
-    bt_err_handlers[BTERR_INTERNAL] = handleError;
+    bt_set_error_handler(BTERR_NOTIFY, NULL);
+    bt_set_error_handler(BTERR_CONTENT, handleError);
+    bt_set_error_handler(BTERR_LEXWARN, handleError);
+    bt_set_error_handler(BTERR_USAGEWARN, handleError);
+    bt_set_error_handler(BTERR_LEXERR, handleError);
+    bt_set_error_handler(BTERR_SYNTAX, handleError);
+    bt_set_error_handler(BTERR_USAGEERR, handleError);
+    bt_set_error_handler(BTERR_INTERNAL, handleError);
 }
 
 static NSString *stringWithoutComments(NSString *string) {
@@ -491,63 +491,62 @@ static NSString *stringWithoutComments(NSString *string) {
 }
 
 static CFArrayRef
-__BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
+__BDCreateArrayOfNames(CFStringRef namesString)
 {
-    CFIndex i, iMax = CFArrayGetCount(names);
-    if(iMax <= 1)
-        return CFRetain(names);
-    
     CFAllocatorRef allocator = CFAllocatorGetDefault();
+    CFIndex length = CFStringGetLength(namesString);
+    CFArrayRef separatorRanges = CFStringCreateArrayWithFindResults(allocator, namesString, CFSTR(" and "), CFRangeMake(0, length), kCFCompareCaseInsensitive);
     
+    if(separatorRanges == NULL)
+        return CFArrayCreate(allocator, (const void**)&namesString, 1, & kCFTypeArrayCallBacks);
+    
+    CFIndex i, iMax = CFArrayGetCount(separatorRanges);
     CFStringInlineBuffer inlineBuffer;
-    CFMutableStringRef mutableString = CFStringCreateMutable(allocator, 0);
     CFIndex idx, braceDepth = 0;
     CFStringRef name;
-    CFIndex nameLen;
     UniChar ch;
-    Boolean shouldAppend = FALSE;
+    CFIndex startIndex = 0, currentIndex = 0, currentLength;
+    CFRange currentRange;
     
-    CFMutableArrayRef mutableArray = CFArrayCreateMutable(allocator, iMax, &kCFTypeArrayCallBacks);
+    CFMutableArrayRef array = CFArrayCreateMutable(allocator, iMax + 1, &kCFTypeArrayCallBacks);
     
-    for(i = 0; i < iMax; i++){
-        name = CFArrayGetValueAtIndex(names, i);
-        nameLen = CFStringGetLength(name);
-        CFStringInitInlineBuffer(name, &inlineBuffer, CFRangeMake(0, nameLen));
+    for(i = 0; i < iMax + 1; i++){
+        if (i == iMax)
+            currentRange = CFRangeMake(length, 0);
+        else
+            currentRange = *(CFRange *)CFArrayGetValueAtIndex(separatorRanges, i);
+        currentLength = currentRange.location - currentIndex;
+        CFStringInitInlineBuffer(namesString, &inlineBuffer, CFRangeMake(currentIndex, currentLength));
 
-        // check for balanced braces in this name (including braces from a previous name)
-        for(idx = 0; idx < nameLen; idx++){
+        // check for balanced braces in this substring (including braces from a previous substring)
+        for(idx = 0; idx < currentLength; idx++){
             ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, idx);
             if(ch == '{')
                 braceDepth++;
             else if(ch == '}')
                 braceDepth--;
         }
-        // if we had an unbalanced string last time, we need to keep appending to the mutable string; likewise, we want to append this name to the mutable string if braces are still unbalanced
-        if(shouldAppend || braceDepth != 0){
-            if(BDIsEmptyString(mutableString) == FALSE)
-                CFStringAppend(mutableString, CFSTR(" and "));
-            CFStringAppend(mutableString, name);
-            shouldAppend = TRUE;
-        } else {
-            // braces balanced, so append the value, and reset the mutable string
-            CFArrayAppendValue(mutableArray, name);
-            CFStringReplaceAll(mutableString, CFSTR(""));
-            // don't append next time unless the next name has unbalanced braces in its own right
-            shouldAppend = FALSE;
+        
+        currentIndex = currentRange.location + currentRange.length;
+        
+        if(braceDepth == 0){
+            // braces balanced, so append the last name we found and reset the startIndex
+            name = CFStringCreateWithSubstring(allocator, namesString, CFRangeMake(startIndex, currentRange.location - startIndex));
+            CFArrayAppendValue(array, name);
+            CFRelease(name);
+            startIndex = currentIndex;
         }
     }
     
-    if(BDIsEmptyString(mutableString) == FALSE)
-        CFArrayAppendValue(mutableArray, mutableString);
-    CFRelease(mutableString);
+    CFRelease(separatorRanges);
     
     // returning NULL will signify our error condition
     if(braceDepth != 0){
-        CFRelease(mutableArray);
-        mutableArray = NULL;
+        CFRelease(array);
+        array = NULL;
     }
     
-    return mutableArray;
+    return array;
 }
 
 + (NSArray *)authorsFromBibtexString:(NSString *)aString withPublication:(BibItem *)pub forField:(NSString *)field{
@@ -558,24 +557,20 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
         return authors;
 
     // This is equivalent to btparse's bt_split_list(str, "and", "BibTex Name", 0, ""), but avoids UTF8String conversion
-    CFArrayRef array = BDStringCreateArrayBySeparatingStringsWithOptions(CFAllocatorGetDefault(), (CFStringRef)aString, CFSTR(" and "), kCFCompareCaseInsensitive);
-    
     // check brace depth; corporate authors such as {Someone and Someone Else, Inc} use braces, so this parsing is BibTeX-specific, rather than general string handling
-    CFArrayRef names = __BDCreateArrayOfNamesByCheckingBraceDepth(array);
+    CFArrayRef names = __BDCreateArrayOfNames((CFStringRef)aString);
     
     // shouldn't ever see this case as far as I know, as long as we're using btparse
     if(names == NULL){
 #if BDSK_OS_X
         [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
-        [BDSKErrorObject reportErrorMessage:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unbalanced braces in author names:", @"Error description"), [(id)array description]] forFile:nil line:-1];
+        [BDSKErrorObject reportErrorMessage:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unbalanced braces in author names:", @"Error description"), aString] forFile:nil line:-1];
         [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForPublication:pub];
 #endif
-        CFRelease(array);
 
         // @@ return the empty array or nil?
         return authors;
     }
-    CFRelease(array);
     
     CFIndex i = 0, iMax = CFArrayGetCount(names);
     BibAuthor *anAuthor;

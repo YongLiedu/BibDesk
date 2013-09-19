@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 8/11/06.
 /*
- This software is Copyright (c) 2005-2012
+ This software is Copyright (c) 2005-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,8 @@
 #import "NSPasteboard_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import <libkern/OSAtomic.h>
+#import "BDSKFilePathCell.h"
+#import "NSEvent_BDSKExtensions.h"
 
 #define BDSKOrphanedFilesWindowFrameAutosaveName @"BDSKOrphanedFilesWindow"
 
@@ -95,11 +97,13 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     return self;
 }
 
-- (void)awakeFromNib{
+- (void)windowDidLoad{
     [self setWindowFrameAutosaveName:BDSKOrphanedFilesWindowFrameAutosaveName];
     [tableView setDoubleAction:@selector(showFile:)];
     [tableView setFontNamePreferenceKey:BDSKOrphanedFilesTableViewFontNameKey];
     [tableView setFontSizePreferenceKey:BDSKOrphanedFilesTableViewFontSizeKey];
+    [tableView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:YES];
+    [tableView setDraggingSourceOperationMask:NSDragOperationCopy | NSDragOperationDelete forLocal:NO];
     [progressIndicator setUsesThreadedAnimation:YES];
 }
 
@@ -205,6 +209,21 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     [statusField setStringValue:message];
 }    
 
+- (IBAction)previewAction:(id)sender
+{
+    if ([QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible])
+        [[QLPreviewPanel sharedPreviewPanel] orderOut:nil];
+    else
+        [[QLPreviewPanel sharedPreviewPanel] makeKeyAndOrderFront:nil];
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
+    if ([menuItem action] == @selector(previewAction:)) {
+        return [[tableView selectedRowIndexes] count] > 0;
+    }
+    return YES;
+}
+
 #pragma mark Accessors
  
 - (NSArray *)orphanedFiles {
@@ -304,10 +323,6 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     return YES;
 }
 
-- (NSDragOperation)tableView:(NSTableView *)tv draggingSourceOperationMaskForLocal:(BOOL)isLocal{
-    return isLocal ? NSDragOperationEvery : NSDragOperationCopy | NSDragOperationDelete;
-}
-
 - (void)tableView:(NSTableView *)tv concludeDragOperation:(NSDragOperation)operation{
     if (operation == NSDragOperationDelete && [draggedFiles count]) {
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Move Files to Trash?", @"Message in alert dialog when deleting a file")
@@ -335,12 +350,67 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     return [image dragImageWithCount:[fileURLs count]];
 }
 
+- (void)tableViewSelectionDidChange:(NSNotification *)notification {
+    if ([QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible] && [[QLPreviewPanel sharedPreviewPanel] dataSource] == self)
+        [[QLPreviewPanel sharedPreviewPanel] reloadData];
+}
+
+- (void)tableViewInsertSpace:(NSTableView *)aTableView {
+    [self previewAction:nil];
+}
+
+- (void)tableViewInsertShiftSpace:(NSTableView *)aTableView {}
+
 #pragma mark Contextual menu
 
 - (void)menuNeedsUpdate:(NSMenu *)menu {
     [menu removeAllItems];
     if (menu == [tableView menu] && [tableView clickedRow] != -1)
         [menu addItemsFromMenu:contextMenu];
+}
+#pragma mark Quick Look Panel Support
+
+- (BOOL)acceptsPreviewPanelControl:(QLPreviewPanel *)panel {
+    return YES;
+}
+
+- (void)beginPreviewPanelControl:(QLPreviewPanel *)panel {
+    [panel setDelegate:self];
+    [panel setDataSource:self];
+}
+
+- (void)endPreviewPanelControl:(QLPreviewPanel *)panel {
+}
+
+- (NSInteger)numberOfPreviewItemsInPreviewPanel:(QLPreviewPanel *)panel {
+    return [[tableView selectedRowIndexes] count];
+}
+
+- (id <QLPreviewItem>)previewPanel:(QLPreviewPanel *)panel previewItemAtIndex:(NSInteger)anIndex {
+    return [[[arrayController arrangedObjects] objectsAtIndexes:[tableView selectedRowIndexes]] objectAtIndex:anIndex];
+}
+
+- (NSRect)previewPanel:(QLPreviewPanel *)panel sourceFrameOnScreenForPreviewItem:(id <QLPreviewItem>)item {
+    NSUInteger row = [[arrayController arrangedObjects] indexOfObject:item];
+    NSRect iconRect = NSZeroRect;
+    if (item != nil && row != NSNotFound) {
+        iconRect = [(BDSKFilePathCell *)[tableView preparedCellAtColumn:0 row:row] iconRectForBounds:[tableView frameOfCellAtColumn:0 row:row]];
+        if (NSIntersectsRect([tableView visibleRect], iconRect)) {
+            iconRect = [tableView convertRectToBase:iconRect];
+            iconRect.origin = [[self window] convertBaseToScreen:iconRect.origin];
+        } else {
+            iconRect = NSZeroRect;
+        }
+    }
+    return iconRect;
+}
+
+- (BOOL)previewPanel:(QLPreviewPanel *)panel handleEvent:(NSEvent *)event {
+    if ([event type] == NSKeyDown) {
+        [tableView keyDown:event];
+        return YES;
+    }
+    return NO;
 }
 
 @end

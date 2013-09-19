@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 19/12/05.
 /*
- This software is Copyright (c) 2005-2012
+ This software is Copyright (c) 2005-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -50,8 +50,8 @@
 
 @implementation BDSKFieldEditor
 
-- (id)init {
-    self = [super initWithFrame:NSZeroRect];
+- (id)initWithFrame:(NSRect)frameRect textContainer:(NSTextContainer *)aTextContainer {
+    self = [super initWithFrame:NSZeroRect textContainer:aTextContainer];
     if (self) {
 		[self setFieldEditor:YES];
 		delegatedDraggedTypes = nil;

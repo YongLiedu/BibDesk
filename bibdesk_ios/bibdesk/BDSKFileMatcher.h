@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 02/09/07.
 /*
- This software is Copyright (c) 2007-2012
+ This software is Copyright (c) 2007-2013
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -37,11 +37,12 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import <Quartz/Quartz.h>
 #import "BDSKOutlineView.h"
 
 @class BDSKGroupingOutlineView;
 
-@interface BDSKFileMatcher : NSWindowController <NSOutlineViewDelegate, NSOutlineViewDataSource>
+@interface BDSKFileMatcher : NSWindowController <NSOutlineViewDelegate, NSOutlineViewDataSource, QLPreviewPanelDataSource, QLPreviewPanelDelegate>
 {
     IBOutlet BDSKGroupingOutlineView *outlineView;
     IBOutlet NSProgressIndicator *progressIndicator;
@@ -64,6 +65,7 @@
 - (IBAction)openAction:(id)sender;
 - (IBAction)abort:(id)sender;
 - (IBAction)configure:(id)sender;
+- (IBAction)previewAction:(id)sender;
 
 @end
 

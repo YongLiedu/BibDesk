@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 17/3/05.
 /*
- This software is Copyright (c) 2005-2012
+ This software is Copyright (c) 2005-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,7 @@ typedef NSUInteger BDSKConjunction;
 	NSUndoManager *undoManager;
 }
 
-- (id)initWithConditions:(NSArray *)newConditions;
+- (id)initWithConditions:(NSArray *)aConditions conjunction:(BDSKConjunction)aConjunction;
 - (id)initWithDictionary:(NSDictionary *)dictionary;
 
 - (NSDictionary *)dictionaryValue;

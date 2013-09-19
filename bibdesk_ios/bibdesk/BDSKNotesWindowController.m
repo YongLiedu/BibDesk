@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 2/25/07.
 /*
- This software is Copyright (c) 2007-2012
+ This software is Copyright (c) 2007-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -92,6 +92,9 @@
         // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
         [splitView setAutosaveName:nil];
     }
+    
+    [outlineView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:YES];
+    [outlineView setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
     
     [tokenField setTokenizingCharacterSet:[NSCharacterSet whitespaceCharacterSet]];
 }

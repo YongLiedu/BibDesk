@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 11/10/06.
 /*
- This software is Copyright (c) 2006-2012
+ This software is Copyright (c) 2006-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,6 @@
  */
 
 #import "BDSKURLGroupSheetController.h"
-#import "BDSKURLGroup.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "BibDocument.h"
@@ -50,15 +49,14 @@
 @implementation BDSKURLGroupSheetController
 
 - (id)init {
-    self = [self initWithGroup:nil];
+    self = [self initWithURL:nil];
     return self;
 }
 
-- (id)initWithGroup:(BDSKURLGroup *)aGroup {
+- (id)initWithURL:(NSURL *)aURL {
     self = [super init];
     if (self) {
-        group = [aGroup retain];
-        urlString = [[[group URL] absoluteString] retain];
+        urlString = [[aURL absoluteString] retain];
         undoManager = nil;
         dragFieldEditor = nil;
     }
@@ -68,7 +66,6 @@
 - (void)dealloc {
     [urlField setDelegate:nil];
     BDSKDESTROY(urlString);
-    BDSKDESTROY(group);
     BDSKDESTROY(undoManager);
     BDSKDESTROY(dragFieldEditor);
     [super dealloc];
@@ -83,28 +80,9 @@
 }
 
 - (IBAction)dismiss:(id)sender {
-    if ([sender tag] == NSOKButton) {
-        
-        if ([self commitEditing] == NO) {
-            NSBeep();
-            return;
-        }
-        
-        NSURL *url = nil;
-        if ([urlString rangeOfString:@"://"].location == NSNotFound) {
-            if ([[NSFileManager defaultManager] fileExistsAtPath:urlString])
-                url = [NSURL fileURLWithPath:urlString];
-            else
-                url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@", urlString]];
-        } else
-            url = [NSURL URLWithString:urlString];
-        
-        if(group == nil){
-            group = [[BDSKURLGroup alloc] initWithURL:url];
-        }else{
-            [group setURL:url];
-            [[group undoManager] setActionName:NSLocalizedString(@"Edit External File Group", @"Undo action name")];
-        }
+    if ([sender tag] == NSOKButton && [self commitEditing] == NO) {
+        NSBeep();
+        return;
     }
     
     [objectController setContent:nil];
@@ -126,10 +104,6 @@
     }];
 }
 
-- (BDSKURLGroup *)group {
-    return group;
-}
-
 - (NSString *)urlString {
     return [[urlString retain] autorelease];
 }
@@ -141,6 +115,18 @@
         urlString = [newUrlString copy];
         [[self undoManager] setActionName:NSLocalizedString(@"Edit URL", @"Undo action name")];
     }
+}
+
+- (NSURL *)URL {
+    NSURL *url = nil;
+    if ([urlString rangeOfString:@"://"].location == NSNotFound) {
+        if ([[NSFileManager defaultManager] fileExistsAtPath:urlString])
+            url = [NSURL fileURLWithPath:urlString];
+        else
+            url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@", urlString]];
+    } else
+        url = [NSURL URLWithString:urlString];
+    return url;
 }
 
 #pragma mark NSEditor

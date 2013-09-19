@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 1/18/08.
 /*
- This software is Copyright (c) 2008-2012
+ This software is Copyright (c) 2008-2013
  Christiaan Hofman. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@
 - (NSUInteger)objectCount;
 - (NSUInteger)countForKey:(id)aKey;
 - (NSUInteger)countForObject:(id)anObject;
-- (NSSet *)allObjectsForKey:(id)aKey;
+- (NSSet *)objectsForKey:(id)aKey;
 - (NSSet *)allKeysForObject:(id)anObject;
 - (id)anyObjectForKey:(id)aKey;
 - (id)anyKeyForObject:(id)anObject;

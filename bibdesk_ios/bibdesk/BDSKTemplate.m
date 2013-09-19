@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 05/23/06.
 /*
- This software is Copyright (c) 2006-2012
+ This software is Copyright (c) 2006-2013
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
 
 #import "BDSKTemplate.h"
 #if BDSK_OS_X
-    #import "BDAlias.h"
+    #import "BDSKAlias.h"
 #endif
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
@@ -563,13 +563,12 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 // iOS TODO: Make new implementations that dont require aliases
 #if BDSK_OS_X
     BDSKASSERT([self isLeaf]);
-    BDAlias *alias = nil;
-    alias = [[BDAlias alloc] initWithURL:aURL];
+    BDSKAlias *alias = [[BDSKAlias alloc] initWithURL:aURL];
     
     if (alias) {
         NSString *name = [aURL lastPathComponent];
         
-        [self setValue:[alias aliasData] forKey:BDSKTemplateAliasString];
+        [self setValue:[alias data] forKey:BDSKTemplateAliasString];
         
         [self setValue:[[aURL path] stringByAbbreviatingWithTildeInPath] forKey:BDSKTemplateFilePathString];
         
@@ -596,7 +595,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 {
     BDSKASSERT([self isLeaf]);
 #if BDSK_OS_X
-    BDAlias *alias = [[BDAlias alloc] initWithData:[self valueForKey:BDSKTemplateAliasString]];
+    BDSKAlias *alias = [[BDSKAlias alloc] initWithData:[self valueForKey:BDSKTemplateAliasString]];
     NSURL *theURL = [alias fileURLNoUI];
     [alias release];
     if (theURL == nil) {

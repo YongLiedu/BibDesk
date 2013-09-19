@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 01/02/06.
 /*
- This software is Copyright (c) 2006-2012
+ This software is Copyright (c) 2006-2013
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
  */
 #import <Foundation/Foundation.h>
 
-extern CFArrayRef BDStringCreateArrayBySeparatingStringsWithOptions(CFAllocatorRef allocator, CFStringRef string, CFStringRef separatorString, CFOptionFlags compareOptions);
+CFArrayRef BDStringCreateComponentsBySeparatingByAnd(CFAllocatorRef allocator, CFStringRef string);
 // supposed to be used only for ASCII-only character sets
 extern CFStringRef BDStringCreateByCollapsingAndTrimmingCharactersInSet(CFAllocatorRef allocator, CFStringRef string, CFCharacterSetRef charSet);
 extern CFStringRef BDStringCreateByNormalizingWhitespaceAndNewlines(CFAllocatorRef allocator, CFStringRef string);

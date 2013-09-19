@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 5/6/10.
 /*
- This software is Copyright (c) 2010-2012
+ This software is Copyright (c) 2010-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -159,10 +159,6 @@
     } else {
         [super resetCursorRects];
     }
-}
-
-- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
-    return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
 }
 
 - (id <BDSKNotesOutlineViewDelegate>)delegate { return (id <BDSKNotesOutlineViewDelegate>)[super delegate]; }

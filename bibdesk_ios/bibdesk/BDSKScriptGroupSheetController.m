@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 11/10/06.
 /*
- This software is Copyright (c) 2006-2012
+ This software is Copyright (c) 2006-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,6 @@
  */
 
 #import "BDSKScriptGroupSheetController.h"
-#import "BDSKScriptGroup.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKFieldEditor.h"
@@ -48,17 +47,15 @@
 @implementation BDSKScriptGroupSheetController
 
 - (id)init {
-    self = [self initWithGroup:nil];
+    self = [self initWithPath:nil arguments:nil];
     return self;
 }
 
-- (id)initWithGroup:(BDSKScriptGroup *)aGroup {
+- (id)initWithPath:(NSString *)aPath arguments:(NSString *)anArguments {
     self = [super init];
     if (self) {
-        group = [aGroup retain];
-        path = [[group scriptPath] retain];
-        arguments = [[group scriptArguments] retain];
-        type = [group scriptType];
+        path = [aPath retain];
+        arguments = [anArguments retain];
         undoManager = nil;
         dragFieldEditor = nil;
     }
@@ -69,7 +66,6 @@
     [pathField setDelegate:nil];
     BDSKDESTROY(path);
     BDSKDESTROY(arguments);
-    BDSKDESTROY(group);
     BDSKDESTROY(undoManager);
     BDSKDESTROY(dragFieldEditor);
     [super dealloc];
@@ -111,25 +107,9 @@
 }
 
 - (IBAction)dismiss:(id)sender {
-    if ([sender tag] == NSOKButton) {
-        
-        if ([self commitEditing] == NO)
-            return;
-        
-        if ([[NSWorkspace sharedWorkspace] isAppleScriptFileAtPath:path])
-            type = BDSKAppleScriptType;
-        else
-            type = BDSKShellScriptType;
-        
-        if(group == nil){
-            group = [[BDSKScriptGroup alloc] initWithScriptPath:path scriptArguments:arguments scriptType:type];
-        }else{
-            [group setScriptPath:path];
-            [group setScriptArguments:arguments];
-            [group setScriptType:type];
-            [[group undoManager] setActionName:NSLocalizedString(@"Edit Script Group", @"Undo action name")];
-        }
-        
+    if ([sender tag] == NSOKButton && [self commitEditing] == NO) {
+        NSBeep();
+        return;
     }
     
     [objectController setContent:nil];
@@ -156,10 +136,6 @@
             [self setPath:[url path]];
         }
     }];
-}
-
-- (BDSKScriptGroup *)group {
-    return group;
 }
 
 - (NSString *)path{

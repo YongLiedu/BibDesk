@@ -41,7 +41,7 @@
 				<string key="NSWindowContentMaxSize">{700, 393}</string>
 				<string key="NSWindowContentMinSize">{372, 393}</string>
 				<object class="NSView" key="NSWindowView" id="514477643">
-					<nil key="NSNextResponder"/>
+					<reference key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
 					<array class="NSMutableArray" key="NSSubviews">
 						<object class="NSTextField" id="353853075">
@@ -49,6 +49,7 @@
 							<int key="NSvFlags">268</int>
 							<string key="NSFrame">{{17, 331}, {47, 17}}</string>
 							<reference key="NSSuperview" ref="514477643"/>
+							<reference key="NSWindow"/>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSTextFieldCell" key="NSCell" id="239577197">
 								<int key="NSCellFlags">67108864</int>
@@ -85,6 +86,7 @@
 							<int key="NSvFlags">266</int>
 							<string key="NSFrame">{{69, 324}, {255, 26}}</string>
 							<reference key="NSSuperview" ref="514477643"/>
+							<reference key="NSWindow"/>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSPopUpButtonCell" key="NSCell" id="250804858">
 								<int key="NSCellFlags">-2076049856</int>
@@ -136,6 +138,7 @@
 							<int key="NSvFlags">289</int>
 							<string key="NSFrame">{{276, 12}, {82, 32}}</string>
 							<reference key="NSSuperview" ref="514477643"/>
+							<reference key="NSWindow"/>
 							<int key="NSTag">1</int>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSButtonCell" key="NSCell" id="915963724">
@@ -159,6 +162,7 @@
 							<int key="NSvFlags">289</int>
 							<string key="NSFrame">{{194, 12}, {82, 32}}</string>
 							<reference key="NSSuperview" ref="514477643"/>
+							<reference key="NSWindow"/>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSButtonCell" key="NSCell" id="313789453">
 								<int key="NSCellFlags">67108864</int>
@@ -180,6 +184,7 @@
 							<int key="NSvFlags">268</int>
 							<string key="NSFrame">{{18, 356}, {152, 17}}</string>
 							<reference key="NSSuperview" ref="514477643"/>
+							<reference key="NSWindow"/>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSTextFieldCell" key="NSCell" id="828639641">
 								<int key="NSCellFlags">67108864</int>
@@ -204,6 +209,7 @@
 									<int key="NSvFlags">268</int>
 									<string key="NSFrame">{{34, 125}, {57, 14}}</string>
 									<reference key="NSSuperview" ref="523054942"/>
+									<reference key="NSWindow"/>
 									<bool key="NSEnabled">YES</bool>
 									<object class="NSTextFieldCell" key="NSCell" id="163153145">
 										<int key="NSCellFlags">67108864</int>
@@ -224,6 +230,7 @@
 									<int key="NSvFlags">266</int>
 									<string key="NSFrame">{{96, 123}, {256, 19}}</string>
 									<reference key="NSSuperview" ref="523054942"/>
+									<reference key="NSWindow"/>
 									<bool key="NSEnabled">YES</bool>
 									<object class="NSTextFieldCell" key="NSCell" id="1063276166">
 										<int key="NSCellFlags">-1804599231</int>
@@ -254,6 +261,7 @@
 									<int key="NSvFlags">268</int>
 									<string key="NSFrame">{{52, 152}, {39, 14}}</string>
 									<reference key="NSSuperview" ref="523054942"/>
+									<reference key="NSWindow"/>
 									<bool key="NSEnabled">YES</bool>
 									<object class="NSTextFieldCell" key="NSCell" id="993685318">
 										<int key="NSCellFlags">67108864</int>
@@ -270,6 +278,7 @@
 									<int key="NSvFlags">266</int>
 									<string key="NSFrame">{{96, 150}, {256, 19}}</string>
 									<reference key="NSSuperview" ref="523054942"/>
+									<reference key="NSWindow"/>
 									<bool key="NSEnabled">YES</bool>
 									<object class="NSTextFieldCell" key="NSCell" id="183498429">
 										<int key="NSCellFlags">-1804599231</int>
@@ -287,6 +296,7 @@
 									<int key="NSvFlags">268</int>
 									<string key="NSFrame">{{233, 227}, {73, 28}}</string>
 									<reference key="NSSuperview" ref="523054942"/>
+									<reference key="NSWindow"/>
 									<bool key="NSEnabled">YES</bool>
 									<object class="NSButtonCell" key="NSCell" id="521588826">
 										<int key="NSCellFlags">67108864</int>
@@ -314,6 +324,7 @@
 									<int key="NSvFlags">268</int>
 									<string key="NSFrame">{{162, 227}, {73, 28}}</string>
 									<reference key="NSSuperview" ref="523054942"/>
+									<reference key="NSWindow"/>
 									<bool key="NSEnabled">YES</bool>
 									<object class="NSButtonCell" key="NSCell" id="378768042">
 										<int key="NSCellFlags">67108864</int>
@@ -337,6 +348,7 @@
 									<int key="NSvFlags">268</int>
 									<string key="NSFrame">{{91, 227}, {73, 28}}</string>
 									<reference key="NSSuperview" ref="523054942"/>
+									<reference key="NSWindow"/>
 									<bool key="NSEnabled">YES</bool>
 									<object class="NSButtonCell" key="NSCell" id="220080151">
 										<int key="NSCellFlags">67108864</int>
@@ -360,6 +372,7 @@
 									<int key="NSvFlags">266</int>
 									<string key="NSFrame">{{12, 223}, {348, 5}}</string>
 									<reference key="NSSuperview" ref="523054942"/>
+									<reference key="NSWindow"/>
 									<string key="NSOffsets">{0, 0}</string>
 									<object class="NSTextFieldCell" key="NSTitleCell">
 										<int key="NSCellFlags">67108864</int>
@@ -382,6 +395,7 @@
 									<int key="NSvFlags">266</int>
 									<string key="NSFrame">{{12, 8}, {348, 5}}</string>
 									<reference key="NSSuperview" ref="523054942"/>
+									<reference key="NSWindow"/>
 									<string key="NSOffsets">{0, 0}</string>
 									<object class="NSTextFieldCell" key="NSTitleCell">
 										<int key="NSCellFlags">67108864</int>
@@ -404,6 +418,7 @@
 									<int key="NSvFlags">268</int>
 									<string key="NSFrame">{{39, 235}, {52, 14}}</string>
 									<reference key="NSSuperview" ref="523054942"/>
+									<reference key="NSWindow"/>
 									<bool key="NSEnabled">YES</bool>
 									<object class="NSTextFieldCell" key="NSCell" id="973606202">
 										<int key="NSCellFlags">67108864</int>
@@ -420,6 +435,7 @@
 									<int key="NSvFlags">266</int>
 									<string key="NSFrame">{{12, 257}, {348, 5}}</string>
 									<reference key="NSSuperview" ref="523054942"/>
+									<reference key="NSWindow"/>
 									<string key="NSOffsets">{0, 0}</string>
 									<object class="NSTextFieldCell" key="NSTitleCell">
 										<int key="NSCellFlags">67108864</int>
@@ -442,6 +458,7 @@
 									<int key="NSvFlags">268</int>
 									<string key="NSFrame">{{17, 203}, {90, 14}}</string>
 									<reference key="NSSuperview" ref="523054942"/>
+									<reference key="NSWindow"/>
 									<bool key="NSEnabled">YES</bool>
 									<object class="NSTextFieldCell" key="NSCell" id="865741771">
 										<int key="NSCellFlags">67108864</int>
@@ -462,6 +479,7 @@
 									<int key="NSvFlags">268</int>
 									<string key="NSFrame">{{96, 177}, {252, 18}}</string>
 									<reference key="NSSuperview" ref="523054942"/>
+									<reference key="NSWindow"/>
 									<bool key="NSEnabled">YES</bool>
 									<int key="NSNumRows">1</int>
 									<int key="NSNumCols">4</int>
@@ -856,6 +874,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 									<int key="NSvFlags">268</int>
 									<string key="NSFrame">{{57, 179}, {34, 14}}</string>
 									<reference key="NSSuperview" ref="523054942"/>
+									<reference key="NSWindow"/>
 									<bool key="NSEnabled">YES</bool>
 									<object class="NSTextFieldCell" key="NSCell" id="148296818">
 										<int key="NSCellFlags">67108864</int>
@@ -876,6 +895,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 											<int key="NSvFlags">256</int>
 											<string key="NSFrame">{{237, 7}, {117, 18}}</string>
 											<reference key="NSSuperview" ref="788789299"/>
+											<reference key="NSWindow"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSButtonCell" key="NSCell" id="345734442">
 												<int key="NSCellFlags">67108864</int>
@@ -903,6 +923,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 											<int key="NSvFlags">266</int>
 											<string key="NSFrame">{{96, 85}, {174, 19}}</string>
 											<reference key="NSSuperview" ref="788789299"/>
+											<reference key="NSWindow"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSTextFieldCell" key="NSCell" id="804012361">
 												<int key="NSCellFlags">-1804599231</int>
@@ -920,6 +941,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 											<int key="NSvFlags">268</int>
 											<string key="NSFrame">{{34, 8}, {57, 14}}</string>
 											<reference key="NSSuperview" ref="788789299"/>
+											<reference key="NSWindow"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSTextFieldCell" key="NSCell" id="913138432">
 												<int key="NSCellFlags">67108864</int>
@@ -936,6 +958,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 											<int key="NSvFlags">268</int>
 											<string key="NSFrame">{{30, 60}, {61, 14}}</string>
 											<reference key="NSSuperview" ref="788789299"/>
+											<reference key="NSWindow"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSTextFieldCell" key="NSCell" id="470442025">
 												<int key="NSCellFlags">67108864</int>
@@ -952,6 +975,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 											<int key="NSvFlags">256</int>
 											<string key="NSFrame">{{96, 5}, {97, 22}}</string>
 											<reference key="NSSuperview" ref="788789299"/>
+											<reference key="NSWindow"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSComboBoxCell" key="NSCell" id="492882269">
 												<int key="NSCellFlags">342884416</int>
@@ -1050,6 +1074,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 											<int key="NSvFlags">265</int>
 											<string key="NSFrame">{{309, 85}, {43, 19}}</string>
 											<reference key="NSSuperview" ref="788789299"/>
+											<reference key="NSWindow"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSTextFieldCell" key="NSCell" id="530225662">
 												<int key="NSCellFlags">-1804599231</int>
@@ -1067,6 +1092,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 											<int key="NSvFlags">266</int>
 											<string key="NSFrame">{{96, 58}, {94, 19}}</string>
 											<reference key="NSSuperview" ref="788789299"/>
+											<reference key="NSWindow"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSTextFieldCell" key="NSCell" id="503514541">
 												<int key="NSCellFlags">-1804599231</int>
@@ -1084,6 +1110,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 											<int key="NSvFlags">266</int>
 											<string key="NSFrame">{{93, 29}, {100, 22}}</string>
 											<reference key="NSSuperview" ref="788789299"/>
+											<reference key="NSWindow"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSPopUpButtonCell" key="NSCell" id="138967729">
 												<int key="NSCellFlags">-2076049856</int>
@@ -1129,6 +1156,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 											<int key="NSvFlags">265</int>
 											<string key="NSFrame">{{195, 60}, {58, 14}}</string>
 											<reference key="NSSuperview" ref="788789299"/>
+											<reference key="NSWindow"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSTextFieldCell" key="NSCell" id="673562235">
 												<int key="NSCellFlags">67108864</int>
@@ -1145,6 +1173,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 											<int key="NSvFlags">265</int>
 											<string key="NSFrame">{{258, 58}, {94, 19}}</string>
 											<reference key="NSSuperview" ref="788789299"/>
+											<reference key="NSWindow"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSTextFieldCell" key="NSCell" id="80435083">
 												<int key="NSCellFlags">-1804599231</int>
@@ -1162,6 +1191,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 											<int key="NSvFlags">268</int>
 											<string key="NSFrame">{{40, 87}, {51, 14}}</string>
 											<reference key="NSSuperview" ref="788789299"/>
+											<reference key="NSWindow"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSTextFieldCell" key="NSCell" id="910529035">
 												<int key="NSCellFlags">67108864</int>
@@ -1178,6 +1208,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 											<int key="NSvFlags">265</int>
 											<string key="NSFrame">{{275, 87}, {29, 14}}</string>
 											<reference key="NSSuperview" ref="788789299"/>
+											<reference key="NSWindow"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSTextFieldCell" key="NSCell" id="27246062">
 												<int key="NSCellFlags">67108864</int>
@@ -1194,6 +1225,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 											<int key="NSvFlags">268</int>
 											<string key="NSFrame">{{48, 34}, {43, 14}}</string>
 											<reference key="NSSuperview" ref="788789299"/>
+											<reference key="NSWindow"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSTextFieldCell" key="NSCell" id="1032828853">
 												<int key="NSCellFlags">67108864</int>
@@ -1208,11 +1240,13 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 									</array>
 									<string key="NSFrame">{{0, 11}, {372, 106}}</string>
 									<reference key="NSSuperview" ref="523054942"/>
+									<reference key="NSWindow"/>
 									<string key="NSClassName">NSView</string>
 								</object>
 							</array>
 							<string key="NSFrame">{{0, 50}, {372, 270}}</string>
 							<reference key="NSSuperview" ref="514477643"/>
+							<reference key="NSWindow"/>
 							<string key="NSClassName">BDSKCollapsibleView</string>
 							<string key="NSExtension">NSView</string>
 						</object>
@@ -1221,6 +1255,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 							<int key="NSvFlags">265</int>
 							<string key="NSFrame">{{327, 324}, {27, 26}}</string>
 							<reference key="NSSuperview" ref="514477643"/>
+							<reference key="NSWindow"/>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSButtonCell" key="NSCell" id="272874483">
 								<int key="NSCellFlags">-2080374784</int>
@@ -1257,6 +1292,8 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 						</object>
 					</array>
 					<string key="NSFrameSize">{372, 393}</string>
+					<reference key="NSSuperview"/>
+					<reference key="NSWindow"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
 				<string key="NSMinSize">{372, 415}</string>
@@ -1606,29 +1643,6 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
-						<string key="label">enabled2: zoom</string>
-						<reference key="source" ref="589063444"/>
-						<reference key="destination" ref="753529048"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="589063444"/>
-							<reference key="NSDestination" ref="753529048"/>
-							<string key="NSLabel">enabled2: zoom</string>
-							<string key="NSBinding">enabled2</string>
-							<string key="NSKeyPath">zoom</string>
-							<dictionary key="NSOptions">
-								<integer value="-1" key="NSMultipleValuesPlaceholder"/>
-								<integer value="-1" key="NSNoSelectionPlaceholder"/>
-								<integer value="-1" key="NSNotApplicablePlaceholder"/>
-								<integer value="-1" key="NSNullPlaceholder"/>
-							</dictionary>
-							<reference key="NSPreviousConnector" ref="641251396"/>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">462</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
 						<string key="label">enabled: editable</string>
 						<reference key="source" ref="338091397"/>
 						<reference key="destination" ref="753529048"/>
@@ -1645,29 +1659,6 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
-						<string key="label">enabled2: zoom</string>
-						<reference key="source" ref="338091397"/>
-						<reference key="destination" ref="753529048"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="338091397"/>
-							<reference key="NSDestination" ref="753529048"/>
-							<string key="NSLabel">enabled2: zoom</string>
-							<string key="NSBinding">enabled2</string>
-							<string key="NSKeyPath">zoom</string>
-							<dictionary key="NSOptions">
-								<integer value="-1" key="NSMultipleValuesPlaceholder"/>
-								<integer value="-1" key="NSNoSelectionPlaceholder"/>
-								<integer value="-1" key="NSNotApplicablePlaceholder"/>
-								<integer value="-1" key="NSNullPlaceholder"/>
-							</dictionary>
-							<reference key="NSPreviousConnector" ref="890861913"/>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">464</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
 						<string key="label">enabled: editable</string>
 						<reference key="source" ref="884927087"/>
 						<reference key="destination" ref="753529048"/>
@@ -1681,29 +1672,6 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 						</object>
 					</object>
 					<int key="connectionID">468</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">enabled2: zoom</string>
-						<reference key="source" ref="884927087"/>
-						<reference key="destination" ref="753529048"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="884927087"/>
-							<reference key="NSDestination" ref="753529048"/>
-							<string key="NSLabel">enabled2: zoom</string>
-							<string key="NSBinding">enabled2</string>
-							<string key="NSKeyPath">zoom</string>
-							<dictionary key="NSOptions">
-								<integer value="-1" key="NSMultipleValuesPlaceholder"/>
-								<integer value="-1" key="NSNoSelectionPlaceholder"/>
-								<integer value="-1" key="NSNotApplicablePlaceholder"/>
-								<integer value="-1" key="NSNullPlaceholder"/>
-							</dictionary>
-							<reference key="NSPreviousConnector" ref="51048126"/>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">469</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -1726,7 +1694,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 						<string key="label">enabled2: zoom</string>
 						<reference key="source" ref="260421660"/>
 						<reference key="destination" ref="753529048"/>
-						<object class="NSNibBindingConnector" key="connector">
+						<object class="NSNibBindingConnector" key="connector" id="736075887">
 							<reference key="NSSource" ref="260421660"/>
 							<reference key="NSDestination" ref="753529048"/>
 							<string key="NSLabel">enabled2: zoom</string>
@@ -1765,7 +1733,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 						<string key="label">enabled2: zoom</string>
 						<reference key="source" ref="337034091"/>
 						<reference key="destination" ref="753529048"/>
-						<object class="NSNibBindingConnector" key="connector">
+						<object class="NSNibBindingConnector" key="connector" id="492711146">
 							<reference key="NSSource" ref="337034091"/>
 							<reference key="NSDestination" ref="753529048"/>
 							<string key="NSLabel">enabled2: zoom</string>
@@ -1804,7 +1772,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 						<string key="label">enabled2: zoom</string>
 						<reference key="source" ref="493143506"/>
 						<reference key="destination" ref="753529048"/>
-						<object class="NSNibBindingConnector" key="connector">
+						<object class="NSNibBindingConnector" key="connector" id="192500503">
 							<reference key="NSSource" ref="493143506"/>
 							<reference key="NSDestination" ref="753529048"/>
 							<string key="NSLabel">enabled2: zoom</string>
@@ -1861,29 +1829,6 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 						<reference key="destination" ref="199124668"/>
 					</object>
 					<int key="connectionID">484</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">enabled2: zoom</string>
-						<reference key="source" ref="1035827153"/>
-						<reference key="destination" ref="753529048"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="1035827153"/>
-							<reference key="NSDestination" ref="753529048"/>
-							<string key="NSLabel">enabled2: zoom</string>
-							<string key="NSBinding">enabled2</string>
-							<string key="NSKeyPath">zoom</string>
-							<dictionary key="NSOptions">
-								<integer value="-1" key="NSMultipleValuesPlaceholder"/>
-								<integer value="-1" key="NSNoSelectionPlaceholder"/>
-								<integer value="-1" key="NSNotApplicablePlaceholder"/>
-								<integer value="-1" key="NSNullPlaceholder"/>
-							</dictionary>
-							<reference key="NSPreviousConnector" ref="322146207"/>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">486</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBAccessibilityConnection" key="connection">
@@ -2254,10 +2199,73 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
 						<string key="label">hidden: zoom</string>
-						<reference key="source" ref="788789299"/>
+						<reference key="source" ref="260421660"/>
 						<reference key="destination" ref="753529048"/>
 						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="788789299"/>
+							<reference key="NSSource" ref="260421660"/>
+							<reference key="NSDestination" ref="753529048"/>
+							<string key="NSLabel">hidden: zoom</string>
+							<string key="NSBinding">hidden</string>
+							<string key="NSKeyPath">zoom</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<reference key="NSPreviousConnector" ref="736075887"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">946</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">hidden: zoom</string>
+						<reference key="source" ref="337034091"/>
+						<reference key="destination" ref="753529048"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="337034091"/>
+							<reference key="NSDestination" ref="753529048"/>
+							<string key="NSLabel">hidden: zoom</string>
+							<string key="NSBinding">hidden</string>
+							<string key="NSKeyPath">zoom</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<reference key="NSPreviousConnector" ref="492711146"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">949</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">hidden: zoom</string>
+						<reference key="source" ref="493143506"/>
+						<reference key="destination" ref="753529048"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="493143506"/>
+							<reference key="NSDestination" ref="753529048"/>
+							<string key="NSLabel">hidden: zoom</string>
+							<string key="NSBinding">hidden</string>
+							<string key="NSKeyPath">zoom</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<reference key="NSPreviousConnector" ref="192500503"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">951</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">hidden: zoom</string>
+						<reference key="source" ref="1039593157"/>
+						<reference key="destination" ref="753529048"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="1039593157"/>
 							<reference key="NSDestination" ref="753529048"/>
 							<string key="NSLabel">hidden: zoom</string>
 							<string key="NSBinding">hidden</string>
@@ -2269,7 +2277,283 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
 					</object>
-					<int key="connectionID">887</int>
+					<int key="connectionID">954</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">hidden: zoom</string>
+						<reference key="source" ref="246432618"/>
+						<reference key="destination" ref="753529048"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="246432618"/>
+							<reference key="NSDestination" ref="753529048"/>
+							<string key="NSLabel">hidden: zoom</string>
+							<string key="NSBinding">hidden</string>
+							<string key="NSKeyPath">zoom</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">956</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">hidden: zoom</string>
+						<reference key="source" ref="389235699"/>
+						<reference key="destination" ref="753529048"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="389235699"/>
+							<reference key="NSDestination" ref="753529048"/>
+							<string key="NSLabel">hidden: zoom</string>
+							<string key="NSBinding">hidden</string>
+							<string key="NSKeyPath">zoom</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">958</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">hidden: zoom</string>
+						<reference key="source" ref="56928006"/>
+						<reference key="destination" ref="753529048"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="56928006"/>
+							<reference key="NSDestination" ref="753529048"/>
+							<string key="NSLabel">hidden: zoom</string>
+							<string key="NSBinding">hidden</string>
+							<string key="NSKeyPath">zoom</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">960</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">hidden: zoomOrISI</string>
+						<reference key="source" ref="243209652"/>
+						<reference key="destination" ref="753529048"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="243209652"/>
+							<reference key="NSDestination" ref="753529048"/>
+							<string key="NSLabel">hidden: zoomOrISI</string>
+							<string key="NSBinding">hidden</string>
+							<string key="NSKeyPath">zoomOrISI</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">971</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">hidden: zoomOrISI</string>
+						<reference key="source" ref="573023376"/>
+						<reference key="destination" ref="753529048"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="573023376"/>
+							<reference key="NSDestination" ref="753529048"/>
+							<string key="NSLabel">hidden: zoomOrISI</string>
+							<string key="NSBinding">hidden</string>
+							<string key="NSKeyPath">zoomOrISI</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">972</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled2: zoom</string>
+						<reference key="source" ref="1035827153"/>
+						<reference key="destination" ref="753529048"/>
+						<object class="NSNibBindingConnector" key="connector" id="31315939">
+							<reference key="NSSource" ref="1035827153"/>
+							<reference key="NSDestination" ref="753529048"/>
+							<string key="NSLabel">enabled2: zoom</string>
+							<string key="NSBinding">enabled2</string>
+							<string key="NSKeyPath">zoom</string>
+							<dictionary key="NSOptions">
+								<integer value="-1" key="NSMultipleValuesPlaceholder"/>
+								<integer value="-1" key="NSNoSelectionPlaceholder"/>
+								<integer value="-1" key="NSNotApplicablePlaceholder"/>
+								<integer value="-1" key="NSNullPlaceholder"/>
+							</dictionary>
+							<reference key="NSPreviousConnector" ref="322146207"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">977</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">hidden: zoom</string>
+						<reference key="source" ref="1035827153"/>
+						<reference key="destination" ref="753529048"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="1035827153"/>
+							<reference key="NSDestination" ref="753529048"/>
+							<string key="NSLabel">hidden: zoom</string>
+							<string key="NSBinding">hidden</string>
+							<string key="NSKeyPath">zoom</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<reference key="NSPreviousConnector" ref="31315939"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">978</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled2: zoom</string>
+						<reference key="source" ref="884927087"/>
+						<reference key="destination" ref="753529048"/>
+						<object class="NSNibBindingConnector" key="connector" id="967426303">
+							<reference key="NSSource" ref="884927087"/>
+							<reference key="NSDestination" ref="753529048"/>
+							<string key="NSLabel">enabled2: zoom</string>
+							<string key="NSBinding">enabled2</string>
+							<string key="NSKeyPath">zoom</string>
+							<dictionary key="NSOptions">
+								<integer value="-1" key="NSMultipleValuesPlaceholder"/>
+								<integer value="-1" key="NSNoSelectionPlaceholder"/>
+								<integer value="-1" key="NSNotApplicablePlaceholder"/>
+								<integer value="-1" key="NSNullPlaceholder"/>
+							</dictionary>
+							<reference key="NSPreviousConnector" ref="51048126"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">979</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">hidden: zoom</string>
+						<reference key="source" ref="884927087"/>
+						<reference key="destination" ref="753529048"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="884927087"/>
+							<reference key="NSDestination" ref="753529048"/>
+							<string key="NSLabel">hidden: zoom</string>
+							<string key="NSBinding">hidden</string>
+							<string key="NSKeyPath">zoom</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<reference key="NSPreviousConnector" ref="967426303"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">980</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled2: zoomOrISI</string>
+						<reference key="source" ref="589063444"/>
+						<reference key="destination" ref="753529048"/>
+						<object class="NSNibBindingConnector" key="connector" id="286837198">
+							<reference key="NSSource" ref="589063444"/>
+							<reference key="NSDestination" ref="753529048"/>
+							<string key="NSLabel">enabled2: zoomOrISI</string>
+							<string key="NSBinding">enabled2</string>
+							<string key="NSKeyPath">zoomOrISI</string>
+							<dictionary key="NSOptions">
+								<integer value="-1" key="NSMultipleValuesPlaceholder"/>
+								<integer value="-1" key="NSNoSelectionPlaceholder"/>
+								<integer value="-1" key="NSNotApplicablePlaceholder"/>
+								<integer value="-1" key="NSNullPlaceholder"/>
+							</dictionary>
+							<reference key="NSPreviousConnector" ref="641251396"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">981</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">hidden: zoomOrISI</string>
+						<reference key="source" ref="589063444"/>
+						<reference key="destination" ref="753529048"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="589063444"/>
+							<reference key="NSDestination" ref="753529048"/>
+							<string key="NSLabel">hidden: zoomOrISI</string>
+							<string key="NSBinding">hidden</string>
+							<string key="NSKeyPath">zoomOrISI</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<reference key="NSPreviousConnector" ref="286837198"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">982</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled2: zoomOrISI</string>
+						<reference key="source" ref="338091397"/>
+						<reference key="destination" ref="753529048"/>
+						<object class="NSNibBindingConnector" key="connector" id="72250029">
+							<reference key="NSSource" ref="338091397"/>
+							<reference key="NSDestination" ref="753529048"/>
+							<string key="NSLabel">enabled2: zoomOrISI</string>
+							<string key="NSBinding">enabled2</string>
+							<string key="NSKeyPath">zoomOrISI</string>
+							<dictionary key="NSOptions">
+								<integer value="-1" key="NSMultipleValuesPlaceholder"/>
+								<integer value="-1" key="NSNoSelectionPlaceholder"/>
+								<integer value="-1" key="NSNotApplicablePlaceholder"/>
+								<integer value="-1" key="NSNullPlaceholder"/>
+							</dictionary>
+							<reference key="NSPreviousConnector" ref="890861913"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">983</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">hidden: zoomOrISI</string>
+						<reference key="source" ref="338091397"/>
+						<reference key="destination" ref="753529048"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="338091397"/>
+							<reference key="NSDestination" ref="753529048"/>
+							<string key="NSLabel">hidden: zoomOrISI</string>
+							<string key="NSBinding">hidden</string>
+							<string key="NSKeyPath">zoomOrISI</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<reference key="NSPreviousConnector" ref="72250029"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">984</int>
 				</object>
 			</array>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -2901,6 +3185,9 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 					</object>
 				</object>
 				<string key="198.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<object class="NSAffineTransform" key="198.IBViewBoundsToFrameTransform">
+					<bytes key="NSTransformStruct">P4AAAL+AAABDmoAAwswAAA</bytes>
+				</object>
 				<string key="199.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<object class="NSMutableDictionary" key="20.IBAttributePlaceholdersKey">
 					<string key="NS.key.0">ToolTip</string>
@@ -2987,7 +3274,9 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				<string key="316.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="318.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="32.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<string key="5.IBEditorWindowLastContentRect">{{84, 360}, {372, 393}}</string>
 				<string key="5.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<string key="5.IBWindowTemplateEditedContentRect">{{84, 360}, {372, 393}}</string>
 				<boolean value="YES" key="5.windowTemplate.hasMaxSize"/>
 				<boolean value="YES" key="5.windowTemplate.hasMinSize"/>
 				<string key="5.windowTemplate.maxSize">{700, 393}</string>
@@ -3077,7 +3366,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">938</int>
+			<int key="maxID">984</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">

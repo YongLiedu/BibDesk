@@ -1,7 +1,7 @@
 // BibItem.h
 // Created by Michael McCracken on Tue Dec 18 2001.
 /*
- This software is Copyright (c) 2001-2012
+ This software is Copyright (c) 2001-2013
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -246,14 +246,6 @@ enum {
     
 */
 - (NSArray *)pubAuthorsInheriting:(BOOL)inherit;
-
-/*!
-    @method     pubAuthorsAsStrings
-    @abstract   Returns an array of normalized names for the publications authors.
-    @discussion (comprehensive description)
-    @result     (description)
-*/
-- (NSArray *)pubAuthorsAsStrings;
 
 /*!
     @method     pubAuthorsForDisplay

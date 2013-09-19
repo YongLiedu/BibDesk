@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 12/30/06.
 /*
- This software is Copyright (c) 2006-2012
+ This software is Copyright (c) 2006-2013
  Christiaan Hofman. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,7 @@
         if ([self isEntrez] || [self isISI] || [self isDBLP]) {
             host = nil;
             port = nil;
-            options = nil;
+            options = [opts count] > 0 ? [opts mutableCopy] : nil;
         } else if ([self isZoom]) {
             host = [aHost copy];
             port = [aPort copy];
@@ -169,6 +169,8 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
         isEqual = isEqualOrBothNil([self host], [other host]) && 
                   isEqualOrBothNil([self port], [(BDSKServerInfo *)other port]) && 
                   (isEqualOrBothNil([self options], [(BDSKServerInfo *)other options]) || ([[self options] count] == 0 && [[(BDSKServerInfo *)other options] count] == 0));
+    else if ([self isISI])
+        isEqual = (isEqualOrBothNil([self options], [(BDSKServerInfo *)other options]) || ([[self options] count] == 0 && [[(BDSKServerInfo *)other options] count] == 0));
     return isEqual;
 }
 
@@ -178,6 +180,8 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
         hash += [[self host] hash] + [[self port] hash] + [[self password] hash];
         if ([options count])
             hash += [[self options] hash];
+    } else if ([self isISI] && [options count] > 0) {
+        hash += [[self options] hash];
     }
     return hash;
 }
@@ -190,6 +194,8 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
     if ([self isZoom]) {
         [info setValue:[self host] forKey:HOST_KEY];
         [info setValue:[self port] forKey:PORT_KEY];
+        [info setValue:[self options] forKey:OPTIONS_KEY];
+    } else if ([self isISI] && [[self options] count] > 0) {
         [info setValue:[self options] forKey:OPTIONS_KEY];
     }
     return info;
@@ -215,7 +221,7 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 
 - (BOOL)removeDiacritics { return [[[self options] objectForKey:REMOVEDIACRITICS_KEY] boolValue]; }
 
-- (NSDictionary *)options { return [self isZoom] ? [[options copy] autorelease] : nil; }
+- (NSDictionary *)options { return [self isZoom] || [options count] > 0 ? [[options copy] autorelease] : nil; }
 
 - (BOOL)isEntrez { return [[self type] isEqualToString:BDSKSearchGroupEntrez]; }
 - (BOOL)isZoom { return [[self type] isEqualToString:BDSKSearchGroupZoom]; }
@@ -272,6 +278,9 @@ static NSSet *optionsSet = nil;
                 [self setHost:DEFAULT_HOST];
             if (port == nil)
                 [self setPort:DEFAULT_PORT];
+            [self setOptions:[NSDictionary dictionary]];
+        } else {
+            [self setOptions:nil];
         }
     }
 }

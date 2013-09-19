@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 2/18/09.
 /*
- This software is Copyright (c) 2009-2012
+ This software is Copyright (c) 2009-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -62,8 +62,6 @@
 - (BOOL)tableViewCanPasteFromPasteboard:(NSTableView *)aTableView;
 - (void)tableView:(NSTableView *)aTableView duplicateRowsWithIndexes:(NSIndexSet *)rowIndexes; // defaults to copy+paste
 - (BOOL)tableView:(NSTableView *)aTableView canDuplicateRowsWithIndexes:(NSIndexSet *)rowIndexes;
-
-- (NSDragOperation)tableView:(NSTableView *)aTableView draggingSourceOperationMaskForLocal:(BOOL)flag;
 
 - (NSImage *)tableView:(NSTableView *)aTableView dragImageForRowsWithIndexes:(NSIndexSet *)dragRows;
 

@@ -2,7 +2,7 @@
 
 //  Created by Michael McCracken on Sun Jul 21 2002.
 /*
- This software is Copyright (c) 2002-2012
+ This software is Copyright (c) 2002-2013
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -1126,23 +1126,18 @@ http://home.planet.nl/~faase009/GNU.txt
     return [(id)BDStringCreateComponentsSeparatedByCharacterSetTrimWhitespace(CFAllocatorGetDefault(), (CFStringRef)self, (CFCharacterSetRef)charSet, trim) autorelease];
 }
 
-- (NSArray *)componentsSeparatedByStringCaseInsensitive:(NSString *)separator;
-{
-    return [(id)BDStringCreateArrayBySeparatingStringsWithOptions(CFAllocatorGetDefault(), (CFStringRef)self, (CFStringRef)separator, kCFCompareCaseInsensitive) autorelease];
-}
-
 - (NSArray *)componentsSeparatedByFieldSeparators;
 {
     NSCharacterSet *acSet = [[BDSKTypeManager sharedManager] separatorCharacterSetForField:BDSKKeywordsString];
     if([self rangeOfCharacterFromSet:acSet].length)
         return [self componentsSeparatedByCharactersInSet:acSet trimWhitespace:YES];
     else 
-        return [self componentsSeparatedByStringCaseInsensitive:@" and "];
+        return [self componentsSeparatedByAnd];
 }
 
 - (NSArray *)componentsSeparatedByAnd;
 {
-    return [self componentsSeparatedByStringCaseInsensitive:@" and "];
+    return [(id)BDStringCreateComponentsBySeparatingByAnd(CFAllocatorGetDefault(), (CFStringRef)self) autorelease];
 }
 
 - (NSArray *)componentsSeparatedByComma;

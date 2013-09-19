@@ -2,7 +2,7 @@
 
 //  Created by Michael McCracken on Tue Jan 29 2002.
 /*
- This software is Copyright (c) 2002-2012
+ This software is Copyright (c) 2002-2013
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -56,9 +56,10 @@
 
 enum {
     BDSKPreviewerTabIndexPDF,
-    BDSKPreviewerTabIndexRTF,
     BDSKPreviewerTabIndexLog,
 };
+
+static NSData *createPDFDataWithStringAndColor(NSString *string, NSColor *color);
 
 @implementation BDSKPreviewer
 
@@ -78,8 +79,6 @@ static BDSKPreviewer *sharedPreviewer = nil;
         // it corresponds to the last drawing item added to the mainQueue
         previewState = BDSKUnknownPreviewState;
         
-        generatedTypes = BDSKGenerateRTF;
-        
         // otherwise a document's previewer might mess up the window position of the shared previewer
         [self setShouldCascadeWindows:NO];
         
@@ -96,7 +95,6 @@ static BDSKPreviewer *sharedPreviewer = nil;
 
 - (void)windowDidLoad{
     CGFloat pdfScaleFactor = 0.0;
-    CGFloat rtfScaleFactor = 1.0;
     BDSKCollapsibleView *collapsibleView = (BDSKCollapsibleView *)[[[progressOverlay contentView] subviews] firstObject];
     NSSize minSize = [progressIndicator frame].size;
     NSRect rect = [warningImageView bounds];
@@ -126,7 +124,6 @@ static BDSKPreviewer *sharedPreviewer = nil;
         [progressOverlay overlayView:[[self window] contentView]];
         
         pdfScaleFactor = [[NSUserDefaults standardUserDefaults] doubleForKey:BDSKPreviewPDFScaleFactorKey];
-        rtfScaleFactor = [[NSUserDefaults standardUserDefaults] doubleForKey:BDSKPreviewRTFScaleFactorKey];
         
         // register to observe when the preview needs to be updated (handle this here rather than on a per document basis as the preview is currently global for the application)
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -140,7 +137,11 @@ static BDSKPreviewer *sharedPreviewer = nil;
     }
         
     // empty document to avoid problem when zoom is set to auto
-    PDFDocument *pdfDoc = [[[PDFDocument alloc] initWithData:[self PDFDataWithString:@"" color:nil]] autorelease];
+    static NSData *emptyPDFData = nil;
+    if (emptyPDFData == nil)
+        emptyPDFData = createPDFDataWithStringAndColor(@"", nil);
+    
+    PDFDocument *pdfDoc = [[[PDFDocument alloc] initWithData:emptyPDFData] autorelease];
     [pdfView setDocument:pdfDoc];
     
     [pdfView setDisplaysPageBreaks:NO];
@@ -148,12 +149,10 @@ static BDSKPreviewer *sharedPreviewer = nil;
     
     // don't reset the scale factor until there's a document loaded, or else we get a huge gray border
     [pdfView setScaleFactor:pdfScaleFactor];
-	[(BDSKZoomableTextView *)rtfPreviewView setScaleFactor:rtfScaleFactor];
     
     [self displayPreviewsForState:BDSKEmptyPreviewState success:YES];
     
     [pdfView retain];
-    [[rtfPreviewView enclosingScrollView] retain];
 }
 
 - (NSString *)windowNibName
@@ -175,8 +174,6 @@ static BDSKPreviewer *sharedPreviewer = nil;
         NSInteger tabIndex = [tabView indexOfTabViewItem:[tabView selectedTabViewItem]];
         if(tabIndex == BDSKPreviewerTabIndexPDF)
             path = [texTask PDFFilePath];
-        else if(tabIndex == BDSKPreviewerTabIndexRTF)
-            path = [texTask RTFFilePath];
         else
             path = [texTask logFilePath];
     }
@@ -192,12 +189,6 @@ static BDSKPreviewer *sharedPreviewer = nil;
 {
     [self window];
     return pdfView;
-}
-
-- (NSTextView *)textView;
-{
-    [self window];
-    return rtfPreviewView;
 }
 
 - (BDSKOverlayPanel *)progressOverlay;
@@ -218,31 +209,8 @@ static BDSKPreviewer *sharedPreviewer = nil;
     [pdfView setScaleFactor:scaleFactor];
 }
 
-- (CGFloat)RTFScaleFactor;
-{
-    [self window];
-    return [(BDSKZoomableTextView *)rtfPreviewView scaleFactor];
-}
-
-- (void)setRTFScaleFactor:(CGFloat)scaleFactor;
-{
-    [self window];
-    [(BDSKZoomableTextView *)rtfPreviewView setScaleFactor:scaleFactor];
-}
-
-
-- (NSInteger)generatedTypes;
-{
-    return generatedTypes;
-}
-
-- (void)setGeneratedTypes:(NSInteger)newGeneratedTypes;
-{
-    generatedTypes = newGeneratedTypes;
-}
-
 - (BOOL)isVisible{
-    return [[pdfView window] isVisible] || [[rtfPreviewView window] isVisible] || [[logView window] isVisible];
+    return [[pdfView window] isVisible] || [[logView window] isVisible];
 }
 
 #pragma mark Actions
@@ -280,36 +248,11 @@ static BDSKPreviewer *sharedPreviewer = nil;
     NSInteger tabIndex = [tabView indexOfTabViewItem:[tabView selectedTabViewItem]];
     if (tabIndex == BDSKPreviewerTabIndexPDF)
         [pdfView printSelection:sender];
-    else if (tabIndex == BDSKPreviewerTabIndexRTF)
-        [(BDSKZoomableTextView *)rtfPreviewView printSelection:sender];
     else if (tabIndex == BDSKPreviewerTabIndexLog)
         [(BDSKZoomableTextView *)logView printSelection:sender];
 }
 
 #pragma mark Drawing methods
-
-- (NSData *)PDFDataWithString:(NSString *)string color:(NSColor *)color{
-    NSRect rect = NSMakeRect(0.0, 0.0, 612.0, 792.0);
-    NSTextView *textView = [[NSTextView alloc] initWithFrame:rect];
-    [textView setVerticallyResizable:YES];
-    [textView setHorizontallyResizable:NO];
-    [textView setTextContainerInset:NSMakeSize(20.0, 20.0)];
-    
-    NSTextStorage *textStorage = [textView textStorage];
-    [textStorage beginEditing];
-    if (string)
-        [[textStorage mutableString] setString:string];
-    [textStorage addAttribute:NSFontAttributeName value:[NSFont userFontOfSize:0.0] range:NSMakeRange(0, [textStorage length])];
-    if (color)
-        [textStorage addAttribute:NSForegroundColorAttributeName value:color range:NSMakeRange(0, [textStorage length])];
-    [textStorage endEditing];
-	
-    NSData *data = [textView dataWithPDFInsideRect:rect];
-    
-    [textView release];
-    
-    return data;
-}
 
 - (void)displayPreviewsForState:(BDSKPreviewState)state success:(BOOL)success{
 
@@ -334,22 +277,15 @@ static BDSKPreviewer *sharedPreviewer = nil;
 	
     [warningView setHidden:success];
     
-    NSString *message = nil;
     NSString *logString = @"";
     NSData *pdfData = nil;
-	NSAttributedString *attrString = nil;
+	static NSData *errorMessagePDFData = nil;
 	static NSData *emptyMessagePDFData = nil;
 	static NSData *generatingMessagePDFData = nil;
 	
 	// get the data to display
 	if(state == BDSKShowingPreviewState){
         
-        NSData *rtfData = [self RTFData];
-		if(rtfData != nil)
-			attrString = [[NSAttributedString alloc] initWithRTF:rtfData documentAttributes:NULL];
-		else
-			message = NSLocalizedString(@"***** ERROR:  unable to create preview *****\n\nsee the logs in the TeX Preview window", @"Preview message");
-		
         logString = [texTask logFileString] ?: NSLocalizedString(@"Unable to read log file from TeX run.", @"Preview message");
         
 		pdfData = [self PDFData];
@@ -368,28 +304,27 @@ static BDSKPreviewer *sharedPreviewer = nil;
 			[errorString appendString:logString];
             logString = [errorString autorelease];
             
-            if(pdfData == nil)
-                pdfData = [self PDFDataWithString:NSLocalizedString(@"***** ERROR:  unable to create preview *****\n\nsee the logs in the TeX Preview window", @"Preview message") color:[NSColor redColor]];
+            if(pdfData == nil) {
+                if (errorMessagePDFData)
+                    errorMessagePDFData = createPDFDataWithStringAndColor(NSLocalizedString(@"***** ERROR:  unable to create preview *****\n\nsee the logs in the TeX Preview window", @"Preview message"), [NSColor redColor]);
+                pdfData = errorMessagePDFData;
+            }
 		}
         
 	}else if(state == BDSKEmptyPreviewState){
 		
-		message = NSLocalizedString(@"No items are selected.", @"Preview message");
-		
         logString = @"";
         
 		if (emptyMessagePDFData == nil)
-			emptyMessagePDFData = [[self PDFDataWithString:message color:[NSColor grayColor]] retain];
+			emptyMessagePDFData = createPDFDataWithStringAndColor(NSLocalizedString(@"No items are selected.", @"Preview message"), [NSColor grayColor]);
 		pdfData = emptyMessagePDFData;
 		
 	}else if(state == BDSKWaitingPreviewState){
 		
-		message = [NSLocalizedString(@"Generating preview", @"Preview message") stringByAppendingEllipsis];
-		
         logString = @"";
         
 		if (generatingMessagePDFData == nil)
-			generatingMessagePDFData = [[self PDFDataWithString:message color:[NSColor grayColor]] retain];
+			generatingMessagePDFData = createPDFDataWithStringAndColor([NSLocalizedString(@"Generating preview", @"Preview message") stringByAppendingEllipsis], [NSColor grayColor]);
 		pdfData = generatingMessagePDFData;
 		
 	}
@@ -400,18 +335,6 @@ static BDSKPreviewer *sharedPreviewer = nil;
     PDFDocument *pdfDocument = [[PDFDocument alloc] initWithData:pdfData];
     [pdfView setDocument:pdfDocument];
     [pdfDocument release];
-    
-    // draw the RTF preview
-	[rtfPreviewView setString:@""];
-	[rtfPreviewView setTextContainerInset:NSMakeSize(20,20)];  // pad the edges of the text
-	if(attrString){
-		[[rtfPreviewView textStorage] appendAttributedString:attrString];
-		[attrString release];
-	} else if (message){
-        NSTextStorage *ts = [rtfPreviewView textStorage];
-        [[ts mutableString] setString:message];
-        [ts addAttribute:NSForegroundColorAttributeName value:(state == BDSKShowingPreviewState ? [NSColor redColor] : [NSColor grayColor]) range:NSMakeRange(0, [ts length])];
-	}
     
 	[logView setString:@""];
 	[logView setTextContainerInset:NSMakeSize(20,20)];  // pad the edges of the text
@@ -437,7 +360,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 		// this will start the spinning wheel
         [self displayPreviewsForState:BDSKWaitingPreviewState success:YES];
         // run the tex task in the background
-        [texTask runWithBibTeXString:bibStr citeKeys:citeKeys generatedTypes:generatedTypes];
+        [texTask runWithBibTeXString:bibStr citeKeys:citeKeys generatedTypes:BDSKGeneratePDF];
 	}	
 }
 
@@ -455,12 +378,6 @@ static BDSKPreviewer *sharedPreviewer = nil;
 	if(previewState != BDSKShowingPreviewState || [self isVisible] == NO)
         return nil;
     return [texTask PDFData];
-}
-
-- (NSData *)RTFData{
-	if(previewState != BDSKShowingPreviewState || [self isVisible] == NO)
-        return nil;
-    return [texTask RTFData];
 }
 
 - (NSString *)LaTeXString{
@@ -485,9 +402,6 @@ static BDSKPreviewer *sharedPreviewer = nil;
 
 	if (fabs(scaleFactor - [[NSUserDefaults standardUserDefaults] doubleForKey:BDSKPreviewPDFScaleFactorKey]) > 0.01)
 		[[NSUserDefaults standardUserDefaults] setDouble:scaleFactor forKey:BDSKPreviewPDFScaleFactorKey];
-	scaleFactor = [(BDSKZoomableTextView *)rtfPreviewView scaleFactor];
-	if (fabs(scaleFactor - [[NSUserDefaults standardUserDefaults] doubleForKey:BDSKPreviewRTFScaleFactorKey]) > 0.01)
-		[[NSUserDefaults standardUserDefaults] setDouble:scaleFactor forKey:BDSKPreviewRTFScaleFactorKey];
     
     // make sure we don't process anything else; the TeX task will take care of its own cleanup
     [texTask terminate];
@@ -500,8 +414,31 @@ static BDSKPreviewer *sharedPreviewer = nil;
     [texTask terminate];
     BDSKDESTROY(texTask);
     [pdfView release];
-    [[rtfPreviewView enclosingScrollView] release];
     [super dealloc];
 }
 
 @end
+
+
+static NSData *createPDFDataWithStringAndColor(NSString *string, NSColor *color) {
+    NSRect rect = NSMakeRect(0.0, 0.0, 612.0, 792.0);
+    NSTextView *textView = [[NSTextView alloc] initWithFrame:rect];
+    [textView setVerticallyResizable:YES];
+    [textView setHorizontallyResizable:NO];
+    [textView setTextContainerInset:NSMakeSize(20.0, 20.0)];
+    
+    NSTextStorage *textStorage = [textView textStorage];
+    [textStorage beginEditing];
+    if (string)
+        [[textStorage mutableString] setString:string];
+    [textStorage addAttribute:NSFontAttributeName value:[NSFont userFontOfSize:0.0] range:NSMakeRange(0, [textStorage length])];
+    if (color)
+        [textStorage addAttribute:NSForegroundColorAttributeName value:color range:NSMakeRange(0, [textStorage length])];
+    [textStorage endEditing];
+	
+    NSData *data = [textView dataWithPDFInsideRect:rect];
+    
+    [textView release];
+    
+    return [data retain];
+}

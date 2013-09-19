@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 3/25/08.
 /*
- This software is Copyright (c) 2008-2012
+ This software is Copyright (c) 2008-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -144,6 +144,7 @@ static Class BDSKSearchBookmarkClass = Nil;
 - (NSImage *)icon { return nil; }
 
 - (NSDictionary *)info { return nil; }
+- (void)setInfo:(NSDictionary *)newInfo {}
 
 - (NSArray *)children { return nil; }
 - (NSUInteger)countOfChildren { return 0; }
@@ -273,6 +274,13 @@ static Class BDSKSearchBookmarkClass = Nil;
 
 - (NSDictionary *)info {
     return info;
+}
+
+- (void)setInfo:(NSDictionary *)newInfo {
+    if (info != newInfo) {
+        [info release];
+        info = [newInfo copy];
+    }
 }
 
 - (NSString *)label {

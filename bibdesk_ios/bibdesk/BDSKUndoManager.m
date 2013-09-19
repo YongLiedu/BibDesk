@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 14/12/04.
 /*
- This software is Copyright (c) 2004-2012
+ This software is Copyright (c) 2004-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -56,12 +56,12 @@
     [super dealloc];
 }
 
-- (id)delegate
+- (id<BDSKUndoManagerDelegate>)delegate
 {
 	return delegate;
 }
 
-- (void)setDelegate:(id)newDelegate
+- (void)setDelegate:(id<BDSKUndoManagerDelegate>)newDelegate
 {
 	delegate = newDelegate;
 }
@@ -69,7 +69,7 @@
 - (void)undo
 {
 	if (delegate && [delegate respondsToSelector:@selector(undoManagerShouldUndoChange:)] && 
-		![delegate undoManagerShouldUndoChange:self]) {
+		NO == [delegate undoManagerShouldUndoChange:self]) {
 		return;
 	}
 	[super undo];

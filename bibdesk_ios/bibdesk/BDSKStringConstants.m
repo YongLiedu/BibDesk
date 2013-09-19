@@ -2,7 +2,7 @@
 // BibDesk 
 // Created by Michael McCracken, 2002
 /*
- This software is Copyright (c) 2002-2012
+ This software is Copyright (c) 2002-2013
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -129,7 +129,6 @@ NSString *BDSKSidePreviewDisplayKey = @"BDSKSidePreviewDisplayKey";
 NSString *BDSKSidePreviewDisplayTemplateKey = @"BDSKSidePreviewDisplayTemplateKey";
 
 NSString *BDSKPreviewPDFScaleFactorKey = @"Preview PDF Scale Factor";
-NSString *BDSKPreviewRTFScaleFactorKey = @"Preview RTF Scale Factor";
 NSString *BDSKPreviewLinkedFileScaleFactorKey = @"Preview Linked File Scale Factor";
 
 NSString *BDSKBottomPreviewScaleFactorKey = @"BDSKBottomPreviewScaleFactorKey";

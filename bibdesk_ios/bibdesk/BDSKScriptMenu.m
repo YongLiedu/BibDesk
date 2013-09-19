@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 30/10/05.
 /*
- This software is Copyright (c) 2005-2012
+ This software is Copyright (c) 2005-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -243,7 +243,7 @@ static void fsevents_callback(FSEventStreamRef streamRef, void *clientCallBackIn
 			
 			[self updateSubmenu:submenu withScripts:folderContent];
 		} else {
-			NSString *showScriptName = [NSString stringWithFormat:NSLocalizedString(@"Show %@", @"menu item title"), scriptName];
+			NSString *showScriptName = [NSString stringWithFormat:NSLocalizedString(@"Show \"%@\"", @"menu item title"), scriptName];
             
 			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:scriptName action:@selector(executeScript:) keyEquivalent:@""];
 			[item setTarget:self];

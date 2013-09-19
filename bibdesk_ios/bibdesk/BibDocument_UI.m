@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 5/26/09.
 /*
- This software is Copyright (c) 2009-2012
+ This software is Copyright (c) 2009-2013
  Christiaan Hofman. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -203,8 +203,6 @@ enum {
         previewer = [[BDSKPreviewer alloc] init];
         NSDictionary *xatrrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
         [previewer setPDFScaleFactor:[xatrrDefaults doubleForKey:BDSKPreviewPDFScaleFactorKey defaultValue:0.0]];
-        [previewer setRTFScaleFactor:[xatrrDefaults doubleForKey:BDSKPreviewRTFScaleFactorKey defaultValue:1.0]];
-        [previewer setGeneratedTypes:BDSKGeneratePDF];
         [[bottomPreviewTabView tabViewItemAtIndex:BDSKPreviewDisplayTeX] setView:[previewer pdfView]];
     }
     

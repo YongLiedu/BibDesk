@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 11/1/06.
 /*
- This software is Copyright (c) 2006-2012
+ This software is Copyright (c) 2006-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -43,14 +43,12 @@
 #import "NSPrintOperation_BDSKExtensions.h"
 
 
-@interface NSResponder (BDSKGesturesPrivate)
-- (void)magnifyWithEvent:(NSEvent *)theEvent;
-- (void)beginGestureWithEvent:(NSEvent *)theEvent;
-- (void)endGestureWithEvent:(NSEvent *)theEvent;
-@end
+@interface BDSKZoomableTextView (BDSKPrivate)
 
-@interface NSEvent (BDSKGesturesPrivate)
-- (CGFloat)magnification;
+- (void)makeScalePopUpButton;
+- (void)scalePopUpAction:(id)sender;
+- (void)setScaleFactor:(CGFloat)factor adjustPopup:(BOOL)flag;
+
 @end
 
 @implementation BDSKZoomableTextView
@@ -65,8 +63,8 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.1, 0.2, 0.25, 0.35, 0.5, 0.6, 
 
 #pragma mark Instance methods
 
-- (id)initWithFrame:(NSRect)rect {
-    self = [super initWithFrame:rect];
+- (id)initWithFrame:(NSRect)frameRect textContainer:(NSTextContainer *)aTextContainer {
+    self = [super initWithFrame:frameRect textContainer:aTextContainer];
     if (self) {
 		scaleFactor = 1.0;
         pinchZoomFactor = 1.0;

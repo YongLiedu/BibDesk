@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 07/23/05.
 /*
- This software is Copyright (c) 2005-2012
+ This software is Copyright (c) 2005-2013
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -44,14 +44,12 @@
 #import "BDSKHighlightingPopUpButton.h"
 
 
-@interface NSResponder (BDSKGesturesPrivate)
-- (void)magnifyWithEvent:(NSEvent *)theEvent;
-- (void)beginGestureWithEvent:(NSEvent *)theEvent;
-- (void)endGestureWithEvent:(NSEvent *)theEvent;
-@end
+@interface BDSKZoomablePDFView (BDSKPrivate)
 
-@interface NSEvent (BDSKGesturesPrivate)
-- (CGFloat)magnification;
+- (void)makeScalePopUpButton;
+- (void)scalePopUpAction:(id)sender;
+- (void)setScaleFactor:(CGFloat)factor adjustPopup:(BOOL)flag;
+
 @end
 
 @implementation BDSKZoomablePDFView
@@ -388,19 +386,6 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
 - (NSScrollView *)scrollView;
 {
     return [[self documentView] enclosingScrollView];
-}
-
-- (void)setScrollerSize:(NSControlSize)controlSize;
-{
-    NSScrollView *scrollView = [[self documentView] enclosingScrollView];
-    [scrollView setHasHorizontalScroller:YES];
-    [scrollView setHasVerticalScroller:YES];
-    [[scrollView horizontalScroller] setControlSize:controlSize];
-    [[scrollView verticalScroller] setControlSize:controlSize];
-	if(scalePopUpButton){
-		[[scalePopUpButton cell] setControlSize:controlSize];
-        [scalePopUpButton setFont:[NSFont toolTipsFontOfSize: BDSKScaleMenuFontSize - controlSize]];
-	}
 }
 
 #pragma mark Gestures

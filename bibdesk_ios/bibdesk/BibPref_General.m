@@ -2,7 +2,7 @@
 
 //  Created by Michael McCracken on Sat Jun 01 2002.
 /*
- This software is Copyright (c) 2002-2012
+ This software is Copyright (c) 2002-2013
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
 #import "BDSKStringConstants.h"
 #import "BDSKAppController.h"
 #import "BDSKTemplate.h"
-#import "BDAlias.h"
+#import "BDSKAlias.h"
 #import <Sparkle/Sparkle.h>
 
 static char BDSKBibPrefGeneralDefaultsObservationContext;
@@ -83,9 +83,9 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
 
 - (void)updateDefaultBibFileUI {
     NSData *aliasData = [sud objectForKey:BDSKDefaultBibFileAliasKey];
-    BDAlias *alias;
-    if([aliasData length] && (alias = [BDAlias aliasWithData:aliasData]))
-        [defaultBibFileTextField setStringValue:[[alias fullPath] stringByAbbreviatingWithTildeInPath]];
+    NSString *path;
+    if ([aliasData length] && (path = [[[[BDSKAlias aliasWithData:aliasData] fileURL] path] stringByAbbreviatingWithTildeInPath]))
+        [defaultBibFileTextField setStringValue:path];
     else
         [defaultBibFileTextField setStringValue:@""];
 }
@@ -131,9 +131,10 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
 }
 
 - (IBAction)setAutoOpenFilePath:(id)sender{
-    BDAlias *alias = [BDAlias aliasWithPath:[[sender stringValue] stringByStandardizingPath]];
+    NSString *path = [[sender stringValue] stringByStandardizingPath];
+    BDSKAlias *alias = path ? [BDSKAlias aliasWithURL:[NSURL fileURLWithPath:path]] : nil;
     if(alias)
-        [sud setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
+        [sud setObject:[alias data] forKey:BDSKDefaultBibFileAliasKey];
     [self updateDefaultBibFileUI];
 }
 
@@ -153,9 +154,9 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
     [openPanel setAllowedFileTypes:[NSArray arrayWithObjects:@"bib", nil]];
     [openPanel beginSheetModalForWindow:[[self view] window] completionHandler:^(NSInteger result){
         if (result == NSFileHandlingPanelOKButton) {
-            BDAlias *alias = [BDAlias aliasWithURL:[openPanel URL]];
+            BDSKAlias *alias = [BDSKAlias aliasWithURL:[openPanel URL]];
             
-            [sud setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
+            [sud setObject:[alias data] forKey:BDSKDefaultBibFileAliasKey];
             [sud setObject:[NSNumber numberWithInteger:3] forKey:BDSKStartupBehaviorKey];
             [self updateDefaultBibFileUI];
             [self updateStartupBehaviorUI];

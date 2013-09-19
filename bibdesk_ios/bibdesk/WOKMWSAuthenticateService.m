@@ -873,6 +873,10 @@
 	[request setHTTPMethod: @"POST"];
 	// set version 1.1 - how?
 	[request setHTTPBody: bodyData];
+    if (self.authUsername && self.authPassword) {
+        NSString *authString = [[[NSString stringWithFormat:@"%@:%@", self.authUsername, self.authPassword] dataUsingEncoding:NSUTF8StringEncoding] base64Encoding];        
+        [request setValue:[NSString stringWithFormat:@"Basic %@", authString] forHTTPHeaderField:@"Authorization"];
+    }
 		
 	if(self.logXMLInOut) {
 		NSLog(@"OutputHeaders:\n%@", [request allHTTPHeaderFields]);

@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 10/19/06.
 /*
- This software is Copyright (c) 2006-2012
+ This software is Copyright (c) 2006-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -81,10 +81,9 @@
     return self;
 }
 
-- (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(NSInteger)type;
+- (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments;
 {
-    self = [self initWithName:nil scriptPath:path scriptArguments:arguments scriptType:type];
-    return self;
+    return [self initWithName:nil scriptPath:path scriptArguments:arguments scriptType:[[NSWorkspace sharedWorkspace] isAppleScriptFileAtPath:path] ? BDSKAppleScriptType : BDSKShellScriptType];
 }
 
 - (void)commonInit {

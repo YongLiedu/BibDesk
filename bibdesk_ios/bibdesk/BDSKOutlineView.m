@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 2/18/09.
 /*
- This software is Copyright (c) 2009-2012
+ This software is Copyright (c) 2009-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -222,6 +222,10 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
     
 	if ((eventChar == NSEnterCharacter || eventChar == NSFormFeedCharacter || eventChar == NSNewlineCharacter || eventChar == NSCarriageReturnCharacter) && (modifierFlags & ~NSFunctionKeyMask) == 0) {
         [self insertNewline:self];
+    } else if (eventChar == 0x0020 && modifierFlags == 0) {
+        [self insertSpace:self];
+    } else if (eventChar== 0x0020 && modifierFlags == NSShiftKeyMask) {
+        [self insertShiftSpace:self];
     } else if (eventChar == NSHomeFunctionKey && (modifierFlags & ~NSFunctionKeyMask) == 0) {
         [self scrollToBeginningOfDocument:self];
     } else if (eventChar == NSEndFunctionKey && (modifierFlags & ~NSFunctionKeyMask) == 0) {
@@ -300,6 +304,20 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
 - (void)insertNewline:(id)sender {
     if ([[self delegate] respondsToSelector:@selector(outlineViewInsertNewline:)])
         [[self delegate] outlineViewInsertNewline:self];
+}
+
+- (void)insertSpace:(id)sender {
+    if ([[self delegate] respondsToSelector:@selector(outlineViewInsertSpace:)])
+        [[self delegate] outlineViewInsertSpace:self];
+    else
+        [[self enclosingScrollView] pageDown:sender];
+}
+
+- (void)insertShiftSpace:(id)sender {
+    if ([[self delegate] respondsToSelector:@selector(outlineViewInsertShiftSpace:)])
+        [[self delegate] outlineViewInsertShiftSpace:self];
+    else
+        [[self enclosingScrollView] pageUp:sender];
 }
 
 - (BOOL)canDelete {
@@ -418,15 +436,6 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
         }
     } else
         NSBeep();
-}
-
-- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)flag {
-    if ([[self dataSource] respondsToSelector:@selector(outlineView:draggingSourceOperationMaskForLocal:)])
-        return [[self dataSource] outlineView:self draggingSourceOperationMaskForLocal:flag];
-    else if (flag)
-        return NSDragOperationEvery;
-    else
-        return NSDragOperationNone;        
 }
 
 - (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation {

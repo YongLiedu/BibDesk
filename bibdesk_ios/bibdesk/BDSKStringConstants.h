@@ -1,6 +1,6 @@
 // BDSKStringConstants 
 /*
- This software is Copyright (c) 2002-2012
+ This software is Copyright (c) 2002-2013
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -92,7 +92,6 @@ extern NSString *BDSKBottomPreviewDisplayTemplateKey;
 extern NSString *BDSKSidePreviewDisplayKey;
 extern NSString *BDSKSidePreviewDisplayTemplateKey;
 extern NSString *BDSKPreviewPDFScaleFactorKey;
-extern NSString *BDSKPreviewRTFScaleFactorKey;
 extern NSString *BDSKBottomPreviewScaleFactorKey;
 extern NSString *BDSKSidePreviewScaleFactorKey;
 extern NSString *BDSKPreviewLinkedFileScaleFactorKey;

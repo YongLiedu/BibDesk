@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 12/26/06.
 /*
- This software is Copyright (c) 2006-2012
+ This software is Copyright (c) 2006-2013
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -62,18 +62,21 @@
     return [NSSet setWithObjects:@"type", nil];
 }
 
-- (id)init {
-    return [self initWithGroup:nil];
++ (NSSet *)keyPathsForValuesAffectingZoomOrISI {
+    return [NSSet setWithObjects:@"type", nil];
 }
 
-- (id)initWithGroup:(BDSKSearchGroup *)aGroup;
-{
+- (id)init {
+    return [self initWithServerInfo:nil];
+}
+
+- (id)initWithServerInfo:(BDSKServerInfo *)aServerInfo {
     self = [super init];
     if (self) {
-        group = [aGroup retain];
         undoManager = nil;
         
-        serverInfo = group ? [[group serverInfo] mutableCopy] : [[BDSKServerInfo defaultServerInfoWithType:BDSKSearchGroupEntrez] mutableCopy];
+        serverInfo = [aServerInfo mutableCopy] ?: [[BDSKServerInfo defaultServerInfoWithType:BDSKSearchGroupEntrez] mutableCopy];
+        originalServerInfo = [aServerInfo retain];
         
         isCustom = NO;
         isEditable = NO;
@@ -84,9 +87,9 @@
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    BDSKDESTROY(group);
     BDSKDESTROY(undoManager);
     BDSKDESTROY(serverInfo);
+    BDSKDESTROY(originalServerInfo);
     BDSKDESTROY(serverView);
     [super dealloc];
 }
@@ -152,8 +155,8 @@
     NSString *name = nil;
     NSArray *servers = [[BDSKSearchGroupServerManager sharedManager] servers];
     
-    if (group) {
-        NSUInteger idx = [servers indexOfObject:[group serverInfo]];
+    if (originalServerInfo) {
+        NSUInteger idx = [servers indexOfObject:originalServerInfo];
         if (idx != NSNotFound)
             name = [[servers objectAtIndex:idx] name];
     } else if ([servers count]) {
@@ -171,20 +174,9 @@
 #pragma mark Actions
 
 - (IBAction)dismiss:(id)sender {
-    if ([sender tag] == NSOKButton) {
-        
-        if ([self commitEditing] == NO) {
-            NSBeep();
-            return;
-        }
-                
-        // we don't have a group, so create  a new one
-        if(group == nil){
-            group = [[BDSKSearchGroup alloc] initWithServerInfo:serverInfo searchTerm:nil];
-        }else{
-            [group setServerInfo:serverInfo];
-            [[group undoManager] setActionName:NSLocalizedString(@"Edit Search Group", @"Undo action name")];
-        }
+    if ([sender tag] == NSOKButton && [self commitEditing] == NO) {
+        NSBeep();
+        return;
     }
     
     [super dismiss:sender];
@@ -198,7 +190,7 @@
     [editButton setToolTip:NSLocalizedString(@"Edit the selected default server settings", @"Tool tip message")];
     
     if (i == [sender numberOfItems] - 1) {
-        [self setServerInfo:[group serverInfo] ?: [BDSKServerInfo defaultServerInfoWithType:[self type]]];
+        [self setServerInfo:originalServerInfo ?: [BDSKServerInfo defaultServerInfoWithType:[self type]]];
         if ([revealButton state] == NSOffState)
             [revealButton performClick:self];
         [self setCustom:YES];
@@ -358,7 +350,7 @@
 
 - (BOOL)isZoom { return [serverInfo isZoom]; }
 
-- (BDSKSearchGroup *)group { return group; }
+- (BOOL)isZoomOrISI { return [serverInfo isZoom] || [serverInfo isISI]; }
 
 - (BDSKServerInfo *)serverInfo { return serverInfo; }
 

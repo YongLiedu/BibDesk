@@ -183,7 +183,7 @@ about the BibTeX file format.
 
 Portions of BibDesk:
 
-Copyright @copyright{} 2001 - 2012 Michael O. McCracken@*
+Copyright @copyright{} 2001 - 2013 Michael O. McCracken@*
 Copyright @copyright{} many others@*
 
 @c ======================================================================================
@@ -3427,16 +3427,21 @@ It exports an RSS representation of the document in the same folder as the BibTe
         <span class="aslangkeyword">set</span> <span class="asvariable">theDocFile</span> <span class="aslangkeyword">to the</span> <span class="asproperty">file</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocument</span>
         <span class="aslangkeyword">tell</span> <span class="asclass">application</span> <span class="asvalue">"Finder"</span>
             <span class="ascomment">-- extract containing folder and file name</span>
-            <span class="aslangkeyword">set</span> <span class="asvariable">theFolder</span> <span class="aslangkeyword">to the</span> <span class="asproperty">container</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocFile</span> <span class="aslangkeyword">as</span> <span class="asclass">text</span>
+            <span class="aslangkeyword">set</span> <span class="asvariable">theFolder</span> <span class="aslangkeyword">to the</span> <span class="asproperty">container</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocFile</span>
             <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to the</span> <span class="asproperty">name</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocFile</span>
             <span class="ascomment">-- change extension to "rss"</span>
+            <span class="aslangkeyword">set</span> <span class="asproperty">AppleScript</span><span class="asvalue">'s</span> <span class="asproperty">text item delimiters</span> <span class="aslangkeyword">to</span> <span class="asvalue">"."</span>
             <span class="aslangkeyword">if the</span> <span class="asproperty">name extension</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocFile</span> <span class="aslangkeyword">is not</span> <span class="asvalue">""</span> <span class="aslangkeyword">then</span>
-                <span class="aslangkeyword">set</span> <span class="asproperty">AppleScript</span><span class="asvalue">'s</span> <span class="asproperty">text item delimiters</span> <span class="aslangkeyword">to</span> <span class="asvalue">"."</span>
                 <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asclass">text items</span> <span class="asvalue">1</span> <span class="aslangkeyword">thru</span> <span class="asvalue">-2</span> <span class="aslangkeyword">of</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">as</span> <span class="asclass">text</span>
             <span class="aslangkeyword">end if</span>
             <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asvariable">theFileName</span> <span class="asoperator">&</span> <span class="asvariable">theFileExtension</span>
-            <span class="ascomment">-- create a reference to the file</span>
-            <span class="aslangkeyword">set</span> <span class="asvariable">theFile</span> <span class="aslangkeyword">to</span> <span class="asoperator">(</span><span class="asvariable">theFileName</span> <span class="asoperator">&</span> <span class="asvariable">theFolder</span><span class="asoperator">)</span> <span class="aslangkeyword">as</span> <span class="asclass">file specification</span>
+            <span class="aslangkeyword">set</span> <span class="asproperty">AppleScript</span><span class="asvalue">'s</span> <span class="asproperty">text item delimiters</span> <span class="aslangkeyword">to</span> <span class="asvalue">""</span>
+            <span class="ascomment">-- create a reference to the file if necessary</span>
+            <span class="aslangkeyword">if</span> <span class="asclass">file</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">of</span> <span class="asvariable">theFolder</span> <span class="ascommand">exists</span> <span class="aslangkeyword">then</span>
+                <span class="aslangkeyword">set</span> <span class="asvariable">theFile</span> <span class="aslangkeyword">to</span> <span class="asoperator">(</span><span class="asclass">file</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">of</span> <span class="asvariable">theFolder</span><span class="asoperator">)</span> <span class="aslangkeyword">as</span> <span class="asclass">alias</span>
+            <span class="aslangkeyword">else</span>
+                <span class="aslangkeyword">set</span> <span class="asvariable">theFile</span> <span class="aslangkeyword">to</span> <span class="asoperator">(<span class="ascommand">make</span> </span><span class="asappkeyword">new</span> <span class="asclass">file</span> <span class="asappkeyword">with properties</span> <span class="asoperator">{</span><span class="asproperty">name</span><span class="asoperator">:</span><span class="asvariable">theFileName</span><span class="asoperator">}</span><span class="asoperator"> <span class="asappkeyword">at</span> <span class="asvariable">theFolder</span>)</span> <span class="aslangkeyword">as</span> <span class="asclass">alias</span>
+            <span class="aslangkeyword">end if</span>
         <span class="aslangkeyword">end tell</span>
         <span class="ascomment">-- now export using the template</span>
         <span class="aslangkeyword">tell</span> <span class="asvariable">theDocument</span>
@@ -3460,16 +3465,21 @@ It exports an RSS representation of the document in the same folder as the BibTe
         @b{set} theDocFile @b{to the} file of theDocument
         @b{tell} application "Finder"
             @i{-- extract containing folder and file name}
-            @b{set} theFolder @b{to the} container of theDocFile @b{as} text
+            @b{set} theFolder @b{to the} container of theDocFile
             @b{set} theFileName @b{to the} name of theDocFile
             @i{-- change extension to "rss"}
-            @b{if} file theFileName @b{of} folder theFolder exists @b{then}
-                @b{set} AppleScript's text item delimiters @b{to} "."
+            @b{set} AppleScript's text item delimiters @b{to} "."
+            @b{if the} name extension @b{of} theDocFile @b{is not} "" @b{then}
                 @b{set} theFileName @b{to} text item 1 @b{thru} -2 of theFileName @b{as} text
             @b{end if}
-            @b{set} theFileName @b{to} theFileName & theTemplateName
-            @i{-- create a reference to the file}
-            @b{set} theFile @b{to} (theFolder & theFileName) @b{as} file specification
+            @b{set} theFileName @b{to} theFileName & theFileExtension
+            @b{set} AppleScript's text item delimiters @b{to} ""
+            @i{-- create a reference to the file if necessary}
+            @b{if} file theFileName @b{of} folder theFolder exists @b{then}
+                @b{set} theFile @b{to} (file theFileName of theFolder) @b{as} alias
+            @b{else}
+                @b{set} theFile @b{to} (@b{make} new file with properties {name:theFileName} at theFolder) @b{as} alias
+            @b{end if}
         @b{end tell} 
         @i{-- now export using the template}
         @b{tell} theDocument

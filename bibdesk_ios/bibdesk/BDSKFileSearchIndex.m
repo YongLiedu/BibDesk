@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 10/11/05.
 /*
- This software is Copyright (c) 2005-2012
+ This software is Copyright (c) 2005-2013
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -174,7 +174,7 @@
 - (NSSet *)identifierURLsForURL:(NSURL *)theURL
 {
     [rwLock lockForReading];
-    NSSet *set = [[[identifierURLs allObjectsForKey:theURL] copy] autorelease];
+    NSSet *set = [[[identifierURLs objectsForKey:theURL] copy] autorelease];
     [rwLock unlock];
     return set;
 }
@@ -407,11 +407,12 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
     // the caller is responsible for updating the delegate, so we can throttle initial indexing
 }
 
-- (void)indexFilesForItems:(NSArray *)items numberPreviouslyIndexed:(double)numberIndexed totalCount:(double)totalObjectCount
+- (void)indexFilesForItems:(NSArray *)items numberPreviouslyIndexed:(double)numberIndexed
 {
     // Use a local pool since initial indexing can use a fair amount of memory, and it's not released until the thread's run loop starts
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
-        
+    double totalObjectCount = numberIndexed + [items count];
+    
     for (id anObject in items) {
         if ([self shouldKeepRunning] == NO) break;
         [self indexFileURLs:[NSSet setWithArray:[anObject objectForKey:@"urls"]] forIdentifierURL:[anObject objectForKey:@"identifierURL"]];
@@ -425,7 +426,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
         
         [self didUpdate];
     }
-        
+    
     // caller queues a final update
     
     [pool release];
@@ -440,7 +441,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
     dispatch_async(queue, ^{
         // this will update the delegate when all is complete
         if ([self shouldKeepRunning])
-            [self indexFilesForItems:searchIndexInfo numberPreviouslyIndexed:0 totalCount:[searchIndexInfo count]];
+            [self indexFilesForItems:searchIndexInfo numberPreviouslyIndexed:0];
     });
 }
 
@@ -503,7 +504,6 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
     SKIndexRef tmpIndex = NULL;
     NSURL *indexCacheURL = documentURL ? [[self class] indexCacheURLForDocumentURL:documentURL] : nil;
     
-    double totalObjectCount = [items count];
     double numberIndexed = 0;
     
     BDSKPRECONDITION(items);
@@ -555,6 +555,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
         
         NSMutableSet *URLsToRemove = [[NSMutableSet alloc] initWithArray:[signatures allKeys]];
         NSMutableArray *itemsToAdd = [[NSMutableArray alloc] init];
+        double totalObjectCount = [items count];
         
         // find URLs in the database that needs to be indexed, and URLs that were indexeed but are not in the database anymore
         for (id anItem in items) {
@@ -608,7 +609,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
     // add items that were not yet indexed
     if ([self shouldKeepRunning] && [items count]) {
         [self updateStatus:BDSKSearchIndexStatusIndexing];
-        [self indexFilesForItems:items numberPreviouslyIndexed:numberIndexed totalCount:totalObjectCount];
+        [self indexFilesForItems:items numberPreviouslyIndexed:numberIndexed];
     }
     
     [items release];

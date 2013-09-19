@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 28/11/05.
 /*
- This software is Copyright (c) 2005-2012
+ This software is Copyright (c) 2005-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -41,24 +41,6 @@
 
 @implementation BDSKDragImageView
 
-- (id)initWithFrame:(NSRect)frameRect {
-    self = [super initWithFrame:frameRect];
-    if (self) {
-		delegate = nil;
-		highlight = NO;
-	}
-	return self;
-}
-
-- (id)initWithCoder:(NSCoder *)decoder {
-    self = [super initWithCoder:decoder];
-    if (self) {
-		delegate = nil;
-		highlight = NO;
-	}
-	return self;
-}
-
 - (id<BDSKDragImageViewDelegate>)delegate {
     return delegate;
 }
@@ -67,31 +49,41 @@
 	delegate = newDelegate;
 }
 
+- (void)drawDragHighlight {
+    [[self window] cacheImageInRect:[self convertRect:[self bounds] toView:nil]];
+    [self lockFocus];
+	[[NSColor alternateSelectedControlColor] set];
+	[NSBezierPath setDefaultLineWidth:2.0];
+	[[NSBezierPath bezierPathWithRoundedRect:NSInsetRect([self bounds], 2.0, 2.0) xRadius:5.0 yRadius:5.0] stroke];
+    [self unlockFocus];
+    [[self window] flushWindow];
+}
+
+- (void)clearDragHighlight {
+    [[self window] restoreCachedImage];
+    [[self window] flushWindow];
+}
+
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender{
     NSDragOperation dragOp = NSDragOperationNone;
 	if ([delegate respondsToSelector:@selector(dragImageView:validateDrop:)])
 		dragOp = [delegate dragImageView:self validateDrop:sender];
-	if (dragOp != NSDragOperationNone) {
-		highlight = YES;
-        [self setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
-		[self setNeedsDisplay:YES];
-	}
+	if (dragOp != NSDragOperationNone)
+        [self drawDragHighlight];
 	return dragOp;
 }
 
 - (void)draggingExited:(id <NSDraggingInfo>)sender{
-    highlight = NO;
-    [self setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
-	[self setNeedsDisplay:YES];
+	if ([delegate respondsToSelector:@selector(dragImageView:validateDrop:)])
+        [self clearDragHighlight];
 }
 
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender {
-    highlight = NO;
-    [self setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
-	[self setNeedsDisplay:YES];
-	if ([delegate respondsToSelector:@selector(dragImageView:acceptDrop:)])
+	if ([delegate respondsToSelector:@selector(dragImageView:acceptDrop:)]) {
+        [self clearDragHighlight];
 		return [delegate dragImageView:self acceptDrop:sender];
-	return NO;
+	}
+    return NO;
 }
 
 - (void)concludeDragOperation:(id <NSDraggingInfo>)sender {
@@ -156,16 +148,6 @@
 // flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag
 - (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFlagsChangedNotification object:NSApp];
-}
-
-- (void)drawRect:(NSRect)aRect {
-	[super drawRect:aRect];
-	
-	if (highlight == NO) return;
-	
-	[[NSColor alternateSelectedControlColor] set];
-	[NSBezierPath setDefaultLineWidth:2.0];
-	[[NSBezierPath bezierPathWithRoundedRect:NSInsetRect(aRect, 2.0, 2.0) xRadius:5.0 yRadius:5.0] stroke];
 }
 
 @end

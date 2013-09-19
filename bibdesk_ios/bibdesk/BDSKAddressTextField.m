@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 11/26/11.
 /*
- This software is Copyright (c) 2011-2012
+ This software is Copyright (c) 2011-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -121,27 +121,26 @@
 }
 
 - (void)viewWillMoveToWindow:(NSWindow *)newWindow {
-    NSWindow *window = [self window];
-    if (window) {
+    NSWindow *oldWindow = [self window];
+    if (oldWindow) {
         NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-        [nc removeObserver:self name:NSWindowDidBecomeMainNotification object:window];
-        [nc removeObserver:self name:NSWindowDidResignMainNotification object:window];
-        [nc removeObserver:self name:NSWindowDidBecomeKeyNotification object:window];
-        [nc removeObserver:self name:NSWindowDidResignKeyNotification object:window];
+        [nc removeObserver:self name:NSWindowDidBecomeMainNotification object:oldWindow];
+        [nc removeObserver:self name:NSWindowDidResignMainNotification object:oldWindow];
+        [nc removeObserver:self name:NSWindowDidBecomeKeyNotification object:oldWindow];
+        [nc removeObserver:self name:NSWindowDidResignKeyNotification object:oldWindow];
+    }
+    if (newWindow) {
+        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+        [nc addObserver:self selector:@selector(handleKeyOrMainStateChangedNotification:) name:NSWindowDidBecomeMainNotification object:newWindow];
+        [nc addObserver:self selector:@selector(handleKeyOrMainStateChangedNotification:) name:NSWindowDidResignMainNotification object:newWindow];
+        [nc addObserver:self selector:@selector(handleKeyOrMainStateChangedNotification:) name:NSWindowDidBecomeKeyNotification object:newWindow];
+        [nc addObserver:self selector:@selector(handleKeyOrMainStateChangedNotification:) name:NSWindowDidResignKeyNotification object:newWindow];
     }
     [super viewWillMoveToWindow:newWindow];
 }
 
-- (void)viewDidMoveToWindow {
-    NSWindow *window = [self window];
-    if (window) {
-        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-        [nc addObserver:self selector:@selector(handleKeyOrMainStateChangedNotification:) name:NSWindowDidBecomeMainNotification object:window];
-        [nc addObserver:self selector:@selector(handleKeyOrMainStateChangedNotification:) name:NSWindowDidResignMainNotification object:window];
-        [nc addObserver:self selector:@selector(handleKeyOrMainStateChangedNotification:) name:NSWindowDidBecomeKeyNotification object:window];
-        [nc addObserver:self selector:@selector(handleKeyOrMainStateChangedNotification:) name:NSWindowDidResignKeyNotification object:window];
-    }
-    [super viewDidMoveToWindow];
+- (void)setKeyboardFocusRingNeedsDisplayInRect:(NSRect)rect {
+    return [super setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
 }
 
 - (void)mouseDown:(NSEvent *)theEvent {

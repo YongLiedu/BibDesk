@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 2/17/09.
 /*
- This software is Copyright (c) 2009-2012
+ This software is Copyright (c) 2009-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,13 +37,6 @@
  */
 
 #import <Cocoa/Cocoa.h>
-
-enum {
-    BDSKPreferencePaneUnselectCancel,
-    BDSKPreferencePaneUnselectNow,
-    BDSKPreferencePaneUnselectLater
-};
-typedef NSInteger BDSKPreferencePaneUnselectReply;
 
 @class BDSKPreferenceController, BDSKPreferenceRecord;
 
@@ -78,8 +71,6 @@ typedef NSInteger BDSKPreferencePaneUnselectReply;
 - (void)willSelect;
 - (void)didSelect;
 
-// if this returns BDSKPreferencePaneUnselectLater, -replyToShouldUnselect: should be called when this is resolved
-- (BDSKPreferencePaneUnselectReply)shouldUnselect;
 - (void)willUnselect;
 - (void)didUnselect;
 

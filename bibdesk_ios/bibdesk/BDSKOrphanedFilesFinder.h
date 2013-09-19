@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 8/11/06.
 /*
- This software is Copyright (c) 2005-2012
+ This software is Copyright (c) 2005-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,10 +37,12 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import <Quartz/Quartz.h>
+#import "BDSKTableView.h"
 
-@class BDSKOrphanedFilesArrayController, BDSKTableView;
+@class BDSKTableView, BDSKOrphanedFilesArrayController;
 
-@interface BDSKOrphanedFilesFinder : NSWindowController <NSTableViewDelegate, NSTableViewDataSource> {
+@interface BDSKOrphanedFilesFinder : NSWindowController <NSTableViewDelegate, NSTableViewDataSource, QLPreviewPanelDataSource, QLPreviewPanelDelegate> {
     IBOutlet BDSKTableView *tableView;
     IBOutlet NSButton *refreshButton;
     IBOutlet BDSKOrphanedFilesArrayController *arrayController;

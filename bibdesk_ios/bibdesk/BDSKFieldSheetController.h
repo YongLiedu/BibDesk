@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 3/18/06.
 /*
- This software is Copyright (c) 2005-2012
+ This software is Copyright (c) 2005-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -41,47 +41,48 @@
 @interface BDSKFieldSheetController : NSWindowController
 {
     IBOutlet NSObjectController *objectController;
-    IBOutlet NSControl *fieldsControl;
-    IBOutlet NSButton *okButton;
+    IBOutlet NSPopUpButton *selectedFieldPopUpButton;
+    IBOutlet NSComboBox *chosenFieldComboBox;
+    IBOutlet NSTextField *selectedFieldLabelField;
+    IBOutlet NSTextField *chosenFieldLabelField;
+    IBOutlet NSButton *defaultButton;
     IBOutlet NSButton *cancelButton;
-    IBOutlet NSTextField *promptField;
-    NSString *prompt;
-    NSArray *fieldsArray;
-    NSString *field;
+    NSString *selectedField;
+    NSString *selectedFieldLabel;
+    NSArray *selectableFields;
+    NSString *chosenField;
+    NSString *chosenFieldLabel;
+    NSArray *choosableFields;
+    NSString *defaultButtonTitle;
+    NSString *cancelButtonTitle;
 }
 
-- (id)initWithPrompt:(NSString *)prompt fieldsArray:(NSArray *)fields;
++ (id)fieldSheetControllerWithSelectableFields:(NSArray *)selectableFields label:(NSString *)selectedFieldLabel choosableFields:(NSArray *)choosableFields label:(NSString *)chosenFieldLabel;
++ (id)fieldSheetControllerWithSelectableFields:(NSArray *)selectableFields label:(NSString *)selectedFieldLabel;
++ (id)fieldSheetControllerWithChoosableFields:(NSArray *)choosableFields label:(NSString *)chosenFieldLabel;
 
-- (NSString *)field;
-- (void)setField:(NSString *)newField;
-- (NSArray *)fieldsArray;
-- (void)setFieldsArray:(NSArray *)array;
-- (NSString *)prompt;
-- (void)setPrompt:(NSString *)promptString;
+- (NSString *)selectedField;
+- (void)setSelectedField:(NSString *)newField;
 
-@end
+- (NSString *)selectedFieldLabel;
+- (void)setSelectedFieldLabel:(NSString *)newLabel;
 
-@interface BDSKAddFieldSheetController : BDSKFieldSheetController
-@end
+- (NSArray *)selectableFields;
+- (void)setSelectableFields:(NSArray *)array;
 
-@interface BDSKRemoveFieldSheetController : BDSKFieldSheetController
-@end
+- (NSString *)chosenField;
+- (void)setChosenField:(NSString *)newField;
 
-@interface BDSKChangeFieldSheetController : BDSKRemoveFieldSheetController {
-    IBOutlet NSComboBox *replaceFieldsComboBox;
-    IBOutlet NSTextField *replacePromptField;
-    NSString *replacePrompt;
-    NSArray *replaceFieldsArray;
-    NSString *replaceField;
-}
+- (NSString *)chosenFieldLabel;
+- (void)setChosenFieldLabel:(NSString *)newLabel;
 
-- (id)initWithPrompt:(NSString *)promptString fieldsArray:(NSArray *)fields replacePrompt:(NSString *)newPromptString replaceFieldsArray:(NSArray *)newFields;
+- (NSArray *)choosableFields;
+- (void)setChoosableFields:(NSArray *)array;
 
-- (NSString *)replaceField;
-- (void)setReplaceField:(NSString *)newField;
-- (NSArray *)replaceFieldsArray;
-- (void)setReplaceFieldsArray:(NSArray *)array;
-- (NSString *)replacePrompt;
-- (void)setReplacePrompt:(NSString *)promptString;
+- (NSString *)defaultButtonTitle;
+- (void)setDefaultButtonTitle:(NSString *)title;
+
+- (NSString *)cancelButtonTitle;
+- (void)setCancelButtonTitle:(NSString *)title;
 
 @end

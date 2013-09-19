@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 3/18/06.
 /*
- This software is Copyright (c) 2005-2012
+ This software is Copyright (c) 2005-2013
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -42,211 +42,203 @@
 
 @implementation BDSKFieldSheetController
 
-- (id)initWithPrompt:(NSString *)promptString fieldsArray:(NSArray *)fields{
-    self = [super init];
++ (id)fieldSheetControllerWithSelectableFields:(NSArray *)selectableFields label:(NSString *)selectedFieldLabel choosableFields:(NSArray *)choosableFields label:(NSString *)chosenFieldLabel {
+    BDSKFieldSheetController *controller = [[[self alloc] init] autorelease];
+    [controller setSelectableFields:selectableFields];
+    [controller setSelectedFieldLabel:selectedFieldLabel];
+    [controller setChoosableFields:choosableFields];
+    [controller setChosenFieldLabel:chosenFieldLabel];
+    if (selectableFields == nil)
+        [controller setDefaultButtonTitle:NSLocalizedString(@"Add", @"Button title")];
+    else if (choosableFields == nil)
+        [controller setDefaultButtonTitle:NSLocalizedString(@"Remove", @"Button title")];
+    else
+        [controller setDefaultButtonTitle:NSLocalizedString(@"Change", @"Button title")];
+    return controller;
+}
+
++ (id)fieldSheetControllerWithSelectableFields:(NSArray *)selectableFields label:(NSString *)selectedFieldLabel {
+    return [self fieldSheetControllerWithSelectableFields:selectableFields label:selectedFieldLabel choosableFields:nil label:nil];
+}
+
++ (id)fieldSheetControllerWithChoosableFields:(NSArray *)choosableFields label:(NSString *)chosenFieldLabel {
+    return [self fieldSheetControllerWithSelectableFields:nil label:nil choosableFields:choosableFields label:chosenFieldLabel];
+}
+
+- (id)init {
+    self = [super initWithWindowNibName:@"FieldSheet"];
     if (self) {
-        [self window]; // make sure the nib is loaded
-        field = nil;
-        [self setPrompt:promptString];
-        [self setFieldsArray:fields];
+        [self setCancelButtonTitle:NSLocalizedString(@"Cancel", @"Button title")];
+        [self setDefaultButtonTitle:NSLocalizedString(@"OK", @"Button title")];
     }
     return self;
 }
 
 - (void)dealloc {
-    BDSKDESTROY(prompt);
-    BDSKDESTROY(fieldsArray);
-    BDSKDESTROY(field);
+    BDSKDESTROY(selectedField);
+    BDSKDESTROY(selectedFieldLabel);
+    BDSKDESTROY(selectableFields);
+    BDSKDESTROY(chosenField);
+    BDSKDESTROY(chosenFieldLabel);
+    BDSKDESTROY(choosableFields);
     [super dealloc];
 }
 
-- (NSString *)field{
-    return field;
+- (void)windowDidLoad {
+    BDSKFieldNameFormatter *formatter = [[[BDSKFieldNameFormatter alloc] init] autorelease];
+    [formatter setKnownFieldNames:[self choosableFields]];
+	[chosenFieldComboBox setFormatter:formatter];
 }
 
-- (void)setField:(NSString *)newField{
-    if (field != newField) {
-        [field release];
-        field = [newField copy];
+- (NSString *)selectedField {
+    return selectedField;
+}
+
+- (void)setSelectedField:(NSString *)newField {
+    if (selectedField != newField) {
+        [selectedField release];
+        selectedField = [newField retain];
     }
 }
 
-- (NSArray *)fieldsArray{
-    return fieldsArray;
+- (NSString *)selectedFieldLabel {
+    return selectedFieldLabel;
 }
 
-- (void)setFieldsArray:(NSArray *)array{
-    if (fieldsArray != array) {
-        [fieldsArray release];
-        fieldsArray = [array retain];
+- (void)setSelectedFieldLabel:(NSString *)newLabel {
+    if (selectedFieldLabel != newLabel) {
+        [selectedFieldLabel release];
+        selectedFieldLabel = [newLabel retain];
     }
 }
 
-- (NSString *)prompt{
-    return prompt;
+- (NSArray *)selectableFields {
+    return selectableFields;
 }
 
-- (void)setPrompt:(NSString *)promptString{
-    if (prompt != promptString) {
-        [prompt release];
-        prompt = [promptString retain];
+- (void)setSelectableFields:(NSArray *)array {
+    if (selectableFields != array) {
+        [selectableFields release];
+        selectableFields = [array copy];
+        if ([selectableFields count] > 0 && selectedField == nil)
+            [self setSelectedField:[selectableFields objectAtIndex:0]];
     }
 }
 
-- (void)prepare{
-    NSRect fieldsFrame = [fieldsControl frame];
-    NSRect oldPromptFrame = [promptField frame];
-    [promptField sizeToFit];
-    NSRect newPromptFrame = [promptField frame];
-    CGFloat dw = NSWidth(newPromptFrame) - NSWidth(oldPromptFrame);
-    fieldsFrame.size.width -= dw;
-    fieldsFrame.origin.x += dw;
-    [fieldsControl setFrame:fieldsFrame];
+- (NSString *)chosenField {
+    return chosenField;
+}
+
+- (void)setChosenField:(NSString *)newField {
+    if (chosenField != newField) {
+        [chosenField release];
+        chosenField = [newField retain];
+    }
+}
+
+- (NSString *)chosenFieldLabel {
+    return chosenFieldLabel;
+}
+
+- (void)setChosenFieldLabel:(NSString *)newLabel {
+    if (chosenFieldLabel != newLabel) {
+        [chosenFieldLabel release];
+        chosenFieldLabel = [newLabel retain];
+    }
+}
+
+- (NSArray *)choosableFields {
+    return choosableFields;
+}
+
+- (void)setChoosableFields:(NSArray *)array {
+    if (choosableFields != array) {
+        [choosableFields release];
+        choosableFields = [array copy];
+        [[chosenFieldComboBox formatter] setKnownFieldNames:choosableFields];
+    }
+}
+
+- (NSString *)defaultButtonTitle {
+    return defaultButtonTitle;
+}
+
+- (void)setDefaultButtonTitle:(NSString *)title{
+    if (defaultButtonTitle != title) {
+        [defaultButtonTitle release];
+        defaultButtonTitle = [title retain];
+    }
+}
+
+- (NSString *)cancelButtonTitle {
+    return cancelButtonTitle;
+}
+
+- (void)setCancelButtonTitle:(NSString *)title {
+    if (cancelButtonTitle != title) {
+        [cancelButtonTitle release];
+        cancelButtonTitle = [title retain];
+    }
+}
+
+#define MIN_BUTTON_WIDTH 82.0
+#define MAX_BUTTON_WIDTH 100.0
+#define EXTRA_BUTTON_WIDTH 12.0
+
+- (void)prepare {
+    NSRect popupFrame = [selectedFieldPopUpButton frame];
+    NSRect oldSelectedLabelFrame = [selectedFieldLabelField frame];
+    NSRect comboboxFrame = [chosenFieldComboBox frame];
+    NSRect oldChosenLabelFrame = [chosenFieldLabelField frame];
+    [selectedFieldLabelField sizeToFit];
+    [chosenFieldLabelField sizeToFit];
+    NSRect newSelectedLabelFrame = [selectedFieldLabelField frame];
+    NSRect newChosenLabelFrame = [chosenFieldLabelField frame];
+    CGFloat dw;
+    if (NSWidth(newSelectedLabelFrame) > NSWidth(newChosenLabelFrame)) {
+        dw = NSWidth(newSelectedLabelFrame) - NSWidth(oldSelectedLabelFrame);
+        newChosenLabelFrame.size.width = NSWidth(newSelectedLabelFrame);
+        [chosenFieldLabelField setFrame:newChosenLabelFrame];
+    } else {
+        dw = NSWidth(newChosenLabelFrame) - NSWidth(oldChosenLabelFrame);
+        newSelectedLabelFrame.size.width = NSWidth(newChosenLabelFrame);
+        [selectedFieldPopUpButton setFrame:newSelectedLabelFrame];
+    }
+    popupFrame.size.width -= dw;
+    popupFrame.origin.x += dw;
+    comboboxFrame.size.width -= dw;
+    comboboxFrame.origin.x += dw;
+    [selectedFieldPopUpButton setFrame:popupFrame];
+    [chosenFieldComboBox setFrame:comboboxFrame];
+    
+    if (selectableFields == nil || choosableFields == nil) {
+        NSRect windowFrame = [[self window] frame];
+        windowFrame.size.height -= NSMinY(popupFrame) - NSMinY(comboboxFrame);
+        [[self window] setFrame:windowFrame display:NO];
+    }
+    
+    CGFloat buttonX = NSMaxX([defaultButton frame]);
+    for (NSButton *button in [NSArray arrayWithObjects:defaultButton, cancelButton, nil]) {
+        [button sizeToFit];
+        NSRect buttonFrame = [button frame];
+        buttonFrame.size.width = fmin(MAX_BUTTON_WIDTH, fmax(MIN_BUTTON_WIDTH, NSWidth(buttonFrame) + EXTRA_BUTTON_WIDTH));
+        buttonX -= NSWidth(buttonFrame);
+        buttonFrame.origin.x = buttonX;
+        [button setFrame:buttonFrame];
+    }
 }
 
 - (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler {
+    [self window];
     [self prepare];
     [super beginSheetModalForWindow:window completionHandler:handler];
 }
 
-- (IBAction)dismiss:(id)sender{
+- (IBAction)dismiss:(id)sender {
     if ([sender tag] == NSCancelButton || [objectController commitEditing]) {
         [objectController setContent:nil];
         [super dismiss:sender];
     }
-}
-
-@end
-
-
-@implementation BDSKAddFieldSheetController
-
-- (void)awakeFromNib{
-    BDSKFieldNameFormatter *formatter = [[[BDSKFieldNameFormatter alloc] init] autorelease];
-    [formatter setKnownFieldNames:[self fieldsArray]];
-	[fieldsControl setFormatter:formatter];
-}
-
-- (NSString *)windowNibName{
-    return @"AddFieldSheet";
-}
-
-- (void)setFieldsArray:(NSArray *)array{
-    [super setFieldsArray:array];
-    [[fieldsControl formatter] setKnownFieldNames:array];
-}
-
-@end
-
-
-@implementation BDSKRemoveFieldSheetController
-
-- (NSString *)windowNibName{
-    return @"RemoveFieldSheet";
-}
-
-- (void)setFieldsArray:(NSArray *)array{
-    [super setFieldsArray:array];
-    if ([fieldsArray count]) {
-        [self setField:[fieldsArray objectAtIndex:0]];
-        [okButton setEnabled:YES];
-    } else {
-        [okButton setEnabled:NO];
-    }
-}
-
-@end
-
-
-@implementation BDSKChangeFieldSheetController
-
-- (id)initWithPrompt:(NSString *)promptString fieldsArray:(NSArray *)fields replacePrompt:(NSString *)newPromptString replaceFieldsArray:(NSArray *)newFields {
-    self = [super initWithPrompt:promptString fieldsArray:fields];
-    if (self) {
-        [self window]; // make sure the nib is loaded
-        field = nil;
-        [self setReplacePrompt:newPromptString];
-        [self setReplaceFieldsArray:newFields];
-    }
-    return self;
-}
-
-- (void)dealloc {
-    BDSKDESTROY(replacePrompt);
-    BDSKDESTROY(replaceFieldsArray);
-    BDSKDESTROY(replaceField);
-    [super dealloc];
-}
-
-- (void)awakeFromNib{
-    BDSKFieldNameFormatter *formatter = [[[BDSKFieldNameFormatter alloc] init] autorelease];
-    [formatter setKnownFieldNames:[self replaceFieldsArray]];
-	[replaceFieldsComboBox setFormatter:formatter];
-}
-
-- (NSString *)windowNibName{
-    return @"ChangeFieldSheet";
-}
-
-- (NSString *)replaceField{
-    return replaceField;
-}
-
-- (void)setReplaceField:(NSString *)newNewField{
-    if (replaceField != newNewField) {
-        [replaceField release];
-        replaceField = [newNewField copy];
-    }
-}
-
-- (NSArray *)replaceFieldsArray{
-    return replaceFieldsArray;
-}
-
-- (void)setReplaceFieldsArray:(NSArray *)array{
-    if (replaceFieldsArray != array) {
-        [replaceFieldsArray release];
-        replaceFieldsArray = [array retain];
-        [[replaceFieldsComboBox formatter] setKnownFieldNames:array];
-    }
-}
-
-- (NSString *)replacePrompt{
-    return replacePrompt;
-}
-
-- (void)setReplacePrompt:(NSString *)promptString{
-    if (replacePrompt != promptString) {
-        [replacePrompt release];
-        replacePrompt = [promptString retain];
-    }
-}
-
-- (void)prepare{
-    NSRect fieldsFrame = [fieldsControl frame];
-    NSRect oldPromptFrame = [promptField frame];
-    NSRect replaceFieldsFrame = [replaceFieldsComboBox frame];
-    NSRect oldReplacePromptFrame = [replacePromptField frame];
-    [promptField sizeToFit];
-    [replacePromptField sizeToFit];
-    NSRect newPromptFrame = [promptField frame];
-    NSRect newReplacePromptFrame = [replacePromptField frame];
-    CGFloat dw;
-    if (NSWidth(newPromptFrame) > NSWidth(newReplacePromptFrame)) {
-        dw = NSWidth(newPromptFrame) - NSWidth(oldPromptFrame);
-        newReplacePromptFrame.size.width = NSWidth(newPromptFrame);
-        [replacePromptField setFrame:newReplacePromptFrame];
-    } else {
-        dw = NSWidth(newReplacePromptFrame) - NSWidth(oldReplacePromptFrame);
-        newPromptFrame.size.width = NSWidth(newReplacePromptFrame);
-        [promptField setFrame:newPromptFrame];
-    }
-    fieldsFrame.size.width -= dw;
-    fieldsFrame.origin.x += dw;
-    replaceFieldsFrame.size.width -= dw;
-    replaceFieldsFrame.origin.x += dw;
-    [fieldsControl setFrame:fieldsFrame];
-    [replaceFieldsComboBox setFrame:replaceFieldsFrame];
 }
 
 @end
