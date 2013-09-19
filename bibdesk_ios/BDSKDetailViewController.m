@@ -234,6 +234,18 @@
     }
 }
 
+- (void)viewDidLayoutSubviews {
+
+    [super viewDidLayoutSubviews];
+    
+    for (NSUInteger i = 1; i < _webViews.count; i++) {
+        UIWebView *webView = _webViews[i];
+        webView.scrollView.contentInset = self.webView.scrollView.contentInset;
+        webView.scrollView.scrollIndicatorInsets = self.webView.scrollView.scrollIndicatorInsets;
+        [webView layoutSubviews];
+    }
+}
+
 #pragma mark - Split view delegate methods
 
 - (void)splitViewController:(UISplitViewController *)splitController willHideViewController:(UIViewController *)viewController withBarButtonItem:(UIBarButtonItem *)barButtonItem forPopoverController:(UIPopoverController *)popoverController
@@ -295,6 +307,10 @@
         NSDictionary *displayedRectDict = [displayedRects objectForKey:urlString];
         if (displayedRectDict) {
             [_linkedFileDisplayedRects setObject:displayedRectDict forKey:urlString];
+        } else {
+            displayedRectDict = (NSDictionary *)CGRectCreateDictionaryRepresentation(CGRectMake(0, 0, 1, 1));
+            [_linkedFileDisplayedRects setObject:displayedRectDict forKey:urlString];
+            [displayedRectDict release];
         }
     }
 }
@@ -368,12 +384,13 @@
                 NSString *urlString = url.absoluteString;
                 NSDictionary *displayedRectDict = [_linkedFileDisplayedRects objectForKey:urlString];
                 if (displayedRectDict) {
-                    [_linkedFileDisplayedRects removeObjectForKey:urlString];
                     //NSLog(@"LinkedFile %i contentSize width: %f height: %f zoomScale: %f", index, newContentSize.width, newContentSize.height, webView.scrollView.zoomScale);
                     CGRect displayedRect;
                     CGRectMakeWithDictionaryRepresentation((CFDictionaryRef)displayedRectDict, &displayedRect);
                     //NSLog(@"displayedRect: %@", NSStringFromCGRect(displayedRect));
                     CGSize viewSize = webView.scrollView.frame.size;
+                    viewSize.width -= webView.scrollView.contentInset.left + webView.scrollView.contentInset.right;
+                    viewSize.height -= webView.scrollView.contentInset.top + webView.scrollView.contentInset.bottom;
                     CGSize contentSize = webView.scrollView.contentSize;
                     CGFloat zoomScale = webView.scrollView.zoomScale;
                     CGFloat newZoomScale = zoomScale*viewSize.width/(contentSize.width*displayedRect.size.width);
@@ -383,12 +400,15 @@
                     CGPoint newContentOffset;
                     newContentOffset.x = floorf(newContentSize.width*displayedRect.origin.x);
                     newContentOffset.y = floorf(MIN(newContentSize.height*displayedRect.origin.y, newContentSize.height-viewSize.height));
+                    newContentOffset.x -= webView.scrollView.contentInset.left;
+                    newContentOffset.y -= webView.scrollView.contentInset.top;
                     //NSLog(@"newContentSize width: %f height: %f", newContentSize.width, newContentSize.height);
                     //NSLog(@"newContentOffset x: %f y: %f newZoomScale: %f", newContentOffset.x, newContentOffset.y, newZoomScale);
                     dispatch_async(dispatch_get_main_queue(), ^{
                         webView.scrollView.zoomScale = newZoomScale;
                         webView.scrollView.contentOffset = newContentOffset;
                     });
+                    [_linkedFileDisplayedRects removeObjectForKey:urlString];
                 }
             }
         }
@@ -439,8 +459,13 @@
         
         UIWebView *webView = [self webViewForLinkedFileIndex:i];
         CGSize viewSize = webView.scrollView.frame.size;
+        viewSize.width -= webView.scrollView.contentInset.left + webView.scrollView.contentInset.right;
+        viewSize.height -= webView.scrollView.contentInset.top + webView.scrollView.contentInset.bottom;
         CGSize contentSize = webView.scrollView.contentSize;
         CGPoint contentOffset = webView.scrollView.contentOffset;
+        contentOffset.x += webView.scrollView.contentInset.left;
+        contentOffset.y += webView.scrollView.contentInset.top;
+        
         //CGFloat zoomScale = webView.scrollView.zoomScale;
         
         //NSLog(@"linkedFile: %i", i);
@@ -451,15 +476,12 @@
         
         CGRect displayedRect = CGRectMake(contentOffset.x/contentSize.width, contentOffset.y/contentSize.height, viewSize.width/contentSize.width, viewSize.height/contentSize.height);
         
-        if (displayedRect.origin.x != 0 || displayedRect.origin.y != 0 || displayedRect.size.width != 1) {
-        
-            //NSLog(@"displayed rect: %@ maxX: %f, maxY: %f", NSStringFromCGRect(displayedRect), CGRectGetMaxX(displayedRect), CGRectGetMaxY(displayedRect));
-            NSDictionary *displayedRectDict = (NSDictionary *)CGRectCreateDictionaryRepresentation(displayedRect);
-            NSURL *url = [_linkedFileURLs objectAtIndex:i];
-            [displayedRects setObject:displayedRectDict forKey:url.absoluteString];
-            [displayedRectDict release];
-            needsUpdate = YES;
-        }
+        //NSLog(@"displayed rect: %@ maxX: %f, maxY: %f", NSStringFromCGRect(displayedRect), CGRectGetMaxX(displayedRect), CGRectGetMaxY(displayedRect));
+        NSDictionary *displayedRectDict = (NSDictionary *)CGRectCreateDictionaryRepresentation(displayedRect);
+        NSURL *url = [_linkedFileURLs objectAtIndex:i];
+        [displayedRects setObject:displayedRectDict forKey:url.absoluteString];
+        [displayedRectDict release];
+        needsUpdate = YES;
     }
     
     if (needsUpdate) {

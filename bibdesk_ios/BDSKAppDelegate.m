@@ -93,7 +93,7 @@
     NSInteger idx = 0;
     if ([personFields containsObject:BDSKAuthorString] == NO || [personFields containsObject:BDSKEditorString] == NO) {
         personFields  = [personFields mutableCopy];
-        if (!personFields) personFields = [NSMutableArray arrayWithCapacity:2];
+        if (!personFields) personFields = [[NSMutableArray alloc] initWithCapacity:2];
         if ([personFields containsObject:BDSKAuthorString] == NO)
             [(NSMutableArray *)personFields insertObject:BDSKAuthorString atIndex:idx++];
         if ([personFields containsObject:BDSKEditorString] == NO)
