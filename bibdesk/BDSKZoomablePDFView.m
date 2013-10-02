@@ -134,8 +134,8 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.0, 0.1, 0.2, 0.25, 0.35, 0.5, 
     [pboard clearContents];
     [pboard setData:[[self currentPage] dataRepresentation] forType:NSPasteboardTypePDF];
 }
-    
-- (void)saveDocumentAs:(id)sender;
+
+- (void)savePDFAs:(id)sender;
 {
     NSString *name = [[[self document] documentURL] lastPathComponent];
     NSSavePanel *savePanel = [NSSavePanel savePanel];
@@ -179,7 +179,7 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.0, 0.1, 0.2, 0.25, 0.35, 0.5, 
     
     [menu addItem:[NSMenuItem separatorItem]];
     
-    item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Save PDF As", @"Menu item title") stringByAppendingEllipsis] action:@selector(saveDocumentAs:) keyEquivalent:@""];
+    item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Save PDF As", @"Menu item title") stringByAppendingEllipsis] action:@selector(savePDFAs:) keyEquivalent:@""];
     [menu addItem:item];
     [item release];
     
