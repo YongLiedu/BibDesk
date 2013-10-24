@@ -687,6 +687,15 @@ static NSOperationQueue *metadataCacheQueue = nil;
     [bottomFileView setDataSource:nil];
     [bottomFileView setDelegate:nil];
     
+    [tableView setDataSource:nil];
+    [tableView setDelegate:nil];
+    
+    [groupOutlineView setDataSource:nil];
+    [groupOutlineView setDelegate:nil];
+    
+    [tableView setDataSource:nil];
+    [tableView setDelegate:nil];
+    
     [self endObserving];
     
     // safety call here, in case the pasteboard is retaining the document; we don't want notifications after the window closes, since all the pointers to UI elements will be garbage
