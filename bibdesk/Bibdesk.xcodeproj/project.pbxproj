@@ -3373,7 +3373,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ -f /usr/bin/codesign ]; then\n\tif ! /usr/bin/codesign -f -s \"BibDesk Signing Certificate\" -v ${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH}\n\tthen\n         # lie about exit status so developers aren't forced to have a cert\n\t\techo \"warning: codesign failed\" >&2\n\t\techo \"warning: you need a certificate named \\\"BibDesk Signing Certificate\\\"\" >&2\n\t\texit 0\n\tfi\nfi";
+			shellScript = "IDENTITY=\"BibDesk Signing Certificate\"\nLOCATION=\"${BUILT_PRODUCTS_DIR}\"/\"${EXECUTABLE_PATH}\"\n\nif ! /usr/bin/codesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}\"\nthen\n\t# lie about exit status so developers aren't forced to have a cert\n\techo \"warning: codesign failed\" >&2\n\techo \"warning: you need a certificate named \\\"${IDENTITY}\\\"\" >&2\n\texit 0\nfi\n\nLOCATION=\"${BUILT_PRODUCTS_DIR}\"/\"${FRAMEWORKS_FOLDER_PATH}\"\ncodesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}/AGRegex.framework/Versions/A\"\ncodesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}/BTParse.framework/Versions/A\"\ncodesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}/FileView.framework/Versions/A\"\ncodesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}/SkimNotesBase.framework/Versions/A\"\ncodesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}/Sparkle.framework/Versions/A\"\ncodesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}/yaz.framework/Versions/A\"\n";
 		};
 		F98870CD07580E5F001D4D49 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
