@@ -121,10 +121,14 @@ static FVCGImageCache *_smallImageCache = nil;
 
 #pragma mark Class methods
 
+#pragma clang diagnostic push
+// Proper warning is unknown by Xcode 3.2.  Starting to think clang sucks.
+#pragma clang diagnostic ignored "-Wincompatible-pointer-types"
 + (id)newKeyForURL:(NSURL *)aURL;
 {
     return (id)[FVCacheFile newKeyForURL:aURL];
 }
+#pragma clang diagnostic pop
 
 + (CGImageRef)newThumbnailForKey:(id)aKey;
 {

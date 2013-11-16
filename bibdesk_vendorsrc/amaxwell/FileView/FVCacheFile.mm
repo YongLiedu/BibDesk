@@ -98,10 +98,13 @@ static NSInteger FVCacheLogLevel = 0;
     FVCacheLogLevel = [[NSUserDefaults standardUserDefaults] integerForKey:@"FVCacheLogLevel"];  
 }
 
-+ (id)newKeyForURL:(NSURL *)aURL;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wincompatible-pointer-types"
++ (id <NSObject, NSCopying>)newKeyForURL:(NSURL *)aURL;
 {
-    return (id)[_FVCacheKey newWithURL:aURL];
+    return (id <NSObject, NSCopying>)[_FVCacheKey newWithURL:aURL];
 }
+#pragma clang diagnostic pop
 
 - (id)init
 {
@@ -153,6 +156,7 @@ static NSInteger FVCacheLogLevel = 0;
         }
         free(tempName);
         tempName = NULL;
+        
         
     }
     return self;
@@ -250,9 +254,10 @@ static NSInteger FVCacheLogLevel = 0;
     else if (scheme) {
         identifier = (CFStringRef)CFRetain(scheme);
     }
-    else {
+    
+    // no scheme or getting UTI failed
+    if (NULL == identifier)
         identifier = CFStringCreateWithCString(NULL, "anonymous", kCFStringEncodingASCII);
-    }
     
     _FVCacheEventRecord *rec = [_eventTable objectForKey:(id)identifier];
     if (nil != rec) {
@@ -310,7 +315,8 @@ static NSInteger FVCacheLogLevel = 0;
             strm.next_in = (Bytef *)[data bytes];
             strm.avail_in = location->_decompressedLength;
             
-            int flush, status = deflateInit2(&strm, Z_BEST_SPEED, Z_DEFLATED, 15, 9, Z_HUFFMAN_ONLY);
+            int flush, status;
+            (void) deflateInit2(&strm, Z_BEST_SPEED, Z_DEFLATED, 15, 9, Z_HUFFMAN_ONLY);
             
             ssize_t writeLength;
             
@@ -328,7 +334,7 @@ static NSInteger FVCacheLogLevel = 0;
                     
                     writeLength = ZLIB_BUFFER_SIZE - strm.avail_out;
                     if (write(_fileDescriptor, _deflateBuffer, writeLength) != writeLength)
-                        FVLog(@"failed to write all data (%d bytes)", writeLength);
+                        FVLog(@"failed to write all data (%ld bytes)", writeLength);
                     
                     location->_compressedLength += writeLength;
                     
@@ -387,12 +393,15 @@ static NSInteger FVCacheLogLevel = 0;
             strm.zfree = (void (*)(void *, void *))NSZoneFree;
             strm.opaque = FVDefaultZone();
             
-            status = inflateInit(&strm);
+            (void) inflateInit(&strm);
             
             void *mapregion = NULL;
             const size_t mapLength = location->_compressedLength + location->_padLength;
+            // !!! early return
             if ((mapregion = mmap(0, mapLength, PROT_READ, MAP_SHARED, _fileDescriptor, location->_offset)) == MAP_FAILED) {
                 perror("mmap failed");
+                CFAllocatorDeallocate(FVAllocatorGetDefault(), bytes);
+                [location release];
                 return nil;
             }
             
@@ -428,7 +437,7 @@ static NSInteger FVCacheLogLevel = 0;
             data = (id)CFDataCreateWithBytesNoCopy(FVAllocatorGetDefault(), (const uint8_t *)bytes, location->_decompressedLength, FVAllocatorGetDefault());
         }
         else {
-            FVLog(@"Unable to malloc %d bytes in -[FVCacheFile copyDataForKey:] with key %@", location->_decompressedLength, aKey);
+            FVLog(@"Unable to malloc %ld bytes in -[FVCacheFile copyDataForKey:] with key %@", (unsigned long)location->_decompressedLength, aKey);
         }
 
         NSParameterAssert([data length] == location->_decompressedLength);
@@ -541,7 +550,7 @@ static NSInteger FVCacheLogLevel = 0;
     CFRelease(_identifier);
     [super dealloc];
 }
-- (NSString *)description { return [NSString stringWithFormat:@"%.2f kilobytes in %lu files", _kbytes, (unsigned long)_count]; }
+- (NSString *)description { return [NSString stringWithFormat:@"%.2f kilobytes in %ld files", _kbytes, (unsigned long)_count]; }
 - (NSUInteger)hash { return CFHash(_identifier); }
 - (BOOL)isEqual:(id)other { return CFStringCompare(_identifier, ((_FVCacheEventRecord *)other)->_identifier, 0) == kCFCompareEqualTo; }
 @end

@@ -69,10 +69,10 @@
 
 #ifdef IMAGE_SHEAR
 #define DEFAULT_OPTIONS kvImageNoFlags
-#define SHEAR_OPTIONS kvImageEdgeExtend | SCALE_QUALITY
+#define SHEAR_OPTIONS (kvImageEdgeExtend | SCALE_QUALITY)
 #else
 #define DEFAULT_OPTIONS kvImageDoNotTile
-#define SHEAR_OPTIONS kvImageEdgeExtend | kvImageDoNotTile | SCALE_QUALITY
+#define SHEAR_OPTIONS (kvImageEdgeExtend | kvImageDoNotTile | SCALE_QUALITY)
 #endif
 
 // monitor cached tile memory consumption by blocking render threads
@@ -379,7 +379,7 @@ static vImage_Error __FVConvertRGB888ImageRegionToPlanar8_buffers(CGImageRef ima
         const uint8_t *srcRow = srcBytes + rowBytes * (region.y + rowIndex) + region.x * bytesPerSample;
 #if DEBUG
         if ((rowBytes * (region.y + rowIndex) + region.x * bytesPerSample + bytesPerSample * region.w) > __FVCGImageGetDataSize(image)) {
-            FVLog(@"image size = %ld, tried to copy %ld bytes", __FVCGImageGetDataSize(image), (long)(rowBytes * (region.y + rowIndex) + region.x * bytesPerSample + bytesPerSample * region.w));
+            FVLog(@"image size = %ld, tried to copy %ld bytes", __FVCGImageGetDataSize(image), rowBytes * (region.y + rowIndex) + region.x * bytesPerSample + bytesPerSample * region.w);
             HALT;
         }
 #endif
@@ -444,7 +444,7 @@ static vImage_Error __FVConvertARGB8888ImageRegionToPlanar8_buffers(CGImageRef i
         const uint8_t *srcRow = srcBytes + rowBytes * (region.y + rowIndex) + region.x * bytesPerSample;
 #if DEBUG
         if ((rowBytes * (region.y + rowIndex) + region.x * bytesPerSample + bytesPerSample * region.w) > __FVCGImageGetDataSize(image)) {
-            FVLog(@"image size = %ld, tried to copy %ld bytes", __FVCGImageGetDataSize(image), (long)(rowBytes * (region.y + rowIndex) + region.x * bytesPerSample + bytesPerSample * region.w));
+            FVLog(@"image size = %ld, tried to copy %ld bytes", __FVCGImageGetDataSize(image), rowBytes * (region.y + rowIndex) + region.x * bytesPerSample + bytesPerSample * region.w);
             HALT;
         }
 #endif
@@ -752,6 +752,7 @@ static vImage_Error __FVCheckAndTrimRow(NSArray *regionRow, vImage_Buffer *desti
     return kvImageNoError;
 }
 
+static CGImageRef __FVTileAndScale_8888_or_888_Image(CGImageRef image, const NSSize desiredSize) CF_RETURNS_RETAINED;
 static CGImageRef __FVTileAndScale_8888_or_888_Image(CGImageRef image, const NSSize desiredSize)
 {
     NSCParameterAssert(image);
@@ -763,21 +764,23 @@ static CGImageRef __FVTileAndScale_8888_or_888_Image(CGImageRef image, const NSS
     if (NULL == srcBytes) {
         
         originalImageData = CGDataProviderCopyData(CGImageGetDataProvider(image));        
-        srcBytes = CFDataGetBytePtr(originalImageData);
         
         // !!! early return
-        if (NULL == srcBytes) {
+        if (NULL == originalImageData) {
 #if FV_LIMIT_TILEMEMORY_USAGE
             __FVCGImageDiscardAllocationSize(__FVCGImageGetDataSize(image));           
 #endif
             return NULL;
         }        
+        
+        srcBytes = CFDataGetBytePtr(originalImageData);
+
     }
         
     const bool isIndexedImage = (kCGColorSpaceModelIndexed == __FVGetColorSpaceModelOfColorSpace(CGImageGetColorSpace(image)));
     if (isIndexedImage) {
         // we'd better not reach this on 10.4...
-        FVAPIAssert(floor(NSAppKitVersionNumber > NSAppKitVersionNumber10_4), @"indexed color space functions not available on 10.4");
+        FVAPIAssert(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4, @"indexed color space functions not available on 10.4");
     }
     
     /*
@@ -899,7 +902,7 @@ static CGImageRef __FVTileAndScale_8888_or_888_Image(CGImageRef image, const NSS
         if (region.row != regionRowIndex) {
             // these FVImageBuffers have correct values for width/height, and represent a series of scanlines 
             accumulatedRows += imageBuffer->buffer->height;
-            ret = __FVCheckAndTrimRow(currentRegionRow, interleavedBuffer, accumulatedRows);
+            (void) __FVCheckAndTrimRow(currentRegionRow, interleavedBuffer, accumulatedRows);
             nextScanline = __FVAddRowOfARGB8888BuffersToImage(currentRegionRow, nextScanline, interleavedBuffer);
             regionRowIndex++;
             regionColumnIndex = 0;
@@ -1101,7 +1104,20 @@ CGImageRef FVCreateResampledImageOfSize(CGImageRef image, const NSSize desiredSi
     // !!! re-add support for monochrome
     if (kCGColorSpaceModelRGB != colorModel && kCGColorSpaceModelIndexed != colorModel) {
 #if DEBUG
-        FVLog(@"%s: no vImage support for CGColorSpaceModel %d.  Using Quartz2D.", __func__, colorModel);
+        const char *modelNames[] = {
+            "kCGColorSpaceModelUnknown",
+            "kCGColorSpaceModelMonochrome",
+            "kCGColorSpaceModelRGB",
+            "kCGColorSpaceModelCMYK",
+            "kCGColorSpaceModelLab",
+            "kCGColorSpaceModelDeviceN",
+            "kCGColorSpaceModelIndexed",
+            "kCGColorSpaceModelPattern"
+        };
+        
+        const unsigned int cmidx = colorModel + 1;
+        const char *modelName = cmidx >= sizeof(modelNames) / sizeof(char *) ? "error: color space model not in enum" : modelNames[cmidx];
+        FVLog(@"%s: no vImage support for CGColorSpaceModel %s = %d.  Using Quartz2D.", __func__, modelName, colorModel);
 #endif
         return __FVCopyImageUsingCacheColorspace(image, desiredSize);
     }
