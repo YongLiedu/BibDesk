@@ -581,7 +581,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         while ([[menu itemAtIndex:0] isSeparatorItem] == NO)
             [menu removeItemAtIndex:0];
         
-        NSArray *fields = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
+        NSArray *fields = [[[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy] autorelease];
         BibDocument *document = (BibDocument *)[[NSDocumentController sharedDocumentController] currentDocument];
         if ([document respondsToSelector:@selector(currentGroupFields)]) {
             for (NSString *field in [document currentGroupFields]) {

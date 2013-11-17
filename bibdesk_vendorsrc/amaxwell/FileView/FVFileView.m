@@ -4093,8 +4093,8 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
     }
     else if ([_selectionIndexes count] == 1) {
         NSUInteger r, c;
-        [self _getGridRow:&r column:&c ofIndex:[_selectionIndexes firstIndex]];
-        [self _previewURL:[self URLAtIndex:[_selectionIndexes firstIndex]] forIconInRect:[self _rectOfIconInRow:r column:c]];
+        if ([self _getGridRow:&r column:&c ofIndex:[_selectionIndexes firstIndex]])
+            [self _previewURL:[self URLAtIndex:[_selectionIndexes firstIndex]] forIconInRect:[self _rectOfIconInRow:r column:c]];
     }
     else {
         [self _previewURLs:[self _selectedURLs]];

@@ -373,7 +373,7 @@ static OSStatus __FVGetVolumeRefNumForURL(NSURL *fileURL, FSVolumeRefNum *volume
     if (noErr == err)
         err = FSGetCatalogInfo(&fileRef, kFSCatInfoVolume, &catInfo, NULL, NULL, NULL);
     
-    if (volume) *volume = catInfo.volume;
+    if (noErr == err && volume) *volume = catInfo.volume;
     return err;
 }
 
