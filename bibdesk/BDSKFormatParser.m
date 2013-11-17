@@ -783,13 +783,12 @@ static NSDictionary *errorAttr = nil;
         NSString *suggestedUnique = nil;
         NSUInteger prefixLength = [prefixStr length];
         NSUInteger suffixLength = [parsedStr length];
-        NSUInteger suggestionLength = [suggestion length] - prefixLength - suffixLength;
-#warning comparison of unsigned >= 0 is always true
-        if (suggestion && ((uniqueNumber == 0 && suggestionLength >= 0) || suggestionLength == uniqueNumber) &&
+        NSInteger suggestionLength = (NSInteger)[suggestion length] - (NSInteger)(prefixLength + suffixLength);
+        if (suggestion && ((uniqueNumber == 0 && suggestionLength >= 0) || suggestionLength == (NSInteger)uniqueNumber) &&
             (prefixLength == 0 || [suggestion hasPrefix:prefixStr]) && (suffixLength == 0 || [suggestion hasSuffix:parsedStr])) {
             suggestedUnique = [suggestion substringWithRange:NSMakeRange(prefixLength, suggestionLength)];
             if ([uniqueSeparator length] && suggestionLength) {
-                if (suggestionLength > [uniqueSeparator length] && [suggestedUnique hasPrefix:uniqueSeparator])
+                if (suggestionLength > (NSInteger)[uniqueSeparator length] && [suggestedUnique hasPrefix:uniqueSeparator])
                     suggestedUnique = [suggestedUnique substringFromIndex:[uniqueSeparator length]];
                 else
                     suggestedUnique = nil;
