@@ -465,7 +465,7 @@ static inline BOOL areEqualEncodings(const char *enc1, const char *enc2)
         if (desc == nil)
         {
             [NSException raise:@"KFUnsupportedAEDescriptorConversion"
-                        format:@"KFAppleScriptHandlerAdditions: conversion of an NSAppleEventDescriptor with objCType '%s' to an aeDescriptor is not supported.", type];
+                        format:@"KFAppleScriptHandlerAdditions: conversion of an NSAppleEventDescriptor with objCType '%d' to an aeDescriptor is not supported.", (unsigned int)type];
 
         }
         else
