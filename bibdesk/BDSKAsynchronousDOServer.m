@@ -37,6 +37,7 @@
  */
 
 #import "BDSKAsynchronousDOServer.h"
+#import <objc/runtime.h>
 
 struct BDSKDOServerFlags {
     volatile int32_t shouldKeepRunning;

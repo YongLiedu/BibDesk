@@ -662,7 +662,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
                 [submenu release];
             }
         } else {
-            NSArray *historyItems = [history orderedItemsLastVisitedOnDay:[NSDate date]];
+            NSArray *historyItems = [history orderedItemsLastVisitedOnDay:[NSCalendarDate date]];
             [self addMenuItemsForHistoryItems:historyItems toMenu:menu];
         }
         if ([historyMenu numberOfItems] > 0)

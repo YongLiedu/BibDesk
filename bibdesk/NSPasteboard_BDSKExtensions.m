@@ -54,7 +54,7 @@
 @implementation BDSKURL
 
 + (id)allocWithZone:(NSZone *)zone {
-    return [NSURL allocWithZone:zone];
+    return (id)[NSURL allocWithZone:zone];
 }
 
 + (NSArray *)readableTypesForPasteboard:(NSPasteboard *)pasteboard {

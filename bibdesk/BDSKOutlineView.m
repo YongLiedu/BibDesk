@@ -333,7 +333,7 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
     if ([self canDelete]) {
         NSUInteger originalNumberOfRows = [self numberOfRows];
         // -selectedRow is last row of multiple selection, no good for trying to select the row before the selection.
-        NSUInteger selectedRow = [[self selectedRowIndexes] firstIndex];
+        NSInteger selectedRow = [[self selectedRowIndexes] firstIndex];
         [[self dataSource] outlineView:self deleteItems:[self selectedItems]];
         [self reloadData];
         NSUInteger newNumberOfRows = [self numberOfRows];
@@ -351,7 +351,7 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
                 }
             } else {
                 // Don't try to go past the new # of rows
-                selectedRow = MIN(selectedRow - 1, newNumberOfRows - 1);
+                selectedRow = MIN(selectedRow - 1, (NSInteger)newNumberOfRows - 1);
                 
                 // Skip all unselectable rows if the delegate responds to -outlineView:shouldSelectItem:
                 if ([[self delegate] respondsToSelector:@selector(outlineView:shouldSelectItem:)]) {

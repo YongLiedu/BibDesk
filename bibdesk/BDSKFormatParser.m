@@ -784,6 +784,7 @@ static NSDictionary *errorAttr = nil;
         NSUInteger prefixLength = [prefixStr length];
         NSUInteger suffixLength = [parsedStr length];
         NSUInteger suggestionLength = [suggestion length] - prefixLength - suffixLength;
+#warning comparison of unsigned >= 0 is always true
         if (suggestion && ((uniqueNumber == 0 && suggestionLength >= 0) || suggestionLength == uniqueNumber) &&
             (prefixLength == 0 || [suggestion hasPrefix:prefixStr]) && (suffixLength == 0 || [suggestion hasSuffix:parsedStr])) {
             suggestedUnique = [suggestion substringWithRange:NSMakeRange(prefixLength, suggestionLength)];

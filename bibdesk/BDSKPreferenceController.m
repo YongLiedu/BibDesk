@@ -583,7 +583,7 @@ static id sharedController = nil;
             if ([searchTerms count]) {
                 NSMutableString *searchString = [[NSMutableString alloc] init];
                 for (NSString *string in searchTerms)
-                    [searchString appendFormat:@"%@%C", [[NSBundle mainBundle] localizedStringForKey:string value:@"" table:DEFAULTS_TABLE], 0x1E];
+                    [searchString appendFormat:@"%@%C", [[NSBundle mainBundle] localizedStringForKey:string value:@"" table:DEFAULTS_TABLE], (unichar)0x1E];
                 [identifierSearchTerms setObject:searchString forKey:identifier];
                 [searchString release];
             }
