@@ -47,20 +47,20 @@ __BEGIN_DECLS
 
 /** @internal @var FVIntegerKeyDictionaryCallBacks
  For integer keys in a CFDictionary.  Do not use for toll-free bridging. */
-FV_PRIVATE_EXTERN const CFDictionaryKeyCallBacks FVIntegerKeyDictionaryCallBacks;
+FV_EXTERN const CFDictionaryKeyCallBacks FVIntegerKeyDictionaryCallBacks;
 
 /** @internal @var FVIntegerValueDictionaryCallBacks
  For integer values in a CFDictionary.  Do not use for toll-free bridging. */
-FV_PRIVATE_EXTERN const CFDictionaryValueCallBacks FVIntegerValueDictionaryCallBacks;
+FV_EXTERN const CFDictionaryValueCallBacks FVIntegerValueDictionaryCallBacks;
 
 /** @internal @var FVNSObjectSetCallBacks
  For NSObject subclasses in a CFSet.  Compatible with toll-free bridging. */
-FV_PRIVATE_EXTERN const CFSetCallBacks FVNSObjectSetCallBacks;
+FV_EXTERN const CFSetCallBacks FVNSObjectSetCallBacks;
 
 
 /** @internal @var FVNSObjectPointerSetCallBacks
  For NSObject subclasses in a CFSet using pointer equality.  Compatible with toll-free bridging. */
-FV_PRIVATE_EXTERN const CFSetCallBacks FVNSObjectPointerSetCallBacks;
+FV_EXTERN const CFSetCallBacks FVNSObjectPointerSetCallBacks;
 
 /** @internal @brief For use with integer-valued dictionaries.
  @param dict CFDictionary with integer values.

@@ -106,19 +106,19 @@ extern const size_t FVMaxThumbnailDimension;
 
 /** @internal @var FVMaxImageDimension
  Maximum dimension of a full image. */
-FV_PRIVATE_EXTERN const size_t FVMaxImageDimension;
+FV_EXTERN const size_t FVMaxImageDimension;
 
 /** @internal @var FVDefaultPaperSize
  Nominal paper size to avoid using NSPrintInfo. */
-FV_PRIVATE_EXTERN const NSSize FVDefaultPaperSize;
+FV_EXTERN const NSSize FVDefaultPaperSize;
 
 /** @internal @var FVTopMargin
  Nominal top margin to avoid using NSPrintInfo. */
-FV_PRIVATE_EXTERN const CGFloat FVTopMargin;
+FV_EXTERN const CGFloat FVTopMargin;
 
 /** @internal @var FVSideMargin
  Nominal side margin to avoid using NSPrintInfo. */
-FV_PRIVATE_EXTERN const CGFloat FVSideMargin;
+FV_EXTERN const CGFloat FVSideMargin;
 
 /** @internal 
  Determine if a full image needs to be resampled.  Used by the resampling functions below.

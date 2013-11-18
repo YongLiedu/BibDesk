@@ -44,7 +44,7 @@
 
 /** \var FVMainQueueRunLoopMode 
  Can use this to run main queue operations in a blocking mode. */
-FV_PRIVATE_EXTERN NSString * const FVMainQueueRunLoopMode;
+FV_EXTERN NSString * const FVMainQueueRunLoopMode;
 
 /** Abstract operation queue.
  
