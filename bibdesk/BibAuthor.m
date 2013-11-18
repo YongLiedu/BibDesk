@@ -65,12 +65,7 @@ static CFCharacterSetRef dashSet = NULL;
     emptyAuthorInstance = [[BibAuthor alloc] initWithName:@"" publication:nil forField:nil];
 }
     
-
-+ (BOOL)accessInstanceVariablesDirectly{ 
-    return NO; 
-}
-
-+ (BibAuthor *)authorWithName:(NSString *)newName {	
++ (BibAuthor *)authorWithName:(NSString *)newName {
     return [[[BibAuthor alloc] initWithName:newName publication:nil forField:nil] autorelease];
 }
 

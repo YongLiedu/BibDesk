@@ -257,15 +257,6 @@ enum {
     }
 }
 
-- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
-    if ([menuItem action] == @selector(alternateDelete:))
-        return [self canAlternateDelete];
-    else if ([menuItem action] == @selector(alternateCut:))
-        return [self canAlternateCut];
-    else
-        return [super validateMenuItem:menuItem];
-}
-
 #pragma mark Alternating row color
 
 - (void)setAlternatingRowBackgroundColors:(NSArray *)colorArray{
@@ -691,7 +682,11 @@ enum {
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
 	SEL action = [menuItem action];
-	if (action == @selector(columnsMenuSelectTableColumn:))
+    if (action == @selector(alternateDelete:))
+        return [self canAlternateDelete];
+    else if (action == @selector(alternateCut:))
+        return [self canAlternateCut];
+    else if (action == @selector(columnsMenuSelectTableColumn:))
 		return ([[menuItem representedObject] isEqualToString:BDSKImportOrderString] == NO && [[menuItem representedObject] isEqualToString:BDSKRelevanceString] == NO && [self numberOfColumns] > 1);
 	else if (action == @selector(columnsMenuAddTableColumn:))
         return YES;
