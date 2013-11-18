@@ -1517,7 +1517,7 @@
 		F9022DEC0758099D00C3F701 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		F9022FBC07580B9400C3F701 /* BDSKAppController+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BDSKAppController+Scripting.m"; sourceTree = "<group>"; };
 		F9022FBE07580B9400C3F701 /* BibAuthor+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BibAuthor+Scripting.m"; sourceTree = "<group>"; };
-		F9022FBF07580B9400C3F701 /* BibDesk.sdef */ = {isa = PBXFileReference; explicitFileType = text.sdef; fileEncoding = 4; languageSpecificationIdentifier = plist; name = BibDesk.sdef; path = Scripting/BibDesk.sdef; sourceTree = "<group>"; };
+		F9022FBF07580B9400C3F701 /* BibDesk.sdef */ = {isa = PBXFileReference; explicitFileType = text.sdef; fileEncoding = 4; languageSpecificationIdentifier = plist; lastKnownFileType = file; name = BibDesk.sdef; path = Scripting/BibDesk.sdef; sourceTree = "<group>"; };
 		F9022FC107580B9400C3F701 /* BDSKSearchForCommand.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchForCommand.m; sourceTree = "<group>"; };
 		F9022FC307580B9400C3F701 /* BibDocument+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BibDocument+Scripting.m"; sourceTree = "<group>"; };
 		F9022FC507580B9400C3F701 /* BibItem+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BibItem+Scripting.m"; sourceTree = "<group>"; };
@@ -3373,7 +3373,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "IDENTITY=\"BibDesk Signing Certificate\"\nLOCATION=\"${BUILT_PRODUCTS_DIR}\"/\"${EXECUTABLE_PATH}\"\n\nif ! /usr/bin/codesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}\"\nthen\n\t# lie about exit status so developers aren't forced to have a cert\n\techo \"warning: codesign failed\" >&2\n\techo \"warning: you need a certificate named \\\"${IDENTITY}\\\"\" >&2\n\texit 0\nfi\n\nLOCATION=\"${BUILT_PRODUCTS_DIR}\"/\"${FRAMEWORKS_FOLDER_PATH}\"\ncodesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}/AGRegex.framework/Versions/A\"\ncodesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}/BTParse.framework/Versions/A\"\ncodesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}/FileView.framework/Versions/A\"\ncodesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}/SkimNotesBase.framework/Versions/A\"\ncodesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}/Sparkle.framework/Versions/A\"\ncodesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}/yaz.framework/Versions/A\"\n";
+			shellScript = "IDENTITY=\"BibDesk Signing Certificate\"\n\n# have to sign frameworks first\nLOCATION=\"${BUILT_PRODUCTS_DIR}\"/\"${FRAMEWORKS_FOLDER_PATH}\"\ncodesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}/AGRegex.framework/Versions/A\"\ncodesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}/BTParse.framework/Versions/A\"\ncodesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}/FileView.framework/Versions/A\"\ncodesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}/SkimNotesBase.framework/Versions/A\"\ncodesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}/Sparkle.framework/Versions/A\"\ncodesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}/yaz.framework/Versions/A\"\n\nLOCATION=\"${BUILT_PRODUCTS_DIR}\"/\"${EXECUTABLE_PATH}\"\n\nif ! /usr/bin/codesign --verbose --force --sign \"${IDENTITY}\" \"${LOCATION}\"\nthen\n# lie about exit status so developers aren't forced to have a cert\necho \"warning: codesign failed\" >&2\necho \"warning: you need a certificate named \\\"${IDENTITY}\\\"\" >&2\nexit 0\nfi\n";
 		};
 		F98870CD07580E5F001D4D49 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -4654,6 +4654,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CEEBA6860D746DD7000204B8 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Debug;
 		};
@@ -4661,6 +4663,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CEEBA6870D746DD7000204B8 /* BibDesk-Release.xcconfig */;
 			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Release;
 		};
