@@ -4654,8 +4654,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CEEBA6860D746DD7000204B8 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Debug;
 		};
@@ -4663,8 +4661,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CEEBA6870D746DD7000204B8 /* BibDesk-Release.xcconfig */;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Release;
 		};
