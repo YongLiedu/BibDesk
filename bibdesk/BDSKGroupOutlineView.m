@@ -213,7 +213,7 @@
         newUserInfo = [NSMutableDictionary dictionaryWithDictionary:[notification userInfo]];
         [newUserInfo setObject:[NSNumber numberWithInteger:NSIllegalTextMovement] forKey:@"NSTextMovement"];
         newNotification = [NSNotification notificationWithName:[notification name] object:[notification object] userInfo:newUserInfo];
-        [super textDidEndEditing:notification];
+        [super textDidEndEditing:newNotification];
 
         // For some reason we lose firstResponder status when we do the above.
         [[self window] makeFirstResponder:self];
