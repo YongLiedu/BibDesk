@@ -432,8 +432,11 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     
     // @@ remove TeX?  case-sensitive?
 	for (NSString *key in keys) {
-		if ([[self stringValueOfField:key inherit:NO] isEqualToString:[aBI stringValueOfField:key inherit:NO]] == NO)
+		if ([[self stringValueOfField:key inherit:NO] isEqualToString:[aBI stringValueOfField:key inherit:NO]] == NO) {
+            // !!! early return
+            [keys release];
 			return NO;
+        }
 	}
     [keys release];
 	
@@ -474,8 +477,11 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     
     // @@ remove TeX?  case-sensitive?
 	for (NSString *key in keys) {
-		if ([[self stringValueOfField:key inherit:NO] isEqualToString:[aBI stringValueOfField:key inherit:NO]] == NO)
+		if ([[self stringValueOfField:key inherit:NO] isEqualToString:[aBI stringValueOfField:key inherit:NO]] == NO) {
+            // !!! early return
+            [keys release];
 			return NO;
+        }
 	}
     [keys release];
 	
@@ -2176,13 +2182,13 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     AddXMLField(@"custom7",@"Custom7");
     AddXMLField(@"custom8",@"Custom8");
     
-    NSDate *date = [self dateAdded];
     static NSDateFormatter *formatter = nil;
     if (formatter == nil) {
         formatter = [[NSDateFormatter alloc] init];
         [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
         [formatter setDateFormat:@"dd/MM/yyyy"];
     }
+    NSDate *date;
     if ((date = [self dateAdded]))
         [s appendStrings:@"<added-date>", [formatter stringFromDate:date], @"</added-date>", nil];
     if ((date = [self dateModified]))

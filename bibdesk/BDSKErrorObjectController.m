@@ -425,7 +425,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 - (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row { return nil; }
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard {
-    NSMutableString *s = [[NSMutableString string] retain];
+    NSMutableString *s = [NSMutableString string];
     NSInteger lineNumber;
     
     for (BDSKErrorObject *errObj in [errorsController selectedObjects]) {
