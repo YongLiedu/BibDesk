@@ -5866,7 +5866,7 @@
 }
 + (WokSearchServiceSoapBinding *)WokSearchServiceSoapBinding
 {
-	return [[[WokSearchServiceSoapBinding alloc] initWithAddress:@"http://search.isiknowledge.com/esti/wokmws/ws/WokSearch"] autorelease];
+	return [[[WokSearchServiceSoapBinding alloc] initWithAddress:@"http://search.webofknowledge.com/esti/wokmws/ws/WokSearch"] autorelease];
 }
 @end
 @implementation WokSearchServiceSoapBinding

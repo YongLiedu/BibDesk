@@ -775,7 +775,7 @@
 }
 + (WOKMWSAuthenticateServiceSoapBinding *)WOKMWSAuthenticateServiceSoapBinding
 {
-	return [[[WOKMWSAuthenticateServiceSoapBinding alloc] initWithAddress:@"http://search.isiknowledge.com/esti/wokmws/ws/WOKMWSAuthenticate"] autorelease];
+	return [[[WOKMWSAuthenticateServiceSoapBinding alloc] initWithAddress:@"http://search.webofknowledge.com/esti/wokmws/ws/WOKMWSAuthenticate"] autorelease];
 }
 @end
 @implementation WOKMWSAuthenticateServiceSoapBinding
