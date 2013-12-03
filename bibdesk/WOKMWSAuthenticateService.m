@@ -769,7 +769,7 @@
 + (void)initialize
 {
 	[[USGlobals sharedInstance].wsdlStandardNamespaces setObject:@"xsd" forKey:@"http://www.w3.org/2001/XMLSchema"];
-	[[USGlobals sharedInstance].wsdlStandardNamespaces setObject:@"WOKMWSAuthenticateService" forKey:@"http://auth.v3.wokmws.thomsonreuters.com"];
+	[[USGlobals sharedInstance].wsdlStandardNamespaces setObject:@"WOKMWSAuthenticateService" forKey:@"http://auth.cxf.wokmws.thomsonreuters.com/"];
 	[[USGlobals sharedInstance].wsdlStandardNamespaces setObject:@"soap" forKey:@"http://schemas.xmlsoap.org/wsdl/soap/"];
 	[[USGlobals sharedInstance].wsdlStandardNamespaces setObject:@"wsdl" forKey:@"http://schemas.xmlsoap.org/wsdl/"];
 }
@@ -1209,7 +1209,7 @@ static WOKMWSAuthenticateServiceSoapBinding_envelope *WOKMWSAuthenticateServiceS
 	xmlNewNsProp(root, xslNs, (const xmlChar*)"version", (const xmlChar*)"1.0");
 	
 	xmlNewNs(root, (const xmlChar*)"http://www.w3.org/2001/XMLSchema", (const xmlChar*)"xsd");
-	xmlNewNs(root, (const xmlChar*)"http://auth.v3.wokmws.thomsonreuters.com", (const xmlChar*)"WOKMWSAuthenticateService");
+	xmlNewNs(root, (const xmlChar*)"http://auth.cxf.wokmws.thomsonreuters.com/", (const xmlChar*)"WOKMWSAuthenticateService");
 	xmlNewNs(root, (const xmlChar*)"http://schemas.xmlsoap.org/wsdl/soap/", (const xmlChar*)"soap");
 	xmlNewNs(root, (const xmlChar*)"http://schemas.xmlsoap.org/wsdl/", (const xmlChar*)"wsdl");
 	
