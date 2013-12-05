@@ -956,7 +956,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     BDSKSearchGroup *group = (BDSKSearchGroup *)[[self selectedGroups] lastObject];
     BDSKBookmarkSheetController *bookmarkSheetController = [[[BDSKBookmarkSheetController alloc] init] autorelease];
 	NSPopUpButton *folderPopUp = [bookmarkSheetController folderPopUpButton];
-    [bookmarkSheetController setStringValue:[NSString stringWithFormat:@"%@: %@", [[group serverInfo] name], [group name]]];
+    [bookmarkSheetController setStringValue:[[group searchTerm] length] > 0 ? [NSString stringWithFormat:@"%@: %@", [group name], [group searchTerm]] : [group name]];
     [folderPopUp removeAllItems];
     BDSKSearchBookmark *bookmark = [[BDSKSearchBookmarkController sharedBookmarkController] bookmarkRoot];
     [self addMenuItemsForBookmarks:[NSArray arrayWithObjects:bookmark, nil] level:0 toMenu:[folderPopUp menu]];
