@@ -61,6 +61,7 @@
 #import "NSData_BDSKExtensions.h"
 #import "CFString_BDSKExtensions.h"
 #import "NSDictionary_BDSKExtensions.h"
+#import "NSFileManager_BDSKExtensions.h"
 
 static NSLock *parserLock = nil;
 
@@ -200,7 +201,16 @@ static NSString *stringWithoutComments(NSString *string) {
     
     BOOL fileExists = filePath != BDSKParserPasteDragString && [[NSFileManager defaultManager] fileExistsAtPath:filePath];
     const char *fs_path = fileExists ? [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath] : NULL;
-    FILE *infile = fileExists && NO == didReplaceNewlines ? fopen(fs_path, "r") : openReadStream(inData);
+    const char *inpath = fs_path;
+    NSString *tmpPath = nil;
+    
+    if (fileExists == NO || didReplaceNewlines) {
+        tmpPath = [[NSFileManager defaultManager] temporaryFileWithBasename:[filePath lastPathComponent]];
+        [inData writeToFile:tmpPath atomically:NO];
+        inpath = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:tmpPath];
+    }
+    
+    FILE *infile = fopen(inpath, "r");
     
     if([parserLock tryLock] == NO)
         [NSException raise:NSInternalInconsistencyException format:@"Attempt to reenter the parser.  Please report this error."];
@@ -264,6 +274,9 @@ static NSString *stringWithoutComments(NSString *string) {
     bt_cleanup();
     fclose(infile);
 	
+    if (tmpPath)
+        [[NSFileManager defaultManager] removeItemAtPath:tmpPath error:NULL];
+    
     [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:([anOwner isDocument] ? (BibDocument *)anOwner : nil) pasteDragData:(filePath == BDSKParserPasteDragString ? inData : nil)];
     
     [parserLock unlock];
