@@ -330,6 +330,8 @@ static void destroyTemporaryDirectory()
 }
 
 - (NSString *)temporaryFileWithBasename:(NSString *)fileName {
+    if (fileName == nil)
+        fileName = [(NSString *)BDCreateUniqueString() autorelease];
 	return [self uniqueFilePathWithName:fileName atPath:temporaryBaseDirectory];
 }
 
