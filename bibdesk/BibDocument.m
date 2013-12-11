@@ -1341,7 +1341,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             NSString *targetPath = [folderPath stringByAppendingPathComponent:relativePath];
             
             if ([fm fileExistsAtPath:targetPath])
-                targetPath = [fm uniqueFilePathWithName:[targetPath stringByDeletingLastPathComponent] atPath:[targetPath lastPathComponent]];
+                targetPath = [fm uniqueFilePathWithName:[targetPath lastPathComponent] atPath:[targetPath stringByDeletingLastPathComponent]];
             success = [fm createPathToFile:targetPath attributes:nil];
             if (success)
                 success = [fm copyItemAtPath:filePath toPath:targetPath error:NULL];
