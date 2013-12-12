@@ -608,8 +608,15 @@
 
 #pragma mark TableView dragging destination
 
+- (BOOL)canDropOrPasteOnSelectedGroups{
+    return [self hasLibraryGroupSelected] || 
+           NSNotFound == [[self selectedGroups] indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop){
+                return [obj isStatic] == NO;
+           }];
+}
+
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op{
-    if (tv != tableView || [self hasExternalGroupsSelected])
+    if (tv != tableView || [self canDropOrPasteOnSelectedGroups] == NO)
         return NSDragOperationNone;
     
     NSPasteboard *pboard = [info draggingPasteboard];
@@ -695,7 +702,7 @@
     if (tv == tableView) {
         NSPasteboard *pboard = [info draggingPasteboard];
         
-        if ([self hasExternalGroupsSelected])
+        if ([self canDropOrPasteOnSelectedGroups] == NO)
             return NO;
 		
         if (row != -1) {
@@ -733,7 +740,19 @@
             if ([pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, NSPasteboardTypeString, nil]] ||
                 [pboard canReadURL]) {
                 
-                return nil != [self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL];
+                NSArray *newPubs = [self addPublicationsFromPasteboard:pboard selectLibrary:NO verbose:YES error:NULL];
+                
+                if ([newPubs count] == 0)
+                    return NO;
+                
+                if ([self hasStaticGroupsSelected]) {
+                    [[self selectedGroups] makeObjectsPerformSelector:@selector(addPublicationsFromArray:) withObject:newPubs];
+                    [self selectPublications:newPubs];
+                }
+                
+                docFlags.didImport = NO;
+                
+                return YES;
                 
             } else {
             
@@ -852,7 +871,12 @@
 
 - (void)tableView:(NSTableView *)tv pasteFromPasteboard:(NSPasteboard *)pboard{
 	if (tv == tableView) {
-        [self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL];
+        NSArray *newPubs = [self addPublicationsFromPasteboard:pboard selectLibrary:NO verbose:YES error:NULL];
+        if ([newPubs count] && [self hasStaticGroupsSelected]) {
+            [[self selectedGroups] makeObjectsPerformSelector:@selector(addPublicationsFromArray:) withObject:newPubs];
+            [self selectPublications:newPubs];
+        }
+        docFlags.didImport = NO;
     } else {
 		NSBeep();
 	}
@@ -860,7 +884,7 @@
 
 - (BOOL)tableViewCanPasteFromPasteboard:(NSTableView *)tv {
     if (tv == tableView) {
-        return [self hasExternalGroupsSelected] == NO;
+        return [self canDropOrPasteOnSelectedGroups];
     }
     return NO;
 }
