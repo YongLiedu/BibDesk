@@ -142,7 +142,8 @@
 
 - (void)reloadData
 {
-    const NSInteger nrows = [self numberOfRows];
+    NSArray *selectedItems = [self selectedItems];
+    
     [super reloadData];
     
     /*
@@ -150,24 +151,20 @@
      This ends up selecting group rows, which is pretty undesirable, and can happen as a result of undo (via a
      notification handler), so isn't straightforward to work around in the controller.
      */
-    if (nrows != [self numberOfRows] && [[self delegate] respondsToSelector:@selector(outlineView:shouldSelectItem:)]) {
+    if ([[self delegate] respondsToSelector:@selector(outlineView:shouldSelectItem:)] &&
+        [[self selectedItems] isEqualToArray:[self selectedItems]] == NO) {
         
-        NSIndexSet *selectedIndexes = [self selectedRowIndexes];
         NSMutableIndexSet *indexesToSelect = [NSMutableIndexSet indexSet];
-        NSUInteger row = [selectedIndexes firstIndex];
-        while (NSNotFound != row) {
-            if ([[self delegate] outlineView:self shouldSelectItem:[self itemAtRow:row]]) {
+        for (id item in selectedItems) {
+            NSInteger row = [self rowForItem:item];
+            if (row != -1 && [[self delegate] outlineView:self shouldSelectItem:item])
                 [indexesToSelect addIndex:row];
-            }
-            row = [selectedIndexes indexGreaterThanIndex:row];
         }
         
-        if ([indexesToSelect count]) {
+        if ([indexesToSelect count])
             [self selectRowIndexes:indexesToSelect byExtendingSelection:NO];
-        }
-        else {
+        else
             [self deselectAll:nil];
-        }
     }
 }
 
