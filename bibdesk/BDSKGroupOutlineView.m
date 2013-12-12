@@ -152,7 +152,7 @@
      notification handler), so isn't straightforward to work around in the controller.
      */
     if ([[self delegate] respondsToSelector:@selector(outlineView:shouldSelectItem:)] &&
-        [[self selectedItems] isEqualToArray:[self selectedItems]] == NO) {
+        [selectedItems isEqualToArray:[self selectedItems]] == NO) {
         
         NSMutableIndexSet *indexesToSelect = [NSMutableIndexSet indexSet];
         for (id item in selectedItems) {
