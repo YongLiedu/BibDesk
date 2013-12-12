@@ -100,10 +100,6 @@
         return [self numberOfClickedOrSelectedPubs] > 0;
 }
 
-- (BOOL)validatePasteMenuItem:(NSMenuItem *)menuItem{
-	return ([documentWindow isKeyWindow] && [[documentWindow firstResponder] isEqual:tableView]);
-}
-
 - (BOOL)validateDuplicateMenuItem:(NSMenuItem *)menuItem{
     if ([documentWindow isKeyWindow] == NO)
         return NO;
