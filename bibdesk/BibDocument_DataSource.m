@@ -1343,7 +1343,8 @@
         // add to the group we're dropping on, /not/ the currently selected group; no need to add to all pubs group, though
         [self addPublications:pubs toGroup:item];
     }
-    [self selectPublications:pubs];
+    if (isDragFromMainTable == NO && isDragFromGroupTable == NO && isDragFromDrawer == NO && [self hasLibraryGroupSelected] == NO)
+        [self selectPublications:pubs];
     
     return YES;
 }
