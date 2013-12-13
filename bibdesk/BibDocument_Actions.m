@@ -1438,7 +1438,7 @@ static BOOL changingColors = NO;
     }
     
     if (isKnownFormat) {		
-        NSArray *newPubs = [self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:NO error:NULL];
+        NSArray *newPubs = [self addPublicationsFromPasteboard:pboard selectLibrary:YES aggregateImport:NO verbose:NO error:NULL];
         if ([newPubs count] > 0)
             return; // it worked, so we're done here
     }
@@ -1447,7 +1447,7 @@ static BOOL changingColors = NO;
     [tic beginSheetForURL:nil modalForWindow:documentWindow completionHandler:^(NSInteger result){
         NSArray *addedPubs = [tic addedPublications];
         if ([addedPubs count] > 0)
-            [self addPublications:addedPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:YES edit:NO];
+            [self addPublications:addedPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:YES aggregateImport:NO edit:NO];
     }];
 }
 
@@ -1464,7 +1464,7 @@ static BOOL changingColors = NO;
             NSArray *newPubs = [self extractPublicationsFromFileURL:fileURL verbose:NO error:&error];
             BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
             if ([newPubs count]) {
-                [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:[[error userInfo] valueForKey:BDSKTemporaryCiteKeyErrorKey] selectLibrary:YES edit:shouldEdit];
+                [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:[[error userInfo] valueForKey:BDSKTemporaryCiteKeyErrorKey] selectLibrary:YES aggregateImport:NO edit:shouldEdit];
                 // succeeded to parse the file, we return immediately
             } else {
                 [oPanel orderOut:nil];
@@ -1473,7 +1473,7 @@ static BOOL changingColors = NO;
                 [tic beginSheetForURL:fileURL modalForWindow:documentWindow  completionHandler:^(NSInteger result2){
                     NSArray *addedPubs = [tic addedPublications];
                     if ([addedPubs count] > 0)
-                        [self addPublications:addedPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:YES edit:NO];
+                        [self addPublications:addedPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:YES aggregateImport:NO edit:NO];
                 }];
             }
         }
@@ -1497,7 +1497,7 @@ static BOOL changingColors = NO;
             [tic beginSheetForURL:url modalForWindow:documentWindow completionHandler:^(NSInteger result2){
                 NSArray *addedPubs = [tic addedPublications];
                 if ([addedPubs count] > 0)
-                    [self addPublications:addedPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:YES edit:NO];
+                    [self addPublications:addedPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:YES aggregateImport:NO edit:NO];
             }];
         }
     }];

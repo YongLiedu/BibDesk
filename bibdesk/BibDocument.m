@@ -230,7 +230,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
         docFlags.previousSortDescending = NO;
         docFlags.tmpSortDescending = NO;
         docFlags.sortGroupsDescending = NO;
-        docFlags.didImport = NO;
+        docFlags.aggregateImport = NO;
         docFlags.itemChangeMask = 0;
         docFlags.displayMigrationAlert = NO;
         docFlags.inOptionKeyState = NO;
@@ -2204,7 +2204,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     return contentArray;
 }
 
-- (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)shouldSelect edit:(BOOL)shouldEdit {
+- (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)shouldSelect aggregateImport:(BOOL)aggregate edit:(BOOL)shouldEdit {
     BibItem *pub;
     
     if (shouldSelect)
@@ -2243,9 +2243,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication", @"Undo action name")];
     
     NSMutableArray *importedItems = [NSMutableArray array];
-    if (shouldSelect == NO && docFlags.didImport)
+    if (aggregate && docFlags.aggregateImport)
         [importedItems addObjectsFromArray:[[groups lastImportGroup] publications]];
-    docFlags.didImport = (shouldSelect == NO);
+    docFlags.aggregateImport = aggregate;
     [importedItems addObjectsFromArray:newPubs];
     
     // set up the smart group that shows the latest import
@@ -2267,7 +2267,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
 }
 
-- (NSArray *)addPublicationsFromPasteboard:(NSPasteboard *)pboard selectLibrary:(BOOL)shouldSelect verbose:(BOOL)verbose error:(NSError **)outError{
+- (NSArray *)addPublicationsFromPasteboard:(NSPasteboard *)pboard selectLibrary:(BOOL)shouldSelect aggregateImport:(BOOL)aggregate verbose:(BOOL)verbose error:(NSError **)outError{
     NSArray *newPubs = nil;
     NSMutableArray *newFilePubs = nil;
 	NSError *error = nil;
@@ -2338,7 +2338,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
     
     if([newPubs count] > 0)
-		[self addPublications:newPubs publicationsToAutoFile:newFilePubs temporaryCiteKey:temporaryCiteKey selectLibrary:shouldSelect edit:shouldEdit];
+		[self addPublications:newPubs publicationsToAutoFile:newFilePubs temporaryCiteKey:temporaryCiteKey selectLibrary:shouldSelect aggregateImport:aggregate edit:shouldEdit];
     else if (newPubs == nil && outError)
         *outError = error;
     

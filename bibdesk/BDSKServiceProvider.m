@@ -295,7 +295,7 @@ static id sharedServiceProvider = nil;
     id doc = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:NULL];
     NSError *nsError = nil;
     
-    if([doc addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:&nsError] == nil && error)
+    if([doc addPublicationsFromPasteboard:pboard selectLibrary:YES aggregateImport:NO verbose:YES error:&nsError] == nil && error)
         *error = [nsError localizedDescription];
 }
 
@@ -314,7 +314,7 @@ static id sharedServiceProvider = nil;
         [self openDocumentFromSelection:pboard userData:userData error:error];
 	} else {
         NSError *addError = nil;
-        if([doc addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:&addError] == nil && error)
+        if([doc addPublicationsFromPasteboard:pboard selectLibrary:YES aggregateImport:NO verbose:YES error:&addError] == nil && error)
             *error = [addError localizedDescription];
     }
 }

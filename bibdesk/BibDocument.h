@@ -237,7 +237,7 @@ extern NSString *BDSKDocumentPublicationsKey;
         unsigned int        sortGroupsDescending:1;
         unsigned int        dragFromExternalGroups:1;
         unsigned int        isDocumentClosed:1;
-        unsigned int        didImport:1;
+        unsigned int        aggregateImport:1;
         unsigned int        displayMigrationAlert:1;
         unsigned int        inOptionKeyState:1;
         unsigned int        isAnimating:1;
@@ -359,8 +359,8 @@ extern NSString *BDSKDocumentPublicationsKey;
 - (BDSKMacroResolver *)macroResolver;
 
 /* Paste related methods */
-- (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)shouldSelect edit:(BOOL)shouldEdit;
-- (NSArray *)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)select verbose:(BOOL)verbose error:(NSError **)error;
+- (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)shouldSelect aggregateImport:(BOOL)aggregate edit:(BOOL)shouldEdit;
+- (NSArray *)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)select aggregateImport:(BOOL)aggregate verbose:(BOOL)verbose error:(NSError **)error;
 - (NSArray *)extractPublicationsFromFileURL:(NSURL *)fileURL verbose:(BOOL)verbose error:(NSError **)outError;
 
 // Private methods

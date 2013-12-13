@@ -740,7 +740,7 @@
             if ([pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, NSPasteboardTypeString, nil]] ||
                 [pboard canReadURL]) {
                 
-                NSArray *newPubs = [self addPublicationsFromPasteboard:pboard selectLibrary:NO verbose:YES error:NULL];
+                NSArray *newPubs = [self addPublicationsFromPasteboard:pboard selectLibrary:NO aggregateImport:NO verbose:YES error:NULL];
                 
                 if ([newPubs count] == 0)
                     return NO;
@@ -749,8 +749,6 @@
                     [[self selectedGroups] makeObjectsPerformSelector:@selector(addPublicationsFromArray:) withObject:newPubs];
                     [self selectPublications:newPubs];
                 }
-                
-                docFlags.didImport = NO;
                 
                 return YES;
                 
@@ -871,12 +869,11 @@
 
 - (void)tableView:(NSTableView *)tv pasteFromPasteboard:(NSPasteboard *)pboard{
 	if (tv == tableView) {
-        NSArray *newPubs = [self addPublicationsFromPasteboard:pboard selectLibrary:NO verbose:YES error:NULL];
+        NSArray *newPubs = [self addPublicationsFromPasteboard:pboard selectLibrary:NO aggregateImport:NO verbose:YES error:NULL];
         if ([newPubs count] && [self hasStaticGroupsSelected]) {
             [[self selectedGroups] makeObjectsPerformSelector:@selector(addPublicationsFromArray:) withObject:newPubs];
             [self selectPublications:newPubs];
         }
-        docFlags.didImport = NO;
     } else {
 		NSBeep();
 	}
@@ -1046,7 +1043,7 @@
         return;
     NSNotification *note = [NSNotification notificationWithName:BDSKGroupTableSelectionChangedNotification object:self];
     [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:nil];
-    docFlags.didImport = NO;
+    docFlags.aggregateImport = NO;
 }
 
 - (CGFloat)outlineView:(NSOutlineView *)ov heightOfRowByItem:(id)item {
@@ -1309,12 +1306,12 @@
     BOOL isDragFromDrawer = [source isEqual:[drawerController tableView]];
     
     if ((isDragFromGroupTable || isDragFromMainTable) && docFlags.dragFromExternalGroups)
-        pubs = [self addPublicationsFromPasteboard:pboard selectLibrary:NO verbose:YES error:NULL];
+        pubs = [self addPublicationsFromPasteboard:pboard selectLibrary:NO aggregateImport:YES verbose:YES error:NULL];
     else if (isDragFromMainTable)
         // we already have these publications, so we just want to add them to the group, not the document
         pubs = [pboardHelper promisedItemsForPasteboard:pboard];
     else if (isDragFromGroupTable == NO && isDragFromDrawer == NO)
-        pubs = [self addPublicationsFromPasteboard:pboard selectLibrary:([item isParent] == NO && [[self selectedGroups] containsObject:item] == NO) verbose:YES error:NULL];
+        pubs = [self addPublicationsFromPasteboard:pboard selectLibrary:([item isParent] == NO && [[self selectedGroups] containsObject:item] == NO) aggregateImport:NO verbose:YES error:NULL];
     
     if ([pubs count] == 0)
         return NO;
@@ -1346,6 +1343,7 @@
         // add to the group we're dropping on, /not/ the currently selected group; no need to add to all pubs group, though
         [self addPublications:pubs toGroup:item];
     }
+    [self selectPublications:pubs];
     
     return YES;
 }

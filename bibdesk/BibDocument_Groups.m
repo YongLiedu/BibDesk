@@ -1328,7 +1328,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     // archive and unarchive mainly to get complex strings with the correct macroResolver
     NSArray *newPubs = [BibItem publicationsFromArchivedData:[BibItem archivedPublications:array] macroResolver:[self macroResolver]];
     
-    [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:YES edit:NO];
+    [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:YES aggregateImport:NO edit:NO];
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Merge External Publications", @"Undo action name")];
     
@@ -1640,7 +1640,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     
     newPubs = [BibItem publicationsFromArchivedData:data macroResolver:[self macroResolver]];
 	
-    [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:NO edit:NO];
+    [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:NO aggregateImport:YES edit:NO];
     
 	[[self undoManager] setActionName:NSLocalizedString(@"Import Publication", @"Undo action name")];
 }
