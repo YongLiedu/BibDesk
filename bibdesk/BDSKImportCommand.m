@@ -126,7 +126,7 @@
         return nil;
 	}
 	if ([pubs count])
-    	[document addPublications:pubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:NO aggregateImport:YES edit:NO];
+    	[document addPublications:pubs publicationsToAutoFile:nil temporaryCiteKey:nil options:BDSKImportAggregate | BDSKImportNoEdit];
 	
     return pubs ?: [NSArray array];
 }

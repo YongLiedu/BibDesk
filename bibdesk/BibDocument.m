@@ -2204,10 +2204,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     return contentArray;
 }
 
-- (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)shouldSelect aggregateImport:(BOOL)aggregate edit:(BOOL)shouldEdit {
+- (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey options:(BDSKImportOptions)options {
     BibItem *pub;
     
-    if (shouldSelect)
+    if ((options & BDSKImportSelectLibrary))
         [self selectLibraryGroup:nil];    
 	[self addPublications:newPubs];
     if ([self hasLibraryGroupSelected])
@@ -2237,12 +2237,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     for (pub in newPubs)
         [pub setField:BDSKDateAddedString toValue:importDate];
 	
-	if(shouldEdit)
+	if((options & BDSKImportNoEdit) == 0 && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey])
 		[self editPublications:newPubs]; // this will ask the user when there are many pubs
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication", @"Undo action name")];
     
     NSMutableArray *importedItems = [NSMutableArray array];
+    BOOL aggregate = (options & BDSKImportAggregate) != 0;
     if (aggregate && docFlags.aggregateImport)
         [importedItems addObjectsFromArray:[[groups lastImportGroup] publications]];
     docFlags.aggregateImport = aggregate;
@@ -2267,13 +2268,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
 }
 
-- (NSArray *)addPublicationsFromPasteboard:(NSPasteboard *)pboard selectLibrary:(BOOL)shouldSelect aggregateImport:(BOOL)aggregate verbose:(BOOL)verbose error:(NSError **)outError{
+- (NSArray *)addPublicationsFromPasteboard:(NSPasteboard *)pboard options:(BDSKImportOptions)options {
     NSArray *newPubs = nil;
     NSMutableArray *newFilePubs = nil;
 	NSError *error = nil;
     BOOL isPartialData = NO;
     NSString *temporaryCiteKey = nil;
-    BOOL shouldEdit = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey];
+    BOOL verbose = (options & BDSKImportNonVerbose) == 0;
     
     if ([pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]]) {
         [pboard types];
@@ -2338,9 +2339,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
     
     if([newPubs count] > 0)
-		[self addPublications:newPubs publicationsToAutoFile:newFilePubs temporaryCiteKey:temporaryCiteKey selectLibrary:shouldSelect aggregateImport:aggregate edit:shouldEdit];
-    else if (newPubs == nil && outError)
-        *outError = error;
+		[self addPublications:newPubs publicationsToAutoFile:newFilePubs temporaryCiteKey:temporaryCiteKey options:options];
     
     return newPubs;
 }

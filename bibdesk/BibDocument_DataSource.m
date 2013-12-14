@@ -740,7 +740,7 @@
             if ([pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, NSPasteboardTypeString, nil]] ||
                 [pboard canReadURL]) {
                 
-                NSArray *newPubs = [self addPublicationsFromPasteboard:pboard selectLibrary:NO aggregateImport:NO verbose:YES error:NULL];
+                NSArray *newPubs = [self addPublicationsFromPasteboard:pboard options:0];
                 
                 if ([newPubs count] == 0)
                     return NO;
@@ -869,7 +869,7 @@
 
 - (void)tableView:(NSTableView *)tv pasteFromPasteboard:(NSPasteboard *)pboard{
 	if (tv == tableView) {
-        NSArray *newPubs = [self addPublicationsFromPasteboard:pboard selectLibrary:NO aggregateImport:NO verbose:YES error:NULL];
+        NSArray *newPubs = [self addPublicationsFromPasteboard:pboard options:0];
         if ([newPubs count] && [self hasStaticGroupsSelected]) {
             [[self selectedGroups] makeObjectsPerformSelector:@selector(addPublicationsFromArray:) withObject:newPubs];
             [self selectPublications:newPubs];
@@ -1305,13 +1305,15 @@
     BOOL isDragFromGroupTable = [source isEqual:groupOutlineView];
     BOOL isDragFromDrawer = [source isEqual:[drawerController tableView]];
     
-    if ((isDragFromGroupTable || isDragFromMainTable) && docFlags.dragFromExternalGroups)
-        pubs = [self addPublicationsFromPasteboard:pboard selectLibrary:NO aggregateImport:YES verbose:YES error:NULL];
-    else if (isDragFromMainTable)
+    if ((isDragFromGroupTable || isDragFromMainTable) && docFlags.dragFromExternalGroups) {
+        pubs = [self addPublicationsFromPasteboard:pboard options:BDSKImportAggregate];
+    } else if (isDragFromMainTable) {
         // we already have these publications, so we just want to add them to the group, not the document
         pubs = [pboardHelper promisedItemsForPasteboard:pboard];
-    else if (isDragFromGroupTable == NO && isDragFromDrawer == NO)
-        pubs = [self addPublicationsFromPasteboard:pboard selectLibrary:([item isParent] == NO && [[self selectedGroups] containsObject:item] == NO) aggregateImport:NO verbose:YES error:NULL];
+    } else if (isDragFromGroupTable == NO && isDragFromDrawer == NO) {
+        BDSKImportOptions options = ([item isParent] == NO && [[self selectedGroups] containsObject:item] == NO) ? BDSKImportSelectLibrary : 0;
+        pubs = [self addPublicationsFromPasteboard:pboard options:options];
+    }
     
     if ([pubs count] == 0)
         return NO;

@@ -78,6 +78,14 @@ enum {
     BDSKPreviewDisplayTeX = 2
 };
 
+enum {
+    BDSKImportSelectLibrary = 1 << 0,
+    BDSKImportAggregate = 1 << 1,
+    BDSKImportNoEdit = 1 << 2,
+    BDSKImportNonVerbose = 1 << 3
+};
+typedef NSUInteger BDSKImportOptions;
+
 // our main document types
 extern NSString *BDSKBibTeXDocumentType;
 extern NSString *BDSKRISDocumentType;
@@ -359,8 +367,8 @@ extern NSString *BDSKDocumentPublicationsKey;
 - (BDSKMacroResolver *)macroResolver;
 
 /* Paste related methods */
-- (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)shouldSelect aggregateImport:(BOOL)aggregate edit:(BOOL)shouldEdit;
-- (NSArray *)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)select aggregateImport:(BOOL)aggregate verbose:(BOOL)verbose error:(NSError **)error;
+- (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey options:(BDSKImportOptions)options;
+- (NSArray *)addPublicationsFromPasteboard:(NSPasteboard *)pb options:(BDSKImportOptions)options;
 - (NSArray *)extractPublicationsFromFileURL:(NSURL *)fileURL verbose:(BOOL)verbose error:(NSError **)outError;
 
 // Private methods
