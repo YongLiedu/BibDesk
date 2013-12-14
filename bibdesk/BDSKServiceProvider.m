@@ -294,7 +294,7 @@ static id sharedServiceProvider = nil;
 
     id doc = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:NULL];
     
-    if([doc addPublicationsFromPasteboard:pboard options:BDSKImportSelectLibrary] == nil && error)
+    if([doc importPublicationsFromPasteboard:pboard options:BDSKImportSelectLibrary] == nil && error)
         *error = NSLocalizedString(@"Did not find anything appropriate on the pasteboard", @"Error description");
 }
 
@@ -311,7 +311,7 @@ static id sharedServiceProvider = nil;
     if (doc == nil) {
         // create a new document if we don't have one, or else this method appears to fail mysteriosly (since the error isn't displayed)
         [self openDocumentFromSelection:pboard userData:userData error:error];
-	} else if([doc addPublicationsFromPasteboard:pboard options:BDSKImportSelectLibrary] == nil && error) {
+	} else if([doc importPublicationsFromPasteboard:pboard options:BDSKImportSelectLibrary] == nil && error) {
         *error = NSLocalizedString(@"Did not find anything appropriate on the pasteboard", @"Error description");
     }
 }

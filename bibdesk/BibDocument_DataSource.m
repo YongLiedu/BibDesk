@@ -740,7 +740,7 @@
             if ([pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, NSPasteboardTypeString, nil]] ||
                 [pboard canReadURL]) {
                 
-                NSArray *newPubs = [self addPublicationsFromPasteboard:pboard options:0];
+                NSArray *newPubs = [self importPublicationsFromPasteboard:pboard options:0];
                 
                 if ([newPubs count] == 0)
                     return NO;
@@ -869,7 +869,7 @@
 
 - (void)tableView:(NSTableView *)tv pasteFromPasteboard:(NSPasteboard *)pboard{
 	if (tv == tableView) {
-        NSArray *newPubs = [self addPublicationsFromPasteboard:pboard options:0];
+        NSArray *newPubs = [self importPublicationsFromPasteboard:pboard options:0];
         if ([newPubs count] && [self hasStaticGroupsSelected]) {
             [[self selectedGroups] makeObjectsPerformSelector:@selector(addPublicationsFromArray:) withObject:newPubs];
             [self selectPublications:newPubs];
@@ -1306,13 +1306,13 @@
     BOOL isDragFromDrawer = [source isEqual:[drawerController tableView]];
     
     if ((isDragFromGroupTable || isDragFromMainTable) && docFlags.dragFromExternalGroups) {
-        pubs = [self addPublicationsFromPasteboard:pboard options:BDSKImportAggregate];
+        pubs = [self importPublicationsFromPasteboard:pboard options:BDSKImportAggregate];
     } else if (isDragFromMainTable) {
         // we already have these publications, so we just want to add them to the group, not the document
         pubs = [pboardHelper promisedItemsForPasteboard:pboard];
     } else if (isDragFromGroupTable == NO && isDragFromDrawer == NO) {
         BDSKImportOptions options = ([item isParent] == NO && [[self selectedGroups] containsObject:item] == NO) ? BDSKImportSelectLibrary : 0;
-        pubs = [self addPublicationsFromPasteboard:pboard options:options];
+        pubs = [self importPublicationsFromPasteboard:pboard options:options];
     }
     
     if ([pubs count] == 0)

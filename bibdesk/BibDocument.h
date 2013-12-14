@@ -367,8 +367,8 @@ extern NSString *BDSKDocumentPublicationsKey;
 - (BDSKMacroResolver *)macroResolver;
 
 /* Paste related methods */
-- (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey options:(BDSKImportOptions)options;
-- (NSArray *)addPublicationsFromPasteboard:(NSPasteboard *)pb options:(BDSKImportOptions)options;
+- (void)importPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey options:(BDSKImportOptions)options;
+- (NSArray *)importPublicationsFromPasteboard:(NSPasteboard *)pb options:(BDSKImportOptions)options;
 - (NSArray *)extractPublicationsFromFileURL:(NSURL *)fileURL verbose:(BOOL)verbose error:(NSError **)outError;
 
 // Private methods

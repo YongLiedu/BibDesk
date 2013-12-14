@@ -2204,7 +2204,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     return contentArray;
 }
 
-- (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey options:(BDSKImportOptions)options {
+- (void)importPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey options:(BDSKImportOptions)options {
     BibItem *pub;
     
     if ((options & BDSKImportSelectLibrary))
@@ -2268,7 +2268,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
 }
 
-- (NSArray *)addPublicationsFromPasteboard:(NSPasteboard *)pboard options:(BDSKImportOptions)options {
+- (NSArray *)importPublicationsFromPasteboard:(NSPasteboard *)pboard options:(BDSKImportOptions)options {
     NSArray *newPubs = nil;
     NSMutableArray *newFilePubs = nil;
 	NSError *error = nil;
@@ -2339,7 +2339,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
     
     if([newPubs count] > 0)
-		[self addPublications:newPubs publicationsToAutoFile:newFilePubs temporaryCiteKey:temporaryCiteKey options:options];
+		[self importPublications:newPubs publicationsToAutoFile:newFilePubs temporaryCiteKey:temporaryCiteKey options:options];
     
     return newPubs;
 }
