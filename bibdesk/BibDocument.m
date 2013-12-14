@@ -2268,6 +2268,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
 }
 
+- (void)importPublications:(NSArray *)newPubs options:(BDSKImportOptions)options {
+    [self importPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:nil options:options];
+}
+
 - (NSArray *)importPublicationsFromPasteboard:(NSPasteboard *)pboard options:(BDSKImportOptions)options {
     NSArray *newPubs = nil;
     NSMutableArray *newFilePubs = nil;

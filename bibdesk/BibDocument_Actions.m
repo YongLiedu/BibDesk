@@ -1447,7 +1447,7 @@ static BOOL changingColors = NO;
     [tic beginSheetForURL:nil modalForWindow:documentWindow completionHandler:^(NSInteger result){
         NSArray *addedPubs = [tic addedPublications];
         if ([addedPubs count] > 0)
-            [self importPublications:addedPubs publicationsToAutoFile:nil temporaryCiteKey:nil options:BDSKImportSelectLibrary | BDSKImportNoEdit];
+            [self importPublications:addedPubs options:BDSKImportSelectLibrary | BDSKImportNoEdit];
     }];
 }
 
@@ -1472,7 +1472,7 @@ static BOOL changingColors = NO;
                 [tic beginSheetForURL:fileURL modalForWindow:documentWindow  completionHandler:^(NSInteger result2){
                     NSArray *addedPubs = [tic addedPublications];
                     if ([addedPubs count] > 0)
-                        [self importPublications:addedPubs publicationsToAutoFile:nil temporaryCiteKey:nil options:BDSKImportSelectLibrary | BDSKImportNoEdit];
+                        [self importPublications:addedPubs options:BDSKImportSelectLibrary | BDSKImportNoEdit];
                 }];
             }
         }
@@ -1496,7 +1496,7 @@ static BOOL changingColors = NO;
             [tic beginSheetForURL:url modalForWindow:documentWindow completionHandler:^(NSInteger result2){
                 NSArray *addedPubs = [tic addedPublications];
                 if ([addedPubs count] > 0)
-                    [self importPublications:addedPubs publicationsToAutoFile:nil temporaryCiteKey:nil options:BDSKImportSelectLibrary | BDSKImportNoEdit];
+                    [self importPublications:addedPubs options:BDSKImportSelectLibrary | BDSKImportNoEdit];
             }];
         }
     }];
