@@ -2325,19 +2325,14 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         }
     }
     
-    if([error isLocalErrorWithCode:kBDSKHadMissingCiteKeys]) {
+    if ([error isLocalErrorWithCode:kBDSKHadMissingCiteKeys]) {
+        // warning shown later
         temporaryCiteKey = [[error userInfo] objectForKey:BDSKTemporaryCiteKeyErrorKey];
-        error = nil; // accept temporary cite keys, but show a warning later
-    }else if([error isLocalErrorWithCode:kBDSKParserIgnoredFrontMatter]){
-        // just warn about this error when verbose, don't treat this as an error further
-        if (verbose)
-            [self presentError:error];
-        error = nil;
-    }else if([error isLocalErrorWithCode:kBDSKBibTeXParserFailed]){
-        // this asks whether to ignore partially failed bibtex when verbose, otherwise just ignore, for NSFilenamesPboardType this was already handled
-        if(isPartialData && (verbose == NO || [self presentError:error] == NO))
+    } else if ([error isLocalErrorWithCode:kBDSKBibTeXParserFailed]) {
+        // this asks whether to ignore partially failed bibtex when verbose, otherwise just ignore
+        if (isPartialData && (verbose == NO || [self presentError:error] == NO))
             newPubs = nil;
-    }else if(error && verbose){
+    } else if (error && verbose) {
         // display error for non-bibtex string parsers when verbose
         [self presentError:error];
     }
