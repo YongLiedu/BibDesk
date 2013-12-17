@@ -232,7 +232,7 @@ static NSString *stringWithoutComments(NSString *string) {
     BOOL hadProblems = NO, ignoredMacros = NO, ignoredFrontmatter = NO;
     int parsed_ok = 1;
     
-    while(entry =  bt_parse_entry(infile, (char *)fs_path, 0, &parsed_ok)){
+    while ((entry = bt_parse_entry(infile, (char *)fs_path, 0, &parsed_ok))) {
 
         if (parsed_ok == 0) {
             // wasn't ok, record it and deal with it later.
