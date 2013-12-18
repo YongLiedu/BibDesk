@@ -1891,6 +1891,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     newPubs = [BDSKBibTeXParser itemsFromData:data macros:&newMacros documentInfo:&newDocumentInfo groups:&newGroups frontMatter:&newFrontMatter filePath:filePath owner:self encoding:parserEncoding isPartialData:&isPartialData error:&error];
     
     // @@ move this to NSDocumentController; need to figure out where to add it, though
+    // @@ should we check for kBDSKBibTeXParserFailed instead? The difference is whether we ignore warnings for circular macros (kBDSKParserIgnoredFrontMatter), which we used to do
     if (isPartialData) {
         NSError *recoveryError = [NSError mutableLocalErrorWithCode:[error code] localizedDescription:[error localizedDescription] ?: NSLocalizedString(@"Error reading file!", @"Message in alert dialog when unable to read file")];
         [recoveryError setValue:NSLocalizedString(@"There was a problem reading the file.  Do you want to give up, edit the file to correct the errors, or keep going with everything that could be analyzed?\n\nIf you choose \"Keep Going\" and then save the file, you will probably lose data.", @"Informative text in alert dialog") forKey:NSLocalizedRecoverySuggestionErrorKey];
