@@ -165,16 +165,16 @@ static NSString *stringWithoutComments(NSString *string) {
 }
 
 /// libbtparse methods
-+ (NSArray *)itemsFromString:(NSString *)aString owner:(id<BDSKOwner>)anOwner isPartialData:(BOOL *)isPartialData error:(NSError **)outError{
++ (NSArray *)itemsFromString:(NSString *)aString owner:(id<BDSKOwner>)anOwner error:(NSError **)outError{
     NSData *inData = [aString dataUsingEncoding:NSUTF8StringEncoding];
-    return [self itemsFromData:inData macros:NULL documentInfo:NULL groups:NULL frontMatter:NULL filePath:BDSKParserPasteDragString owner:anOwner encoding:NSUTF8StringEncoding isPartialData:isPartialData error:outError];
+    return [self itemsFromData:inData macros:NULL documentInfo:NULL groups:NULL frontMatter:NULL filePath:BDSKParserPasteDragString owner:anOwner encoding:NSUTF8StringEncoding error:outError];
 }
 
-+ (NSArray *)itemsFromData:(NSData *)inData macros:(NSDictionary **)outMacros filePath:(NSString *)filePath owner:(id<BDSKOwner>)anOwner encoding:(NSStringEncoding)parserEncoding isPartialData:(BOOL *)isPartialData error:(NSError **)outError{
-    return [self itemsFromData:inData macros:outMacros documentInfo:NULL groups:NULL frontMatter:NULL filePath:filePath owner:anOwner encoding:parserEncoding isPartialData:isPartialData error:outError];
++ (NSArray *)itemsFromData:(NSData *)inData macros:(NSDictionary **)outMacros filePath:(NSString *)filePath owner:(id<BDSKOwner>)anOwner encoding:(NSStringEncoding)parserEncoding error:(NSError **)outError{
+    return [self itemsFromData:inData macros:outMacros documentInfo:NULL groups:NULL frontMatter:NULL filePath:filePath owner:anOwner encoding:parserEncoding error:outError];
 }
 
-+ (NSArray *)itemsFromData:(NSData *)inData macros:(NSDictionary **)outMacros documentInfo:(NSDictionary **)outDocumentInfo groups:(NSDictionary **)outGroups frontMatter:(NSString **)outFrontMatter filePath:(NSString *)filePath owner:(id<BDSKOwner>)anOwner encoding:(NSStringEncoding)parserEncoding isPartialData:(BOOL *)isPartialData error:(NSError **)outError{
++ (NSArray *)itemsFromData:(NSData *)inData macros:(NSDictionary **)outMacros documentInfo:(NSDictionary **)outDocumentInfo groups:(NSDictionary **)outGroups frontMatter:(NSString **)outFrontMatter filePath:(NSString *)filePath owner:(id<BDSKOwner>)anOwner encoding:(NSStringEncoding)parserEncoding error:(NSError **)outError{
     NSMutableDictionary *groups = nil;
     NSMutableDictionary *macros = nil;
     NSMutableString *frontMatter = nil;
@@ -190,8 +190,8 @@ static NSString *stringWithoutComments(NSString *string) {
     
     // btparse will crash if we pass it a zero-length data, so we'll return here for empty files
     if ([inData length] == 0) {
-        if (isPartialData)
-            *isPartialData = NO;
+        if (outError)
+            *outError = nil;
         return [NSArray array];
     }
     
@@ -301,9 +301,6 @@ static NSString *stringWithoutComments(NSString *string) {
         }
         *outError = error;
     }
-    
-    if (isPartialData)
-        *isPartialData = (hadProblems || hadCircularMacros || ignoredMacros || ignoredFrontmatter);
     
     return returnArray;
 }

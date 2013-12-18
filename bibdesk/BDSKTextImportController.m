@@ -1479,16 +1479,13 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         return;
 		
     NSError *error = nil;
-    BOOL isPartialData = NO;
-    NSArray *pubs = [BDSKStringParser itemsFromString:string ofType:type owner:owner isPartialData:&isPartialData error:&error];
+    NSArray *pubs = [BDSKStringParser itemsFromString:string ofType:type owner:owner error:&error];
     
-    // ignore warnings for parsing with temporary citekeys, as we're not interested in the cite key
-    if ([error isLocalErrorWithCode:kBDSKHadMissingCiteKeys]) {
-        isPartialData = NO;
+    // ignore warnings for parsing with temporary citekeys or when frontmatter was ignored, as we're not interested in the cite keys or frontmatter
+    if ([error isLocalErrorWithCode:kBDSKHadMissingCiteKeys] || [error isLocalErrorWithCode:kBDSKParserIgnoredFrontMatter])
         error = nil;
-    }
     
-    if(isPartialData || [pubs count] == 0)
+    if(error || [pubs count] == 0)
         return;
     
     if([[self publication] hasBeenEdited]){

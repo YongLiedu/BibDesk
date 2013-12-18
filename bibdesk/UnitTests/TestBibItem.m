@@ -119,10 +119,9 @@
 - (void)testMakeMinimalBibtex{
 	// Note, this test is deliberately rather fragile, so feel free to refine if it breaks
 	// with a new behaviour that you consider reasonable
-	BOOL isPartialData = NO;
 	NSError *parseError = nil;
 	
-	NSArray *testArray = [BDSKBibTeXParser itemsFromString:oneItem owner:nil isPartialData:&isPartialData error:&parseError];
+	NSArray *testArray = [BDSKBibTeXParser itemsFromString:oneItem owner:nil error:&parseError];
 	
 	BibItem *item1 = [testArray objectAtIndex:0];
 
@@ -140,10 +139,9 @@
 
 - (void)testParseTwoRecords{
 	// init two bibitems, then check that the difference in their fileorder is one
-    BOOL isPartialData = NO;
 	NSError *parseError = nil;
 
-	NSArray *testArray = [BDSKBibTeXParser itemsFromString:twoItems owner:nil isPartialData:&isPartialData error:&parseError];
+	NSArray *testArray = [BDSKBibTeXParser itemsFromString:twoItems owner:nil error:&parseError];
 
     BibItem *item1 = [testArray objectAtIndex:0];
     BibItem *item2 = [testArray objectAtIndex:1];
@@ -157,10 +155,9 @@
 }
 
 - (void)testMakeTypeBibTeX{
-    BOOL isPartialData = NO;
 	NSError *parseError = nil;
 	
-	NSArray *testArray = [BDSKBibTeXParser itemsFromString:oneItem owner:nil isPartialData:&isPartialData error:&parseError];
+	NSArray *testArray = [BDSKBibTeXParser itemsFromString:oneItem owner:nil error:&parseError];
 
 	BibItem *item1 = [testArray objectAtIndex:0];
 

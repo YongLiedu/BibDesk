@@ -57,14 +57,13 @@
     @param      outError (description)
     @result     (description)
 */
-+ (NSArray *)itemsFromString:(NSString *)aString owner:(id<BDSKOwner>)anOwner isPartialData:(BOOL *)isPartialData error:(NSError **)outError;
++ (NSArray *)itemsFromString:(NSString *)aString owner:(id<BDSKOwner>)anOwner error:(NSError **)outError;
 
 + (NSArray *)itemsFromData:(NSData *)inData
                     macros:(NSDictionary **)outMacros
                   filePath:(NSString *)filePath
                      owner:(id<BDSKOwner>)anOwner
                   encoding:(NSStringEncoding)parserEncoding
-             isPartialData:(BOOL *)isPartialData
                      error:(NSError **)outError;
 
 /*!
@@ -79,7 +78,6 @@
     @param      filePath (description)
     @param      anOwner (description)
     @param      parserEncoding (description)
-    @param      isPartialData Returns by reference an indication of whether problems occurred
     @param      outError May be NULL.  If non-NULL and the item has partial data, will be filled.
     @result     (description)
 */
@@ -91,7 +89,6 @@
                   filePath:(NSString *)filePath
                      owner:(id<BDSKOwner>)anOwner
                   encoding:(NSStringEncoding)parserEncoding
-             isPartialData:(BOOL *)isPartialData
                      error:(NSError **)outError;
 
 /*!

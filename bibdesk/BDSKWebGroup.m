@@ -206,9 +206,9 @@ static NSString *BDSKWebLocalizedString = nil;
             }
             BDSKStringType type = [string contentStringType];
             if (type == BDSKBibTeXStringType)
-                newPubs = [BDSKBibTeXParser itemsFromString:string owner:nil isPartialData:NULL error:&error];
+                newPubs = [BDSKBibTeXParser itemsFromString:string owner:nil error:&error];
             else if (type == BDSKNoKeyBibTeXStringType)
-                newPubs = [BDSKBibTeXParser itemsFromString:[string stringWithPhoneyCiteKeys:[BibItem defaultCiteKey]] owner:nil isPartialData:NULL error:&error];
+                newPubs = [BDSKBibTeXParser itemsFromString:[string stringWithPhoneyCiteKeys:[BibItem defaultCiteKey]] owner:nil error:&error];
             else if (type != BDSKUnknownStringType)
                 newPubs = [BDSKStringParser itemsFromString:string ofType:type error:&error];
         }

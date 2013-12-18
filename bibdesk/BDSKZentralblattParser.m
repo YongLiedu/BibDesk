@@ -150,7 +150,7 @@
 		bibTeXString = [bibTeXString stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 		bibTeXString = [umlautFixer replaceWithString:@"{$1}" inString:bibTeXString];
 		NSError * ignoreError;
-		NSArray * newPubs = [BDSKBibTeXParser itemsFromString:bibTeXString owner:nil isPartialData:NULL error: &ignoreError];
+		NSArray * newPubs = [BDSKBibTeXParser itemsFromString:bibTeXString owner:nil error: &ignoreError];
 		
 		if (newPubs != nil) {
 			[results addObjectsFromArray:newPubs];

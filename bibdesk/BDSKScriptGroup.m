@@ -276,19 +276,16 @@
         outputString = [outputString stringWithPhoneyCiteKeys:@"FixMe"];
         type = BDSKBibTeXStringType;
     }
-    BOOL isPartialData = NO;
     NSDictionary *macros = nil;
     
     if (type == BDSKBibTeXStringType) {
-        pubs = [BDSKBibTeXParser itemsFromData:[outputString dataUsingEncoding:NSUTF8StringEncoding] macros:&macros filePath:@"" owner:self encoding:NSUTF8StringEncoding isPartialData:&isPartialData error:&error];
-        if (isPartialData && [error isLocalErrorWithCode:kBDSKParserIgnoredFrontMatter])
-            isPartialData = NO;
+        pubs = [BDSKBibTeXParser itemsFromData:[outputString dataUsingEncoding:NSUTF8StringEncoding] macros:&macros filePath:@"" owner:self encoding:NSUTF8StringEncoding error:&error];
     } else if (type != BDSKUnknownStringType){
         pubs = [BDSKStringParser itemsFromString:outputString ofType:type error:&error];
     } else {
         error = [NSError localErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script did not return BibTeX", @"Error description")];
     }
-    if (pubs == nil || isPartialData) {
+    if (pubs == nil || [error isLocalErrorWithCode:kBDSKBibTeXParserFailed]) {
         failedDownload = YES;
         [self setErrorMessage:[error localizedDescription]];
     }

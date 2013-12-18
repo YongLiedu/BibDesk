@@ -161,7 +161,7 @@
 			cleanedRecord = [umlautFixer replaceWithString:@"{$1}" inString:cleanedRecord];
 			
 			NSError * parseError;
-			NSArray * newPubs = [BDSKBibTeXParser itemsFromString:cleanedRecord owner:nil isPartialData:NULL error: &parseError];
+			NSArray * newPubs = [BDSKBibTeXParser itemsFromString:cleanedRecord owner:nil error: &parseError];
 			
 			if (newPubs != nil) {
 				[results addObjectsFromArray:newPubs];

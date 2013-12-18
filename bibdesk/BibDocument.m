@@ -1881,18 +1881,17 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
     
     NSError *error = nil;
-    BOOL isPartialData;
 	NSArray *newPubs;
 	NSDictionary *newMacros = nil;
 	NSDictionary *newGroups = nil;
 	NSDictionary *newDocumentInfo = nil;
 	NSString *newFrontMatter = nil;
     
-    newPubs = [BDSKBibTeXParser itemsFromData:data macros:&newMacros documentInfo:&newDocumentInfo groups:&newGroups frontMatter:&newFrontMatter filePath:filePath owner:self encoding:parserEncoding isPartialData:&isPartialData error:&error];
+    newPubs = [BDSKBibTeXParser itemsFromData:data macros:&newMacros documentInfo:&newDocumentInfo groups:&newGroups frontMatter:&newFrontMatter filePath:filePath owner:self encoding:parserEncoding error:&error];
     
     // @@ move this to NSDocumentController; need to figure out where to add it, though
     // @@ should we check for kBDSKBibTeXParserFailed instead? The difference is whether we ignore warnings for circular macros (kBDSKParserIgnoredFrontMatter), which we used to do
-    if (isPartialData) {
+    if (error) {
         NSError *recoveryError = [NSError mutableLocalErrorWithCode:[error code] localizedDescription:[error localizedDescription] ?: NSLocalizedString(@"Error reading file!", @"Message in alert dialog when unable to read file")];
         [recoveryError setValue:NSLocalizedString(@"There was a problem reading the file.  Do you want to give up, edit the file to correct the errors, or keep going with everything that could be analyzed?\n\nIf you choose \"Keep Going\" and then save the file, you will probably lose data.", @"Informative text in alert dialog") forKey:NSLocalizedRecoverySuggestionErrorKey];
         [recoveryError setValue:[BDSKErrorObjectController sharedErrorObjectController] forKey:NSRecoveryAttempterErrorKey];
@@ -1905,13 +1904,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         if ([self presentError:recoveryError])
             // the user said to keep going, so if they save, they might clobber data...
             // if we don't return YES, NSDocumentController puts up its lame alert saying the document could not be opened, and we get no partial data
-            isPartialData = NO;
+            error = nil;
         else if (outError)
             // return NSUserCancelledError so NSDocumentController won't show another alert
             *outError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSUserCancelledError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:error, NSUnderlyingErrorKey, nil]];
     }
     
-    if (isPartialData == NO) {
+    if (error == nil) {
         [self setPublications:newPubs macros:newMacros documentInfo:newDocumentInfo groups:newGroups frontMatter:newFrontMatter encoding:encoding];
         return YES;
     } else {
@@ -2110,19 +2109,18 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 #pragma mark New publications from pasteboard
 
 - (BibItem *)publicationForFileURL:(NSURL *)fileURL {
-    NSError *xerror = nil;
+    NSError *error = nil;
     BibItem *newBI = nil;
     
     fileURL = [fileURL URLByStandardizingPath];
     
     // most reliable metadata should be our private EA
     if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKReadExtendedAttributesKey]){
-        NSData *btData = [[SKNExtendedAttributeManager sharedNoSplitManager] extendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" atPath:[fileURL path] traverseLink:NO error:&xerror];
+        NSData *btData = [[SKNExtendedAttributeManager sharedNoSplitManager] extendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" atPath:[fileURL path] traverseLink:NO error:&error];
         if(btData){
             NSString *btString = [[NSString alloc] initWithData:btData encoding:NSUTF8StringEncoding];
-            BOOL isPartialData;
-            NSArray *items = [BDSKBibTeXParser itemsFromString:btString owner:self isPartialData:&isPartialData error:&xerror];
-            newBI = isPartialData ? nil : [items firstObject];
+            NSArray *items = [BDSKBibTeXParser itemsFromString:btString owner:self error:&error];
+            newBI = error ? nil : [items firstObject];
             [btString release];
         }
     }
@@ -2159,7 +2157,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSSet *unreadableTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"pdf", @"ps", @"eps", @"doc", @"htm", @"textClipping", @"webloc", @"html", @"rtf", @"tiff", @"tif", @"png", @"jpg", @"jpeg", nil];
     
     NSError *parseError = nil;
-    BOOL isPartialData = NO;
     NSArray *contentArray = nil;
     
     if ([unreadableTypes containsObject:[fileURL pathExtension]] == NO) {
@@ -2177,13 +2174,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                 type = [contentString contentStringType];
             
             if (type != BDSKUnknownStringType) {
-                contentArray = [BDSKStringParser itemsFromString:contentString ofType:type owner:self isPartialData:&isPartialData error:&parseError];
+                contentArray = [BDSKStringParser itemsFromString:contentString ofType:type owner:self error:&parseError];
                 
-                if (isPartialData) {
-                    if ([parseError isLocalErrorWithCode:kBDSKParserIgnoredFrontMatter]) {
-                        if (verbose) [self presentError:parseError];
-                        parseError = nil;
-                    } else if([parseError isLocalErrorWithCode:kBDSKBibTeXParserFailed]) {
+                if (parseError) {
+                    if([parseError isLocalErrorWithCode:kBDSKBibTeXParserFailed]) {
                         if (verbose == NO) {
                             contentArray = nil;
                         } else {
@@ -2191,6 +2185,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                                 contentArray = nil;
                             parseError = nil;
                         }
+                    } else if (verbose) {
+                        [self presentError:parseError];
+                        parseError = nil;
                     }
                 }
             }
@@ -2277,7 +2274,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSArray *newPubs = nil;
     NSMutableArray *newFilePubs = nil;
 	NSError *error = nil;
-    BOOL isPartialData = NO;
     NSString *temporaryCiteKey = nil;
     BOOL verbose = (options & BDSKImportNonVerbose) == 0;
     
@@ -2318,7 +2314,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                 // sniffing the string for RIS is broken because RefMiner puts junk at the beginning
                 if ([pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKReferenceMinerStringPboardType, nil]])
                     stringType = BDSKReferenceMinerStringType;
-                newPubs = [BDSKStringParser itemsFromString:string ofType:stringType owner:self isPartialData:&isPartialData error:&error];
+                newPubs = [BDSKStringParser itemsFromString:string ofType:stringType owner:self error:&error];
             } else {
                 // errors are key, value
                 error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Did not find anything appropriate on the pasteboard", @"Error description")];
@@ -2331,7 +2327,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         temporaryCiteKey = [[error userInfo] objectForKey:BDSKTemporaryCiteKeyErrorKey];
     } else if ([error isLocalErrorWithCode:kBDSKBibTeXParserFailed]) {
         // this asks whether to ignore partially failed bibtex when verbose, otherwise just ignore
-        if (isPartialData && (verbose == NO || [self presentError:error] == NO))
+        if (verbose == NO || [self presentError:error] == NO)
             newPubs = nil;
     } else if (error && verbose) {
         // display error for non-bibtex string parsers when verbose

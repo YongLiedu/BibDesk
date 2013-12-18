@@ -86,7 +86,6 @@
     
     NSArray* bibtexItems = [BDSKBibTeXParser itemsFromString:bibTeXString
                                                        owner:nil
-                                               isPartialData:NULL
                                                        error:&error];
     if (bibtexItems == nil){
         if(outError) *outError = error;

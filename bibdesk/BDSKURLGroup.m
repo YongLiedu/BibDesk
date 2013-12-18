@@ -196,15 +196,12 @@
         [self setErrorMessage:NSLocalizedString(@"Unable to find content", @"Error description")];
     } else {
         BDSKStringType type = [contentString contentStringType];
-        BOOL isPartialData = NO;
         if (type == BDSKBibTeXStringType) {
-            pubs = [BDSKBibTeXParser itemsFromData:[contentString dataUsingEncoding:NSUTF8StringEncoding] macros:&macros filePath:filePath owner:self encoding:NSUTF8StringEncoding isPartialData:&isPartialData error:&error];
-            if (isPartialData && [error isLocalErrorWithCode:kBDSKParserIgnoredFrontMatter])
-                isPartialData = NO;
+            pubs = [BDSKBibTeXParser itemsFromData:[contentString dataUsingEncoding:NSUTF8StringEncoding] macros:&macros filePath:filePath owner:self encoding:NSUTF8StringEncoding error:&error];
         } else if (type != BDSKUnknownStringType && type != BDSKNoKeyBibTeXStringType){
             pubs = [BDSKStringParser itemsFromString:contentString ofType:type error:&error];
         }
-        if (pubs == nil || isPartialData) {
+        if (pubs == nil || [error isLocalErrorWithCode:kBDSKBibTeXParserFailed]) {
             failedDownload = YES;
             [self setErrorMessage:[error localizedDescription]];
         }

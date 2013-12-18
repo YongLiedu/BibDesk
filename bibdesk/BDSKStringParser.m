@@ -95,7 +95,7 @@ static Class classForType(BDSKStringType stringType)
     return [parserClass itemsFromString:string error:outError];
 }
 
-+ (NSArray *)itemsFromString:(NSString *)string ofType:(BDSKStringType)type owner:(id <BDSKOwner>)owner isPartialData:(BOOL *)isPartialData error:(NSError **)outError {
++ (NSArray *)itemsFromString:(NSString *)string ofType:(BDSKStringType)type owner:(id <BDSKOwner>)owner error:(NSError **)outError {
     NSArray *newPubs = nil;
     NSError *parseError = nil;
     
@@ -104,14 +104,12 @@ static Class classForType(BDSKStringType stringType)
         type = [string contentStringType];
     
     if(type == BDSKBibTeXStringType){
-        newPubs = [BDSKBibTeXParser itemsFromString:string owner:owner isPartialData:isPartialData error:&parseError];
+        newPubs = [BDSKBibTeXParser itemsFromString:string owner:owner error:&parseError];
     }else if(type == BDSKNoKeyBibTeXStringType){
-        newPubs = [BDSKBibTeXParser itemsFromString:[string stringWithPhoneyCiteKeys:@"FixMe"] owner:owner isPartialData:isPartialData error:&parseError];
+        newPubs = [BDSKBibTeXParser itemsFromString:[string stringWithPhoneyCiteKeys:@"FixMe"] owner:owner error:&parseError];
 	}else{
         // this will create the NSError if the type is unrecognized
         newPubs = [self itemsFromString:string ofType:type error:&parseError];
-        if(isPartialData)
-            *isPartialData = newPubs != nil;
     }
     
     if([parseError isLocalErrorWithCode:kBDSKBibTeXParserFailed]){

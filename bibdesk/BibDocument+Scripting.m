@@ -67,6 +67,7 @@
 #import "BDSKBibTeXParser.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKTemplate.h"
+#import "NSError_BDSKExtensions.h"
 
 
 @implementation BibDocument (Scripting)
@@ -166,9 +167,8 @@
         NSString *bibtexString = [properties objectForKey:@"bibTeXString"];
         if (bibtexString) {
             NSError *error = nil;
-            BOOL isPartialData;
-            NSArray *newPubs = [BDSKBibTeXParser itemsFromString:bibtexString owner:self isPartialData:&isPartialData error:&error];
-            if (isPartialData) {
+            NSArray *newPubs = [BDSKBibTeXParser itemsFromString:bibtexString owner:self error:&error];
+            if ([error isLocalErrorWithCode:kBDSKBibTeXParserFailed]) {
                 NSScriptCommand *cmd = [NSScriptCommand currentCommand];
                 [cmd setScriptErrorNumber:NSInternalScriptError];
                 [cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"BibDesk failed to process the BibTeX entry %@ with error %@. It may be malformed.",@"Error description"), bibtexString, [error localizedDescription]]];
