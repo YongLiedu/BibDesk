@@ -82,7 +82,7 @@ static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacro
 // private functions for handling different entry types; these functions do not do any locking around the parser
 static BOOL addItemToDictionaryOrSetDocumentInfo(AST *entry, NSMutableArray *returnArray, NSDictionary **outDocumentInfo, const char *buf, NSUInteger inputDataLength, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding);
 static BOOL appendPreambleToFrontmatter(AST *entry, NSMutableString *frontMatter, NSString *filePath, NSStringEncoding encoding);
-static BOOL addMacroToDictionary(AST *entry, NSMutableDictionary *dictionary, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding encoding, NSError **error);
+static BOOL addMacroToDictionary(AST *entry, NSMutableDictionary *dictionary, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding encoding, BOOL *hadCircularMacros);
 static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *frontMatter, NSMutableDictionary *groups, NSString *filePath, NSStringEncoding encoding);
 
 // private function for preserving newlines in annote/abstract fields; does not lock the parser
@@ -228,8 +228,7 @@ static NSString *stringWithoutComments(NSString *string) {
     const char *buf = (const char *)[inData bytes];
     BDSKMacroResolver *macroResolver = [anOwner macroResolver];	
     AST *entry = NULL;
-    NSError *error = nil;
-    BOOL hadProblems = NO, ignoredMacros = NO, ignoredFrontmatter = NO;
+    BOOL hadProblems = NO, ignoredMacros = NO, ignoredFrontmatter = NO, hadCircularMacros = NO;
     int parsed_ok = 1;
     
     while ((entry = bt_parse_entry(infile, (char *)fs_path, 0, &parsed_ok))) {
@@ -258,7 +257,7 @@ static NSString *stringWithoutComments(NSString *string) {
                 case BTE_MACRODEF:
                     if (macros == nil)
                         ignoredMacros = YES;
-                    else if (NO == addMacroToDictionary(entry, macros, macroResolver, filePath, parserEncoding, &error))
+                    else if (NO == addMacroToDictionary(entry, macros, macroResolver, filePath, parserEncoding, &hadCircularMacros))
                         hadProblems = YES;
                     break;
                 default:
@@ -282,10 +281,14 @@ static NSString *stringWithoutComments(NSString *string) {
     [parserLock unlock];
         
     if (outError) {
+        NSError *error = nil;
         // generic error message; the error tableview will have specific errors and context
-        if (parsed_ok == 0 || hadProblems) {
+        if (hadProblems) {
             error = [NSError localErrorWithCode:kBDSKBibTeXParserFailed localizedDescription:NSLocalizedString(@"Unable to parse string as BibTeX", @"Error description") underlyingError:error];
         // If no critical errors, warn about ignoring macros or frontmatter; callers can ignore this by passing a valid NSMutableString for frontmatter (or ignoring the partial data flag).  Mainly relevant for paste/drag on the document.
+        } else if (hadCircularMacros) {
+            error = [NSError mutableLocalErrorWithCode:kBDSKParserIgnoredFrontMatter localizedDescription:NSLocalizedString(@"Macros ignored while parsing BibTeX", @"")];
+            [error setValue:NSLocalizedString(@"Circular macro ignored.", @"Error description") forKey:NSLocalizedRecoverySuggestionErrorKey];
         } else if (ignoredMacros && ignoredFrontmatter) {
             error = [NSError mutableLocalErrorWithCode:kBDSKParserIgnoredFrontMatter localizedDescription:NSLocalizedString(@"Macros and front matter ignored while parsing BibTeX", @"")];
             [error setValue:NSLocalizedString(@"Front matter (preamble and comments) from pasted data should be added via a text editor, and macros should be added via the macro editor (cmd-shift-M)", @"") forKey:NSLocalizedRecoverySuggestionErrorKey];
@@ -894,7 +897,7 @@ static BOOL appendPreambleToFrontmatter(AST *entry, NSMutableString *frontMatter
     return success;
 }
 
-static BOOL addMacroToDictionary(AST *entry, NSMutableDictionary *dictionary, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding encoding, NSError **error)
+static BOOL addMacroToDictionary(AST *entry, NSMutableDictionary *dictionary, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding encoding, BOOL *hadCircularMacros)
 {
     // get the field name, there can be several macros in a single entry
     AST *field = NULL;
@@ -908,8 +911,8 @@ static BOOL addMacroToDictionary(AST *entry, NSMutableDictionary *dictionary, BD
         if([macroResolver string:macroString dependsOnMacro:macroKey inMacroDefinitions:dictionary]){
             NSString *message = NSLocalizedString(@"Macro leads to circular definition, ignored.", @"Error description");            
             [BDSKErrorObject reportErrorMessage:message forFile:filePath line:field->line];
-            if (error)
-                *error = [NSError localErrorWithCode:kBDSKBibTeXParserFailed localizedDescription:NSLocalizedString(@"Circular macro ignored.", @"Error description")];
+            if (hadCircularMacros)
+                *hadCircularMacros = YES;
         }else if(nil != macroString){
             [dictionary setObject:macroString forKey:macroKey];
         }else {
