@@ -303,7 +303,7 @@ static NSString *stringWithoutComments(NSString *string) {
     }
     
     if (isPartialData)
-        *isPartialData = (hadProblems || parsed_ok == 0 || ignoredMacros || ignoredFrontmatter);
+        *isPartialData = (hadProblems || hadCircularMacros || ignoredMacros || ignoredFrontmatter);
     
     return returnArray;
 }
