@@ -59,10 +59,12 @@ typedef NSInteger BDSKStringType;
 @protocol BDSKOwner;
 
 @interface BDSKStringParser : NSObject
-// passing BDSKUnknownStringType will ise the appropriate -contentStringType
+// passing BDSKUnknownStringType will use the appropriate -contentStringType
 + (BOOL)canParseString:(NSString *)string ofType:(BDSKStringType)stringType;
+// only for non-BibTeX string types
 + (NSArray *)itemsFromString:(NSString *)string ofType:(BDSKStringType)stringType error:(NSError **)outError;
-+ (NSArray *)itemsFromString:(NSString *)string ofType:(BDSKStringType)type owner:(id <BDSKOwner>)owner error:(NSError **)outError;
+// all string types including BibTeX
++ (NSArray *)itemsFromString:(NSString *)string ofType:(BDSKStringType)stringType owner:(id <BDSKOwner>)owner error:(NSError **)outError;
 @end
 
 
