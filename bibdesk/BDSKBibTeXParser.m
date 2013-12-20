@@ -877,7 +877,7 @@ static BOOL appendPreambleToFrontmatter(AST *entry, NSMutableString *frontMatter
     BOOL success = YES;
     
     // bt_get_text() just gives us \\ne for the field, so we'll manually traverse it and poke around in the AST to get what we want.  This is sort of nasty, so if someone finds a better way, go for it.
-    while(field = bt_next_value(entry, field, &type, NULL)){
+    while((field = bt_next_value(entry, field, &type, NULL))){
         char *text = field->text;
         if(text){
             if(paste) [frontMatter appendString:@"\" #\n   \""];
@@ -944,7 +944,7 @@ static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
     NSStringEncoding groupsEncoding = [[BDSKStringEncodingManager sharedEncodingManager] isUnparseableEncoding:encoding] ? encoding : NSUTF8StringEncoding;
     BOOL success = YES;
     
-    while(field = bt_next_value(entry, field, NULL, &text)){
+    while((field = bt_next_value(entry, field, NULL, &text))){
         if(text){
             if(firstValue){
                 firstValue = FALSE;
