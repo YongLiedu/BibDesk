@@ -871,23 +871,23 @@ static BOOL appendPreambleToFrontmatter(AST *entry, NSMutableString *frontMatter
     
     [frontMatter appendString:@"\n@preamble{\""];
     AST *field = NULL;
-    bt_nodetype type = BTAST_STRING;
+    char *text = NULL;
     BOOL paste = NO;
     NSString *tmpStr = nil;
     BOOL success = YES;
     
-    // bt_get_text() just gives us \\ne for the field, so we'll manually traverse it and poke around in the AST to get what we want.  This is sort of nasty, so if someone finds a better way, go for it.
-    while((field = bt_next_value(entry, field, &type, NULL))){
-        char *text = field->text;
-        if(text){
-            if(paste) [frontMatter appendString:@"\" #\n   \""];
+    // bt_get_text() just gives us \\n for the field, so we'll manually traverse it and poke around in the AST to get what we want.  This is sort of nasty, so if someone finds a better way, go for it.
+    while ((field = bt_next_value(entry, field, NULL, &text))) {
+        if (text) {
+            if (paste) [frontMatter appendString:@"\" #\n   \""];
             tmpStr = copyCheckedString(text, field->line, filePath, encoding);
-            if(tmpStr) 
+            if (tmpStr) {
                 [frontMatter appendString:tmpStr];
-            else
+                paste = YES;
+            } else {
                 success = NO;
+            }
             [tmpStr release];
-            paste = YES;
         }
     }
     [frontMatter appendString:@"\"}"];
