@@ -57,8 +57,6 @@ NSString *BDSKTemporaryCiteKeyErrorKey = @"BDSKTemporaryCiteKey";
     self = [super initWithDomain:domain code:code userInfo:nil];
     if (self) {
         mutableUserInfo = [[NSMutableDictionary alloc] initWithDictionary:dict];
-        // we override code with our own storage so it can be set
-        [self setCode:code];
     }
     return self;
 }
@@ -98,21 +96,6 @@ NSString *BDSKTemporaryCiteKeyErrorKey = @"BDSKTemporaryCiteKey";
 {
     if (value)
         [mutableUserInfo setValue:value forKey:key];
-}
-
-- (void)embedError:(NSError *)underlyingError;
-{
-    [self setValue:underlyingError forKey:NSUnderlyingErrorKey];
-}
-
-- (void)setCode:(NSInteger)code;
-{
-    [self setValue:[NSNumber numberWithInteger:code] forKey:@"__BDSKErrorCode"];
-}
-
-- (NSInteger)code;
-{
-    return [[self valueForKey:@"__BDSKErrorCode"] integerValue];
 }
 
 - (BOOL)isMutable;
@@ -161,23 +144,13 @@ NSString *BDSKTemporaryCiteKeyErrorKey = @"BDSKTemporaryCiteKey";
 + (id)mutableLocalErrorWithCode:(NSInteger)code localizedDescription:(NSString *)description underlyingError:(NSError *)underlyingError;
 {
     id error = [NSError mutableLocalErrorWithCode:code localizedDescription:description];
-    [error embedError:underlyingError];
+    [error setValue:underlyingError forKey:NSUnderlyingErrorKey];
     return error;
 }
 
 - (id)mutableCopyWithZone:(NSZone *)aZone;
 {
     return [[BDSKMutableError allocWithZone:aZone] initWithDomain:[self domain] code:[self code] userInfo:[self userInfo]];
-}
-
-- (void)embedError:(NSError *)underlyingError;
-{
-    [NSException raise:NSInternalInconsistencyException format:@"Mutating method sent to immutable NSError instance"];
-}
-
-- (void)setCode:(NSInteger)code;
-{
-    [NSException raise:NSInternalInconsistencyException format:@"Mutating method sent to immutable NSError instance"];
 }
 
 - (id)valueForUndefinedKey:(NSString *)aKey

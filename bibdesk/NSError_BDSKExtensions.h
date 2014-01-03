@@ -89,8 +89,4 @@ extern NSString *BDSKTemporaryCiteKeyErrorKey;
 - (BOOL)isLocalErrorWithCode:(NSInteger)code;
 - (BOOL)isMutable;
 
-// embed an underlying error; if this isn't a mutable subclass, raises an exception
-- (void)embedError:(NSError *)underlyingError;
-- (void)setCode:(NSInteger)code;
-
 @end
