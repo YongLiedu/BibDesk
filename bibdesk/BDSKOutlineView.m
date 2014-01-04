@@ -304,6 +304,8 @@ static char BDSKOutlineViewFontDefaultsObservationContext;
 - (void)insertNewline:(id)sender {
     if ([[self delegate] respondsToSelector:@selector(outlineViewInsertNewline:)])
         [[self delegate] outlineViewInsertNewline:self];
+    else
+        NSBeep();
 }
 
 - (void)insertSpace:(id)sender {
