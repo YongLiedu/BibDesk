@@ -747,6 +747,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     // try the main document first
     id document = [[NSDocumentController sharedDocumentController] mainDocument];
     if ([document isKindOfClass:aClass] == NO) {
+        document = nil;
         for (document in [NSApp orderedDocuments])
             if ([document isKindOfClass:aClass]) break;
         if (document == nil)
