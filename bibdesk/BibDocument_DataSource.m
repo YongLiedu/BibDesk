@@ -49,7 +49,6 @@
 #import "BDSKWebGroupViewController.h"
 #import "BDSKScriptHookManager.h"
 #import "BibDocument_Groups.h"
-#import "BibDocument_Search.h"
 #import "NSBezierPath_BDSKExtensions.h"
 #import "BDSKPreviewer.h"
 #import "BDSKMainTableView.h"
@@ -1497,7 +1496,7 @@
 
 - (BOOL)fileView:(FVFileView *)aFileView shouldOpenURL:(NSURL *)aURL {
     if ([aURL isFileURL])
-        return NO == [[NSWorkspace sharedWorkspace] openURL:aURL withSearchString:[self fileContentSearchString]];
+        return NO == [self openLinkedFileURL:aURL];
     else
         return NO == [[NSWorkspace sharedWorkspace] openLinkedURL:aURL];
 }

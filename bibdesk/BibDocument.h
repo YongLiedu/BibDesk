@@ -424,4 +424,6 @@ extern NSString *BDSKDocumentPublicationsKey;
 - (void)userAddedURL:(NSURL *)aURL forPublication:(BibItem *)pub;
 - (void)userRemovedURL:(NSURL *)aURL forPublication:(BibItem *)pub;
 
+- (BOOL)openLinkedFileURL:(NSURL *)url;
+
 @end

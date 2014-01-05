@@ -2630,4 +2630,12 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentFileURLDidChangeNotification object:self];
 }
 
+#pragma mark Opening a file URL
+
+- (BOOL)openLinkedFileURL:(NSURL *)url {
+    // See bug #1344720; don't search if this is a known field (Title, Author, etc.).  This feature can be annoying because Preview.app zooms in on the search result in this case, in spite of your zoom settings (bug report filed with Apple).
+    NSString *searchString = [self isDisplayingFileContentSearch] ? [searchField stringValue] : @"";
+    return [[NSWorkspace sharedWorkspace] openURL:url withSearchString:searchString];
+}
+
 @end

@@ -688,7 +688,7 @@ static BOOL changingColors = NO;
 - (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(NSUInteger)charIndex
 {
     if ([aLink respondsToSelector:@selector(isFileURL)] && [aLink isFileURL]) {
-        [[NSWorkspace sharedWorkspace] openURL:aLink withSearchString:[self fileContentSearchString]];
+        [self openLinkedFileURL:aLink];
         return YES;
     } else if ([aLink isKindOfClass:[NSString class]]) {
         BibItem *pub = [[self publications] itemForCiteKey:aLink];
@@ -713,7 +713,7 @@ static BOOL changingColors = NO;
         // the user said to go ahead
         for (BibItem *pub in [self clickedOrSelectedPublications]) {
             if ((fileURL = [pub localFileURLForField:field]))
-                [[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:[self fileContentSearchString]];
+                [self openLinkedFileURL:fileURL];
         }
     }
     [field release];
@@ -888,7 +888,7 @@ static BOOL changingColors = NO;
         
         for (NSURL *fileURL in urls) {
             if ([fileURL isEqual:[NSNull null]] == NO) {
-                [[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:[self fileContentSearchString]];
+                [self openLinkedFileURL:fileURL];
             }
         }
     }
