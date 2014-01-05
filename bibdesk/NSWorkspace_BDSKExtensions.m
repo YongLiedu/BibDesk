@@ -58,16 +58,15 @@
     
     // Find the application that should open this file
     BOOL success = NO;
-    NSURL *appURL = NULL;
+    NSURL *appURL = nil;
     NSString *bundleID = nil;
     NSString *extension = [[fileURL pathExtension] lowercaseString];
     NSDictionary *defaultViewers = [[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKDefaultViewersKey];
-    NSWorkspace *ws = [NSWorkspace sharedWorkspace];
     bundleID = [defaultViewers objectForKey:extension];
     if (bundleID)
-        appURL = [ws URLForApplicationWithBundleIdentifier:bundleID];
+        appURL = [self URLForApplicationWithBundleIdentifier:bundleID];
     if (appURL == nil) {
-        appURL = [ws URLForApplicationToOpenURL:fileURL];
+        appURL = [self URLForApplicationToOpenURL:fileURL];
         if (appURL)
             bundleID = [[NSBundle bundleWithURL:appURL] bundleIdentifier];
     }
