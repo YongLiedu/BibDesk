@@ -42,7 +42,7 @@
 
 - (id)initWithFrame:(NSRect)frameRect{
 	if(self = [super initWithFrame:frameRect]){
-		showFocusRing = YES;
+		showFocusRing = NO;
 	}
 	return self;
 }
