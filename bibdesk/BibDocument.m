@@ -211,11 +211,6 @@ static NSOperationQueue *metadataCacheQueue = nil;
         pboardHelper = [[BDSKItemPasteboardHelper alloc] init];
         [pboardHelper setDelegate:self];
         
-        docFlags.isDocumentClosed = NO;
-        
-        // need to set this for new documents
-        [self setDocumentStringEncoding:[[NSDocumentController sharedDocumentController] lastSelectedEncoding]]; 
-        
         // these are set in windowControllerDidLoadNib: from the xattr defaults if available
         bottomPreviewDisplay = BDSKPreviewDisplayText;
         bottomPreviewDisplayTemplate = nil;
@@ -229,6 +224,9 @@ static NSOperationQueue *metadataCacheQueue = nil;
         
         memset(&docFlags, 0, sizeof(docFlags));
         memset(&docState, 0, sizeof(docState));
+        
+        // need to set this for new documents
+        docState.documentStringEncoding = [[NSDocumentController sharedDocumentController] lastSelectedEncoding];
         
         // these are created lazily when needed
         fileSearchController = nil;
