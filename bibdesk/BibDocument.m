@@ -226,31 +226,15 @@ static NSOperationQueue *metadataCacheQueue = nil;
         previousSortKey = nil;
         tmpSortKey = nil;
         sortGroupsKey = nil;
-        docFlags.sortDescending = NO;
-        docFlags.previousSortDescending = NO;
-        docFlags.tmpSortDescending = NO;
-        docFlags.sortGroupsDescending = NO;
-        docFlags.aggregateImport = NO;
-        docFlags.itemChangeMask = 0;
-        docFlags.displayMigrationAlert = NO;
-        docFlags.inOptionKeyState = NO;
+        
+        memset(&docFlags, 0, sizeof(docFlags));
+        memset(&docState, 0, sizeof(docState));
         
         // these are created lazily when needed
         fileSearchController = nil;
         drawerController = nil;
         previewer = nil;
         toolbarItems = nil;
-        docState.lastPreviewHeight = 0.0;
-        docState.lastGroupViewWidth = 0.0;
-        docState.lastFileViewWidth = 0.0;
-        docState.lastWebViewFraction = 0.0;
-        docFlags.isAnimating = NO;
-        docFlags.ignoreSelectionChange = NO;
-        docFlags.ignoreGroupSelectionChange = NO;
-        
-        // these are temporary state variables
-        docFlags.dragFromExternalGroups = NO;
-        docState.currentSaveOperationType = 0;
         
         [self registerForNotifications];
         
