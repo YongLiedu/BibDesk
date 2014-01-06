@@ -98,13 +98,47 @@ enum {
     return self;
 }
 
+// This method initializes the popup with list of encodings; it also sets up the selected encoding as indicated and if includeDefaultItem is YES, includes an initial item for selecting "Automatic" choice.  These non-encoding items all have BDSKNoStringEncoding as their tags. Otherwise the tags are set to the NSStringEncoding value for the encoding.
+- (void)setupEncodings {
+    NSArray *encs = [[BDSKStringEncodingManager sharedEncodingManager] enabledEncodings];
+    NSUInteger itemToSelect = 0;
+    
+    // Put the encodings in the popup
+    [self removeAllItems];
+    
+    // Make sure the initial selected encoding appears in the list
+    if (NO == [encs containsObject:[NSNumber numberWithUnsignedInteger:defaultEncoding]])
+        encs = [encs arrayByAddingObject:[NSNumber numberWithUnsignedInteger:defaultEncoding]];
+    
+    // Fill with encodings
+    for (NSNumber *encNumber in encs) {
+        NSStringEncoding enc = [encNumber unsignedIntegerValue];
+        [self addItemWithTitle:enc != BDSKNoStringEncoding ? [NSString localizedNameOfStringEncoding:enc] : @""];
+        [[self lastItem] setTag:enc];
+        [[self lastItem] setEnabled:YES];
+        if (enc == defaultEncoding) itemToSelect = [self numberOfItems] - 1;
+    }
+    
+    // Add an optional separator and "customize" item at end
+    if ([self numberOfItems] > 0) {
+        [[self menu] addItem:[NSMenuItem separatorItem]];
+        [[self lastItem] setTag:BDSKNoStringEncoding];
+    }
+    [self addItemWithTitle:[NSLocalizedString(@"Customize Encodings List", @"Encoding popup entry for bringing up the Customize Encodings List panel") stringByAppendingEllipsis]];
+    [[self lastItem] setAction:@selector(showWindow:)];
+    [[self lastItem] setTarget:[BDSKStringEncodingManager sharedEncodingManager]];
+    [[self lastItem] setTag:BDSKNoStringEncoding];
+    
+    [self selectItemAtIndex:itemToSelect];
+}
+
 - (NSStringEncoding)encoding {
     return [[self selectedItem] tag];
 }
 
 - (void)setEncoding:(NSStringEncoding)encoding {
     defaultEncoding = encoding;
-    [[BDSKStringEncodingManager sharedEncodingManager] setupPopUp:self selectedEncoding:defaultEncoding];
+    [self setupEncodings];
 }
 
 - (void)dealloc {
@@ -114,9 +148,7 @@ enum {
 
 // Update contents based on encodings list customization
 - (void)handleEncodingsListChanged:(NSNotification *)notification {
-    NSInteger tag = [[self selectedItem] tag];
-    defaultEncoding = tag;
-    [[BDSKStringEncodingManager sharedEncodingManager] setupPopUp:self selectedEncoding:defaultEncoding];
+    [self setEncoding:[[self selectedItem] tag]];
 }
 
 @end
@@ -266,42 +298,6 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
     }
     [encodingMatrix sizeToCells];
     [self noteEncodingListChange:NO updateList:YES postNotification:NO];
-}
-
-
-// This method initializes the provided popup with list of encodings; it also sets up the selected encoding as indicated and if includeDefaultItem is YES, includes an initial item for selecting "Automatic" choice.  These non-encoding items all have BDSKNoStringEncoding as their tags. Otherwise the tags are set to the NSStringEncoding value for the encoding.
-- (void)setupPopUp:(BDSKEncodingPopUpButton *)popup selectedEncoding:(NSUInteger)selectedEncoding {
-    NSArray *encs = [self enabledEncodings];
-    NSUInteger cnt, numEncodings, itemToSelect = 0;
-        
-    // Put the encodings in the popup
-    [popup removeAllItems];
-
-    // Make sure the initial selected encoding appears in the list
-    if (NO == [encs containsObject:[NSNumber numberWithUnsignedInteger:selectedEncoding]]) encs = [encs arrayByAddingObject:[NSNumber numberWithUnsignedInteger:selectedEncoding]];
-
-    numEncodings = [encs count];
-
-    // Fill with encodings
-    for (cnt = 0; cnt < numEncodings; cnt++) {
-        NSStringEncoding enc = [[encs objectAtIndex:cnt] unsignedIntegerValue];
-        [popup addItemWithTitle:enc != BDSKNoStringEncoding ? [NSString localizedNameOfStringEncoding:enc] : @""];
-        [[popup lastItem] setTag:enc];
-        [[popup lastItem] setEnabled:YES];
-        if (enc == selectedEncoding) itemToSelect = [popup numberOfItems] - 1;
-    }
-
-    // Add an optional separator and "customize" item at end
-    if ([popup numberOfItems] > 0) {
-        [[popup menu] addItem:[NSMenuItem separatorItem]];
-        [[popup lastItem] setTag:BDSKNoStringEncoding];
-    }
-    [popup addItemWithTitle:[NSLocalizedString(@"Customize Encodings List", @"Encoding popup entry for bringing up the Customize Encodings List panel") stringByAppendingEllipsis]];
-    [[popup lastItem] setAction:@selector(showWindow:)];
-    [[popup lastItem] setTarget:self];
-    [[popup lastItem] setTag:BDSKNoStringEncoding];
-
-    [popup selectItemAtIndex:itemToSelect];
 }
 
 
