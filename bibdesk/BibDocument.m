@@ -1441,7 +1441,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     BOOL shouldAppendFrontMatter = YES;
     NSStringEncoding encoding = [self encodingForSaving];
     NSString *encodingName = [NSString localizedNameOfStringEncoding:encoding];
-    NSStringEncoding groupsEncoding = [[BDSKStringEncodingManager sharedEncodingManager] isUnparseableEncoding:encoding] ? encoding : NSUTF8StringEncoding;
+    NSStringEncoding groupsEncoding = [BDSKBibTeXParser isUnparseableEncoding:encoding] ? encoding : NSUTF8StringEncoding;
     
     NSInteger options = 0;
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey])
@@ -1848,7 +1848,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 - (BOOL)readFromBibTeXData:(NSData *)data fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
     NSString *filePath = [absoluteURL path];
-    NSStringEncoding parserEncoding = [[BDSKStringEncodingManager sharedEncodingManager] isUnparseableEncoding:encoding] ? NSUTF8StringEncoding : encoding;
+    NSStringEncoding parserEncoding = [BDSKBibTeXParser isUnparseableEncoding:encoding] ? NSUTF8StringEncoding : encoding;
     
     if(parserEncoding != encoding){
         NSString *string = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];

@@ -54,7 +54,6 @@
 #import "BDSKMacroResolver.h"
 #import "BDSKOwnerProtocol.h"
 #import "BDSKGroupsArray.h"
-#import "BDSKStringEncodingManager.h"
 #import "NSScanner_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "BDSKCompletionManager.h"
@@ -162,6 +161,16 @@ static NSString *stringWithoutComments(NSString *string) {
     [theRegex release];
 				
     return found;
+}
+
+// encodings which btparse cannot handle, we might add more encodings when we find out
++ (BOOL)isUnparseableEncoding:(NSStringEncoding)encoding;
+{
+    CFStringEncoding cfEncoding = CFStringConvertNSStringEncodingToEncoding(encoding);
+    return cfEncoding == kCFStringEncodingUTF16 || cfEncoding == kCFStringEncodingUTF16BE || cfEncoding == kCFStringEncodingUTF16LE || 
+           cfEncoding == kCFStringEncodingUTF32 || cfEncoding == kCFStringEncodingUTF32BE || cfEncoding == kCFStringEncodingUTF32LE || 
+           cfEncoding == kCFStringEncodingDOSJapanese || cfEncoding == kCFStringEncodingShiftJIS || cfEncoding == kCFStringEncodingMacJapanese || cfEncoding == kCFStringEncodingISO_2022_JP || cfEncoding == kCFStringEncodingShiftJIS_X0213_00 || 
+           cfEncoding == kCFStringEncodingEBCDIC_CP037;
 }
 
 /// libbtparse methods
@@ -941,7 +950,7 @@ static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
     NSInteger groupType = -1;
     Boolean firstValue = (groups != nil);
     
-    NSStringEncoding groupsEncoding = [[BDSKStringEncodingManager sharedEncodingManager] isUnparseableEncoding:encoding] ? encoding : NSUTF8StringEncoding;
+    NSStringEncoding groupsEncoding = [BDSKBibTeXParser isUnparseableEncoding:encoding] ? encoding : NSUTF8StringEncoding;
     BOOL success = YES;
     
     while((field = bt_next_value(entry, field, NULL, &text))){

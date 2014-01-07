@@ -272,16 +272,6 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
     return allEncodings;
 }
 
-// encodings which btparse cannot handle, we might add more encodings when we find out
-- (BOOL)isUnparseableEncoding:(NSStringEncoding)encoding;
-{
-    CFStringEncoding cfEncoding = CFStringConvertNSStringEncodingToEncoding(encoding);
-    return cfEncoding == kCFStringEncodingUTF16 || cfEncoding == kCFStringEncodingUTF16BE || cfEncoding == kCFStringEncodingUTF16LE || 
-           cfEncoding == kCFStringEncodingUTF32 || cfEncoding == kCFStringEncodingUTF32BE || cfEncoding == kCFStringEncodingUTF32LE || 
-           cfEncoding == kCFStringEncodingDOSJapanese || cfEncoding == kCFStringEncodingShiftJIS || cfEncoding == kCFStringEncodingMacJapanese || cfEncoding == kCFStringEncodingISO_2022_JP || cfEncoding == kCFStringEncodingShiftJIS_X0213_00 || 
-           cfEncoding == kCFStringEncodingEBCDIC_CP037;
-}
-
 // Called once (when the UI is first brought up) to properly setup the encodings list in the "Customize Encodings List" panel.
 - (void)setupEncodingsList {
     NSArray *allEncodings = [[self class] allAvailableStringEncodings];
@@ -299,7 +289,6 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
     [encodingMatrix sizeToCells];
     [self noteEncodingListChange:NO updateList:YES postNotification:NO];
 }
-
 
 // Returns the actual enabled list of encodings.
 - (NSArray *)enabledEncodings {

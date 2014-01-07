@@ -48,6 +48,8 @@
 + (BOOL)canParseString:(NSString *)string;
 + (BOOL)canParseStringAfterFixingKeys:(NSString *)string;
 
++ (BOOL)isUnparseableEncoding:(NSStringEncoding)encoding;
+
 /*!
     @method     itemsFromString:error:owner:encoding:error:
     @abstract   Convenience method that returns an array of BibItems from the input string; used by the pasteboard.  Uses libbtparse to parse the data.

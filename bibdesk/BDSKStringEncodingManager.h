@@ -68,8 +68,6 @@
 
 + (NSStringEncoding)defaultEncoding;
 
-- (BOOL)isUnparseableEncoding:(NSStringEncoding)encoding;
-
 - (NSArray *)enabledEncodings;
 
 - (IBAction)encodingListChanged:(id)sender;
