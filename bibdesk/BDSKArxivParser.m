@@ -89,10 +89,10 @@
         arxivIDNodePath = @"./a[contains(text(),'arXiv:')]";
         
         pdfURLNodePath = @".//div[@class='full-text']//a[contains(text(),'PDF')]";
-        titleNodePath = @".//h1[@class='title']";
+        titleNodePath = @".//h1[@class='title mathjax']";
         authorsNodePath = @".//div[@class='authors']/a";
         journalNodePath = @".//td[@class='tablecell jref']";
-        abstractNodePath = @".//blockquote[@class='abstract']";
+        abstractNodePath = @".//blockquote[@class='abstract mathjax']";
     }
     
     AGRegex *eprintRegex1 = [AGRegex regexWithPattern:@"([0-9]{2})([0-9]{2})\\.([0-9]{4})"
