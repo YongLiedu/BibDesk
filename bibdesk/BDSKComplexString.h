@@ -1,6 +1,6 @@
 // BDSKComplexString.h
 /*
- This software is Copyright (c) 2004-2013
+ This software is Copyright (c) 2004-2014
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without

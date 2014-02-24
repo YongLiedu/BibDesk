@@ -2,7 +2,7 @@
 // BibDesk
 // Created by Michael McCracken, 2002 
 /*
- This software is Copyright (c) 2002-2013
+ This software is Copyright (c) 2002-2014
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
