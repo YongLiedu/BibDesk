@@ -52,8 +52,6 @@
 #define TITLE_KEY                   @"title"
 #define INITIAL_VALUES_KEY          @"initialValues"
 #define PANES_KEY                   @"panes"
-#define MINIMUM_SYSTEM_VERSION_KEY  @"minimumSystemVersion"
-#define MAXIMUM_SYSTEM_VERSION_KEY  @"maximumSystemVersion"
 
 #define BDSKPreferencesToolbarIdentifier                @"BDSKPreferencesToolbarIdentifier"
 #define BDSKPreferencesToolbarShowAllItemIdentifier     @"BDSKPreferencesToolbarShowAllItemIdentifier"
