@@ -41,7 +41,6 @@
 #import "BDSKPreferencePane.h"
 #import "BDSKPreferenceIconView.h"
 #import "BDSKOverlayWindow.h"
-#import "BDSKVersionNumber.h"
 #import <Sparkle/Sparkle.h>
 #import "NSViewAnimation_BDSKExtensions.h"
 
@@ -530,11 +529,6 @@ static id sharedController = nil;
 	
     NSAssert(categoryArray != nil, @"Could not find preferences in main bundle");
     
-    SInt32 majorVersion = 0, minorVersion = 0, bugfixVersion = 0;
-	BDSKVersionNumber *systemVersion = nil;
-    if (noErr == Gestalt(gestaltSystemVersionMajor, &majorVersion) && noErr == Gestalt(gestaltSystemVersionMinor, &minorVersion) && noErr == Gestalt(gestaltSystemVersionBugFix, &bugfixVersion))
-        systemVersion = [BDSKVersionNumber versionNumberWithVersionString:[NSString stringWithFormat:@"%i.%i.%i", majorVersion, minorVersion, bugfixVersion]];
-    
     for (NSDictionary *dict in categoryArray) {
         NSMutableArray *paneArray = [[NSMutableArray alloc] init];
         
@@ -545,11 +539,7 @@ static id sharedController = nil;
             [initialValues addEntriesFromDictionary:[record initialValues]];
             [records setObject:record forKey:identifier];
             [record release];
-            BDSKVersionNumber *minimumSystemVersion = [BDSKVersionNumber versionNumberWithVersionString:[paneDict valueForKey:MINIMUM_SYSTEM_VERSION_KEY]];
-            BDSKVersionNumber *maximumSystemVersion = [BDSKVersionNumber versionNumberWithVersionString:[paneDict valueForKey:MAXIMUM_SYSTEM_VERSION_KEY]];
-            if ((minimumSystemVersion == nil || [systemVersion compare:minimumSystemVersion] != NSOrderedAscending) &&
-                (maximumSystemVersion == nil || [systemVersion compare:maximumSystemVersion] != NSOrderedDescending))
-                [paneArray addObject:identifier];
+            [paneArray addObject:identifier];
         }
         
         NSString *category = [dict valueForKey:IDENTIFIER_KEY];
