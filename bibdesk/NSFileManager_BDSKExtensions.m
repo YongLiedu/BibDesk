@@ -198,18 +198,10 @@ static void destroyTemporaryDirectory()
             [dirEnum skipDescendents];
             NSString *pipePath = [fullPath stringByAppendingPathComponent:@".lyxpipe.in"];
             if ([file hasPrefix:@"LyX"] && [self fileExistsAtPath:pipePath]) {
-                if (version == nil) {
+                BDSKVersionNumber *fileVersion = [[[BDSKVersionNumber alloc] initWithVersionString:([file hasPrefix:@"LyX-"] ? [file substringFromIndex:4] : @"")] autorelease];
+                if (version == nil || [fileVersion compare:version] == NSOrderedDescending) {
                     lyxPipePath = pipePath;
-                } else {
-                    BDSKVersionNumber *fileVersion = nil;
-                    if ([file hasPrefix:@"LyX-"])
-                        fileVersion = [[[BDSKVersionNumber alloc] initWithVersionString:[file substringFromIndex:4]] autorelease];
-                    else
-                        fileVersion = [[[BDSKVersionNumber alloc] initWithVersionString:@""] autorelease];
-                    if ([fileVersion compare:version] == NSOrderedDescending) {
-                        lyxPipePath = pipePath;
-                        version = fileVersion;
-                    }
+                    version = fileVersion;
                 }
             }
         }
