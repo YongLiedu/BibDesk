@@ -164,7 +164,7 @@ static id sharedOpenWithController = nil;
     [openPanel setCanChooseDirectories:NO];
     [openPanel setAllowsMultipleSelection:NO];
     [openPanel setPrompt:NSLocalizedString(@"Choose Viewer", @"Prompt for Choose panel")];
-    [openPanel setDirectoryURL:[NSURL fileURLWithPath:[[NSFileManager defaultManager] applicationsDirectory]]];
+    [openPanel setDirectoryURL:[[NSFileManager defaultManager] applicationsDirectoryURL]];
     [openPanel setAllowedFileTypes:[NSArray arrayWithObjects:@"app", nil]];
     
     NSInteger rv = [openPanel runModal];

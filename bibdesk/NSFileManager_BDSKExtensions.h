@@ -70,8 +70,8 @@
 @interface NSFileManager (BDSKExtensions)
 
 - (NSString *)applicationSupportDirectory;
-- (NSString *)applicationsDirectory;
 - (NSString *)desktopDirectory;
+- (NSURL *)applicationsDirectoryURL;
 - (NSURL *)downloadFolderURL;
 - (NSURL *)latestLyXPipeURL;
 

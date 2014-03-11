@@ -543,7 +543,7 @@ static NSSet *alwaysDisabledFields = nil;
         [openPanel setCanChooseDirectories:NO];
         [openPanel setAllowsMultipleSelection:NO];
         [openPanel setPrompt:NSLocalizedString(@"Choose Viewer", @"Prompt for Choose panel")];
-        [openPanel setDirectoryURL:[NSURL fileURLWithPath:[[NSFileManager defaultManager] applicationsDirectory]]];
+        [openPanel setDirectoryURL:[[NSFileManager defaultManager] applicationsDirectoryURL]];
         [openPanel setAllowedFileTypes:[NSArray arrayWithObjects:@"app", nil]];
         [openPanel beginSheetModalForWindow:[[self view] window] completionHandler:^(NSInteger result){
             NSString *bundleID;

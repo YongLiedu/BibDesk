@@ -159,29 +159,28 @@ static void destroyTemporaryDirectory()
     return path;
 }
 
-- (NSString *)applicationsDirectory{
-    NSString *path = [NSSearchPathForDirectoriesInDomains(NSApplicationDirectory, NSLocalDomainMask, YES) firstObject];
+- (NSString *)desktopDirectory {
+    return [NSSearchPathForDirectoriesInDomains(NSDesktopDirectory, NSUserDomainMask, YES) firstObject];
+}
+
+- (NSURL *)applicationsDirectoryURL {
+    NSURL *applicationsURL = [self URLForDirectory:NSApplicationDirectory inDomain:NSLocalDomainMask appropriateForURL:nil create:NO error:NULL];
     
-    if (path == nil) {
-        path = @"/Applications";
+    if (applicationsURL == nil) {
+        applicationsURL = [NSURL fileURLWithPath:@"/Applications"];
         BOOL isDir;
-        if ([self fileExistsAtPath:path isDirectory:&isDir] == NO || isDir == NO) {
+        if ([self fileExistsAtPath:[applicationsURL path] isDirectory:&isDir] == NO || isDir == NO) {
             NSLog(@"The system was unable to find your Applications folder.");
             return nil;
         }
     }
     
-    return path;
-}
-
-- (NSString *)desktopDirectory {
-    return [NSSearchPathForDirectoriesInDomains(NSDesktopDirectory, NSUserDomainMask, YES) firstObject];
+    return applicationsURL;
 }
 
 - (NSURL *)downloadFolderURL;
 {
-    NSString *downloadsPath = [NSSearchPathForDirectoriesInDomains(NSDownloadsDirectory, NSUserDomainMask, YES) lastObject];
-    return downloadsPath ? [NSURL fileURLWithPath:downloadsPath] : nil;
+    return [self URLForDirectory:NSDownloadsDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:NO error:NULL];
 }
 
 - (NSURL *)latestLyXPipeURL {
