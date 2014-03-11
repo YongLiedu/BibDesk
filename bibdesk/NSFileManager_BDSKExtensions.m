@@ -186,7 +186,7 @@ static void destroyTemporaryDirectory()
 
 - (NSURL *)latestLyXPipeURL {
     NSURL *appSupportURL = [self URLForDirectory:NSApplicationSupportDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:NO error:NULL];
-    NSDirectoryEnumerator *dirEnum = [self enumeratorAtURL:appSupportURL includingPropertiesForKeys:[NSArray arrayWithObjects:NSURLIsDirectoryKey, nil] options:NSDirectoryEnumerationSkipsSubdirectoryDescendants errorHandler:nil];
+    NSDirectoryEnumerator *dirEnum = [self enumeratorAtURL:appSupportURL includingPropertiesForKeys:[NSArray arrayWithObjects:NSURLNameKey, NSURLIsDirectoryKey, nil] options:NSDirectoryEnumerationSkipsSubdirectoryDescendants errorHandler:nil];
     NSURL *fileURL;
     NSURL *lyxPipeURL = nil;
     BDSKVersionNumber *version = nil;
@@ -195,13 +195,16 @@ static void destroyTemporaryDirectory()
         NSNumber *isDir = nil;
         [fileURL getResourceValue:&isDir forKey:NSURLIsDirectoryKey error:NULL];
         if ([isDir boolValue]) {
-            NSString *fileName = [fileURL lastPathComponent];
-            NSURL *pipeURL = [fileURL URLByAppendingPathComponent:@".lyxpipe.in"];
-            if ([fileName hasPrefix:@"LyX"] && [self objectExistsAtFileURL:pipeURL]) {
-                BDSKVersionNumber *fileVersion = [[[BDSKVersionNumber alloc] initWithVersionString:([fileName hasPrefix:@"LyX-"] ? [fileName substringFromIndex:4] : @"")] autorelease];
-                if (version == nil || [fileVersion compare:version] == NSOrderedDescending) {
-                    lyxPipeURL = pipeURL;
-                    version = fileVersion;
+            NSString *fileName = nil;
+            [fileURL getResourceValue:&fileName forKey:NSURLNameKey error:NULL];
+            if ([fileName hasPrefix:@"LyX"]) {
+                NSURL *pipeURL = [fileURL URLByAppendingPathComponent:@".lyxpipe.in"];
+                if ([self objectExistsAtFileURL:pipeURL]) {
+                    BDSKVersionNumber *fileVersion = [[[BDSKVersionNumber alloc] initWithVersionString:([fileName hasPrefix:@"LyX-"] ? [fileName substringFromIndex:4] : @"")] autorelease];
+                    if (version == nil || [fileVersion compare:version] == NSOrderedDescending) {
+                        lyxPipeURL = pipeURL;
+                        version = fileVersion;
+                    }
                 }
             }
         }
