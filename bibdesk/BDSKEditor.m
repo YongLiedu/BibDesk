@@ -2499,7 +2499,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     if ([[[publication owner] publications] itemForCiteKey:key] == nil) {
         NSString *queryString = queryStringWithCiteKey(key);
         if ([[BDSKPersistentSearch sharedSearch] hasQuery:queryString] == NO) {
-            [[BDSKPersistentSearch sharedSearch] addQuery:queryString scopes:[NSArray arrayWithObject:[[NSFileManager defaultManager] spotlightCacheFolderPathByCreating:NULL]]];
+            [[BDSKPersistentSearch sharedSearch] addQuery:queryString scopes:[NSArray arrayWithObject:[[[NSFileManager defaultManager] spotlightCacheFolderURLByCreating:NULL] path]]];
         }
         isValid = ([[[BDSKPersistentSearch sharedSearch] resultsForQuery:queryString attribute:(id)kMDItemPath] count] > 0);
     } else {

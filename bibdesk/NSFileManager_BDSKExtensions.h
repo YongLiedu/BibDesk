@@ -92,10 +92,9 @@
 - (NSString *)temporaryFileWithBasename:(NSString *)fileName;
 
 // for spotlight stuff; thread safe
-- (NSString *)spotlightCacheFolderPathByCreating:(NSError **)anError;
-- (BOOL)removeSpotlightCacheFilesForCiteKeys:(NSArray *)itemNames;
+- (NSURL *)spotlightCacheFolderURLByCreating:(NSError **)anError;
 - (BOOL)removeSpotlightCacheFileForCiteKey:(NSString *)citeKey;
-- (NSString *)spotlightCacheFilePathWithCiteKey:(NSString *)citeKey;
+- (NSURL *)spotlightCacheFileURLWithCiteKey:(NSString *)citeKey;
 
 // methods to get/set com.apple.TextEncoding attribute for 10.5 compatibility
 // apparently only used by NSString methods with the usedEncoding: parameter

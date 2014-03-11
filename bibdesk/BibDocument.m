@@ -862,7 +862,9 @@ static NSOperationQueue *metadataCacheQueue = nil;
 	[publications removeObjectsAtIndexes:indexes];
 	
 	[pubs setValue:nil forKey:@"owner"];
-    [[NSFileManager defaultManager] removeSpotlightCacheFilesForCiteKeys:[pubs valueForKey:@"citeKey"]];
+    NSFileManager *fm = [NSFileManager defaultManager];
+    for (BibItem *pub in pubs)
+        [fm removeSpotlightCacheFileForCiteKey:[pub citeKey]];
 	
 	notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, BDSKDocumentPublicationsKey, nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocDelItemNotification

@@ -507,56 +507,42 @@ static void destroyTemporaryDirectory()
 
 #pragma mark Spotlight support
     
-- (NSString *)spotlightCacheFolderPathByCreating:(NSError **)anError{
-
-    NSString *cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
-    cachePath = [cachePath stringByAppendingPathComponent:@"Metadata"];
-    cachePath = [cachePath stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
+- (NSURL *)spotlightCacheFolderURLByCreating:(NSError **)anError{
+    
+    NSURL *cacheURL = [self URLForDirectory:NSCachesDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:NO error:NULL];
+    cacheURL = [[cacheURL URLByAppendingPathComponent:@"Metadata"] URLByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
     
     BOOL dirExists = YES;
     
-    if (NO == [self fileExistsAtPath:cachePath])
-        dirExists = [self createDirectoryAtPath:cachePath withIntermediateDirectories:YES attributes:nil error:NULL];
+    if (NO == [self objectExistsAtFileURL:cacheURL])
+        dirExists = [self createDirectoryAtPath:[cacheURL path] withIntermediateDirectories:YES attributes:nil error:NULL];
 
     if(dirExists == NO && anError != nil){
-        *anError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:cachePath, NSFilePathErrorKey, NSLocalizedString(@"Unable to create the cache directory.", @"Error description"), NSLocalizedDescriptionKey, nil]];
+        *anError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[cacheURL path], NSFilePathErrorKey, NSLocalizedString(@"Unable to create the cache directory.", @"Error description"), NSLocalizedDescriptionKey, nil]];
     }
         
-    return cachePath;
+    return cacheURL;
 }
 
-- (BOOL)removeSpotlightCacheFilesForCiteKeys:(NSArray *)itemNames;
-{
-	BOOL removed = YES;
-	
-	for (NSString *name in itemNames)
-		removed = removed && [self removeSpotlightCacheFileForCiteKey:name];
-	return removed;
-}
-
-- (NSString *)spotlightCacheFilePathWithCiteKey:(NSString *)citeKey;
+- (NSURL *)spotlightCacheFileURLWithCiteKey:(NSString *)citeKey;
 {
     // We use citeKey as the file's name, since it needs to be unique and static (relatively speaking), so we can overwrite the old cache content with newer content when saving the document.  We replace pathSeparator in paths, as we can't create subdirectories with -[NSDictionary writeToFile:] (currently this is the POSIX path separator).
-    NSString *path = citeKey;
+    NSString *filename = citeKey;
     NSString *pathSeparator = [NSString pathSeparator];
-    if([path rangeOfString:pathSeparator].length){
-        NSMutableString *mutablePath = [[path mutableCopy] autorelease];
+    if([filename rangeOfString:pathSeparator].length){
+        NSMutableString *mutableFilename = [[filename mutableCopy] autorelease];
         // replace with % as it can't occur in a cite key, so will still be unique
-        [mutablePath replaceOccurrencesOfString:pathSeparator withString:@"%" options:0 range:NSMakeRange(0, [path length])];
-        path = mutablePath;
+        [mutableFilename replaceOccurrencesOfString:pathSeparator withString:@"%" options:0 range:NSMakeRange(0, [filename length])];
+        filename = mutableFilename;
     }
     
     // return nil in case of an empty/nil path
-    path = [NSString isEmptyString:path] ? nil : [[self spotlightCacheFolderPathByCreating:NULL] stringByAppendingPathComponent:[path stringByAppendingPathExtension:@"bdskcache"]];
-    return path;
+    return [NSString isEmptyString:filename] ? nil : [[self spotlightCacheFolderURLByCreating:NULL] URLByAppendingPathComponent:[filename stringByAppendingPathExtension:@"bdskcache"]];
 }
 
 - (BOOL)removeSpotlightCacheFileForCiteKey:(NSString *)citeKey;
 {
-    NSString *path = [self spotlightCacheFilePathWithCiteKey:citeKey];
-    NSURL *theURL = nil;
-    if(path)
-        theURL = [NSURL fileURLWithPath:path];
+    NSURL *theURL = [self spotlightCacheFileURLWithCiteKey:citeKey];
     return theURL ? [self removeItemAtURL:theURL error:NULL] : NO;
 }
 

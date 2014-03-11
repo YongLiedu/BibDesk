@@ -78,10 +78,10 @@
         BOOL useXMLFormat = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKUseXMLSpotlightCacheKey];
         NSPropertyListFormat plistFormat = useXMLFormat ? NSPropertyListXMLFormat_v1_0 : NSPropertyListBinaryFormat_v1_0;
 
-        NSString *cachePath = [fileManager spotlightCacheFolderPathByCreating:&error];
-        if (cachePath == nil) {
+        NSURL *cacheURL = [fileManager spotlightCacheFolderURLByCreating:&error];
+        if (cacheURL == nil) {
             error = [NSError localErrorWithCode:kBDSKFileOperationFailed localizedDescription:NSLocalizedString(@"Unable to create the cache folder for Spotlight metadata.", @"Error description") underlyingError:error];
-            @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to build metadata cache at path \"%@\"", cachePath] userInfo:nil];
+            @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to build metadata cache at path \"%@\"", [cacheURL path]] userInfo:nil];
         }
         
         NSString *docPath = [documentURL path];
@@ -110,9 +110,9 @@
             } else {
                 NSString *citeKey = [anItem objectForKey:@"net_sourceforge_bibdesk_citekey"];
                 if (citeKey) {
-                    NSString *path = [fileManager spotlightCacheFilePathWithCiteKey:citeKey];
+                    NSURL *fileURL = [fileManager spotlightCacheFileURLWithCiteKey:citeKey];
                     // Save the plist; we can get an error if these are not plist objects, or the file couldn't be written.  The first case is a programmer error, and the second should have been caught much earlier in this code.
-                    if (path) {
+                    if (fileURL) {
                         NSMutableDictionary *metadata = [docInfo mutableCopy];
                         [metadata addEntriesFromDictionary:anItem];
                         NSError *err = nil;
@@ -121,7 +121,7 @@
                         if (nil == data) {
                             error = [NSError localErrorWithCode:kBDSKPropertyListSerializationFailed localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to save metadata cache file for item with cite key \"%@\".  The error was \"%@\"", @"Error description"), citeKey, [err localizedDescription]]];
                             @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to create cache file for %@", anItem] userInfo:nil];
-                        } else if (NO == [data writeToFile:path options:NSAtomicWrite error:&error]) {
+                        } else if (NO == [data writeToURL:fileURL options:NSAtomicWrite error:&error]) {
                             @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to create cache file for %@", anItem] userInfo:nil];
                         }
                     }

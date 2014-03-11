@@ -776,10 +776,9 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     if ([[theURL scheme] isEqualToString:BDSKBibItemURLScheme]) {
         
         NSString *citeKey = [[theURLString substringFromIndex:9] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        NSString *path = [[NSFileManager defaultManager] spotlightCacheFilePathWithCiteKey:citeKey];
-        NSURL *fileURL;
+        NSURL *fileURL = [[NSFileManager defaultManager] spotlightCacheFileURLWithCiteKey:citeKey];
         
-        if (path && (fileURL = [NSURL fileURLWithPath:path])) {
+        if (fileURL) {
             document = [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:fileURL display:YES error:&error];
         } else {
             error = [NSError localErrorWithCode:kBDSKURLOperationFailed localizedDescription:NSLocalizedString(@"Unable to get item from bdsk:// URL.", @"error when opening bdskURL")];
