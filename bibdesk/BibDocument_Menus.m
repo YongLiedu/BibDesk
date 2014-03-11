@@ -135,7 +135,7 @@
     if ([self numberOfClickedOrSelectedPubs] == 0)
         return NO;
     
-    if ([[NSFileManager defaultManager] latestLyXPipePath])
+    if ([[NSFileManager defaultManager] latestLyXPipeURL])
         return YES;
         
     return NO;

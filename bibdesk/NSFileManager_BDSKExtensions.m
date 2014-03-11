@@ -184,34 +184,34 @@ static void destroyTemporaryDirectory()
     return downloadsPath ? [NSURL fileURLWithPath:downloadsPath] : nil;
 }
 
-- (NSString *)latestLyXPipePath {
-    NSString *appSupportPath = [NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) firstObject];
-    NSDirectoryEnumerator *dirEnum = [self enumeratorAtPath:appSupportPath];
-    NSString *file;
-    NSString *lyxPipePath = nil;
+- (NSURL *)latestLyXPipeURL {
+    NSURL *appSupportURL = [self URLForDirectory:NSApplicationSupportDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:NO error:NULL];
+    NSDirectoryEnumerator *dirEnum = [self enumeratorAtURL:appSupportURL includingPropertiesForKeys:[NSArray arrayWithObjects:NSURLIsDirectoryKey, nil] options:NSDirectoryEnumerationSkipsSubdirectoryDescendants errorHandler:nil];
+    NSURL *fileURL;
+    NSURL *lyxPipeURL = nil;
     BDSKVersionNumber *version = nil;
     
-    while ((file = [dirEnum nextObject])) {
-        NSString *fullPath = [appSupportPath stringByAppendingPathComponent:file];
-        NSDictionary *fileAttributes = [self attributesOfItemAtPath:fullPath error:NULL];
-        if ([[fileAttributes fileType] isEqualToString:NSFileTypeDirectory]) {
-            [dirEnum skipDescendents];
-            NSString *pipePath = [fullPath stringByAppendingPathComponent:@".lyxpipe.in"];
-            if ([file hasPrefix:@"LyX"] && [self fileExistsAtPath:pipePath]) {
-                BDSKVersionNumber *fileVersion = [[[BDSKVersionNumber alloc] initWithVersionString:([file hasPrefix:@"LyX-"] ? [file substringFromIndex:4] : @"")] autorelease];
+    for (fileURL in dirEnum) {
+        NSNumber *isDir = nil;
+        [fileURL getResourceValue:&isDir forKey:NSURLIsDirectoryKey error:NULL];
+        if ([isDir boolValue]) {
+            NSString *fileName = [fileURL lastPathComponent];
+            NSURL *pipeURL = [fileURL URLByAppendingPathComponent:@".lyxpipe.in"];
+            if ([fileName hasPrefix:@"LyX"] && [self objectExistsAtFileURL:pipeURL]) {
+                BDSKVersionNumber *fileVersion = [[[BDSKVersionNumber alloc] initWithVersionString:([fileName hasPrefix:@"LyX-"] ? [fileName substringFromIndex:4] : @"")] autorelease];
                 if (version == nil || [fileVersion compare:version] == NSOrderedDescending) {
-                    lyxPipePath = pipePath;
+                    lyxPipeURL = pipeURL;
                     version = fileVersion;
                 }
             }
         }
     }
-    if (lyxPipePath == nil) {
+    if (lyxPipeURL == nil) {
         NSString *pipePath = [[NSHomeDirectory() stringByAppendingPathComponent:@".lyx"] stringByAppendingPathComponent:@"lyxpipe.in"];
         if ([self fileExistsAtPath:pipePath])
-            lyxPipePath = pipePath;
+            lyxPipeURL = [NSURL fileURLWithPath:pipePath];
     }
-    return lyxPipePath;
+    return lyxPipeURL;
 }
 
 - (BOOL)copyFileFromSharedSupportToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite{
