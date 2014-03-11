@@ -506,16 +506,12 @@ static void destroyTemporaryDirectory()
 }
 
 #pragma mark Spotlight support
-
-// not application-specific; append the bundle identifier
-- (NSString *)metadataFolderPath{
-    return [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingPathComponent:@"Metadata"];
-}
     
 - (NSString *)spotlightCacheFolderPathByCreating:(NSError **)anError{
 
-    NSString *basePath = [self metadataFolderPath];
-    NSString *cachePath = [basePath stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
+    NSString *cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
+    cachePath = [cachePath stringByAppendingPathComponent:@"Metadata"];
+    cachePath = [cachePath stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
     
     BOOL dirExists = YES;
     
@@ -523,7 +519,7 @@ static void destroyTemporaryDirectory()
         dirExists = [self createDirectoryAtPath:cachePath withIntermediateDirectories:YES attributes:nil error:NULL];
 
     if(dirExists == NO && anError != nil){
-        *anError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:basePath, NSFilePathErrorKey, NSLocalizedString(@"Unable to create the cache directory.", @"Error description"), NSLocalizedDescriptionKey, nil]];
+        *anError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:cachePath, NSFilePathErrorKey, NSLocalizedString(@"Unable to create the cache directory.", @"Error description"), NSLocalizedDescriptionKey, nil]];
     }
         
     return cachePath;
