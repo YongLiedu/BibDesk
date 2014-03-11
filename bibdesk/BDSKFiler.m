@@ -262,8 +262,7 @@ static BDSKFiler *sharedFiler = nil;
     }else if([self fileExistsAtPath:resolvedNewPath]){
         if([self fileExistsAtPath:resolvedPath]){
             if(force){
-                NSString *backupPath = [[self desktopDirectory] stringByAppendingPathComponent:[resolvedNewPath lastPathComponent]];
-                backupPath = [self uniqueFilePathWithName:[resolvedNewPath lastPathComponent] atPath:[self desktopDirectory]];
+                NSString *backupPath = [self uniqueFilePathWithName:[resolvedNewPath lastPathComponent] atPath:[self desktopDirectory]];
                 if(NO == [self movePath:resolvedNewPath toPath:backupPath force:NO error:NULL] && 
                     [self fileExistsAtPath:resolvedNewPath] && 
                     ![self removeItemAtPath:resolvedNewPath error:NULL]){
