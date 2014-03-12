@@ -159,10 +159,6 @@ static void destroyTemporaryDirectory()
     return path;
 }
 
-- (NSString *)desktopDirectory {
-    return [NSSearchPathForDirectoriesInDomains(NSDesktopDirectory, NSUserDomainMask, YES) firstObject];
-}
-
 - (NSURL *)applicationsDirectoryURL {
     NSURL *applicationsURL = [self URLForDirectory:NSApplicationDirectory inDomain:NSLocalDomainMask appropriateForURL:nil create:NO error:NULL];
     
@@ -327,6 +323,11 @@ static void destroyTemporaryDirectory()
     if (fileName == nil)
         fileName = [(NSString *)BDCreateUniqueString() autorelease];
 	return [self uniqueFilePathWithName:fileName atPath:temporaryBaseDirectory];
+}
+
+- (NSString *)desktopFileWithBasename:(NSString *)fileName {
+    NSString *desktopDirectory = [NSSearchPathForDirectoriesInDomains(NSDesktopDirectory, NSUserDomainMask, YES) firstObject];
+	return [self uniqueFilePathWithName:fileName atPath:desktopDirectory];
 }
 
 - (NSString *)makeTemporaryDirectoryWithBasename:(NSString *)baseName {

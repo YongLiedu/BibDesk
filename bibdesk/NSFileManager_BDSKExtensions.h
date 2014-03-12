@@ -70,7 +70,6 @@
 @interface NSFileManager (BDSKExtensions)
 
 - (NSString *)applicationSupportDirectory;
-- (NSString *)desktopDirectory;
 - (NSURL *)applicationsDirectoryURL;
 - (NSURL *)downloadFolderURL;
 - (NSURL *)latestLyXPipeURL;
@@ -90,6 +89,8 @@
 - (NSString *)uniqueFilePathWithName:(NSString *)fileName atPath:(NSString *)directory;
 // creates a file in a system temp location; pass nil for fileName if you want a UUID based name
 - (NSString *)temporaryFileWithBasename:(NSString *)fileName;
+// creates a unique file name on the desktop
+- (NSString *)desktopFileWithBasename:(NSString *)fileName;
 
 // for spotlight stuff; thread safe
 - (NSURL *)spotlightCacheFolderURLByCreating:(NSError **)anError;

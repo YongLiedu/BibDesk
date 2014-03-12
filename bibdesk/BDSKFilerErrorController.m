@@ -145,9 +145,7 @@
     }
     
     NSString *fileName = NSLocalizedString(@"BibDesk AutoFile Errors", @"Filename for dumped autofile errors.");
-    NSString *path = [[NSFileManager defaultManager] desktopDirectory];
-    if (path)
-        path = [[NSFileManager defaultManager] uniqueFilePathWithName:[fileName stringByAppendingPathExtension:@"txt"] atPath:path];
+    NSString *path = [[NSFileManager defaultManager] desktopFileWithBasename:[fileName stringByAppendingPathExtension:@"txt"]];
     
     [string writeToFile:path atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
