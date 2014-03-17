@@ -175,13 +175,16 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 }
 
 - (NSUInteger)hash {
-    NSUInteger hash = [[self type] hash] + [[self database] hash];
+    NSUInteger prime = 31;
+    NSUInteger hash = prime * [[self type] hash] + [[self database] hash];
     if ([self isZoom]) {
-        hash += [[self host] hash] + [[self port] hash] + [[self password] hash];
+        hash = prime * hash + [[self host] hash];
+        hash = prime * hash + [[self port] hash];
+        hash = prime * hash + [[self password] hash];
         if ([options count])
-            hash += [[self options] hash];
+            hash = prime * hash + [[self options] hash];
     } else if ([self isISI] && [options count] > 0) {
-        hash += [[self options] hash];
+        hash = prime * hash + [[self options] hash];
     }
     return hash;
 }

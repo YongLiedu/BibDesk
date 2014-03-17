@@ -43,6 +43,8 @@
 
 #define EQUAL_OR_NIL_STRINGS(string1, string2) ( (string1 == nil && string2 == nil) || [string1 isEqualToString:string2] )
 
+#define PRIME 31
+
 #define TITLE_KEY @"title"
 #define FONTNAME_KEY @"fontName"
 #define FONTSIZE_KEY @"fontSize"
@@ -168,7 +170,10 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (NSUInteger)hash {
-    return [title hash] + [fontName hash] + ((NSUInteger)fontSize >> 4) + (bold >> 5) + (italic >> 6);
+    NSUInteger hash = [title hash];
+    hash = PRIME * hash + [fontName hash];
+    hash = PRIME * hash + ((NSUInteger)fontSize >> 4) + (bold >> 5) + (italic >> 6);
+    return hash;
 }
 
 - (BDSKTokenType)type {
@@ -310,7 +315,9 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (NSUInteger)hash {
-    return [super hash] + [key hash];
+    NSUInteger hash = [super hash];
+    hash = PRIME * hash + [key hash];
+    return hash;
 }
 
 - (NSString *)key {
@@ -402,7 +409,11 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (NSUInteger)hash {
-    return [super hash] + [appendingKey hash] + [prefix hash] + [suffix hash];
+    NSUInteger hash = [super hash];
+    hash = PRIME * hash + [appendingKey hash];
+    hash = PRIME * hash + [prefix hash];
+    hash = PRIME * hash + [suffix hash];
+    return hash;
 }
 
 - (NSString *)appendingKey {
@@ -537,7 +548,10 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (NSUInteger)hash {
-    return [super hash] + [casingKey hash] + [cleaningKey hash];
+    NSUInteger hash = [super hash];
+    hash = PRIME * hash + [casingKey hash];
+    hash = PRIME * hash + [cleaningKey hash];
+    return hash;
 }
 
 - (BDSKTokenType)type {
@@ -662,7 +676,9 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (NSUInteger)hash {
-    return [super hash] + [urlFormatKey hash];
+    NSUInteger hash = [super hash];
+    hash = PRIME * hash + [urlFormatKey hash];
+    return hash;
 }
 
 - (BDSKTokenType)type {
@@ -761,7 +777,10 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (NSUInteger)hash {
-    return [super hash] + [nameStyleKey hash] + [joinStyleKey hash];
+    NSUInteger hash = [super hash];
+    hash = PRIME * hash + [nameStyleKey hash];
+    hash = PRIME * hash + [joinStyleKey hash];
+    return hash;
 }
 
 - (BDSKTokenType)type {
@@ -873,7 +892,10 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (NSUInteger)hash {
-    return [super hash] + [linkedFileFormatKey hash] + [linkedFileJoinStyleKey hash];
+    NSUInteger hash = [super hash];
+    hash = PRIME * hash + [linkedFileFormatKey hash];
+    hash = PRIME * hash + [linkedFileJoinStyleKey hash];
+    return hash;
 }
 
 - (BDSKTokenType)type {
@@ -977,7 +999,9 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (NSUInteger)hash {
-    return [super hash] + [dateFormatKey hash];
+    NSUInteger hash = [super hash];
+    hash = PRIME * hash + [dateFormatKey hash];
+    return hash;
 }
 
 - (BDSKTokenType)type {
@@ -1076,7 +1100,10 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (NSUInteger)hash {
-    return [super hash] + [counterStyleKey hash] + [counterCasingKey hash];
+    NSUInteger hash = [super hash];
+    hash = PRIME * hash + [counterStyleKey hash];
+    hash = PRIME * hash + [counterCasingKey hash];
+    return hash;
 }
 
 - (BDSKTokenType)type {
@@ -1187,7 +1214,10 @@ NSString *BDSKRichTextString = @"Rich Text";
 }
 
 - (NSUInteger)hash {
-    return [super hash] + [field hash] + [altText hash];
+    NSUInteger hash = [super hash];
+    hash = PRIME * hash + [field hash];
+    hash = PRIME * hash + [altText hash];
+    return hash;
 }
 
 - (BDSKTokenType)type {
