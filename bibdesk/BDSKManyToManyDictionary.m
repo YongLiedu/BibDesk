@@ -72,14 +72,6 @@
     return value;
 }
 
-- (NSUInteger)countForKey:(id)aKey {
-    return [[self _setForValue:aKey inverse:NO create:NO] count];
-}
-
-- (NSUInteger)countForObject:(id)anObject {
-    return [[self _setForValue:anObject inverse:YES create:NO] count];
-}
-
 - (NSSet *)objectsForKey:(id)aKey {
     return [self _setForValue:aKey inverse:NO create:NO];
 }
@@ -93,23 +85,7 @@
     [[self _setForValue:anObject inverse:YES create:YES] addObject:aKey];
 }
 
-- (void)addObjects:(NSSet *)newObjects forKey:(id)aKey {
-    if ([newObjects count]) {
-        [[self _setForValue:aKey inverse:NO create:YES] unionSet:newObjects];
-        for (id anObject in newObjects)
-            [[self _setForValue:anObject inverse:YES create:YES] addObject:aKey];
-    }
-}
-
-- (void)addObject:(id)anObject forKeys:(NSSet *)newKeys {
-    if ([newKeys count]) {
-        [[self _setForValue:anObject inverse:YES create:YES] unionSet:newKeys];
-        for (id aKey in newKeys)
-            [[self _setForValue:aKey inverse:NO create:YES] addObject:anObject];
-    }
-}
-
-- (void)removeObject:(id)anObject forKey:(id)aKey{
+- (void)removeObject:(id)anObject forKey:(id)aKey {
     NSMutableSet *objectSet = [self _setForValue:aKey inverse:NO create:NO];
     NSMutableSet *keySet = [self _setForValue:anObject inverse:YES create:NO];
     if (objectSet) {
@@ -118,15 +94,10 @@
             [mapTable removeObjectForKey:aKey];
     }
     if (keySet) {
-        [keySet removeObject:anObject];
+        [keySet removeObject:aKey];
         if ([keySet count] == 0)
             [inverseMapTable removeObjectForKey:anObject];
     }
-}
-
-- (void)removeAllObjects {
-    [mapTable removeAllObjects];
-    [inverseMapTable removeAllObjects];
 }
 
 @end

@@ -377,7 +377,8 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
     // SKIndexRenameDocument changes the URL, so it's not useful
     
     [rwLock lockForWriting];
-    [identifierURLs addObject:identifierURL forKeys:urlsToAdd];
+    for (NSURL *url in urlsToAdd)
+        [identifierURLs addObject:identifierURL forKey:url];
     [rwLock unlock];
     
     for (NSURL *url in urlsToAdd)
@@ -397,7 +398,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
         
         [rwLock lockForWriting];
         [identifierURLs removeObject:identifierURL forKey:url];
-        shouldBeRemoved = (0 == [identifierURLs countForKey:url]);
+        shouldBeRemoved = (0 == [[identifierURLs objectsForKey:url] count]);
         [rwLock unlock];
         
         if (shouldBeRemoved)
@@ -544,9 +545,8 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
             [rwLock lockForWriting];
             for (NSDictionary *item in items) {
                 NSURL *identifierURL = [item objectForKey:@"identifierURL"];
-                NSSet *keys = [[NSSet alloc] initWithArray:[item objectForKey:@"urls"]];
-                [identifierURLs addObject:identifierURL forKeys:keys];
-                [keys release];
+                for (NSURL *url in [item objectForKey:@"urls"])
+                    [identifierURLs addObject:identifierURL forKey:url];
             }
             [rwLock unlock];
         }
