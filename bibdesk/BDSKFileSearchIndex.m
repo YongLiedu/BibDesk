@@ -390,7 +390,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
     }
 }
 
-- (void)indexFileURLs:(NSSet *)urlsToAdd forIdentifierURL:(NSURL *)identifierURL
+- (void)indexFileURLs:(id<NSFastEnumeration>)urlsToAdd forIdentifierURL:(NSURL *)identifierURL
 {
     BDSKASSERT(identifierURL);
     
@@ -410,7 +410,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
     // the caller is responsible for updating the delegate, so we can throttle initial indexing
 }
 
-- (void)removeFileURLs:(NSSet *)urlsToRemove forIdentifierURL:(NSURL *)identifierURL
+- (void)removeFileURLs:(id<NSFastEnumeration>)urlsToRemove forIdentifierURL:(NSURL *)identifierURL
 {
     BDSKASSERT(identifierURL);
         
@@ -440,7 +440,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
     
     for (id anObject in items) {
         if ([self shouldKeepRunning] == NO) break;
-        [self indexFileURLs:[NSSet setWithArray:[anObject objectForKey:@"urls"]] forIdentifierURL:[anObject objectForKey:@"identifierURL"]];
+        [self indexFileURLs:[anObject objectForKey:@"urls"] forIdentifierURL:[anObject objectForKey:@"identifierURL"]];
         numberIndexed++;
         dispatch_async(lockQueue, ^{
             progressValue = (numberIndexed / totalObjectCount) * 100;
