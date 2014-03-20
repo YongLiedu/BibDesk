@@ -455,7 +455,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
                 NSURL *identifierURL = [anItem valueForKey:@"identifierURL"];
                 
                 [rwLock lockForReading];
-                NSSet *urlsToRemove = [[[identifierURLs allKeysForObject:identifierURL] copy] autorelease];
+                NSSet *urlsToRemove = [[[identifierURLs keysForObject:identifierURL] copy] autorelease];
                 [rwLock unlock];
                
                 [self removeFileURLs:urlsToRemove forIdentifierURL:identifierURL];
@@ -479,7 +479,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
             NSMutableSet *removedURLs;
             
             [rwLock lockForReading];
-            removedURLs = [[identifierURLs allKeysForObject:identifierURL] mutableCopy];
+            removedURLs = [[identifierURLs keysForObject:identifierURL] mutableCopy];
             [rwLock unlock];
             [removedURLs minusSet:newURLs];
             

@@ -72,14 +72,6 @@
     return value;
 }
 
-- (NSUInteger)keyCount {
-    return [mapTable count];
-}
-
-- (NSUInteger)objectCount {
-    return [inverseMapTable count];
-}
-
 - (NSUInteger)countForKey:(id)aKey {
     return [[self _setForValue:aKey inverse:NO create:NO] count];
 }
@@ -92,16 +84,8 @@
     return [self _setForValue:aKey inverse:NO create:NO];
 }
 
-- (NSSet *)allKeysForObject:(id)anObject {
+- (NSSet *)keysForObject:(id)anObject {
     return [self _setForValue:anObject inverse:YES create:NO];
-}
-
-- (id)anyObjectForKey:(id)aKey {
-    return [[self _setForValue:aKey inverse:NO create:NO] anyObject];
-}
-
-- (id)anyKeyForObject:(id)anObject {
-    return [[self _setForValue:anObject inverse:YES create:NO] anyObject];
 }
 
 - (void)addObject:(id)anObject forKey:(id)aKey {

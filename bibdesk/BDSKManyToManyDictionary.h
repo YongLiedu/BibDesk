@@ -44,14 +44,10 @@
     NSMapTable *inverseMapTable;
 }
 
-- (NSUInteger)keyCount;
-- (NSUInteger)objectCount;
 - (NSUInteger)countForKey:(id)aKey;
 - (NSUInteger)countForObject:(id)anObject;
 - (NSSet *)objectsForKey:(id)aKey;
-- (NSSet *)allKeysForObject:(id)anObject;
-- (id)anyObjectForKey:(id)aKey;
-- (id)anyKeyForObject:(id)anObject;
+- (NSSet *)keysForObject:(id)anObject;
 - (void)addObject:(id)anObject forKey:(id)aKey;
 - (void)addObjects:(NSSet *)newObjects forKey:(id)aKey;
 - (void)addObject:(id)anObject forKeys:(NSSet *)newKeys;
