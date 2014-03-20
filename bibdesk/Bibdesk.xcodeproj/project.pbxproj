@@ -132,7 +132,6 @@
 		CE2941050A7F8F2900A46D05 /* ReadMe.rtf in Resources */ = {isa = PBXBuildFile; fileRef = CE2941040A7F8F2900A46D05 /* ReadMe.rtf */; };
 		CE2AFE5A0911425F00E65C87 /* BDSKGroupCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */; };
 		CE2C16F90A0A149E006F0A73 /* gear2.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2C16F80A0A149E006F0A73 /* gear2.tiff */; };
-		CE2E78CD0D40F6BB00340B39 /* BDSKManyToManyDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2E78CB0D40F6BB00340B39 /* BDSKManyToManyDictionary.m */; };
 		CE2F056911B517E9001B0AE0 /* BDSKOpenAccessoryViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2F056711B517E9001B0AE0 /* BDSKOpenAccessoryViewController.m */; };
 		CE2F057211B51FA7001B0AE0 /* BDSKOpenAccessoryView.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE2F057111B51FA7001B0AE0 /* BDSKOpenAccessoryView.xib */; };
 		CE3011A30D5CC41D00C0B7FA /* BDSKAddCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3011A10D5CC41D00C0B7FA /* BDSKAddCommand.m */; };
@@ -936,8 +935,6 @@
 		CE2BB58F0E0BE0EA0090E848 /* PDFKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PDFKit.framework; path = /System/Library/Frameworks/Quartz.framework/Frameworks/PDFKit.framework; sourceTree = "<absolute>"; };
 		CE2BB5920E0BE1370090E848 /* FileView.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FileView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE2C16F80A0A149E006F0A73 /* gear2.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = gear2.tiff; sourceTree = "<group>"; };
-		CE2E78CA0D40F6BB00340B39 /* BDSKManyToManyDictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKManyToManyDictionary.h; sourceTree = "<group>"; };
-		CE2E78CB0D40F6BB00340B39 /* BDSKManyToManyDictionary.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKManyToManyDictionary.m; sourceTree = "<group>"; };
 		CE2F056611B517E9001B0AE0 /* BDSKOpenAccessoryViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKOpenAccessoryViewController.h; sourceTree = "<group>"; };
 		CE2F056711B517E9001B0AE0 /* BDSKOpenAccessoryViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKOpenAccessoryViewController.m; sourceTree = "<group>"; };
 		CE2F056E11B51F90001B0AE0 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/BDSKOpenAccessoryView.xib; sourceTree = "<group>"; };
@@ -2221,7 +2218,6 @@
 				CE38FB8B091D94A100BCB69D /* BDSKFilter.m */,
 				CEEFE6C00B0403E700668BB0 /* BDSKGroupsArray.m */,
 				F911D7110CFE90050009C77B /* BDSKLinkedFile.m */,
-				CE2E78CB0D40F6BB00340B39 /* BDSKManyToManyDictionary.m */,
 				F94DE74A09CB46FF00B5FD51 /* BDSKPersistentSearch.m */,
 				CEDBDE4A0F4C863500190AF5 /* BDSKPreferenceRecord.m */,
 				CE3448000A11302F0026A92A /* BDSKPreviewItem.m */,
@@ -2631,7 +2627,6 @@
 				CE3B5E7A09CEDE470017D339 /* BDSKMacroResolver.h */,
 				CE82BE8A0D58C12A00A2E8C5 /* BDSKMacroResolver+Scripting.h */,
 				2730077B07CF20B500F2E485 /* BDSKMacroWindowController.h */,
-				CE2E78CA0D40F6BB00340B39 /* BDSKManyToManyDictionary.h */,
 				CE34A5710B249E0B00755730 /* BDSKMARCParser.h */,
 				CE0AB6FE14BB019400638C8F /* BDSKMASParser.h */,
 				6C567DBE0F818A1600DE285D /* BDSKMathSciNetParser.h */,
@@ -3652,7 +3647,6 @@
 				F9EF94E60D15FE7400314058 /* BDSKFileMigrationController.m in Sources */,
 				CE4376F70D24341E00C993CF /* NSViewAnimation_BDSKExtensions.m in Sources */,
 				CE83E3A60D294EE300BB7AD8 /* BDSKSortCommand.m in Sources */,
-				CE2E78CD0D40F6BB00340B39 /* BDSKManyToManyDictionary.m in Sources */,
 				F990C58C0D42D58D00B5425E /* BDSKDocumentSearch.m in Sources */,
 				CE38FEFF0D4E7EC700D0A886 /* BDSKVersionNumber.m in Sources */,
 				CE82B2D20D57AE0B00A2E8C5 /* BDSKSharingClient.m in Sources */,

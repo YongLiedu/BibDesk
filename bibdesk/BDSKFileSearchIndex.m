@@ -40,7 +40,6 @@
 #import "BDSKOwnerProtocol.h"
 #import "BibItem.h"
 #import <libkern/OSAtomic.h>
-#import "BDSKManyToManyDictionary.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSData_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
@@ -95,7 +94,8 @@
         flags.status = BDSKSearchIndexStatusStarting;
         
         // maintain dictionaries mapping URL -> identifierURL, since SKIndex properties are slow; this should be accessed with the rwlock
-        identifierURLs = [[BDSKManyToManyDictionary alloc] init];
+        URLsForIdentifierURLs = [[NSMapTable alloc] initWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory capacity:0];
+        identifierURLsForURLs = [[NSMapTable alloc] initWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory capacity:0];
 		rwLock = [[BDSKReadWriteLock alloc] init];
         
         progressValue = 0.0;
@@ -122,7 +122,8 @@
     BDSKDISPATCHDESTROY(queue);
     BDSKDISPATCHDESTROY(lockQueue);
     [rwLock lockForWriting];
-	BDSKDESTROY(identifierURLs);
+	BDSKDESTROY(URLsForIdentifierURLs);
+	BDSKDESTROY(identifierURLsForURLs);
     [rwLock unlock];
     BDSKDESTROY(rwLock);
     BDSKDESTROY(signatures);
@@ -174,7 +175,7 @@
 - (NSSet *)identifierURLsForURL:(NSURL *)theURL
 {
     [rwLock lockForReading];
-    NSSet *set = [[[identifierURLs objectsForKey:theURL] copy] autorelease];
+    NSSet *set = [[[identifierURLsForURLs objectForKey:theURL] copy] autorelease];
     [rwLock unlock];
     return set;
 }
@@ -335,6 +336,26 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
 
 #pragma mark Indexing
 
+- (void)addURL:(NSURL *)objectURL forURL:(NSURL *)keyURL inMapTable:(NSMapTable *)mapTable {
+    NSMutableSet *set = (NSMutableSet *)[mapTable objectForKey:keyURL];
+    if (set) {
+        [set addObject:objectURL];
+    } else {
+        set = [[NSMutableSet alloc] initWithObjects:objectURL, nil];
+        [mapTable setObject:set forKey:keyURL];
+        [set release];
+    }
+}
+
+- (void)removeURL:(NSURL *)objectURL forURL:(NSURL *)keyURL inMapTable:(NSMapTable *)mapTable {
+    NSMutableSet *set = (NSMutableSet *)[mapTable objectForKey:keyURL];
+    if (set) {
+        [set removeObject:objectURL];
+        if ([set count] == 0)
+            [mapTable removeObjectForKey:keyURL];
+    }
+}
+
 - (void)indexFileURL:(NSURL *)aURL{
     id signature = signatureForURL(aURL);
     
@@ -377,8 +398,10 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
     // SKIndexRenameDocument changes the URL, so it's not useful
     
     [rwLock lockForWriting];
-    for (NSURL *url in urlsToAdd)
-        [identifierURLs addObject:identifierURL forKey:url];
+    for (NSURL *url in urlsToAdd) {
+        [self addURL:identifierURL forURL:url inMapTable:identifierURLsForURLs];
+        [self addURL:url forURL:identifierURL inMapTable:URLsForIdentifierURLs];
+    }
     [rwLock unlock];
     
     for (NSURL *url in urlsToAdd)
@@ -397,8 +420,9 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
     for (NSURL *url in urlsToRemove) {
         
         [rwLock lockForWriting];
-        [identifierURLs removeObject:identifierURL forKey:url];
-        shouldBeRemoved = (0 == [[identifierURLs objectsForKey:url] count]);
+        [self removeURL:identifierURL forURL:url inMapTable:identifierURLsForURLs];
+        [self removeURL:url forURL:identifierURL inMapTable:URLsForIdentifierURLs];
+        shouldBeRemoved = (nil == [identifierURLsForURLs objectForKey:url]);
         [rwLock unlock];
         
         if (shouldBeRemoved)
@@ -456,10 +480,12 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
                 NSURL *identifierURL = [anItem valueForKey:@"identifierURL"];
                 
                 [rwLock lockForReading];
-                NSSet *urlsToRemove = [[[identifierURLs keysForObject:identifierURL] copy] autorelease];
+                NSSet *urlsToRemove = [[URLsForIdentifierURLs objectForKey:identifierURL] copy];
                 [rwLock unlock];
                
                 [self removeFileURLs:urlsToRemove forIdentifierURL:identifierURL];
+                
+                [urlsToRemove release];
             }
             
             [self didUpdate];
@@ -480,7 +506,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
             NSMutableSet *removedURLs;
             
             [rwLock lockForReading];
-            removedURLs = [[identifierURLs keysForObject:identifierURL] mutableCopy];
+            removedURLs = [[URLsForIdentifierURLs objectForKey:identifierURL] mutableCopy];
             [rwLock unlock];
             [removedURLs minusSet:newURLs];
             
@@ -545,8 +571,10 @@ static inline BOOL isIndexCacheForDocumentURL(NSURL *aURL, NSURL *documentURL) {
             [rwLock lockForWriting];
             for (NSDictionary *item in items) {
                 NSURL *identifierURL = [item objectForKey:@"identifierURL"];
-                for (NSURL *url in [item objectForKey:@"urls"])
-                    [identifierURLs addObject:identifierURL forKey:url];
+                for (NSURL *url in [item objectForKey:@"urls"]) {
+                    [self addURL:identifierURL forURL:url inMapTable:identifierURLsForURLs];
+                    [self addURL:url forURL:identifierURL inMapTable:URLsForIdentifierURLs];
+                }
             }
             [rwLock unlock];
         }
