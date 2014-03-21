@@ -155,36 +155,38 @@
     
     @try {
         SKDocumentRef doc = SKDocumentCreateWithURL((CFURLRef)identifierURL);
-        NSMutableString *searchText = nil;
-        if ([fileURLs count]) {
-            searchText = [NSMutableString string];
-            for (NSURL *fileURL in fileURLs) {
-                NSString *notesString = nil;
-                NSWorkspace *ws = [NSWorkspace sharedWorkspace];
-                NSString *type = [ws typeOfFile:[fileURL path] error:NULL];
-                if (type && [ws type:type conformsToType:@"net.sourceforge.skim-app.pdfd"])
-                    notesString = [fileManager readSkimTextNotesFromPDFBundleAtURL:fileURL error:NULL];
-                else
-                    notesString = [fileManager readSkimTextNotesFromExtendedAttributesAtURL:fileURL error:NULL];
-                if (notesString == nil) {
-                    NSArray *notes = nil;
+        if (doc) {
+            
+            NSMutableString *searchText = nil;
+            if ([fileURLs count]) {
+                searchText = [NSMutableString string];
+                for (NSURL *fileURL in fileURLs) {
+                    NSString *notesString = nil;
+                    NSWorkspace *ws = [NSWorkspace sharedWorkspace];
+                    NSString *type = [ws typeOfFile:[fileURL path] error:NULL];
                     if (type && [ws type:type conformsToType:@"net.sourceforge.skim-app.pdfd"])
-                        notes = [fileManager readSkimNotesFromPDFBundleAtURL:fileURL error:NULL];
-                    else if (type && [ws type:type conformsToType:@"net.sourceforge.skim-app.skimnotes"])
-                        notes = [fileManager readSkimNotesFromSkimFileAtURL:fileURL error:NULL];
+                        notesString = [fileManager readSkimTextNotesFromPDFBundleAtURL:fileURL error:NULL];
                     else
-                        notes = [fileManager readSkimNotesFromExtendedAttributesAtURL:fileURL error:NULL];
-                    if (notes)
-                        notesString = SKNSkimTextNotes(notes);
-                }
-                if ([notesString length]) {
-                    if ([searchText length])
-                        [searchText appendString:@"\n"];
-                    [searchText appendString:notesString];
+                        notesString = [fileManager readSkimTextNotesFromExtendedAttributesAtURL:fileURL error:NULL];
+                    if (notesString == nil) {
+                        NSArray *notes = nil;
+                        if (type && [ws type:type conformsToType:@"net.sourceforge.skim-app.pdfd"])
+                            notes = [fileManager readSkimNotesFromPDFBundleAtURL:fileURL error:NULL];
+                        else if (type && [ws type:type conformsToType:@"net.sourceforge.skim-app.skimnotes"])
+                            notes = [fileManager readSkimNotesFromSkimFileAtURL:fileURL error:NULL];
+                        else
+                            notes = [fileManager readSkimNotesFromExtendedAttributesAtURL:fileURL error:NULL];
+                        if (notes)
+                            notesString = SKNSkimTextNotes(notes);
+                    }
+                    if ([notesString length]) {
+                        if ([searchText length])
+                            [searchText appendString:@"\n"];
+                        [searchText appendString:notesString];
+                    }
                 }
             }
-        }
-        if (doc) {
+            
             __block SKIndexRef theIndex = NULL;
             dispatch_sync(lockQueue, ^{
                 if (skIndex) theIndex = (SKIndexRef)CFRetain(skIndex);
