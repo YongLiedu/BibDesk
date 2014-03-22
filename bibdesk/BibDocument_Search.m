@@ -336,7 +336,6 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     
     // reconnect the searchfield
     [searchField setTarget:self];
-    [searchField setDelegate:self];
     
     // removeFileContentSearch may be called after the user clicks a different search type, without changing the searchfield; in that case, we want to leave the search button view in place, and refilter the list.  Otherwise, select the pubs corresponding to the file content selection.
     if ([[searchField stringValue] isEqualToString:@""]) {
