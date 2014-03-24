@@ -89,7 +89,7 @@
 - (void)setCount:(NSInteger)newCount;
 
 /*!
-	@method count
+	@method icon
 	@abstract Returns the icon for the group.
 	@discussion -
 */
