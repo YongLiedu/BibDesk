@@ -153,10 +153,12 @@ static NSString *BDSKWebLocalizedString = nil;
 }
 
 - (void)webView:(WebView *)sender setStatusText:(NSString *)text {
-    if ([NSString isEmptyString:text])
-        [document updateStatus];
-    else
-        [document setStatus:text];
+    if ([[document selectedGroups] containsObject:self]) {
+        if ([NSString isEmptyString:text])
+            [document updateStatus];
+        else
+            [document setStatus:text];
+    }
 }
 
 - (WebView *)webViewCreateWebView:(WebView *)sender {
