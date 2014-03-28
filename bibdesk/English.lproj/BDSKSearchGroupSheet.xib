@@ -620,7 +620,7 @@ SW5jLiwgMjAwNQAAAAA</bytes>
 										<object class="NSButtonCell" id="790726290">
 											<int key="NSCellFlags">67108864</int>
 											<int key="NSCellFlags2">131072</int>
-											<string key="NSContents">ISI</string>
+											<string key="NSContents">WOK</string>
 											<reference key="NSSupport" ref="26"/>
 											<reference key="NSControlView" ref="982085043"/>
 											<int key="NSTag">2</int>
@@ -3307,7 +3307,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 					<object class="IBToolTipAttribute" key="NS.object.0">
 						<string key="name">ToolTip</string>
 						<reference key="object" ref="790726290"/>
-						<string key="toolTip">ISI World of Science server</string>
+						<string key="toolTip">World of Knowledge server</string>
 					</object>
 				</object>
 				<string key="757.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
