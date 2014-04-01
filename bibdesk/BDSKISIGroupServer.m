@@ -503,6 +503,7 @@ static NSArray *publicationsFromData(NSData *data);
         @try {
             WOKMWSAuthenticateServiceSoapBinding *binding = [WOKMWSAuthenticateService WOKMWSAuthenticateServiceSoapBinding];
             WOKMWSAuthenticateService_closeSession *request = [[[WOKMWSAuthenticateService_closeSession alloc] init] autorelease];
+            [binding addCookie:sessionCookie];
             [binding closeSessionUsingParameters:request];
         }
         @catch (id exception) {
