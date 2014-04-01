@@ -46,7 +46,7 @@
 #import "NSError_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 
-#define SERVER_URL @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve"
+#define SERVER_URL @"http://search.webofknowledge.com/esti/wokmws/ws/WokSearch"
 
 #define WOS_DB_ID @"WOS"
 #define EN_QUERY_LANG @"en"
