@@ -263,7 +263,7 @@ static NSArray *publicationsFromData(NSData *data);
 		
         // there is nothing to download
         OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
-        // notify that we stopped retrieving, but don't add nil as that indicates an error
+        // notify that we stopped retrieving
         [[self serverOnMainThread] addPublicationsToGroup:nil];
         
     } else {
