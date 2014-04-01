@@ -51,9 +51,6 @@
 #define WOS_DB_ID @"WOS"
 #define EN_QUERY_LANG @"en"
 
-#define RECORDSFOUND_KEY @"recordsFound"
-#define RECORDS_KEY @"records"
-
 #define BDSKAddISIXMLStringToAnnoteKey @"BDSKAddISIXMLStringToAnnote"
 #define BDSKDisableISITitleCasingKey @"BDSKDisableISITitleCasing"
 #define BDSKISISourceXMLTagPriorityKey @"BDSKISISourceXMLTagPriority"
@@ -62,6 +59,7 @@
 #define DefaultISIURLFieldName @"ISI URL"
 
 #define MAX_RESULTS 100
+
 #ifdef DEBUG
 static BOOL addXMLStringToAnnote = YES;
 #else
