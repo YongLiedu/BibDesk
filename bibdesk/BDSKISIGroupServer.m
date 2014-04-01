@@ -244,7 +244,6 @@ static NSArray *publicationsFromData(NSData *data);
 }
 
 #pragma mark Server thread
-
 // @@ currently limited to topic search; need to figure out UI for other search types (mixing search types will require either NSTokenField or raw text string entry)
 - (oneway void)downloadWithSearchTerm:(NSString *)searchTerm database:(NSString *)database options:(NSDictionary *)options;
 {    
@@ -252,9 +251,22 @@ static NSArray *publicationsFromData(NSData *data);
     enum operationTypes { search, citedReferences, citingArticles, relatedRecords, retrieveById } operation = search;
     NSInteger availableResultsLocal = [self numberOfAvailableResults];
     NSInteger fetchedResultsLocal = [self numberOfFetchedResults];
+    NSInteger numResults = MAX_RESULTS;
     
-    if (NO == [NSString isEmptyString:searchTerm]){
+    if (availableResultsLocal > 0)
+        numResults = MIN(availableResultsLocal - fetchedResultsLocal, MAX_RESULTS);
+    
+    // Strip whitespace from the search term to make WOS happy
+    searchTerm = [searchTerm stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    
+    if ([NSString isEmptyString:searchTerm] || numResults == 0){
+		
+        // there is nothing to download
+        OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
+        // notify that we stopped retrieving, but don't add nil as that indicates an error
+        [[self serverOnMainThread] addPublicationsToGroup:nil];
         
+    } else {
         /*
          TODO: document this syntax and the results thereof in the code, and in the help book.
          */
@@ -286,24 +298,21 @@ static NSArray *publicationsFromData(NSData *data);
             }
         }
         
-        // Strip whitespace from the search term to make WOS happy
-        searchTerm = [searchTerm stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        
         // perform WS query to get count of results; don't pass zero for record numbers, although it's not clear what the values mean in this context
-        NSString *resultString = nil;
         NSString *errorString = nil;
-        
+		
         WokSearchService_editionDesc *edition = [[[WokSearchService_editionDesc alloc] init] autorelease];
         edition.collection = WOS_DB_ID;
         edition.edition = database;
         
+		// Reto: WOK returns a wrong number of found records if count is set to 1, so set it to 100 by default
         WokSearchService_retrieveParameters *retrieveParameters = [[[WokSearchService_retrieveParameters alloc] init] autorelease];
-        retrieveParameters.firstRecord = [NSNumber numberWithInt:1];
-        retrieveParameters.count = [NSNumber numberWithInt:1];
+        retrieveParameters.firstRecord = [NSNumber numberWithInt:fetchedResultsLocal + 1];
+        retrieveParameters.count = [NSNumber numberWithInt:numResults];
         
         WokSearchService_timeSpan *timeSpan = [[[WokSearchService_timeSpan alloc] init] autorelease];
         timeSpan.begin = @"1600-01-01";
-        timeSpan.end = @"2020-01-01";
+        timeSpan.end = [NSDate date]; // Reto: Obj-C dummy Question: how do I convert NSDate to a String of YYYY-MM-DD ???
         
         WokSearchService_search *searchRequest = nil;
         WokSearchService_searchResponse *searchResponse = nil;
@@ -329,21 +338,22 @@ static NSArray *publicationsFromData(NSData *data);
         [binding addCookie:sessionCookie];
         //binding.logXMLInOut = YES;
         
-        // ISI seems to return all fields, so the below aren't currently needed
-        //NSString *fields = @"doctype authors bib_vol pub_url source_title source_abbrev item_title bib_issue bib_pages keywords abstract source_series article_nos bib_date publisher pub_address issue_ed times_cited get_parent ut refs ";
-        //if (sourceXMLTagPriority)
-        //    fields = [fields stringByAppendingString:[sourceXMLTagPriority componentsJoinedByString:@" "]];
-        
-        // @@ Currently limited to WOS database; extension to other WOS databases might require different WebService stubs?  Note that the value we're passing as database is referred to as  "edition" in the WoS docs.
+        // @@ Currently limited to WOS database; extension to other WOS databases might require different WebService stubs?  
+		// Note that the value we're passing as database is referred to as  "edition" in the WoS docs.
+		// Reto: Edition is not really needed. If omitted, the search is performed in all WOK databases which yields
+		// a more consistent result with the web search. 
+		// Reto: We could actually search the whole Web of Knowledge DB by choice of
+		// "WOK aas databaseID. This returns all sorts of fun references including Patents, Books etc, for which there is currently
+		// no support in BibDesk anyway, so limit the search to WOS databaseID
         NSScanner *scanner;
         NSString *token;
         switch (operation) {
-            
             case search:
+				// Reto: this works for the Premium edition of WOKSearch (and not for WOKSearchLite)
                 searchRequest = [[[WokSearchService_search alloc] init] autorelease];
                 searchRequest.queryParameters = [[[WokSearchService_queryParameters alloc] init] autorelease];
                 searchRequest.queryParameters.databaseID = WOS_DB_ID;
-                [searchRequest.queryParameters addEditions:edition];
+				//                [searchRequest.queryParameters addEditions:edition];
                 searchRequest.queryParameters.userQuery = searchTerm;
                 searchRequest.queryParameters.queryLanguage = @"en";
                 searchRequest.retrieveParameters = retrieveParameters;
@@ -359,13 +369,13 @@ static NSArray *publicationsFromData(NSData *data);
                     }
                 }
                 break;
-            
             case citedReferences:
+				// Reto: undocumented and untested. I'm going to check its usefulness before removing.
                 citedReferencesRequest = [[[WokSearchService_citedReferences alloc] init] autorelease];
                 citedReferencesRequest.databaseId = WOS_DB_ID;
                 citedReferencesRequest.uid = searchTerm;
-                [citedReferencesRequest addEditions:edition];
-                citedReferencesRequest.timeSpan = timeSpan;
+				//                [citedReferencesRequest addEditions:edition];
+				//                citedReferencesRequest.timeSpan = timeSpan;
                 citedReferencesRequest.queryLanguage = @"en";
                 citedReferencesRequest.retrieveParameters = retrieveParameters;
                 response = [binding citedReferencesUsingParameters:citedReferencesRequest];
@@ -377,16 +387,17 @@ static NSArray *publicationsFromData(NSData *data);
                         citedReferencesResponse = bodyPart;
                         citedReferencesSearchResults = citedReferencesResponse.return_;
                         availableResultsLocal = citedReferencesSearchResults.recordsFound.integerValue;
+                        citedReferencesSearchResults = citedReferencesResponse.return_;
                     }
                 }
                 break;
-            
             case citingArticles:
+				// Reto: undocumented and untested. I'm going to check its usefulness before removing.            
                 citingArticlesRequest = [[[WokSearchService_citingArticles alloc] init] autorelease];
                 citingArticlesRequest.databaseId = WOS_DB_ID;
                 citingArticlesRequest.uid = searchTerm;
-                [citingArticlesRequest addEditions:edition];
-                citingArticlesRequest.timeSpan = timeSpan;
+				//                [citingArticlesRequest addEditions:edition];
+				//                citingArticlesRequest.timeSpan = timeSpan;
                 citingArticlesRequest.queryLanguage = @"en";
                 citingArticlesRequest.retrieveParameters = retrieveParameters;
                 response = [binding citingArticlesUsingParameters:citingArticlesRequest];
@@ -401,13 +412,13 @@ static NSArray *publicationsFromData(NSData *data);
                     }
                 }
                 break;
-            
             case relatedRecords:
+				// Reto: undocumented and untested. I'm going to check its usefulness before removing.
                 relatedRecordsRequest = [[[WokSearchService_relatedRecords alloc] init] autorelease];
                 relatedRecordsRequest.databaseId = WOS_DB_ID;
                 relatedRecordsRequest.uid = searchTerm;
-                [relatedRecordsRequest addEditions:edition];
-                relatedRecordsRequest.timeSpan = timeSpan;
+				//                [relatedRecordsRequest addEditions:edition];
+				//                relatedRecordsRequest.timeSpan = timeSpan;
                 relatedRecordsRequest.queryLanguage = @"en";
                 relatedRecordsRequest.retrieveParameters = retrieveParameters;
                 response = [binding relatedRecordsUsingParameters:relatedRecordsRequest];
@@ -422,8 +433,9 @@ static NSArray *publicationsFromData(NSData *data);
                     }
                 }
                 break;
-            
+				
             case retrieveById:
+				// Reto: undocumented and untested. I'm going to check its usefulness before removing.
                 retrieveByIdRequest = [[[WokSearchService_retrieveById alloc] init] autorelease];
                 retrieveByIdRequest.databaseId = WOS_DB_ID;
                 scanner = [[[NSScanner alloc] initWithString:searchTerm] autorelease];
@@ -448,7 +460,11 @@ static NSArray *publicationsFromData(NSData *data);
                 break;
         }
         
-        if (nil == fullRecordSearchResults && nil == citedReferencesSearchResults) {
+        if (citedReferencesSearchResults) {
+            pubs = publicationInfosWithISICitedReferences(citedReferencesSearchResults.records);
+        } else if (fullRecordSearchResults) {
+            pubs = publicationInfosWithISIXMLString(fullRecordSearchResults.records);
+        } else {
             OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
             // we already know that a connection can be made, so we likely don't have permission to read this edition or database
             if (errorString) {
@@ -458,110 +474,27 @@ static NSArray *publicationsFromData(NSData *data);
             }
         }
         
-        NSInteger numResults = MIN(availableResultsLocal - fetchedResultsLocal, MAX_RESULTS);
-        //NSAssert(numResults >= 0, @"number of results to get must be non-negative");
+        // now increment this so we don't get the same set next time; BDSKSearchGroup resets it when the searcn term changes
+        fetchedResultsLocal += [pubs count];
         
-        if(numResults > 0) {
-            // retrieve the actual XML results up to the maximum number per fetch
-            switch (operation) {
-                
-                case search:
-                    searchRequest.retrieveParameters.firstRecord = [NSNumber numberWithInt:fetchedResultsLocal+1];
-                    searchRequest.retrieveParameters.count = [NSNumber numberWithInt:numResults];
-                    response = [binding searchUsingParameters:searchRequest];
-                    responseBodyParts = response.bodyParts;
-                    for (id bodyPart in responseBodyParts) {
-                        if ([bodyPart isKindOfClass:[WokSearchService_searchResponse class]]) {
-                            searchResponse = bodyPart;
-                            fullRecordSearchResults = searchResponse.return_;
-                            resultString = fullRecordSearchResults.records;
-                        }
-                    }
-                    break;
-            
-                case citedReferences:
-                    citedReferencesRequest.retrieveParameters.firstRecord = [NSNumber numberWithInt:fetchedResultsLocal+1];
-                    citedReferencesRequest.retrieveParameters.count = [NSNumber numberWithInt:numResults];
-                    response = [binding citedReferencesUsingParameters:citedReferencesRequest];
-                    responseBodyParts = response.bodyParts;
-                    for (id bodyPart in responseBodyParts) {
-                        if ([bodyPart isKindOfClass:[WokSearchService_citedReferencesResponse class]]) {
-                            citedReferencesResponse = bodyPart;
-                            citedReferencesSearchResults = citedReferencesResponse.return_;
-                        }
-                    }
-                    break;
-
-                case citingArticles:
-                    citingArticlesRequest.retrieveParameters.firstRecord = [NSNumber numberWithInt:fetchedResultsLocal+1];
-                    citingArticlesRequest.retrieveParameters.count = [NSNumber numberWithInt:numResults];
-                    response = [binding citingArticlesUsingParameters:citingArticlesRequest];
-                    responseBodyParts = response.bodyParts;
-                    for (id bodyPart in responseBodyParts) {
-                        if ([bodyPart isKindOfClass:[WokSearchService_citingArticlesResponse class]]) {
-                            citingArticlesResponse = bodyPart;
-                            fullRecordSearchResults = citingArticlesResponse.return_;
-                            resultString = fullRecordSearchResults.records;
-                        }
-                    }
-                    break;
-
-                case relatedRecords:
-                    relatedRecordsRequest.retrieveParameters.firstRecord = [NSNumber numberWithInt:fetchedResultsLocal+1];
-                    relatedRecordsRequest.retrieveParameters.count = [NSNumber numberWithInt:numResults];
-                    response = [binding relatedRecordsUsingParameters:relatedRecordsRequest];
-                    responseBodyParts = response.bodyParts;
-                    for (id bodyPart in responseBodyParts) {
-                        if ([bodyPart isKindOfClass:[WokSearchService_relatedRecordsResponse class]]) {
-                            relatedRecordsResponse = bodyPart;
-                            fullRecordSearchResults = relatedRecordsResponse.return_;
-                            resultString = fullRecordSearchResults.records;
-                        }
-                    }
-                    break;
-                    
-                case retrieveById:
-                    retrieveByIdRequest.retrieveParameters.firstRecord = [NSNumber numberWithInt:fetchedResultsLocal+1];
-                    retrieveByIdRequest.retrieveParameters.count = [NSNumber numberWithInt:numResults];
-                    response = [binding retrieveByIdUsingParameters:retrieveByIdRequest];
-                    responseBodyParts = response.bodyParts;
-                    for (id bodyPart in responseBodyParts) {
-                        if ([bodyPart isKindOfClass:[WokSearchService_retrieveByIdResponse class]]) {
-                            retrieveByIdResponse = bodyPart;
-                            fullRecordSearchResults = retrieveByIdResponse.return_;
-                            resultString = fullRecordSearchResults.records;
-                        }
-                    }
-                    break;
-            }
+        OSAtomicCompareAndSwap32Barrier(availableResults, availableResultsLocal, &availableResults);
+        OSAtomicCompareAndSwap32Barrier(fetchedResults, fetchedResultsLocal, &fetchedResults);
         
-            if (citedReferencesSearchResults) {
-                pubs = publicationInfosWithISICitedReferences(citedReferencesSearchResults.records);
-            } else {
-                pubs = publicationInfosWithISIXMLString(resultString);
-            }
-            
-            // now increment this so we don't get the same set next time; BDSKSearchGroup resets it when the searcn term changes
-            fetchedResultsLocal += [pubs count];
-        }
+        // set this flag before adding pubs, or the client will think we're still retrieving (and spinners don't stop)
+        OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
+        
+        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:pubs];
+        
+        // this will create the array if it doesn't exist
+        [[self serverOnMainThread] addPublicationsToGroup:data];
+        
     }
-    
-    OSAtomicCompareAndSwap32Barrier(availableResults, availableResultsLocal, &availableResults);
-    OSAtomicCompareAndSwap32Barrier(fetchedResults, fetchedResultsLocal, &fetchedResults);
-    
-    // set this flag before adding pubs, or the client will think we're still retrieving (and spinners don't stop)
-    OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
-    
-    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:pubs];
-    
-    // this will create the array if it doesn't exist
-    [[self serverOnMainThread] addPublicationsToGroup:data];
 }
 
 - (void)authenticateWithOptions:(NSDictionary *)options {
 
     WOKMWSAuthenticateServiceSoapBinding *binding = [WOKMWSAuthenticateService WOKMWSAuthenticateServiceSoapBinding];
-    //binding.logXMLInOut = YES;
+    binding.logXMLInOut = YES;
     binding.authUsername = [options objectForKey:@"username"];
     binding.authPassword = [options objectForKey:@"password"];
     
@@ -616,20 +549,6 @@ static NSString *nodeStringsForXPathJoinedByString(NSXMLNode *child, NSString *X
     return toReturn;
 }
 
-// adds authors using the most complete representation available
-static void addAuthorsFromXMLNode(NSXMLNode *child, NSMutableDictionary *pubFields)
-{
-    // this seems to be the most complete name representation, although we could build authors from components as well
-    NSString *authorString = nodeStringsForXPathJoinedByString(child, @".//AuCollectiveName", @" and ");
-    if (authorString)
-        [pubFields setObject:authorString forKey:BDSKAuthorString];
-    else { 
-        // join the subnodes by their stringValue, since that's all that's available at this point
-        authorString = [[[child children] valueForKey:@"stringValue"] componentsJoinedByString:@" and "];
-        if (authorString) [pubFields setObject:authorString forKey:BDSKAuthorString];
-    }
-}
-
 static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
 {
     // this is now a field/value set for a particular publication record
@@ -637,184 +556,172 @@ static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
     NSMutableDictionary *pubFields = [NSMutableDictionary new];
     NSString *keywordSeparator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
     NSMutableDictionary *sourceTagValues = [NSMutableDictionary dictionary];
-    NSString *isiURL = nil;
-    
-    // default values
-    NSString *pubType = BDSKArticleString;
-    NSString *sourceField = BDSKJournalString;
-    
-    /*
-     I've seen "Meeting Abstract" and "Article" as common types.  However, "Geomorphology" and 
-     "Estuarine Coastal and Shelf Science" articles are sometimes listed as "Proceedings Paper"
-     which is clearly wrong.  Likewise, any journal with "Review" in the name is listed as a 
-     "Review" type, when it should probably be a journal (e.g., "Earth Science Reviews").
-     */
-    NSString *docType =[[[record nodesForXPath:@"item/doctype" error:NULL] lastObject] stringValue];
-    if ([docType isEqualToString:@"Meeting Abstract"]) {
-        pubType = BDSKInproceedingsString;
-        sourceField = BDSKBooktitleString;
-    } else if ([docType isEqualToString:@"Article"] == NO && [docType isEqualToString:@"Review"] == NO) {
-        // preserve the type if it's unclear
-        addStringToDictionaryIfNotNil(docType, BDSKTypeString, pubFields);
-    }
-    
-    [pubFields setObject:pubType forKey:BDSKPubTypeString];
-    
-    addStringToDictionaryIfNotNil([[(NSXMLElement *)record attributeForName:@"timescited"] stringValue], @"Times-Cited", pubFields);
-    addStringToDictionaryIfNotNil([[(NSXMLElement *)record attributeForName:@"recid"] stringValue], @"Isi-Recid", pubFields);
-        
-    // in the 2.0 API, record data is buried in "item" and "issue" subnodes
-    NSXMLNode *itemChild = nil;
-    NSXMLNode *issueChild = nil;
-    while (nil != child) {
-        if ([child.name isEqualToString:@"item"]) {
-            itemChild = [child childCount] ? [child childAtIndex:0] : nil;
-        }
-        if ([child.name isEqualToString:@"issue"]) {
-            issueChild = [child childCount] ? [child childAtIndex:0] : nil;
-        }
-        child = [child nextSibling];
-    }
-    
-    child = itemChild;
-    
-    while (nil != child) {
-        
-        NSString *name = [child name];
-        
-        if ([name isEqualToString:@"item_title"])
+   
+    // default value for publication type
+    NSString *pubType = nil;
+    NSString *ISIpubType = nil;
+	NSString *journalName = nil;
+
+	/* get some major branches of XML nodes which are used several times */
+	NSXMLNode *summaryChild = [[record nodesForXPath:@"./static_data/summary" error:NULL] lastObject];
+	
+	/* get WOS ID */
+	NSString *wosID = [[[[record nodesForXPath:@"./UID" error:NULL] lastObject] stringValue] stringByRemovingPrefix:@"WOS:"];
+	if (wosID != nil) {
+		[pubFields setObject:wosID forKey:@"Isi"];
+		NSString *isiURL = [@"http://ws.isiknowledge.com/cps/openurl/service?url_ver=Z39.88-2004&rft_id=info:ut/" stringByAppendingString:wosID];
+		[pubFields setObject:isiURL forKey:ISIURLFieldName];
+	}
+		
+	/* get authors */
+	NSString *authorString = nodeStringsForXPathJoinedByString(summaryChild, @"./names/name/full_name", @" and ");
+	addStringToDictionaryIfNotNil(authorString,BDSKAuthorString,pubFields);
+	
+	/* get title, journal name etc */
+	NSArray *titleChilds = [summaryChild nodesForXPath:@"./titles/title" error:NULL];
+    for (child in titleChilds) {		
+        if ([[[(NSXMLElement *)child attributeForName:@"type"] stringValue] isEqualToString:@"item"])
             addStringValueOfNodeForField(child, BDSKTitleString, pubFields);
-        else if ([name isEqualToString:@"source_title"])
-            addStringToDictionaryIfNotNil((useTitlecase ? [[child stringValue] titlecaseString] : [child stringValue]), sourceField, pubFields);
-        else if ([name isEqualToString:@"source_abbrev"])
+        else if ([[[(NSXMLElement *)child attributeForName:@"type"] stringValue] isEqualToString:@"source"]) {
+			journalName = (useTitlecase ? [[child stringValue] titlecaseString] : [child stringValue]);
+            addStringToDictionaryIfNotNil(journalName, BDSKJournalString, pubFields);
+		}
+        else if ([[[(NSXMLElement *)child attributeForName:@"type"] stringValue] isEqualToString:@"source_abbrev"])
             addStringToDictionaryIfNotNil((useTitlecase ? [[child stringValue] titlecaseString] : [child stringValue]), @"Iso-Source-Abbreviation", pubFields);
-        else if ([name isEqualToString:@"authors"])
-            addAuthorsFromXMLNode(child, pubFields);
-        else if ([name isEqualToString:@"abstract"])
-            // abstract is broken into paragraphs; we'll use a double newline as separator
-            addStringToDictionaryIfNotNil( nodeStringsForXPathJoinedByString(child, @"p", @"\n\n"), BDSKAbstractString, pubFields);
-        else if ([name isEqualToString:@"keywords"])
-            addStringToDictionaryIfNotNil( nodeStringsForXPathJoinedByString(child, @".//keyword", keywordSeparator), BDSKKeywordsString, pubFields);
-        else if ([name isEqualToString:@"bib_pages"]) {
-            NSString *begin = [[(NSXMLElement *)child attributeForName:@"begin"] stringValue];
-            NSString *end = [[(NSXMLElement *)child attributeForName:@"end"] stringValue];
-            if (NO == [NSString isEmptyString:begin] && NO == [NSString isEmptyString:end])
-                addStringToDictionaryIfNotNil([NSString stringWithFormat:@"%@--%@", begin, end], BDSKPagesString, pubFields);
-            else if (NO == [NSString isEmptyString:begin])
-                addStringToDictionaryIfNotNil(begin, BDSKPagesString, pubFields);
-            else if (NO == [[child stringValue] isEqualToString:@"-"])
-                addStringValueOfNodeForField(child, BDSKPagesString, pubFields);
-        }
-        else if ([name isEqualToString:@"bib_issue"] && [child kind] == NSXMLElementKind) {
-            addStringValueOfNodeForField([(NSXMLElement *)child attributeForName:@"year"], BDSKYearString, pubFields);
-            addStringValueOfNodeForField([(NSXMLElement *)child attributeForName:@"vol"], BDSKVolumeString, pubFields);
-        }
-        else if ([name isEqualToString:@"article_nos"]) {
-            // for current journals, these are DOI strings, which doesn't follow from the name or the description
-            addStringValueOfNodeForField([[child nodesForXPath:@"./article_no[starts-with(., 'DOI')]" error:NULL] lastObject], BDSKDoiString, pubFields);
-            if ([pubFields objectForKey:BDSKPagesString] == nil) {
-                NSString *artnum = [[[child nodesForXPath:@"./article_no[starts-with(., 'ARTN ')]" error:NULL] lastObject] stringValue];
-                addStringToDictionaryIfNotNil([artnum stringByRemovingPrefix:@"ARTN "], BDSKPagesString, pubFields);
-            }
-        }
-        else if ([name isEqualToString:@"source_series"])
-            addStringValueOfNodeForField(child, BDSKSeriesString, pubFields);
-        else if ([name isEqualToString:@"bib_date"] && [child kind] == NSXMLElementKind) {
-            /* 
-             There are at least 3 variants of this, so it's not always possible to get something
-             truly useful from it.
-             
-             <bib_date date="AUG" year="2008">AUG 2008</bib_date>
-             <bib_date date="JUN 19" year="2008">JUN 19 2008</bib_date>
-             <bib_date date="MAR-APR" year="2007">MAR-APR 2007</bib_date>
-             */
-            NSString *possibleMonthString = [[(NSXMLElement *)child attributeForName:@"date"] stringValue];
-            NSString *monthString;
-            NSScanner *scanner = nil;
-            if (possibleMonthString)
-                scanner = [[NSScanner alloc] initWithString:possibleMonthString];
-            static NSCharacterSet *monthSet = nil;
-            if (nil == monthSet) {
-                NSMutableCharacterSet *cset = [[NSCharacterSet letterCharacterSet] mutableCopy];
-                [cset addCharactersInString:@"-"];
-                monthSet = [cset copy];
-                [cset release];
-            }
-            if ([scanner scanCharactersFromSet:monthSet intoString:&monthString]) {
-                if ([monthString rangeOfString:@"-"].length == 0)
-                    monthString = [NSString stringWithBibTeXString:[monthString lowercaseString] macroResolver:nil error:NULL];
-                else
-                    monthString = [monthString titlecaseString];
-                addStringToDictionaryIfNotNil(monthString, BDSKMonthString, pubFields);
-            }
-            else
-                addStringToDictionaryIfNotNil(possibleMonthString, BDSKDateString, pubFields);
-            [scanner release];
-        }
-        
-        // @@ remainder are untested (they're empty in all of my search results) so may be NSXMLElements
-        else if ([name isEqualToString:@"pub_url"])
-            addStringValueOfNodeForField(child, BDSKUrlString, pubFields);
-        else if ([name isEqualToString:@"bib_vol"])
-            addStringToDictionaryIfNotNil([[(NSXMLElement *)child attributeForName:@"issue"] stringValue], BDSKNumberString, pubFields);
-        else if ([name isEqualToString:@"publisher"])
-            addStringValueOfNodeForField(child, BDSKPublisherString, pubFields);
-        else if ([name isEqualToString:@"pub_address"])
-            addStringValueOfNodeForField(child, BDSKAddressString, pubFields);
-        else if ([name isEqualToString:@"ut"]) {
-            addStringValueOfNodeForField(child, @"Isi", pubFields);
-            isiURL = [@"http://ws.isiknowledge.com/cps/openurl/service?url_ver=Z39.88-2004&rft_id=info:ut/" stringByAppendingString:[pubFields objectForKey:@"Isi"]];
-            [pubFields setObject:isiURL forKey:ISIURLFieldName];
-        } else if ([name isEqualToString:@"refs"])
-            addStringToDictionaryIfNotNil( nodeStringsForXPathJoinedByString(child, @".//ref", @" "), @"Isi-Ref-Recids", pubFields);
-        
-        // check to see if the current tag name matches an item in the source XML tag priority list
-        NSString *sourceTagValue;
-        for (NSString *sourceTagName in sourceXMLTagPriority) {
-            if ([name isEqualToString:sourceTagName]) {
-                sourceTagValue = (useTitlecase ? [[child stringValue] titlecaseString] : [child stringValue]);
-                if (sourceTagValue && [sourceTagValue length])
-                    [sourceTagValues setObject:sourceTagValue forKey:sourceTagName];
-            }
-        }
-        
-        child = [child nextSibling];
     }
+	
+	/* get page numbers */
+	child = [[summaryChild nodesForXPath:@"./pub_info/page" error:NULL] lastObject];
+	if (child != nil) {
+		NSString *begin = [[(NSXMLElement *)child attributeForName:@"begin"] stringValue];
+		NSString *end = [[(NSXMLElement *)child attributeForName:@"end"] stringValue];
+		if (NO == [NSString isEmptyString:begin] && NO == [NSString isEmptyString:end])
+			addStringToDictionaryIfNotNil([NSString stringWithFormat:@"%@--%@", begin, end], BDSKPagesString, pubFields);
+		else if (NO == [NSString isEmptyString:begin])
+			addStringToDictionaryIfNotNil(begin, BDSKPagesString, pubFields);
+//		else if (NO == [[child stringValue] isEqualToString:@"-"])
+//			addStringValueOfNodeForField(child, BDSKPagesString, pubFields);			
+	}
+	
+	/* get publication year, volume, issue and month */
+	child = [[summaryChild nodesForXPath:@"./pub_info" error:NULL] lastObject];
+	if (child != nil) {
+		addStringValueOfNodeForField([(NSXMLElement *)child attributeForName:@"pubyear"], BDSKYearString, pubFields);
+		addStringValueOfNodeForField([(NSXMLElement *)child attributeForName:@"vol"], BDSKVolumeString, pubFields);
+		addStringValueOfNodeForField([(NSXMLElement *)child attributeForName:@"issue"], BDSKNumberString, pubFields);
+		
+		ISIpubType = [[(NSXMLElement *)child attributeForName:@"pubtype"] stringValue];
+//		NSLog(@"ISIpubType:\n%@", ISIpubType);
+
+		//             There are at least 3 variants of this, so it's not always possible to get something
+		//             truly useful from it.
+		
+		//             <bib_date date="AUG" year="2008">AUG 2008</bib_date>
+		//             <bib_date date="JUN 19" year="2008">JUN 19 2008</bib_date>
+		//             <bib_date date="MAR-APR" year="2007">MAR-APR 2007</bib_date>		
+		NSString *possibleMonthString = [[(NSXMLElement *)child attributeForName:@"pubmonth"] stringValue];
+		NSString *monthString;
+		NSScanner *scanner = nil;
+		if (possibleMonthString)
+			scanner = [[NSScanner alloc] initWithString:possibleMonthString];
+		static NSCharacterSet *monthSet = nil;
+		if (nil == monthSet) {
+			NSMutableCharacterSet *cset = [[NSCharacterSet letterCharacterSet] mutableCopy];
+			[cset addCharactersInString:@"-"];
+			monthSet = [cset copy];
+			[cset release];
+		}
+		if ([scanner scanCharactersFromSet:monthSet intoString:&monthString]) {
+			if ([monthString rangeOfString:@"-"].length == 0) {
+				monthString = [NSString stringWithBibTeXString:[monthString lowercaseString] macroResolver:nil error:NULL];
+			} else {
+				monthString = [monthString titlecaseString];
+				addStringToDictionaryIfNotNil(monthString, BDSKMonthString, pubFields);
+			}
+		} else {
+			addStringToDictionaryIfNotNil(possibleMonthString, BDSKDateString, pubFields);
+		}
+		[scanner release];
+	}	
+
+	
+	/* get the document / publication type */
+	/* needs some more testing for conferences etc. maybe we also need to get the conference name? */
+	child = [[summaryChild nodesForXPath:@"./doctypes/doctype" error:NULL] lastObject]; 	
+    if (child != nil) {		
+		NSString *docType = [child stringValue];			
+//		NSLog(@"docType:\n%@", docType);
+		/*
+		I've seen "Meeting Abstract" and "Article" as common types.  However, "Geomorphology" and 
+		"Estuarine Coastal and Shelf Science" articles are sometimes listed as "Proceedings Paper"
+		which is clearly wrong.  Likewise, any journal with "Review" in the name is listed as a 
+		"Review" type, when it should probably be a journal (e.g., "Earth Science Reviews").
+		*/
+		if ([docType isEqualToString:@"Meeting Abstract"]) {
+			pubType = BDSKInproceedingsString;
+		} else if ([docType isEqualToString:@"Review"]) {
+			pubType = BDSKArticleString;
+		} else if ([docType isEqualToString:@"Book Review"]) {
+			pubType = BDSKArticleString;
+		} else if ([docType isEqualToString:@"Journal Paper"]) {
+			pubType = BDSKArticleString;
+		} else if ([docType isEqualToString:@"Proceedings Paper"]) {
+			pubType = BDSKInproceedingsString;
+			[pubFields setObject:journalName forKey:BDSKBooktitleString];
+		} else {
+			if ([ISIpubType isEqualToString:@"Journal"]) {
+				pubType = BDSKArticleString;
+			} else {
+				// preserve the type if it's unclear
+				pubType = docType;
+			}
+		}
+			
+	}
     
-    child = issueChild;
-    
-    while (nil != child) {
-        
-        NSString *name = [child name];
-        
-        // check to see if the current tag name matches an item in the source XML tag priority list
-        NSString *sourceTagValue;
-        for (NSString *sourceTagName in sourceXMLTagPriority) {
-            if ([name isEqualToString:sourceTagName]) {
-                sourceTagValue = (useTitlecase ? [[child stringValue] titlecaseString] : [child stringValue]);
-                if (sourceTagValue && [sourceTagValue length])
-                    [sourceTagValues setObject:sourceTagValue forKey:sourceTagName];
-            }
-        }
-    
-        child = [child nextSibling];
-    }
-    
-    // if source field value(s) are in the priority list, subtitute the first one
-    if ([sourceTagValues count]) {
-        NSString *sourceTagValue;
-        for (NSString *sourceTagName in sourceXMLTagPriority) {
-            if ((sourceTagValue = [sourceTagValues objectForKey:sourceTagName])) {
-                [pubFields setObject:sourceTagValue forKey:sourceField];
-                break;
-            }
-        }
-    }
-    
-    // mainly useful for debugging
-    if (addXMLStringToAnnote)
-        addStringToDictionaryIfNotNil([record XMLString], BDSKAnnoteString, pubFields);
-    
+	[pubFields setObject:pubType forKey:BDSKPubTypeString];
+
+	/* get publisher name and address */
+	addStringValueOfNodeForField([[summaryChild nodesForXPath:@"./publishers/publisher/names/name/full_name" error:NULL] lastObject], 
+								 BDSKPublisherString, pubFields);
+	addStringValueOfNodeForField([[summaryChild nodesForXPath:@"./publishers/publisher/address_spec/full_address" error:NULL] lastObject],
+								 BDSKAddressString, pubFields);
+
+	/* get abstract */
+	NSString *abstractString = nodeStringsForXPathJoinedByString(record, @"./static_data/fullrecord_metadata/abstracts/abstract/abstract_text/p", @"\n\n");
+	addStringToDictionaryIfNotNil(abstractString,BDSKAbstractString,pubFields);
+
+	/* get keywords */
+	NSString *keywordString = nodeStringsForXPathJoinedByString(record, @"./static_data/item/keywords_plus/keyword", keywordSeparator);
+	addStringToDictionaryIfNotNil(keywordString,BDSKKeywordsString,pubFields);						
+	
+	/* get identifiers (DOI, ISSN, ISBN) */
+	NSArray *identifierChilds = [record nodesForXPath:@"./dynamic_data/cluster_related/identifiers/identifier" error:NULL];
+	for (child in identifierChilds) {
+		NSString *typeString = [[(NSXMLElement *)child attributeForName:@"type"] stringValue];
+		if ([typeString isEqualToString:@"doi"]) {
+			addStringToDictionaryIfNotNil([[(NSXMLElement *)child attributeForName:@"value"] stringValue],BDSKDoiString,pubFields);
+		}
+		if ([typeString isEqualToString:@"art_no"]) {
+			if ([pubFields objectForKey:BDSKNumberString] == nil) {
+				NSString *artnum = [[(NSXMLElement *)child attributeForName:@"value"] stringValue];
+				addStringToDictionaryIfNotNil([artnum stringByRemovingPrefix:@"ARTN "], BDSKNumberString, pubFields);
+			}
+		}
+		if ([typeString isEqualToString:@"issn"]) {
+			NSString *issn = [[(NSXMLElement *)child attributeForName:@"value"] stringValue];
+			addStringToDictionaryIfNotNil(issn, @"Issn", pubFields);
+		}
+		if ([typeString isEqualToString:@"isbn"]) {
+			NSString *isbn = [[(NSXMLElement *)child attributeForName:@"value"] stringValue];
+			addStringToDictionaryIfNotNil(isbn, @"Isbn", pubFields);
+		}
+	}
+	
+	/* get times-cited */
+	addStringToDictionaryIfNotNil([[[[record nodesForXPath:@"./dynamic_data/citation_related/tc_list/silo_tc" error:NULL] lastObject] 
+								   attributeForName:@"local_count"] stringValue], @"Times-Cited", pubFields);
+	
     return pubFields;
 }
 

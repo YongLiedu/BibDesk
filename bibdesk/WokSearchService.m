@@ -918,6 +918,9 @@
 			xmlAddChild(node, [child xmlNodeForDoc:node->doc elementName:@"collectionFields" elementNSPrefix:nil]); // FIX @"WokSearchService"]);
 		}
 	}
+	if(self.firstRecord != 0) {
+		xmlAddChild(node, [self.firstRecord xmlNodeForDoc:node->doc elementName:@"firstRecord" elementNSPrefix:nil]); // FIX @"WokSearchService"]);
+	}
 	if(self.count != 0) {
 		xmlAddChild(node, [self.count xmlNodeForDoc:node->doc elementName:@"count" elementNSPrefix:nil]); // FIX @"WokSearchService"]);
 	}
@@ -925,9 +928,6 @@
 		for(WokSearchService_queryField * child in self.fields) {
 			xmlAddChild(node, [child xmlNodeForDoc:node->doc elementName:@"fields" elementNSPrefix:nil]); // FIX @"WokSearchService"]);
 		}
-	}
-	if(self.firstRecord != 0) {
-		xmlAddChild(node, [self.firstRecord xmlNodeForDoc:node->doc elementName:@"firstRecord" elementNSPrefix:nil]); // FIX @"WokSearchService"]);
 	}
 	if(self.options != 0) {
 		for(WokSearchService_keyValuePair * child in self.options) {
@@ -4879,7 +4879,10 @@
 {
 	
 	if(self.databaseID != 0) {
-		xmlAddChild(node, [self.databaseID xmlNodeForDoc:node->doc elementName:@"databaseID" elementNSPrefix:nil]); // FIX @"WokSearchService"]);
+		xmlAddChild(node, [self.databaseID xmlNodeForDoc:node->doc elementName:@"databaseId" elementNSPrefix:nil]); // FIX @"WokSearchService"]);
+	}
+	if(self.userQuery != 0) {
+		xmlAddChild(node, [self.userQuery xmlNodeForDoc:node->doc elementName:@"userQuery" elementNSPrefix:nil]); // FIX @"WokSearchService"]);
 	}
 	if(self.editions != 0) {
 		for(WokSearchService_editionDesc * child in self.editions) {
@@ -4894,9 +4897,6 @@
 	}
 	if(self.timeSpan != 0) {
 		xmlAddChild(node, [self.timeSpan xmlNodeForDoc:node->doc elementName:@"timeSpan" elementNSPrefix:nil]); // FIX @"WokSearchService"]);
-	}
-	if(self.userQuery != 0) {
-		xmlAddChild(node, [self.userQuery xmlNodeForDoc:node->doc elementName:@"userQuery" elementNSPrefix:nil]); // FIX @"WokSearchService"]);
 	}
 }
 /* elements */
@@ -4943,7 +4943,7 @@
 				[elementString self]; // avoid compiler warning for unused var
 				xmlFree(elementText);
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "databaseID")) {
+			if(xmlStrEqual(cur->name, (const xmlChar *) "databaseId")) {
 				
 				Class elementClass = nil;
 				xmlChar *instanceType = xmlGetNsProp(cur, (const xmlChar *) "type", (const xmlChar *) "http://www.w3.org/2001/XMLSchema-instance");
@@ -5860,13 +5860,13 @@
 + (void)initialize
 {
 	[[USGlobals sharedInstance].wsdlStandardNamespaces setObject:@"xsd" forKey:@"http://www.w3.org/2001/XMLSchema"];
-	[[USGlobals sharedInstance].wsdlStandardNamespaces setObject:@"WokSearchService" forKey:@"http://woksearch.cxf.wokmws.thomsonreuters.com"];
+	[[USGlobals sharedInstance].wsdlStandardNamespaces setObject:@"WokSearchService" forKey:@"http://woksearch.v3.wokmws.thomsonreuters.com"];
 	[[USGlobals sharedInstance].wsdlStandardNamespaces setObject:@"soap" forKey:@"http://schemas.xmlsoap.org/wsdl/soap/"];
 	[[USGlobals sharedInstance].wsdlStandardNamespaces setObject:@"wsdl" forKey:@"http://schemas.xmlsoap.org/wsdl/"];
 }
 + (WokSearchServiceSoapBinding *)WokSearchServiceSoapBinding
 {
-	return [[[WokSearchServiceSoapBinding alloc] initWithAddress:@"http://search.isiknowledge.com/esti/wokmws/ws/WokSearch"] autorelease];
+	return [[[WokSearchServiceSoapBinding alloc] initWithAddress:@"http://search.webofknowledge.com/esti/wokmws/ws/WokSearch"] autorelease];
 }
 @end
 @implementation WokSearchServiceSoapBinding
@@ -6821,7 +6821,7 @@ static WokSearchServiceSoapBinding_envelope *WokSearchServiceSoapBindingSharedEn
 	xmlNewNsProp(root, xslNs, (const xmlChar*)"version", (const xmlChar*)"1.0");
 	
 	xmlNewNs(root, (const xmlChar*)"http://www.w3.org/2001/XMLSchema", (const xmlChar*)"xsd");
-	xmlNewNs(root, (const xmlChar*)"http://woksearch.cxf.wokmws.thomsonreuters.com", (const xmlChar*)"WokSearchService");
+	xmlNewNs(root, (const xmlChar*)"http://woksearch.v3.wokmws.thomsonreuters.com", (const xmlChar*)"WokSearchService");
 	xmlNewNs(root, (const xmlChar*)"http://schemas.xmlsoap.org/wsdl/soap/", (const xmlChar*)"soap");
 	xmlNewNs(root, (const xmlChar*)"http://schemas.xmlsoap.org/wsdl/", (const xmlChar*)"wsdl");
 	
