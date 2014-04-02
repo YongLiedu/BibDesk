@@ -70,6 +70,9 @@ static BOOL useTitlecase = YES;
 static NSArray *sourceXMLTagPriority = nil;
 static NSString *ISIURLFieldName = nil;
 
+static NSSet *validDatabases = nil;
+static NSSet *WOSEditions = nil;
+
 static NSArray *publicationInfosWithISIXMLString(NSString *xmlString);
 static NSArray *publicationInfosWithISICitedReferences(NSArray *citedReferences);
 //static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs, NSString *fieldName);
@@ -121,6 +124,9 @@ static NSArray *publicationsFromData(NSData *data);
 
     // set the ISI URL in a specified field name
     ISIURLFieldName = [([[NSUserDefaults standardUserDefaults] stringForKey:BDSKISIURLFieldNameKey] ?: DefaultISIURLFieldName) retain];
+    
+    validDatabases = [[NSSet alloc] initWithObjects:@"WOK", @"UGB", @"WOS", @"BIOABS", @"BIOSIS", @"CABI", @"CCC", @"DIIDW", @"FSTA", @"INSPEC", @"MEDLINE", @"ZOOREC", @"FAST", nil];
+    WOSEditions = [[NSSet alloc] initWithObjects:@"SCI", @"SSCI", @"AHCI", @"IC", @"ISTP", @"ISSHP", @"CCR", nil];
 }
 
 - (Protocol *)protocolForMainThread { return @protocol(BDSKISIGroupServerMainThread); }
@@ -255,7 +261,9 @@ static NSArray *publicationsFromData(NSData *data);
         numResults = MIN(availableResultsLocal - fetchedResultsLocal, MAX_RESULTS);
     
     // Strip whitespace from the search term to make WOS happy
-    searchTerm = [searchTerm stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    searchTerm = [searchTerm stringByRemovingSurroundingWhitespace];
+    
+    database = [database stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
     
     if ([NSString isEmptyString:searchTerm] || numResults == 0){
 		
@@ -286,6 +294,20 @@ static NSArray *publicationsFromData(NSData *data);
             searchTerm = [NSString stringWithFormat:@"TS=\"%@\"", searchTerm];
         }
         
+        NSArray *editionIDs = nil;
+        if ([NSString isEmptyString:database]) {
+            database = WOS_DB_ID;
+        } else {
+            NSArray *ids = [database componentsSeparatedByString:@" "];
+            database = [ids firstObject];
+            if ([WOSEditions containsObject:database]) {
+                database = WOS_DB_ID;
+                editionIDs = ids;
+            } else if ([ids count] > 1) {
+                editionIDs = [ids subarrayWithRange:NSMakeRange(1, [ids count] - 1)];
+            }
+        }
+        
         // authenticate if necessary
         if (nil == sessionCookie) {
             [self authenticateWithOptions:options];
@@ -300,9 +322,13 @@ static NSArray *publicationsFromData(NSData *data);
         // perform WS query to get count of results; don't pass zero for record numbers, although it's not clear what the values mean in this context
         NSString *errorString = nil;
 		
-        //WokSearchService_editionDesc *edition = [[[WokSearchService_editionDesc alloc] init] autorelease];
-        //[edition setCollection:WOS_DB_ID];
-        //[edition setEdition:database];
+        NSMutableArray *editions = [NSMutableArray array];
+        for (NSString *editionID in editionIDs) {
+            WokSearchService_editionDesc *edition = [[[WokSearchService_editionDesc alloc] init] autorelease];
+            [edition setCollection:database];
+            [edition setEdition:editionID];
+            [editions addObject:edition];
+        }
         
         WokSearchService_retrieveParameters *retrieveParameters = [[[WokSearchService_retrieveParameters alloc] init] autorelease];
         [retrieveParameters setFirstRecord:[NSNumber numberWithInteger:fetchedResultsLocal + 1]];
@@ -333,8 +359,9 @@ static NSArray *publicationsFromData(NSData *data);
 				// Reto: this works for the Premium edition of WOKSearch (and not for WOKSearchLite)
                 WokSearchService_search *searchRequest = [[[WokSearchService_search alloc] init] autorelease];
                 WokSearchService_queryParameters *queryParameters = [[[WokSearchService_queryParameters alloc] init] autorelease];
-                [queryParameters setDatabaseID:WOS_DB_ID];
-				// [queryParameters addEditions:edition];
+                [queryParameters setDatabaseID:database];
+                for (WokSearchService_editionDesc *edition in editions)
+                    [queryParameters addEditions:edition];
                 [queryParameters setUserQuery:searchTerm];
                 [queryParameters setQueryLanguage:EN_QUERY_LANG];
                 [searchRequest setQueryParameters:queryParameters];
@@ -353,9 +380,10 @@ static NSArray *publicationsFromData(NSData *data);
 			{
             	// Reto: undocumented and untested. I'm going to check its usefulness before removing.
                 WokSearchService_citedReferences *citedReferencesRequest = [[[WokSearchService_citedReferences alloc] init] autorelease];
-                [citedReferencesRequest setDatabaseId:WOS_DB_ID];
+                [citedReferencesRequest setDatabaseId:database];
                 [citedReferencesRequest setUid:searchTerm];
-				// [citedReferencesRequest addEditions:edition];
+                for (WokSearchService_editionDesc *edition in editions)
+                    [citedReferencesRequest addEditions:edition];
 				// [citedReferencesRequest setTimeSpan:timeSpan];
                 [citedReferencesRequest setQueryLanguage:EN_QUERY_LANG];
                 [citedReferencesRequest setRetrieveParameters:retrieveParameters];
@@ -373,9 +401,10 @@ static NSArray *publicationsFromData(NSData *data);
 			{
             	// Reto: undocumented and untested. I'm going to check its usefulness before removing.            
                 WokSearchService_citingArticles *citingArticlesRequest = [[[WokSearchService_citingArticles alloc] init] autorelease];
-                [citingArticlesRequest setDatabaseId:WOS_DB_ID];
+                [citingArticlesRequest setDatabaseId:database];
                 [citingArticlesRequest setUid:searchTerm];
-				// [citingArticlesRequest addEditions:edition];
+                for (WokSearchService_editionDesc *edition in editions)
+                    [citingArticlesRequest addEditions:edition];
 				// [citingArticlesRequest setTimeSpan:timeSpan];
                 [citingArticlesRequest setQueryLanguage:EN_QUERY_LANG];
                 [citingArticlesRequest setRetrieveParameters:retrieveParameters];
@@ -393,9 +422,10 @@ static NSArray *publicationsFromData(NSData *data);
 			{
             	// Reto: undocumented and untested. I'm going to check its usefulness before removing.
                 WokSearchService_relatedRecords *relatedRecordsRequest = [[[WokSearchService_relatedRecords alloc] init] autorelease];
-                [relatedRecordsRequest setDatabaseId:WOS_DB_ID];
+                [relatedRecordsRequest setDatabaseId:database];
                 [relatedRecordsRequest setUid:searchTerm];
-				// [relatedRecordsRequest addEditions:edition];
+                for (WokSearchService_editionDesc *edition in editions)
+                    [relatedRecordsRequest addEditions:edition];
 				// [relatedRecordsRequest setTimeSpan:timeSpan];
                 [relatedRecordsRequest setQueryLanguage:EN_QUERY_LANG];
                 [relatedRecordsRequest setRetrieveParameters:retrieveParameters];
@@ -413,7 +443,7 @@ static NSArray *publicationsFromData(NSData *data);
 			{
             	// Reto: undocumented and untested. I'm going to check its usefulness before removing.
                 WokSearchService_retrieveById *retrieveByIdRequest = [[[WokSearchService_retrieveById alloc] init] autorelease];
-                [retrieveByIdRequest setDatabaseId:WOS_DB_ID];
+                [retrieveByIdRequest setDatabaseId:database];
                 NSString *token = nil;
                 NSScanner *scanner = [[[NSScanner alloc] initWithString:searchTerm] autorelease];
                 [scanner scanUpToCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:NULL];
@@ -477,9 +507,7 @@ static NSArray *publicationsFromData(NSData *data);
     
     WOKMWSAuthenticateServiceSoapBindingResponse *response = [binding authenticateUsingParameters:request];
     
-    NSArray *responseBodyParts = response.bodyParts;
-    
-    for (id bodyPart in responseBodyParts) {
+    for (id bodyPart in [response bodyParts]) {
         
         if ([bodyPart isKindOfClass:[SOAPFault class]]) {
         
