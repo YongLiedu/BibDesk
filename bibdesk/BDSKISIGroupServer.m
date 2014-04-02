@@ -70,7 +70,6 @@ static BOOL useTitlecase = YES;
 static NSArray *sourceXMLTagPriority = nil;
 static NSString *ISIURLFieldName = nil;
 
-static NSSet *validDatabases = nil;
 static NSSet *WOSEditions = nil;
 
 static NSArray *publicationInfosWithISIXMLString(NSString *xmlString);
@@ -125,7 +124,6 @@ static NSArray *publicationsFromData(NSData *data);
     // set the ISI URL in a specified field name
     ISIURLFieldName = [([[NSUserDefaults standardUserDefaults] stringForKey:BDSKISIURLFieldNameKey] ?: DefaultISIURLFieldName) retain];
     
-    validDatabases = [[NSSet alloc] initWithObjects:@"WOK", @"UGB", @"WOS", @"BIOABS", @"BIOSIS", @"CABI", @"CCC", @"DIIDW", @"FSTA", @"INSPEC", @"MEDLINE", @"ZOOREC", @"FAST", nil];
     WOSEditions = [[NSSet alloc] initWithObjects:@"SCI", @"SSCI", @"AHCI", @"IC", @"ISTP", @"ISSHP", @"CCR", nil];
 }
 
