@@ -11,93 +11,33 @@
 @class WokSearchService_relatedRecords;
 @class WokSearchService_relatedRecordsResponse;
 @class WokSearchService_retrieve;
+@class WokSearchService_retrieveResponse;
 @class WokSearchService_retrieveById;
 @class WokSearchService_retrieveByIdResponse;
-@class WokSearchService_retrieveResponse;
 @class WokSearchService_search;
 @class WokSearchService_searchResponse;
 @class WokSearchService_retrieveParameters;
-@class WokSearchService_collectionFields;
-@class WokSearchService_queryField;
-@class WokSearchService_keyValuePair;
+@class WokSearchService_citedReferencesSearchResults;
 @class WokSearchService_citedReference;
 @class WokSearchService_editionDesc;
 @class WokSearchService_timeSpan;
 @class WokSearchService_fullRecordSearchResults;
-@class WokSearchService_labelValuesPair;
-@class WokSearchService_citedReferencesSearchResults;
 @class WokSearchService_fullRecordData;
 @class WokSearchService_queryParameters;
+@class WokSearchService_sortField;
+@class WokSearchService_viewField;
+@class WokSearchService_keyValuePair;
+@class WokSearchService_labelValuesPair;
+@class WokSearchService_FaultInformation;
+@class WokSearchService_SupportingWebServiceException;
+@class WokSearchService_RawFaultInformation;
 @class WokSearchService_QueryException;
 @class WokSearchService_AuthenticationException;
 @class WokSearchService_InvalidInputException;
 @class WokSearchService_ESTIWSException;
 @class WokSearchService_InternalServerException;
 @class WokSearchService_SessionException;
-@interface WokSearchService_editionDesc : NSObject {
-	
-/* elements */
-	NSString * collection;
-	NSString * edition;
-/* attributes */
-}
-- (NSString *)nsPrefix;
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
-- (void)addAttributesToNode:(xmlNodePtr)node;
-- (void)addElementsToNode:(xmlNodePtr)node;
-+ (WokSearchService_editionDesc *)deserializeNode:(xmlNodePtr)cur;
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
-/* elements */
-@property (retain) NSString * collection;
-@property (retain) NSString * edition;
-/* attributes */
-- (NSDictionary *)attributes;
-@end
-@interface WokSearchService_timeSpan : NSObject {
-	
-/* elements */
-	NSString * begin;
-	NSString * end;
-/* attributes */
-}
-- (NSString *)nsPrefix;
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
-- (void)addAttributesToNode:(xmlNodePtr)node;
-- (void)addElementsToNode:(xmlNodePtr)node;
-+ (WokSearchService_timeSpan *)deserializeNode:(xmlNodePtr)cur;
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
-/* elements */
-@property (retain) NSString * begin;
-@property (retain) NSString * end;
-/* attributes */
-- (NSDictionary *)attributes;
-@end
-@interface WokSearchService_collectionFields : NSObject {
-	
-/* elements */
-	NSString * collectionName;
-	NSMutableArray *fieldList;
-	NSString * listName;
-/* attributes */
-}
-- (NSString *)nsPrefix;
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
-- (void)addAttributesToNode:(xmlNodePtr)node;
-- (void)addElementsToNode:(xmlNodePtr)node;
-+ (WokSearchService_collectionFields *)deserializeNode:(xmlNodePtr)cur;
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
-/* elements */
-@property (retain) NSString * collectionName;
-- (void)addFieldList:(NSString *)toAdd;
-@property (readonly) NSMutableArray * fieldList;
-@property (retain) NSString * listName;
-/* attributes */
-- (NSDictionary *)attributes;
-@end
-@interface WokSearchService_queryField : NSObject {
+@interface WokSearchService_sortField : NSObject {
 	
 /* elements */
 	NSString * name;
@@ -108,12 +48,33 @@
 - (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
 - (void)addAttributesToNode:(xmlNodePtr)node;
 - (void)addElementsToNode:(xmlNodePtr)node;
-+ (WokSearchService_queryField *)deserializeNode:(xmlNodePtr)cur;
++ (WokSearchService_sortField *)deserializeNode:(xmlNodePtr)cur;
 - (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
 - (void)deserializeElementsFromNode:(xmlNodePtr)cur;
 /* elements */
 @property (retain) NSString * name;
 @property (retain) NSString * sort;
+/* attributes */
+- (NSDictionary *)attributes;
+@end
+@interface WokSearchService_viewField : NSObject {
+	
+/* elements */
+	NSString * collectionName;
+	NSMutableArray *fieldName;
+/* attributes */
+}
+- (NSString *)nsPrefix;
+- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
+- (void)addAttributesToNode:(xmlNodePtr)node;
+- (void)addElementsToNode:(xmlNodePtr)node;
++ (WokSearchService_viewField *)deserializeNode:(xmlNodePtr)cur;
+- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
+- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
+/* elements */
+@property (retain) NSString * collectionName;
+- (void)addFieldName:(NSString *)toAdd;
+@property (readonly) NSMutableArray * fieldName;
 /* attributes */
 - (NSDictionary *)attributes;
 @end
@@ -140,11 +101,11 @@
 @interface WokSearchService_retrieveParameters : NSObject {
 	
 /* elements */
-	NSMutableArray *collectionFields;
-	NSNumber * count;
-	NSMutableArray *fields;
 	NSNumber * firstRecord;
-	NSMutableArray *options;
+	NSNumber * count;
+	NSMutableArray *sortField;
+	NSMutableArray *viewField;
+	NSMutableArray *option;
 /* attributes */
 }
 - (NSString *)nsPrefix;
@@ -155,14 +116,14 @@
 - (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
 - (void)deserializeElementsFromNode:(xmlNodePtr)cur;
 /* elements */
-- (void)addCollectionFields:(WokSearchService_collectionFields *)toAdd;
-@property (readonly) NSMutableArray * collectionFields;
-@property (retain) NSNumber * count;
-- (void)addFields:(WokSearchService_queryField *)toAdd;
-@property (readonly) NSMutableArray * fields;
 @property (retain) NSNumber * firstRecord;
-- (void)addOptions:(WokSearchService_keyValuePair *)toAdd;
-@property (readonly) NSMutableArray * options;
+@property (retain) NSNumber * count;
+- (void)addSortField:(WokSearchService_sortField *)toAdd;
+@property (readonly) NSMutableArray * sortField;
+- (void)addViewField:(WokSearchService_viewField *)toAdd;
+@property (readonly) NSMutableArray * viewField;
+- (void)addOption:(WokSearchService_keyValuePair *)toAdd;
+@property (readonly) NSMutableArray * option;
 /* attributes */
 - (NSDictionary *)attributes;
 @end
@@ -171,8 +132,6 @@
 /* elements */
 	NSString * databaseId;
 	NSString * uid;
-	NSMutableArray *editions;
-	WokSearchService_timeSpan * timeSpan;
 	NSString * queryLanguage;
 	WokSearchService_retrieveParameters * retrieveParameters;
 /* attributes */
@@ -187,9 +146,6 @@
 /* elements */
 @property (retain) NSString * databaseId;
 @property (retain) NSString * uid;
-- (void)addEditions:(WokSearchService_editionDesc *)toAdd;
-@property (readonly) NSMutableArray * editions;
-@property (retain) WokSearchService_timeSpan * timeSpan;
 @property (retain) NSString * queryLanguage;
 @property (retain) WokSearchService_retrieveParameters * retrieveParameters;
 /* attributes */
@@ -198,16 +154,17 @@
 @interface WokSearchService_citedReference : NSObject {
 	
 /* elements */
-	NSString * articleID;
+	NSString * uid;
+	NSString * docid;
+	NSString * articleId;
 	NSString * citedAuthor;
+	NSString * timesCited;
+	NSString * year;
+	NSString * page;
+	NSString * volume;
 	NSString * citedTitle;
 	NSString * citedWork;
-	NSString * page;
-	NSString * recID;
-	NSString * refID;
-	NSString * timesCited;
-	NSString * volume;
-	NSString * year;
+	NSString * hot;
 /* attributes */
 }
 - (NSString *)nsPrefix;
@@ -218,24 +175,25 @@
 - (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
 - (void)deserializeElementsFromNode:(xmlNodePtr)cur;
 /* elements */
-@property (retain) NSString * articleID;
+@property (retain) NSString * uid;
+@property (retain) NSString * docid;
+@property (retain) NSString * articleId;
 @property (retain) NSString * citedAuthor;
+@property (retain) NSString * timesCited;
+@property (retain) NSString * year;
+@property (retain) NSString * page;
+@property (retain) NSString * volume;
 @property (retain) NSString * citedTitle;
 @property (retain) NSString * citedWork;
-@property (retain) NSString * page;
-@property (retain) NSString * recID;
-@property (retain) NSString * refID;
-@property (retain) NSString * timesCited;
-@property (retain) NSString * volume;
-@property (retain) NSString * year;
+@property (retain) NSString * hot;
 /* attributes */
 - (NSDictionary *)attributes;
 @end
 @interface WokSearchService_citedReferencesSearchResults : NSObject {
 	
 /* elements */
-	NSString * queryID;
-	NSMutableArray *records;
+	NSString * queryId;
+	NSMutableArray *references;
 	NSNumber * recordsFound;
 	NSNumber * recordsSearched;
 /* attributes */
@@ -248,9 +206,9 @@
 - (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
 - (void)deserializeElementsFromNode:(xmlNodePtr)cur;
 /* elements */
-@property (retain) NSString * queryID;
-- (void)addRecords:(WokSearchService_citedReference *)toAdd;
-@property (readonly) NSMutableArray * records;
+@property (retain) NSString * queryId;
+- (void)addReferences:(WokSearchService_citedReference *)toAdd;
+@property (readonly) NSMutableArray * references;
 @property (retain) NSNumber * recordsFound;
 @property (retain) NSNumber * recordsSearched;
 /* attributes */
@@ -313,6 +271,46 @@
 /* attributes */
 - (NSDictionary *)attributes;
 @end
+@interface WokSearchService_editionDesc : NSObject {
+	
+/* elements */
+	NSString * collection;
+	NSString * edition;
+/* attributes */
+}
+- (NSString *)nsPrefix;
+- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
+- (void)addAttributesToNode:(xmlNodePtr)node;
+- (void)addElementsToNode:(xmlNodePtr)node;
++ (WokSearchService_editionDesc *)deserializeNode:(xmlNodePtr)cur;
+- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
+- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
+/* elements */
+@property (retain) NSString * collection;
+@property (retain) NSString * edition;
+/* attributes */
+- (NSDictionary *)attributes;
+@end
+@interface WokSearchService_timeSpan : NSObject {
+	
+/* elements */
+	NSString * begin;
+	NSString * end;
+/* attributes */
+}
+- (NSString *)nsPrefix;
+- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
+- (void)addAttributesToNode:(xmlNodePtr)node;
+- (void)addElementsToNode:(xmlNodePtr)node;
++ (WokSearchService_timeSpan *)deserializeNode:(xmlNodePtr)cur;
+- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
+- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
+/* elements */
+@property (retain) NSString * begin;
+@property (retain) NSString * end;
+/* attributes */
+- (NSDictionary *)attributes;
+@end
 @interface WokSearchService_citingArticles : NSObject {
 	
 /* elements */
@@ -346,7 +344,7 @@
 	
 /* elements */
 	NSString * label;
-	NSMutableArray *values;
+	NSMutableArray *value;
 /* attributes */
 }
 - (NSString *)nsPrefix;
@@ -358,20 +356,20 @@
 - (void)deserializeElementsFromNode:(xmlNodePtr)cur;
 /* elements */
 @property (retain) NSString * label;
-- (void)addValues:(NSString *)toAdd;
-@property (readonly) NSMutableArray * values;
+- (void)addValue:(NSString *)toAdd;
+@property (readonly) NSMutableArray * value;
 /* attributes */
 - (NSDictionary *)attributes;
 @end
 @interface WokSearchService_fullRecordSearchResults : NSObject {
 	
 /* elements */
-	NSMutableArray *options;
-	NSString * parent;
-	NSString * queryID;
-	NSString * records;
+	NSString * queryId;
 	NSNumber * recordsFound;
 	NSNumber * recordsSearched;
+	NSString * parent;
+	NSMutableArray *optionValue;
+	NSString * records;
 /* attributes */
 }
 - (NSString *)nsPrefix;
@@ -382,13 +380,13 @@
 - (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
 - (void)deserializeElementsFromNode:(xmlNodePtr)cur;
 /* elements */
-- (void)addOptions:(WokSearchService_labelValuesPair *)toAdd;
-@property (readonly) NSMutableArray * options;
-@property (retain) NSString * parent;
-@property (retain) NSString * queryID;
-@property (retain) NSString * records;
+@property (retain) NSString * queryId;
 @property (retain) NSNumber * recordsFound;
 @property (retain) NSNumber * recordsSearched;
+@property (retain) NSString * parent;
+- (void)addOptionValue:(WokSearchService_labelValuesPair *)toAdd;
+@property (readonly) NSMutableArray * optionValue;
+@property (retain) NSString * records;
 /* attributes */
 - (NSDictionary *)attributes;
 @end
@@ -477,11 +475,50 @@
 /* attributes */
 - (NSDictionary *)attributes;
 @end
+@interface WokSearchService_fullRecordData : NSObject {
+	
+/* elements */
+	NSMutableArray *optionValue;
+	NSString * records;
+/* attributes */
+}
+- (NSString *)nsPrefix;
+- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
+- (void)addAttributesToNode:(xmlNodePtr)node;
+- (void)addElementsToNode:(xmlNodePtr)node;
++ (WokSearchService_fullRecordData *)deserializeNode:(xmlNodePtr)cur;
+- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
+- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
+/* elements */
+- (void)addOptionValue:(WokSearchService_labelValuesPair *)toAdd;
+@property (readonly) NSMutableArray * optionValue;
+@property (retain) NSString * records;
+/* attributes */
+- (NSDictionary *)attributes;
+@end
+@interface WokSearchService_retrieveResponse : NSObject {
+	
+/* elements */
+	WokSearchService_fullRecordData * return_;
+/* attributes */
+}
+- (NSString *)nsPrefix;
+- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
+- (void)addAttributesToNode:(xmlNodePtr)node;
+- (void)addElementsToNode:(xmlNodePtr)node;
++ (WokSearchService_retrieveResponse *)deserializeNode:(xmlNodePtr)cur;
+- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
+- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
+/* elements */
+@property (retain) WokSearchService_fullRecordData * return_;
+/* attributes */
+- (NSDictionary *)attributes;
+@end
 @interface WokSearchService_retrieveById : NSObject {
 	
 /* elements */
 	NSString * databaseId;
-	NSMutableArray *uids;
+	NSMutableArray *uid;
 	NSString * queryLanguage;
 	WokSearchService_retrieveParameters * retrieveParameters;
 /* attributes */
@@ -495,8 +532,8 @@
 - (void)deserializeElementsFromNode:(xmlNodePtr)cur;
 /* elements */
 @property (retain) NSString * databaseId;
-- (void)addUids:(NSString *)toAdd;
-@property (readonly) NSMutableArray * uids;
+- (void)addUid:(NSString *)toAdd;
+@property (readonly) NSMutableArray * uid;
 @property (retain) NSString * queryLanguage;
 @property (retain) WokSearchService_retrieveParameters * retrieveParameters;
 /* attributes */
@@ -520,54 +557,15 @@
 /* attributes */
 - (NSDictionary *)attributes;
 @end
-@interface WokSearchService_fullRecordData : NSObject {
-	
-/* elements */
-	NSMutableArray *options;
-	NSString * records;
-/* attributes */
-}
-- (NSString *)nsPrefix;
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
-- (void)addAttributesToNode:(xmlNodePtr)node;
-- (void)addElementsToNode:(xmlNodePtr)node;
-+ (WokSearchService_fullRecordData *)deserializeNode:(xmlNodePtr)cur;
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
-/* elements */
-- (void)addOptions:(WokSearchService_labelValuesPair *)toAdd;
-@property (readonly) NSMutableArray * options;
-@property (retain) NSString * records;
-/* attributes */
-- (NSDictionary *)attributes;
-@end
-@interface WokSearchService_retrieveResponse : NSObject {
-	
-/* elements */
-	WokSearchService_fullRecordData * return_;
-/* attributes */
-}
-- (NSString *)nsPrefix;
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
-- (void)addAttributesToNode:(xmlNodePtr)node;
-- (void)addElementsToNode:(xmlNodePtr)node;
-+ (WokSearchService_retrieveResponse *)deserializeNode:(xmlNodePtr)cur;
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
-/* elements */
-@property (retain) WokSearchService_fullRecordData * return_;
-/* attributes */
-- (NSDictionary *)attributes;
-@end
 @interface WokSearchService_queryParameters : NSObject {
 	
 /* elements */
-	NSString * databaseID;
+	NSString * databaseId;
+	NSString * userQuery;
 	NSMutableArray *editions;
-	NSString * queryLanguage;
 	NSString * symbolicTimeSpan;
 	WokSearchService_timeSpan * timeSpan;
-	NSString * userQuery;
+	NSString * queryLanguage;
 /* attributes */
 }
 - (NSString *)nsPrefix;
@@ -578,13 +576,13 @@
 - (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
 - (void)deserializeElementsFromNode:(xmlNodePtr)cur;
 /* elements */
-@property (retain) NSString * databaseID;
+@property (retain) NSString * databaseId;
+@property (retain) NSString * userQuery;
 - (void)addEditions:(WokSearchService_editionDesc *)toAdd;
 @property (readonly) NSMutableArray * editions;
-@property (retain) NSString * queryLanguage;
 @property (retain) NSString * symbolicTimeSpan;
 @property (retain) WokSearchService_timeSpan * timeSpan;
-@property (retain) NSString * userQuery;
+@property (retain) NSString * queryLanguage;
 /* attributes */
 - (NSDictionary *)attributes;
 @end
@@ -626,9 +624,98 @@
 /* attributes */
 - (NSDictionary *)attributes;
 @end
+@interface WokSearchService_SupportingWebServiceException : NSObject {
+	
+/* elements */
+	NSString * remoteNamespace;
+	NSString * remoteOperation;
+	NSString * remoteCode;
+	NSString * remoteReason;
+	NSString * handshakeCauseId;
+	NSString * handshakeCause;
+/* attributes */
+}
+- (NSString *)nsPrefix;
+- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
+- (void)addAttributesToNode:(xmlNodePtr)node;
+- (void)addElementsToNode:(xmlNodePtr)node;
++ (WokSearchService_SupportingWebServiceException *)deserializeNode:(xmlNodePtr)cur;
+- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
+- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
+/* elements */
+@property (retain) NSString * remoteNamespace;
+@property (retain) NSString * remoteOperation;
+@property (retain) NSString * remoteCode;
+@property (retain) NSString * remoteReason;
+@property (retain) NSString * handshakeCauseId;
+@property (retain) NSString * handshakeCause;
+/* attributes */
+- (NSDictionary *)attributes;
+@end
+@interface WokSearchService_FaultInformation : NSObject {
+	
+/* elements */
+	NSString * code;
+	NSString * message;
+	NSString * reason;
+	NSString * causeType;
+	NSString * cause;
+	WokSearchService_SupportingWebServiceException * supportingWebServiceException;
+	NSString * remedy;
+/* attributes */
+}
+- (NSString *)nsPrefix;
+- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
+- (void)addAttributesToNode:(xmlNodePtr)node;
+- (void)addElementsToNode:(xmlNodePtr)node;
++ (WokSearchService_FaultInformation *)deserializeNode:(xmlNodePtr)cur;
+- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
+- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
+/* elements */
+@property (retain) NSString * code;
+@property (retain) NSString * message;
+@property (retain) NSString * reason;
+@property (retain) NSString * causeType;
+@property (retain) NSString * cause;
+@property (retain) WokSearchService_SupportingWebServiceException * supportingWebServiceException;
+@property (retain) NSString * remedy;
+/* attributes */
+- (NSDictionary *)attributes;
+@end
+@interface WokSearchService_RawFaultInformation : NSObject {
+	
+/* elements */
+	NSString * rawFaultstring;
+	NSString * rawMessage;
+	NSString * rawReason;
+	NSString * rawCause;
+	NSString * rawRemedy;
+	NSMutableArray *messageData;
+/* attributes */
+}
+- (NSString *)nsPrefix;
+- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
+- (void)addAttributesToNode:(xmlNodePtr)node;
+- (void)addElementsToNode:(xmlNodePtr)node;
++ (WokSearchService_RawFaultInformation *)deserializeNode:(xmlNodePtr)cur;
+- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
+- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
+/* elements */
+@property (retain) NSString * rawFaultstring;
+@property (retain) NSString * rawMessage;
+@property (retain) NSString * rawReason;
+@property (retain) NSString * rawCause;
+@property (retain) NSString * rawRemedy;
+- (void)addMessageData:(NSString *)toAdd;
+@property (readonly) NSMutableArray * messageData;
+/* attributes */
+- (NSDictionary *)attributes;
+@end
 @interface WokSearchService_QueryException : NSObject {
 	
 /* elements */
+	WokSearchService_FaultInformation * faultInformation;
+	WokSearchService_RawFaultInformation * rawFaultInformation;
 /* attributes */
 }
 - (NSString *)nsPrefix;
@@ -639,12 +726,16 @@
 - (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
 - (void)deserializeElementsFromNode:(xmlNodePtr)cur;
 /* elements */
+@property (retain) WokSearchService_FaultInformation * faultInformation;
+@property (retain) WokSearchService_RawFaultInformation * rawFaultInformation;
 /* attributes */
 - (NSDictionary *)attributes;
 @end
 @interface WokSearchService_AuthenticationException : NSObject {
 	
 /* elements */
+	WokSearchService_FaultInformation * faultInformation;
+	WokSearchService_RawFaultInformation * rawFaultInformation;
 /* attributes */
 }
 - (NSString *)nsPrefix;
@@ -655,12 +746,16 @@
 - (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
 - (void)deserializeElementsFromNode:(xmlNodePtr)cur;
 /* elements */
+@property (retain) WokSearchService_FaultInformation * faultInformation;
+@property (retain) WokSearchService_RawFaultInformation * rawFaultInformation;
 /* attributes */
 - (NSDictionary *)attributes;
 @end
 @interface WokSearchService_InvalidInputException : NSObject {
 	
 /* elements */
+	WokSearchService_FaultInformation * faultInformation;
+	WokSearchService_RawFaultInformation * rawFaultInformation;
 /* attributes */
 }
 - (NSString *)nsPrefix;
@@ -671,12 +766,16 @@
 - (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
 - (void)deserializeElementsFromNode:(xmlNodePtr)cur;
 /* elements */
+@property (retain) WokSearchService_FaultInformation * faultInformation;
+@property (retain) WokSearchService_RawFaultInformation * rawFaultInformation;
 /* attributes */
 - (NSDictionary *)attributes;
 @end
 @interface WokSearchService_ESTIWSException : NSObject {
 	
 /* elements */
+	WokSearchService_FaultInformation * faultInformation;
+	WokSearchService_RawFaultInformation * rawFaultInformation;
 /* attributes */
 }
 - (NSString *)nsPrefix;
@@ -687,12 +786,16 @@
 - (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
 - (void)deserializeElementsFromNode:(xmlNodePtr)cur;
 /* elements */
+@property (retain) WokSearchService_FaultInformation * faultInformation;
+@property (retain) WokSearchService_RawFaultInformation * rawFaultInformation;
 /* attributes */
 - (NSDictionary *)attributes;
 @end
 @interface WokSearchService_InternalServerException : NSObject {
 	
 /* elements */
+	WokSearchService_FaultInformation * faultInformation;
+	WokSearchService_RawFaultInformation * rawFaultInformation;
 /* attributes */
 }
 - (NSString *)nsPrefix;
@@ -703,12 +806,16 @@
 - (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
 - (void)deserializeElementsFromNode:(xmlNodePtr)cur;
 /* elements */
+@property (retain) WokSearchService_FaultInformation * faultInformation;
+@property (retain) WokSearchService_RawFaultInformation * rawFaultInformation;
 /* attributes */
 - (NSDictionary *)attributes;
 @end
 @interface WokSearchService_SessionException : NSObject {
 	
 /* elements */
+	WokSearchService_FaultInformation * faultInformation;
+	WokSearchService_RawFaultInformation * rawFaultInformation;
 /* attributes */
 }
 - (NSString *)nsPrefix;
@@ -719,12 +826,14 @@
 - (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
 - (void)deserializeElementsFromNode:(xmlNodePtr)cur;
 /* elements */
+@property (retain) WokSearchService_FaultInformation * faultInformation;
+@property (retain) WokSearchService_RawFaultInformation * rawFaultInformation;
 /* attributes */
 - (NSDictionary *)attributes;
 @end
 /* Cookies handling provided by http://en.wikibooks.org/wiki/Programming:WebObjects/Web_Services/Web_Service_Provider */
 #import <libxml/parser.h>
-// FIX #import "xsd.h"
+// FIX #import "xs.h"
 // FIX #import "WokSearchService.h"
 @class WokSearchServiceSoapBinding;
 @interface WokSearchService : NSObject {

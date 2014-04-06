@@ -45,6 +45,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
+#import "NSDate+ISO8601Unparsing.h"
 
 #define SERVER_URL @"http://search.webofknowledge.com/esti/wokmws/ws/WokSearch"
 
@@ -332,9 +333,9 @@ static NSArray *publicationsFromData(NSData *data);
         [retrieveParameters setFirstRecord:[NSNumber numberWithInteger:fetchedResultsLocal + 1]];
         [retrieveParameters setCount:[NSNumber numberWithInteger:numResults]];
         
-        //WokSearchService_timeSpan *timeSpan = [[[WokSearchService_timeSpan alloc] init] autorelease];
-        //timeSpan.begin = @"1600-01-01";
-        //timeSpan.end = [[[NSData date] standardDescription] substringToIndex:10]; // Reto: Obj-C dummy Question: how do I convert NSDate to a String of YYYY-MM-DD ???
+        WokSearchService_timeSpan *timeSpan = [[[WokSearchService_timeSpan alloc] init] autorelease];
+        timeSpan.begin = @"1600-01-01";
+        timeSpan.end = [[NSDate date] ISO8601DateStringWithTime:NO];
         
         WokSearchServiceSoapBindingResponse *response = nil;
         WokSearchService_fullRecordSearchResults *fullRecordSearchResults = nil;
@@ -357,7 +358,7 @@ static NSArray *publicationsFromData(NSData *data);
 				// Reto: this works for the Premium edition of WOKSearch (and not for WOKSearchLite)
                 WokSearchService_search *searchRequest = [[[WokSearchService_search alloc] init] autorelease];
                 WokSearchService_queryParameters *queryParameters = [[[WokSearchService_queryParameters alloc] init] autorelease];
-                [queryParameters setDatabaseID:database];
+                [queryParameters setDatabaseId:database];
                 for (WokSearchService_editionDesc *edition in editions)
                     [queryParameters addEditions:edition];
                 [queryParameters setUserQuery:searchTerm];
@@ -380,8 +381,8 @@ static NSArray *publicationsFromData(NSData *data);
                 WokSearchService_citedReferences *citedReferencesRequest = [[[WokSearchService_citedReferences alloc] init] autorelease];
                 [citedReferencesRequest setDatabaseId:database];
                 [citedReferencesRequest setUid:searchTerm];
-                for (WokSearchService_editionDesc *edition in editions)
-                    [citedReferencesRequest addEditions:edition];
+                //for (WokSearchService_editionDesc *edition in editions)
+                //    [citedReferencesRequest addEditions:edition];
 				// [citedReferencesRequest setTimeSpan:timeSpan];
                 [citedReferencesRequest setQueryLanguage:EN_QUERY_LANG];
                 [citedReferencesRequest setRetrieveParameters:retrieveParameters];
@@ -403,7 +404,7 @@ static NSArray *publicationsFromData(NSData *data);
                 [citingArticlesRequest setUid:searchTerm];
                 for (WokSearchService_editionDesc *edition in editions)
                     [citingArticlesRequest addEditions:edition];
-				// [citingArticlesRequest setTimeSpan:timeSpan];
+				[citingArticlesRequest setTimeSpan:timeSpan];
                 [citingArticlesRequest setQueryLanguage:EN_QUERY_LANG];
                 [citingArticlesRequest setRetrieveParameters:retrieveParameters];
                 response = [binding citingArticlesUsingParameters:citingArticlesRequest];
@@ -446,7 +447,7 @@ static NSArray *publicationsFromData(NSData *data);
                 NSScanner *scanner = [[[NSScanner alloc] initWithString:searchTerm] autorelease];
                 [scanner scanUpToCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:NULL];
                 while ([scanner scanUpToCharactersFromSet:[[NSCharacterSet decimalDigitCharacterSet] invertedSet] intoString:&token]) {
-                    [retrieveByIdRequest addUids:token];
+                    [retrieveByIdRequest addUid:token];
                     [scanner scanUpToCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:NULL];
                 }
                 [retrieveByIdRequest setQueryLanguage:EN_QUERY_LANG];
@@ -466,7 +467,7 @@ static NSArray *publicationsFromData(NSData *data);
         NSArray *pubs = nil;
         
         if (citedReferencesSearchResults) {
-            pubs = publicationInfosWithISICitedReferences([citedReferencesSearchResults records]);
+            pubs = publicationInfosWithISICitedReferences([citedReferencesSearchResults references]);
             availableResultsLocal = [[citedReferencesSearchResults recordsFound] integerValue];
         } else if (fullRecordSearchResults) {
             pubs = publicationInfosWithISIXMLString([fullRecordSearchResults records]);
@@ -788,7 +789,7 @@ static NSDictionary *createPublicationInfoWithCitedReference(WokSearchService_ci
     addStringToDictionaryIfNotNil((useTitlecase ? [[citedReference citedWork] titlecaseString] : [citedReference citedWork]), BDSKJournalString, pubFields);
 
     addStringToDictionaryIfNotNil([citedReference page], BDSKPagesString, pubFields);
-    addStringToDictionaryIfNotNil([citedReference recID], @"Isi-Recid", pubFields);
+    addStringToDictionaryIfNotNil([citedReference uid], @"Isi", pubFields);
     addStringToDictionaryIfNotNil([citedReference timesCited], @"Times-Cited", pubFields);
     addStringToDictionaryIfNotNil([citedReference volume], BDSKVolumeString, pubFields);
     addStringToDictionaryIfNotNil([citedReference year], BDSKYearString, pubFields);

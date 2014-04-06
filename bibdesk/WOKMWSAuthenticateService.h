@@ -176,7 +176,7 @@
 @end
 /* Cookies handling provided by http://en.wikibooks.org/wiki/Programming:WebObjects/Web_Services/Web_Service_Provider */
 #import <libxml/parser.h>
-// FIX #import "xsd.h"
+// FIX #import "xs.h"
 // FIX #import "WOKMWSAuthenticateService.h"
 @class WOKMWSAuthenticateServiceSoapBinding;
 @interface WOKMWSAuthenticateService : NSObject {
