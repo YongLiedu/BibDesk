@@ -444,11 +444,11 @@ static NSArray *publicationsFromData(NSData *data);
                 WokSearchService_retrieveById *retrieveByIdRequest = [[[WokSearchService_retrieveById alloc] init] autorelease];
                 [retrieveByIdRequest setDatabaseId:database];
                 NSString *token = nil;
+                NSCharacterSet *separatorCharSet = [NSCharacterSet characterSetWithCharactersInString:@","];
                 NSScanner *scanner = [[[NSScanner alloc] initWithString:searchTerm] autorelease];
-                [scanner scanUpToCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:NULL];
-                while ([scanner scanCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:&token]) {
-                    [retrieveByIdRequest addUid:token];
-                    [scanner scanUpToCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:NULL];
+                while ([scanner scanUpToCharactersFromSet:separatorCharSet intoString:&token]) {
+                    [retrieveByIdRequest addUid:[token stringByRemovingSurroundingWhitespace]];
+                    [scanner scanCharactersFromSet:separatorCharSet intoString:NULL];
                 }
                 [retrieveByIdRequest setQueryLanguage:EN_QUERY_LANG];
                 [retrieveByIdRequest setRetrieveParameters:retrieveParameters];
