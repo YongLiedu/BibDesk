@@ -446,7 +446,7 @@ static NSArray *publicationsFromData(NSData *data);
                 NSString *token = nil;
                 NSScanner *scanner = [[[NSScanner alloc] initWithString:searchTerm] autorelease];
                 [scanner scanUpToCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:NULL];
-                while ([scanner scanUpToCharactersFromSet:[[NSCharacterSet decimalDigitCharacterSet] invertedSet] intoString:&token]) {
+                while ([scanner scanCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:&token]) {
                     [retrieveByIdRequest addUid:token];
                     [scanner scanUpToCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:NULL];
                 }
