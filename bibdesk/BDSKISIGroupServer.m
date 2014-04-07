@@ -747,6 +747,9 @@ static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
 static NSArray *publicationInfosWithISIXMLString(NSString *xmlString)
 {
     NSCParameterAssert(nil != xmlString);
+    if (nil == xmlString)
+        return nil;
+    
     NSError *error;
     NSXMLDocument *doc = [[[NSXMLDocument alloc] initWithXMLString:xmlString options:0 error:&error] autorelease];
     if (nil == doc) {
