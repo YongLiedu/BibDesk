@@ -163,6 +163,11 @@ NSString *BDSKSearchGroupURLScheme = @"x-bdsk-search";
                         if ([value boolValue])
                             value = @"YES";
                         else continue;
+                    } else if ([key isCaseInsensitiveEqual:@"lite"]) {
+                        key = @"lite";
+                        if ([value boolValue])
+                            value = @"YES";
+                        else continue;
                     }
                     [options setValue:value forKey:key];
                 }
@@ -389,6 +394,8 @@ NSString *BDSKSearchGroupURLScheme = @"x-bdsk-search";
             [string appendFormat:first ? @"?%@=%@" : @"&%@=%@", key, [value stringByAddingPercentEscapesIncludingReserved]];
             first = NO;
         }
+    } else if ([serverInfo isISI] && [serverInfo isLite]) {
+        [string appendString:@"?lite=1"];
     }
     return [NSURL URLWithString:string];
 }
