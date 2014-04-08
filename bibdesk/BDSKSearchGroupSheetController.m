@@ -62,6 +62,10 @@
     return [NSSet setWithObjects:@"type", nil];
 }
 
++ (NSSet *)keyPathsForValuesAffectingISI {
+    return [NSSet setWithObjects:@"type", nil];
+}
+
 + (NSSet *)keyPathsForValuesAffectingZoomOrISI {
     return [NSSet setWithObjects:@"type", nil];
 }
@@ -143,11 +147,17 @@
     }
 }
 
-- (void)awakeFromNib
+- (void)windowDidLoad
 {
     [serverView retain];
     [serverView setMinSize:[serverView frame].size];
     [serverView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMinYEdgeMask];
+    
+    NSRect frame = [liteButton frame];
+    frame.origin = [addressField frame].origin;
+    frame.origin.x -= 3.0;
+    [liteButton setFrame:frame];
+    [[addressField superview] addSubview:liteButton];
     
     [revealButton setBezelStyle:NSRoundedDisclosureBezelStyle];
     [revealButton performClick:self];
@@ -349,6 +359,8 @@
 - (BOOL)isEditable { return isEditable; }
 
 - (BOOL)isZoom { return [serverInfo isZoom]; }
+
+- (BOOL)isISI { return [serverInfo isISI]; }
 
 - (BOOL)isZoomOrISI { return [serverInfo isZoom] || [serverInfo isISI]; }
 

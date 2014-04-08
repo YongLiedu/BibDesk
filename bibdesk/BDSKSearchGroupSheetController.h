@@ -60,6 +60,7 @@
     IBOutlet NSPopUpButton *syntaxPopup;
     IBOutlet NSComboBox *encodingComboBox;
     IBOutlet NSButton *removeDiacriticsButton;
+    IBOutlet NSButton *liteButton;
     
     IBOutlet NSButton *editButton;
     IBOutlet NSButton *addRemoveButton;
@@ -86,6 +87,7 @@
 - (void)setEditable:(BOOL)flag;
 - (BOOL)isEditable;
 - (BOOL)isZoom;
+- (BOOL)isISI;
 - (BOOL)isZoomOrISI;
 
 - (void)setType:(NSString *)newType;
