@@ -260,7 +260,7 @@ static NSSet *optionsSet = nil;
 + (void)initialize {
     BDSKINITIALIZE;
     keysAffectedByType = [[NSSet alloc] initWithObjects:@"serverType", HOST_KEY, PORT_KEY, OPTIONS_KEY, nil];
-    keysAffectedByOptions = [[NSSet alloc] initWithObjects:PASSWORD_KEY, USERNAME_KEY, RECORDSYNTAX_KEY, RESULTENCODING_KEY, REMOVEDIACRITICS_KEY, nil];
+    keysAffectedByOptions = [[NSSet alloc] initWithObjects:PASSWORD_KEY, USERNAME_KEY, RECORDSYNTAX_KEY, RESULTENCODING_KEY, REMOVEDIACRITICS_KEY, LITE_KEY, nil];
     typeSet = [[NSSet alloc] initWithObjects:TYPE_KEY, nil];
     optionsSet = [[NSSet alloc] initWithObjects:OPTIONS_KEY, nil];
 }
