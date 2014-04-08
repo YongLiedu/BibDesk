@@ -292,6 +292,8 @@
 		CEB5D6411072AE360001C135 /* TextImport.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEB5D6041072AE360001C135 /* TextImport.xib */; };
 		CEBB8D8809C8B0D90074C79E /* Font.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEBB8D8709C8B0D90074C79E /* Font.tiff */; };
 		CEBC676F0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEBC676D0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m */; };
+		CEBF7AE718F2EB6300012ECD /* WokSearchLiteService.h in Headers */ = {isa = PBXBuildFile; fileRef = CEBF7AE518F2EB6300012ECD /* WokSearchLiteService.h */; };
+		CEBF7AE818F2EB6300012ECD /* WokSearchLiteService.m in Sources */ = {isa = PBXBuildFile; fileRef = CEBF7AE618F2EB6300012ECD /* WokSearchLiteService.m */; };
 		CEC1CEA80F51D2CE00D18921 /* BDSKReadWriteLock.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC1CEA60F51D2CE00D18921 /* BDSKReadWriteLock.m */; };
 		CEC46E311629743200B51A9D /* NSPasteboard_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC46E2F1629743200B51A9D /* NSPasteboard_BDSKExtensions.m */; };
 		CEC7CDE10F6725890051794E /* BDSKFilePathCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC7CDDF0F6725890051794E /* BDSKFilePathCell.m */; };
@@ -1304,6 +1306,8 @@
 		CEBB8D8709C8B0D90074C79E /* Font.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Font.tiff; sourceTree = "<group>"; };
 		CEBC676C0B4A845F00CE0B2D /* BDSKSearchGroupViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchGroupViewController.h; sourceTree = "<group>"; };
 		CEBC676D0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchGroupViewController.m; sourceTree = "<group>"; };
+		CEBF7AE518F2EB6300012ECD /* WokSearchLiteService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WokSearchLiteService.h; sourceTree = "<group>"; };
+		CEBF7AE618F2EB6300012ECD /* WokSearchLiteService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WokSearchLiteService.m; sourceTree = "<group>"; };
 		CEC1CEA50F51D2CE00D18921 /* BDSKReadWriteLock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKReadWriteLock.h; sourceTree = "<group>"; };
 		CEC1CEA60F51D2CE00D18921 /* BDSKReadWriteLock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKReadWriteLock.m; sourceTree = "<group>"; };
 		CEC3158A0F24D0B9008D2C75 /* BDSKRichTextForCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKRichTextForCommand.h; sourceTree = "<group>"; };
@@ -1961,6 +1965,8 @@
 				3B91DD44162225850088206D /* USGlobals.m */,
 				3B91DD45162225850088206D /* WOKMWSAuthenticateService.h */,
 				3B91DD46162225850088206D /* WOKMWSAuthenticateService.m */,
+				CEBF7AE518F2EB6300012ECD /* WokSearchLiteService.h */,
+				CEBF7AE618F2EB6300012ECD /* WokSearchLiteService.m */,
 				3B91DD47162225850088206D /* WokSearchService.h */,
 				3B91DD48162225850088206D /* WokSearchService.m */,
 			);
@@ -2910,6 +2916,7 @@
 				3B91DD4F162225850088206D /* USGlobals.h in Headers */,
 				3B91DD51162225850088206D /* WOKMWSAuthenticateService.h in Headers */,
 				3B91DD53162225850088206D /* WokSearchService.h in Headers */,
+				CEBF7AE718F2EB6300012ECD /* WokSearchLiteService.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3743,6 +3750,7 @@
 				CEC46E311629743200B51A9D /* NSPasteboard_BDSKExtensions.m in Sources */,
 				CE2153D416B169A4004EB59A /* BDSKAlias.m in Sources */,
 				CE280D4816C6C51600344CC8 /* BDSKSaveAccessoryViewController.m in Sources */,
+				CEBF7AE818F2EB6300012ECD /* WokSearchLiteService.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
