@@ -970,6 +970,8 @@ static NSDictionary *createPublicationInfoWithLiteRecord(WokSearchLiteService_li
             addStringToDictionaryIfNotNil([[pair value] firstObject], @"Issn", pubFields);
         else if ([[pair label] isEqualToString:@"Identifier.Isbn"])
             addStringToDictionaryIfNotNil([[pair value] firstObject], @"Isbn", pubFields);
+		else if ([[pair label] isEqualToString:@"Identifier.Article_no"] && [pubFields objectForKey:BDSKNumberString] == nil)
+            addStringToDictionaryIfNotNil([[[pair value] firstObject] stringByRemovingPrefix:@"ARTN "], BDSKNumberString, pubFields);
     }
     
     return pubFields;
