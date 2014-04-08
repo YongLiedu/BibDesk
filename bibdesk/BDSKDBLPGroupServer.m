@@ -44,6 +44,9 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
+#import "NSURL_BDSKExtensions.h"
+
+#define SERVER_URL_STRING @"http://dblp.uni-trier.de"
 
 // private protocols for inter-thread messaging
 @protocol BDSKDBLPGroupServerMainThread <BDSKAsyncDOServerMainThread>
@@ -56,23 +59,6 @@
 
 
 @implementation BDSKDBLPGroupServer
-
-+ (BOOL)canConnect;
-{
-    CFURLRef theURL = (CFURLRef)[NSURL URLWithString:@"http://dblp.uni-trier.de"];
-    CFNetDiagnosticRef diagnostic = CFNetDiagnosticCreateWithURL(CFGetAllocator(theURL), theURL);
-    
-    NSString *details;
-    CFNetDiagnosticStatus status = CFNetDiagnosticCopyNetworkStatusPassively(diagnostic, (CFStringRef *)&details);
-    CFRelease(diagnostic);
-    [details autorelease];
-    
-    BOOL canConnect = kCFNetDiagnosticConnectionUp == status;
-    if (NO == canConnect)
-        NSLog(@"%@", details);
-    
-    return canConnect;
-}
 
 - (Protocol *)protocolForMainThread { return @protocol(BDSKDBLPGroupServerMainThread); }
 - (Protocol *)protocolForServerThread { return @protocol(BDSKDBLPGroupServerLocalThread); }
@@ -126,7 +112,7 @@
 
 - (void)retrieveWithSearchTerm:(NSString *)aSearchTerm
 {
-    if ([[self class] canConnect]) {
+    if ([[NSURL URLWithString:SERVER_URL_STRING] canConnect]) {
         OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
         
         // stop the current service (if any); -cancel is thread safe, and so is calling it multiple times
@@ -196,7 +182,7 @@ static void fixEEURL(BibItem *pub)
         
         // some refs have a partial URL in the ee field that uses this as a base
         if (nil == [aURL scheme]) {
-            [URLString insertString:@"http://dblp.uni-trier.de/" atIndex:0];
+            [URLString insertString:SERVER_URL_STRING @"/" atIndex:0];
             aURL = [NSURL URLWithString:URLString];
         }
         
@@ -285,7 +271,7 @@ static void fixEEURL(BibItem *pub)
         for (NSString *aKey in dblpKeys) {
             if (flags.isRetrieving == 0) break;
             
-            NSURL *theURL = [NSURL URLWithString:[@"http://dblp.uni-trier.de/rec/bibtex/" stringByAppendingString:aKey]];
+            NSURL *theURL = [NSURL URLWithString:[SERVER_URL_STRING @"/rec/bibtex/" stringByAppendingString:aKey]];
             NSXMLDocument *doc = [[NSXMLDocument alloc] initWithContentsOfURL:theURL options:NSXMLDocumentTidyHTML error:NULL];
             
             NSArray *btNodes = [doc nodesForXPath:@"//pre" error:NULL];

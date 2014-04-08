@@ -49,6 +49,7 @@
 #import "NSDate+ISO8601Unparsing.h"
 
 #define SERVER_URL @"http://search.webofknowledge.com/esti/wokmws/ws/WokSearch"
+#define SERVER_URL_LITE @"http://search.webofknowledge.com/esti/wokmws/ws/WokSearchLite"
 
 #define WOS_DB_ID @"WOS"
 #define EN_QUERY_LANG @"en"
@@ -94,23 +95,6 @@ static NSArray *publicationsFromData(NSData *data);
 @end
 
 @implementation BDSKISIGroupServer
-
-+ (BOOL)canConnect;
-{
-    CFURLRef theURL = (CFURLRef)[NSURL URLWithString:SERVER_URL];
-    CFNetDiagnosticRef diagnostic = CFNetDiagnosticCreateWithURL(CFGetAllocator(theURL), theURL);
-    
-    NSString *details;
-    CFNetDiagnosticStatus status = CFNetDiagnosticCopyNetworkStatusPassively(diagnostic, (CFStringRef *)&details);
-    CFRelease(diagnostic);
-    [details autorelease];
-    
-    BOOL canConnect = kCFNetDiagnosticConnectionUp == status;
-    if (NO == canConnect)
-        NSLog(@"%@", details);
-    
-    return canConnect;
-}
 
 + (void)initialize
 {
@@ -178,7 +162,7 @@ static NSArray *publicationsFromData(NSData *data);
 
 - (void)retrieveWithSearchTerm:(NSString *)aSearchTerm
 {
-    if ([[self class] canConnect]) {
+    if ([[NSURL URLWithString:[serverInfo isLite] ? SERVER_URL_LITE : SERVER_URL] canConnect]) {
         OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
         
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.isRetrieving);

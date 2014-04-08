@@ -364,30 +364,13 @@ static void removeAliens(NSMutableString *string)
 
 + (NSString *)baseURLString { return @"http://eutils.ncbi.nlm.nih.gov/entrez/eutils"; }
 
-+ (BOOL)canConnect;
-{
-    CFURLRef theURL = (CFURLRef)[NSURL URLWithString:[self baseURLString]];
-    CFNetDiagnosticRef diagnostic = CFNetDiagnosticCreateWithURL(CFGetAllocator(theURL), theURL);
-    
-    NSString *details;
-    CFNetDiagnosticStatus status = CFNetDiagnosticCopyNetworkStatusPassively(diagnostic, (CFStringRef *)&details);
-    CFRelease(diagnostic);
-    [details autorelease];
-    
-    BOOL canConnect = kCFNetDiagnosticConnectionUp == status;
-    if (NO == canConnect)
-        NSLog(@"%@", details);
-    
-    return canConnect;
-}
-
 + (NSData *)xmlReferenceDataForSearchTerm:(NSString *)searchTerm;
 {
     NSParameterAssert(searchTerm != nil);
     
     NSData *toReturn = nil;
         
-    if ([self canConnect] == NO)
+    if ([[NSURL URLWithString:[self baseURLString]] canConnect] == NO)
         return toReturn;
         
     NSXMLDocument *document = nil;

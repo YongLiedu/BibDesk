@@ -59,7 +59,6 @@
     NSString *errorMessage;
 }
 + (NSString *)baseURLString;
-+ (BOOL)canConnect;
 - (void)setServerInfo:(BDSKServerInfo *)info;
 - (BDSKServerInfo *)serverInfo;
 - (void)setSearchTerm:(NSString *)string;

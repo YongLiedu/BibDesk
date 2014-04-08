@@ -59,30 +59,13 @@
 #import "NSError_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKPubMedXMLParser.h"
+#import "NSURL_BDSKExtensions.h"
 
 @implementation BDSKEntrezGroupServer
 
 enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
 
 + (NSString *)baseURLString { return @"http://eutils.ncbi.nlm.nih.gov/entrez/eutils"; }
-
-// may be useful for UI validation
-+ (BOOL)canConnect;
-{
-    CFURLRef theURL = (CFURLRef)[NSURL URLWithString:[self baseURLString]];
-    CFNetDiagnosticRef diagnostic = CFNetDiagnosticCreateWithURL(CFGetAllocator(theURL), theURL);
-    
-    NSString *details;
-    CFNetDiagnosticStatus status = CFNetDiagnosticCopyNetworkStatusPassively(diagnostic, (CFStringRef *)&details);
-    CFRelease(diagnostic);
-    [details autorelease];
-    
-    BOOL canConnect = kCFNetDiagnosticConnectionUp == status;
-    if (NO == canConnect)
-        NSLog(@"%@", details);
-    
-    return canConnect;
-}
 
 - (id)initWithGroup:(id<BDSKSearchGroup>)aGroup serverInfo:(BDSKServerInfo *)info;
 {
@@ -137,7 +120,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
 }
 
 - (void)retrieveWithSearchTerm:(NSString *)aSearchTerm {
-    if ([[self class] canConnect]) {
+    if ([[NSURL URLWithString:[[self class] baseURLString]] canConnect]) {
         isRetrieving = YES;
         if ([[self searchTerm] isEqualToString:aSearchTerm] == NO || needsReset) {
             [self setSearchTerm:aSearchTerm];

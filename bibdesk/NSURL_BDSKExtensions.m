@@ -215,6 +215,21 @@
     return [selfUTI caseInsensitiveCompare:otherUTI];
 }
 
+- (BOOL)canConnect {
+    CFNetDiagnosticRef diagnostic = CFNetDiagnosticCreateWithURL(NULL, (CFURLRef)self);
+    
+    NSString *details;
+    CFNetDiagnosticStatus status = CFNetDiagnosticCopyNetworkStatusPassively(diagnostic, (CFStringRef *)&details);
+    CFRelease(diagnostic);
+    [details autorelease];
+    
+    BOOL canConnect = kCFNetDiagnosticConnectionUp == status;
+    if (NO == canConnect)
+        NSLog(@"%@", details);
+    
+    return canConnect;
+}
+
 #pragma mark Skim Notes
 
 - (NSArray *)SkimNotes {

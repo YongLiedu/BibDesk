@@ -50,6 +50,8 @@
 + (NSCharacterSet *)illegalURLCharacterSet;
 - (NSString *)precomposedPath;
 
+- (BOOL)canConnect;
+
 - (NSComparisonResult)UTICompare:(NSURL *)other;
 
 - (NSArray *)SkimNotes;

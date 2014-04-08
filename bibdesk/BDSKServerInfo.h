@@ -73,6 +73,7 @@ typedef NSInteger BDSKServerType;
 - (NSString *)recordSyntax;
 - (NSString *)resultEncoding;
 - (BOOL)removeDiacritics;
+- (BOOL)isLite;
 - (NSDictionary *)options;
 
 - (BOOL)isEntrez;
@@ -96,6 +97,7 @@ typedef NSInteger BDSKServerType;
 - (void)setRecordSyntax:(NSString *)newSyntax;
 - (void)setResultEncoding:(NSString *)newEncoding;
 - (void)setRemoveDiacritics:(BOOL)flag;
+- (void)setLite:(BOOL)flag;
 - (void)setOptions:(NSDictionary *)newOptions;
 
 @end

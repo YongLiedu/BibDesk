@@ -52,6 +52,7 @@
 #define RECORDSYNTAX_KEY     @"recordSyntax"
 #define RESULTENCODING_KEY   @"resultEncoding"
 #define REMOVEDIACRITICS_KEY @"removeDiacritics"
+#define LITE_KEY             @"lite"
 
 #define DEFAULT_NAME     NSLocalizedString(@"New Server", @"")
 #define DEFAULT_DATABASE DATABASE_KEY 
@@ -224,6 +225,8 @@ static inline BOOL isEqualOrBothNil(id object1, id object2) {
 
 - (BOOL)removeDiacritics { return [[[self options] objectForKey:REMOVEDIACRITICS_KEY] boolValue]; }
 
+- (BOOL)isLite { return [[[self options] objectForKey:LITE_KEY] boolValue]; }
+
 - (NSDictionary *)options { return [self isZoom] || [options count] > 0 ? [[options copy] autorelease] : nil; }
 
 - (BOOL)isEntrez { return [[self type] isEqualToString:BDSKSearchGroupEntrez]; }
@@ -342,6 +345,11 @@ static NSSet *optionsSet = nil;
 - (void)setRemoveDiacritics:(BOOL)flag;
 {
     [self setOptionValue:(flag ? @"YES" : nil) forKey:REMOVEDIACRITICS_KEY];
+}
+
+- (void)setLite:(BOOL)flag;
+{
+    [self setOptionValue:(flag ? @"YES" : nil) forKey:LITE_KEY];
 }
 
 - (void)setOptions:(NSDictionary *)newOptions;
