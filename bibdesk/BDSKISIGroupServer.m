@@ -671,6 +671,43 @@ static void addISIIDStringToDictionary(NSString *value, NSMutableDictionary *pub
 	}
 }
 
+/* sample from WoS
+ Petersen, JK
+ Karlsson, O
+ Loo, LO
+ Nilsson, SF
+ */
+static void addAuthorNamesToDictionary(NSArray *names, NSMutableDictionary *pubFields)
+{
+    NSMutableString *nameString = nil;
+    
+    for (NSString *name in names) {
+        NSRange range = [name rangeOfString:@", "];
+        if (range.location != NSNotFound) {
+            NSString *lastName = [name substringToIndex:NSMaxRange(range)];
+            NSString *firstNames = [name substringFromIndex:NSMaxRange(range)];
+            
+            // if there are lower case letters, don't mess with it
+            if ([firstNames rangeOfCharacterFromSet:[NSCharacterSet lowercaseLetterCharacterSet]].location == NSNotFound) {
+                NSMutableString *newName = [[lastName mutableCopy] autorelease];    
+                
+                NSUInteger idx, maxIdx = [firstNames length];
+                for(idx = 0; idx < maxIdx; idx++){
+                    [newName appendString:[firstNames substringWithRange:NSMakeRange(idx, 1)]];
+                    [newName appendString:(idx == maxIdx - 1 ? @"." : @". ")];
+                }
+                name = newName;
+            }
+        }
+        if (nameString == nil)
+            nameString = [NSMutableString string];
+        else
+            [nameString appendString:@" and "];
+        [nameString appendString:name];
+    }
+    addStringToDictionaryIfNotNil(nameString, BDSKAuthorString, pubFields);
+}
+
 static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
 {
     // this is now a field/value set for a particular publication record
@@ -691,8 +728,8 @@ static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
     addISIIDStringToDictionary([[[record nodesForXPath:@"./UID" error:NULL] lastObject] stringValue], pubFields);
     
 	/* get authors */
-	NSString *authorString = nodeStringsForXPathJoinedByString(summaryChild, @"./names/name/full_name", @" and ");
-	addStringToDictionaryIfNotNil(authorString, BDSKAuthorString, pubFields);
+    NSArray *authorNames = [[summaryChild nodesForXPath:@"./names/name/full_name" error:NULL] valueForKey:@"stringValue"];
+    addAuthorNamesToDictionary(authorNames, pubFields);
 	
 	/* get title, journal name etc */
 	NSArray *titleChilds = [summaryChild nodesForXPath:@"./titles/title" error:NULL];
@@ -897,7 +934,7 @@ static NSDictionary *createPublicationInfoWithLiteRecord(WokSearchLiteService_li
     
     for (pair in [liteRecord authors]) {
         if ([[pair label] isEqualToString:@"Authors"])
-            addStringToDictionaryIfNotNil([[pair value] componentsJoinedByString:@" and "], BDSKAuthorString, pubFields);
+            addAuthorNamesToDictionary([pair value], pubFields);
     }
     
     for (pair in [liteRecord title]) {
