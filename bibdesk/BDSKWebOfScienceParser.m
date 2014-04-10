@@ -75,22 +75,23 @@ static NSString *fixedAuthorName(NSString *name)
     NSCParameterAssert(name);
     
     NSRange range = [name rangeOfString:@", "];
-    if(range.length == 0)
+    if (range.location == NSNotFound)
         return name;
     
-    NSString *lastName = [name substringToIndex:NSMaxRange(range)];
-    NSString *firstNames = [name substringFromIndex:NSMaxRange(range)];
+    NSUInteger len = [name length];
+    
+    range = NSMakeRange(NSMaxRange(range), len - NSMaxRange(range));
     
     // if there are lower case letters, don't mess with it
-    if([firstNames rangeOfCharacterFromSet:[NSCharacterSet lowercaseLetterCharacterSet]].length)
+    if (range.length > 0 && [name rangeOfCharacterFromSet:[NSCharacterSet lowercaseLetterCharacterSet] options:0 range:range].length)
         return name;
     
-    NSMutableString *newName = [[lastName mutableCopy] autorelease];    
+    NSMutableString *newName = [[[name substringToIndex:range.location] mutableCopy] autorelease];    
     
-    NSUInteger idx, maxIdx = [firstNames length];
-    for(idx = 0; idx < maxIdx; idx++){
-        [newName appendString:[firstNames substringWithRange:NSMakeRange(idx, 1)]];
-        [newName appendString:(idx == maxIdx - 1 ? @"." : @". ")];
+    for (; range.location < len; range.location += range.length) {
+        range = [name rangeOfComposedCharacterSequenceAtIndex:range.location];
+        [newName appendString:[name substringWithRange:range]];
+        [newName appendString:(NSMaxRange(range) < len ? @". " : @".")];
     }
     
     return newName;
