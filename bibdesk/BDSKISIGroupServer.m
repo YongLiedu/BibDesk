@@ -614,7 +614,7 @@ static NSSet *WOSEditions = nil;
         if ([bodyPart isKindOfClass:[SOAPFault class]]) {
         
             NSString *errorString = [(SOAPFault *)bodyPart simpleFaultString];
-            [self setErrorMessage:[NSString stringWithFormat:NSLocalizedString(@"ISI Authentication Error: %@", "ISI Authentication Error Format"), errorString]];
+            [self setErrorMessage:[NSString stringWithFormat:NSLocalizedString(@"WOK Authentication Error: %@", "WOK Authentication Error Format"), errorString]];
             [sessionCookie release];
             sessionCookie = nil;
         } else if ([bodyPart isKindOfClass:[WOKMWSAuthenticateService_authenticateResponse class]]) {
