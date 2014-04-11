@@ -194,35 +194,41 @@
         };
     },
 /* ISI servers */
+    /* Web of Science database */
+    {
+        type = isi;
+        name = "Web Of Science";
+        database = "WOS";
+    },
     /* Science Citation Index */
     {
         type = isi;
         name = "Web Of Science SCI";
-        database = "SCI";
+        database = "WOS SCI";
     },
     /* Social Sciences Citation Index */
     {
         type = isi;
         name = "Web Of Science SSCI";
-        database = "SSCI";
+        database = "WOS SSCI";
     },
     /* Arts & Humanities Citation Index */
     {
         type = isi;
         name = "Web Of Science AHCI";
-        database = "AHCI";
+        database = "WOS AHCI";
     },
     /* Index Chemiculus */
     {
         type = isi;
         name = "Web Of Science IC";
-        database = "IC";
+        database = "WOS IC";
     },
     /* Current Chemical Reactions */
     {
         type = isi;
         name = "Web Of Science CCR";
-        database = "CCR";
+        database = "WOS CCR";
     },
 /* DBLP servers */
     {
