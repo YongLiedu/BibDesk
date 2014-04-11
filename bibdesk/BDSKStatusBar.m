@@ -191,6 +191,7 @@
 
 - (void)setStringValue:(NSString *)aString {
 	[textCell setStringValue:aString];
+	[self rebuildToolTips];
 	[self setNeedsDisplay:YES];
 }
 
@@ -265,7 +266,10 @@
 }
 
 - (NSString *)view:(NSView *)view stringForToolTip:(NSToolTipTag)tag point:(NSPoint)point userData:(void *)userData {
-	if ([delegate respondsToSelector:@selector(statusBar:toolTipForIdentifier:)])
+	if (userData == NULL)
+        return [textCell stringValue];
+    
+    if ([delegate respondsToSelector:@selector(statusBar:toolTipForIdentifier:)])
 		return [delegate statusBar:self toolTipForIdentifier:(NSString *)userData];
 	
 	for (NSDictionary *dict in icons) {
@@ -283,7 +287,7 @@
 	if (progressIndicator != nil) 
 		fullRightMargin += NSMinX([progressIndicator frame]) + MARGIN_BETWEEN_ITEMS;
 	
-    rect = BDSKShrinkRect([self bounds], fullRightMargin, NSMaxXEdge);
+    rect = BDSKShrinkRect(BDSKShrinkRect([self bounds], leftMargin, NSMinXEdge), fullRightMargin, NSMaxXEdge);
     
 	NSRect iconRect;
     NSSize size;
@@ -298,6 +302,9 @@
         iconRect.origin.y += VERTICAL_OFFSET;
 		[self addToolTipRect:iconRect owner:self userData:[dict objectForKey:@"identifier"]];
 	}
+    
+    if (NSWidth(rect) < [textCell cellSize].width)
+		[self addToolTipRect:rect owner:self userData:NULL];
 }
 
 - (void)resetCursorRects {
