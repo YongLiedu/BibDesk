@@ -59,7 +59,7 @@
 #define BDSKISISourceXMLTagPriorityKey @"BDSKISISourceXMLTagPriority"
 #define BDSKISIURLFieldNameKey @"BDSKISIURLFieldName"
 
-#define DefaultISIURLFieldName @"ISI URL"
+#define WOK_UID_FIELDNAME @"Wok-Uid"
 
 #define MAX_RESULTS 100
 
@@ -75,11 +75,9 @@ static NSString *ISIURLFieldName = nil;
 
 static NSSet *WOSEditions = nil;
 
-static NSArray *publicationInfosWithISIXMLString(NSString *xmlString);
-static NSArray *publicationInfosWithISICitedReferences(NSArray *citedReferences);
-static NSArray *publicationInfosWithISILiteRecords(NSArray *liteReferences);
-//static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs, NSString *fieldName);
-static NSArray *publicationsFromData(NSData *data);
+@interface NSObject (BDSKISIGroupServer)
+- (NSDictionary *)newWOKPublicationInfo;
+@end
 
 // private protocols for inter-thread messaging
 @protocol BDSKISIGroupServerMainThread <BDSKAsyncDOServerMainThread>
@@ -109,7 +107,7 @@ static NSArray *publicationsFromData(NSData *data);
     sourceXMLTagPriority = [[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKISISourceXMLTagPriorityKey] retain];
 
     // set the ISI URL in a specified field name
-    ISIURLFieldName = [([[NSUserDefaults standardUserDefaults] stringForKey:BDSKISIURLFieldNameKey] ?: DefaultISIURLFieldName) retain];
+    ISIURLFieldName = [[[NSUserDefaults standardUserDefaults] stringForKey:BDSKISIURLFieldNameKey] retain];
     
     WOSEditions = [[NSSet alloc] initWithObjects:@"SCI", @"SSCI", @"AHCI", @"IC", @"ISTP", @"ISSHP", @"CCR", nil];
 }
@@ -227,9 +225,38 @@ static NSArray *publicationsFromData(NSData *data);
 - (void)addPublicationsToGroup:(bycopy NSData *)data;
 {
     BDSKASSERT([NSThread isMainThread]);
-    [NSString setMacroResolverForUnarchiving:[group macroResolver]];
-    NSArray *pubs = publicationsFromData(data);
-    [NSString setMacroResolverForUnarchiving:nil];
+    NSMutableArray *pubs = nil;
+    if (data) {
+        [NSString setMacroResolverForUnarchiving:[group macroResolver]];
+        NSArray *pubInfos = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+        [NSString setMacroResolverForUnarchiving:nil];
+        
+        pubs = [NSMutableArray arrayWithCapacity:[pubInfos count]];
+        for (NSDictionary *pubInfo in pubInfos) {
+            NSMutableDictionary *pubFields = [pubInfo mutableCopy];
+            NSArray *files = nil;
+            
+            NSString *pubType = [pubFields objectForKey:BDSKPubTypeString];
+            [pubFields removeObjectForKey:BDSKPubTypeString];
+            
+            NSString *uid = [pubFields objectForKey:WOK_UID_FIELDNAME];
+            if (uid) {
+                NSString *wokURL = [@"http://ws.isiknowledge.com/cps/openurl/service?url_ver=Z39.88-2004&rft_id=info:ut/" stringByAppendingString:uid];
+                // insert the WOK URL into the normal file array if shouldn't be put elsewhere
+                if (ISIURLFieldName)
+                    [pubFields setObject:wokURL forKey:ISIURLFieldName];
+                else
+                    files = [[NSArray alloc] initWithObjects:[BDSKLinkedFile linkedFileWithURL:[NSURL URLWithStringByNormalizingPercentEscapes:wokURL] delegate:nil], nil];
+            }
+            
+            BibItem *pub = [[BibItem alloc] initWithType:pubType citeKey:nil pubFields:pubFields files:files isNew:YES];
+            
+            [pubs addObject:pub];
+            [pub release];
+            [pubFields release];
+            [files release];
+        }
+    }
     [group addPublications:pubs];
 }
 
@@ -391,10 +418,6 @@ static NSArray *publicationsFromData(NSData *data);
             [retrieveParameters setFirstRecord:[NSNumber numberWithInteger:fetchedResultsLocal + 1]];
             [retrieveParameters setCount:[NSNumber numberWithInteger:numResults]];
             
-            WokSearchService_timeSpan *timeSpan = [[[WokSearchService_timeSpan alloc] init] autorelease];
-            timeSpan.begin = @"1600-01-01";
-            timeSpan.end = [[NSDate date] ISO8601DateStringWithTime:NO];
-            
             WokSearchServiceSoapBindingResponse *response = nil;
             
             WokSearchServiceSoapBinding *binding = [WokSearchService WokSearchServiceSoapBinding];
@@ -460,6 +483,9 @@ static NSArray *publicationsFromData(NSData *data);
                     [citingArticlesRequest setUid:searchTerm];
                     for (WokSearchService_editionDesc *edition in editions)
                         [citingArticlesRequest addEditions:edition];
+                    WokSearchService_timeSpan *timeSpan = [[[WokSearchService_timeSpan alloc] init] autorelease];
+                    timeSpan.begin = @"1600-01-01";
+                    timeSpan.end = [[NSDate date] ISO8601DateStringWithTime:NO];
                     [citingArticlesRequest setTimeSpan:timeSpan];
                     [citingArticlesRequest setQueryLanguage:EN_QUERY_LANG];
                     [citingArticlesRequest setRetrieveParameters:retrieveParameters];
@@ -522,19 +548,19 @@ static NSArray *publicationsFromData(NSData *data);
             
         }
         
-        NSArray *pubs = nil;
+        NSArray *records = nil;
         
         if (citedReferencesSearchResults) {
-            pubs = publicationInfosWithISICitedReferences([citedReferencesSearchResults references]);
+            records = [citedReferencesSearchResults references];
             availableResultsLocal = [[citedReferencesSearchResults recordsFound] integerValue];
         } else if (fullRecordSearchResults) {
-            pubs = publicationInfosWithISIXMLString([fullRecordSearchResults records]);
+            NSXMLDocument *doc = [[[NSXMLDocument alloc] initWithXMLString:[fullRecordSearchResults records] options:0 error:NULL] autorelease];
+            records = [doc nodesForXPath:@"/records/REC" error:NULL];
             availableResultsLocal = [[fullRecordSearchResults recordsFound] integerValue];
         } else if (searchResults) {
-            pubs = publicationInfosWithISILiteRecords([searchResults records]);
+            records = [searchResults records];
             availableResultsLocal = [[searchResults recordsFound] integerValue];
         } else {
-            OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
             // we already know that a connection can be made, so we likely don't have permission to read this edition or database
             [self setErrorMessage:errorString ?: NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.")];
             if ([errorString hasPrefix:@"There is a problem with your session identifier (SID)."]) {
@@ -542,9 +568,20 @@ static NSArray *publicationsFromData(NSData *data);
                 [sessionCookie release];
                 sessionCookie = nil;
             }
+            OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
+            OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
+            [[self serverOnMainThread] addPublicationsToGroup:nil];
+            return;
         }
         
-        // now increment this so we don't get the same set next time; BDSKSearchGroup resets it when the searcn term changes
+        NSMutableArray *pubs = [NSMutableArray array];
+        for (id record in records) {
+            NSDictionary *pubInfo = [record newWOKPublicationInfo];
+            [pubs addObject:pubInfo];
+            [pubInfo release];
+        }
+        
+        // now increment this so we don't get the same set next time; BDSKSearchGroup resets it when the search term changes
         fetchedResultsLocal += [pubs count];
         
         OSAtomicCompareAndSwap32Barrier(availableResults, availableResultsLocal, &availableResults);
@@ -603,7 +640,10 @@ static NSArray *publicationsFromData(NSData *data);
     }
 }
 
-#pragma mark XML Parsing
+@end
+
+#pragma mark -
+#pragma mark Record Parsing
 
 // convenience to avoid creating a local variable and checking it each time
 static inline void addStringToDictionaryIfNotNil(NSString *value, NSString *key, NSMutableDictionary *dict)
@@ -611,22 +651,18 @@ static inline void addStringToDictionaryIfNotNil(NSString *value, NSString *key,
     if (value) [dict setObject:[value stringByBackslashEscapingTeXSpecials] forKey:key];
 }
 
-// convenience to add the string value of a node; only adds if non-nil
-static inline void addStringValueOfNodeForField(NSXMLNode *child, NSString *field, NSMutableDictionary *pubFields)
+// convenience method to add the stringValue for the nodes from an XPath query, either the first one or all joined by a string
+static void addStringForXPathToDictionary(NSXMLNode *node, NSString *XPath, NSString *join, NSString *field, NSMutableDictionary *pubFields)
 {
-    addStringToDictionaryIfNotNil([child stringValue], field, pubFields);
-}
-
-// this returns nil if the XPath query fails, and addAuthorsFromXMLNode() relies on that behavior
-static NSString *nodeStringsForXPathJoinedByString(NSXMLNode *child, NSString *XPath, NSString *join)
-{
-    NSArray *nodes = [child nodesForXPath:XPath error:NULL];
-    NSString *toReturn = nil;
+    NSArray *nodes = [node nodesForXPath:XPath error:NULL];
     if ([nodes count]) {
-        nodes = [nodes valueForKey:@"stringValue"];
-        toReturn = [nodes componentsJoinedByString:join];
+        NSString *stringValue = nil;
+        if (join && [nodes count] > 1)
+            stringValue = [[nodes valueForKey:@"stringValue"] componentsJoinedByString:join];
+        else
+            stringValue = [[nodes objectAtIndex:0] stringValue];
+        addStringToDictionaryIfNotNil(stringValue, field, pubFields);
     }
-    return toReturn;
 }
 
 static void addDateStringToDictionary(NSString *value, NSMutableDictionary *pubFields)
@@ -661,119 +697,125 @@ static void addDateStringToDictionary(NSString *value, NSMutableDictionary *pubF
     [scanner release];
 }
 
-static void addISIIDStringToDictionary(NSString *value, NSMutableDictionary *pubFields)
-{
-	NSString *wosID = [value stringByRemovingPrefix:@"WOS:"];
-	if (wosID != nil) {
-		[pubFields setObject:wosID forKey:@"Isi"];
-		NSString *isiURL = [@"http://ws.isiknowledge.com/cps/openurl/service?url_ver=Z39.88-2004&rft_id=info:ut/" stringByAppendingString:wosID];
-		[pubFields setObject:isiURL forKey:ISIURLFieldName];
-	}
-}
-
-/* sample from WoS
- Petersen, JK
- Karlsson, O
- Loo, LO
- Nilsson, SF
- */
 static void addAuthorNamesToDictionary(NSArray *names, NSMutableDictionary *pubFields)
 {
-    NSMutableString *nameString = nil;
+    NSMutableString *namesString = nil;
+    static NSCharacterSet *nonUpperChars = nil;
+    if (nonUpperChars == nil) {
+        NSMutableCharacterSet *mutableSet = [NSMutableCharacterSet uppercaseLetterCharacterSet];
+        [mutableSet formUnionWithCharacterSet:[NSCharacterSet nonBaseCharacterSet]];
+        [mutableSet invert];
+        nonUpperChars = [mutableSet copy];
+    }
     
     for (NSString *name in names) {
+        if (namesString == nil)
+            namesString = [NSMutableString string];
+        else
+            [namesString appendString:@" and "];
+        [namesString appendString:name];
+        // e.g. "Petersen, JK" should become "Peterson, J. K."
         NSRange range = [name rangeOfString:@", "];
         if (range.location != NSNotFound) {
-            NSString *lastName = [name substringToIndex:NSMaxRange(range)];
-            NSString *firstNames = [name substringFromIndex:NSMaxRange(range)];
-            
-            // if there are lower case letters, don't mess with it
-            if ([firstNames rangeOfCharacterFromSet:[NSCharacterSet lowercaseLetterCharacterSet]].location == NSNotFound) {
-                NSMutableString *newName = [[lastName mutableCopy] autorelease];    
-                
-                NSUInteger idx, maxIdx = [firstNames length];
-                for(idx = 0; idx < maxIdx; idx++){
-                    [newName appendString:[firstNames substringWithRange:NSMakeRange(idx, 1)]];
-                    [newName appendString:(idx == maxIdx - 1 ? @"." : @". ")];
+            range = NSMakeRange(NSMaxRange(range), [name length] - NSMaxRange(range));
+            // if there are lower case letters or periods, don't mess with it
+            if (range.length > 0 && [name rangeOfCharacterFromSet:nonUpperChars options:0 range:range].location == NSNotFound) {
+                NSUInteger idx = range.location + [namesString length] - [name length];
+                while (YES) {
+                    idx = NSMaxRange([namesString rangeOfComposedCharacterSequenceAtIndex:idx]);
+                    if (idx < [namesString length]) {
+                        [namesString insertString:@". " atIndex:idx];
+                        idx += 2;
+                    } else {
+                        [namesString appendString:@"."];
+                        break;
+                    }
                 }
-                name = newName;
             }
         }
-        if (nameString == nil)
-            nameString = [NSMutableString string];
-        else
-            [nameString appendString:@" and "];
-        [nameString appendString:name];
     }
-    addStringToDictionaryIfNotNil(nameString, BDSKAuthorString, pubFields);
+    addStringToDictionaryIfNotNil(namesString, BDSKAuthorString, pubFields);
 }
 
-static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
-{
-    // this is now a field/value set for a particular publication record
-    NSXMLNode *child = [record childCount] ? [record childAtIndex:0] : nil;
+#pragma mark -
+
+@implementation NSObject (BDSKISIGroupServer)
+
+- (NSDictionary *)newWOKPublicationInfo {
+    return [[NSDictionary alloc] initWithObjectsAndKeys:BDSKArticleString, BDSKPubTypeString, nil];
+}
+
+@end
+
+@implementation NSXMLNode (BDSKISIGroupServer)
+
+- (NSDictionary *)newWOKPublicationInfo {
+    // this is now a field/value set for a particular publication self
     NSMutableDictionary *pubFields = [NSMutableDictionary new];
-    NSString *keywordSeparator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
-    NSMutableDictionary *sourceTagValues = [NSMutableDictionary dictionary];
    
     // default value for publication type
-    NSString *pubType = nil;
-    NSString *ISIpubType = nil;
+    NSString *isiPubType = nil;
 	NSString *journalName = nil;
 
 	/* get some major branches of XML nodes which are used several times */
-	NSXMLNode *summaryChild = [[record nodesForXPath:@"./static_data/summary" error:NULL] lastObject];
+	NSXMLNode *staticChild = [[self nodesForXPath:@"./static_data" error:NULL] firstObject];
+	NSXMLNode *summaryChild = [[staticChild nodesForXPath:@"./summary" error:NULL] firstObject];
+	NSXMLNode *dynamicChild = [[self nodesForXPath:@"./dynamic_data" error:NULL] firstObject];
+    NSXMLNode *child;
 	
-	/* get WOS ID */
-    addISIIDStringToDictionary([[[record nodesForXPath:@"./UID" error:NULL] lastObject] stringValue], pubFields);
+	/* get WOK UID */
+    addStringForXPathToDictionary(self, @"./UID", nil, WOK_UID_FIELDNAME, pubFields);
     
 	/* get authors */
     NSArray *authorNames = [[summaryChild nodesForXPath:@"./names/name/full_name" error:NULL] valueForKey:@"stringValue"];
     addAuthorNamesToDictionary(authorNames, pubFields);
 	
 	/* get title, journal name etc */
-	NSArray *titleChilds = [summaryChild nodesForXPath:@"./titles/title" error:NULL];
-    for (child in titleChilds) {		
-        if ([[[(NSXMLElement *)child attributeForName:@"type"] stringValue] isEqualToString:@"item"])
-            addStringValueOfNodeForField(child, BDSKTitleString, pubFields);
-        else if ([[[(NSXMLElement *)child attributeForName:@"type"] stringValue] isEqualToString:@"source"]) {
+    for (child in [summaryChild nodesForXPath:@"./titles/title" error:NULL]) {
+		NSString *typeString = [[(NSXMLElement *)child attributeForName:@"type"] stringValue];
+        if ([typeString isEqualToString:@"item"]) {
+            addStringToDictionaryIfNotNil([child stringValue], BDSKTitleString, pubFields);
+        } else if ([typeString isEqualToString:@"source"]) {
 			journalName = (useTitlecase ? [[child stringValue] titlecaseString] : [child stringValue]);
             addStringToDictionaryIfNotNil(journalName, BDSKJournalString, pubFields);
-		}
-        else if ([[[(NSXMLElement *)child attributeForName:@"type"] stringValue] isEqualToString:@"source_abbrev"])
+		} else if ([typeString isEqualToString:@"source_abbrev"]) {
             addStringToDictionaryIfNotNil((useTitlecase ? [[child stringValue] titlecaseString] : [child stringValue]), @"Iso-Source-Abbreviation", pubFields);
+        }
     }
 	
-	/* get page numbers */
-	child = [[summaryChild nodesForXPath:@"./pub_info/page" error:NULL] lastObject];
-	if (child != nil) {
-		NSString *begin = [[(NSXMLElement *)child attributeForName:@"begin"] stringValue];
-		NSString *end = [[(NSXMLElement *)child attributeForName:@"end"] stringValue];
-		if (NO == [NSString isEmptyString:begin] && NO == [NSString isEmptyString:end])
-			addStringToDictionaryIfNotNil([NSString stringWithFormat:@"%@--%@", begin, end], BDSKPagesString, pubFields);
-		else if (NO == [NSString isEmptyString:begin])
-			addStringToDictionaryIfNotNil(begin, BDSKPagesString, pubFields);
-//		else if (NO == [[child stringValue] isEqualToString:@"-"])
-//			addStringValueOfNodeForField(child, BDSKPagesString, pubFields);			
-	}
-	
 	/* get publication year, volume, issue and month */
-	child = [[summaryChild nodesForXPath:@"./pub_info" error:NULL] lastObject];
+	child = [[summaryChild nodesForXPath:@"./pub_info" error:NULL] firstObject];
 	if (child != nil) {
-		addStringValueOfNodeForField([(NSXMLElement *)child attributeForName:@"pubyear"], BDSKYearString, pubFields);
-		addStringValueOfNodeForField([(NSXMLElement *)child attributeForName:@"vol"], BDSKVolumeString, pubFields);
-		addStringValueOfNodeForField([(NSXMLElement *)child attributeForName:@"issue"], BDSKNumberString, pubFields);
+		addStringForXPathToDictionary(child, @"./@pubyear", nil, BDSKYearString, pubFields);
+		addStringForXPathToDictionary(child, @"./@vol", nil, BDSKVolumeString, pubFields);
+		addStringForXPathToDictionary(child, @"./@issue", nil, BDSKNumberString, pubFields);
 		
-		ISIpubType = [[(NSXMLElement *)child attributeForName:@"pubtype"] stringValue];
-//		NSLog(@"ISIpubType:\n%@", ISIpubType);
+		isiPubType = [[(NSXMLElement *)child attributeForName:@"pubtype"] stringValue];
+//		NSLog(@"isiPubType:\n%@", isiPubType);
         
         addDateStringToDictionary([[(NSXMLElement *)child attributeForName:@"pubmonth"] stringValue], pubFields);
+        
+        /* get page numbers */
+        child = [[child nodesForXPath:@"./page" error:NULL] firstObject];
+        if (child != nil) {
+            NSString *begin = [[(NSXMLElement *)child attributeForName:@"begin"] stringValue];
+            NSString *end = [[(NSXMLElement *)child attributeForName:@"end"] stringValue];
+            if (NO == [NSString isEmptyString:begin]) {
+                if (NO == [NSString isEmptyString:end])
+                    addStringToDictionaryIfNotNil([NSString stringWithFormat:@"%@--%@", begin, end], BDSKPagesString, pubFields);
+                else
+                    addStringToDictionaryIfNotNil(begin, BDSKPagesString, pubFields);
+            }
+            //else if (NO == [[child stringValue] isEqualToString:@"-"])
+            //    addStringToDictionaryIfNotNil([child stringValue], BDSKPagesString, pubFields);			
+        }
 	}	
 
 	
 	/* get the document / publication type */
 	/* needs some more testing for conferences etc. maybe we also need to get the conference name? */
-	child = [[summaryChild nodesForXPath:@"./doctypes/doctype" error:NULL] lastObject]; 	
+    NSString *pubType = BDSKArticleString;
+	child = [[summaryChild nodesForXPath:@"./doctypes/doctype" error:NULL] firstObject]; 	
     if (child != nil) {		
 		NSString *docType = [child stringValue];			
 //		NSLog(@"docType:\n%@", docType);
@@ -783,168 +825,109 @@ static NSDictionary *createPublicationInfoWithRecord(NSXMLNode *record)
 		which is clearly wrong.  Likewise, any journal with "Review" in the name is listed as a 
 		"Review" type, when it should probably be a journal (e.g., "Earth Science Reviews").
 		*/
-		if ([docType isEqualToString:@"Meeting Abstract"]) {
+		if ([docType isEqualToString:@"Journal Paper"] || [docType isEqualToString:@"Review"] || [docType isEqualToString:@"Book Review"]) {
+			pubType = BDSKArticleString;
+		} else if ([docType isEqualToString:@"Meeting Abstract"]) {
 			pubType = BDSKInproceedingsString;
-		} else if ([docType isEqualToString:@"Review"]) {
-			pubType = BDSKArticleString;
-		} else if ([docType isEqualToString:@"Book Review"]) {
-			pubType = BDSKArticleString;
-		} else if ([docType isEqualToString:@"Journal Paper"]) {
-			pubType = BDSKArticleString;
 		} else if ([docType isEqualToString:@"Proceedings Paper"]) {
 			pubType = BDSKInproceedingsString;
-			[pubFields setObject:journalName forKey:BDSKBooktitleString];
-		} else {
-			if ([ISIpubType isEqualToString:@"Journal"]) {
-				pubType = BDSKArticleString;
-			} else {
-				// preserve the type if it's unclear
-				pubType = docType;
-			}
+            if (journalName)
+                [pubFields setObject:journalName forKey:BDSKBooktitleString];
+		} else if ([isiPubType isEqualToString:@"Journal"]) {
+            pubType = BDSKArticleString;
+        } else {
+            // preserve the type if it's unclear
+            pubType = [docType entryType];
 		}
-			
-	}
+    }
     
 	[pubFields setObject:pubType forKey:BDSKPubTypeString];
 
 	/* get publisher name and address */
-	addStringValueOfNodeForField([[summaryChild nodesForXPath:@"./publishers/publisher/names/name/full_name" error:NULL] lastObject], 
-								 BDSKPublisherString, pubFields);
-	addStringValueOfNodeForField([[summaryChild nodesForXPath:@"./publishers/publisher/address_spec/full_address" error:NULL] lastObject],
-								 BDSKAddressString, pubFields);
-
-	/* get abstract */
-	NSString *abstractString = nodeStringsForXPathJoinedByString(record, @"./static_data/fullrecord_metadata/abstracts/abstract/abstract_text/p", @"\n\n");
-	addStringToDictionaryIfNotNil(abstractString, BDSKAbstractString, pubFields);
-
-	/* get keywords */
-	NSString *keywordString = nodeStringsForXPathJoinedByString(record, @"./static_data/item/keywords_plus/keyword", keywordSeparator);
-	addStringToDictionaryIfNotNil(keywordString, BDSKKeywordsString, pubFields);						
-	
-	/* get identifiers (DOI, ISSN, ISBN) */
-	NSArray *identifierChilds = [record nodesForXPath:@"./dynamic_data/cluster_related/identifiers/identifier" error:NULL];
-	for (child in identifierChilds) {
-		NSString *typeString = [[(NSXMLElement *)child attributeForName:@"type"] stringValue];
-		if ([typeString isEqualToString:@"doi"]) {
-			addStringToDictionaryIfNotNil([[(NSXMLElement *)child attributeForName:@"value"] stringValue],BDSKDoiString,pubFields);
-		}
-		if ([typeString isEqualToString:@"art_no"]) {
-			if ([pubFields objectForKey:BDSKNumberString] == nil) {
-				NSString *artnum = [[(NSXMLElement *)child attributeForName:@"value"] stringValue];
-				addStringToDictionaryIfNotNil([artnum stringByRemovingPrefix:@"ARTN "], BDSKNumberString, pubFields);
-			}
-		}
-		if ([typeString isEqualToString:@"issn"]) {
-			NSString *issn = [[(NSXMLElement *)child attributeForName:@"value"] stringValue];
-			addStringToDictionaryIfNotNil(issn, @"Issn", pubFields);
-		}
-		if ([typeString isEqualToString:@"isbn"]) {
-			NSString *isbn = [[(NSXMLElement *)child attributeForName:@"value"] stringValue];
-			addStringToDictionaryIfNotNil(isbn, @"Isbn", pubFields);
-		}
-	}
-	
-	/* get times-cited */
-	addStringToDictionaryIfNotNil([[[[record nodesForXPath:@"./dynamic_data/citation_related/tc_list/silo_tc" error:NULL] lastObject] 
-								   attributeForName:@"local_count"] stringValue], @"Times-Cited", pubFields);
+	child = [[summaryChild nodesForXPath:@"./publishers/publisher" error:NULL] firstObject]; 	
+    if (child != nil) {		
+        addStringForXPathToDictionary(child, @"./names/name/full_name", nil, BDSKPublisherString, pubFields);
+        addStringForXPathToDictionary(child, @"./address_spec/full_address", nil, BDSKAddressString, pubFields);
+    }
+    
+    /* get abstract */
+    addStringForXPathToDictionary(staticChild, @"./fullrecord_metadata/abstracts/abstract/abstract_text/p", @"\n\n", BDSKAbstractString, pubFields);
+    
+    /* get keywords */
+    NSString *keywordSeparator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+    addStringForXPathToDictionary(staticChild, @"./item/keywords_plus/keyword", keywordSeparator, BDSKKeywordsString, pubFields);						
+    
+    /* get identifiers (DOI, ISSN, ISBN) */
+    for (child in [dynamicChild nodesForXPath:@"./cluster_related/identifiers/identifier" error:NULL]) {
+        NSString *typeString = [[(NSXMLElement *)child attributeForName:@"type"] stringValue];
+        if ([typeString isEqualToString:@"doi"]) {
+            addStringForXPathToDictionary(child, @"./@value", nil, BDSKDoiString, pubFields);
+        } else if ([typeString isEqualToString:@"issn"]) {
+            addStringForXPathToDictionary(child, @"./@value", nil, @"Issn", pubFields);
+        } else if ([typeString isEqualToString:@"isbn"]) {
+            addStringForXPathToDictionary(child, @"./@value", nil, @"Isbn", pubFields);
+        } else if ([typeString isEqualToString:@"art_no"] && [pubFields objectForKey:BDSKNumberString] == nil) {
+            NSString *artnum = [[[(NSXMLElement *)child attributeForName:@"value"] stringValue] stringByRemovingPrefix:@"ARTN "];
+            addStringToDictionaryIfNotNil(artnum, BDSKNumberString, pubFields);
+        }
+    }
+    
+    /* get times-cited */
+    addStringForXPathToDictionary(dynamicChild, @"./citation_related/tc_list/silo_tc/@local_count", nil, @"Times-Cited", pubFields);
 	
     return pubFields;
 }
 
-static NSArray *publicationInfosWithISIXMLString(NSString *xmlString)
-{
-    NSCParameterAssert(nil != xmlString);
-    if (nil == xmlString)
-        return nil;
-    
-    NSError *error;
-    NSXMLDocument *doc = [[[NSXMLDocument alloc] initWithXMLString:xmlString options:0 error:&error] autorelease];
-    if (nil == doc) {
-        NSLog(@"failed to create XML document from ISI string.  %@", error);
-        return nil;
-    }
-    
-    NSArray *records = [doc nodesForXPath:@"/records/REC" error:&error];
-    if (nil == records)
-        NSLog(@"%@", error);
-    
-    NSXMLNode *record = [records firstObject];
-    NSMutableArray *pubs = [NSMutableArray array];
-    
-    while (nil != record) {
-        
-        NSDictionary *pub = createPublicationInfoWithRecord(record);
-        [pubs addObject:pub];
-        [pub release];
-        
-        record = [record nextSibling];
-    }
-    return pubs;
-}
+@end
 
-static NSDictionary *createPublicationInfoWithCitedReference(WokSearchService_citedReference *citedReference) {
+@implementation WokSearchService_citedReference (BDSKISIGroupServer)
 
+- (NSDictionary *)newWOKPublicationInfo {
     NSMutableDictionary *pubFields = [NSMutableDictionary new];
     
     [pubFields setObject:BDSKArticleString forKey:BDSKPubTypeString];
     
-    addISIIDStringToDictionary([citedReference uid], pubFields);
+    addStringToDictionaryIfNotNil([self uid], WOK_UID_FIELDNAME, pubFields);
     
-    NSArray *authorTokens = [[citedReference citedAuthor] componentsSeparatedByString:@" "];
-    if ([authorTokens count] == 2) {
-        NSString *lastName = [authorTokens objectAtIndex:0];
-        NSString *firstInitials = [authorTokens objectAtIndex:1];
-        NSString *authorName = [[lastName capitalizedString] stringByAppendingFormat:@", %@", firstInitials];
-        addStringToDictionaryIfNotNil(authorName, BDSKAuthorString, pubFields);
-    }
+    addAuthorNamesToDictionary([NSArray arrayWithObjects:[self citedAuthor], nil], pubFields);
     
-    addStringToDictionaryIfNotNil((useTitlecase ? [[citedReference citedWork] titlecaseString] : [citedReference citedWork]), BDSKJournalString, pubFields);
+    addStringToDictionaryIfNotNil((useTitlecase ? [[self citedWork] titlecaseString] : [self citedWork]), BDSKJournalString, pubFields);
 
-    addStringToDictionaryIfNotNil([citedReference page], BDSKPagesString, pubFields);
-    addStringToDictionaryIfNotNil([citedReference timesCited], @"Times-Cited", pubFields);
-    addStringToDictionaryIfNotNil([citedReference volume], BDSKVolumeString, pubFields);
-    addStringToDictionaryIfNotNil([citedReference year], BDSKYearString, pubFields);
+    addStringToDictionaryIfNotNil([self page], BDSKPagesString, pubFields);
+    addStringToDictionaryIfNotNil([self timesCited], @"Times-Cited", pubFields);
+    addStringToDictionaryIfNotNil([self volume], BDSKVolumeString, pubFields);
+    addStringToDictionaryIfNotNil([self year], BDSKYearString, pubFields);
     
     return pubFields;
 }
 
-static NSArray *publicationInfosWithISICitedReferences(NSArray *citedReferences) {
+@end
 
-    NSMutableArray *pubs = [NSMutableArray array];
-    
-    for (WokSearchService_citedReference *citedReference in citedReferences) {
-    
-        NSDictionary *pub = createPublicationInfoWithCitedReference(citedReference);
-        [pubs addObject:pub];
-        [pub release];
-    }
-    
-    return pubs;
-}
+@implementation WokSearchLiteService_liteRecord (BDSKISIGroupServer)
 
-static NSDictionary *createPublicationInfoWithLiteRecord(WokSearchLiteService_liteRecord *liteRecord) {
+- (NSDictionary *)newWOKPublicationInfo {
 
     NSMutableDictionary *pubFields = [NSMutableDictionary new];
     
     [pubFields setObject:BDSKArticleString forKey:BDSKPubTypeString];
 
-    addISIIDStringToDictionary([liteRecord uid], pubFields);
+    addStringToDictionaryIfNotNil([self uid], WOK_UID_FIELDNAME, pubFields);
     
     WokSearchLiteService_labelValuesPair *pair = nil;
     
-    for (pair in [liteRecord authors]) {
+    for (pair in [self authors]) {
         if ([[pair label] isEqualToString:@"Authors"])
             addAuthorNamesToDictionary([pair value], pubFields);
     }
     
-    for (pair in [liteRecord title]) {
+    for (pair in [self title]) {
         if ([[pair label] isEqualToString:@"Title"])
             addStringToDictionaryIfNotNil([[pair value] firstObject], BDSKTitleString, pubFields);
         else if ([[pair label] isEqualToString:@"Issue"])
             addStringToDictionaryIfNotNil([[pair value] firstObject], BDSKNumberString, pubFields);
     }
     
-    for (pair in [liteRecord source]) {
+    for (pair in [self source]) {
         if ([[pair label] isEqualToString:@"Pages"])
             addStringToDictionaryIfNotNil([[pair value] firstObject], BDSKPagesString, pubFields);
         else if ([[pair label] isEqualToString:@"Published.BiblioDate"])
@@ -958,12 +941,12 @@ static NSDictionary *createPublicationInfoWithLiteRecord(WokSearchLiteService_li
     }
 
     NSString *keywordSeparator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
-    for (pair in [liteRecord keywords]) {
+    for (pair in [self keywords]) {
         if ([[pair label] isEqualToString:@"Keywords"])
             addStringToDictionaryIfNotNil([[pair value] componentsJoinedByString:keywordSeparator], BDSKKeywordsString, pubFields);
     }
     
-    for (pair in [liteRecord other]) {
+    for (pair in [self other]) {
         if ([[pair label] isEqualToString:@"Identifier.Doi"])
             addStringToDictionaryIfNotNil([[pair value] firstObject], BDSKDoiString, pubFields);
         else if ([[pair label] isEqualToString:@"Identifier.Issn"])
@@ -975,72 +958,6 @@ static NSDictionary *createPublicationInfoWithLiteRecord(WokSearchLiteService_li
     }
     
     return pubFields;
-}
-
-static NSArray *publicationInfosWithISILiteRecords(NSArray *liteRecords) {
-
-    NSMutableArray *pubs = [NSMutableArray array];
-    
-    for (WokSearchLiteService_liteRecord *liteRecord in liteRecords) {
-    
-        NSDictionary *pub = createPublicationInfoWithLiteRecord(liteRecord);
-        [pubs addObject:pub];
-        [pub release];
-    }
-    
-    return pubs;
-}
-
-/*
-static NSArray *replacePubInfosByField(NSArray *targetPubs, NSArray *sourcePubs, NSString *fieldName)
-{
-    NSMutableArray *outPubs = [NSMutableArray arrayWithCapacity:[targetPubs count]];
-    NSMutableDictionary *sourcePubIndex = [NSMutableDictionary dictionaryWithCapacity:[sourcePubs count]];
-    NSDictionary *pub;
-    NSString *value;
-    NSDictionary *replacedPub;
-    
-    for (pub in sourcePubs) {
-        if ((value = [pub objectForKey:fieldName]))
-            [sourcePubIndex setValue:pub forKey:value];
-    }
-    
-    for (pub in targetPubs) {
-        if ((value = [pub objectForKey:fieldName]) &&
-            (replacedPub = [sourcePubIndex objectForKey:value]))
-            pub = replacedPub;
-        [outPubs addObject:pub]; 
-    }
-    
-    return outPubs;
-}
-*/
-static NSArray *publicationsFromData(NSData *data) {
-    if (!data) return [NSArray array];
-    NSArray *pubInfos = [NSKeyedUnarchiver unarchiveObjectWithData:data];
-    NSMutableArray *pubs = [NSMutableArray arrayWithCapacity:[pubInfos count]];
-    for (NSDictionary *pubInfo in pubInfos) {
-        NSMutableDictionary *pubFields = [pubInfo mutableCopy];
-        NSArray *files = nil;
-        
-        NSString *pubType = [pubFields objectForKey:BDSKPubTypeString];
-        [pubFields removeObjectForKey:BDSKPubTypeString];
-        
-        // insert the ISI URL into the normal file array if hasn't been put elsewhere
-        NSString *isiURL = [pubFields objectForKey:DefaultISIURLFieldName];
-        if (isiURL) {
-            files = [[NSMutableArray alloc] initWithObjects:[BDSKLinkedFile linkedFileWithURL:[NSURL URLWithStringByNormalizingPercentEscapes:isiURL] delegate:nil], nil];
-            [pubFields removeObjectForKey:DefaultISIURLFieldName];
-        }
-        
-        BibItem *pub = [[BibItem alloc] initWithType:pubType citeKey:nil pubFields:pubFields files:files isNew:YES];
-        
-        [pubs addObject:pub];
-        [pub release];
-        [pubFields release];
-        [files release];
-    }
-    return pubs;
 }
 
 @end
