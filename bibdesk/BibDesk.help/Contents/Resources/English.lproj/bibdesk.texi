@@ -821,7 +821,7 @@ There are many ways to add existing reference items to a BibDesk database.
 @end itemize
 
 Here @samp{formatted text} means bibliography data in any of a number of formats that BibDesk can recognize.
-This includes BibTeX, RIS, Medline (PubMed), MARC, JSTOR, and ISI Web of Science. 
+This includes BibTeX, RIS, Medline (PubMed), MARC, JSTOR, and Web of Knowledge. 
 
 More details are given in the following sections.
 
@@ -841,7 +841,7 @@ More details are given in the following sections.
 
 References can also be added to a bibliography by dragging entries
 from a text source (text editor, web browser) into BibDesk's main publicationslist.
-The text can be BibTeX, RIS (Reference Manager), MARC, JSTOR or ISI Web Of Science formatted text.
+The text can be BibTeX, RIS (Reference Manager), MARC, JSTOR or Web Of Knowledge formatted text.
 Here's a fancy picture:
 
 @image{gfx/dragIntoBib}
@@ -871,7 +871,7 @@ to easily copy items between documents.
 
 References can be added to a publications list by copying them from another
 source and pasting them into BibDesk's main window.  The text being pasted must
-be BibTeX, RIS (Reference Manager), MARC, JSTOR or ISI Web Of Science formatted text, or an error will occur.
+be BibTeX, RIS (Reference Manager), MARC, JSTOR or Web Of Knowledge formatted text, or an error will occur.
 
 Furthermore, everything that can be @ref{Drag and Drop, dragged and dropped} on a BibDesk window can also
 be added using Copy and Paste. 
@@ -917,7 +917,7 @@ to add references from an arbitrary text file, or the
 to add publactions from a website. 
 
 If the clipboard or the file contains formatted text that BibDesk can understand, 
-such as BibTeX, RIS, Medline (PubMed), MARC, JSTOR, and ISI Web of Science formatted text, 
+such as BibTeX, RIS, Medline (PubMed), MARC, JSTOR, and Web of Knowledge formatted text, 
 Bibdesk will parse the text and the new references are immediately added to the database 
 instead of openingthe sheet to do it by hand. 
 
@@ -1652,7 +1652,7 @@ With BibDesk, you can search the
 @uref{http://www.ncbi.nlm.nih.gov/Database/index.html,NCBI's Entrez set of databases},
 the catalogs at many 
 @uref{http://targettest.indexdata.com/,research libraries using the z39.50 protocol},
-the @uref{http://www.isiknowledge.com/,ISI Web of Knowledge}, and
+the @uref{http://wokinfo.com/,Web of Knowledge}, and
 the @uref{http://dblp.uni-trier.de/,DBLP Computer Science Bibliography}.
 
 To search these databases, select @menutitle{New Search Group} 
@@ -1662,7 +1662,7 @@ the menu that appears.
 @menu
 * Syntax for Z39.50 Searching::
 * Syntax for Entrez Searching::
-* Syntax for ISI Searching::
+* Syntax for WOK Searching::
 @end menu
 
 @c --------------------------------------------------------------------------------------
@@ -1834,24 +1834,24 @@ Complete documentation of the extensions is provided at
 
 @c --------------------------------------------------------------------------------------
 
-@node Syntax for ISI Searching
-@section Syntax for ISI Searching
-@abstract{Syntax for searching ISI databases}
+@node Syntax for WOK Searching
+@section Syntax for WOK Searching
+@abstract{Syntax for searching WOK databases}
 
-@cindex ISI
-@cindex Searching ISI
+@cindex WOK
+@cindex Searching WOK
 
-The default syntax for searching the ISI Web of Knowledge is described 
+The default syntax for searching the WOK Web of Knowledge is described 
 on the ``Search Rules'' section of the 
-@uref{http://images.isiknowledge.com/WOK46/help/WOS/h_toc.html, Web of Knowledge help page}.
+@uref{http://images.webofknowledge.com/WOK46/help/WOS/h_toc.html, Web of Knowledge help page}.
 
 A more complete description of specific options used for BibDesk is given on the
-@uref{http://images.isiknowledge.com/WOK46/help/WOS/h_advanced.html, Advanced Search page} 
-and the @uref{http://images.isiknowledge.com/WOK46/help/WOS/h_advanced_examples.html, Advanced Search Examples page}.
+@uref{http://images.webofknowledge.com/WOK46/help/WOS/h_advanced.html, Advanced Search page} 
+and the @uref{http://images.webofknowledge.com/WOK46/help/WOS/h_advanced_examples.html, Advanced Search Examples page}.
 
 If you just type a search term or group of terms in the search field, BibDesk will
 automatically convert it to a ``Topic Search'' (TS=), unless you specify the 
-@uref{http://images.isiknowledge.com/WOK46/help/WOS/h_advanced_fieldtags.html, field tag}
+@uref{http://images.webofknowledge.com/WOK46/help/WOS/h_advanced_fieldtags.html, field tag}
 manually.  This is an easy way of searching Title, Abstract, and Keywords, but won't work for authors.
 
 @c ======================================================================================
