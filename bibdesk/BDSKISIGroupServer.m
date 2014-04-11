@@ -75,6 +75,8 @@ static NSString *ISIURLFieldName = nil;
 
 static NSSet *WOSEditions = nil;
 
+static NSArray *uidsFromString(NSString *uidString);
+
 @interface NSObject (BDSKISIGroupServer)
 - (NSDictionary *)newWOKPublicationInfo;
 @end
@@ -381,13 +383,8 @@ static NSSet *WOSEditions = nil;
                     // Reto: undocumented and untested. I'm going to check its usefulness before removing.
                     WokSearchLiteService_retrieveById *retrieveByIdRequest = [[[WokSearchLiteService_retrieveById alloc] init] autorelease];
                     [retrieveByIdRequest setDatabaseId:database];
-                    NSString *token = nil;
-                    NSCharacterSet *separatorCharSet = [NSCharacterSet characterSetWithCharactersInString:@","];
-                    NSScanner *scanner = [[[NSScanner alloc] initWithString:searchTerm] autorelease];
-                    while ([scanner scanUpToCharactersFromSet:separatorCharSet intoString:&token]) {
-                        [retrieveByIdRequest addUid:[token stringByRemovingSurroundingWhitespace]];
-                        [scanner scanCharactersFromSet:separatorCharSet intoString:NULL];
-                    }
+                    for (NSString *uid in uidsFromString(searchTerm))
+                        [retrieveByIdRequest addUid:uid];
                     [retrieveByIdRequest setQueryLanguage:EN_QUERY_LANG];
                     [retrieveByIdRequest setRetrieveParameters:retrieveParameters];
                     response = [binding retrieveByIdUsingParameters:retrieveByIdRequest];
@@ -525,13 +522,8 @@ static NSSet *WOSEditions = nil;
                     // Reto: undocumented and untested. I'm going to check its usefulness before removing.
                     WokSearchService_retrieveById *retrieveByIdRequest = [[[WokSearchService_retrieveById alloc] init] autorelease];
                     [retrieveByIdRequest setDatabaseId:database];
-                    NSString *token = nil;
-                    NSCharacterSet *separatorCharSet = [NSCharacterSet characterSetWithCharactersInString:@","];
-                    NSScanner *scanner = [[[NSScanner alloc] initWithString:searchTerm] autorelease];
-                    while ([scanner scanUpToCharactersFromSet:separatorCharSet intoString:&token]) {
-                        [retrieveByIdRequest addUid:[token stringByRemovingSurroundingWhitespace]];
-                        [scanner scanCharactersFromSet:separatorCharSet intoString:NULL];
-                    }
+                    for (NSString *uid in uidsFromString(searchTerm))
+                        [retrieveByIdRequest addUid:uid];
                     [retrieveByIdRequest setQueryLanguage:EN_QUERY_LANG];
                     [retrieveByIdRequest setRetrieveParameters:retrieveParameters];
                     response = [binding retrieveByIdUsingParameters:retrieveByIdRequest];
@@ -645,6 +637,26 @@ static NSSet *WOSEditions = nil;
 }
 
 @end
+
+static NSArray *uidsFromString(NSString *uidString) {
+    NSCharacterSet *uidCharSet = nil;
+    if (uidCharSet == nil) {
+        NSMutableCharacterSet *mutableSet = [NSMutableCharacterSet alphanumericCharacterSet];
+        [mutableSet addCharactersInString:@":"];
+        uidCharSet = [mutableSet copy];
+    }
+    NSMutableArray *uids = [NSMutableArray array];
+    NSScanner *scanner = [NSScanner scannerWithString:uidString];
+    NSString *uid;
+    [scanner scanUpToCharactersFromSet:uidCharSet intoString:NULL];
+    while ([scanner isAtEnd] == NO) {
+        if ([scanner scanCharactersFromSet:uidCharSet intoString:&uid])
+            [uids addObject:uid];
+        [scanner scanString:@" OR " intoString:NULL] || [scanner scanUpToCharactersFromSet:uidCharSet intoString:NULL];
+    }
+    
+    return uids;
+}
 
 #pragma mark -
 #pragma mark Record Parsing
