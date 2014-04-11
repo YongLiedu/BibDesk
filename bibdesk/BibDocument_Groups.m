@@ -475,8 +475,12 @@ The groupedPublications array is a subset of the publications array, developed b
             [self sortGroupsByKey:nil];
         } else {
             [groupOutlineView reloadData];
-            if ([[self selectedGroups] containsObject:group] && (isWeb || succeeded))
-                [self displaySelectedGroups];
+            if ([[self selectedGroups] containsObject:group]) {
+                if (isWeb || succeeded)
+                    [self displaySelectedGroups];
+                else
+                    [self updateStatus];
+            }
         }
         
         if (succeeded)
