@@ -562,7 +562,11 @@ static NSSet *WOSEditions = nil;
             availableResultsLocal = [[searchResults recordsFound] integerValue];
         } else {
             // we already know that a connection can be made, so we likely don't have permission to read this edition or database
-            [self setErrorMessage:errorString ?: NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.")];
+            if (errorString == nil)
+                errorString = NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.");
+            else
+                errorString = [errorString stringByDeletingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+            [self setErrorMessage:errorString];
             if ([errorString hasPrefix:@"There is a problem with your session identifier (SID)."]) {
                 // this error usually indicates the session has expired, so discard the cookie to allow authentication again
                 [sessionCookie release];
