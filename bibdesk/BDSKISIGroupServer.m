@@ -524,7 +524,6 @@ static NSArray *uidsFromString(NSString *uidString);
                     [retrieveByIdRequest setDatabaseId:database];
                     for (NSString *uid in uidsFromString(searchTerm))
                         [retrieveByIdRequest addUid:uid];
-                    NSLog(@"%@",retrieveByIdRequest.uid);
                     [retrieveByIdRequest setQueryLanguage:EN_QUERY_LANG];
                     [retrieveByIdRequest setRetrieveParameters:retrieveParameters];
                     response = [binding retrieveByIdUsingParameters:retrieveByIdRequest];
