@@ -909,6 +909,7 @@ static void addAuthorNamesToDictionary(NSArray *names, NSMutableDictionary *pubF
     
     addStringToDictionaryIfNotNil((useTitlecase ? [[self citedWork] titlecaseString] : [self citedWork]), BDSKJournalString, pubFields);
 
+    addStringToDictionaryIfNotNil([self citedTitle], BDSKTitleString, pubFields);
     addStringToDictionaryIfNotNil([self page], BDSKPagesString, pubFields);
     addStringToDictionaryIfNotNil([self timesCited], @"Times-Cited", pubFields);
     addStringToDictionaryIfNotNil([self volume], BDSKVolumeString, pubFields);
