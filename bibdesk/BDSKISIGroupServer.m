@@ -524,6 +524,7 @@ static NSArray *uidsFromString(NSString *uidString);
                     [retrieveByIdRequest setDatabaseId:database];
                     for (NSString *uid in uidsFromString(searchTerm))
                         [retrieveByIdRequest addUid:uid];
+                    NSLog(@"%@",retrieveByIdRequest.uid);
                     [retrieveByIdRequest setQueryLanguage:EN_QUERY_LANG];
                     [retrieveByIdRequest setRetrieveParameters:retrieveParameters];
                     response = [binding retrieveByIdUsingParameters:retrieveByIdRequest];
@@ -650,9 +651,9 @@ static NSArray *uidsFromString(NSString *uidString) {
     NSString *uid;
     [scanner scanUpToCharactersFromSet:uidCharSet intoString:NULL];
     while ([scanner isAtEnd] == NO) {
-        if ([scanner scanCharactersFromSet:uidCharSet intoString:&uid])
+        if ([scanner scanCharactersFromSet:uidCharSet intoString:&uid] && [uid isCaseInsensitiveEqual:@"OR"] == NO)
             [uids addObject:uid];
-        [scanner scanString:@" OR " intoString:NULL] || [scanner scanUpToCharactersFromSet:uidCharSet intoString:NULL];
+        [scanner scanUpToCharactersFromSet:uidCharSet intoString:NULL];
     }
     
     return uids;
