@@ -287,16 +287,16 @@ static NSArray *uidsFromString(NSString *uidString);
          */
         
         if ([searchTerm hasCaseInsensitivePrefix:@"REF="]) {
-            searchTerm = [searchTerm substringFromIndex:4];
+            searchTerm = [[searchTerm substringFromIndex:4] stringByRemovingSurroundingWhitespace];
             operation = citedReferences;
         } else if ([searchTerm hasCaseInsensitivePrefix:@"CIT="]) {
-            searchTerm = [searchTerm substringFromIndex:4];
+            searchTerm = [[searchTerm substringFromIndex:4] stringByRemovingSurroundingWhitespace];
             operation = citingArticles;
         } else if ([searchTerm hasCaseInsensitivePrefix:@"REL="]) {
-            searchTerm = [searchTerm substringFromIndex:4];
+            searchTerm = [[searchTerm substringFromIndex:4] stringByRemovingSurroundingWhitespace];
             operation = relatedRecords;
         } else if ([searchTerm hasCaseInsensitivePrefix:@"UID="]) {
-            searchTerm = [searchTerm substringFromIndex:4];
+            searchTerm = [[searchTerm substringFromIndex:4] stringByRemovingSurroundingWhitespace];
             operation = retrieveById;
         } else if ([searchTerm rangeOfString:@"="].location == NSNotFound) {
             searchTerm = [NSString stringWithFormat:@"TS=\"%@\"", searchTerm];
