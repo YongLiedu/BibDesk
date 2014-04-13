@@ -93,6 +93,8 @@ enum {
 
 - (void)handleWindowDidBecomeMainNotification:(NSNotification *)notification{
     id currentDocument = [self currentDocument];
+    if ([currentDocument isKindOfClass:[BibDocument class]] == NO)
+        mainDocument = [[NSApp orderedDocuments] firstObject];
     if(currentDocument && [currentDocument isEqual:mainDocument] == NO){
         mainDocument = currentDocument;
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentControllerDidChangeMainDocumentNotification object:self];
