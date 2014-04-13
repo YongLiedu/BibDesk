@@ -63,12 +63,7 @@
 
 #define MAX_RESULTS 100
 
-#ifdef DEBUG
-static BOOL addXMLStringToAnnote = YES;
-#else
 static BOOL addXMLStringToAnnote = NO;
-#endif
-
 static BOOL useTitlecase = YES;
 static NSArray *sourceXMLTagPriority = nil;
 static NSString *ISIURLFieldName = nil;
@@ -291,18 +286,17 @@ static NSArray *uidsFromString(NSString *uidString);
          TODO: document this syntax and the results thereof in the code, and in the help book.
          */
         
-        NSRange prefixRange;
-        if ((prefixRange = [searchTerm rangeOfString:@"CitedReferences:" options:NSAnchoredSearch]).location == 0) {
-            searchTerm = [searchTerm substringFromIndex:NSMaxRange(prefixRange)];
+        if ([searchTerm hasCaseInsensitivePrefix:@"REF="]) {
+            searchTerm = [searchTerm substringFromIndex:4];
             operation = citedReferences;
-        } else if ((prefixRange = [searchTerm rangeOfString:@"CitingArticles:" options:NSAnchoredSearch]).location == 0) {
-            searchTerm = [searchTerm substringFromIndex:NSMaxRange(prefixRange)];
+        } else if ([searchTerm hasCaseInsensitivePrefix:@"CIT="]) {
+            searchTerm = [searchTerm substringFromIndex:4];
             operation = citingArticles;
-        } else if ((prefixRange = [searchTerm rangeOfString:@"RelatedRecords:" options:NSAnchoredSearch]).location == 0) {
-            searchTerm = [searchTerm substringFromIndex:NSMaxRange(prefixRange)];
+        } else if ([searchTerm hasCaseInsensitivePrefix:@"REL="]) {
+            searchTerm = [searchTerm substringFromIndex:4];
             operation = relatedRecords;
-        } else if ((prefixRange = [searchTerm rangeOfString:@"RetrieveById:" options:NSAnchoredSearch]).location == 0) {
-            searchTerm = [searchTerm substringFromIndex:NSMaxRange(prefixRange)];
+        } else if ([searchTerm hasCaseInsensitivePrefix:@"UID="]) {
+            searchTerm = [searchTerm substringFromIndex:4];
             operation = retrieveById;
         } else if ([searchTerm rangeOfString:@"="].location == NSNotFound) {
             searchTerm = [NSString stringWithFormat:@"TS=\"%@\"", searchTerm];
@@ -891,6 +885,9 @@ static void addAuthorNamesToDictionary(NSArray *names, NSMutableDictionary *pubF
     /* get times-cited */
     addStringForXPathToDictionary(dynamicChild, @"./citation_related/tc_list/silo_tc/@local_count", nil, @"Times-Cited", pubFields);
 	
+    if (addXMLStringToAnnote)
+        [pubFields setValue:[self XMLString] forKey:BDSKAnnoteString];
+    
     return pubFields;
 }
 
