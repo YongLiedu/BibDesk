@@ -38,7 +38,7 @@
 #import "BDSKStringConstants.h"
 #import "BDSKStringEncodingManager.h"
 #import "BibDocument.h"
-#import "BibDocument_Groupds.h"
+#import "BibDocument_Groups.h"
 #import "NSTask_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKAlias.h"
