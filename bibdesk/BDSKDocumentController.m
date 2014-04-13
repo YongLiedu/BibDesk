@@ -38,6 +38,7 @@
 #import "BDSKStringConstants.h"
 #import "BDSKStringEncodingManager.h"
 #import "BibDocument.h"
+#import "BibDocument_Groupds.h"
 #import "NSTask_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKAlias.h"
@@ -298,8 +299,11 @@ enum {
             if (nil == document)
                 document = [self openUntitledDocumentAndDisplay:YES error:outError];
             
-            [[document groups] addSearchGroup:group];
-            [group release];
+            if ([document respondsToSelector:@selector(groups)]) {
+                [[document groups] addSearchGroup:group];
+                [document selectGroup:group];
+                [group release];
+            }
         }
         
     } else {
