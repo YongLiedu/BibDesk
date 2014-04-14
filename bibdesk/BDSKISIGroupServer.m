@@ -563,7 +563,7 @@ static NSArray *uidsFromString(NSString *uidString);
                 [sessionCookie release];
                 sessionCookie = nil;
             }
-            OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
+            OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
             
         } else {
             
