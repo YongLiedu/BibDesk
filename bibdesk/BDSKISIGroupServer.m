@@ -274,7 +274,7 @@ static NSArray *uidsFromString(NSString *uidString);
     
     database = [database stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
     
-    if (numResults > 0 && [NSString isEmptyString:searchTerm] == NO){
+    if (numResults > 0 && [NSString isEmptyString:searchTerm] == NO) {
         
         enum operationTypes { search, citedReferences, citingArticles, relatedRecords, retrieveById } operation = search;
         BOOL isLite = [[options objectForKey:@"lite"] boolValue];
@@ -312,7 +312,11 @@ static NSArray *uidsFromString(NSString *uidString);
         }
         
         // authenticate if necessary
-        if ([self authenticateWithOptions:options]) {
+        if ([self authenticateWithOptions:options] == NO) {
+            
+            OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
+            
+        } else {
             
             // perform WS query to get count of results; don't pass zero for record numbers, although it's not clear what the values mean in this context
             NSString *errorString = nil;
@@ -549,6 +553,8 @@ static NSArray *uidsFromString(NSString *uidString);
                     sessionCookie = nil;
                 }
                 
+                OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
+                
             } else {
                 
                 NSMutableArray *pubs = [NSMutableArray array];
@@ -569,10 +575,6 @@ static NSArray *uidsFromString(NSString *uidString);
             }
             
         }
-        
-        // if the data to return was nil we failed somewhere
-        if (data == nil)
-            OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
         
         // set this flag before adding pubs, or the client will think we're still retrieving (and spinners don't stop)
         OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
