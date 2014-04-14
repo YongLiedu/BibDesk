@@ -274,14 +274,7 @@ static NSArray *uidsFromString(NSString *uidString);
     
     database = [database stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
     
-    if ([NSString isEmptyString:searchTerm] || numResults == 0){
-		
-        // there is nothing to download
-        OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
-        // notify that we stopped retrieving
-        [[self serverOnMainThread] addPublicationsToGroup:nil];
-        
-    } else {
+    if (numResults > 0 && [NSString isEmptyString:searchTerm] == NO){
         
         enum operationTypes { search, citedReferences, citingArticles, relatedRecords, retrieveById } operation = search;
         BOOL isLite = [[options objectForKey:@"lite"] boolValue];
