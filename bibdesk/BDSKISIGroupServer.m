@@ -261,7 +261,6 @@ static NSArray *uidsFromString(NSString *uidString);
 // @@ currently limited to topic search; need to figure out UI for other search types (mixing search types will require either NSTokenField or raw text string entry)
 - (oneway void)downloadWithSearchTerm:(NSString *)searchTerm database:(NSString *)database options:(NSDictionary *)options;
 {    
-    enum operationTypes { search, citedReferences, citingArticles, relatedRecords, retrieveById } operation = search;
     NSInteger availableResultsLocal = [self numberOfAvailableResults];
     NSInteger fetchedResultsLocal = [self numberOfFetchedResults];
     NSInteger numResults = MAX_RESULTS;
@@ -282,17 +281,19 @@ static NSArray *uidsFromString(NSString *uidString);
         [[self serverOnMainThread] addPublicationsToGroup:nil];
         
     } else {
+        
+        enum operationTypes { search, citedReferences, citingArticles, relatedRecords, retrieveById } operation = search;
+        BOOL isLite = [[options objectForKey:@"lite"] boolValue];
         /*
          TODO: document this syntax and the results thereof in the code, and in the help book.
          */
-        
-        if ([searchTerm hasCaseInsensitivePrefix:@"REF="]) {
+        if (isLite == NO && [searchTerm hasCaseInsensitivePrefix:@"REF="]) {
             searchTerm = [[searchTerm substringFromIndex:4] stringByRemovingSurroundingWhitespace];
             operation = citedReferences;
-        } else if ([searchTerm hasCaseInsensitivePrefix:@"CIT="]) {
+        } else if (isLite == NO && [searchTerm hasCaseInsensitivePrefix:@"CIT="]) {
             searchTerm = [[searchTerm substringFromIndex:4] stringByRemovingSurroundingWhitespace];
             operation = citingArticles;
-        } else if ([searchTerm hasCaseInsensitivePrefix:@"REL="]) {
+        } else if (isLite == NO && [searchTerm hasCaseInsensitivePrefix:@"REL="]) {
             searchTerm = [[searchTerm substringFromIndex:4] stringByRemovingSurroundingWhitespace];
             operation = relatedRecords;
         } else if ([searchTerm hasCaseInsensitivePrefix:@"UID="]) {
@@ -333,7 +334,7 @@ static NSArray *uidsFromString(NSString *uidString);
         WokSearchService_citedReferencesSearchResults *citedReferencesSearchResults = nil;
         WokSearchLiteService_searchResults *searchResults = nil;
         
-        if ([[options objectForKey:@"lite"] boolValue]) {
+        if (isLite) {
             
             WokSearchLiteService_retrieveParameters *retrieveParameters = [[[WokSearchLiteService_retrieveParameters alloc] init] autorelease];
             [retrieveParameters setFirstRecord:[NSNumber numberWithInteger:fetchedResultsLocal + 1]];
@@ -535,18 +536,22 @@ static NSArray *uidsFromString(NSString *uidString);
         }
         
         NSArray *records = nil;
+        NSData *data = nil;
         
         if (citedReferencesSearchResults) {
             records = [citedReferencesSearchResults references];
             availableResultsLocal = [[citedReferencesSearchResults recordsFound] integerValue];
         } else if (fullRecordSearchResults) {
             NSXMLDocument *doc = [[[NSXMLDocument alloc] initWithXMLString:[fullRecordSearchResults records] options:0 error:NULL] autorelease];
-            records = [doc nodesForXPath:@"/records/REC" error:NULL];
+            records = [doc nodesForXPath:@"/records/REC" error:NULL] ?: [NSArray array];
             availableResultsLocal = [[fullRecordSearchResults recordsFound] integerValue];
         } else if (searchResults) {
             records = [searchResults records];
             availableResultsLocal = [[searchResults recordsFound] integerValue];
-        } else {
+        }
+        
+        if (records == nil) {
+            
             // we already know that a connection can be made, so we likely don't have permission to read this edition or database
             if (errorString == nil)
                 errorString = NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.");
@@ -558,29 +563,28 @@ static NSArray *uidsFromString(NSString *uidString);
                 [sessionCookie release];
                 sessionCookie = nil;
             }
-            OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
-            OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
-            [[self serverOnMainThread] addPublicationsToGroup:nil];
-            return;
+            
+        } else {
+            
+            NSMutableArray *pubs = [NSMutableArray array];
+            for (id record in records) {
+                NSDictionary *pubInfo = [record newWOKPublicationInfo];
+                [pubs addObject:pubInfo];
+                [pubInfo release];
+            }
+            
+            // now increment this so we don't get the same set next time; BDSKSearchGroup resets it when the search term changes
+            fetchedResultsLocal += [pubs count];
+            
+            OSAtomicCompareAndSwap32Barrier(availableResults, availableResultsLocal, &availableResults);
+            OSAtomicCompareAndSwap32Barrier(fetchedResults, fetchedResultsLocal, &fetchedResults);
+            
+            data = [NSKeyedArchiver archivedDataWithRootObject:pubs];
+            
         }
-        
-        NSMutableArray *pubs = [NSMutableArray array];
-        for (id record in records) {
-            NSDictionary *pubInfo = [record newWOKPublicationInfo];
-            [pubs addObject:pubInfo];
-            [pubInfo release];
-        }
-        
-        // now increment this so we don't get the same set next time; BDSKSearchGroup resets it when the search term changes
-        fetchedResultsLocal += [pubs count];
-        
-        OSAtomicCompareAndSwap32Barrier(availableResults, availableResultsLocal, &availableResults);
-        OSAtomicCompareAndSwap32Barrier(fetchedResults, fetchedResultsLocal, &fetchedResults);
         
         // set this flag before adding pubs, or the client will think we're still retrieving (and spinners don't stop)
         OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
-        
-        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:pubs];
         
         // this will create the array if it doesn't exist
         [[self serverOnMainThread] addPublicationsToGroup:data];
