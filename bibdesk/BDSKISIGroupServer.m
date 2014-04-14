@@ -86,7 +86,7 @@ static NSArray *uidsFromString(NSString *uidString);
 @end
 
 @interface BDSKISIGroupServer (BDSKPrivate)
-- (void)authenticateWithOptions:(NSDictionary *)options;
+- (BOOL)authenticateWithOptions:(NSDictionary *)options;
 @end
 
 @implementation BDSKISIGroupServer
@@ -264,6 +264,7 @@ static NSArray *uidsFromString(NSString *uidString);
     NSInteger availableResultsLocal = [self numberOfAvailableResults];
     NSInteger fetchedResultsLocal = [self numberOfFetchedResults];
     NSInteger numResults = MAX_RESULTS;
+    NSData *data = nil;
     
     if (availableResultsLocal > 0)
         numResults = MIN(availableResultsLocal - fetchedResultsLocal, MAX_RESULTS);
@@ -318,271 +319,267 @@ static NSArray *uidsFromString(NSString *uidString);
         }
         
         // authenticate if necessary
-        if (nil == sessionCookie) {
-            [self authenticateWithOptions:options];
-            if (nil == sessionCookie) {
-                OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
-                OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
-                [[self serverOnMainThread] addPublicationsToGroup:nil];
-                return;
+        if ([self authenticateWithOptions:options]) {
+            
+            // perform WS query to get count of results; don't pass zero for record numbers, although it's not clear what the values mean in this context
+            NSString *errorString = nil;
+            WokSearchService_fullRecordSearchResults *fullRecordSearchResults = nil;
+            WokSearchService_citedReferencesSearchResults *citedReferencesSearchResults = nil;
+            WokSearchLiteService_searchResults *searchResults = nil;
+            
+            if (isLite) {
+                
+                WokSearchLiteService_retrieveParameters *retrieveParameters = [[[WokSearchLiteService_retrieveParameters alloc] init] autorelease];
+                [retrieveParameters setFirstRecord:[NSNumber numberWithInteger:fetchedResultsLocal + 1]];
+                [retrieveParameters setCount:[NSNumber numberWithInteger:numResults]];
+                
+                WokSearchLiteServiceSoapBindingResponse *response = nil;
+                
+                WokSearchLiteServiceSoapBinding *binding = [WokSearchLiteService WokSearchLiteServiceSoapBinding];
+                [binding addCookie:sessionCookie];
+                //binding.logXMLInOut = YES;
+                
+                switch (operation) {
+                    case search:
+                    {
+                        // Reto: this works for the Premium edition of WOKSearch (and not for WOKSearchLite)
+                        WokSearchLiteService_search *searchRequest = [[[WokSearchLiteService_search alloc] init] autorelease];
+                        WokSearchLiteService_queryParameters *queryParameters = [[[WokSearchLiteService_queryParameters alloc] init] autorelease];
+                        [queryParameters setDatabaseId:database];
+                        for (NSString *editionID in editionIDs) {
+                            WokSearchLiteService_editionDesc *edition = [[[WokSearchLiteService_editionDesc alloc] init] autorelease];
+                            [edition setCollection:database];
+                            [edition setEdition:editionID];
+                            [queryParameters addEditions:edition];
+                        }
+                        [queryParameters setUserQuery:searchTerm];
+                        [queryParameters setQueryLanguage:EN_QUERY_LANG];
+                        [searchRequest setQueryParameters:queryParameters];
+                        [searchRequest setRetrieveParameters:retrieveParameters];
+                        response = [binding searchUsingParameters:searchRequest];
+                        for (id bodyPart in [response bodyParts]) {
+                            if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+                                errorString = [(SOAPFault *)bodyPart simpleFaultString];
+                            } else if ([bodyPart isKindOfClass:[WokSearchLiteService_searchResponse class]]) {
+                                searchResults = [(WokSearchLiteService_searchResponse *)bodyPart return_];
+                            }
+                        }
+                        break;
+                    }
+                    case retrieveById:
+                    {
+                        // Reto: undocumented and untested. I'm going to check its usefulness before removing.
+                        WokSearchLiteService_retrieveById *retrieveByIdRequest = [[[WokSearchLiteService_retrieveById alloc] init] autorelease];
+                        [retrieveByIdRequest setDatabaseId:database];
+                        for (NSString *uid in uidsFromString(searchTerm))
+                            [retrieveByIdRequest addUid:uid];
+                        [retrieveByIdRequest setQueryLanguage:EN_QUERY_LANG];
+                        [retrieveByIdRequest setRetrieveParameters:retrieveParameters];
+                        response = [binding retrieveByIdUsingParameters:retrieveByIdRequest];
+                        for (id bodyPart in [response bodyParts]) {
+                            if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+                                errorString = [(SOAPFault *)bodyPart simpleFaultString];
+                            } else if ([bodyPart isKindOfClass:[WokSearchLiteService_retrieveByIdResponse class]]) {
+                                searchResults = [(WokSearchLiteService_retrieveByIdResponse *)bodyPart return_];
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+                
+            } else {
+                
+                NSMutableArray *editions = [NSMutableArray array];
+                for (NSString *editionID in editionIDs) {
+                    WokSearchService_editionDesc *edition = [[[WokSearchService_editionDesc alloc] init] autorelease];
+                    [edition setCollection:database];
+                    [edition setEdition:editionID];
+                    [editions addObject:edition];
+                }
+                
+                WokSearchService_retrieveParameters *retrieveParameters = [[[WokSearchService_retrieveParameters alloc] init] autorelease];
+                [retrieveParameters setFirstRecord:[NSNumber numberWithInteger:fetchedResultsLocal + 1]];
+                [retrieveParameters setCount:[NSNumber numberWithInteger:numResults]];
+                
+                WokSearchServiceSoapBindingResponse *response = nil;
+                
+                WokSearchServiceSoapBinding *binding = [WokSearchService WokSearchServiceSoapBinding];
+                [binding addCookie:sessionCookie];
+                //binding.logXMLInOut = YES;
+                
+                // @@ Currently limited to WOS database; extension to other WOS databases might require different WebService stubs?  
+                // Note that the value we're passing as database is referred to as  "edition" in the WoS docs.
+                // Reto: Edition is not really needed. If omitted, the search is performed in all WOK databases which yields
+                // a more consistent result with the web search. 
+                // Reto: We could actually search the whole Web of Knowledge DB by choice of
+                // "WOK aas databaseID. This returns all sorts of fun references including Patents, Books etc, for which there is currently
+                // no support in BibDesk anyway, so limit the search to WOS databaseID
+                switch (operation) {
+                    case search:
+                    {
+                        // Reto: this works for the Premium edition of WOKSearch (and not for WOKSearchLite)
+                        WokSearchService_search *searchRequest = [[[WokSearchService_search alloc] init] autorelease];
+                        WokSearchService_queryParameters *queryParameters = [[[WokSearchService_queryParameters alloc] init] autorelease];
+                        [queryParameters setDatabaseId:database];
+                        for (WokSearchService_editionDesc *edition in editions)
+                            [queryParameters addEditions:edition];
+                        [queryParameters setUserQuery:searchTerm];
+                        [queryParameters setQueryLanguage:EN_QUERY_LANG];
+                        [searchRequest setQueryParameters:queryParameters];
+                        [searchRequest setRetrieveParameters:retrieveParameters];
+                        response = [binding searchUsingParameters:searchRequest];
+                        for (id bodyPart in [response bodyParts]) {
+                            if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+                                errorString = [(SOAPFault *)bodyPart simpleFaultString];
+                            } else if ([bodyPart isKindOfClass:[WokSearchService_searchResponse class]]) {
+                                fullRecordSearchResults = [(WokSearchService_searchResponse *)bodyPart return_];
+                            }
+                        }
+                        break;
+                    }
+                    case citedReferences:
+                    {
+                        // Reto: undocumented and untested. I'm going to check its usefulness before removing.
+                        WokSearchService_citedReferences *citedReferencesRequest = [[[WokSearchService_citedReferences alloc] init] autorelease];
+                        [citedReferencesRequest setDatabaseId:database];
+                        [citedReferencesRequest setUid:searchTerm];
+                        //for (WokSearchService_editionDesc *edition in editions)
+                        //    [citedReferencesRequest addEditions:edition];
+                        // [citedReferencesRequest setTimeSpan:timeSpan];
+                        [citedReferencesRequest setQueryLanguage:EN_QUERY_LANG];
+                        [citedReferencesRequest setRetrieveParameters:retrieveParameters];
+                        response = [binding citedReferencesUsingParameters:citedReferencesRequest];
+                        for (id bodyPart in [response bodyParts]) {
+                            if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+                                errorString = [(SOAPFault *)bodyPart simpleFaultString];
+                            } else if ([bodyPart isKindOfClass:[WokSearchService_citedReferencesResponse class]]) {
+                                citedReferencesSearchResults = [(WokSearchService_citedReferencesResponse *)bodyPart return_];
+                            }
+                        }
+                        break;
+                    }
+                    case citingArticles:
+                    {
+                        // Reto: undocumented and untested. I'm going to check its usefulness before removing.            
+                        WokSearchService_citingArticles *citingArticlesRequest = [[[WokSearchService_citingArticles alloc] init] autorelease];
+                        [citingArticlesRequest setDatabaseId:database];
+                        [citingArticlesRequest setUid:searchTerm];
+                        for (WokSearchService_editionDesc *edition in editions)
+                            [citingArticlesRequest addEditions:edition];
+                        WokSearchService_timeSpan *timeSpan = [[[WokSearchService_timeSpan alloc] init] autorelease];
+                        timeSpan.begin = @"1600-01-01";
+                        timeSpan.end = [[NSDate date] ISO8601DateStringWithTime:NO];
+                        [citingArticlesRequest setTimeSpan:timeSpan];
+                        [citingArticlesRequest setQueryLanguage:EN_QUERY_LANG];
+                        [citingArticlesRequest setRetrieveParameters:retrieveParameters];
+                        response = [binding citingArticlesUsingParameters:citingArticlesRequest];
+                        for (id bodyPart in [response bodyParts]) {
+                            if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+                                errorString = [(SOAPFault *)bodyPart simpleFaultString];
+                            } else if ([bodyPart isKindOfClass:[WokSearchService_citingArticlesResponse class]]) {
+                                fullRecordSearchResults = [(WokSearchService_citingArticlesResponse *)bodyPart return_];
+                            }
+                        }
+                        break;
+                    }
+                    case relatedRecords:
+                    {
+                        // Reto: undocumented and untested. I'm going to check its usefulness before removing.
+                        WokSearchService_relatedRecords *relatedRecordsRequest = [[[WokSearchService_relatedRecords alloc] init] autorelease];
+                        [relatedRecordsRequest setDatabaseId:database];
+                        [relatedRecordsRequest setUid:searchTerm];
+                        for (WokSearchService_editionDesc *edition in editions)
+                            [relatedRecordsRequest addEditions:edition];
+                        // [relatedRecordsRequest setTimeSpan:timeSpan];
+                        [relatedRecordsRequest setQueryLanguage:EN_QUERY_LANG];
+                        [relatedRecordsRequest setRetrieveParameters:retrieveParameters];
+                        response = [binding relatedRecordsUsingParameters:relatedRecordsRequest];
+                        for (id bodyPart in [response bodyParts]) {
+                            if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+                                errorString = [(SOAPFault *)bodyPart simpleFaultString];
+                            } else if ([bodyPart isKindOfClass:[WokSearchService_relatedRecordsResponse class]]) {
+                                fullRecordSearchResults = [(WokSearchService_relatedRecordsResponse *)bodyPart return_];
+                            }
+                        }
+                        break;
+                    }
+                    case retrieveById:
+                    {
+                        // Reto: undocumented and untested. I'm going to check its usefulness before removing.
+                        WokSearchService_retrieveById *retrieveByIdRequest = [[[WokSearchService_retrieveById alloc] init] autorelease];
+                        [retrieveByIdRequest setDatabaseId:database];
+                        for (NSString *uid in uidsFromString(searchTerm))
+                            [retrieveByIdRequest addUid:uid];
+                        [retrieveByIdRequest setQueryLanguage:EN_QUERY_LANG];
+                        [retrieveByIdRequest setRetrieveParameters:retrieveParameters];
+                        response = [binding retrieveByIdUsingParameters:retrieveByIdRequest];
+                        for (id bodyPart in [response bodyParts]) {
+                            if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+                                errorString = [(SOAPFault *)bodyPart simpleFaultString];
+                            } else if ([bodyPart isKindOfClass:[WokSearchService_retrieveByIdResponse class]]) {
+                                fullRecordSearchResults = [(WokSearchService_retrieveByIdResponse *)bodyPart return_];
+                            }
+                        }
+                        break;
+                    }
+                }
+                
             }
+            
+            NSArray *records = nil;
+            
+            if (citedReferencesSearchResults) {
+                records = [citedReferencesSearchResults references];
+                availableResultsLocal = [[citedReferencesSearchResults recordsFound] integerValue];
+            } else if (fullRecordSearchResults) {
+                NSXMLDocument *doc = [[[NSXMLDocument alloc] initWithXMLString:[fullRecordSearchResults records] options:0 error:NULL] autorelease];
+                records = [doc nodesForXPath:@"/records/REC" error:NULL] ?: [NSArray array];
+                availableResultsLocal = [[fullRecordSearchResults recordsFound] integerValue];
+            } else if (searchResults) {
+                records = [searchResults records];
+                availableResultsLocal = [[searchResults recordsFound] integerValue];
+            }
+            
+            if (records == nil) {
+                
+                // we already know that a connection can be made, so we likely don't have permission to read this edition or database
+                if (errorString == nil)
+                    errorString = NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.");
+                else
+                    errorString = [errorString stringByDeletingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+                [self setErrorMessage:errorString];
+                if ([errorString hasPrefix:@"There is a problem with your session identifier (SID)."]) {
+                    // this error usually indicates the session has expired, so discard the cookie to allow authentication again
+                    [sessionCookie release];
+                    sessionCookie = nil;
+                }
+                
+            } else {
+                
+                NSMutableArray *pubs = [NSMutableArray array];
+                for (id record in records) {
+                    NSDictionary *pubInfo = [record newWOKPublicationInfo];
+                    [pubs addObject:pubInfo];
+                    [pubInfo release];
+                }
+                
+                // now increment this so we don't get the same set next time; BDSKSearchGroup resets it when the search term changes
+                fetchedResultsLocal += [pubs count];
+                
+                OSAtomicCompareAndSwap32Barrier(availableResults, availableResultsLocal, &availableResults);
+                OSAtomicCompareAndSwap32Barrier(fetchedResults, fetchedResultsLocal, &fetchedResults);
+                
+                data = [NSKeyedArchiver archivedDataWithRootObject:pubs];
+                
+            }
+            
         }
         
-        // perform WS query to get count of results; don't pass zero for record numbers, although it's not clear what the values mean in this context
-        NSString *errorString = nil;
-        WokSearchService_fullRecordSearchResults *fullRecordSearchResults = nil;
-        WokSearchService_citedReferencesSearchResults *citedReferencesSearchResults = nil;
-        WokSearchLiteService_searchResults *searchResults = nil;
-        
-        if (isLite) {
-            
-            WokSearchLiteService_retrieveParameters *retrieveParameters = [[[WokSearchLiteService_retrieveParameters alloc] init] autorelease];
-            [retrieveParameters setFirstRecord:[NSNumber numberWithInteger:fetchedResultsLocal + 1]];
-            [retrieveParameters setCount:[NSNumber numberWithInteger:numResults]];
-            
-            WokSearchLiteServiceSoapBindingResponse *response = nil;
-            
-            WokSearchLiteServiceSoapBinding *binding = [WokSearchLiteService WokSearchLiteServiceSoapBinding];
-            [binding addCookie:sessionCookie];
-            //binding.logXMLInOut = YES;
-            
-            switch (operation) {
-                case search:
-                {
-                    // Reto: this works for the Premium edition of WOKSearch (and not for WOKSearchLite)
-                    WokSearchLiteService_search *searchRequest = [[[WokSearchLiteService_search alloc] init] autorelease];
-                    WokSearchLiteService_queryParameters *queryParameters = [[[WokSearchLiteService_queryParameters alloc] init] autorelease];
-                    [queryParameters setDatabaseId:database];
-                    for (NSString *editionID in editionIDs) {
-                        WokSearchLiteService_editionDesc *edition = [[[WokSearchLiteService_editionDesc alloc] init] autorelease];
-                        [edition setCollection:database];
-                        [edition setEdition:editionID];
-                        [queryParameters addEditions:edition];
-                    }
-                    [queryParameters setUserQuery:searchTerm];
-                    [queryParameters setQueryLanguage:EN_QUERY_LANG];
-                    [searchRequest setQueryParameters:queryParameters];
-                    [searchRequest setRetrieveParameters:retrieveParameters];
-                    response = [binding searchUsingParameters:searchRequest];
-                    for (id bodyPart in [response bodyParts]) {
-                        if ([bodyPart isKindOfClass:[SOAPFault class]]) {
-                            errorString = [(SOAPFault *)bodyPart simpleFaultString];
-                        } else if ([bodyPart isKindOfClass:[WokSearchLiteService_searchResponse class]]) {
-                            searchResults = [(WokSearchLiteService_searchResponse *)bodyPart return_];
-                        }
-                    }
-                    break;
-                }
-                case retrieveById:
-                {
-                    // Reto: undocumented and untested. I'm going to check its usefulness before removing.
-                    WokSearchLiteService_retrieveById *retrieveByIdRequest = [[[WokSearchLiteService_retrieveById alloc] init] autorelease];
-                    [retrieveByIdRequest setDatabaseId:database];
-                    for (NSString *uid in uidsFromString(searchTerm))
-                        [retrieveByIdRequest addUid:uid];
-                    [retrieveByIdRequest setQueryLanguage:EN_QUERY_LANG];
-                    [retrieveByIdRequest setRetrieveParameters:retrieveParameters];
-                    response = [binding retrieveByIdUsingParameters:retrieveByIdRequest];
-                    for (id bodyPart in [response bodyParts]) {
-                        if ([bodyPart isKindOfClass:[SOAPFault class]]) {
-                            errorString = [(SOAPFault *)bodyPart simpleFaultString];
-                        } else if ([bodyPart isKindOfClass:[WokSearchLiteService_retrieveByIdResponse class]]) {
-                            searchResults = [(WokSearchLiteService_retrieveByIdResponse *)bodyPart return_];
-                        }
-                    }
-                    break;
-                }
-                default:
-                    break;
-            }
-            
-        } else {
-            
-            NSMutableArray *editions = [NSMutableArray array];
-            for (NSString *editionID in editionIDs) {
-                WokSearchService_editionDesc *edition = [[[WokSearchService_editionDesc alloc] init] autorelease];
-                [edition setCollection:database];
-                [edition setEdition:editionID];
-                [editions addObject:edition];
-            }
-            
-            WokSearchService_retrieveParameters *retrieveParameters = [[[WokSearchService_retrieveParameters alloc] init] autorelease];
-            [retrieveParameters setFirstRecord:[NSNumber numberWithInteger:fetchedResultsLocal + 1]];
-            [retrieveParameters setCount:[NSNumber numberWithInteger:numResults]];
-            
-            WokSearchServiceSoapBindingResponse *response = nil;
-            
-            WokSearchServiceSoapBinding *binding = [WokSearchService WokSearchServiceSoapBinding];
-            [binding addCookie:sessionCookie];
-            //binding.logXMLInOut = YES;
-            
-            // @@ Currently limited to WOS database; extension to other WOS databases might require different WebService stubs?  
-            // Note that the value we're passing as database is referred to as  "edition" in the WoS docs.
-            // Reto: Edition is not really needed. If omitted, the search is performed in all WOK databases which yields
-            // a more consistent result with the web search. 
-            // Reto: We could actually search the whole Web of Knowledge DB by choice of
-            // "WOK aas databaseID. This returns all sorts of fun references including Patents, Books etc, for which there is currently
-            // no support in BibDesk anyway, so limit the search to WOS databaseID
-            switch (operation) {
-                case search:
-                {
-                    // Reto: this works for the Premium edition of WOKSearch (and not for WOKSearchLite)
-                    WokSearchService_search *searchRequest = [[[WokSearchService_search alloc] init] autorelease];
-                    WokSearchService_queryParameters *queryParameters = [[[WokSearchService_queryParameters alloc] init] autorelease];
-                    [queryParameters setDatabaseId:database];
-                    for (WokSearchService_editionDesc *edition in editions)
-                        [queryParameters addEditions:edition];
-                    [queryParameters setUserQuery:searchTerm];
-                    [queryParameters setQueryLanguage:EN_QUERY_LANG];
-                    [searchRequest setQueryParameters:queryParameters];
-                    [searchRequest setRetrieveParameters:retrieveParameters];
-                    response = [binding searchUsingParameters:searchRequest];
-                    for (id bodyPart in [response bodyParts]) {
-                        if ([bodyPart isKindOfClass:[SOAPFault class]]) {
-                            errorString = [(SOAPFault *)bodyPart simpleFaultString];
-                        } else if ([bodyPart isKindOfClass:[WokSearchService_searchResponse class]]) {
-                            fullRecordSearchResults = [(WokSearchService_searchResponse *)bodyPart return_];
-                        }
-                    }
-                    break;
-                }
-                case citedReferences:
-                {
-                    // Reto: undocumented and untested. I'm going to check its usefulness before removing.
-                    WokSearchService_citedReferences *citedReferencesRequest = [[[WokSearchService_citedReferences alloc] init] autorelease];
-                    [citedReferencesRequest setDatabaseId:database];
-                    [citedReferencesRequest setUid:searchTerm];
-                    //for (WokSearchService_editionDesc *edition in editions)
-                    //    [citedReferencesRequest addEditions:edition];
-                    // [citedReferencesRequest setTimeSpan:timeSpan];
-                    [citedReferencesRequest setQueryLanguage:EN_QUERY_LANG];
-                    [citedReferencesRequest setRetrieveParameters:retrieveParameters];
-                    response = [binding citedReferencesUsingParameters:citedReferencesRequest];
-                    for (id bodyPart in [response bodyParts]) {
-                        if ([bodyPart isKindOfClass:[SOAPFault class]]) {
-                            errorString = [(SOAPFault *)bodyPart simpleFaultString];
-                        } else if ([bodyPart isKindOfClass:[WokSearchService_citedReferencesResponse class]]) {
-                            citedReferencesSearchResults = [(WokSearchService_citedReferencesResponse *)bodyPart return_];
-                        }
-                    }
-                    break;
-                }
-                case citingArticles:
-                {
-                    // Reto: undocumented and untested. I'm going to check its usefulness before removing.            
-                    WokSearchService_citingArticles *citingArticlesRequest = [[[WokSearchService_citingArticles alloc] init] autorelease];
-                    [citingArticlesRequest setDatabaseId:database];
-                    [citingArticlesRequest setUid:searchTerm];
-                    for (WokSearchService_editionDesc *edition in editions)
-                        [citingArticlesRequest addEditions:edition];
-                    WokSearchService_timeSpan *timeSpan = [[[WokSearchService_timeSpan alloc] init] autorelease];
-                    timeSpan.begin = @"1600-01-01";
-                    timeSpan.end = [[NSDate date] ISO8601DateStringWithTime:NO];
-                    [citingArticlesRequest setTimeSpan:timeSpan];
-                    [citingArticlesRequest setQueryLanguage:EN_QUERY_LANG];
-                    [citingArticlesRequest setRetrieveParameters:retrieveParameters];
-                    response = [binding citingArticlesUsingParameters:citingArticlesRequest];
-                    for (id bodyPart in [response bodyParts]) {
-                        if ([bodyPart isKindOfClass:[SOAPFault class]]) {
-                            errorString = [(SOAPFault *)bodyPart simpleFaultString];
-                        } else if ([bodyPart isKindOfClass:[WokSearchService_citingArticlesResponse class]]) {
-                            fullRecordSearchResults = [(WokSearchService_citingArticlesResponse *)bodyPart return_];
-                        }
-                    }
-                    break;
-                }
-                case relatedRecords:
-                {
-                    // Reto: undocumented and untested. I'm going to check its usefulness before removing.
-                    WokSearchService_relatedRecords *relatedRecordsRequest = [[[WokSearchService_relatedRecords alloc] init] autorelease];
-                    [relatedRecordsRequest setDatabaseId:database];
-                    [relatedRecordsRequest setUid:searchTerm];
-                    for (WokSearchService_editionDesc *edition in editions)
-                        [relatedRecordsRequest addEditions:edition];
-                    // [relatedRecordsRequest setTimeSpan:timeSpan];
-                    [relatedRecordsRequest setQueryLanguage:EN_QUERY_LANG];
-                    [relatedRecordsRequest setRetrieveParameters:retrieveParameters];
-                    response = [binding relatedRecordsUsingParameters:relatedRecordsRequest];
-                    for (id bodyPart in [response bodyParts]) {
-                        if ([bodyPart isKindOfClass:[SOAPFault class]]) {
-                            errorString = [(SOAPFault *)bodyPart simpleFaultString];
-                        } else if ([bodyPart isKindOfClass:[WokSearchService_relatedRecordsResponse class]]) {
-                            fullRecordSearchResults = [(WokSearchService_relatedRecordsResponse *)bodyPart return_];
-                        }
-                    }
-                    break;
-                }
-                case retrieveById:
-                {
-                    // Reto: undocumented and untested. I'm going to check its usefulness before removing.
-                    WokSearchService_retrieveById *retrieveByIdRequest = [[[WokSearchService_retrieveById alloc] init] autorelease];
-                    [retrieveByIdRequest setDatabaseId:database];
-                    for (NSString *uid in uidsFromString(searchTerm))
-                        [retrieveByIdRequest addUid:uid];
-                    [retrieveByIdRequest setQueryLanguage:EN_QUERY_LANG];
-                    [retrieveByIdRequest setRetrieveParameters:retrieveParameters];
-                    response = [binding retrieveByIdUsingParameters:retrieveByIdRequest];
-                    for (id bodyPart in [response bodyParts]) {
-                        if ([bodyPart isKindOfClass:[SOAPFault class]]) {
-                            errorString = [(SOAPFault *)bodyPart simpleFaultString];
-                        } else if ([bodyPart isKindOfClass:[WokSearchService_retrieveByIdResponse class]]) {
-                            fullRecordSearchResults = [(WokSearchService_retrieveByIdResponse *)bodyPart return_];
-                        }
-                    }
-                    break;
-                }
-            }
-            
-        }
-        
-        NSArray *records = nil;
-        NSData *data = nil;
-        
-        if (citedReferencesSearchResults) {
-            records = [citedReferencesSearchResults references];
-            availableResultsLocal = [[citedReferencesSearchResults recordsFound] integerValue];
-        } else if (fullRecordSearchResults) {
-            NSXMLDocument *doc = [[[NSXMLDocument alloc] initWithXMLString:[fullRecordSearchResults records] options:0 error:NULL] autorelease];
-            records = [doc nodesForXPath:@"/records/REC" error:NULL] ?: [NSArray array];
-            availableResultsLocal = [[fullRecordSearchResults recordsFound] integerValue];
-        } else if (searchResults) {
-            records = [searchResults records];
-            availableResultsLocal = [[searchResults recordsFound] integerValue];
-        }
-        
-        if (records == nil) {
-            
-            // we already know that a connection can be made, so we likely don't have permission to read this edition or database
-            if (errorString == nil)
-                errorString = NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.");
-            else
-                errorString = [errorString stringByDeletingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
-            [self setErrorMessage:errorString];
-            if ([errorString hasPrefix:@"There is a problem with your session identifier (SID)."]) {
-                // this error usually indicates the session has expired, so discard the cookie to allow authentication again
-                [sessionCookie release];
-                sessionCookie = nil;
-            }
+        // if the data to return was nil we failed somewhere
+        if (data == nil)
             OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
-            
-        } else {
-            
-            NSMutableArray *pubs = [NSMutableArray array];
-            for (id record in records) {
-                NSDictionary *pubInfo = [record newWOKPublicationInfo];
-                [pubs addObject:pubInfo];
-                [pubInfo release];
-            }
-            
-            // now increment this so we don't get the same set next time; BDSKSearchGroup resets it when the search term changes
-            fetchedResultsLocal += [pubs count];
-            
-            OSAtomicCompareAndSwap32Barrier(availableResults, availableResultsLocal, &availableResults);
-            OSAtomicCompareAndSwap32Barrier(fetchedResults, fetchedResultsLocal, &fetchedResults);
-            
-            data = [NSKeyedArchiver archivedDataWithRootObject:pubs];
-            
-        }
         
         // set this flag before adding pubs, or the client will think we're still retrieving (and spinners don't stop)
         OSAtomicCompareAndSwap32Barrier(1, 0, &flags.isRetrieving);
@@ -593,32 +590,35 @@ static NSArray *uidsFromString(NSString *uidString);
     }
 }
 
-- (void)authenticateWithOptions:(NSDictionary *)options {
-
-    WOKMWSAuthenticateServiceSoapBinding *binding = [WOKMWSAuthenticateService WOKMWSAuthenticateServiceSoapBinding];
-    //binding.logXMLInOut = YES;
-    [binding setAuthUsername:[options objectForKey:@"username"]];
-    [binding setAuthPassword:[options objectForKey:@"password"]];
-    
-    WOKMWSAuthenticateService_authenticate *request = [[[WOKMWSAuthenticateService_authenticate alloc] init] autorelease];
-    
-    WOKMWSAuthenticateServiceSoapBindingResponse *response = [binding authenticateUsingParameters:request];
-    
-    for (id bodyPart in [response bodyParts]) {
+- (BOOL)authenticateWithOptions:(NSDictionary *)options {
+    // if sessionCookie was not nil we already authenticated
+    if (sessionCookie == nil) {
+        WOKMWSAuthenticateServiceSoapBinding *binding = [WOKMWSAuthenticateService WOKMWSAuthenticateServiceSoapBinding];
+        //binding.logXMLInOut = YES;
+        [binding setAuthUsername:[options objectForKey:@"username"]];
+        [binding setAuthPassword:[options objectForKey:@"password"]];
         
-        if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+        WOKMWSAuthenticateService_authenticate *request = [[[WOKMWSAuthenticateService_authenticate alloc] init] autorelease];
         
-            NSString *errorString = [(SOAPFault *)bodyPart simpleFaultString];
-            [self setErrorMessage:[NSString stringWithFormat:NSLocalizedString(@"WOK Authentication Error: %@", "WOK Authentication Error Format"), errorString]];
-            [sessionCookie release];
-            sessionCookie = nil;
-        } else if ([bodyPart isKindOfClass:[WOKMWSAuthenticateService_authenticateResponse class]]) {
+        WOKMWSAuthenticateServiceSoapBindingResponse *response = [binding authenticateUsingParameters:request];
         
-            // if we reach this point the only session cookie should be the SID
-            [sessionCookie release];
-            sessionCookie = [[[binding cookies] objectAtIndex:0] retain];
+        for (id bodyPart in [response bodyParts]) {
+            
+            if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+            
+                NSString *errorString = [(SOAPFault *)bodyPart simpleFaultString];
+                [self setErrorMessage:[NSString stringWithFormat:NSLocalizedString(@"WOK Authentication Error: %@", "WOK Authentication Error Format"), errorString]];
+                [sessionCookie release];
+                sessionCookie = nil;
+            } else if ([bodyPart isKindOfClass:[WOKMWSAuthenticateService_authenticateResponse class]]) {
+            
+                // if we reach this point the only session cookie should be the SID
+                [sessionCookie release];
+                sessionCookie = [[[binding cookies] objectAtIndex:0] retain];
+            }
         }
     }
+    return sessionCookie != nil;
 }
 
 - (void)serverDidFinish {
