@@ -258,7 +258,7 @@ static NSArray *uidsFromString(NSString *uidString);
 }
 
 #pragma mark Server thread
-// @@ currently limited to topic search; need to figure out UI for other search types (mixing search types will require either NSTokenField or raw text string entry)
+
 - (oneway void)downloadWithSearchTerm:(NSString *)searchTerm database:(NSString *)database options:(NSDictionary *)options;
 {    
     NSInteger availableResultsLocal = [self numberOfAvailableResults];
@@ -313,7 +313,6 @@ static NSArray *uidsFromString(NSString *uidString);
         // authenticate if necessary
         if ([self authenticateWithOptions:options]) {
             
-            // perform WS query to get count of results; don't pass zero for record numbers, although it's not clear what the values mean in this context
             NSString *errorString = nil;
             WokSearchService_fullRecordSearchResults *fullRecordSearchResults = nil;
             WokSearchService_citedReferencesSearchResults *citedReferencesSearchResults = nil;
@@ -334,7 +333,6 @@ static NSArray *uidsFromString(NSString *uidString);
                 switch (operation) {
                     case search:
                     {
-                        // Reto: this works for the Premium edition of WOKSearch (and not for WOKSearchLite)
                         WokSearchLiteService_search *searchRequest = [[[WokSearchLiteService_search alloc] init] autorelease];
                         WokSearchLiteService_queryParameters *queryParameters = [[[WokSearchLiteService_queryParameters alloc] init] autorelease];
                         [queryParameters setDatabaseId:database];
@@ -408,12 +406,10 @@ static NSArray *uidsFromString(NSString *uidString);
                 [binding addCookie:sessionCookie];
                 //binding.logXMLInOut = YES;
                 
-                // @@ Currently limited to WOS database; extension to other WOS databases might require different WebService stubs?  
-                // Note that the value we're passing as database is referred to as  "edition" in the WoS docs.
                 // Reto: Edition is not really needed. If omitted, the search is performed in all WOK databases which yields
                 // a more consistent result with the web search. 
                 // Reto: We could actually search the whole Web of Knowledge DB by choice of
-                // "WOK aas databaseID. This returns all sorts of fun references including Patents, Books etc, for which there is currently
+                // WOK as databaseID. This returns all sorts of fun references including Patents, Books etc, for which there is currently
                 // no support in BibDesk anyway, so limit the search to WOS databaseID
                 switch (operation) {
                     case search:
