@@ -277,17 +277,16 @@ static NSArray *uidsFromString(NSString *uidString);
     if (numResults > 0 && [NSString isEmptyString:searchTerm] == NO) {
         
         enum operationTypes { search, citedReferences, citingArticles, relatedRecords, retrieveById } operation = search;
-        BOOL isLite = [[options objectForKey:@"lite"] boolValue];
         /*
          TODO: document this syntax and the results thereof in the code, and in the help book.
          */
-        if (isLite == NO && [searchTerm hasCaseInsensitivePrefix:@"citedby:"]) {
+        if ([searchTerm hasCaseInsensitivePrefix:@"citedby:"]) {
             searchTerm = [[searchTerm substringFromIndex:8] stringByRemovingSurroundingWhitespace];
             operation = citedReferences;
-        } else if (isLite == NO && [searchTerm hasCaseInsensitivePrefix:@"citing:"]) {
+        } else if ([searchTerm hasCaseInsensitivePrefix:@"citing:"]) {
             searchTerm = [[searchTerm substringFromIndex:7] stringByRemovingSurroundingWhitespace];
             operation = citingArticles;
-        } else if (isLite == NO && [searchTerm hasCaseInsensitivePrefix:@"related:"]) {
+        } else if ([searchTerm hasCaseInsensitivePrefix:@"related:"]) {
             searchTerm = [[searchTerm substringFromIndex:8] stringByRemovingSurroundingWhitespace];
             operation = relatedRecords;
         } else if ([searchTerm hasCaseInsensitivePrefix:@"uid:"]) {
@@ -320,7 +319,7 @@ static NSArray *uidsFromString(NSString *uidString);
             WokSearchService_citedReferencesSearchResults *citedReferencesSearchResults = nil;
             WokSearchLiteService_searchResults *searchResults = nil;
             
-            if (isLite) {
+            if ([[options objectForKey:@"lite"] boolValue]) {
                 
                 WokSearchLiteService_retrieveParameters *retrieveParameters = [[[WokSearchLiteService_retrieveParameters alloc] init] autorelease];
                 [retrieveParameters setFirstRecord:[NSNumber numberWithInteger:fetchedResultsLocal + 1]];
@@ -378,7 +377,14 @@ static NSArray *uidsFromString(NSString *uidString);
                         }
                         break;
                     }
-                    default:
+                    case citedReferences:
+                        errorString = [NSString stringWithFormat:NSLocalizedString(@"The WOK Light service does not support the %@ operation.", @"WOK search error message"), @"citedby:"];
+                        break;
+                    case citingArticles:
+                        errorString = [NSString stringWithFormat:NSLocalizedString(@"The WOK Light service does not support the %@ operation.", @"WOK search error message"), @"citing:"];
+                        break;
+                    case relatedRecords:
+                        errorString = [NSString stringWithFormat:NSLocalizedString(@"The WOK Light service does not support the %@ operation.", @"WOK search error message"), @"related:"];
                         break;
                 }
                 
