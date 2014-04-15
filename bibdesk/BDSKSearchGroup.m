@@ -127,7 +127,7 @@ NSString *BDSKSearchGroupURLScheme = @"x-bdsk-search";
         NSMutableDictionary *options = [NSMutableDictionary dictionary];
         
         [options setValue:[[bdsksearchURL password] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] forKey:@"password"];
-        [options setValue:[bdsksearchURL user] forKey:@"username"];
+        [options setValue:[[bdsksearchURL user] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] forKey:@"username"];
         
         if (aPort == nil) {
             if ([aHost isCaseInsensitiveEqual:BDSKSearchGroupEntrez])
