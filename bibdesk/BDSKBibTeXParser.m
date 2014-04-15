@@ -90,8 +90,6 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSUIntege
 // parses an individual entry and adds it's field/value pairs to the dictionary
 static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dictionary, const char *buf, NSUInteger inputDataLength, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding);
 
-static FILE *openReadStream(NSData *data);
-
 static void handleError(bt_error *err);
 
 
@@ -1163,23 +1161,6 @@ static BOOL addItemToDictionaryOrSetDocumentInfo(AST *entry, NSMutableArray *ret
     [dictionary release];
     
     return hadProblems == NO;
-}
-
-static FILE *openReadStream(NSData *data) {
-    (void) signal(SIGPIPE, SIG_IGN);
-    NSPipe *aPipe = [NSPipe pipe];
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        @try {
-            [[aPipe fileHandleForWriting] writeData:data];
-        }
-        @catch (id exception) {
-            NSLog(@"caught exception writing %ld bytes to pipe (%@)", (long)[data length], exception);
-        }
-        [[aPipe fileHandleForWriting] closeFile];
-    });
-    int fd = [[aPipe fileHandleForReading] fileDescriptor];
-    // caller will block on this until we write to it
-    return -1 == fd ? NULL : fdopen(fd, "r");
 }
 
 void handleError (bt_error *err)
