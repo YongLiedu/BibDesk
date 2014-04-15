@@ -281,16 +281,16 @@ static NSArray *uidsFromString(NSString *uidString);
         /*
          TODO: document this syntax and the results thereof in the code, and in the help book.
          */
-        if (isLite == NO && [searchTerm hasCaseInsensitivePrefix:@"REF="]) {
-            searchTerm = [[searchTerm substringFromIndex:4] stringByRemovingSurroundingWhitespace];
+        if (isLite == NO && [searchTerm hasCaseInsensitivePrefix:@"citedby:"]) {
+            searchTerm = [[searchTerm substringFromIndex:8] stringByRemovingSurroundingWhitespace];
             operation = citedReferences;
-        } else if (isLite == NO && [searchTerm hasCaseInsensitivePrefix:@"CIT="]) {
-            searchTerm = [[searchTerm substringFromIndex:4] stringByRemovingSurroundingWhitespace];
+        } else if (isLite == NO && [searchTerm hasCaseInsensitivePrefix:@"citing:"]) {
+            searchTerm = [[searchTerm substringFromIndex:7] stringByRemovingSurroundingWhitespace];
             operation = citingArticles;
-        } else if (isLite == NO && [searchTerm hasCaseInsensitivePrefix:@"REL="]) {
-            searchTerm = [[searchTerm substringFromIndex:4] stringByRemovingSurroundingWhitespace];
+        } else if (isLite == NO && [searchTerm hasCaseInsensitivePrefix:@"related:"]) {
+            searchTerm = [[searchTerm substringFromIndex:8] stringByRemovingSurroundingWhitespace];
             operation = relatedRecords;
-        } else if ([searchTerm hasCaseInsensitivePrefix:@"UID="]) {
+        } else if ([searchTerm hasCaseInsensitivePrefix:@"uid:"]) {
             searchTerm = [[searchTerm substringFromIndex:4] stringByRemovingSurroundingWhitespace];
             operation = retrieveById;
         } else if ([searchTerm rangeOfString:@"="].location == NSNotFound) {
