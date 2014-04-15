@@ -763,7 +763,8 @@ static void addAuthorNamesToDictionary(NSArray *names, NSMutableDictionary *pubF
    
     // default value for publication type
     NSString *isiPubType = nil;
-	NSString *journalName = nil;
+	NSString *source = nil;
+    NSString *source_abbrev = nil;
 
 	/* get some major branches of XML nodes which are used several times */
 	NSXMLNode *staticChild = [[self nodesForXPath:@"./static_data" error:NULL] firstObject];
@@ -783,12 +784,19 @@ static void addAuthorNamesToDictionary(NSArray *names, NSMutableDictionary *pubF
 		NSString *typeString = [[(NSXMLElement *)child attributeForName:@"type"] stringValue];
         if ([typeString isEqualToString:@"item"]) {
             addStringToDictionaryIfNotNil([child stringValue], BDSKTitleString, pubFields);
+		} else if ([typeString isEqualToString:@"abbrev_iso"]) {
+            addStringToDictionaryIfNotNil([child stringValue], BDSKJournalString, pubFields);
         } else if ([typeString isEqualToString:@"source"]) {
-			journalName = (useTitlecase ? [[child stringValue] titlecaseString] : [child stringValue]);
-            addStringToDictionaryIfNotNil(journalName, BDSKJournalString, pubFields);
+            source = useTitlecase ? [[child stringValue] titlecaseString] : [child stringValue];
 		} else if ([typeString isEqualToString:@"source_abbrev"]) {
-            addStringToDictionaryIfNotNil((useTitlecase ? [[child stringValue] titlecaseString] : [child stringValue]), @"Iso-Source-Abbreviation", pubFields);
+            source_abbrev = [child stringValue];
         }
+    }
+    if ([pubFields objectForKey:BDSKJournalString] == nil) {
+        if (source_abbrev)
+            addStringToDictionaryIfNotNil(source_abbrev, BDSKJournalString, pubFields);
+        else if (source)
+            addStringToDictionaryIfNotNil(source, BDSKJournalString, pubFields);
     }
 	
 	/* get publication year, volume, issue and month */
@@ -839,8 +847,7 @@ static void addAuthorNamesToDictionary(NSArray *names, NSMutableDictionary *pubF
 			pubType = BDSKInproceedingsString;
 		} else if ([docType isEqualToString:@"Proceedings Paper"]) {
 			pubType = BDSKInproceedingsString;
-            if (journalName)
-                [pubFields setObject:journalName forKey:BDSKBooktitleString];
+            addStringToDictionaryIfNotNil(source, BDSKBooktitleString, pubFields);
 		} else if ([isiPubType isEqualToString:@"Journal"]) {
             pubType = BDSKArticleString;
         } else {
