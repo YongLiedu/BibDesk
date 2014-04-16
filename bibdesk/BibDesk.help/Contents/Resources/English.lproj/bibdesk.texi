@@ -1841,7 +1841,7 @@ Complete documentation of the extensions is provided at
 @cindex WOK
 @cindex Searching WOK
 
-The default syntax for searching the WOK Web of Knowledge is described 
+The default syntax for searching Web of Knowledge is described 
 on the ``Search Rules'' section of the 
 @uref{http://images.webofknowledge.com/WOK46/help/WOS/h_toc.html, Web of Knowledge help page}.
 
@@ -1853,6 +1853,12 @@ If you just type a search term or group of terms in the search field, BibDesk wi
 automatically convert it to a ``Topic Search'' (TS=), unless you specify the 
 @uref{http://images.webofknowledge.com/WOK46/help/WOS/h_advanced_fieldtags.html, field tag}
 manually.  This is an easy way of searching Title, Abstract, and Keywords, but won't work for authors.
+
+Apart from these searches, BibDesk supports a number of additional search operators to fetch associated items.
+These are @samp{citedby:} for cited references, @samp{citing:} for citing articles, @samp{related:} for related items, 
+and @samp{uid:} to fetch one or more items by ID.  These operators should be followed by a WOK UID, 
+which is usually returned in the Wok-Uid field.  The @samp{uid:} operator accepts multiple UIDs.
+These operators cannot be combined with each other and with other search terms.
 
 @c ======================================================================================
 
