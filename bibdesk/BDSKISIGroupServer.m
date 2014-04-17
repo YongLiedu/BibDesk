@@ -434,7 +434,7 @@ static NSArray *uidsFromString(NSString *uidString);
                         for (WokSearchService_editionDesc *edition in editions)
                             [citingArticlesRequest addEditions:edition];
                         WokSearchService_timeSpan *timeSpan = [[[WokSearchService_timeSpan alloc] init] autorelease];
-                        timeSpan.begin = @"1600-01-01";
+                        timeSpan.begin = @"1800-01-01";
                         timeSpan.end = [[NSDate date] ISO8601DateStringWithTime:NO];
                         [citingArticlesRequest setTimeSpan:timeSpan];
                         [citingArticlesRequest setQueryLanguage:EN_QUERY_LANG];
