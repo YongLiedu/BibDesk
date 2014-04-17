@@ -135,7 +135,7 @@ static NSArray *uidsFromString(NSString *uidString);
 - (void)dealloc {
     group = nil;
     BDSKDESTROY(serverInfo);
-    [sessionCookie release];
+    BDSKDESTROY(sessionCookie);
     [super dealloc];
 }
 
