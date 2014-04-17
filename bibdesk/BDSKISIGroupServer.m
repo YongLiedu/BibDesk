@@ -73,6 +73,9 @@ static NSSet *WOSEditions = nil;
 static NSArray *uidsFromString(NSString *uidString);
 
 @interface NSObject (BDSKISIGroupServer)
+// should be implemented by returned searchResults classes
+- (NSArray *)WOKRecords;
+// should be implemented by record classes
 - (NSDictionary *)newWOKPublicationInfo;
 @end
 
@@ -313,18 +316,15 @@ static NSArray *uidsFromString(NSString *uidString);
         // authenticate if necessary
         if ([self authenticateWithOptions:options]) {
             
+            // this can eb a WokSearchServiceSoapBindingResponse or WokSearchLiteServiceSoapBindingResponse
+            id response = nil;
             NSString *errorString = nil;
-            WokSearchService_fullRecordSearchResults *fullRecordSearchResults = nil;
-            WokSearchService_citedReferencesSearchResults *citedReferencesSearchResults = nil;
-            WokSearchLiteService_searchResults *searchResults = nil;
             
             if ([[options objectForKey:@"lite"] boolValue]) {
                 
                 WokSearchLiteService_retrieveParameters *retrieveParameters = [[[WokSearchLiteService_retrieveParameters alloc] init] autorelease];
                 [retrieveParameters setFirstRecord:[NSNumber numberWithInteger:fetchedResultsLocal + 1]];
                 [retrieveParameters setCount:[NSNumber numberWithInteger:numResults]];
-                
-                WokSearchLiteServiceSoapBindingResponse *response = nil;
                 
                 WokSearchLiteServiceSoapBinding *binding = [WokSearchLiteService WokSearchLiteServiceSoapBinding];
                 [binding addCookie:sessionCookie];
@@ -347,13 +347,6 @@ static NSArray *uidsFromString(NSString *uidString);
                         [searchRequest setQueryParameters:queryParameters];
                         [searchRequest setRetrieveParameters:retrieveParameters];
                         response = [binding searchUsingParameters:searchRequest];
-                        for (id bodyPart in [response bodyParts]) {
-                            if ([bodyPart isKindOfClass:[SOAPFault class]]) {
-                                errorString = [(SOAPFault *)bodyPart simpleFaultString];
-                            } else if ([bodyPart isKindOfClass:[WokSearchLiteService_searchResponse class]]) {
-                                searchResults = [(WokSearchLiteService_searchResponse *)bodyPart return_];
-                            }
-                        }
                         break;
                     }
                     case retrieveById:
@@ -366,13 +359,6 @@ static NSArray *uidsFromString(NSString *uidString);
                         [retrieveByIdRequest setQueryLanguage:EN_QUERY_LANG];
                         [retrieveByIdRequest setRetrieveParameters:retrieveParameters];
                         response = [binding retrieveByIdUsingParameters:retrieveByIdRequest];
-                        for (id bodyPart in [response bodyParts]) {
-                            if ([bodyPart isKindOfClass:[SOAPFault class]]) {
-                                errorString = [(SOAPFault *)bodyPart simpleFaultString];
-                            } else if ([bodyPart isKindOfClass:[WokSearchLiteService_retrieveByIdResponse class]]) {
-                                searchResults = [(WokSearchLiteService_retrieveByIdResponse *)bodyPart return_];
-                            }
-                        }
                         break;
                     }
                     case citedReferences:
@@ -400,8 +386,6 @@ static NSArray *uidsFromString(NSString *uidString);
                 [retrieveParameters setFirstRecord:[NSNumber numberWithInteger:fetchedResultsLocal + 1]];
                 [retrieveParameters setCount:[NSNumber numberWithInteger:numResults]];
                 
-                WokSearchServiceSoapBindingResponse *response = nil;
-                
                 WokSearchServiceSoapBinding *binding = [WokSearchService WokSearchServiceSoapBinding];
                 [binding addCookie:sessionCookie];
                 //binding.logXMLInOut = YES;
@@ -425,13 +409,6 @@ static NSArray *uidsFromString(NSString *uidString);
                         [searchRequest setQueryParameters:queryParameters];
                         [searchRequest setRetrieveParameters:retrieveParameters];
                         response = [binding searchUsingParameters:searchRequest];
-                        for (id bodyPart in [response bodyParts]) {
-                            if ([bodyPart isKindOfClass:[SOAPFault class]]) {
-                                errorString = [(SOAPFault *)bodyPart simpleFaultString];
-                            } else if ([bodyPart isKindOfClass:[WokSearchService_searchResponse class]]) {
-                                fullRecordSearchResults = [(WokSearchService_searchResponse *)bodyPart return_];
-                            }
-                        }
                         break;
                     }
                     case citedReferences:
@@ -446,13 +423,6 @@ static NSArray *uidsFromString(NSString *uidString);
                         [citedReferencesRequest setQueryLanguage:EN_QUERY_LANG];
                         [citedReferencesRequest setRetrieveParameters:retrieveParameters];
                         response = [binding citedReferencesUsingParameters:citedReferencesRequest];
-                        for (id bodyPart in [response bodyParts]) {
-                            if ([bodyPart isKindOfClass:[SOAPFault class]]) {
-                                errorString = [(SOAPFault *)bodyPart simpleFaultString];
-                            } else if ([bodyPart isKindOfClass:[WokSearchService_citedReferencesResponse class]]) {
-                                citedReferencesSearchResults = [(WokSearchService_citedReferencesResponse *)bodyPart return_];
-                            }
-                        }
                         break;
                     }
                     case citingArticles:
@@ -470,13 +440,6 @@ static NSArray *uidsFromString(NSString *uidString);
                         [citingArticlesRequest setQueryLanguage:EN_QUERY_LANG];
                         [citingArticlesRequest setRetrieveParameters:retrieveParameters];
                         response = [binding citingArticlesUsingParameters:citingArticlesRequest];
-                        for (id bodyPart in [response bodyParts]) {
-                            if ([bodyPart isKindOfClass:[SOAPFault class]]) {
-                                errorString = [(SOAPFault *)bodyPart simpleFaultString];
-                            } else if ([bodyPart isKindOfClass:[WokSearchService_citingArticlesResponse class]]) {
-                                fullRecordSearchResults = [(WokSearchService_citingArticlesResponse *)bodyPart return_];
-                            }
-                        }
                         break;
                     }
                     case relatedRecords:
@@ -491,13 +454,6 @@ static NSArray *uidsFromString(NSString *uidString);
                         [relatedRecordsRequest setQueryLanguage:EN_QUERY_LANG];
                         [relatedRecordsRequest setRetrieveParameters:retrieveParameters];
                         response = [binding relatedRecordsUsingParameters:relatedRecordsRequest];
-                        for (id bodyPart in [response bodyParts]) {
-                            if ([bodyPart isKindOfClass:[SOAPFault class]]) {
-                                errorString = [(SOAPFault *)bodyPart simpleFaultString];
-                            } else if ([bodyPart isKindOfClass:[WokSearchService_relatedRecordsResponse class]]) {
-                                fullRecordSearchResults = [(WokSearchService_relatedRecordsResponse *)bodyPart return_];
-                            }
-                        }
                         break;
                     }
                     case retrieveById:
@@ -510,51 +466,26 @@ static NSArray *uidsFromString(NSString *uidString);
                         [retrieveByIdRequest setQueryLanguage:EN_QUERY_LANG];
                         [retrieveByIdRequest setRetrieveParameters:retrieveParameters];
                         response = [binding retrieveByIdUsingParameters:retrieveByIdRequest];
-                        for (id bodyPart in [response bodyParts]) {
-                            if ([bodyPart isKindOfClass:[SOAPFault class]]) {
-                                errorString = [(SOAPFault *)bodyPart simpleFaultString];
-                            } else if ([bodyPart isKindOfClass:[WokSearchService_retrieveByIdResponse class]]) {
-                                fullRecordSearchResults = [(WokSearchService_retrieveByIdResponse *)bodyPart return_];
-                            }
-                        }
                         break;
                     }
                 }
                 
             }
             
-            NSArray *records = nil;
+            // this can be a WokSearchService_fullRecordSearchResults, WokSearchService_citedReferencesSearchResults, or WokSearchLiteService_searchResults
+            id searchResults = nil;
             
-            if (citedReferencesSearchResults) {
-                records = [citedReferencesSearchResults references];
-                availableResultsLocal = [[citedReferencesSearchResults recordsFound] integerValue];
-            } else if (fullRecordSearchResults) {
-                NSXMLDocument *doc = [[[NSXMLDocument alloc] initWithXMLString:[fullRecordSearchResults records] options:0 error:NULL] autorelease];
-                records = [doc nodesForXPath:@"/records/REC" error:NULL] ?: [NSArray array];
-                availableResultsLocal = [[fullRecordSearchResults recordsFound] integerValue];
-            } else if (searchResults) {
-                records = [searchResults records];
-                availableResultsLocal = [[searchResults recordsFound] integerValue];
+            for (id bodyPart in [response bodyParts]) {
+                if ([bodyPart respondsToSelector:@selector(simpleFaultString)])
+                    errorString = [[(SOAPFault *)bodyPart simpleFaultString] stringByDeletingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+                else if ([bodyPart respondsToSelector:@selector(return_)])
+                    searchResults = [bodyPart return_];
             }
             
-            if (records == nil) {
-                
-                // we already know that a connection can be made, so we likely don't have permission to read this edition or database
-                if (errorString == nil)
-                    errorString = NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.");
-                else
-                    errorString = [errorString stringByDeletingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
-                [self setErrorMessage:errorString];
-                if ([errorString hasPrefix:@"There is a problem with your session identifier (SID)."]) {
-                    // this error usually indicates the session has expired, so discard the cookie to allow authentication again
-                    [sessionCookie release];
-                    sessionCookie = nil;
-                }
-                
-            } else {
+            if (searchResults) {
                 
                 NSMutableArray *pubs = [NSMutableArray array];
-                for (id record in records) {
+                for (id record in [searchResults WOKRecords]) {
                     NSDictionary *pubInfo = [record newWOKPublicationInfo];
                     [pubs addObject:pubInfo];
                     [pubInfo release];
@@ -562,14 +493,23 @@ static NSArray *uidsFromString(NSString *uidString);
                 
                 // now increment this so we don't get the same set next time; BDSKSearchGroup resets it when the search term changes
                 fetchedResultsLocal += [pubs count];
+                availableResultsLocal = [[searchResults recordsFound] integerValue];
                 
                 OSAtomicCompareAndSwap32Barrier(availableResults, availableResultsLocal, &availableResults);
                 OSAtomicCompareAndSwap32Barrier(fetchedResults, fetchedResultsLocal, &fetchedResults);
                 
                 data = [NSKeyedArchiver archivedDataWithRootObject:pubs];
                 
+            } else {
+                
+                // we already know that a connection can be made, so we likely don't have permission to read this edition or database
+                if ([errorString hasPrefix:@"There is a problem with your session identifier (SID)."]) {
+                    // this error usually indicates the session has expired, so discard the cookie to allow authentication again
+                    [sessionCookie release];
+                    sessionCookie = nil;
+                }
+                [self setErrorMessage:errorString ?: NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.")];
             }
-            
         }
         
         // if we got no data at this point the search have failed somewhere
@@ -751,9 +691,32 @@ static void addAuthorNamesToDictionary(NSArray *names, NSMutableDictionary *pubF
 
 @implementation NSObject (BDSKISIGroupServer)
 
+- (NSArray *)WOKRecords { return nil; }
+
 - (NSDictionary *)newWOKPublicationInfo {
     return [[NSDictionary alloc] initWithObjectsAndKeys:BDSKArticleString, BDSKPubTypeString, nil];
 }
+
+@end
+
+@implementation WokSearchService_fullRecordSearchResults (BDSKISIGroupServer)
+
+- (NSArray *)WOKRecords {
+    NSXMLDocument *doc = [[[NSXMLDocument alloc] initWithXMLString:[self records] options:0 error:NULL] autorelease];
+    return [doc nodesForXPath:@"/records/REC" error:NULL];
+}
+
+@end
+
+@implementation WokSearchService_citedReferencesSearchResults (BDSKISIGroupServer)
+
+- (NSArray *)WOKRecords { return [self references]; }
+
+@end
+
+@implementation WokSearchLiteService_searchResults (BDSKISIGroupServer)
+
+- (NSArray *)WOKRecords { return [self records]; }
 
 @end
 
