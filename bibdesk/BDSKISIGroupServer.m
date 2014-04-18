@@ -304,17 +304,13 @@ static NSArray *uidsFromString(NSString *uidString);
             NSArray *editionIDs = nil;
             
             database = [database stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
-            if ([NSString isEmptyString:database]) {
+            NSArray *ids = [database componentsSeparatedByString:@" "];
+            database = [ids firstObject];
+            if ([WOSEditions containsObject:database]) {
                 database = WOS_DB_ID;
-            } else {
-                NSArray *ids = [database componentsSeparatedByString:@" "];
-                database = [ids firstObject];
-                if ([WOSEditions containsObject:database]) {
-                    database = WOS_DB_ID;
-                    editionIDs = ids;
-                } else if ([ids count] > 1) {
-                    editionIDs = [ids subarrayWithRange:NSMakeRange(1, [ids count] - 1)];
-                }
+                editionIDs = ids;
+            } else if ([ids count] > 1) {
+                editionIDs = [ids subarrayWithRange:NSMakeRange(1, [ids count] - 1)];
             }
             
             // this can be a WokSearchServiceSoapBindingResponse or WokSearchLiteServiceSoapBindingResponse
