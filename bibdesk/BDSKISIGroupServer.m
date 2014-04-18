@@ -341,8 +341,9 @@ static NSArray *uidsFromString(NSString *uidString);
                         [queryParameters setDatabaseId:database];
                         for (NSString *editionID in editionIDs) {
                             WokSearchLiteService_editionDesc *edition = [[[WokSearchLiteService_editionDesc alloc] init] autorelease];
-                            [edition setCollection:database];
-                            [edition setEdition:editionID];
+                            NSRange range = [editionID rangeOfString:@"."];
+                            [edition setCollection:range.location == NSNotFound ? database : [editionID substringToIndex:range.location]];
+                            [edition setEdition:range.location == NSNotFound ? editionID : [editionID substringFromIndex:NSMaxRange(range)]];
                             [queryParameters addEditions:edition];
                         }
                         [queryParameters setUserQuery:searchTerm];
@@ -379,8 +380,9 @@ static NSArray *uidsFromString(NSString *uidString);
                 NSMutableArray *editions = [NSMutableArray array];
                 for (NSString *editionID in editionIDs) {
                     WokSearchService_editionDesc *edition = [[[WokSearchService_editionDesc alloc] init] autorelease];
-                    [edition setCollection:database];
-                    [edition setEdition:editionID];
+                    NSRange range = [editionID rangeOfString:@"."];
+                    [edition setCollection:range.location == NSNotFound ? database : [editionID substringToIndex:range.location]];
+                    [edition setEdition:range.location == NSNotFound ? editionID : [editionID substringFromIndex:NSMaxRange(range)]];
                     [editions addObject:edition];
                 }
                 
