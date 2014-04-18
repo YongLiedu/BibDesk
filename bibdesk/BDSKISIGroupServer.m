@@ -316,7 +316,7 @@ static NSArray *uidsFromString(NSString *uidString);
         // authenticate if necessary
         if ([self authenticateWithOptions:options]) {
             
-            // this can eb a WokSearchServiceSoapBindingResponse or WokSearchLiteServiceSoapBindingResponse
+            // this can be a WokSearchServiceSoapBindingResponse or WokSearchLiteServiceSoapBindingResponse
             id response = nil;
             NSString *errorString = nil;
             
@@ -351,7 +351,6 @@ static NSArray *uidsFromString(NSString *uidString);
                     }
                     case retrieveById:
                     {
-                        // Reto: undocumented and untested. I'm going to check its usefulness before removing.
                         WokSearchLiteService_retrieveById *retrieveByIdRequest = [[[WokSearchLiteService_retrieveById alloc] init] autorelease];
                         [retrieveByIdRequest setDatabaseId:database];
                         for (NSString *uid in uidsFromString(searchTerm))
@@ -392,13 +391,10 @@ static NSArray *uidsFromString(NSString *uidString);
                 
                 // Reto: Edition is not really needed. If omitted, the search is performed in all WOK databases which yields
                 // a more consistent result with the web search. 
-                // Reto: We could actually search the whole Web of Knowledge DB by choice of
-                // WOK as databaseID. This returns all sorts of fun references including Patents, Books etc, for which there is currently
-                // no support in BibDesk anyway, so limit the search to WOS databaseID
+                // Reto: We could actually search the whole Web of Knowledge DB by choice of WOK as databaseID.
                 switch (operation) {
                     case search:
                     {
-                        // Reto: this works for the Premium edition of WOKSearch (and not for WOKSearchLite)
                         WokSearchService_search *searchRequest = [[[WokSearchService_search alloc] init] autorelease];
                         WokSearchService_queryParameters *queryParameters = [[[WokSearchService_queryParameters alloc] init] autorelease];
                         [queryParameters setDatabaseId:database];
@@ -413,12 +409,9 @@ static NSArray *uidsFromString(NSString *uidString);
                     }
                     case citedReferences:
                     {
-                        // Reto: undocumented and untested. I'm going to check its usefulness before removing.
                         WokSearchService_citedReferences *citedReferencesRequest = [[[WokSearchService_citedReferences alloc] init] autorelease];
                         [citedReferencesRequest setDatabaseId:database];
                         [citedReferencesRequest setUid:searchTerm];
-                        //for (WokSearchService_editionDesc *edition in editions)
-                        //    [citedReferencesRequest addEditions:edition];
                         // [citedReferencesRequest setTimeSpan:timeSpan];
                         [citedReferencesRequest setQueryLanguage:EN_QUERY_LANG];
                         [citedReferencesRequest setRetrieveParameters:retrieveParameters];
@@ -427,7 +420,6 @@ static NSArray *uidsFromString(NSString *uidString);
                     }
                     case citingArticles:
                     {
-                        // Reto: undocumented and untested. I'm going to check its usefulness before removing.            
                         WokSearchService_citingArticles *citingArticlesRequest = [[[WokSearchService_citingArticles alloc] init] autorelease];
                         [citingArticlesRequest setDatabaseId:database];
                         [citingArticlesRequest setUid:searchTerm];
@@ -444,7 +436,6 @@ static NSArray *uidsFromString(NSString *uidString);
                     }
                     case relatedRecords:
                     {
-                        // Reto: undocumented and untested. I'm going to check its usefulness before removing.
                         WokSearchService_relatedRecords *relatedRecordsRequest = [[[WokSearchService_relatedRecords alloc] init] autorelease];
                         [relatedRecordsRequest setDatabaseId:database];
                         [relatedRecordsRequest setUid:searchTerm];
@@ -458,7 +449,6 @@ static NSArray *uidsFromString(NSString *uidString);
                     }
                     case retrieveById:
                     {
-                        // Reto: undocumented and untested. I'm going to check its usefulness before removing.
                         WokSearchService_retrieveById *retrieveByIdRequest = [[[WokSearchService_retrieveById alloc] init] autorelease];
                         [retrieveByIdRequest setDatabaseId:database];
                         for (NSString *uid in uidsFromString(searchTerm))
