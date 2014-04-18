@@ -304,8 +304,10 @@ static NSArray *uidsFromString(NSString *uidString);
             NSArray *editionIDs = nil;
             
             database = [database stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
+            // split the database into a database ID optionally followed by edition IDs, separated by space
             NSArray *ids = [database componentsSeparatedByString:@" "];
             database = [ids firstObject];
+            // legacy, the database used to be just a WOS edition ID without the database ID
             if ([WOSEditions containsObject:database]) {
                 database = WOS_DB_ID;
                 editionIDs = ids;
