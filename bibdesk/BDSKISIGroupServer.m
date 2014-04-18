@@ -534,13 +534,13 @@ static NSArray *uidsFromString(NSString *uidString);
         
         for (id bodyPart in [response bodyParts]) {
             
-            if ([bodyPart isKindOfClass:[SOAPFault class]]) {
+            if ([bodyPart respondsToSelector:@selector(simpleFaultString)]) {
             
                 NSString *errorString = [(SOAPFault *)bodyPart simpleFaultString];
                 [self setErrorMessage:[NSString stringWithFormat:NSLocalizedString(@"WOK Authentication Error: %@", "WOK Authentication Error Format"), errorString]];
                 [sessionCookie release];
                 sessionCookie = nil;
-            } else if ([bodyPart isKindOfClass:[WOKMWSAuthenticateService_authenticateResponse class]]) {
+            } else if ([bodyPart respondsToSelector:@selector(return_)]) {
             
                 // if we reach this point the only session cookie should be the SID
                 [sessionCookie release];
