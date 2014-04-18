@@ -72,10 +72,13 @@ static NSSet *WOSEditions = nil;
 
 static NSArray *uidsFromString(NSString *uidString);
 
-@interface NSObject (BDSKISIGroupServer)
 // should be implemented by returned searchResults classes
+@interface NSObject (BDSKWOKSearchResults)
 - (NSArray *)WOKRecords;
+@end
+
 // should be implemented by record classes
+@interface NSObject (BDSKWOKRecord)
 - (NSDictionary *)newWOKPublicationInfo;
 @end
 
@@ -679,17 +682,13 @@ static void addAuthorNamesToDictionary(NSArray *names, NSMutableDictionary *pubF
 
 #pragma mark -
 
-@implementation NSObject (BDSKISIGroupServer)
+@implementation NSObject (BDSKWOKSearchResults)
 
 - (NSArray *)WOKRecords { return nil; }
 
-- (NSDictionary *)newWOKPublicationInfo {
-    return [[NSDictionary alloc] initWithObjectsAndKeys:BDSKArticleString, BDSKPubTypeString, nil];
-}
-
 @end
 
-@implementation WokSearchService_fullRecordSearchResults (BDSKISIGroupServer)
+@implementation WokSearchService_fullRecordSearchResults (BDSKWOKSearchResults)
 
 - (NSArray *)WOKRecords {
     NSXMLDocument *doc = [[[NSXMLDocument alloc] initWithXMLString:[self records] options:0 error:NULL] autorelease];
@@ -698,19 +697,27 @@ static void addAuthorNamesToDictionary(NSArray *names, NSMutableDictionary *pubF
 
 @end
 
-@implementation WokSearchService_citedReferencesSearchResults (BDSKISIGroupServer)
+@implementation WokSearchService_citedReferencesSearchResults (BDSKWOKSearchResults)
 
 - (NSArray *)WOKRecords { return [self references]; }
 
 @end
 
-@implementation WokSearchLiteService_searchResults (BDSKISIGroupServer)
+@implementation WokSearchLiteService_searchResults (BDSKWOKSearchResults)
 
 - (NSArray *)WOKRecords { return [self records]; }
 
 @end
 
-@implementation NSXMLNode (BDSKISIGroupServer)
+@implementation NSObject (BDSKWOKRecord)
+
+- (NSDictionary *)newWOKPublicationInfo {
+    return [[NSDictionary alloc] initWithObjectsAndKeys:BDSKArticleString, BDSKPubTypeString, nil];
+}
+
+@end
+
+@implementation NSXMLNode (BDSKWOKRecord)
 
 - (NSDictionary *)newWOKPublicationInfo {
     // this is now a field/value set for a particular publication self
@@ -853,7 +860,7 @@ static void addAuthorNamesToDictionary(NSArray *names, NSMutableDictionary *pubF
 
 @end
 
-@implementation WokSearchService_citedReference (BDSKISIGroupServer)
+@implementation WokSearchService_citedReference (BDSKWOKRecord)
 
 - (NSDictionary *)newWOKPublicationInfo {
     NSMutableDictionary *pubFields = [NSMutableDictionary new];
@@ -877,7 +884,7 @@ static void addAuthorNamesToDictionary(NSArray *names, NSMutableDictionary *pubF
 
 @end
 
-@implementation WokSearchLiteService_liteRecord (BDSKISIGroupServer)
+@implementation WokSearchLiteService_liteRecord (BDSKWOKRecord)
 
 - (NSDictionary *)newWOKPublicationInfo {
 
