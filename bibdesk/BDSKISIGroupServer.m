@@ -278,46 +278,44 @@ static NSArray *uidsFromString(NSString *uidString);
     // Strip whitespace from the search term to make WOS happy
     searchTerm = [searchTerm stringByRemovingSurroundingWhitespace];
     
-    database = [database stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
-    
     if (numResults > 0 && [NSString isEmptyString:searchTerm] == NO) {
-        
-        enum operationTypes { search, citedReferences, citingArticles, relatedRecords, retrieveById } operation = search;
-        /*
-         TODO: document this syntax and the results thereof in the code, and in the help book.
-         */
-        if ([searchTerm hasCaseInsensitivePrefix:@"citedby:"]) {
-            searchTerm = [[searchTerm substringFromIndex:8] stringByRemovingSurroundingWhitespace];
-            operation = citedReferences;
-        } else if ([searchTerm hasCaseInsensitivePrefix:@"citing:"]) {
-            searchTerm = [[searchTerm substringFromIndex:7] stringByRemovingSurroundingWhitespace];
-            operation = citingArticles;
-        } else if ([searchTerm hasCaseInsensitivePrefix:@"related:"]) {
-            searchTerm = [[searchTerm substringFromIndex:8] stringByRemovingSurroundingWhitespace];
-            operation = relatedRecords;
-        } else if ([searchTerm hasCaseInsensitivePrefix:@"uid:"]) {
-            searchTerm = [[searchTerm substringFromIndex:4] stringByRemovingSurroundingWhitespace];
-            operation = retrieveById;
-        } else if ([searchTerm rangeOfString:@"="].location == NSNotFound) {
-            searchTerm = [NSString stringWithFormat:@"TS=\"%@\"", searchTerm];
-        }
-        
-        NSArray *editionIDs = nil;
-        if ([NSString isEmptyString:database]) {
-            database = WOS_DB_ID;
-        } else {
-            NSArray *ids = [database componentsSeparatedByString:@" "];
-            database = [ids firstObject];
-            if ([WOSEditions containsObject:database]) {
-                database = WOS_DB_ID;
-                editionIDs = ids;
-            } else if ([ids count] > 1) {
-                editionIDs = [ids subarrayWithRange:NSMakeRange(1, [ids count] - 1)];
-            }
-        }
         
         // authenticate if necessary
         if ([self authenticateWithOptions:options]) {
+            
+            enum operationTypes { search, citedReferences, citingArticles, relatedRecords, retrieveById } operation = search;
+            
+            if ([searchTerm hasCaseInsensitivePrefix:@"citedby:"]) {
+                searchTerm = [[searchTerm substringFromIndex:8] stringByRemovingSurroundingWhitespace];
+                operation = citedReferences;
+            } else if ([searchTerm hasCaseInsensitivePrefix:@"citing:"]) {
+                searchTerm = [[searchTerm substringFromIndex:7] stringByRemovingSurroundingWhitespace];
+                operation = citingArticles;
+            } else if ([searchTerm hasCaseInsensitivePrefix:@"related:"]) {
+                searchTerm = [[searchTerm substringFromIndex:8] stringByRemovingSurroundingWhitespace];
+                operation = relatedRecords;
+            } else if ([searchTerm hasCaseInsensitivePrefix:@"uid:"]) {
+                searchTerm = [[searchTerm substringFromIndex:4] stringByRemovingSurroundingWhitespace];
+                operation = retrieveById;
+            } else if ([searchTerm rangeOfString:@"="].location == NSNotFound) {
+                searchTerm = [NSString stringWithFormat:@"TS=\"%@\"", searchTerm];
+            }
+            
+            NSArray *editionIDs = nil;
+            
+            database = [database stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
+            if ([NSString isEmptyString:database]) {
+                database = WOS_DB_ID;
+            } else {
+                NSArray *ids = [database componentsSeparatedByString:@" "];
+                database = [ids firstObject];
+                if ([WOSEditions containsObject:database]) {
+                    database = WOS_DB_ID;
+                    editionIDs = ids;
+                } else if ([ids count] > 1) {
+                    editionIDs = [ids subarrayWithRange:NSMakeRange(1, [ids count] - 1)];
+                }
+            }
             
             // this can be a WokSearchServiceSoapBindingResponse or WokSearchLiteServiceSoapBindingResponse
             id response = nil;
