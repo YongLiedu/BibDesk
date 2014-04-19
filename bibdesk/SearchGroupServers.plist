@@ -194,6 +194,12 @@
         };
     },
 /* ISI servers */
+    /* All Web of Knowledge databases */
+    {
+        type = isi;
+        name = "Web of Knowledge";
+        database = "WOK";
+    },
     /* Web of Science database */
     {
         type = isi;
@@ -205,30 +211,6 @@
         type = isi;
         name = "Web of Science SCI";
         database = "WOS SCI";
-    },
-    /* Social Sciences Citation Index */
-    {
-        type = isi;
-        name = "Web of Science SSCI";
-        database = "WOS SSCI";
-    },
-    /* Arts & Humanities Citation Index */
-    {
-        type = isi;
-        name = "Web of Science AHCI";
-        database = "WOS AHCI";
-    },
-    /* Index Chemiculus */
-    {
-        type = isi;
-        name = "Web of Science IC";
-        database = "WOS IC";
-    },
-    /* Current Chemical Reactions */
-    {
-        type = isi;
-        name = "Web of Science CCR";
-        database = "WOS CCR";
     },
 /* DBLP servers */
     {
