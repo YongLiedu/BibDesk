@@ -1136,7 +1136,7 @@ http://home.planet.nl/~faase009/GNU.txt
 
 - (NSArray *)componentsSeparatedByComma;
 {
-    return [self componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@","] trimWhitespace:YES];
+    return [self componentsSeparatedByCharactersInSet:[NSCharacterSet commaCharacterSet] trimWhitespace:YES];
 }
 
 - (NSString *)stringByCollapsingAndTrimmingCharactersInSet:(NSCharacterSet *)charSet;
