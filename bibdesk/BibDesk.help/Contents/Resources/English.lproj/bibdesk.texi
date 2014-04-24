@@ -1860,6 +1860,10 @@ and @samp{uid:} to fetch one or more items by ID.  These operators should be fol
 which is usually returned in the Wok-Uid field.  The @samp{uid:} operator accepts multiple UIDs.
 These operators cannot be combined with each other and with other search terms.
 
+In addition, for all search types, you can add either or both of the search operators @samp{begin:} and @samp{end:} 
+to restrict the search to a specific time span. They are followed by a date in the format Y-M-D, Y-M, or Y.
+Components can be omitted, in which case they are implied by the current date; e.g. @samp{-3} indicates March of the current year.
+
 @c ======================================================================================
 
 @node Citation Keys

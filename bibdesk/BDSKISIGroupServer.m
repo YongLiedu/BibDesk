@@ -72,6 +72,8 @@ static NSSet *WOSEditions = nil;
 
 static NSArray *uidsFromString(NSString *uidString);
 
+static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *rangePtr);
+
 // should be implemented by returned searchResults classes
 @interface NSObject (BDSKWOKSearchResults)
 - (NSArray *)WOKRecords;
@@ -284,22 +286,33 @@ static NSArray *uidsFromString(NSString *uidString);
         if ([self authenticateWithOptions:options]) {
             
             enum operationTypes { search, citedReferences, citingArticles, relatedRecords, retrieveById } operation = search;
+            static NSString *operator[5] = {@"", @"citedby:", @"citing:", @"related:", @"uid:"};
             
-            if ([searchTerm hasCaseInsensitivePrefix:@"citedby:"]) {
-                searchTerm = [[searchTerm substringFromIndex:8] stringByRemovingSurroundingWhitespace];
-                operation = citedReferences;
-            } else if ([searchTerm hasCaseInsensitivePrefix:@"citing:"]) {
-                searchTerm = [[searchTerm substringFromIndex:7] stringByRemovingSurroundingWhitespace];
-                operation = citingArticles;
-            } else if ([searchTerm hasCaseInsensitivePrefix:@"related:"]) {
-                searchTerm = [[searchTerm substringFromIndex:8] stringByRemovingSurroundingWhitespace];
-                operation = relatedRecords;
-            } else if ([searchTerm hasCaseInsensitivePrefix:@"uid:"]) {
-                searchTerm = [[searchTerm substringFromIndex:4] stringByRemovingSurroundingWhitespace];
-                operation = retrieveById;
-            } else if ([searchTerm rangeOfString:@"="].location == NSNotFound) {
-                searchTerm = [NSString stringWithFormat:@"TS=\"%@\"", searchTerm];
+            // extract special search operators
+            for (operation = retrieveById; operation > search; --operation)
+                if ([searchTerm hasCaseInsensitivePrefix:operator[operation]]) break;
+            
+            // extract begin: or end: dates for time span
+            NSRange beginRange, endRange;
+            NSString *begin = dateFromSearchTerm(searchTerm, YES, &beginRange);
+            NSString *end = dateFromSearchTerm(searchTerm, NO, &endRange);
+            
+            if (begin || end || operation != search) {
+                // remove the operators from the search term
+                NSMutableString *tmpString = [[searchTerm mutableCopy] autorelease];
+                if (end) {
+                    [tmpString deleteCharactersInRange:endRange];
+                    if (begin && beginRange.location > endRange.location)
+                        beginRange.location -= endRange.length;
+                }
+                if (begin)
+                    [tmpString deleteCharactersInRange:beginRange];
+                if (operation != search)
+                    [tmpString deleteCharactersInRange:NSMakeRange(0, [operator[operation] length])];
+                searchTerm = [tmpString stringByRemovingSurroundingWhitespace];
             }
+            if (operation == search && [searchTerm rangeOfString:@"="].location == NSNotFound)
+                searchTerm = [NSString stringWithFormat:@"TS=\"%@\"", searchTerm];
             
             NSArray *editionIDs = nil;
             
@@ -343,6 +356,12 @@ static NSArray *uidsFromString(NSString *uidString);
                             [queryParameters addEditions:edition];
                         }
                         [queryParameters setUserQuery:searchTerm];
+                        if (begin || end) {
+                            WokSearchLiteService_timeSpan *timeSpan = [[[WokSearchLiteService_timeSpan alloc] init] autorelease];
+                            [timeSpan setBegin:begin ?: @"1800-01-01"];
+                            [timeSpan setEnd:end ?: [[NSDate date] ISO8601DateStringWithTime:NO]];
+                            [queryParameters setTimeSpan:timeSpan];
+                        }
                         [queryParameters setQueryLanguage:EN_QUERY_LANG];
                         [searchRequest setQueryParameters:queryParameters];
                         [searchRequest setRetrieveParameters:retrieveParameters];
@@ -382,6 +401,13 @@ static NSArray *uidsFromString(NSString *uidString);
                     [editions addObject:edition];
                 }
                 
+                WokSearchService_timeSpan *timeSpan = nil;
+                if (begin || end || operation == citingArticles) {
+                    timeSpan = [[[WokSearchService_timeSpan alloc] init] autorelease];
+                    [timeSpan setBegin:begin ?: @"1800-01-01"];
+                    [timeSpan setEnd:end ?: [[NSDate date] ISO8601DateStringWithTime:NO]];
+                }
+                
                 WokSearchService_retrieveParameters *retrieveParameters = [[[WokSearchService_retrieveParameters alloc] init] autorelease];
                 [retrieveParameters setFirstRecord:[NSNumber numberWithInteger:fetchedResultsLocal + 1]];
                 [retrieveParameters setCount:[NSNumber numberWithInteger:numResults]];
@@ -402,6 +428,7 @@ static NSArray *uidsFromString(NSString *uidString);
                         for (WokSearchService_editionDesc *edition in editions)
                             [queryParameters addEditions:edition];
                         [queryParameters setUserQuery:searchTerm];
+                        [queryParameters setTimeSpan:timeSpan];
                         [queryParameters setQueryLanguage:EN_QUERY_LANG];
                         [searchRequest setQueryParameters:queryParameters];
                         [searchRequest setRetrieveParameters:retrieveParameters];
@@ -413,7 +440,6 @@ static NSArray *uidsFromString(NSString *uidString);
                         WokSearchService_citedReferences *citedReferencesRequest = [[[WokSearchService_citedReferences alloc] init] autorelease];
                         [citedReferencesRequest setDatabaseId:database];
                         [citedReferencesRequest setUid:searchTerm];
-                        // [citedReferencesRequest setTimeSpan:timeSpan];
                         [citedReferencesRequest setQueryLanguage:EN_QUERY_LANG];
                         [citedReferencesRequest setRetrieveParameters:retrieveParameters];
                         response = [binding citedReferencesUsingParameters:citedReferencesRequest];
@@ -426,9 +452,6 @@ static NSArray *uidsFromString(NSString *uidString);
                         [citingArticlesRequest setUid:searchTerm];
                         for (WokSearchService_editionDesc *edition in editions)
                             [citingArticlesRequest addEditions:edition];
-                        WokSearchService_timeSpan *timeSpan = [[[WokSearchService_timeSpan alloc] init] autorelease];
-                        timeSpan.begin = @"1800-01-01";
-                        timeSpan.end = [[NSDate date] ISO8601DateStringWithTime:NO];
                         [citingArticlesRequest setTimeSpan:timeSpan];
                         [citingArticlesRequest setQueryLanguage:EN_QUERY_LANG];
                         [citingArticlesRequest setRetrieveParameters:retrieveParameters];
@@ -442,7 +465,7 @@ static NSArray *uidsFromString(NSString *uidString);
                         [relatedRecordsRequest setUid:searchTerm];
                         for (WokSearchService_editionDesc *edition in editions)
                             [relatedRecordsRequest addEditions:edition];
-                        // [relatedRecordsRequest setTimeSpan:timeSpan];
+                        [relatedRecordsRequest setTimeSpan:timeSpan];
                         [relatedRecordsRequest setQueryLanguage:EN_QUERY_LANG];
                         [relatedRecordsRequest setRetrieveParameters:retrieveParameters];
                         response = [binding relatedRecordsUsingParameters:relatedRecordsRequest];
@@ -581,6 +604,57 @@ static NSArray *uidsFromString(NSString *uidString) {
     }
     
     return uids;
+}
+
+static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *rangePtr) {
+    NSString *operator = begin ? @"begin:" : @"end:";
+    NSScanner *scanner = [NSScanner scannerWithString:searchTerm];
+    [scanner setCharactersToBeSkipped:nil];
+    [scanner scanUpToString:operator intoString:NULL];
+    if ([scanner isAtEnd])
+        return nil;
+    
+    NSUInteger i = [scanner scanLocation];
+    if (i > 0 && [[NSCharacterSet letterCharacterSet] characterIsMember:[searchTerm characterAtIndex:i - 1]])
+        return nil;
+    
+    NSInteger year = -1, month = 0, day = 0;
+    NSCharacterSet *digits = [NSCharacterSet decimalDigitCharacterSet];
+    NSString *s = nil;
+    
+    [scanner scanString:operator intoString:NULL];
+    
+    // the date format is Y-M-D, Y-M, or Y, components can be empty
+    year = [scanner scanCharactersFromSet:digits intoString:&s] ? [s integerValue] : -1;
+    if ([scanner scanString:@"-" intoString:NULL]) {
+        month = [scanner scanCharactersFromSet:digits intoString:&s] ? [s integerValue] : -1;
+        if ([scanner scanString:@"-" intoString:NULL])
+            day = [scanner scanCharactersFromSet:digits intoString:&s] ? [s integerValue] : -1;
+    }
+    
+    if (year == -1 || month == -1 || day == -1) {
+        // year, month, and/or day was empty, implied by the current date
+        NSDateComponents *today = [[[[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar] autorelease] components:NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit fromDate:[NSDate date]];
+        if (year == -1)
+            year = [today year];
+        if (month == -1)
+            month = [today month];
+        if (day == -1)
+            day = [today day];
+    }
+    // allow subcentury years
+    if (year < 100)
+        year += 2000;
+    // complete dates using first (for begin:) or last (for end:) month or day
+    if (month == 0)
+        month = begin ? 1 : 12;
+    if (day == 0)
+        day = begin ? 1 : ((((month - 1) % 7) % 2) == 0) ? 31 : (month != 2) ? 30 : ((year % 4) == 0 && ((year % 100) != 0 || (year % 400) == 0)) ? 29 : 28;
+    
+    if (rangePtr)
+        *rangePtr = NSMakeRange(i, [scanner scanLocation] - i);
+    
+    return [NSString stringWithFormat:@"%.4ld-%.2ld-%.2ld", (long)year, (long)month, (long)day];
 }
 
 #pragma mark -
