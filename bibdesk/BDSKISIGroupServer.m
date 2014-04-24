@@ -48,8 +48,8 @@
 #import "NSURL_BDSKExtensions.h"
 #import "NSDate+ISO8601Unparsing.h"
 
-#define SERVER_URL @"http://search.webofknowledge.com/esti/wokmws/ws/WokSearch"
-#define SERVER_URL_LITE @"http://search.webofknowledge.com/esti/wokmws/ws/WokSearchLite"
+#define SERVER_URL @"http://BDSKWOKSearch.webofknowledge.com/esti/wokmws/ws/WokSearch"
+#define SERVER_URL_LITE @"http://BDSKWOKSearch.webofknowledge.com/esti/wokmws/ws/WokSearchLite"
 
 #define WOS_DB_ID @"WOS"
 #define EN_QUERY_LANG @"en"
@@ -277,7 +277,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
     if (availableResultsLocal > 0)
         numResults = MIN(availableResultsLocal - fetchedResultsLocal, MAX_RESULTS);
     
-    // Strip whitespace from the search term to make WOS happy
+    // Strip whitespace from the BDSKWOKSearch term to make WOS happy
     searchTerm = [searchTerm stringByRemovingSurroundingWhitespace];
     
     if (numResults > 0 && [NSString isEmptyString:searchTerm] == NO) {
@@ -285,11 +285,11 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
         // authenticate if necessary
         if ([self authenticateWithOptions:options]) {
             
-            enum operationTypes { search, citedReferences, citingArticles, relatedRecords, retrieveById } operation = search;
+            enum operationTypes { BDSKWOKSearch, BDSKWOKCitedBy, BDSKWOKCiting, BDSKWOKRelated, BDSKWOKUid } operation = BDSKWOKSearch;
             static NSString *operator[5] = {@"", @"citedby:", @"citing:", @"related:", @"uid:"};
             
-            // extract special search operators
-            for (operation = retrieveById; operation > search; --operation)
+            // extract special BDSKWOKSearch operators
+            for (operation = BDSKWOKUid; operation > BDSKWOKSearch; --operation)
                 if ([searchTerm hasCaseInsensitivePrefix:operator[operation]]) break;
             
             // extract begin: or end: dates for time span
@@ -297,8 +297,8 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
             NSString *begin = dateFromSearchTerm(searchTerm, YES, &beginRange);
             NSString *end = dateFromSearchTerm(searchTerm, NO, &endRange);
             
-            if (begin || end || operation != search) {
-                // remove the operators from the search term
+            if (begin || end || operation != BDSKWOKSearch) {
+                // remove the operators from the BDSKWOKSearch term
                 NSMutableString *tmpString = [[searchTerm mutableCopy] autorelease];
                 if (end) {
                     [tmpString deleteCharactersInRange:endRange];
@@ -307,11 +307,11 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                 }
                 if (begin)
                     [tmpString deleteCharactersInRange:beginRange];
-                if (operation != search)
+                if (operation != BDSKWOKSearch)
                     [tmpString deleteCharactersInRange:NSMakeRange(0, [operator[operation] length])];
                 searchTerm = [tmpString stringByRemovingSurroundingWhitespace];
             }
-            if (operation == search && [searchTerm rangeOfString:@"="].location == NSNotFound)
+            if (operation == BDSKWOKSearch && [searchTerm rangeOfString:@"="].location == NSNotFound)
                 searchTerm = [NSString stringWithFormat:@"TS=\"%@\"", searchTerm];
             
             NSArray *editionIDs = nil;
@@ -343,7 +343,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                 //binding.logXMLInOut = YES;
                 
                 switch (operation) {
-                    case search:
+                    case BDSKWOKSearch:
                     {
                         WokSearchLiteService_search *searchRequest = [[[WokSearchLiteService_search alloc] init] autorelease];
                         WokSearchLiteService_queryParameters *queryParameters = [[[WokSearchLiteService_queryParameters alloc] init] autorelease];
@@ -368,7 +368,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                         response = [binding searchUsingParameters:searchRequest];
                         break;
                     }
-                    case retrieveById:
+                    case BDSKWOKUid:
                     {
                         WokSearchLiteService_retrieveById *retrieveByIdRequest = [[[WokSearchLiteService_retrieveById alloc] init] autorelease];
                         [retrieveByIdRequest setDatabaseId:database];
@@ -379,14 +379,14 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                         response = [binding retrieveByIdUsingParameters:retrieveByIdRequest];
                         break;
                     }
-                    case citedReferences:
-                        errorString = [NSString stringWithFormat:NSLocalizedString(@"The WOK Light service does not support the %@ operation.", @"WOK search error message"), @"citedby:"];
+                    case BDSKWOKCitedBy:
+                        errorString = [NSString stringWithFormat:NSLocalizedString(@"The WOK Light service does not support the %@ operation.", @"WOK BDSKWOKSearch error message"), @"citedby:"];
                         break;
-                    case citingArticles:
-                        errorString = [NSString stringWithFormat:NSLocalizedString(@"The WOK Light service does not support the %@ operation.", @"WOK search error message"), @"citing:"];
+                    case BDSKWOKCiting:
+                        errorString = [NSString stringWithFormat:NSLocalizedString(@"The WOK Light service does not support the %@ operation.", @"WOK BDSKWOKSearch error message"), @"citing:"];
                         break;
-                    case relatedRecords:
-                        errorString = [NSString stringWithFormat:NSLocalizedString(@"The WOK Light service does not support the %@ operation.", @"WOK search error message"), @"related:"];
+                    case BDSKWOKRelated:
+                        errorString = [NSString stringWithFormat:NSLocalizedString(@"The WOK Light service does not support the %@ operation.", @"WOK BDSKWOKSearch error message"), @"related:"];
                         break;
                 }
                 
@@ -402,7 +402,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                 }
                 
                 WokSearchService_timeSpan *timeSpan = nil;
-                if (begin || end || operation == citingArticles) {
+                if (begin || end || operation == BDSKWOKCiting) {
                     timeSpan = [[[WokSearchService_timeSpan alloc] init] autorelease];
                     [timeSpan setBegin:begin ?: @"1800-01-01"];
                     [timeSpan setEnd:end ?: [[NSDate date] ISO8601DateStringWithTime:NO]];
@@ -416,11 +416,11 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                 [binding addCookie:sessionCookie];
                 //binding.logXMLInOut = YES;
                 
-                // Reto: Edition is not really needed. If omitted, the search is performed in all WOK databases which yields
-                // a more consistent result with the web search. 
-                // Reto: We could actually search the whole Web of Knowledge DB by choice of WOK as databaseID.
+                // Reto: Edition is not really needed. If omitted, the BDSKWOKSearch is performed in all WOK databases which yields
+                // a more consistent result with the web BDSKWOKSearch. 
+                // Reto: We could actually BDSKWOKSearch the whole Web of Knowledge DB by choice of WOK as databaseID.
                 switch (operation) {
-                    case search:
+                    case BDSKWOKSearch:
                     {
                         WokSearchService_search *searchRequest = [[[WokSearchService_search alloc] init] autorelease];
                         WokSearchService_queryParameters *queryParameters = [[[WokSearchService_queryParameters alloc] init] autorelease];
@@ -435,7 +435,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                         response = [binding searchUsingParameters:searchRequest];
                         break;
                     }
-                    case citedReferences:
+                    case BDSKWOKCitedBy:
                     {
                         WokSearchService_citedReferences *citedReferencesRequest = [[[WokSearchService_citedReferences alloc] init] autorelease];
                         [citedReferencesRequest setDatabaseId:database];
@@ -445,7 +445,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                         response = [binding citedReferencesUsingParameters:citedReferencesRequest];
                         break;
                     }
-                    case citingArticles:
+                    case BDSKWOKCiting:
                     {
                         WokSearchService_citingArticles *citingArticlesRequest = [[[WokSearchService_citingArticles alloc] init] autorelease];
                         [citingArticlesRequest setDatabaseId:database];
@@ -458,7 +458,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                         response = [binding citingArticlesUsingParameters:citingArticlesRequest];
                         break;
                     }
-                    case relatedRecords:
+                    case BDSKWOKRelated:
                     {
                         WokSearchService_relatedRecords *relatedRecordsRequest = [[[WokSearchService_relatedRecords alloc] init] autorelease];
                         [relatedRecordsRequest setDatabaseId:database];
@@ -471,7 +471,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                         response = [binding relatedRecordsUsingParameters:relatedRecordsRequest];
                         break;
                     }
-                    case retrieveById:
+                    case BDSKWOKUid:
                     {
                         WokSearchService_retrieveById *retrieveByIdRequest = [[[WokSearchService_retrieveById alloc] init] autorelease];
                         [retrieveByIdRequest setDatabaseId:database];
@@ -505,7 +505,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                     [pubInfo release];
                 }
                 
-                // now increment this so we don't get the same set next time; BDSKSearchGroup resets it when the search term changes
+                // now increment this so we don't get the same set next time; BDSKSearchGroup resets it when the BDSKWOKSearch term changes
                 fetchedResultsLocal += [pubs count];
                 availableResultsLocal = [[searchResults recordsFound] integerValue];
                 
@@ -526,7 +526,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
             }
         }
         
-        // if we got no data at this point the search have failed somewhere
+        // if we got no data at this point the BDSKWOKSearch have failed somewhere
         if (data == nil)
             OSAtomicCompareAndSwap32Barrier(0, 1, &flags.failedDownload);
     }
