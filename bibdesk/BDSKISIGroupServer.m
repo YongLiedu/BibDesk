@@ -598,7 +598,7 @@ static NSArray *uidsFromString(NSString *uidString) {
     NSString *uid;
     [scanner scanUpToCharactersFromSet:uidCharSet intoString:NULL];
     while ([scanner isAtEnd] == NO) {
-        if ([scanner scanCharactersFromSet:uidCharSet intoString:&uid] && [uid isCaseInsensitiveEqual:@"OR"] == NO)
+        if ([scanner scanCharactersFromSet:uidCharSet intoString:&uid])
             [uids addObject:uid];
         [scanner scanUpToCharactersFromSet:uidCharSet intoString:NULL];
     }
