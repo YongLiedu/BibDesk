@@ -49,6 +49,7 @@
 #import "BDSKGroup+Scripting.h"
 #import "BibItem.h"
 #import "NSString_BDSKExtensions.h"
+#import "NSDictionary_BDSKExtensions.h"
 
 NSString *BDSKSearchGroupEntrez = @"entrez";
 NSString *BDSKSearchGroupZoom = @"zoom";
@@ -57,8 +58,17 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 NSString *BDSKSearchGroupURLScheme = @"x-bdsk-search";
 
+static NSDictionary *BDSKSearchGroupURLQueryKeys = nil;
+
 @implementation BDSKSearchGroup
 
++ (void)initialize {
+    BDSKINITIALIZE;
+    NSString *keys[14] = {@"searchTerm", @"term", @"name", @"database", @"db", @"password", @"username", @"user", @"recordSyntax", @"syntax", @"resultEncoding", @"encoding", @"removeDiacritics", @"lite"};
+    NSString *objects[14] = {@"searchTerm", @"searchTerm", @"name", @"database", @"database", @"password", @"username", @"username", @"recordSyntax", @"recordSyntax", @"resultEncoding", @"resultEncoding", @"removeDiacritics", @"lite"};
+    BDSKSearchGroupURLQueryKeys = [[NSDictionary alloc] initWithObjects:objects forCaseInsensitiveKeys:keys count:14];
+}
+ 
 // old designated initializer
 - (id)initWithName:(NSString *)aName;
 {
@@ -143,31 +153,17 @@ NSString *BDSKSearchGroupURLScheme = @"x-bdsk-search";
             if (idx != NSNotFound && idx > 0) {
                 NSString *key = [query substringToIndex:idx];
                 NSString *value = [[query substringFromIndex:idx + 1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-                if ([key isCaseInsensitiveEqual:@"searchTerm"] || [key isCaseInsensitiveEqual:@"term"]) {
+                key = [BDSKSearchGroupURLQueryKeys objectForKey:key] ?: key;
+                if ([key isEqualToString:@"searchTerm"]) {
                     aSearchTerm = value;
-                } else if ([key isCaseInsensitiveEqual:@"name"]) {
+                } else if ([key isEqualToString:@"name"]) {
                     aName = value;
-                } else if ([key isCaseInsensitiveEqual:@"database"] || [key isCaseInsensitiveEqual:@"db"]) {
+                } else if ([key isEqualToString:@"database"]) {
                     aDatabase = value;
                 } else {
-                    if ([key isCaseInsensitiveEqual:@"password"]) {
-                        key = @"password";
-                    } else if ([key isCaseInsensitiveEqual:@"username"] || [key isCaseInsensitiveEqual:@"user"]) {
-                        key = @"username";
-                    } else if ([key isCaseInsensitiveEqual:@"recordSyntax"] || [key isCaseInsensitiveEqual:@"syntax"]) {
-                        key = @"recordSyntax";
-                    } else if ([key isCaseInsensitiveEqual:@"resultEncoding"] || [key isCaseInsensitiveEqual:@"encoding"]) {
-                        key = @"resultEncoding";
-                    } else if ([key isCaseInsensitiveEqual:@"removeDiacritics"]) {
-                        key = @"removeDiacritics";
-                        if ([value boolValue])
-                            value = @"YES";
-                        else continue;
-                    } else if ([key isCaseInsensitiveEqual:@"lite"]) {
-                        key = @"lite";
-                        if ([value boolValue])
-                            value = @"YES";
-                        else continue;
+                    if ([key isEqualToString:@"removeDiacritics"] || [key isEqualToString:@"lite"]) {
+                        if ([value boolValue] == NO) continue;
+                        value = @"YES";
                     }
                     [options setValue:value forKey:key];
                 }
