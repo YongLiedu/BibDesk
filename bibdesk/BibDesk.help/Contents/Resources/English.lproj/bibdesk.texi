@@ -3754,6 +3754,8 @@ The specifiers are displayed in blue, the optional parameters in green.
 @tab File name of the linked file, with extension
 @item @spec{%e}
 @tab File extension of the linked file, including dot
+@item @specparam{%e, []}
+@tab File extension of the linked filewithout dot
 @item @spec{%b}
 @tab Bibliography document file name, without extension
 @item @specargparam{%f, Field, [/]0 }
@@ -3811,6 +3813,9 @@ and the second one is the separator between the last name and the first initial.
 The optional parameter delimited by square brackets after a title specifier @spec{%T} denotes 
 the maximum length of words to be dropped. If this arguments is missing, 
 words with length up to 3 are not counted, but they are included. 
+
+The optional parameter delimited by square brackets after a file extension specifier @spec{%E} denotes 
+a default extension used when the file has no extension.
 
 The optional parameter delimited by square brackets after one of the @samp{unique} specifiers 
 @spec{%u}, @spec{%U} and @spec{%n} is a separator inserted before the added unique characters. 

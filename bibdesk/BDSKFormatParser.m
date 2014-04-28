@@ -76,13 +76,13 @@ static NSDictionary *errorAttr = nil;
     nonUppercaseLetterCharSet = [[[NSCharacterSet characterSetWithRange:NSMakeRange('A',26)] invertedSet] copy];
     nonDecimalDigitCharSet = [[[NSCharacterSet characterSetWithRange:NSMakeRange('0',10)] invertedSet] copy];
     
-    validSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTmyYlLebkfwcsirRduUn0123456789%[]"] retain];
+    validSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTmyYlLeEbkfwcsirRduUn0123456789%[]"] retain];
     validParamSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTkfwciuUn"] retain];
     validUniqueSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"uUn"] retain];
-    validLocalFileSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"lLe"] retain];
+    validLocalFileSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"lLeE"] retain];
     validEscapeSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"0123456789%[]"] retain];
     validArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"fwcsi"] retain];
-    validOptArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPTkfwsuUn"] retain];
+    validOptArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPTEkfwsuUn"] retain];
     validAuthorSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApP"] retain];
     
     NSFont *font = [NSFont systemFontOfSize:0];
@@ -501,6 +501,30 @@ static NSDictionary *errorAttr = nil;
 							filename = [self stringBySanitizingString:filename forField:fieldName]; 
 							[parsedStr appendFormat:@".%@", filename];
 						}
+					}
+					break;
+				}
+                case 'E':
+				{
+                	// old file extension without period
+                    NSString *defaultExt = @"";
+					if ([scanner scanString:@"[" intoString:NULL]) {
+						if (NO == [scanner scanUpToString:@"]" intoString:&defaultExt]) defaultExt = @"";
+						[scanner scanString:@"]" intoString:NULL];
+					}
+					NSString *filename = nil;
+                    if (file)
+						filename = [[file URL] path];
+                    else if ([fieldName isLocalFileField])
+						filename = [[pub localFileURLForField:fieldName] path];
+					else
+						filename = [[pub localFileURLForField:BDSKLocalUrlString] path];
+                    filename = [filename pathExtension];
+                    if ([NSString isEmptyString:filename])
+                        filename = defaultExt;
+                    if (NO == [filename isEqualToString:@""]) {
+                        filename = [self stringBySanitizingString:filename forField:fieldName]; 
+                        [parsedStr appendString:filename];
 					}
 					break;
 				}
@@ -1168,6 +1192,7 @@ static NSDictionary *errorAttr = nil;
 			case 'l':
 			case 'L':
 			case 'e':
+			case 'E':
 				[arr addObject:BDSKLocalFileString];
 				break;
 			case 'b':
