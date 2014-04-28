@@ -380,13 +380,13 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                         break;
                     }
                     case BDSKWOKCitedBy:
-                        errorString = [NSString stringWithFormat:NSLocalizedString(@"The WOK Light service does not support the %@ operation.", @"WOK BDSKWOKSearch error message"), @"citedby:"];
+                        errorString = [NSString stringWithFormat:NSLocalizedString(@"The WOK Light service does not support the %@ operation.", @"WOK search error message"), @"citedby:"];
                         break;
                     case BDSKWOKCiting:
-                        errorString = [NSString stringWithFormat:NSLocalizedString(@"The WOK Light service does not support the %@ operation.", @"WOK BDSKWOKSearch error message"), @"citing:"];
+                        errorString = [NSString stringWithFormat:NSLocalizedString(@"The WOK Light service does not support the %@ operation.", @"WOK search error message"), @"citing:"];
                         break;
                     case BDSKWOKRelated:
-                        errorString = [NSString stringWithFormat:NSLocalizedString(@"The WOK Light service does not support the %@ operation.", @"WOK BDSKWOKSearch error message"), @"related:"];
+                        errorString = [NSString stringWithFormat:NSLocalizedString(@"The WOK Light service does not support the %@ operation.", @"WOK search error message"), @"related:"];
                         break;
                 }
                 
