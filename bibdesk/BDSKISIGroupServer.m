@@ -43,6 +43,7 @@
 #import "BDSKLinkedFile.h"
 #import "BDSKServerInfo.h"
 #import "BibItem.h"
+#import "BDSKMacroResolver.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
@@ -691,23 +692,18 @@ static void addStringForXPathToDictionary(NSXMLNode *node, NSString *XPath, NSSt
 
 static void addDateStringToDictionary(NSString *value, NSMutableDictionary *pubFields)
 {
-    //             There are at least 3 variants of this, so it's not always possible to get something
-    //             truly useful from it.
-    
-    //             <bib_date date="AUG" year="2008">AUG 2008</bib_date>
-    //             <bib_date date="JUN 19" year="2008">JUN 19 2008</bib_date>
-    //             <bib_date date="MAR-APR" year="2007">MAR-APR 2007</bib_date>		
+    // There are at least 3 variants of this, so it's not always possible to get something truly useful from it.
+    // "AUG", "JUN 19", "MAR-APR"	
     NSString *monthString;
     NSScanner *scanner = nil;
     if (value)
         scanner = [[NSScanner alloc] initWithString:value];
     if ([scanner scanCharactersFromSet:monthCharSet intoString:&monthString]) {
-        if ([monthString rangeOfString:@"-"].length == 0) {
-            monthString = [NSString stringWithBibTeXString:[monthString lowercaseString] macroResolver:nil error:NULL];
-        } else {
-            monthString = [monthString titlecaseString];
-            addStringToDictionaryIfNotNil(monthString, BDSKMonthString, pubFields);
-        }
+        if ([monthString rangeOfString:@"-"].length == 0)
+            monthString = [[BDSKMacroResolver defaultMacroResolver] valueOfMacro:monthString] ?: [monthString capitalizedString];
+        else
+            monthString = [monthString capitalizedString];
+        addStringToDictionaryIfNotNil(monthString, BDSKMonthString, pubFields);
     } else {
         addStringToDictionaryIfNotNil(value, BDSKDateString, pubFields);
     }
