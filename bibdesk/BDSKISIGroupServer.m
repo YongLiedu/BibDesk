@@ -70,6 +70,10 @@ static NSString *ISIURLFieldName = nil;
 
 static NSSet *WOSEditions = nil;
 
+static NSCharacterSet *monthCharSet = nil;
+static NSCharacterSet *nonUpperCharSet = nil;
+static NSCharacterSet *uidCharSet = nil;
+
 static NSArray *uidsFromString(NSString *uidString);
 
 static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *rangePtr);
@@ -115,6 +119,17 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
     ISIURLFieldName = [[[NSUserDefaults standardUserDefaults] stringForKey:BDSKISIURLFieldNameKey] retain];
     
     WOSEditions = [[NSSet alloc] initWithObjects:@"SCI", @"SSCI", @"AHCI", @"IC", @"ISTP", @"ISSHP", @"CCR", nil];
+    
+    NSMutableCharacterSet *mutableSet = [NSMutableCharacterSet letterCharacterSet];
+    [mutableSet addCharactersInString:@"-"];
+    monthCharSet = [mutableSet copy];
+    mutableSet = [NSMutableCharacterSet uppercaseLetterCharacterSet];
+    [mutableSet formUnionWithCharacterSet:[NSCharacterSet nonBaseCharacterSet]];
+    [mutableSet invert];
+    nonUpperCharSet = [mutableSet copy];
+    mutableSet = [NSMutableCharacterSet alphanumericCharacterSet];
+    [mutableSet addCharactersInString:@":"];
+    uidCharSet = [mutableSet copy];
 }
 
 - (Protocol *)protocolForMainThread { return @protocol(BDSKISIGroupServerMainThread); }
@@ -587,12 +602,6 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
 @end
 
 static NSArray *uidsFromString(NSString *uidString) {
-    NSCharacterSet *uidCharSet = nil;
-    if (uidCharSet == nil) {
-        NSMutableCharacterSet *mutableSet = [NSMutableCharacterSet alphanumericCharacterSet];
-        [mutableSet addCharactersInString:@":"];
-        uidCharSet = [mutableSet copy];
-    }
     NSMutableArray *uids = [NSMutableArray array];
     NSScanner *scanner = [NSScanner scannerWithString:uidString];
     NSString *uid;
@@ -692,14 +701,7 @@ static void addDateStringToDictionary(NSString *value, NSMutableDictionary *pubF
     NSScanner *scanner = nil;
     if (value)
         scanner = [[NSScanner alloc] initWithString:value];
-    static NSCharacterSet *monthSet = nil;
-    if (nil == monthSet) {
-        NSMutableCharacterSet *cset = [[NSCharacterSet letterCharacterSet] mutableCopy];
-        [cset addCharactersInString:@"-"];
-        monthSet = [cset copy];
-        [cset release];
-    }
-    if ([scanner scanCharactersFromSet:monthSet intoString:&monthString]) {
+    if ([scanner scanCharactersFromSet:monthCharSet intoString:&monthString]) {
         if ([monthString rangeOfString:@"-"].length == 0) {
             monthString = [NSString stringWithBibTeXString:[monthString lowercaseString] macroResolver:nil error:NULL];
         } else {
@@ -715,14 +717,6 @@ static void addDateStringToDictionary(NSString *value, NSMutableDictionary *pubF
 static void addAuthorNamesToDictionary(NSArray *names, NSMutableDictionary *pubFields)
 {
     NSMutableString *namesString = nil;
-    static NSCharacterSet *nonUpperChars = nil;
-    if (nonUpperChars == nil) {
-        NSMutableCharacterSet *mutableSet = [NSMutableCharacterSet uppercaseLetterCharacterSet];
-        [mutableSet formUnionWithCharacterSet:[NSCharacterSet nonBaseCharacterSet]];
-        [mutableSet invert];
-        nonUpperChars = [mutableSet copy];
-    }
-    
     for (NSString *name in names) {
         if (namesString == nil)
             namesString = [NSMutableString string];
@@ -734,7 +728,7 @@ static void addAuthorNamesToDictionary(NSArray *names, NSMutableDictionary *pubF
         if (range.location != NSNotFound) {
             range = NSMakeRange(NSMaxRange(range), [name length] - NSMaxRange(range));
             // if there are lower case letters or periods, don't mess with it
-            if (range.length > 0 && [name rangeOfCharacterFromSet:nonUpperChars options:0 range:range].location == NSNotFound) {
+            if (range.length > 0 && [name rangeOfCharacterFromSet:nonUpperCharSet options:0 range:range].location == NSNotFound) {
                 NSUInteger idx = range.location + [namesString length] - [name length];
                 while (YES) {
                     idx = NSMaxRange([namesString rangeOfComposedCharacterSequenceAtIndex:idx]);
