@@ -66,7 +66,7 @@
 
 // these should correspond to the items in the popups set in IB
 static NSString *presetFormatStrings[] = {@"%l%n0%e", @"%a1/%Y%u0%e", @"%a1/%T5%n0%e"};
-static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", @"%P0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%L", @"%l", @"%e", @"%b", @"%f{}0", @"%w{}[ ]0", @"%s{}[][][]0", @"%c{}", @"%f{Cite Key}", @"%f{BibTeX Type}", @"%i{}0", @"%u0", @"%U0", @"%n0", @"%0", @"%%"};
+static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", @"%P0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%L", @"%l", @"%e", @"%E", @"%b", @"%f{}0", @"%w{}[ ]0", @"%s{}[][][]0", @"%c{}", @"%f{Cite Key}", @"%f{BibTeX Type}", @"%i{}0", @"%u0", @"%U0", @"%n0", @"%0", @"%%"};
 
 - (void)dealloc{
     BDSKDESTROY(lastPapersFolderPath);
@@ -96,6 +96,9 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
     
     [previewDisplay setStringValue:[[BDSKPreviewItem sharedItem] displayText]];
     [previewDisplay sizeToFit];
+    
+	[[formatRepositoryPopUp cell] setUsesItemFromMenu:NO];
+	[[formatRepositoryPopUp cell] setMenuItem:[formatRepositoryPopUp itemAtIndex:0]];
     
     [self updateUI];
 }

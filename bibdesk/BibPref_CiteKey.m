@@ -88,6 +88,9 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
     [previewDisplay setStringValue:[[BDSKPreviewItem sharedItem] displayText]];
     [previewDisplay sizeToFit];
     
+	[[formatRepositoryPopUp cell] setUsesItemFromMenu:NO];
+	[[formatRepositoryPopUp cell] setMenuItem:[formatRepositoryPopUp itemAtIndex:0]];
+    
     [self updateUI];
 }
 
