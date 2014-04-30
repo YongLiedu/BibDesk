@@ -71,7 +71,7 @@ static NSString *ISIURLFieldName = nil;
 
 static NSSet *WOSEditions = nil;
 
-static NSCharacterSet *monthCharSet = nil;
+static NSCharacterSet *nonMonthCharSet = nil;
 static NSCharacterSet *nonUpperCharSet = nil;
 static NSCharacterSet *uidCharSet = nil;
 
@@ -123,7 +123,8 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
     
     NSMutableCharacterSet *mutableSet = [NSMutableCharacterSet letterCharacterSet];
     [mutableSet addCharactersInString:@"-"];
-    monthCharSet = [mutableSet copy];
+    [mutableSet invert];
+    nonMonthCharSet = [mutableSet copy];
     mutableSet = [NSMutableCharacterSet uppercaseLetterCharacterSet];
     [mutableSet formUnionWithCharacterSet:[NSCharacterSet nonBaseCharacterSet]];
     [mutableSet invert];
@@ -694,20 +695,18 @@ static void addDateStringToDictionary(NSString *value, NSMutableDictionary *pubF
 {
     // There are at least 3 variants of this, so it's not always possible to get something truly useful from it.
     // "AUG", "JUN 19", "MAR-APR"	
-    NSString *monthString;
-    NSScanner *scanner = nil;
-    if (value)
-        scanner = [[NSScanner alloc] initWithString:value];
-    if ([scanner scanCharactersFromSet:monthCharSet intoString:&monthString]) {
-        if ([monthString rangeOfString:@"-"].length == 0)
-            monthString = [[BDSKMacroResolver defaultMacroResolver] valueOfMacro:monthString] ?: [monthString capitalizedString];
+    NSUInteger idx = [value rangeOfCharacterFromSet:nonMonthCharSet].location;
+    NSString *field = BDSKDateString;
+    if (value && idx > 0) {
+        if (idx != NSNotFound)
+            value = [value substringToIndex:idx];
+        if ([value rangeOfString:@"-"].location == NSNotFound)
+            value = [[BDSKMacroResolver defaultMacroResolver] valueOfMacro:value] ?: [value capitalizedString];
         else
-            monthString = [monthString capitalizedString];
-        addStringToDictionaryIfNotNil(monthString, BDSKMonthString, pubFields);
-    } else {
-        addStringToDictionaryIfNotNil(value, BDSKDateString, pubFields);
+            value = [value capitalizedString];
+        field = BDSKMonthString;
     }
-    [scanner release];
+    addStringToDictionaryIfNotNil(value, field, pubFields);
 }
 
 static void addAuthorNamesToDictionary(NSArray *names, NSMutableDictionary *pubFields)
