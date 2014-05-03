@@ -539,7 +539,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                     [sessionCookie release];
                     sessionCookie = nil;
                 }
-                [self setErrorMessage:errorString ?: NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.")];
+                [self setErrorMessage:errorString ?: [[response error] localizedDescription] ?: NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.")];
             }
         }
         
