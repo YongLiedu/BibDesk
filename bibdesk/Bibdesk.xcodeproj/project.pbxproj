@@ -38,17 +38,11 @@
 		2730078107CF20B500F2E485 /* BDSKComplexStringEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2730077A07CF20B500F2E485 /* BDSKComplexStringEditor.m */; };
 		2730078307CF20B500F2E485 /* BDSKMacroWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2730077C07CF20B500F2E485 /* BDSKMacroWindowController.m */; };
 		27AFAF9D080D1E1B0096F5D2 /* BDSKTextImportController.m in Sources */ = {isa = PBXBuildFile; fileRef = 27AFAF9B080D1E1B0096F5D2 /* BDSKTextImportController.m */; };
-		3B91DD49162225850088206D /* NSDate+ISO8601Parsing.h in Headers */ = {isa = PBXBuildFile; fileRef = 3B91DD3D162225850088206D /* NSDate+ISO8601Parsing.h */; };
 		3B91DD4A162225850088206D /* NSDate+ISO8601Parsing.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD3E162225850088206D /* NSDate+ISO8601Parsing.m */; };
-		3B91DD4B162225850088206D /* NSDate+ISO8601Unparsing.h in Headers */ = {isa = PBXBuildFile; fileRef = 3B91DD3F162225850088206D /* NSDate+ISO8601Unparsing.h */; };
 		3B91DD4C162225850088206D /* NSDate+ISO8601Unparsing.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD40162225850088206D /* NSDate+ISO8601Unparsing.m */; };
-		3B91DD4D162225850088206D /* USAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = 3B91DD41162225850088206D /* USAdditions.h */; };
 		3B91DD4E162225850088206D /* USAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD42162225850088206D /* USAdditions.m */; };
-		3B91DD4F162225850088206D /* USGlobals.h in Headers */ = {isa = PBXBuildFile; fileRef = 3B91DD43162225850088206D /* USGlobals.h */; };
 		3B91DD50162225850088206D /* USGlobals.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD44162225850088206D /* USGlobals.m */; };
-		3B91DD51162225850088206D /* WOKMWSAuthenticateService.h in Headers */ = {isa = PBXBuildFile; fileRef = 3B91DD45162225850088206D /* WOKMWSAuthenticateService.h */; };
 		3B91DD52162225850088206D /* WOKMWSAuthenticateService.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD46162225850088206D /* WOKMWSAuthenticateService.m */; };
-		3B91DD53162225850088206D /* WokSearchService.h in Headers */ = {isa = PBXBuildFile; fileRef = 3B91DD47162225850088206D /* WokSearchService.h */; };
 		3B91DD54162225850088206D /* WokSearchService.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD48162225850088206D /* WokSearchService.m */; };
 		3B91DD56162229B70088206D /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B91DD55162229B70088206D /* libxml2.dylib */; };
 		3D0D76B3084898C100A495A5 /* BibPref_Crossref.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D0D76B1084898C100A495A5 /* BibPref_Crossref.m */; };
@@ -292,7 +286,6 @@
 		CEB5D6411072AE360001C135 /* TextImport.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEB5D6041072AE360001C135 /* TextImport.xib */; };
 		CEBB8D8809C8B0D90074C79E /* Font.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEBB8D8709C8B0D90074C79E /* Font.tiff */; };
 		CEBC676F0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEBC676D0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m */; };
-		CEBF7AE718F2EB6300012ECD /* WokSearchLiteService.h in Headers */ = {isa = PBXBuildFile; fileRef = CEBF7AE518F2EB6300012ECD /* WokSearchLiteService.h */; };
 		CEBF7AE818F2EB6300012ECD /* WokSearchLiteService.m in Sources */ = {isa = PBXBuildFile; fileRef = CEBF7AE618F2EB6300012ECD /* WokSearchLiteService.m */; };
 		CEC1CEA80F51D2CE00D18921 /* BDSKReadWriteLock.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC1CEA60F51D2CE00D18921 /* BDSKReadWriteLock.m */; };
 		CEC46E311629743200B51A9D /* NSPasteboard_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC46E2F1629743200B51A9D /* NSPasteboard_BDSKExtensions.m */; };
@@ -2910,13 +2903,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				3B91DD49162225850088206D /* NSDate+ISO8601Parsing.h in Headers */,
-				3B91DD4B162225850088206D /* NSDate+ISO8601Unparsing.h in Headers */,
-				3B91DD4D162225850088206D /* USAdditions.h in Headers */,
-				3B91DD4F162225850088206D /* USGlobals.h in Headers */,
-				3B91DD51162225850088206D /* WOKMWSAuthenticateService.h in Headers */,
-				3B91DD53162225850088206D /* WokSearchService.h in Headers */,
-				CEBF7AE718F2EB6300012ECD /* WokSearchLiteService.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
