@@ -1,25 +1,6 @@
 #import "WOKMWSAuthenticateService.h"
-#import <libxml/xmlstring.h>
-#if TARGET_OS_IPHONE
-#import <CFNetwork/CFNetwork.h>
-#endif
-@implementation WOKMWSAuthenticateService_authenticate
-- (id)init
-{
-	if((self = [super init])) {
-	}
-	
-	return self;
-}
-- (void)dealloc
-{
-	
-	[super dealloc];
-}
-- (NSString *)nsPrefix
-{
-	return @"WOKMWSAuthenticateService";
-}
+
+@implementation WOKMWSAuthenticateServiceElement
 - (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix
 {
 	NSString *nodeName = nil;
@@ -29,56 +10,39 @@
 	}
 	else
 	{
-		nodeName = [NSString stringWithFormat:@"%@:%@", @"WOKMWSAuthenticateService", elName];
+		nodeName = elName;
 	}
 	
 	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
 	
-	
-	[self addAttributesToNode:node];
-	
+	[self addElementsToNode:node];
 	
 	return node;
 }
-- (void)addAttributesToNode:(xmlNodePtr)node
-{
-	
-}
 - (void)addElementsToNode:(xmlNodePtr)node
 {
-	
 }
-/* elements */
-/* attributes */
-- (NSDictionary *)attributes
++ (id)deserializeNode:(xmlNodePtr)cur
 {
-	NSMutableDictionary *attributes = [NSMutableDictionary dictionary];
+	id newObject = [[self new] autorelease];
 	
-	return attributes;
-}
-+ (WOKMWSAuthenticateService_authenticate *)deserializeNode:(xmlNodePtr)cur
-{
-	WOKMWSAuthenticateService_authenticate *newObject = [[WOKMWSAuthenticateService_authenticate new] autorelease];
-	
-	[newObject deserializeAttributesFromNode:cur];
 	[newObject deserializeElementsFromNode:cur];
 	
 	return newObject;
 }
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur
-{
-}
 - (void)deserializeElementsFromNode:(xmlNodePtr)cur
 {
-	
-	
 }
 @end
+
+@implementation WOKMWSAuthenticateService_authenticate
+@end
+
 @implementation WOKMWSAuthenticateService_authenticateResponse
 - (id)init
 {
 	if((self = [super init])) {
-		return_ = 0;
+		return_ = nil;
 	}
 	
 	return self;
@@ -89,695 +53,57 @@
 	
 	[super dealloc];
 }
-- (NSString *)nsPrefix
-{
-	return @"WOKMWSAuthenticateService";
-}
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix
-{
-	NSString *nodeName = nil;
-	if(elNSPrefix != nil && [elNSPrefix length] > 0)
-	{
-		nodeName = [NSString stringWithFormat:@"%@:%@", elNSPrefix, elName];
-	}
-	else
-	{
-		nodeName = [NSString stringWithFormat:@"%@:%@", @"WOKMWSAuthenticateService", elName];
-	}
-	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
-	
-	
-	[self addAttributesToNode:node];
-	
-	[self addElementsToNode:node];
-	
-	return node;
-}
-- (void)addAttributesToNode:(xmlNodePtr)node
-{
-	
-}
 - (void)addElementsToNode:(xmlNodePtr)node
 {
-	
-	if(self.return_ != 0) {
-		xmlAddChild(node, [self.return_ xmlNodeForDoc:node->doc elementName:@"return" elementNSPrefix:@"WOKMWSAuthenticateService"]);
+	if(self.return_!= nil) {
+		xmlAddChild(node, [self.return_ xmlNodeForDoc:node->doc elementName:@"return" elementNSPrefix:nil]);
 	}
 }
-/* elements */
 @synthesize return_;
-/* attributes */
-- (NSDictionary *)attributes
-{
-	NSMutableDictionary *attributes = [NSMutableDictionary dictionary];
-	
-	return attributes;
-}
-+ (WOKMWSAuthenticateService_authenticateResponse *)deserializeNode:(xmlNodePtr)cur
-{
-	WOKMWSAuthenticateService_authenticateResponse *newObject = [[WOKMWSAuthenticateService_authenticateResponse new] autorelease];
-	
-	[newObject deserializeAttributesFromNode:cur];
-	[newObject deserializeElementsFromNode:cur];
-	
-	return newObject;
-}
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur
-{
-}
 - (void)deserializeElementsFromNode:(xmlNodePtr)cur
 {
-	
-	
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
-			xmlChar *elementText = xmlNodeListGetString(cur->doc, cur->children, 1);
-			NSString *elementString = nil;
-			
-			if(elementText != NULL) {
-				elementString = [NSString stringWithCString:(char*)elementText encoding:NSUTF8StringEncoding];
-				[elementString self]; // avoid compiler warning for unused var
-				xmlFree(elementText);
-			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "return")) {
-				
-				Class elementClass = nil;
-				xmlChar *instanceType = xmlGetNsProp(cur, (const xmlChar *) "type", (const xmlChar *) "http://www.w3.org/2001/XMLSchema-instance");
-				if(instanceType == NULL) {
-					elementClass = [NSString  class];
-				} else {
-					NSString *elementTypeString = [NSString stringWithCString:(char*)instanceType encoding:NSUTF8StringEncoding];
-					
-					NSArray *elementTypeArray = [elementTypeString componentsSeparatedByString:@":"];
-					
-					NSString *elementClassString = nil;
-					if([elementTypeArray count] > 1) {
-						NSString *prefix = [elementTypeArray objectAtIndex:0];
-						NSString *localName = [elementTypeArray objectAtIndex:1];
-						
-						xmlNsPtr elementNamespace = xmlSearchNs(cur->doc, cur, [prefix xmlCString]);
-						
-						NSString *standardPrefix = [[USGlobals sharedInstance].wsdlStandardNamespaces objectForKey:[NSString stringWithCString:(char*)elementNamespace->href encoding:NSUTF8StringEncoding]];
-						
-						elementClassString = [NSString stringWithFormat:@"%@_%@", standardPrefix, localName];
-					} else {
-						elementClassString = [elementTypeString stringByReplacingOccurrencesOfString:@":" withString:@"_" options:0 range:NSMakeRange(0, [elementTypeString length])];
-					}
-					
-					elementClass = NSClassFromString(elementClassString);
-					xmlFree(instanceType);
-				}
-				
-				id newChild = [elementClass deserializeNode:cur];
-				
+				id newChild = [NSString deserializeNode:cur];
 				self.return_ = newChild;
 			}
 		}
 	}
 }
 @end
+
 @implementation WOKMWSAuthenticateService_closeSession
-- (id)init
-{
-	if((self = [super init])) {
-	}
-	
-	return self;
-}
-- (void)dealloc
-{
-	
-	[super dealloc];
-}
-- (NSString *)nsPrefix
-{
-	return @"WOKMWSAuthenticateService";
-}
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix
-{
-	NSString *nodeName = nil;
-	if(elNSPrefix != nil && [elNSPrefix length] > 0)
-	{
-		nodeName = [NSString stringWithFormat:@"%@:%@", elNSPrefix, elName];
-	}
-	else
-	{
-		nodeName = [NSString stringWithFormat:@"%@:%@", @"WOKMWSAuthenticateService", elName];
-	}
-	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
-	
-	
-	[self addAttributesToNode:node];
-	
-	
-	return node;
-}
-- (void)addAttributesToNode:(xmlNodePtr)node
-{
-	
-}
-- (void)addElementsToNode:(xmlNodePtr)node
-{
-	
-}
-/* elements */
-/* attributes */
-- (NSDictionary *)attributes
-{
-	NSMutableDictionary *attributes = [NSMutableDictionary dictionary];
-	
-	return attributes;
-}
-+ (WOKMWSAuthenticateService_closeSession *)deserializeNode:(xmlNodePtr)cur
-{
-	WOKMWSAuthenticateService_closeSession *newObject = [[WOKMWSAuthenticateService_closeSession new] autorelease];
-	
-	[newObject deserializeAttributesFromNode:cur];
-	[newObject deserializeElementsFromNode:cur];
-	
-	return newObject;
-}
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur
-{
-}
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
-{
-	
-	
-}
 @end
+
 @implementation WOKMWSAuthenticateService_closeSessionResponse
-- (id)init
-{
-	if((self = [super init])) {
-	}
-	
-	return self;
-}
-- (void)dealloc
-{
-	
-	[super dealloc];
-}
-- (NSString *)nsPrefix
-{
-	return @"WOKMWSAuthenticateService";
-}
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix
-{
-	NSString *nodeName = nil;
-	if(elNSPrefix != nil && [elNSPrefix length] > 0)
-	{
-		nodeName = [NSString stringWithFormat:@"%@:%@", elNSPrefix, elName];
-	}
-	else
-	{
-		nodeName = [NSString stringWithFormat:@"%@:%@", @"WOKMWSAuthenticateService", elName];
-	}
-	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
-	
-	
-	[self addAttributesToNode:node];
-	
-	
-	return node;
-}
-- (void)addAttributesToNode:(xmlNodePtr)node
-{
-	
-}
-- (void)addElementsToNode:(xmlNodePtr)node
-{
-	
-}
-/* elements */
-/* attributes */
-- (NSDictionary *)attributes
-{
-	NSMutableDictionary *attributes = [NSMutableDictionary dictionary];
-	
-	return attributes;
-}
-+ (WOKMWSAuthenticateService_closeSessionResponse *)deserializeNode:(xmlNodePtr)cur
-{
-	WOKMWSAuthenticateService_closeSessionResponse *newObject = [[WOKMWSAuthenticateService_closeSessionResponse new] autorelease];
-	
-	[newObject deserializeAttributesFromNode:cur];
-	[newObject deserializeElementsFromNode:cur];
-	
-	return newObject;
-}
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur
-{
-}
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
-{
-	
-	
-}
 @end
+
 @implementation WOKMWSAuthenticateService_InternalServerException
-- (id)init
-{
-	if((self = [super init])) {
-	}
-	
-	return self;
-}
-- (void)dealloc
-{
-	
-	[super dealloc];
-}
-- (NSString *)nsPrefix
-{
-	return @"WOKMWSAuthenticateService";
-}
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix
-{
-	NSString *nodeName = nil;
-	if(elNSPrefix != nil && [elNSPrefix length] > 0)
-	{
-		nodeName = [NSString stringWithFormat:@"%@:%@", elNSPrefix, elName];
-	}
-	else
-	{
-		nodeName = [NSString stringWithFormat:@"%@:%@", @"WOKMWSAuthenticateService", elName];
-	}
-	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
-	
-	
-	[self addAttributesToNode:node];
-	
-	
-	return node;
-}
-- (void)addAttributesToNode:(xmlNodePtr)node
-{
-	
-}
-- (void)addElementsToNode:(xmlNodePtr)node
-{
-	
-}
-/* elements */
-/* attributes */
-- (NSDictionary *)attributes
-{
-	NSMutableDictionary *attributes = [NSMutableDictionary dictionary];
-	
-	return attributes;
-}
-+ (WOKMWSAuthenticateService_InternalServerException *)deserializeNode:(xmlNodePtr)cur
-{
-	WOKMWSAuthenticateService_InternalServerException *newObject = [[WOKMWSAuthenticateService_InternalServerException new] autorelease];
-	
-	[newObject deserializeAttributesFromNode:cur];
-	[newObject deserializeElementsFromNode:cur];
-	
-	return newObject;
-}
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur
-{
-}
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
-{
-	
-	
-}
 @end
+
 @implementation WOKMWSAuthenticateService_ESTIWSException
-- (id)init
-{
-	if((self = [super init])) {
-	}
-	
-	return self;
-}
-- (void)dealloc
-{
-	
-	[super dealloc];
-}
-- (NSString *)nsPrefix
-{
-	return @"WOKMWSAuthenticateService";
-}
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix
-{
-	NSString *nodeName = nil;
-	if(elNSPrefix != nil && [elNSPrefix length] > 0)
-	{
-		nodeName = [NSString stringWithFormat:@"%@:%@", elNSPrefix, elName];
-	}
-	else
-	{
-		nodeName = [NSString stringWithFormat:@"%@:%@", @"WOKMWSAuthenticateService", elName];
-	}
-	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
-	
-	
-	[self addAttributesToNode:node];
-	
-	
-	return node;
-}
-- (void)addAttributesToNode:(xmlNodePtr)node
-{
-	
-}
-- (void)addElementsToNode:(xmlNodePtr)node
-{
-	
-}
-/* elements */
-/* attributes */
-- (NSDictionary *)attributes
-{
-	NSMutableDictionary *attributes = [NSMutableDictionary dictionary];
-	
-	return attributes;
-}
-+ (WOKMWSAuthenticateService_ESTIWSException *)deserializeNode:(xmlNodePtr)cur
-{
-	WOKMWSAuthenticateService_ESTIWSException *newObject = [[WOKMWSAuthenticateService_ESTIWSException new] autorelease];
-	
-	[newObject deserializeAttributesFromNode:cur];
-	[newObject deserializeElementsFromNode:cur];
-	
-	return newObject;
-}
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur
-{
-}
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
-{
-	
-	
-}
 @end
+
 @implementation WOKMWSAuthenticateService_SessionException
-- (id)init
-{
-	if((self = [super init])) {
-	}
-	
-	return self;
-}
-- (void)dealloc
-{
-	
-	[super dealloc];
-}
-- (NSString *)nsPrefix
-{
-	return @"WOKMWSAuthenticateService";
-}
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix
-{
-	NSString *nodeName = nil;
-	if(elNSPrefix != nil && [elNSPrefix length] > 0)
-	{
-		nodeName = [NSString stringWithFormat:@"%@:%@", elNSPrefix, elName];
-	}
-	else
-	{
-		nodeName = [NSString stringWithFormat:@"%@:%@", @"WOKMWSAuthenticateService", elName];
-	}
-	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
-	
-	
-	[self addAttributesToNode:node];
-	
-	
-	return node;
-}
-- (void)addAttributesToNode:(xmlNodePtr)node
-{
-	
-}
-- (void)addElementsToNode:(xmlNodePtr)node
-{
-	
-}
-/* elements */
-/* attributes */
-- (NSDictionary *)attributes
-{
-	NSMutableDictionary *attributes = [NSMutableDictionary dictionary];
-	
-	return attributes;
-}
-+ (WOKMWSAuthenticateService_SessionException *)deserializeNode:(xmlNodePtr)cur
-{
-	WOKMWSAuthenticateService_SessionException *newObject = [[WOKMWSAuthenticateService_SessionException new] autorelease];
-	
-	[newObject deserializeAttributesFromNode:cur];
-	[newObject deserializeElementsFromNode:cur];
-	
-	return newObject;
-}
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur
-{
-}
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
-{
-	
-	
-}
 @end
+
 @implementation WOKMWSAuthenticateService_AuthenticationException
-- (id)init
-{
-	if((self = [super init])) {
-	}
-	
-	return self;
-}
-- (void)dealloc
-{
-	
-	[super dealloc];
-}
-- (NSString *)nsPrefix
-{
-	return @"WOKMWSAuthenticateService";
-}
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix
-{
-	NSString *nodeName = nil;
-	if(elNSPrefix != nil && [elNSPrefix length] > 0)
-	{
-		nodeName = [NSString stringWithFormat:@"%@:%@", elNSPrefix, elName];
-	}
-	else
-	{
-		nodeName = [NSString stringWithFormat:@"%@:%@", @"WOKMWSAuthenticateService", elName];
-	}
-	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
-	
-	
-	[self addAttributesToNode:node];
-	
-	
-	return node;
-}
-- (void)addAttributesToNode:(xmlNodePtr)node
-{
-	
-}
-- (void)addElementsToNode:(xmlNodePtr)node
-{
-	
-}
-/* elements */
-/* attributes */
-- (NSDictionary *)attributes
-{
-	NSMutableDictionary *attributes = [NSMutableDictionary dictionary];
-	
-	return attributes;
-}
-+ (WOKMWSAuthenticateService_AuthenticationException *)deserializeNode:(xmlNodePtr)cur
-{
-	WOKMWSAuthenticateService_AuthenticationException *newObject = [[WOKMWSAuthenticateService_AuthenticationException new] autorelease];
-	
-	[newObject deserializeAttributesFromNode:cur];
-	[newObject deserializeElementsFromNode:cur];
-	
-	return newObject;
-}
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur
-{
-}
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
-{
-	
-	
-}
 @end
+
 @implementation WOKMWSAuthenticateService_QueryException
-- (id)init
-{
-	if((self = [super init])) {
-	}
-	
-	return self;
-}
-- (void)dealloc
-{
-	
-	[super dealloc];
-}
-- (NSString *)nsPrefix
-{
-	return @"WOKMWSAuthenticateService";
-}
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix
-{
-	NSString *nodeName = nil;
-	if(elNSPrefix != nil && [elNSPrefix length] > 0)
-	{
-		nodeName = [NSString stringWithFormat:@"%@:%@", elNSPrefix, elName];
-	}
-	else
-	{
-		nodeName = [NSString stringWithFormat:@"%@:%@", @"WOKMWSAuthenticateService", elName];
-	}
-	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
-	
-	
-	[self addAttributesToNode:node];
-	
-	
-	return node;
-}
-- (void)addAttributesToNode:(xmlNodePtr)node
-{
-	
-}
-- (void)addElementsToNode:(xmlNodePtr)node
-{
-	
-}
-/* elements */
-/* attributes */
-- (NSDictionary *)attributes
-{
-	NSMutableDictionary *attributes = [NSMutableDictionary dictionary];
-	
-	return attributes;
-}
-+ (WOKMWSAuthenticateService_QueryException *)deserializeNode:(xmlNodePtr)cur
-{
-	WOKMWSAuthenticateService_QueryException *newObject = [[WOKMWSAuthenticateService_QueryException new] autorelease];
-	
-	[newObject deserializeAttributesFromNode:cur];
-	[newObject deserializeElementsFromNode:cur];
-	
-	return newObject;
-}
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur
-{
-}
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
-{
-	
-	
-}
 @end
+
 @implementation WOKMWSAuthenticateService_InvalidInputException
-- (id)init
-{
-	if((self = [super init])) {
-	}
-	
-	return self;
-}
-- (void)dealloc
-{
-	
-	[super dealloc];
-}
-- (NSString *)nsPrefix
-{
-	return @"WOKMWSAuthenticateService";
-}
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix
-{
-	NSString *nodeName = nil;
-	if(elNSPrefix != nil && [elNSPrefix length] > 0)
-	{
-		nodeName = [NSString stringWithFormat:@"%@:%@", elNSPrefix, elName];
-	}
-	else
-	{
-		nodeName = [NSString stringWithFormat:@"%@:%@", @"WOKMWSAuthenticateService", elName];
-	}
-	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
-	
-	
-	[self addAttributesToNode:node];
-	
-	
-	return node;
-}
-- (void)addAttributesToNode:(xmlNodePtr)node
-{
-	
-}
-- (void)addElementsToNode:(xmlNodePtr)node
-{
-	
-}
-/* elements */
-/* attributes */
-- (NSDictionary *)attributes
-{
-	NSMutableDictionary *attributes = [NSMutableDictionary dictionary];
-	
-	return attributes;
-}
-+ (WOKMWSAuthenticateService_InvalidInputException *)deserializeNode:(xmlNodePtr)cur
-{
-	WOKMWSAuthenticateService_InvalidInputException *newObject = [[WOKMWSAuthenticateService_InvalidInputException new] autorelease];
-	
-	[newObject deserializeAttributesFromNode:cur];
-	[newObject deserializeElementsFromNode:cur];
-	
-	return newObject;
-}
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur
-{
-}
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
-{
-	
-	
-}
 @end
+
 @implementation WOKMWSAuthenticateService
-+ (void)initialize
-{
-	[[USGlobals sharedInstance].wsdlStandardNamespaces setObject:@"xs" forKey:@"http://www.w3.org/2001/XMLSchema"];
-	[[USGlobals sharedInstance].wsdlStandardNamespaces setObject:@"WOKMWSAuthenticateService" forKey:@"http://auth.cxf.wokmws.thomsonreuters.com"];
-	[[USGlobals sharedInstance].wsdlStandardNamespaces setObject:@"wsdl" forKey:@"http://schemas.xmlsoap.org/wsdl/"];
-	[[USGlobals sharedInstance].wsdlStandardNamespaces setObject:@"soap" forKey:@"http://schemas.xmlsoap.org/wsdl/soap/"];
-}
 + (WOKMWSAuthenticateServiceSoapBinding *)WOKMWSAuthenticateServiceSoapBinding
 {
 	return [[[WOKMWSAuthenticateServiceSoapBinding alloc] initWithAddress:@"http://search.webofknowledge.com/esti/wokmws/ws/WOKMWSAuthenticate"] autorelease];
 }
 @end
+
 @implementation WOKMWSAuthenticateServiceSoapBinding
 @synthesize address;
 @synthesize defaultTimeout;
@@ -812,8 +138,10 @@
 		[cookies addObject:toAdd];
 	}
 }
-- (WOKMWSAuthenticateServiceSoapBindingResponse *)performSynchronousOperation:(WOKMWSAuthenticateServiceSoapBindingOperation *)operation
+- (WOKMWSAuthenticateServiceSoapBindingResponse *)performSynchronousOperationWithBodyElements:(NSDictionary *)bodyElements
 {
+	WOKMWSAuthenticateServiceSoapBindingOperation *operation = [[[WOKMWSAuthenticateServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements] autorelease];
+	
 	synchronousOperationComplete = NO;
 	[operation start];
 	
@@ -823,8 +151,10 @@
 	while (!synchronousOperationComplete && [theRL runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]]);
 	return operation.response;
 }
-- (void)performAsynchronousOperation:(WOKMWSAuthenticateServiceSoapBindingOperation *)operation
+- (void)performAsynchronousOperationWithBodyElements:(NSDictionary *)bodyElements delegate:(id<WOKMWSAuthenticateServiceSoapBindingResponseDelegate>)responseDelegate
 {
+	WOKMWSAuthenticateServiceSoapBindingOperation *operation = [[[WOKMWSAuthenticateServiceSoapBindingOperation alloc] initWithBinding:self delegate:responseDelegate bodyElements:bodyElements] autorelease];
+	
 	[operation start];
 }
 - (void) operation:(WOKMWSAuthenticateServiceSoapBindingOperation *)operation completedWithResponse:(WOKMWSAuthenticateServiceSoapBindingResponse *)response
@@ -833,27 +163,23 @@
 }
 - (WOKMWSAuthenticateServiceSoapBindingResponse *)authenticateUsingParameters:(WOKMWSAuthenticateService_authenticate *)aParameters 
 {
-	return [self performSynchronousOperation:[[(WOKMWSAuthenticateServiceSoapBinding_authenticate*)[WOKMWSAuthenticateServiceSoapBinding_authenticate alloc] initWithBinding:self delegate:self
-																							parameters:aParameters
-																							] autorelease]];
+	NSDictionary *bodyElements = [NSDictionary dictionaryWithObject:aParameters forKey:@"authenticate"];
+	return [self performSynchronousOperationWithBodyElements:bodyElements];
 }
 - (void)authenticateAsyncUsingParameters:(WOKMWSAuthenticateService_authenticate *)aParameters  delegate:(id<WOKMWSAuthenticateServiceSoapBindingResponseDelegate>)responseDelegate
 {
-	[self performAsynchronousOperation: [[(WOKMWSAuthenticateServiceSoapBinding_authenticate*)[WOKMWSAuthenticateServiceSoapBinding_authenticate alloc] initWithBinding:self delegate:responseDelegate
-																							 parameters:aParameters
-																							 ] autorelease]];
+	NSDictionary *bodyElements = [NSDictionary dictionaryWithObject:aParameters forKey:@"authenticate"];
+	[self performAsynchronousOperationWithBodyElements:bodyElements delegate:responseDelegate];
 }
 - (WOKMWSAuthenticateServiceSoapBindingResponse *)closeSessionUsingParameters:(WOKMWSAuthenticateService_closeSession *)aParameters 
 {
-	return [self performSynchronousOperation:[[(WOKMWSAuthenticateServiceSoapBinding_closeSession*)[WOKMWSAuthenticateServiceSoapBinding_closeSession alloc] initWithBinding:self delegate:self
-																							parameters:aParameters
-																							] autorelease]];
+	NSDictionary *bodyElements = [NSDictionary dictionaryWithObject:aParameters forKey:@"closeSession"];
+	return [self performSynchronousOperationWithBodyElements:bodyElements];
 }
 - (void)closeSessionAsyncUsingParameters:(WOKMWSAuthenticateService_closeSession *)aParameters  delegate:(id<WOKMWSAuthenticateServiceSoapBindingResponseDelegate>)responseDelegate
 {
-	[self performAsynchronousOperation: [[(WOKMWSAuthenticateServiceSoapBinding_closeSession*)[WOKMWSAuthenticateServiceSoapBinding_closeSession alloc] initWithBinding:self delegate:responseDelegate
-																							 parameters:aParameters
-																							 ] autorelease]];
+	NSDictionary *bodyElements = [NSDictionary dictionaryWithObject:aParameters forKey:@"closeSession"];
+	[self performAsynchronousOperationWithBodyElements:bodyElements delegate:responseDelegate];
 }
 - (void)sendHTTPCallUsingBody:(NSString *)outputBody soapAction:(NSString *)soapAction forOperation:(WOKMWSAuthenticateServiceSoapBindingOperation *)operation
 {
@@ -895,16 +221,19 @@
 	[super dealloc];
 }
 @end
+
 @implementation WOKMWSAuthenticateServiceSoapBindingOperation
 @synthesize binding;
+@synthesize bodyElements;
 @synthesize response;
 @synthesize delegate;
 @synthesize responseData;
 @synthesize urlConnection;
-- (id)initWithBinding:(WOKMWSAuthenticateServiceSoapBinding *)aBinding delegate:(id<WOKMWSAuthenticateServiceSoapBindingResponseDelegate>)aDelegate
+- (id)initWithBinding:(WOKMWSAuthenticateServiceSoapBinding *)aBinding delegate:(id<WOKMWSAuthenticateServiceSoapBindingResponseDelegate>)aDelegate bodyElements:(NSDictionary *)aBodyElements
 {
 	if ((self = [super init])) {
 		self.binding = aBinding;
+		self.bodyElements = aBodyElements;
 		response = nil;
 		self.delegate = aDelegate;
 		self.responseData = nil;
@@ -913,7 +242,18 @@
 	
 	return self;
 }
--(void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+- (void)main
+{
+	[response autorelease];
+	response = [WOKMWSAuthenticateServiceSoapBindingResponse new];
+	
+	WOKMWSAuthenticateServiceSoapBinding_envelope *envelope = [WOKMWSAuthenticateServiceSoapBinding_envelope sharedInstance];
+	
+	NSString *operationXMLString = [envelope serializedFormUsingHeaderElements:nil bodyElements:bodyElements];
+	
+	[binding sendHTTPCallUsingBody:operationXMLString soapAction:@"" forOperation:self];
+}
+- (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
 	if ([challenge previousFailureCount] == 0) {
 		NSURLCredential *newCredential;
@@ -980,9 +320,68 @@
 	response.error = error;
 	[delegate operation:self completedWithResponse:response];
 }
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection
+{
+	if (responseData != nil && delegate != nil)
+	{
+		xmlDocPtr doc;
+		xmlNodePtr cur;
+		
+		if (binding.logXMLInOut) {
+			NSLog(@"ResponseBody:\n%@", [[[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding] autorelease]);
+		}
+		
+		doc = xmlParseMemory([responseData bytes], [responseData length]);
+		
+		if (doc == NULL) {
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"Errors while parsing returned XML" forKey:NSLocalizedDescriptionKey];
+			
+			response.error = [NSError errorWithDomain:@"WOKMWSAuthenticateServiceSoapBindingResponseXML" code:1 userInfo:userInfo];
+			[delegate operation:self completedWithResponse:response];
+		} else {
+			cur = xmlDocGetRootElement(doc);
+			cur = cur->children;
+			
+			for( ; cur != NULL ; cur = cur->next) {
+				if(cur->type == XML_ELEMENT_NODE) {
+					
+					if(xmlStrEqual(cur->name, (const xmlChar *) "Body")) {
+						NSMutableArray *responseBodyParts = [NSMutableArray array];
+						
+						xmlNodePtr bodyNode;
+						for(bodyNode=cur->children ; bodyNode != NULL ; bodyNode = bodyNode->next) {
+							if(cur->type == XML_ELEMENT_NODE) {
+								Class responseClass = nil;
+								if (xmlStrEqual(bodyNode->ns->prefix, cur->ns->prefix) && 
+									xmlStrEqual(bodyNode->name, (const xmlChar *) "Fault")) {
+									SOAPFault *bodyObject = [SOAPFault deserializeNode:bodyNode];
+									//NSAssert1(bodyObject != nil, @"Errors while parsing body %s", bodyNode->name);
+									if (bodyObject != nil) [responseBodyParts addObject:bodyObject];
+								}
+								else if((responseClass = NSClassFromString([NSString stringWithFormat:@"%@_%s", @"WOKMWSAuthenticateService", bodyNode->name]))) {
+									id bodyObject = [responseClass deserializeNode:bodyNode];
+									//NSAssert1(bodyObject != nil, @"Errors while parsing body %s", bodyNode->name);
+									if (bodyObject != nil) [responseBodyParts addObject:bodyObject];
+								}
+							}
+						}
+						
+						response.bodyParts = responseBodyParts;
+					}
+				}
+			}
+			
+			xmlFreeDoc(doc);
+		}
+		
+		xmlCleanupParser();
+		[delegate operation:self completedWithResponse:response];
+	}
+}
 - (void)dealloc
 {
 	[binding release];
+	[bodyElements release];
 	[response release];
 	delegate = nil;
 	[responseData release];
@@ -991,192 +390,7 @@
 	[super dealloc];
 }
 @end
-@implementation WOKMWSAuthenticateServiceSoapBinding_authenticate
-@synthesize parameters;
-- (id)initWithBinding:(WOKMWSAuthenticateServiceSoapBinding *)aBinding delegate:(id<WOKMWSAuthenticateServiceSoapBindingResponseDelegate>)responseDelegate
-parameters:(WOKMWSAuthenticateService_authenticate *)aParameters
-{
-	if((self = [super initWithBinding:aBinding delegate:responseDelegate])) {
-		self.parameters = aParameters;
-	}
-	
-	return self;
-}
-- (void)dealloc
-{
-	if(parameters != nil) [parameters release];
-	
-	[super dealloc];
-}
-- (void)main
-{
-	[response autorelease];
-	response = [WOKMWSAuthenticateServiceSoapBindingResponse new];
-	
-	WOKMWSAuthenticateServiceSoapBinding_envelope *envelope = [WOKMWSAuthenticateServiceSoapBinding_envelope sharedInstance];
-	
-	NSMutableDictionary *headerElements = nil;
-	headerElements = [NSMutableDictionary dictionary];
-	
-	NSMutableDictionary *bodyElements = nil;
-	bodyElements = [NSMutableDictionary dictionary];
-	if(parameters != nil) [bodyElements setObject:parameters forKey:@"authenticate"];
-	
-	NSString *operationXMLString = [envelope serializedFormUsingHeaderElements:headerElements bodyElements:bodyElements];
-	
-	[binding sendHTTPCallUsingBody:operationXMLString soapAction:@"" forOperation:self];
-}
-- (void)connectionDidFinishLoading:(NSURLConnection *)connection
-{
-	if (responseData != nil && delegate != nil)
-	{
-		xmlDocPtr doc;
-		xmlNodePtr cur;
-		
-		if (binding.logXMLInOut) {
-			NSLog(@"ResponseBody:\n%@", [[[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding] autorelease]);
-		}
-		
-		doc = xmlParseMemory([responseData bytes], [responseData length]);
-		
-		if (doc == NULL) {
-			NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"Errors while parsing returned XML" forKey:NSLocalizedDescriptionKey];
-			
-			response.error = [NSError errorWithDomain:@"WOKMWSAuthenticateServiceSoapBindingResponseXML" code:1 userInfo:userInfo];
-			[delegate operation:self completedWithResponse:response];
-		} else {
-			cur = xmlDocGetRootElement(doc);
-			cur = cur->children;
-			
-			for( ; cur != NULL ; cur = cur->next) {
-				if(cur->type == XML_ELEMENT_NODE) {
-					
-					if(xmlStrEqual(cur->name, (const xmlChar *) "Body")) {
-						NSMutableArray *responseBodyParts = [NSMutableArray array];
-						
-						xmlNodePtr bodyNode;
-						for(bodyNode=cur->children ; bodyNode != NULL ; bodyNode = bodyNode->next) {
-							if(cur->type == XML_ELEMENT_NODE) {
-								if(xmlStrEqual(bodyNode->name, (const xmlChar *) "authenticateResponse")) {
-									WOKMWSAuthenticateService_authenticateResponse *bodyObject = [WOKMWSAuthenticateService_authenticateResponse deserializeNode:bodyNode];
-									//NSAssert1(bodyObject != nil, @"Errors while parsing body %s", bodyNode->name);
-									if (bodyObject != nil) [responseBodyParts addObject:bodyObject];
-								}
-								if (xmlStrEqual(bodyNode->ns->prefix, cur->ns->prefix) && 
-									xmlStrEqual(bodyNode->name, (const xmlChar *) "Fault")) {
-									SOAPFault *bodyObject = [SOAPFault deserializeNode:bodyNode];
-									//NSAssert1(bodyObject != nil, @"Errors while parsing body %s", bodyNode->name);
-									if (bodyObject != nil) [responseBodyParts addObject:bodyObject];
-								}
-							}
-						}
-						
-						response.bodyParts = responseBodyParts;
-					}
-				}
-			}
-			
-			xmlFreeDoc(doc);
-		}
-		
-		xmlCleanupParser();
-		[delegate operation:self completedWithResponse:response];
-	}
-}
-@end
-@implementation WOKMWSAuthenticateServiceSoapBinding_closeSession
-@synthesize parameters;
-- (id)initWithBinding:(WOKMWSAuthenticateServiceSoapBinding *)aBinding delegate:(id<WOKMWSAuthenticateServiceSoapBindingResponseDelegate>)responseDelegate
-parameters:(WOKMWSAuthenticateService_closeSession *)aParameters
-{
-	if((self = [super initWithBinding:aBinding delegate:responseDelegate])) {
-		self.parameters = aParameters;
-	}
-	
-	return self;
-}
-- (void)dealloc
-{
-	if(parameters != nil) [parameters release];
-	
-	[super dealloc];
-}
-- (void)main
-{
-	[response autorelease];
-	response = [WOKMWSAuthenticateServiceSoapBindingResponse new];
-	
-	WOKMWSAuthenticateServiceSoapBinding_envelope *envelope = [WOKMWSAuthenticateServiceSoapBinding_envelope sharedInstance];
-	
-	NSMutableDictionary *headerElements = nil;
-	headerElements = [NSMutableDictionary dictionary];
-	
-	NSMutableDictionary *bodyElements = nil;
-	bodyElements = [NSMutableDictionary dictionary];
-	if(parameters != nil) [bodyElements setObject:parameters forKey:@"closeSession"];
-	
-	NSString *operationXMLString = [envelope serializedFormUsingHeaderElements:headerElements bodyElements:bodyElements];
-	
-	[binding sendHTTPCallUsingBody:operationXMLString soapAction:@"" forOperation:self];
-}
-- (void)connectionDidFinishLoading:(NSURLConnection *)connection
-{
-	if (responseData != nil && delegate != nil)
-	{
-		xmlDocPtr doc;
-		xmlNodePtr cur;
-		
-		if (binding.logXMLInOut) {
-			NSLog(@"ResponseBody:\n%@", [[[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding] autorelease]);
-		}
-		
-		doc = xmlParseMemory([responseData bytes], [responseData length]);
-		
-		if (doc == NULL) {
-			NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"Errors while parsing returned XML" forKey:NSLocalizedDescriptionKey];
-			
-			response.error = [NSError errorWithDomain:@"WOKMWSAuthenticateServiceSoapBindingResponseXML" code:1 userInfo:userInfo];
-			[delegate operation:self completedWithResponse:response];
-		} else {
-			cur = xmlDocGetRootElement(doc);
-			cur = cur->children;
-			
-			for( ; cur != NULL ; cur = cur->next) {
-				if(cur->type == XML_ELEMENT_NODE) {
-					
-					if(xmlStrEqual(cur->name, (const xmlChar *) "Body")) {
-						NSMutableArray *responseBodyParts = [NSMutableArray array];
-						
-						xmlNodePtr bodyNode;
-						for(bodyNode=cur->children ; bodyNode != NULL ; bodyNode = bodyNode->next) {
-							if(cur->type == XML_ELEMENT_NODE) {
-								if(xmlStrEqual(bodyNode->name, (const xmlChar *) "closeSessionResponse")) {
-									WOKMWSAuthenticateService_closeSessionResponse *bodyObject = [WOKMWSAuthenticateService_closeSessionResponse deserializeNode:bodyNode];
-									//NSAssert1(bodyObject != nil, @"Errors while parsing body %s", bodyNode->name);
-									if (bodyObject != nil) [responseBodyParts addObject:bodyObject];
-								}
-								if (xmlStrEqual(bodyNode->ns->prefix, cur->ns->prefix) && 
-									xmlStrEqual(bodyNode->name, (const xmlChar *) "Fault")) {
-									SOAPFault *bodyObject = [SOAPFault deserializeNode:bodyNode];
-									//NSAssert1(bodyObject != nil, @"Errors while parsing body %s", bodyNode->name);
-									if (bodyObject != nil) [responseBodyParts addObject:bodyObject];
-								}
-							}
-						}
-						
-						response.bodyParts = responseBodyParts;
-					}
-				}
-			}
-			
-			xmlFreeDoc(doc);
-		}
-		
-		xmlCleanupParser();
-		[delegate operation:self completedWithResponse:response];
-	}
-}
-@end
+
 static WOKMWSAuthenticateServiceSoapBinding_envelope *WOKMWSAuthenticateServiceSoapBindingSharedEnvelopeInstance = nil;
 @implementation WOKMWSAuthenticateServiceSoapBinding_envelope
 + (WOKMWSAuthenticateServiceSoapBinding_envelope *)sharedInstance
@@ -1200,16 +414,11 @@ static WOKMWSAuthenticateServiceSoapBinding_envelope *WOKMWSAuthenticateServiceS
 	xmlNodePtr root = xmlNewDocNode(doc, NULL, (const xmlChar*)"Envelope", NULL);
 	xmlDocSetRootElement(doc, root);
 	
-	xmlNsPtr soapEnvelopeNs = xmlNewNs(root, (const xmlChar*)"http://schemas.xmlsoap.org/soap/envelope/", (const xmlChar*)"soap");
+	xmlNsPtr soapEnvelopeNs = xmlNewNs(root, (const xmlChar*)"http://schemas.xmlsoap.org/soap/envelope/", (const xmlChar*)"soapenv");
 	xmlSetNs(root, soapEnvelopeNs);
 	
-	xmlNsPtr xslNs = xmlNewNs(root, (const xmlChar*)"http://www.w3.org/1999/XSL/Transform", (const xmlChar*)"xsl");
-	xmlNewNs(root, (const xmlChar*)"http://www.w3.org/2001/XMLSchema-instance", (const xmlChar*)"xsi");
+	xmlNsPtr authNs = xmlNewNs(root, (const xmlChar*)"http://auth.cxf.wokmws.thomsonreuters.com", (const xmlChar*)"auth");
 	
-	xmlNewNsProp(root, xslNs, (const xmlChar*)"version", (const xmlChar*)"1.0");
-	
-	xmlNewNs(root, (const xmlChar*)"http://www.w3.org/2001/XMLSchema", (const xmlChar*)"xs");
-	xmlNewNs(root, (const xmlChar*)"http://auth.cxf.wokmws.thomsonreuters.com", (const xmlChar*)"WOKMWSAuthenticateService");
 	xmlNewNs(root, (const xmlChar*)"http://schemas.xmlsoap.org/wsdl/", (const xmlChar*)"wsdl");
 	xmlNewNs(root, (const xmlChar*)"http://schemas.xmlsoap.org/wsdl/soap/", (const xmlChar*)"soap");
 	
@@ -1219,7 +428,8 @@ static WOKMWSAuthenticateServiceSoapBinding_envelope *WOKMWSAuthenticateServiceS
 		
 		for(NSString *key in [headerElements allKeys]) {
 			id header = [headerElements objectForKey:key];
-			xmlAddChild(headerNode, [header xmlNodeForDoc:doc elementName:key elementNSPrefix:nil]);
+			xmlNodePtr child = xmlAddChild(headerNode, [header xmlNodeForDoc:doc elementName:key elementNSPrefix:nil]);
+			xmlSetNs(child, authNs);
 		}
 	}
 	
@@ -1229,7 +439,8 @@ static WOKMWSAuthenticateServiceSoapBinding_envelope *WOKMWSAuthenticateServiceS
 		
 		for(NSString *key in [bodyElements allKeys]) {
 			id body = [bodyElements objectForKey:key];
-			xmlAddChild(bodyNode, [body xmlNodeForDoc:doc elementName:key elementNSPrefix:nil]);
+			xmlNodePtr child = xmlAddChild(bodyNode, [body xmlNodeForDoc:doc elementName:key elementNSPrefix:nil]);
+			xmlSetNs(child, authNs);
 		}
 	}
 	
@@ -1244,6 +455,7 @@ static WOKMWSAuthenticateServiceSoapBinding_envelope *WOKMWSAuthenticateServiceS
 	return serializedForm;
 }
 @end
+
 @implementation WOKMWSAuthenticateServiceSoapBindingResponse
 @synthesize headers;
 @synthesize bodyParts;
@@ -1258,7 +470,7 @@ static WOKMWSAuthenticateServiceSoapBinding_envelope *WOKMWSAuthenticateServiceS
 	
 	return self;
 }
--(void)dealloc {
+- (void)dealloc {
     self.headers = nil;
     self.bodyParts = nil;
     self.error = nil;	

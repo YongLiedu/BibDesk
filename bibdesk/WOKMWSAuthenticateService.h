@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import "USAdditions.h"
 #import <libxml/tree.h>
-#import "USGlobals.h"
+
 @class WOKMWSAuthenticateService_authenticate;
 @class WOKMWSAuthenticateService_authenticateResponse;
 @class WOKMWSAuthenticateService_closeSession;
@@ -12,183 +12,70 @@
 @class WOKMWSAuthenticateService_AuthenticationException;
 @class WOKMWSAuthenticateService_QueryException;
 @class WOKMWSAuthenticateService_InvalidInputException;
-@interface WOKMWSAuthenticateService_authenticate : NSObject {
-	
-/* elements */
-/* attributes */
+
+@interface WOKMWSAuthenticateServiceElement : NSObject {
 }
-- (NSString *)nsPrefix;
 - (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
-- (void)addAttributesToNode:(xmlNodePtr)node;
 - (void)addElementsToNode:(xmlNodePtr)node;
-+ (WOKMWSAuthenticateService_authenticate *)deserializeNode:(xmlNodePtr)cur;
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
++ (id)deserializeNode:(xmlNodePtr)cur;
 - (void)deserializeElementsFromNode:(xmlNodePtr)cur;
-/* elements */
-/* attributes */
-- (NSDictionary *)attributes;
 @end
-@interface WOKMWSAuthenticateService_authenticateResponse : NSObject {
-	
-/* elements */
+
+@interface WOKMWSAuthenticateService_authenticate : WOKMWSAuthenticateServiceElement {
+}
+@end
+
+@interface WOKMWSAuthenticateService_authenticateResponse : WOKMWSAuthenticateServiceElement {
 	NSString * return_;
-/* attributes */
 }
-- (NSString *)nsPrefix;
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
-- (void)addAttributesToNode:(xmlNodePtr)node;
-- (void)addElementsToNode:(xmlNodePtr)node;
-+ (WOKMWSAuthenticateService_authenticateResponse *)deserializeNode:(xmlNodePtr)cur;
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
-/* elements */
 @property (retain) NSString * return_;
-/* attributes */
-- (NSDictionary *)attributes;
 @end
-@interface WOKMWSAuthenticateService_closeSession : NSObject {
-	
-/* elements */
-/* attributes */
+
+@interface WOKMWSAuthenticateService_closeSession : WOKMWSAuthenticateServiceElement {
 }
-- (NSString *)nsPrefix;
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
-- (void)addAttributesToNode:(xmlNodePtr)node;
-- (void)addElementsToNode:(xmlNodePtr)node;
-+ (WOKMWSAuthenticateService_closeSession *)deserializeNode:(xmlNodePtr)cur;
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
-/* elements */
-/* attributes */
-- (NSDictionary *)attributes;
 @end
-@interface WOKMWSAuthenticateService_closeSessionResponse : NSObject {
-	
-/* elements */
-/* attributes */
+
+@interface WOKMWSAuthenticateService_closeSessionResponse : WOKMWSAuthenticateServiceElement {
 }
-- (NSString *)nsPrefix;
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
-- (void)addAttributesToNode:(xmlNodePtr)node;
-- (void)addElementsToNode:(xmlNodePtr)node;
-+ (WOKMWSAuthenticateService_closeSessionResponse *)deserializeNode:(xmlNodePtr)cur;
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
-/* elements */
-/* attributes */
-- (NSDictionary *)attributes;
 @end
-@interface WOKMWSAuthenticateService_InternalServerException : NSObject {
-	
-/* elements */
-/* attributes */
+
+@interface WOKMWSAuthenticateService_InternalServerException : WOKMWSAuthenticateServiceElement {
 }
-- (NSString *)nsPrefix;
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
-- (void)addAttributesToNode:(xmlNodePtr)node;
-- (void)addElementsToNode:(xmlNodePtr)node;
-+ (WOKMWSAuthenticateService_InternalServerException *)deserializeNode:(xmlNodePtr)cur;
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
-/* elements */
-/* attributes */
-- (NSDictionary *)attributes;
 @end
-@interface WOKMWSAuthenticateService_ESTIWSException : NSObject {
-	
-/* elements */
-/* attributes */
+
+@interface WOKMWSAuthenticateService_ESTIWSException : WOKMWSAuthenticateServiceElement {
 }
-- (NSString *)nsPrefix;
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
-- (void)addAttributesToNode:(xmlNodePtr)node;
-- (void)addElementsToNode:(xmlNodePtr)node;
-+ (WOKMWSAuthenticateService_ESTIWSException *)deserializeNode:(xmlNodePtr)cur;
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
-/* elements */
-/* attributes */
-- (NSDictionary *)attributes;
 @end
-@interface WOKMWSAuthenticateService_SessionException : NSObject {
-	
-/* elements */
-/* attributes */
+
+@interface WOKMWSAuthenticateService_SessionException : WOKMWSAuthenticateServiceElement {
 }
-- (NSString *)nsPrefix;
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
-- (void)addAttributesToNode:(xmlNodePtr)node;
-- (void)addElementsToNode:(xmlNodePtr)node;
-+ (WOKMWSAuthenticateService_SessionException *)deserializeNode:(xmlNodePtr)cur;
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
-/* elements */
-/* attributes */
-- (NSDictionary *)attributes;
 @end
-@interface WOKMWSAuthenticateService_AuthenticationException : NSObject {
-	
-/* elements */
-/* attributes */
+
+@interface WOKMWSAuthenticateService_AuthenticationException : WOKMWSAuthenticateServiceElement {
 }
-- (NSString *)nsPrefix;
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
-- (void)addAttributesToNode:(xmlNodePtr)node;
-- (void)addElementsToNode:(xmlNodePtr)node;
-+ (WOKMWSAuthenticateService_AuthenticationException *)deserializeNode:(xmlNodePtr)cur;
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
-/* elements */
-/* attributes */
-- (NSDictionary *)attributes;
 @end
-@interface WOKMWSAuthenticateService_QueryException : NSObject {
-	
-/* elements */
-/* attributes */
+
+@interface WOKMWSAuthenticateService_QueryException : WOKMWSAuthenticateServiceElement {
 }
-- (NSString *)nsPrefix;
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
-- (void)addAttributesToNode:(xmlNodePtr)node;
-- (void)addElementsToNode:(xmlNodePtr)node;
-+ (WOKMWSAuthenticateService_QueryException *)deserializeNode:(xmlNodePtr)cur;
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
-/* elements */
-/* attributes */
-- (NSDictionary *)attributes;
 @end
-@interface WOKMWSAuthenticateService_InvalidInputException : NSObject {
-	
-/* elements */
-/* attributes */
+
+@interface WOKMWSAuthenticateService_InvalidInputException : WOKMWSAuthenticateServiceElement {
 }
-- (NSString *)nsPrefix;
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
-- (void)addAttributesToNode:(xmlNodePtr)node;
-- (void)addElementsToNode:(xmlNodePtr)node;
-+ (WOKMWSAuthenticateService_InvalidInputException *)deserializeNode:(xmlNodePtr)cur;
-- (void)deserializeAttributesFromNode:(xmlNodePtr)cur;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
-/* elements */
-/* attributes */
-- (NSDictionary *)attributes;
 @end
+
 /* Cookies handling provided by http://en.wikibooks.org/wiki/Programming:WebObjects/Web_Services/Web_Service_Provider */
-#import <libxml/parser.h>
-// FIX #import "xs.h"
-// FIX #import "WOKMWSAuthenticateService.h"
 @class WOKMWSAuthenticateServiceSoapBinding;
 @interface WOKMWSAuthenticateService : NSObject {
-	
 }
 + (WOKMWSAuthenticateServiceSoapBinding *)WOKMWSAuthenticateServiceSoapBinding;
 @end
+
 @class WOKMWSAuthenticateServiceSoapBindingResponse;
 @class WOKMWSAuthenticateServiceSoapBindingOperation;
 @protocol WOKMWSAuthenticateServiceSoapBindingResponseDelegate <NSObject>
 - (void) operation:(WOKMWSAuthenticateServiceSoapBindingOperation *)operation completedWithResponse:(WOKMWSAuthenticateServiceSoapBindingResponse *)response;
 @end
+
 @interface WOKMWSAuthenticateServiceSoapBinding : NSObject <WOKMWSAuthenticateServiceSoapBindingResponseDelegate> {
 	NSURL *address;
 	NSTimeInterval defaultTimeout;
@@ -212,41 +99,30 @@
 - (WOKMWSAuthenticateServiceSoapBindingResponse *)closeSessionUsingParameters:(WOKMWSAuthenticateService_closeSession *)aParameters ;
 - (void)closeSessionAsyncUsingParameters:(WOKMWSAuthenticateService_closeSession *)aParameters  delegate:(id<WOKMWSAuthenticateServiceSoapBindingResponseDelegate>)responseDelegate;
 @end
+
 @interface WOKMWSAuthenticateServiceSoapBindingOperation : NSOperation {
 	WOKMWSAuthenticateServiceSoapBinding *binding;
+	NSDictionary *bodyElements;
 	WOKMWSAuthenticateServiceSoapBindingResponse *response;
 	id<WOKMWSAuthenticateServiceSoapBindingResponseDelegate> delegate;
 	NSMutableData *responseData;
 	NSURLConnection *urlConnection;
 }
 @property (retain) WOKMWSAuthenticateServiceSoapBinding *binding;
+@property (retain) NSDictionary *bodyElements;
 @property (readonly) WOKMWSAuthenticateServiceSoapBindingResponse *response;
 @property (nonatomic, assign) id<WOKMWSAuthenticateServiceSoapBindingResponseDelegate> delegate;
 @property (nonatomic, retain) NSMutableData *responseData;
 @property (nonatomic, retain) NSURLConnection *urlConnection;
-- (id)initWithBinding:(WOKMWSAuthenticateServiceSoapBinding *)aBinding delegate:(id<WOKMWSAuthenticateServiceSoapBindingResponseDelegate>)aDelegate;
+- (id)initWithBinding:(WOKMWSAuthenticateServiceSoapBinding *)aBinding delegate:(id<WOKMWSAuthenticateServiceSoapBindingResponseDelegate>)aDelegate bodyElements:(NSDictionary *)aBodyElements;
 @end
-@interface WOKMWSAuthenticateServiceSoapBinding_authenticate : WOKMWSAuthenticateServiceSoapBindingOperation {
-	WOKMWSAuthenticateService_authenticate * parameters;
-}
-@property (retain) WOKMWSAuthenticateService_authenticate * parameters;
-- (id)initWithBinding:(WOKMWSAuthenticateServiceSoapBinding *)aBinding delegate:(id<WOKMWSAuthenticateServiceSoapBindingResponseDelegate>)aDelegate
-	parameters:(WOKMWSAuthenticateService_authenticate *)aParameters
-;
-@end
-@interface WOKMWSAuthenticateServiceSoapBinding_closeSession : WOKMWSAuthenticateServiceSoapBindingOperation {
-	WOKMWSAuthenticateService_closeSession * parameters;
-}
-@property (retain) WOKMWSAuthenticateService_closeSession * parameters;
-- (id)initWithBinding:(WOKMWSAuthenticateServiceSoapBinding *)aBinding delegate:(id<WOKMWSAuthenticateServiceSoapBindingResponseDelegate>)aDelegate
-	parameters:(WOKMWSAuthenticateService_closeSession *)aParameters
-;
-@end
+
 @interface WOKMWSAuthenticateServiceSoapBinding_envelope : NSObject {
 }
 + (WOKMWSAuthenticateServiceSoapBinding_envelope *)sharedInstance;
 - (NSString *)serializedFormUsingHeaderElements:(NSDictionary *)headerElements bodyElements:(NSDictionary *)bodyElements;
 @end
+
 @interface WOKMWSAuthenticateServiceSoapBindingResponse : NSObject {
 	NSArray *headers;
 	NSArray *bodyParts;
