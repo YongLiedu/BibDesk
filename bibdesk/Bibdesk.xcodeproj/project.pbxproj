@@ -41,7 +41,6 @@
 		3B91DD4A162225850088206D /* NSDate+ISO8601Parsing.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD3E162225850088206D /* NSDate+ISO8601Parsing.m */; };
 		3B91DD4C162225850088206D /* NSDate+ISO8601Unparsing.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD40162225850088206D /* NSDate+ISO8601Unparsing.m */; };
 		3B91DD4E162225850088206D /* USAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD42162225850088206D /* USAdditions.m */; };
-		3B91DD50162225850088206D /* USGlobals.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD44162225850088206D /* USGlobals.m */; };
 		3B91DD52162225850088206D /* WOKMWSAuthenticateService.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD46162225850088206D /* WOKMWSAuthenticateService.m */; };
 		3B91DD54162225850088206D /* WokSearchService.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD48162225850088206D /* WokSearchService.m */; };
 		3B91DD56162229B70088206D /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B91DD55162229B70088206D /* libxml2.dylib */; };
@@ -782,8 +781,6 @@
 		3B91DD40162225850088206D /* NSDate+ISO8601Unparsing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+ISO8601Unparsing.m"; sourceTree = "<group>"; };
 		3B91DD41162225850088206D /* USAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = USAdditions.h; sourceTree = "<group>"; };
 		3B91DD42162225850088206D /* USAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = USAdditions.m; sourceTree = "<group>"; };
-		3B91DD43162225850088206D /* USGlobals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = USGlobals.h; sourceTree = "<group>"; };
-		3B91DD44162225850088206D /* USGlobals.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = USGlobals.m; sourceTree = "<group>"; };
 		3B91DD45162225850088206D /* WOKMWSAuthenticateService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WOKMWSAuthenticateService.h; sourceTree = "<group>"; };
 		3B91DD46162225850088206D /* WOKMWSAuthenticateService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WOKMWSAuthenticateService.m; sourceTree = "<group>"; };
 		3B91DD47162225850088206D /* WokSearchService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WokSearchService.h; sourceTree = "<group>"; };
@@ -1954,8 +1951,6 @@
 				3B91DD40162225850088206D /* NSDate+ISO8601Unparsing.m */,
 				3B91DD41162225850088206D /* USAdditions.h */,
 				3B91DD42162225850088206D /* USAdditions.m */,
-				3B91DD43162225850088206D /* USGlobals.h */,
-				3B91DD44162225850088206D /* USGlobals.m */,
 				3B91DD45162225850088206D /* WOKMWSAuthenticateService.h */,
 				3B91DD46162225850088206D /* WOKMWSAuthenticateService.m */,
 				CEBF7AE518F2EB6300012ECD /* WokSearchLiteService.h */,
@@ -3730,7 +3725,6 @@
 				3B91DD4A162225850088206D /* NSDate+ISO8601Parsing.m in Sources */,
 				3B91DD4C162225850088206D /* NSDate+ISO8601Unparsing.m in Sources */,
 				3B91DD4E162225850088206D /* USAdditions.m in Sources */,
-				3B91DD50162225850088206D /* USGlobals.m in Sources */,
 				3B91DD52162225850088206D /* WOKMWSAuthenticateService.m in Sources */,
 				3B91DD54162225850088206D /* WokSearchService.m in Sources */,
 				CEC46E311629743200B51A9D /* NSPasteboard_BDSKExtensions.m in Sources */,
