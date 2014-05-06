@@ -6,12 +6,6 @@
 @class WOKMWSAuthenticateService_authenticateResponse;
 @class WOKMWSAuthenticateService_closeSession;
 @class WOKMWSAuthenticateService_closeSessionResponse;
-@class WOKMWSAuthenticateService_InternalServerException;
-@class WOKMWSAuthenticateService_ESTIWSException;
-@class WOKMWSAuthenticateService_SessionException;
-@class WOKMWSAuthenticateService_AuthenticationException;
-@class WOKMWSAuthenticateService_QueryException;
-@class WOKMWSAuthenticateService_InvalidInputException;
 
 @interface WOKMWSAuthenticateServiceElement : NSObject {
 }
@@ -36,30 +30,6 @@
 @end
 
 @interface WOKMWSAuthenticateService_closeSessionResponse : WOKMWSAuthenticateServiceElement {
-}
-@end
-
-@interface WOKMWSAuthenticateService_InternalServerException : WOKMWSAuthenticateServiceElement {
-}
-@end
-
-@interface WOKMWSAuthenticateService_ESTIWSException : WOKMWSAuthenticateServiceElement {
-}
-@end
-
-@interface WOKMWSAuthenticateService_SessionException : WOKMWSAuthenticateServiceElement {
-}
-@end
-
-@interface WOKMWSAuthenticateService_AuthenticationException : WOKMWSAuthenticateServiceElement {
-}
-@end
-
-@interface WOKMWSAuthenticateService_QueryException : WOKMWSAuthenticateServiceElement {
-}
-@end
-
-@interface WOKMWSAuthenticateService_InvalidInputException : WOKMWSAuthenticateServiceElement {
 }
 @end
 

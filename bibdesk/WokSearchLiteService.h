@@ -16,15 +16,6 @@
 @class WokSearchLiteService_sortField;
 @class WokSearchLiteService_liteRecord;
 @class WokSearchLiteService_labelValuesPair;
-@class WokSearchLiteService_FaultInformation;
-@class WokSearchLiteService_SupportingWebServiceException;
-@class WokSearchLiteService_RawFaultInformation;
-@class WokSearchLiteService_QueryException;
-@class WokSearchLiteService_AuthenticationException;
-@class WokSearchLiteService_InvalidInputException;
-@class WokSearchLiteService_ESTIWSException;
-@class WokSearchLiteService_InternalServerException;
-@class WokSearchLiteService_SessionException;
 
 @interface WokSearchLiteServiceElement : NSObject {
 }
@@ -176,105 +167,6 @@
 	WokSearchLiteService_searchResults * return_;
 }
 @property (retain) WokSearchLiteService_searchResults * return_;
-@end
-
-@interface WokSearchLiteService_SupportingWebServiceException : WokSearchLiteServiceElement {
-	NSString * remoteNamespace;
-	NSString * remoteOperation;
-	NSString * remoteCode;
-	NSString * remoteReason;
-	NSString * handshakeCauseId;
-	NSString * handshakeCause;
-}
-@property (retain) NSString * remoteNamespace;
-@property (retain) NSString * remoteOperation;
-@property (retain) NSString * remoteCode;
-@property (retain) NSString * remoteReason;
-@property (retain) NSString * handshakeCauseId;
-@property (retain) NSString * handshakeCause;
-@end
-
-@interface WokSearchLiteService_FaultInformation : WokSearchLiteServiceElement {
-	NSString * code;
-	NSString * message;
-	NSString * reason;
-	NSString * causeType;
-	NSString * cause;
-	WokSearchLiteService_SupportingWebServiceException * supportingWebServiceException;
-	NSString * remedy;
-}
-@property (retain) NSString * code;
-@property (retain) NSString * message;
-@property (retain) NSString * reason;
-@property (retain) NSString * causeType;
-@property (retain) NSString * cause;
-@property (retain) WokSearchLiteService_SupportingWebServiceException * supportingWebServiceException;
-@property (retain) NSString * remedy;
-@end
-
-@interface WokSearchLiteService_RawFaultInformation : WokSearchLiteServiceElement {
-	NSString * rawFaultstring;
-	NSString * rawMessage;
-	NSString * rawReason;
-	NSString * rawCause;
-	NSString * rawRemedy;
-	NSMutableArray *messageData;
-}
-@property (retain) NSString * rawFaultstring;
-@property (retain) NSString * rawMessage;
-@property (retain) NSString * rawReason;
-@property (retain) NSString * rawCause;
-@property (retain) NSString * rawRemedy;
-- (void)addMessageData:(NSString *)toAdd;
-@property (readonly) NSMutableArray * messageData;
-@end
-
-@interface WokSearchLiteService_QueryException : WokSearchLiteServiceElement {
-	WokSearchLiteService_FaultInformation * faultInformation;
-	WokSearchLiteService_RawFaultInformation * rawFaultInformation;
-}
-@property (retain) WokSearchLiteService_FaultInformation * faultInformation;
-@property (retain) WokSearchLiteService_RawFaultInformation * rawFaultInformation;
-@end
-
-@interface WokSearchLiteService_AuthenticationException : WokSearchLiteServiceElement {
-	WokSearchLiteService_FaultInformation * faultInformation;
-	WokSearchLiteService_RawFaultInformation * rawFaultInformation;
-}
-@property (retain) WokSearchLiteService_FaultInformation * faultInformation;
-@property (retain) WokSearchLiteService_RawFaultInformation * rawFaultInformation;
-@end
-
-@interface WokSearchLiteService_InvalidInputException : WokSearchLiteServiceElement {
-	WokSearchLiteService_FaultInformation * faultInformation;
-	WokSearchLiteService_RawFaultInformation * rawFaultInformation;
-}
-@property (retain) WokSearchLiteService_FaultInformation * faultInformation;
-@property (retain) WokSearchLiteService_RawFaultInformation * rawFaultInformation;
-@end
-
-@interface WokSearchLiteService_ESTIWSException : WokSearchLiteServiceElement {
-	WokSearchLiteService_FaultInformation * faultInformation;
-	WokSearchLiteService_RawFaultInformation * rawFaultInformation;
-}
-@property (retain) WokSearchLiteService_FaultInformation * faultInformation;
-@property (retain) WokSearchLiteService_RawFaultInformation * rawFaultInformation;
-@end
-
-@interface WokSearchLiteService_InternalServerException : WokSearchLiteServiceElement {
-	WokSearchLiteService_FaultInformation * faultInformation;
-	WokSearchLiteService_RawFaultInformation * rawFaultInformation;
-}
-@property (retain) WokSearchLiteService_FaultInformation * faultInformation;
-@property (retain) WokSearchLiteService_RawFaultInformation * rawFaultInformation;
-@end
-
-@interface WokSearchLiteService_SessionException : WokSearchLiteServiceElement {
-	WokSearchLiteService_FaultInformation * faultInformation;
-	WokSearchLiteService_RawFaultInformation * rawFaultInformation;
-}
-@property (retain) WokSearchLiteService_FaultInformation * faultInformation;
-@property (retain) WokSearchLiteService_RawFaultInformation * rawFaultInformation;
 @end
 
 /* Cookies handling provided by http://en.wikibooks.org/wiki/Programming:WebObjects/Web_Services/Web_Service_Provider */

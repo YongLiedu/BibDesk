@@ -79,24 +79,6 @@
 @implementation WOKMWSAuthenticateService_closeSessionResponse
 @end
 
-@implementation WOKMWSAuthenticateService_InternalServerException
-@end
-
-@implementation WOKMWSAuthenticateService_ESTIWSException
-@end
-
-@implementation WOKMWSAuthenticateService_SessionException
-@end
-
-@implementation WOKMWSAuthenticateService_AuthenticationException
-@end
-
-@implementation WOKMWSAuthenticateService_QueryException
-@end
-
-@implementation WOKMWSAuthenticateService_InvalidInputException
-@end
-
 @implementation WOKMWSAuthenticateService
 + (WOKMWSAuthenticateServiceSoapBinding *)WOKMWSAuthenticateServiceSoapBinding
 {
