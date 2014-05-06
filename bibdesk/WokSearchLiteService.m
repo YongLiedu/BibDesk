@@ -1094,7 +1094,7 @@
 						
 						xmlNodePtr bodyNode;
 						for(bodyNode=cur->children ; bodyNode != NULL ; bodyNode = bodyNode->next) {
-							if(cur->type == XML_ELEMENT_NODE) {
+							if(bodyNode->type == XML_ELEMENT_NODE) {
 								Class responseClass = nil;
 								if (xmlStrEqual(bodyNode->ns->prefix, cur->ns->prefix) && 
 									xmlStrEqual(bodyNode->name, (const xmlChar *) "Fault")) {
