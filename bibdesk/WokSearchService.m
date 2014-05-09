@@ -1,40 +1,5 @@
 #import "WokSearchService.h"
 
-@implementation WokSearchServiceElement
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix
-{
-	NSString *nodeName = nil;
-	if(elNSPrefix != nil && [elNSPrefix length] > 0)
-	{
-		nodeName = [NSString stringWithFormat:@"%@:%@", elNSPrefix, elName];
-	}
-	else
-	{
-		nodeName = elName;
-	}
-	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, [nodeName xmlCString], NULL);
-	
-	[self addElementsToNode:node];
-	
-	return node;
-}
-- (void)addElementsToNode:(xmlNodePtr)node
-{
-}
-+ (id)deserializeNode:(xmlNodePtr)cur
-{
-	id newObject = [[self new] autorelease];
-	
-	[newObject deserializeElementsFromNode:cur];
-	
-	return newObject;
-}
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
-{
-}
-@end
-
 @implementation WokSearchService_sortField
 - (id)init
 {
@@ -332,6 +297,18 @@
 		}
 	}
 }
+- (NSString *)elementName
+{
+	return @"citedReferences";
+}
+- (NSString *)responseName
+{
+	return @"citedReferencesResponse";
+}
+- (Class)responseClass
+{
+	return [WokSearchService_citedReferencesResponse class];
+}
 @end
 
 @implementation WokSearchService_citedReference
@@ -618,6 +595,18 @@
 		}
 	}
 }
+- (NSString *)elementName
+{
+	return @"citedReferencesRetrieve";
+}
+- (NSString *)responseName
+{
+	return @"citedReferencesRetrieveResponse";
+}
+- (Class)responseClass
+{
+	return [WokSearchService_citedReferencesRetrieveResponse class];
+}
 @end
 
 @implementation WokSearchService_citedReferencesRetrieveResponse
@@ -839,6 +828,18 @@
 			}
 		}
 	}
+}
+- (NSString *)elementName
+{
+	return @"citingArticles";
+}
+- (NSString *)responseName
+{
+	return @"citingArticlesResponse";
+}
+- (Class)responseClass
+{
+	return [WokSearchService_citingArticlesResponse class];
 }
 @end
 
@@ -1108,6 +1109,18 @@
 		}
 	}
 }
+- (NSString *)elementName
+{
+	return @"relatedRecords";
+}
+- (NSString *)responseName
+{
+	return @"relatedRecordsResponse";
+}
+- (Class)responseClass
+{
+	return [WokSearchService_relatedRecordsResponse class];
+}
 @end
 
 @implementation WokSearchService_relatedRecordsResponse
@@ -1187,6 +1200,18 @@
 			}
 		}
 	}
+}
+- (NSString *)elementName
+{
+	return @"retrieve";
+}
+- (NSString *)responseName
+{
+	return @"retrieveResponse";
+}
+- (Class)responseClass
+{
+	return [WokSearchService_retrieveResponse class];
 }
 @end
 
@@ -1344,6 +1369,18 @@
 			}
 		}
 	}
+}
+- (NSString *)elementName
+{
+	return @"retrieveById";
+}
+- (NSString *)responseName
+{
+	return @"retrieveByIdResponse";
+}
+- (Class)responseClass
+{
+	return [WokSearchService_retrieveByIdResponse class];
 }
 @end
 
@@ -1516,6 +1553,18 @@
 		}
 	}
 }
+- (NSString *)elementName
+{
+	return @"search";
+}
+- (NSString *)responseName
+{
+	return @"searchResponse";
+}
+- (Class)responseClass
+{
+	return [WokSearchService_searchResponse class];
+}
 @end
 
 @implementation WokSearchService_searchResponse
@@ -1554,423 +1603,16 @@
 @end
 
 @implementation WokSearchService
-+ (WokSearchServiceSoapBinding *)WokSearchServiceSoapBinding
++ (NSString *)address
 {
-	return [[[WokSearchServiceSoapBinding alloc] initWithAddress:@"http://search.webofknowledge.com/esti/wokmws/ws/WokSearch"] autorelease];
+	return @"http://search.webofknowledge.com/esti/wokmws/ws/WokSearch";
 }
-@end
-
-@implementation WokSearchServiceSoapBinding
-@synthesize address;
-@synthesize defaultTimeout;
-@synthesize logXMLInOut;
-@synthesize cookies;
-@synthesize authUsername;
-@synthesize authPassword;
-- (id)init
++ (NSString *)namespaceURI
 {
-	if((self = [super init])) {
-		address = nil;
-		cookies = nil;
-		defaultTimeout = 10;//seconds
-		logXMLInOut = NO;
-		synchronousOperationComplete = NO;
-	}
-	
-	return self;
+	return @"http://woksearch.v3.wokmws.thomsonreuters.com";
 }
-- (id)initWithAddress:(NSString *)anAddress
++ (WokServiceSoapBinding *)soapBinding
 {
-	if((self = [self init])) {
-		self.address = [NSURL URLWithString:anAddress];
-	}
-	
-	return self;
-}
-- (void)addCookie:(NSHTTPCookie *)toAdd
-{
-	if(toAdd != nil) {
-		if(cookies == nil) cookies = [[NSMutableArray alloc] init];
-		[cookies addObject:toAdd];
-	}
-}
-- (WokSearchServiceSoapBindingResponse *)performSynchronousOperationWithBodyElements:(NSDictionary *)bodyElements
-{
-	WokSearchServiceSoapBindingOperation *operation = [[[WokSearchServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements] autorelease];
-	synchronousOperationComplete = NO;
-	[operation start];
-	
-	// Now wait for response
-	NSRunLoop *theRL = [NSRunLoop currentRunLoop];
-	
-	while (!synchronousOperationComplete && [theRL runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]]);
-	return operation.response;
-}
-- (void)performAsynchronousOperationWithBodyElements:(NSDictionary *)bodyElements delegate:(id<WokSearchServiceSoapBindingResponseDelegate>)responseDelegate
-{
-	WokSearchServiceSoapBindingOperation *operation = [[[WokSearchServiceSoapBindingOperation alloc] initWithBinding:self delegate:responseDelegate bodyElements:bodyElements] autorelease];
-	[operation start];
-}
-- (void) operation:(WokSearchServiceSoapBindingOperation *)operation completedWithResponse:(WokSearchServiceSoapBindingResponse *)response
-{
-	synchronousOperationComplete = YES;
-}
-- (WokSearchServiceSoapBindingResponse *)citedReferencesRetrieveUsingParameters:(WokSearchService_citedReferencesRetrieve *)aParameters 
-{
-	NSDictionary *bodyElements = [NSDictionary dictionaryWithObject:aParameters forKey:@"citedReferencesRetrieve"];
-	return [self performSynchronousOperationWithBodyElements:bodyElements];
-}
-- (void)citedReferencesRetrieveAsyncUsingParameters:(WokSearchService_citedReferencesRetrieve *)aParameters  delegate:(id<WokSearchServiceSoapBindingResponseDelegate>)responseDelegate
-{
-	NSDictionary *bodyElements = [NSDictionary dictionaryWithObject:aParameters forKey:@"citedReferencesRetrieve"];
-	[self performAsynchronousOperationWithBodyElements:bodyElements delegate:responseDelegate];
-}
-- (WokSearchServiceSoapBindingResponse *)relatedRecordsUsingParameters:(WokSearchService_relatedRecords *)aParameters 
-{
-	NSDictionary *bodyElements = [NSDictionary dictionaryWithObject:aParameters forKey:@"relatedRecords"];
-	return [self performSynchronousOperationWithBodyElements:bodyElements];
-}
-- (void)relatedRecordsAsyncUsingParameters:(WokSearchService_relatedRecords *)aParameters  delegate:(id<WokSearchServiceSoapBindingResponseDelegate>)responseDelegate
-{
-	NSDictionary *bodyElements = [NSDictionary dictionaryWithObject:aParameters forKey:@"relatedRecords"];
-	[self performAsynchronousOperationWithBodyElements:bodyElements delegate:responseDelegate];
-}
-- (WokSearchServiceSoapBindingResponse *)citedReferencesUsingParameters:(WokSearchService_citedReferences *)aParameters 
-{
-	NSDictionary *bodyElements = [NSDictionary dictionaryWithObject:aParameters forKey:@"citedReferences"];
-	return [self performSynchronousOperationWithBodyElements:bodyElements];
-}
-- (void)citedReferencesAsyncUsingParameters:(WokSearchService_citedReferences *)aParameters  delegate:(id<WokSearchServiceSoapBindingResponseDelegate>)responseDelegate
-{
-	NSDictionary *bodyElements = [NSDictionary dictionaryWithObject:aParameters forKey:@"citedReferences"];
-	[self performAsynchronousOperationWithBodyElements:bodyElements delegate:responseDelegate];
-}
-- (WokSearchServiceSoapBindingResponse *)retrieveUsingParameters:(WokSearchService_retrieve *)aParameters 
-{
-	NSDictionary *bodyElements = [NSDictionary dictionaryWithObject:aParameters forKey:@"retrieve"];
-	return [self performSynchronousOperationWithBodyElements:bodyElements];
-}
-- (void)retrieveAsyncUsingParameters:(WokSearchService_retrieve *)aParameters  delegate:(id<WokSearchServiceSoapBindingResponseDelegate>)responseDelegate
-{
-	NSDictionary *bodyElements = [NSDictionary dictionaryWithObject:aParameters forKey:@"retrieve"];
-	[self performAsynchronousOperationWithBodyElements:bodyElements delegate:responseDelegate];
-}
-- (WokSearchServiceSoapBindingResponse *)searchUsingParameters:(WokSearchService_search *)aParameters 
-{
-	NSDictionary *bodyElements = [NSDictionary dictionaryWithObject:aParameters forKey:@"search"];
-	return [self performSynchronousOperationWithBodyElements:bodyElements];
-}
-- (void)searchAsyncUsingParameters:(WokSearchService_search *)aParameters  delegate:(id<WokSearchServiceSoapBindingResponseDelegate>)responseDelegate
-{
-	NSDictionary *bodyElements = [NSDictionary dictionaryWithObject:aParameters forKey:@"search"];
-	[self performAsynchronousOperationWithBodyElements:bodyElements delegate:responseDelegate];
-}
-- (WokSearchServiceSoapBindingResponse *)citingArticlesUsingParameters:(WokSearchService_citingArticles *)aParameters 
-{
-	NSDictionary *bodyElements = [NSDictionary dictionaryWithObject:aParameters forKey:@"citingArticles"];
-	return [self performSynchronousOperationWithBodyElements:bodyElements];
-}
-- (void)citingArticlesAsyncUsingParameters:(WokSearchService_citingArticles *)aParameters  delegate:(id<WokSearchServiceSoapBindingResponseDelegate>)responseDelegate
-{
-	NSDictionary *bodyElements = [NSDictionary dictionaryWithObject:aParameters forKey:@"citingArticles"];
-	[self performAsynchronousOperationWithBodyElements:bodyElements delegate:responseDelegate];
-}
-- (WokSearchServiceSoapBindingResponse *)retrieveByIdUsingParameters:(WokSearchService_retrieveById *)aParameters 
-{
-	NSDictionary *bodyElements = [NSDictionary dictionaryWithObject:aParameters forKey:@"retrieveById"];
-	return [self performSynchronousOperationWithBodyElements:bodyElements];
-}
-- (void)retrieveByIdAsyncUsingParameters:(WokSearchService_retrieveById *)aParameters  delegate:(id<WokSearchServiceSoapBindingResponseDelegate>)responseDelegate
-{
-	NSDictionary *bodyElements = [NSDictionary dictionaryWithObject:aParameters forKey:@"retrieveById"];
-	[self performAsynchronousOperationWithBodyElements:bodyElements delegate:responseDelegate];
-}
-- (void)sendHTTPCallUsingBody:(NSString *)outputBody soapAction:(NSString *)soapAction forOperation:(WokSearchServiceSoapBindingOperation *)operation
-{
-	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:self.address 
-																												 cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData
-																										 timeoutInterval:self.defaultTimeout];
-	NSData *bodyData = [outputBody dataUsingEncoding:NSUTF8StringEncoding];
-	
-	if(cookies != nil) {
-		[request setAllHTTPHeaderFields:[NSHTTPCookie requestHeaderFieldsWithCookies:cookies]];
-	}
-	[request setValue:@"wsdl2objc" forHTTPHeaderField:@"User-Agent"];
-	[request setValue:soapAction forHTTPHeaderField:@"SOAPAction"];
-	[request setValue:@"text/xml; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
-	[request setValue:[NSString stringWithFormat:@"%lu", (unsigned long)[bodyData length]] forHTTPHeaderField:@"Content-Length"];
-	[request setValue:self.address.host forHTTPHeaderField:@"Host"];
-	[request setHTTPMethod: @"POST"];
-	// set version 1.1 - how?
-	[request setHTTPBody: bodyData];
-		
-	if(self.logXMLInOut) {
-		NSLog(@"OutputHeaders:\n%@", [request allHTTPHeaderFields]);
-		NSLog(@"OutputBody:\n%@", outputBody);
-	}
-	
-	NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request delegate:operation];
-	
-	operation.urlConnection = connection;
-	[connection release];
-}
-- (void) dealloc
-{
-	[address release];
-	[cookies release];
-	[super dealloc];
-}
-@end
-
-@implementation WokSearchServiceSoapBindingOperation
-@synthesize binding;
-@synthesize bodyElements;
-@synthesize response;
-@synthesize delegate;
-@synthesize responseData;
-@synthesize urlConnection;
-- (id)initWithBinding:(WokSearchServiceSoapBinding *)aBinding delegate:(id<WokSearchServiceSoapBindingResponseDelegate>)aDelegate bodyElements:(NSDictionary *)aBodyElements
-{
-	if ((self = [super init])) {
-		self.binding = aBinding;
-		self.bodyElements = aBodyElements;
-		response = nil;
-		self.delegate = aDelegate;
-		self.responseData = nil;
-		self.urlConnection = nil;
-	}
-	
-	return self;
-}
-- (void)main
-{
-	[response autorelease];
-	response = [WokSearchServiceSoapBindingResponse new];
-	
-	WokSearchServiceSoapBinding_envelope *envelope = [WokSearchServiceSoapBinding_envelope sharedInstance];
-	
-	NSString *operationXMLString = [envelope serializedFormUsingHeaderElements:nil bodyElements:bodyElements];
-	
-	[binding sendHTTPCallUsingBody:operationXMLString soapAction:@"" forOperation:self];
-}
-- (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-	if ([challenge previousFailureCount] == 0) {
-		NSURLCredential *newCredential;
-		newCredential=[NSURLCredential credentialWithUser:self.binding.authUsername
-												 password:self.binding.authPassword
-											  persistence:NSURLCredentialPersistenceForSession];
-		[[challenge sender] useCredential:newCredential
-			   forAuthenticationChallenge:challenge];
-	} else {
-		[[challenge sender] cancelAuthenticationChallenge:challenge];
-		NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"Authentication Error" forKey:NSLocalizedDescriptionKey];
-		NSError *authError = [NSError errorWithDomain:@"Connection Authentication" code:0 userInfo:userInfo];
-		[self connection:connection didFailWithError:authError];
-	}
-}
-- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)urlResponse
-{
-	NSHTTPURLResponse *httpResponse;
-	if ([urlResponse isKindOfClass:[NSHTTPURLResponse class]]) {
-		httpResponse = (NSHTTPURLResponse *) urlResponse;
-	} else {
-		httpResponse = nil;
-	}
-	
-	if(binding.logXMLInOut) {
-		NSLog(@"ResponseStatus: %ld\n", (long)[httpResponse statusCode]);
-		NSLog(@"ResponseHeaders:\n%@", [httpResponse allHeaderFields]);
-	}
-	
-	NSMutableArray *cookies = [[NSHTTPCookie cookiesWithResponseHeaderFields:[httpResponse allHeaderFields] forURL:binding.address] mutableCopy];
-	
-	binding.cookies = cookies;
-	[cookies release];
-  if ([urlResponse.MIMEType rangeOfString:@"text/xml"].length == 0) {
-		NSError *error = nil;
-		[connection cancel];
-		if ([httpResponse statusCode] >= 400) {
-			NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSHTTPURLResponse localizedStringForStatusCode:[httpResponse statusCode]] forKey:NSLocalizedDescriptionKey];
-				
-			error = [NSError errorWithDomain:@"WokSearchServiceSoapBindingResponseHTTP" code:[httpResponse statusCode] userInfo:userInfo];
-		} else {
-			NSDictionary *userInfo = [NSDictionary dictionaryWithObject:
-																[NSString stringWithFormat: @"Unexpected response MIME type to SOAP call:%@", urlResponse.MIMEType]
-																													 forKey:NSLocalizedDescriptionKey];
-			error = [NSError errorWithDomain:@"WokSearchServiceSoapBindingResponseHTTP" code:1 userInfo:userInfo];
-		}
-				
-		[self connection:connection didFailWithError:error];
-  }
-}
-- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
-{
-  if (responseData == nil) {
-		responseData = [data mutableCopy];
-	} else {
-		[responseData appendData:data];
-	}
-}
-- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
-{
-	if (binding.logXMLInOut) {
-		NSLog(@"ResponseError:\n%@", error);
-	}
-	response.error = error;
-	[delegate operation:self completedWithResponse:response];
-}
-- (void)connectionDidFinishLoading:(NSURLConnection *)connection
-{
-	if (responseData != nil && delegate != nil)
-	{
-		xmlDocPtr doc;
-		xmlNodePtr cur;
-		
-		if (binding.logXMLInOut) {
-			NSLog(@"ResponseBody:\n%@", [[[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding] autorelease]);
-		}
-		
-		doc = xmlParseMemory([responseData bytes], [responseData length]);
-		
-		if (doc == NULL) {
-			NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"Errors while parsing returned XML" forKey:NSLocalizedDescriptionKey];
-			
-			response.error = [NSError errorWithDomain:@"WokSearchServiceSoapBindingResponseXML" code:1 userInfo:userInfo];
-			[delegate operation:self completedWithResponse:response];
-		} else {
-			cur = xmlDocGetRootElement(doc);
-			cur = cur->children;
-			
-			for( ; cur != NULL ; cur = cur->next) {
-				if(cur->type == XML_ELEMENT_NODE) {
-					
-					if(xmlStrEqual(cur->name, (const xmlChar *) "Body")) {
-						NSMutableArray *responseBodyParts = [NSMutableArray array];
-						
-						xmlNodePtr bodyNode;
-						for(bodyNode=cur->children ; bodyNode != NULL ; bodyNode = bodyNode->next) {
-							if(bodyNode->type == XML_ELEMENT_NODE) {
-								Class responseClass = nil;
-								if (xmlStrEqual(bodyNode->ns->prefix, cur->ns->prefix) && 
-									xmlStrEqual(bodyNode->name, (const xmlChar *) "Fault")) {
-									SOAPFault *bodyObject = [SOAPFault deserializeNode:bodyNode];
-									//NSAssert1(bodyObject != nil, @"Errors while parsing body %s", bodyNode->name);
-									if (bodyObject != nil) [responseBodyParts addObject:bodyObject];
-								}
-								else if((responseClass = NSClassFromString([NSString stringWithFormat:@"%@_%s", @"WokSearchService", bodyNode->name]))) {
-									id bodyObject = [responseClass deserializeNode:bodyNode];
-									//NSAssert1(bodyObject != nil, @"Errors while parsing body %s", bodyNode->name);
-									if (bodyObject != nil) [responseBodyParts addObject:bodyObject];
-								}
-							}
-						}
-						
-						response.bodyParts = responseBodyParts;
-					}
-				}
-			}
-			
-			xmlFreeDoc(doc);
-		}
-		
-		xmlCleanupParser();
-		[delegate operation:self completedWithResponse:response];
-	}
-}
-- (void)dealloc
-{
-	[binding release];
-	[bodyElements release];
-	[response release];
-	delegate = nil;
-	[responseData release];
-	[urlConnection release];
-	
-	[super dealloc];
-}
-@end
-
-static WokSearchServiceSoapBinding_envelope *WokSearchServiceSoapBindingSharedEnvelopeInstance = nil;
-@implementation WokSearchServiceSoapBinding_envelope
-+ (WokSearchServiceSoapBinding_envelope *)sharedInstance
-{
-	if(WokSearchServiceSoapBindingSharedEnvelopeInstance == nil) {
-		WokSearchServiceSoapBindingSharedEnvelopeInstance = [WokSearchServiceSoapBinding_envelope new];
-	}
-	
-	return WokSearchServiceSoapBindingSharedEnvelopeInstance;
-}
-- (NSString *)serializedFormUsingHeaderElements:(NSDictionary *)headerElements bodyElements:(NSDictionary *)bodyElements
-{
-	xmlDocPtr doc;
-	
-	doc = xmlNewDoc((const xmlChar*)XML_DEFAULT_VERSION);
-	if (doc == NULL) {
-		NSLog(@"Error creating the xml document tree");
-		return @"";
-	}
-	
-	xmlNodePtr root = xmlNewDocNode(doc, NULL, (const xmlChar*)"Envelope", NULL);
-	xmlDocSetRootElement(doc, root);
-	
-	xmlNsPtr soapEnvelopeNs = xmlNewNs(root, (const xmlChar*)"http://schemas.xmlsoap.org/soap/envelope/", (const xmlChar*)"soap");
-	xmlSetNs(root, soapEnvelopeNs);
-	
-    xmlNsPtr woksearchNs = xmlNewNs(root, (const xmlChar*)"http://woksearch.v3.wokmws.thomsonreuters.com", (const xmlChar*)"woksearch");
-	
-	if((headerElements != nil) && ([headerElements count] > 0)) {
-		xmlNodePtr headerNode = xmlNewDocNode(doc, soapEnvelopeNs, (const xmlChar*)"Header", NULL);
-		xmlAddChild(root, headerNode);
-		
-		for(NSString *key in [headerElements allKeys]) {
-			id header = [headerElements objectForKey:key];
-			xmlNodePtr child = xmlAddChild(headerNode, [header xmlNodeForDoc:doc elementName:key elementNSPrefix:nil]);
-			xmlSetNs(child, woksearchNs);
-		}
-	}
-	
-	if((bodyElements != nil) && ([bodyElements count] > 0)) {
-		xmlNodePtr bodyNode = xmlNewDocNode(doc, soapEnvelopeNs, (const xmlChar*)"Body", NULL);
-		xmlAddChild(root, bodyNode);
-		
-		for(NSString *key in [bodyElements allKeys]) {
-			id body = [bodyElements objectForKey:key];
-			xmlNodePtr child = xmlAddChild(bodyNode, [body xmlNodeForDoc:doc elementName:key elementNSPrefix:nil]);
-			xmlSetNs(child, woksearchNs);
-		}
-	}
-	
-	xmlChar *buf;
-	int size;
-	xmlDocDumpFormatMemory(doc, &buf, &size, 1);
-	
-	NSString *serializedForm = [NSString stringWithCString:(const char*)buf encoding:NSUTF8StringEncoding];
-	xmlFree(buf);
-	
-	xmlFreeDoc(doc);	
-	return serializedForm;
-}
-@end
-
-@implementation WokSearchServiceSoapBindingResponse
-@synthesize headers;
-@synthesize bodyParts;
-@synthesize error;
-- (id)init
-{
-	if((self = [super init])) {
-		headers = nil;
-		bodyParts = nil;
-		error = nil;
-	}
-	
-	return self;
-}
-- (void)dealloc {
-	self.headers = nil;
-	self.bodyParts = nil;
-	self.error = nil;	
-	[super dealloc];
+	return [[[WokServiceSoapBinding alloc] initWithAddress:[self address] namespaceURI:[self namespaceURI]] autorelease];
 }
 @end

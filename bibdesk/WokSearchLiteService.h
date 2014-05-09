@@ -1,6 +1,5 @@
 #import <Foundation/Foundation.h>
-#import "USAdditions.h"
-#import <libxml/tree.h>
+#import "WokServiceSoapBinding.h"
 
 @class WokSearchLiteService_retrieve;
 @class WokSearchLiteService_retrieveResponse;
@@ -17,15 +16,7 @@
 @class WokSearchLiteService_liteRecord;
 @class WokSearchLiteService_labelValuesPair;
 
-@interface WokSearchLiteServiceElement : NSObject {
-}
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
-- (void)addElementsToNode:(xmlNodePtr)node;
-+ (id)deserializeNode:(xmlNodePtr)cur;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
-@end
-
-@interface WokSearchLiteService_sortField : WokSearchLiteServiceElement {
+@interface WokSearchLiteService_sortField : WokServiceSoapBindingElement {
 	NSString * name;
 	NSString * sort;
 }
@@ -33,7 +24,7 @@
 @property (retain) NSString * sort;
 @end
 
-@interface WokSearchLiteService_retrieveParameters : WokSearchLiteServiceElement {
+@interface WokSearchLiteService_retrieveParameters : WokServiceSoapBindingElement {
 	NSNumber * firstRecord;
 	NSNumber * count;
 	NSMutableArray *sortField;
@@ -44,7 +35,7 @@
 @property (readonly) NSMutableArray * sortField;
 @end
 
-@interface WokSearchLiteService_retrieve : WokSearchLiteServiceElement {
+@interface WokSearchLiteService_retrieve : WokServiceSoapBindingElement {
 	NSString * queryId;
 	WokSearchLiteService_retrieveParameters * retrieveParameters;
 }
@@ -52,7 +43,7 @@
 @property (retain) WokSearchLiteService_retrieveParameters * retrieveParameters;
 @end
 
-@interface WokSearchLiteService_labelValuesPair : WokSearchLiteServiceElement {
+@interface WokSearchLiteService_labelValuesPair : WokServiceSoapBindingElement {
 	NSString * label;
 	NSMutableArray *value;
 }
@@ -61,7 +52,7 @@
 @property (readonly) NSMutableArray * value;
 @end
 
-@interface WokSearchLiteService_liteRecord : WokSearchLiteServiceElement {
+@interface WokSearchLiteService_liteRecord : WokServiceSoapBindingElement {
 	NSString * uid;
 	NSMutableArray *title;
 	NSMutableArray *source;
@@ -82,7 +73,7 @@
 @property (readonly) NSMutableArray * other;
 @end
 
-@interface WokSearchLiteService_searchResults : WokSearchLiteServiceElement {
+@interface WokSearchLiteService_searchResults : WokServiceSoapBindingElement {
 	NSString * queryId;
 	NSNumber * recordsFound;
 	NSNumber * recordsSearched;
@@ -97,13 +88,13 @@
 @property (readonly) NSMutableArray * records;
 @end
 
-@interface WokSearchLiteService_retrieveResponse : WokSearchLiteServiceElement {
+@interface WokSearchLiteService_retrieveResponse : WokServiceSoapBindingElement {
 	WokSearchLiteService_searchResults * return_;
 }
 @property (retain) WokSearchLiteService_searchResults * return_;
 @end
 
-@interface WokSearchLiteService_retrieveById : WokSearchLiteServiceElement {
+@interface WokSearchLiteService_retrieveById : WokServiceSoapBindingElement {
 	NSString * databaseId;
 	NSMutableArray *uid;
 	NSString * queryLanguage;
@@ -116,13 +107,13 @@
 @property (retain) WokSearchLiteService_retrieveParameters * retrieveParameters;
 @end
 
-@interface WokSearchLiteService_retrieveByIdResponse : WokSearchLiteServiceElement {
+@interface WokSearchLiteService_retrieveByIdResponse : WokServiceSoapBindingElement {
 	WokSearchLiteService_searchResults * return_;
 }
 @property (retain) WokSearchLiteService_searchResults * return_;
 @end
 
-@interface WokSearchLiteService_editionDesc : WokSearchLiteServiceElement {
+@interface WokSearchLiteService_editionDesc : WokServiceSoapBindingElement {
 	NSString * collection;
 	NSString * edition;
 }
@@ -130,7 +121,7 @@
 @property (retain) NSString * edition;
 @end
 
-@interface WokSearchLiteService_timeSpan : WokSearchLiteServiceElement {
+@interface WokSearchLiteService_timeSpan : WokServiceSoapBindingElement {
 	NSString * begin;
 	NSString * end;
 }
@@ -138,7 +129,7 @@
 @property (retain) NSString * end;
 @end
 
-@interface WokSearchLiteService_queryParameters : WokSearchLiteServiceElement {
+@interface WokSearchLiteService_queryParameters : WokServiceSoapBindingElement {
 	NSString * databaseId;
 	NSString * userQuery;
 	NSMutableArray *editions;
@@ -155,7 +146,7 @@
 @property (retain) NSString * queryLanguage;
 @end
 
-@interface WokSearchLiteService_search : WokSearchLiteServiceElement {
+@interface WokSearchLiteService_search : WokServiceSoapBindingElement {
 	WokSearchLiteService_queryParameters * queryParameters;
 	WokSearchLiteService_retrieveParameters * retrieveParameters;
 }
@@ -163,104 +154,15 @@
 @property (retain) WokSearchLiteService_retrieveParameters * retrieveParameters;
 @end
 
-@interface WokSearchLiteService_searchResponse : WokSearchLiteServiceElement {
+@interface WokSearchLiteService_searchResponse : WokServiceSoapBindingElement {
 	WokSearchLiteService_searchResults * return_;
 }
 @property (retain) WokSearchLiteService_searchResults * return_;
 @end
 
-/* Cookies handling provided by http://en.wikibooks.org/wiki/Programming:WebObjects/Web_Services/Web_Service_Provider */
-@class WokSearchLiteServiceSoapBinding;
 @interface WokSearchLiteService : NSObject {
 }
-+ (WokSearchLiteServiceSoapBinding *)WokSearchLiteServiceSoapBinding;
-@end
-
-@class WokSearchLiteServiceSoapBindingResponse;
-@class WokSearchLiteServiceSoapBindingOperation;
-@protocol WokSearchLiteServiceSoapBindingResponseDelegate <NSObject>
-- (void) operation:(WokSearchLiteServiceSoapBindingOperation *)operation completedWithResponse:(WokSearchLiteServiceSoapBindingResponse *)response;
-@end
-
-@interface WokSearchLiteServiceSoapBinding : NSObject <WokSearchLiteServiceSoapBindingResponseDelegate> {
-	NSURL *address;
-	NSTimeInterval defaultTimeout;
-	NSMutableArray *cookies;
-	BOOL logXMLInOut;
-	BOOL synchronousOperationComplete;
-	NSString *authUsername;
-	NSString *authPassword;
-}
-@property (copy) NSURL *address;
-@property (assign) BOOL logXMLInOut;
-@property (assign) NSTimeInterval defaultTimeout;
-@property (nonatomic, retain) NSMutableArray *cookies;
-@property (nonatomic, retain) NSString *authUsername;
-@property (nonatomic, retain) NSString *authPassword;
-- (id)initWithAddress:(NSString *)anAddress;
-- (void)sendHTTPCallUsingBody:(NSString *)body soapAction:(NSString *)soapAction forOperation:(WokSearchLiteServiceSoapBindingOperation *)operation;
-- (void)addCookie:(NSHTTPCookie *)toAdd;
-- (WokSearchLiteServiceSoapBindingResponse *)retrieveByIdUsingParameters:(WokSearchLiteService_retrieveById *)aParameters ;
-- (void)retrieveByIdAsyncUsingParameters:(WokSearchLiteService_retrieveById *)aParameters  delegate:(id<WokSearchLiteServiceSoapBindingResponseDelegate>)responseDelegate;
-- (WokSearchLiteServiceSoapBindingResponse *)retrieveUsingParameters:(WokSearchLiteService_retrieve *)aParameters ;
-- (void)retrieveAsyncUsingParameters:(WokSearchLiteService_retrieve *)aParameters  delegate:(id<WokSearchLiteServiceSoapBindingResponseDelegate>)responseDelegate;
-- (WokSearchLiteServiceSoapBindingResponse *)searchUsingParameters:(WokSearchLiteService_search *)aParameters ;
-- (void)searchAsyncUsingParameters:(WokSearchLiteService_search *)aParameters  delegate:(id<WokSearchLiteServiceSoapBindingResponseDelegate>)responseDelegate;
-@end
-
-@interface WokSearchLiteServiceSoapBindingOperation : NSOperation {
-	WokSearchLiteServiceSoapBinding *binding;
-	NSDictionary *bodyElements;
-	WokSearchLiteServiceSoapBindingResponse *response;
-	id<WokSearchLiteServiceSoapBindingResponseDelegate> delegate;
-	NSMutableData *responseData;
-	NSURLConnection *urlConnection;
-}
-@property (retain) WokSearchLiteServiceSoapBinding *binding;
-@property (retain) NSDictionary *bodyElements;
-@property (readonly) WokSearchLiteServiceSoapBindingResponse *response;
-@property (nonatomic, assign) id<WokSearchLiteServiceSoapBindingResponseDelegate> delegate;
-@property (nonatomic, retain) NSMutableData *responseData;
-@property (nonatomic, retain) NSURLConnection *urlConnection;
-- (id)initWithBinding:(WokSearchLiteServiceSoapBinding *)aBinding delegate:(id<WokSearchLiteServiceSoapBindingResponseDelegate>)aDelegate bodyElements:(NSDictionary *)aBodyElements;
-@end
-
-@interface WokSearchLiteServiceSoapBinding_retrieveById : WokSearchLiteServiceSoapBindingOperation {
-	WokSearchLiteService_retrieveById * parameters;
-}
-@property (retain) WokSearchLiteService_retrieveById * parameters;
-- (id)initWithBinding:(WokSearchLiteServiceSoapBinding *)aBinding delegate:(id<WokSearchLiteServiceSoapBindingResponseDelegate>)aDelegate
-	parameters:(WokSearchLiteService_retrieveById *)aParameters;
-@end
-
-@interface WokSearchLiteServiceSoapBinding_retrieve : WokSearchLiteServiceSoapBindingOperation {
-	WokSearchLiteService_retrieve * parameters;
-}
-@property (retain) WokSearchLiteService_retrieve * parameters;
-- (id)initWithBinding:(WokSearchLiteServiceSoapBinding *)aBinding delegate:(id<WokSearchLiteServiceSoapBindingResponseDelegate>)aDelegate
-	parameters:(WokSearchLiteService_retrieve *)aParameters;
-@end
-
-@interface WokSearchLiteServiceSoapBinding_search : WokSearchLiteServiceSoapBindingOperation {
-	WokSearchLiteService_search * parameters;
-}
-@property (retain) WokSearchLiteService_search * parameters;
-- (id)initWithBinding:(WokSearchLiteServiceSoapBinding *)aBinding delegate:(id<WokSearchLiteServiceSoapBindingResponseDelegate>)aDelegate
-	parameters:(WokSearchLiteService_search *)aParameters;
-@end
-
-@interface WokSearchLiteServiceSoapBinding_envelope : NSObject {
-}
-+ (WokSearchLiteServiceSoapBinding_envelope *)sharedInstance;
-- (NSString *)serializedFormUsingHeaderElements:(NSDictionary *)headerElements bodyElements:(NSDictionary *)bodyElements;
-@end
-
-@interface WokSearchLiteServiceSoapBindingResponse : NSObject {
-	NSArray *headers;
-	NSArray *bodyParts;
-	NSError *error;
-}
-@property (retain) NSArray *headers;
-@property (retain) NSArray *bodyParts;
-@property (retain) NSError *error;
++ (NSString *)address;
++ (NSString *)namespaceURI;
++ (WokServiceSoapBinding *)soapBinding;
 @end

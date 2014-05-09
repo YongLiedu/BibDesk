@@ -38,9 +38,6 @@
 		2730078107CF20B500F2E485 /* BDSKComplexStringEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2730077A07CF20B500F2E485 /* BDSKComplexStringEditor.m */; };
 		2730078307CF20B500F2E485 /* BDSKMacroWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2730077C07CF20B500F2E485 /* BDSKMacroWindowController.m */; };
 		27AFAF9D080D1E1B0096F5D2 /* BDSKTextImportController.m in Sources */ = {isa = PBXBuildFile; fileRef = 27AFAF9B080D1E1B0096F5D2 /* BDSKTextImportController.m */; };
-		3B91DD4A162225850088206D /* NSDate+ISO8601Parsing.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD3E162225850088206D /* NSDate+ISO8601Parsing.m */; };
-		3B91DD4C162225850088206D /* NSDate+ISO8601Unparsing.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD40162225850088206D /* NSDate+ISO8601Unparsing.m */; };
-		3B91DD4E162225850088206D /* USAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD42162225850088206D /* USAdditions.m */; };
 		3B91DD52162225850088206D /* WOKMWSAuthenticateService.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD46162225850088206D /* WOKMWSAuthenticateService.m */; };
 		3B91DD54162225850088206D /* WokSearchService.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD48162225850088206D /* WokSearchService.m */; };
 		3B91DD56162229B70088206D /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B91DD55162229B70088206D /* libxml2.dylib */; };
@@ -161,6 +158,7 @@
 		CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3A0BD50B1634D500233208 /* BDSKCompletionServerProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CE4376F70D24341E00C993CF /* NSViewAnimation_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4376F50D24341E00C993CF /* NSViewAnimation_BDSKExtensions.m */; };
 		CE4385E90BB81D0500A56987 /* BDSKSearchBookmarkController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */; };
+		CE458971191B91D100D1790F /* WokServiceSoapBinding.m in Sources */ = {isa = PBXBuildFile; fileRef = CE45896F191B91D100D1790F /* WokServiceSoapBinding.m */; };
 		CE4A0E141115ABEF000A95C5 /* BDSKServiceProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4A0E121115ABEF000A95C5 /* BDSKServiceProvider.m */; };
 		CE4D85290C3A8C8F002C20CB /* BDSKAutofileCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4D85270C3A8C8E002C20CB /* BDSKAutofileCommand.m */; };
 		CE51922109E5755600E97C3A /* BDSKFindFieldEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = CE51921F09E5755600E97C3A /* BDSKFindFieldEditor.m */; };
@@ -775,12 +773,6 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* Bibdesk_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bibdesk_Prefix.pch; sourceTree = "<group>"; };
-		3B91DD3D162225850088206D /* NSDate+ISO8601Parsing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+ISO8601Parsing.h"; sourceTree = "<group>"; };
-		3B91DD3E162225850088206D /* NSDate+ISO8601Parsing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+ISO8601Parsing.m"; sourceTree = "<group>"; };
-		3B91DD3F162225850088206D /* NSDate+ISO8601Unparsing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+ISO8601Unparsing.h"; sourceTree = "<group>"; };
-		3B91DD40162225850088206D /* NSDate+ISO8601Unparsing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+ISO8601Unparsing.m"; sourceTree = "<group>"; };
-		3B91DD41162225850088206D /* USAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = USAdditions.h; sourceTree = "<group>"; };
-		3B91DD42162225850088206D /* USAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = USAdditions.m; sourceTree = "<group>"; };
 		3B91DD45162225850088206D /* WOKMWSAuthenticateService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WOKMWSAuthenticateService.h; sourceTree = "<group>"; };
 		3B91DD46162225850088206D /* WOKMWSAuthenticateService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WOKMWSAuthenticateService.m; sourceTree = "<group>"; };
 		3B91DD47162225850088206D /* WokSearchService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WokSearchService.h; sourceTree = "<group>"; };
@@ -1056,6 +1048,8 @@
 		CE4385E60BB81D0500A56987 /* BDSKSearchBookmarkController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchBookmarkController.h; sourceTree = "<group>"; };
 		CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchBookmarkController.m; sourceTree = "<group>"; };
 		CE452AC00F1EBBD500DA1A5A /* TestBDSKRISParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestBDSKRISParser.h; sourceTree = "<group>"; };
+		CE45896E191B91D100D1790F /* WokServiceSoapBinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WokServiceSoapBinding.h; sourceTree = "<group>"; };
+		CE45896F191B91D100D1790F /* WokServiceSoapBinding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WokServiceSoapBinding.m; sourceTree = "<group>"; };
 		CE4A0E111115ABEF000A95C5 /* BDSKServiceProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKServiceProvider.h; sourceTree = "<group>"; };
 		CE4A0E121115ABEF000A95C5 /* BDSKServiceProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKServiceProvider.m; sourceTree = "<group>"; };
 		CE4D85260C3A8C8E002C20CB /* BDSKAutofileCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKAutofileCommand.h; sourceTree = "<group>"; };
@@ -1942,26 +1936,6 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		3B91DD3C1622254B0088206D /* ISI wsdl2objc */ = {
-			isa = PBXGroup;
-			children = (
-				3B91DD3D162225850088206D /* NSDate+ISO8601Parsing.h */,
-				3B91DD3E162225850088206D /* NSDate+ISO8601Parsing.m */,
-				3B91DD3F162225850088206D /* NSDate+ISO8601Unparsing.h */,
-				3B91DD40162225850088206D /* NSDate+ISO8601Unparsing.m */,
-				3B91DD41162225850088206D /* USAdditions.h */,
-				3B91DD42162225850088206D /* USAdditions.m */,
-				3B91DD45162225850088206D /* WOKMWSAuthenticateService.h */,
-				3B91DD46162225850088206D /* WOKMWSAuthenticateService.m */,
-				CEBF7AE518F2EB6300012ECD /* WokSearchLiteService.h */,
-				CEBF7AE618F2EB6300012ECD /* WokSearchLiteService.m */,
-				3B91DD47162225850088206D /* WokSearchService.h */,
-				3B91DD48162225850088206D /* WokSearchService.m */,
-			);
-			name = "ISI wsdl2objc";
-			path = ..;
-			sourceTree = "<group>";
-		};
 		CE1255DF0C80DD3000F755F8 /* Scripting */ = {
 			isa = PBXGroup;
 			children = (
@@ -1998,7 +1972,6 @@
 			isa = PBXGroup;
 			children = (
 				CE3E4A080E75B9F20014C328 /* Ken Ferry */,
-				3B91DD3C1622254B0088206D /* ISI wsdl2objc */,
 			);
 			name = "Third Party Sources";
 			path = vendorsrc;
@@ -2232,6 +2205,14 @@
 				F9022C6E075802E300C3F701 /* BibItem.m */,
 				F9B3405C0BBC16720072C2B0 /* BibItem_PubMedLookup.m */,
 				F97C9DBB0C44866F0002EE01 /* WSGeneratedObj.m */,
+				3B91DD45162225850088206D /* WOKMWSAuthenticateService.h */,
+				3B91DD46162225850088206D /* WOKMWSAuthenticateService.m */,
+				CEBF7AE518F2EB6300012ECD /* WokSearchLiteService.h */,
+				CEBF7AE618F2EB6300012ECD /* WokSearchLiteService.m */,
+				3B91DD47162225850088206D /* WokSearchService.h */,
+				3B91DD48162225850088206D /* WokSearchService.m */,
+				CE45896E191B91D100D1790F /* WokServiceSoapBinding.h */,
+				CE45896F191B91D100D1790F /* WokServiceSoapBinding.m */,
 			);
 			name = Data;
 			sourceTree = "<group>";
@@ -3722,15 +3703,13 @@
 				CEA498A61481185100AB81C5 /* BDSKAddressTextFieldCell.m in Sources */,
 				CE15198214B62E47003AE698 /* BDSKLineNumberView.m in Sources */,
 				CE0AB70114BB019400638C8F /* BDSKMASParser.m in Sources */,
-				3B91DD4A162225850088206D /* NSDate+ISO8601Parsing.m in Sources */,
-				3B91DD4C162225850088206D /* NSDate+ISO8601Unparsing.m in Sources */,
-				3B91DD4E162225850088206D /* USAdditions.m in Sources */,
 				3B91DD52162225850088206D /* WOKMWSAuthenticateService.m in Sources */,
 				3B91DD54162225850088206D /* WokSearchService.m in Sources */,
 				CEC46E311629743200B51A9D /* NSPasteboard_BDSKExtensions.m in Sources */,
 				CE2153D416B169A4004EB59A /* BDSKAlias.m in Sources */,
 				CE280D4816C6C51600344CC8 /* BDSKSaveAccessoryViewController.m in Sources */,
 				CEBF7AE818F2EB6300012ECD /* WokSearchLiteService.m in Sources */,
+				CE458971191B91D100D1790F /* WokServiceSoapBinding.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

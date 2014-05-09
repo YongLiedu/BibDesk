@@ -37,6 +37,7 @@
  */
 
 #import "BDSKISIGroupServer.h"
+#import "WokServiceSoapBinding.h"
 #import "WOKMWSAuthenticateService.h"
 #import "WokSearchService.h"
 #import "WokSearchLiteService.h"
@@ -47,10 +48,6 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
-#import "NSDate+ISO8601Unparsing.h"
-
-#define SERVER_URL @"http://BDSKWOKSearch.webofknowledge.com/esti/wokmws/ws/WokSearch"
-#define SERVER_URL_LITE @"http://BDSKWOKSearch.webofknowledge.com/esti/wokmws/ws/WokSearchLite"
 
 #define WOS_DB_ID @"WOS"
 #define EN_QUERY_LANG @"en"
@@ -182,7 +179,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
 
 - (void)retrieveWithSearchTerm:(NSString *)aSearchTerm
 {
-    if ([[NSURL URLWithString:[serverInfo isLite] ? SERVER_URL_LITE : SERVER_URL] canConnect]) {
+    if ([[NSURL URLWithString:[serverInfo isLite] ? [WokSearchLiteService address] : [WokSearchService address]] canConnect]) {
         OSAtomicCompareAndSwap32Barrier(1, 0, &flags.failedDownload);
         
         OSAtomicCompareAndSwap32Barrier(0, 1, &flags.isRetrieving);
@@ -345,19 +342,17 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                 editionIDs = [ids subarrayWithRange:NSMakeRange(1, [ids count] - 1)];
             }
             
-            // this can be a WokSearchServiceSoapBindingResponse or WokSearchLiteServiceSoapBindingResponse
-            id response = nil;
+            WokServiceSoapBinding *binding = nil;
+            WokServiceSoapBindingElement *request = nil;
             NSString *errorString = nil;
             
             if ([[options objectForKey:@"lite"] boolValue]) {
                 
+                binding = [WokSearchLiteService soapBinding];
+                
                 WokSearchLiteService_retrieveParameters *retrieveParameters = [[[WokSearchLiteService_retrieveParameters alloc] init] autorelease];
                 [retrieveParameters setFirstRecord:[NSNumber numberWithInteger:fetchedResultsLocal + 1]];
                 [retrieveParameters setCount:[NSNumber numberWithInteger:numResults]];
-                
-                WokSearchLiteServiceSoapBinding *binding = [WokSearchLiteService WokSearchLiteServiceSoapBinding];
-                [binding addCookie:sessionCookie];
-                //binding.logXMLInOut = YES;
                 
                 switch (operation) {
                     case BDSKWOKSearch:
@@ -376,13 +371,13 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                         if (begin || end) {
                             WokSearchLiteService_timeSpan *timeSpan = [[[WokSearchLiteService_timeSpan alloc] init] autorelease];
                             [timeSpan setBegin:begin ?: @"1800-01-01"];
-                            [timeSpan setEnd:end ?: [[NSDate date] ISO8601DateStringWithTime:NO]];
+                            [timeSpan setEnd:end ?: dateFromSearchTerm(@"end:--", NO, NULL)];
                             [queryParameters setTimeSpan:timeSpan];
                         }
                         [queryParameters setQueryLanguage:EN_QUERY_LANG];
                         [searchRequest setQueryParameters:queryParameters];
                         [searchRequest setRetrieveParameters:retrieveParameters];
-                        response = [binding searchUsingParameters:searchRequest];
+                        request = searchRequest;
                         break;
                     }
                     case BDSKWOKUid:
@@ -393,7 +388,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                             [retrieveByIdRequest addUid:uid];
                         [retrieveByIdRequest setQueryLanguage:EN_QUERY_LANG];
                         [retrieveByIdRequest setRetrieveParameters:retrieveParameters];
-                        response = [binding retrieveByIdUsingParameters:retrieveByIdRequest];
+                        request = retrieveByIdRequest;
                         break;
                     }
                     case BDSKWOKCitedBy:
@@ -409,6 +404,8 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                 
             } else {
                 
+                binding = [WokSearchService soapBinding];
+                
                 NSMutableArray *editions = [NSMutableArray array];
                 for (NSString *editionID in editionIDs) {
                     WokSearchService_editionDesc *edition = [[[WokSearchService_editionDesc alloc] init] autorelease];
@@ -422,16 +419,12 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                 if (begin || end || operation == BDSKWOKCiting) {
                     timeSpan = [[[WokSearchService_timeSpan alloc] init] autorelease];
                     [timeSpan setBegin:begin ?: @"1800-01-01"];
-                    [timeSpan setEnd:end ?: [[NSDate date] ISO8601DateStringWithTime:NO]];
+                    [timeSpan setEnd:end ?: dateFromSearchTerm(@"end:--", NO, NULL)];
                 }
                 
                 WokSearchService_retrieveParameters *retrieveParameters = [[[WokSearchService_retrieveParameters alloc] init] autorelease];
                 [retrieveParameters setFirstRecord:[NSNumber numberWithInteger:fetchedResultsLocal + 1]];
                 [retrieveParameters setCount:[NSNumber numberWithInteger:numResults]];
-                
-                WokSearchServiceSoapBinding *binding = [WokSearchService WokSearchServiceSoapBinding];
-                [binding addCookie:sessionCookie];
-                //binding.logXMLInOut = YES;
                 
                 // Reto: Edition is not really needed. If omitted, the BDSKWOKSearch is performed in all WOK databases which yields
                 // a more consistent result with the web BDSKWOKSearch. 
@@ -449,7 +442,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                         [queryParameters setQueryLanguage:EN_QUERY_LANG];
                         [searchRequest setQueryParameters:queryParameters];
                         [searchRequest setRetrieveParameters:retrieveParameters];
-                        response = [binding searchUsingParameters:searchRequest];
+                        request = searchRequest;
                         break;
                     }
                     case BDSKWOKCitedBy:
@@ -459,7 +452,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                         [citedReferencesRequest setUid:searchTerm];
                         [citedReferencesRequest setQueryLanguage:EN_QUERY_LANG];
                         [citedReferencesRequest setRetrieveParameters:retrieveParameters];
-                        response = [binding citedReferencesUsingParameters:citedReferencesRequest];
+                        request = citedReferencesRequest;
                         break;
                     }
                     case BDSKWOKCiting:
@@ -472,7 +465,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                         [citingArticlesRequest setTimeSpan:timeSpan];
                         [citingArticlesRequest setQueryLanguage:EN_QUERY_LANG];
                         [citingArticlesRequest setRetrieveParameters:retrieveParameters];
-                        response = [binding citingArticlesUsingParameters:citingArticlesRequest];
+                        request = citingArticlesRequest;
                         break;
                     }
                     case BDSKWOKRelated:
@@ -485,7 +478,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                         [relatedRecordsRequest setTimeSpan:timeSpan];
                         [relatedRecordsRequest setQueryLanguage:EN_QUERY_LANG];
                         [relatedRecordsRequest setRetrieveParameters:retrieveParameters];
-                        response = [binding relatedRecordsUsingParameters:relatedRecordsRequest];
+                        request = relatedRecordsRequest;
                         break;
                     }
                     case BDSKWOKUid:
@@ -496,7 +489,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                             [retrieveByIdRequest addUid:uid];
                         [retrieveByIdRequest setQueryLanguage:EN_QUERY_LANG];
                         [retrieveByIdRequest setRetrieveParameters:retrieveParameters];
-                        response = [binding retrieveByIdUsingParameters:retrieveByIdRequest];
+                        request = retrieveByIdRequest;
                         break;
                     }
                 }
@@ -506,11 +499,21 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
             // this can be a WokSearchService_fullRecordSearchResults, WokSearchService_citedReferencesSearchResults, or WokSearchLiteService_searchResults
             id searchResults = nil;
             
-            for (id bodyPart in [response bodyParts]) {
-                if ([bodyPart respondsToSelector:@selector(simpleFaultString)])
-                    errorString = [[(SOAPFault *)bodyPart simpleFaultString] stringByDeletingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
-                else if ([bodyPart respondsToSelector:@selector(return_)])
-                    searchResults = [bodyPart return_];
+            if (binding && request) {
+                [binding addCookie:sessionCookie];
+                //binding.logXMLInOut = YES;
+                
+                WokServiceSoapBindingResponse *response = [binding performSynchronousOperationWithParameters:request];
+                
+                for (id bodyPart in [response bodyParts]) {
+                    if ([bodyPart respondsToSelector:@selector(faultstring)])
+                        errorString = [[(WokServiceSoapBinding_fault *)bodyPart faultstring] stringByDeletingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+                    else if ([bodyPart respondsToSelector:@selector(return_)])
+                        searchResults = [bodyPart return_];
+                }
+                
+                if (searchResults == nil && errorString == nil)
+                    errorString = [[response error] localizedDescription];
             }
             
             if (searchResults) {
@@ -539,7 +542,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                     [sessionCookie release];
                     sessionCookie = nil;
                 }
-                [self setErrorMessage:errorString ?: [[response error] localizedDescription] ?: NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.")];
+                [self setErrorMessage:errorString ?: NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database, or your query syntax may be incorrect.", @"Error message when connection to Web of Science fails.")];
             }
         }
         
@@ -559,20 +562,20 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
 - (BOOL)authenticateWithOptions:(NSDictionary *)options {
     // if sessionCookie was not nil we already authenticated
     if (sessionCookie == nil) {
-        WOKMWSAuthenticateServiceSoapBinding *binding = [WOKMWSAuthenticateService WOKMWSAuthenticateServiceSoapBinding];
+        WokServiceSoapBinding *binding = [WOKMWSAuthenticateService soapBinding];
         //binding.logXMLInOut = YES;
         [binding setAuthUsername:[options objectForKey:@"username"]];
         [binding setAuthPassword:[options objectForKey:@"password"]];
         
         WOKMWSAuthenticateService_authenticate *request = [[[WOKMWSAuthenticateService_authenticate alloc] init] autorelease];
         
-        WOKMWSAuthenticateServiceSoapBindingResponse *response = [binding authenticateUsingParameters:request];
+        WokServiceSoapBindingResponse *response = [binding performSynchronousOperationWithParameters:request];
         
         for (id bodyPart in [response bodyParts]) {
             
-            if ([bodyPart respondsToSelector:@selector(simpleFaultString)]) {
+            if ([bodyPart respondsToSelector:@selector(faultstring)]) {
             
-                NSString *errorString = [(SOAPFault *)bodyPart simpleFaultString];
+                NSString *errorString = [(WokServiceSoapBinding_fault *)bodyPart faultstring];
                 [self setErrorMessage:[NSString stringWithFormat:NSLocalizedString(@"WOK Authentication Error: %@", "WOK Authentication Error Format"), errorString]];
                 [sessionCookie release];
                 sessionCookie = nil;
@@ -590,10 +593,10 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
 - (void)serverDidFinish {
     if (sessionCookie) {
         @try {
-            WOKMWSAuthenticateServiceSoapBinding *binding = [WOKMWSAuthenticateService WOKMWSAuthenticateServiceSoapBinding];
+            WokServiceSoapBinding *binding = [WOKMWSAuthenticateService soapBinding];
             WOKMWSAuthenticateService_closeSession *request = [[[WOKMWSAuthenticateService_closeSession alloc] init] autorelease];
             [binding addCookie:sessionCookie];
-            [binding closeSessionUsingParameters:request];
+            [binding performSynchronousOperationWithParameters:request];
         }
         @catch (id exception) {
             NSLog(@"Exception \"%@\" raised in object %@", exception, self);
