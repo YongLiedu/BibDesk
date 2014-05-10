@@ -66,6 +66,7 @@
 @property (readonly) NSString * elementName;
 @property (readonly) NSString * responseName;
 @property (readonly) Class responseClass;
+@property (readonly) NSString * soapAction;
 - (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
 - (void)addElementsToNode:(xmlNodePtr)node;
 + (id)deserializeNode:(xmlNodePtr)cur;

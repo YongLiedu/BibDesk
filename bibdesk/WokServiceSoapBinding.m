@@ -193,7 +193,7 @@
 	
 	NSString *operationXMLString = [binding serializedEnvelopeUsingHeaderElements:headerElements bodyElements:bodyElements];
 	
-	[binding sendHTTPCallUsingBody:operationXMLString soapAction:@"" forOperation:self];
+	[binding sendHTTPCallUsingBody:operationXMLString soapAction:self.parameters.soapAction forOperation:self];
 }
 - (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
@@ -385,6 +385,7 @@
 @dynamic elementName;
 @dynamic responseName;
 @dynamic responseClass;
+@dynamic soapAction;
 - (NSString *)elementName
 {
 	NSString *name = NSStringFromClass([self class]);
@@ -401,6 +402,10 @@
 - (Class)responseClass
 {
 	return NSClassFromString([NSStringFromClass([self class]) stringByAppendingString:@"Response"]);
+}
+- (NSString *)soapAction
+{
+	return @"";
 }
 @end
 
