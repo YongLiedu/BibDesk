@@ -6,7 +6,7 @@
 @class WOKMWSAuthenticateService_closeSession;
 @class WOKMWSAuthenticateService_closeSessionResponse;
 
-@interface WOKMWSAuthenticateService_authenticate : WokServiceSoapBindingElement {
+@interface WOKMWSAuthenticateService_authenticate : WokServiceSoapBindingRequest {
 }
 @end
 
@@ -16,7 +16,7 @@
 @property (retain) NSString * return_;
 @end
 
-@interface WOKMWSAuthenticateService_closeSession : WokServiceSoapBindingElement {
+@interface WOKMWSAuthenticateService_closeSession : WokServiceSoapBindingRequest {
 }
 @end
 

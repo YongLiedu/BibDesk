@@ -39,7 +39,7 @@
 		[cookies addObject:toAdd];
 	}
 }
-- (WokServiceSoapBindingResponse *)performSynchronousOperationWithParameters:(WokServiceSoapBindingElement *)parameters
+- (WokServiceSoapBindingResponse *)performSynchronousOperationWithParameters:(WokServiceSoapBindingRequest *)parameters
 {
 	WokServiceSoapBindingOperation *operation = [[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self parameters:parameters] autorelease];
 	synchronousOperationComplete = NO;
@@ -51,7 +51,7 @@
 	while (!synchronousOperationComplete && [theRL runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]]);
 	return operation.response;
 }
-- (void)performAsynchronousOperationWithParameters:(WokServiceSoapBindingElement *)parameters delegate:(id<WokServiceSoapBindingResponseDelegate>)responseDelegate
+- (void)performAsynchronousOperationWithParameters:(WokServiceSoapBindingRequest *)parameters delegate:(id<WokServiceSoapBindingResponseDelegate>)responseDelegate
 {
 	WokServiceSoapBindingOperation *operation = [[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:responseDelegate parameters:parameters] autorelease];
 	[operation start];
@@ -165,7 +165,7 @@
 @synthesize delegate;
 @synthesize responseData;
 @synthesize urlConnection;
-- (id)initWithBinding:(WokServiceSoapBinding *)aBinding delegate:(id<WokServiceSoapBindingResponseDelegate>)aDelegate parameters:(WokServiceSoapBindingElement *)aParameters
+- (id)initWithBinding:(WokServiceSoapBinding *)aBinding delegate:(id<WokServiceSoapBindingResponseDelegate>)aDelegate parameters:(WokServiceSoapBindingRequest *)aParameters
 {
 	if ((self = [super init])) {
 		self.binding = aBinding;
@@ -382,6 +382,9 @@
 - (void)deserializeElementsFromNode:(xmlNodePtr)cur
 {
 }
+@end
+
+@implementation WokServiceSoapBindingRequest
 @dynamic elementName;
 @dynamic responseName;
 @dynamic responseClass;

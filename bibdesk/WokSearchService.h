@@ -70,7 +70,7 @@
 @property (readonly) NSMutableArray * option;
 @end
 
-@interface WokSearchService_citedReferences : WokServiceSoapBindingElement {
+@interface WokSearchService_citedReferences : WokServiceSoapBindingRequest {
 	NSString * databaseId;
 	NSString * uid;
 	NSString * queryLanguage;
@@ -127,7 +127,7 @@
 @property (retain) WokSearchService_citedReferencesSearchResults * return_;
 @end
 
-@interface WokSearchService_citedReferencesRetrieve : WokServiceSoapBindingElement {
+@interface WokSearchService_citedReferencesRetrieve : WokServiceSoapBindingRequest {
 	NSString * queryId;
 	WokSearchService_retrieveParameters * retrieveParameters;
 }
@@ -158,7 +158,7 @@
 @property (retain) NSString * end;
 @end
 
-@interface WokSearchService_citingArticles : WokServiceSoapBindingElement {
+@interface WokSearchService_citingArticles : WokServiceSoapBindingRequest {
 	NSString * databaseId;
 	NSString * uid;
 	NSMutableArray *editions;
@@ -207,7 +207,7 @@
 @property (retain) WokSearchService_fullRecordSearchResults * return_;
 @end
 
-@interface WokSearchService_relatedRecords : WokServiceSoapBindingElement {
+@interface WokSearchService_relatedRecords : WokServiceSoapBindingRequest {
 	NSString * databaseId;
 	NSString * uid;
 	NSMutableArray *editions;
@@ -230,7 +230,7 @@
 @property (retain) WokSearchService_fullRecordSearchResults * return_;
 @end
 
-@interface WokSearchService_retrieve : WokServiceSoapBindingElement {
+@interface WokSearchService_retrieve : WokServiceSoapBindingRequest {
 	NSString * queryId;
 	WokSearchService_retrieveParameters * retrieveParameters;
 }
@@ -253,7 +253,7 @@
 @property (retain) WokSearchService_fullRecordData * return_;
 @end
 
-@interface WokSearchService_retrieveById : WokServiceSoapBindingElement {
+@interface WokSearchService_retrieveById : WokServiceSoapBindingRequest {
 	NSString * databaseId;
 	NSMutableArray *uid;
 	NSString * queryLanguage;
@@ -289,7 +289,7 @@
 @property (retain) NSString * queryLanguage;
 @end
 
-@interface WokSearchService_search : WokServiceSoapBindingElement {
+@interface WokSearchService_search : WokServiceSoapBindingRequest {
 	WokSearchService_queryParameters * queryParameters;
 	WokSearchService_retrieveParameters * retrieveParameters;
 }

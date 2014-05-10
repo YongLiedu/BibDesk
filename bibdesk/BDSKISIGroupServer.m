@@ -343,7 +343,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
             }
             
             WokServiceSoapBinding *binding = nil;
-            WokServiceSoapBindingElement *request = nil;
+            WokServiceSoapBindingRequest *request = nil;
             NSString *errorString = nil;
             
             if ([[options objectForKey:@"lite"] boolValue]) {

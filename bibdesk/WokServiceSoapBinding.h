@@ -2,6 +2,7 @@
 #import <libxml/tree.h>
 
 @class WokServiceSoapBindingElement;
+@class WokServiceSoapBindingRequest;
 @class WokServiceSoapBindingResponse;
 @class WokServiceSoapBindingOperation;
 
@@ -30,25 +31,25 @@
 - (NSString *)serializedEnvelopeUsingHeaderElements:(NSDictionary *)headerElements bodyElements:(NSDictionary *)bodyElements;
 - (void)sendHTTPCallUsingBody:(NSString *)body soapAction:(NSString *)soapAction forOperation:(WokServiceSoapBindingOperation *)operation;
 - (void)addCookie:(NSHTTPCookie *)toAdd;
-- (WokServiceSoapBindingResponse *)performSynchronousOperationWithParameters:(WokServiceSoapBindingElement *)parameters;
-- (void)performAsynchronousOperationWithParameters:(WokServiceSoapBindingElement *)parameters delegate:(id<WokServiceSoapBindingResponseDelegate>)responseDelegate;
+- (WokServiceSoapBindingResponse *)performSynchronousOperationWithParameters:(WokServiceSoapBindingRequest *)parameters;
+- (void)performAsynchronousOperationWithParameters:(WokServiceSoapBindingRequest *)parameters delegate:(id<WokServiceSoapBindingResponseDelegate>)responseDelegate;
 @end
 
 @interface WokServiceSoapBindingOperation : NSOperation {
 	WokServiceSoapBinding *binding;
-	WokServiceSoapBindingElement *parameters;
+	WokServiceSoapBindingRequest *parameters;
 	WokServiceSoapBindingResponse *response;
 	id<WokServiceSoapBindingResponseDelegate> delegate;
 	NSMutableData *responseData;
 	NSURLConnection *urlConnection;
 }
 @property (retain) WokServiceSoapBinding *binding;
-@property (retain) WokServiceSoapBindingElement *parameters;
+@property (retain) WokServiceSoapBindingRequest *parameters;
 @property (readonly) WokServiceSoapBindingResponse *response;
 @property (nonatomic, assign) id<WokServiceSoapBindingResponseDelegate> delegate;
 @property (nonatomic, retain) NSMutableData *responseData;
 @property (nonatomic, retain) NSURLConnection *urlConnection;
-- (id)initWithBinding:(WokServiceSoapBinding *)aBinding delegate:(id<WokServiceSoapBindingResponseDelegate>)aDelegate parameters:(WokServiceSoapBindingElement *)aParameters;
+- (id)initWithBinding:(WokServiceSoapBinding *)aBinding delegate:(id<WokServiceSoapBindingResponseDelegate>)aDelegate parameters:(WokServiceSoapBindingRequest *)aParameters;
 @end
 
 @interface WokServiceSoapBindingResponse : NSObject {
@@ -63,14 +64,18 @@
 
 @interface WokServiceSoapBindingElement : NSObject {
 }
-@property (readonly) NSString * elementName;
-@property (readonly) NSString * responseName;
-@property (readonly) Class responseClass;
-@property (readonly) NSString * soapAction;
 - (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
 - (void)addElementsToNode:(xmlNodePtr)node;
 + (id)deserializeNode:(xmlNodePtr)cur;
 - (void)deserializeElementsFromNode:(xmlNodePtr)cur;
+@end
+
+@interface WokServiceSoapBindingRequest : WokServiceSoapBindingElement {
+}
+@property (readonly) NSString * elementName;
+@property (readonly) NSString * responseName;
+@property (readonly) Class responseClass;
+@property (readonly) NSString * soapAction;
 @end
 
 @interface WokServiceSoapBinding_fault : WokServiceSoapBindingElement {

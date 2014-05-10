@@ -35,7 +35,7 @@
 @property (readonly) NSMutableArray * sortField;
 @end
 
-@interface WokSearchLiteService_retrieve : WokServiceSoapBindingElement {
+@interface WokSearchLiteService_retrieve : WokServiceSoapBindingRequest {
 	NSString * queryId;
 	WokSearchLiteService_retrieveParameters * retrieveParameters;
 }
@@ -94,7 +94,7 @@
 @property (retain) WokSearchLiteService_searchResults * return_;
 @end
 
-@interface WokSearchLiteService_retrieveById : WokServiceSoapBindingElement {
+@interface WokSearchLiteService_retrieveById : WokServiceSoapBindingRequest {
 	NSString * databaseId;
 	NSMutableArray *uid;
 	NSString * queryLanguage;
@@ -146,7 +146,7 @@
 @property (retain) NSString * queryLanguage;
 @end
 
-@interface WokSearchLiteService_search : WokServiceSoapBindingElement {
+@interface WokSearchLiteService_search : WokServiceSoapBindingRequest {
 	WokSearchLiteService_queryParameters * queryParameters;
 	WokSearchLiteService_retrieveParameters * retrieveParameters;
 }
