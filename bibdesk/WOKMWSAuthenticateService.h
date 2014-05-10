@@ -6,7 +6,7 @@
 @class WOKMWSAuthenticateService_closeSession;
 @class WOKMWSAuthenticateService_closeSessionResponse;
 
-@interface WOKMWSAuthenticateService_authenticate : WokServiceSoapBindingRequest {
+@interface WOKMWSAuthenticateService_authenticate : WokServiceSoapBindingElement {
 }
 @end
 
@@ -16,7 +16,7 @@
 @property (retain) NSString * return_;
 @end
 
-@interface WOKMWSAuthenticateService_closeSession : WokServiceSoapBindingRequest {
+@interface WOKMWSAuthenticateService_closeSession : WokServiceSoapBindingElement {
 }
 @end
 
@@ -24,9 +24,10 @@
 }
 @end
 
-@interface WOKMWSAuthenticateService : NSObject {
+@interface WOKMWSAuthenticateService : WokServiceSoapBinding {
 }
 + (NSString *)address;
 + (NSString *)namespaceURI;
-+ (WokServiceSoapBinding *)soapBinding;
+- (WokServiceSoapBindingResponse *)authenticateUsingParameters:(WOKMWSAuthenticateService_authenticate *)parameters;
+- (WokServiceSoapBindingResponse *)closeSessionUsingParameters:(WOKMWSAuthenticateService_closeSession *)parameters;
 @end

@@ -297,18 +297,6 @@
 		}
 	}
 }
-- (NSString *)elementName
-{
-	return @"citedReferences";
-}
-- (NSString *)responseName
-{
-	return @"citedReferencesResponse";
-}
-- (Class)responseClass
-{
-	return [WokSearchService_citedReferencesResponse class];
-}
 @end
 
 @implementation WokSearchService_citedReference
@@ -595,18 +583,6 @@
 		}
 	}
 }
-- (NSString *)elementName
-{
-	return @"citedReferencesRetrieve";
-}
-- (NSString *)responseName
-{
-	return @"citedReferencesRetrieveResponse";
-}
-- (Class)responseClass
-{
-	return [WokSearchService_citedReferencesRetrieveResponse class];
-}
 @end
 
 @implementation WokSearchService_citedReferencesRetrieveResponse
@@ -828,18 +804,6 @@
 			}
 		}
 	}
-}
-- (NSString *)elementName
-{
-	return @"citingArticles";
-}
-- (NSString *)responseName
-{
-	return @"citingArticlesResponse";
-}
-- (Class)responseClass
-{
-	return [WokSearchService_citingArticlesResponse class];
 }
 @end
 
@@ -1109,18 +1073,6 @@
 		}
 	}
 }
-- (NSString *)elementName
-{
-	return @"relatedRecords";
-}
-- (NSString *)responseName
-{
-	return @"relatedRecordsResponse";
-}
-- (Class)responseClass
-{
-	return [WokSearchService_relatedRecordsResponse class];
-}
 @end
 
 @implementation WokSearchService_relatedRecordsResponse
@@ -1200,18 +1152,6 @@
 			}
 		}
 	}
-}
-- (NSString *)elementName
-{
-	return @"retrieve";
-}
-- (NSString *)responseName
-{
-	return @"retrieveResponse";
-}
-- (Class)responseClass
-{
-	return [WokSearchService_retrieveResponse class];
 }
 @end
 
@@ -1369,18 +1309,6 @@
 			}
 		}
 	}
-}
-- (NSString *)elementName
-{
-	return @"retrieveById";
-}
-- (NSString *)responseName
-{
-	return @"retrieveByIdResponse";
-}
-- (Class)responseClass
-{
-	return [WokSearchService_retrieveByIdResponse class];
 }
 @end
 
@@ -1553,18 +1481,6 @@
 		}
 	}
 }
-- (NSString *)elementName
-{
-	return @"search";
-}
-- (NSString *)responseName
-{
-	return @"searchResponse";
-}
-- (Class)responseClass
-{
-	return [WokSearchService_searchResponse class];
-}
 @end
 
 @implementation WokSearchService_searchResponse
@@ -1611,8 +1527,46 @@
 {
 	return @"http://woksearch.v3.wokmws.thomsonreuters.com";
 }
-+ (WokServiceSoapBinding *)soapBinding
+- (WokServiceSoapBindingResponse *)searchUsingParameters:(WokSearchService_search *)parameters;
 {
-	return [[[WokServiceSoapBinding alloc] initWithAddress:[self address] namespaceURI:[self namespaceURI]] autorelease];
+	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"search", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_search class], @"retrieveResponse", nil];
+	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
+}
+- (WokServiceSoapBindingResponse *)citedReferencesUsingParameters:(WokSearchService_citedReferences *)parameters;
+{
+	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"citedReferences", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_citedReferences class], @"retrieveResponse", nil];
+	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
+}
+- (WokServiceSoapBindingResponse *)citedReferencesRetrieveUsingParameters:(WokSearchService_citedReferencesRetrieve *)parameters;
+{
+	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"citedReferencesRetrieve", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_citedReferencesRetrieve class], @"retrieveResponse", nil];
+	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
+}
+- (WokServiceSoapBindingResponse *)citingArticlesUsingParameters:(WokSearchService_citingArticles *)parameters;
+{
+	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"citingArticles", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_citingArticles class], @"retrieveResponse", nil];
+	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
+}
+- (WokServiceSoapBindingResponse *)relatedRecordsUsingParameters:(WokSearchService_relatedRecords *)parameters;
+{
+	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"relatedRecords", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_relatedRecords class], @"retrieveResponse", nil];
+	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
+}
+- (WokServiceSoapBindingResponse *)retrieveUsingParameters:(WokSearchService_retrieve *)parameters;
+{
+	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"retrieve", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_retrieve class], @"retrieveResponse", nil];
+	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
+}
+- (WokServiceSoapBindingResponse *)retrieveByIdUsingParameters:(WokSearchService_retrieveById *)parameters;
+{
+	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"retrieveById", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_retrieveById class], @"retrieveResponse", nil];
+	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
 }
 @end

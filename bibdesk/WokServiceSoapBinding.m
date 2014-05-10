@@ -3,6 +3,18 @@
 
 /* Cookies handling provided by http://en.wikibooks.org/wiki/Programming:WebObjects/Web_Services/Web_Service_Provider */
 @implementation WokServiceSoapBinding
++ (NSString *)address
+{
+	return nil;
+}
++ (NSString *)namespaceURI
+{
+	return nil;
+}
++ (id)soapBinding
+{
+	return [[[self alloc] initWithAddress:[self address] namespaceURI:[self namespaceURI]] autorelease];
+}
 @synthesize address;
 @synthesize namespaceURI;
 @synthesize defaultTimeout;
@@ -39,10 +51,10 @@
 		[cookies addObject:toAdd];
 	}
 }
-- (WokServiceSoapBindingResponse *)performSynchronousOperationWithParameters:(WokServiceSoapBindingRequest *)parameters
+- (WokServiceSoapBindingResponse *)performSynchronousOperation:(WokServiceSoapBindingOperation *)operation
 {
-	WokServiceSoapBindingOperation *operation = [[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self parameters:parameters] autorelease];
 	synchronousOperationComplete = NO;
+	[operation setDelegate:self];
 	[operation start];
 	
 	// Now wait for response
@@ -51,9 +63,8 @@
 	while (!synchronousOperationComplete && [theRL runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]]);
 	return operation.response;
 }
-- (void)performAsynchronousOperationWithParameters:(WokServiceSoapBindingRequest *)parameters delegate:(id<WokServiceSoapBindingResponseDelegate>)responseDelegate
+- (void)performAsynchronousOperation:(WokServiceSoapBindingOperation *)operation delegate:(id<WokServiceSoapBindingResponseDelegate>)responseDelegate
 {
-	WokServiceSoapBindingOperation *operation = [[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:responseDelegate parameters:parameters] autorelease];
 	[operation start];
 }
 - (void)operation:(WokServiceSoapBindingOperation *)operation completedWithResponse:(WokServiceSoapBindingResponse *)response
@@ -160,16 +171,20 @@
 
 @implementation WokServiceSoapBindingOperation
 @synthesize binding;
-@synthesize parameters;
+@synthesize bodyElements;
+@synthesize responseClasses;
+@synthesize soapAction;
 @synthesize response;
 @synthesize delegate;
 @synthesize responseData;
 @synthesize urlConnection;
-- (id)initWithBinding:(WokServiceSoapBinding *)aBinding delegate:(id<WokServiceSoapBindingResponseDelegate>)aDelegate parameters:(WokServiceSoapBindingRequest *)aParameters
+- (id)initWithBinding:(WokServiceSoapBinding *)aBinding delegate:(id<WokServiceSoapBindingResponseDelegate>)aDelegate bodyElements:(NSDictionary *)aBodyElements responseClasses:(NSDictionary *)aResponseClasses
 {
 	if ((self = [super init])) {
 		self.binding = aBinding;
-		self.parameters = aParameters;
+		self.bodyElements = aBodyElements;
+		self.responseClasses = aResponseClasses;
+		self.soapAction = @"";
 		response = nil;
 		self.delegate = aDelegate;
 		self.responseData = nil;
@@ -185,15 +200,9 @@
 	
 	NSMutableDictionary *headerElements = [NSMutableDictionary dictionary];
 	
-	NSMutableDictionary *bodyElements = [NSMutableDictionary dictionary];
-	
-	if (self.parameters.elementName != nil) {
-		[bodyElements setObject:self.parameters forKey:self.parameters.elementName];
-	}
-	
 	NSString *operationXMLString = [binding serializedEnvelopeUsingHeaderElements:headerElements bodyElements:bodyElements];
 	
-	[binding sendHTTPCallUsingBody:operationXMLString soapAction:self.parameters.soapAction forOperation:self];
+	[binding sendHTTPCallUsingBody:operationXMLString soapAction:self.soapAction forOperation:self];
 }
 - (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
@@ -293,8 +302,9 @@
 						xmlNodePtr bodyNode;
 						for(bodyNode=cur->children ; bodyNode != NULL ; bodyNode = bodyNode->next) {
 							if(bodyNode->type == XML_ELEMENT_NODE) {
-								if(xmlStrEqual(bodyNode->name, (const xmlChar *)[parameters.responseName UTF8String])) {
-									id bodyObject = [parameters.responseClass deserializeNode:bodyNode];
+								Class responseClass = [self.responseClasses objectForKey:[NSString stringWithUTF8String:(const char *)bodyNode->name]];
+								if(responseClass != nil) {
+									id bodyObject = [responseClass deserializeNode:bodyNode];
 									//NSAssert1(bodyObject != nil, @"Errors while parsing body %s", bodyNode->name);
 									if (bodyObject != nil) [responseBodyParts addObject:bodyObject];
 								}
@@ -322,7 +332,9 @@
 - (void)dealloc
 {
 	[binding release];
-	[parameters release];
+	[bodyElements release];
+	[responseClasses release];
+	[soapAction release];
 	[response release];
 	delegate = nil;
 	[responseData release];
@@ -381,34 +393,6 @@
 }
 - (void)deserializeElementsFromNode:(xmlNodePtr)cur
 {
-}
-@end
-
-@implementation WokServiceSoapBindingRequest
-@dynamic elementName;
-@dynamic responseName;
-@dynamic responseClass;
-@dynamic soapAction;
-- (NSString *)elementName
-{
-	NSString *name = NSStringFromClass([self class]);
-	NSUInteger idx = NSMaxRange([name rangeOfString:@"_"]);
-	if (idx != NSNotFound) {
-		name = [name substringFromIndex:idx];
-	}
-	return name;
-}
-- (NSString *)responseName
-{
-	return [self.elementName stringByAppendingString:@"Response"];
-}
-- (Class)responseClass
-{
-	return NSClassFromString([NSStringFromClass([self class]) stringByAppendingString:@"Response"]);
-}
-- (NSString *)soapAction
-{
-	return @"";
 }
 @end
 

@@ -149,18 +149,6 @@
 		}
 	}
 }
-- (NSString *)elementName
-{
-	return @"retrieve";
-}
-- (NSString *)responseName
-{
-	return @"retrieveResponse";
-}
-- (Class)responseClass
-{
-	return [WokSearchLiteService_retrieveResponse class];
-}
 @end
 
 @implementation WokSearchLiteService_labelValuesPair
@@ -514,18 +502,6 @@
 		}
 	}
 }
-- (NSString *)elementName
-{
-	return @"retrieveById";
-}
-- (NSString *)responseName
-{
-	return @"retrieveByIdResponse";
-}
-- (Class)responseClass
-{
-	return [WokSearchLiteService_retrieveByIdResponse class];
-}
 @end
 
 @implementation WokSearchLiteService_retrieveByIdResponse
@@ -787,18 +763,6 @@
 		}
 	}
 }
-- (NSString *)elementName
-{
-	return @"search";
-}
-- (NSString *)responseName
-{
-	return @"searchResponse";
-}
-- (Class)responseClass
-{
-	return [WokSearchLiteService_searchResponse class];
-}
 @end
 
 @implementation WokSearchLiteService_searchResponse
@@ -845,8 +809,22 @@
 {
 	return @"http://woksearchlite.v3.wokmws.thomsonreuters.com";
 }
-+ (WokServiceSoapBinding *)soapBinding
+- (WokServiceSoapBindingResponse *)searchUsingParameters:(WokSearchLiteService_search *)parameters;
 {
-	return [[[WokServiceSoapBinding alloc] initWithAddress:[self address] namespaceURI:[self namespaceURI]] autorelease];
+	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"search", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchLiteService_search class], @"retrieveResponse", nil];
+	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
+}
+- (WokServiceSoapBindingResponse *)retrieveUsingParameters:(WokSearchLiteService_retrieve *)parameters;
+{
+	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"retrieve", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchLiteService_retrieve class], @"retrieveResponse", nil];
+	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
+}
+- (WokServiceSoapBindingResponse *)retrieveByIdUsingParameters:(WokSearchLiteService_retrieveById *)parameters;
+{
+	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"retrieveById", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchLiteService_retrieveById class], @"retrieveResponse", nil];
+	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
 }
 @end

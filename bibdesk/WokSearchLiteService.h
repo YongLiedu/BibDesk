@@ -35,7 +35,7 @@
 @property (readonly) NSMutableArray * sortField;
 @end
 
-@interface WokSearchLiteService_retrieve : WokServiceSoapBindingRequest {
+@interface WokSearchLiteService_retrieve : WokServiceSoapBindingElement {
 	NSString * queryId;
 	WokSearchLiteService_retrieveParameters * retrieveParameters;
 }
@@ -94,7 +94,7 @@
 @property (retain) WokSearchLiteService_searchResults * return_;
 @end
 
-@interface WokSearchLiteService_retrieveById : WokServiceSoapBindingRequest {
+@interface WokSearchLiteService_retrieveById : WokServiceSoapBindingElement {
 	NSString * databaseId;
 	NSMutableArray *uid;
 	NSString * queryLanguage;
@@ -146,7 +146,7 @@
 @property (retain) NSString * queryLanguage;
 @end
 
-@interface WokSearchLiteService_search : WokServiceSoapBindingRequest {
+@interface WokSearchLiteService_search : WokServiceSoapBindingElement {
 	WokSearchLiteService_queryParameters * queryParameters;
 	WokSearchLiteService_retrieveParameters * retrieveParameters;
 }
@@ -160,9 +160,11 @@
 @property (retain) WokSearchLiteService_searchResults * return_;
 @end
 
-@interface WokSearchLiteService : NSObject {
+@interface WokSearchLiteService : WokServiceSoapBinding {
 }
 + (NSString *)address;
 + (NSString *)namespaceURI;
-+ (WokServiceSoapBinding *)soapBinding;
+- (WokServiceSoapBindingResponse *)searchUsingParameters:(WokSearchLiteService_search *)parameters;
+- (WokServiceSoapBindingResponse *)retrieveUsingParameters:(WokSearchLiteService_retrieve *)parameters;
+- (WokServiceSoapBindingResponse *)retrieveByIdUsingParameters:(WokSearchLiteService_retrieveById *)parameters;
 @end

@@ -1,18 +1,6 @@
 #import "WOKMWSAuthenticateService.h"
 
 @implementation WOKMWSAuthenticateService_authenticate
-- (NSString *)elementName
-{
-	return @"authenticate";
-}
-- (NSString *)responseName
-{
-	return @"authenticateResponse";
-}
-- (Class)responseClass
-{
-	return [WOKMWSAuthenticateService_authenticateResponse class];
-}
 @end
 
 @implementation WOKMWSAuthenticateService_authenticateResponse
@@ -51,18 +39,6 @@
 @end
 
 @implementation WOKMWSAuthenticateService_closeSession
-- (NSString *)elementName
-{
-	return @"closeSession";
-}
-- (NSString *)responseName
-{
-	return @"closeSessionResponse";
-}
-- (Class)responseClass
-{
-	return [WOKMWSAuthenticateService_closeSessionResponse class];
-}
 @end
 
 @implementation WOKMWSAuthenticateService_closeSessionResponse
@@ -77,8 +53,16 @@
 {
 	return @"http://auth.cxf.wokmws.thomsonreuters.com";
 }
-+ (WokServiceSoapBinding *)soapBinding
+- (WokServiceSoapBindingResponse *)authenticateUsingParameters:(WOKMWSAuthenticateService_authenticate *)parameters;
 {
-	return [[[WokServiceSoapBinding alloc] initWithAddress:[self address] namespaceURI:[self namespaceURI]] autorelease];
+	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"authenticate", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WOKMWSAuthenticateService_authenticate class], @"authenticateResponse", nil];
+	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
+}
+- (WokServiceSoapBindingResponse *)closeSessionUsingParameters:(WOKMWSAuthenticateService_closeSession *)parameters;
+{
+	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"closeSession", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WOKMWSAuthenticateService_closeSession class], @"closeSessionResponse", nil];
+	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
 }
 @end
