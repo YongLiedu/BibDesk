@@ -1530,43 +1530,43 @@
 - (WokServiceSoapBindingResponse *)searchUsingParameters:(WokSearchService_search *)parameters;
 {
 	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"search", nil];
-	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_search class], @"retrieveResponse", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_searchResponse class], @"searchResponse", nil];
 	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
 }
 - (WokServiceSoapBindingResponse *)citedReferencesUsingParameters:(WokSearchService_citedReferences *)parameters;
 {
 	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"citedReferences", nil];
-	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_citedReferences class], @"retrieveResponse", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_citedReferencesResponse class], @"citedReferencesResponse", nil];
 	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
 }
 - (WokServiceSoapBindingResponse *)citedReferencesRetrieveUsingParameters:(WokSearchService_citedReferencesRetrieve *)parameters;
 {
 	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"citedReferencesRetrieve", nil];
-	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_citedReferencesRetrieve class], @"retrieveResponse", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_citedReferencesRetrieveResponse class], @"citedReferencesRetrieveResponse", nil];
 	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
 }
 - (WokServiceSoapBindingResponse *)citingArticlesUsingParameters:(WokSearchService_citingArticles *)parameters;
 {
 	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"citingArticles", nil];
-	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_citingArticles class], @"retrieveResponse", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_citingArticlesResponse class], @"citingArticlesResponse", nil];
 	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
 }
 - (WokServiceSoapBindingResponse *)relatedRecordsUsingParameters:(WokSearchService_relatedRecords *)parameters;
 {
 	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"relatedRecords", nil];
-	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_relatedRecords class], @"retrieveResponse", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_relatedRecordsResponse class], @"relatedRecordsResponse", nil];
 	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
 }
 - (WokServiceSoapBindingResponse *)retrieveUsingParameters:(WokSearchService_retrieve *)parameters;
 {
 	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"retrieve", nil];
-	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_retrieve class], @"retrieveResponse", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_retrieveResponse class], @"retrieveResponse", nil];
 	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
 }
 - (WokServiceSoapBindingResponse *)retrieveByIdUsingParameters:(WokSearchService_retrieveById *)parameters;
 {
 	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"retrieveById", nil];
-	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_retrieveById class], @"retrieveResponse", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchService_retrieveByIdResponse class], @"retrieveByIdResponse", nil];
 	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
 }
 @end

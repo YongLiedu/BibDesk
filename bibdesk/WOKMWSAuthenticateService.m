@@ -56,13 +56,13 @@
 - (WokServiceSoapBindingResponse *)authenticateUsingParameters:(WOKMWSAuthenticateService_authenticate *)parameters;
 {
 	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"authenticate", nil];
-	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WOKMWSAuthenticateService_authenticate class], @"authenticateResponse", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WOKMWSAuthenticateService_authenticateResponse class], @"authenticateResponse", nil];
 	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
 }
 - (WokServiceSoapBindingResponse *)closeSessionUsingParameters:(WOKMWSAuthenticateService_closeSession *)parameters;
 {
 	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"closeSession", nil];
-	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WOKMWSAuthenticateService_closeSession class], @"closeSessionResponse", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WOKMWSAuthenticateService_closeSessionResponse class], @"closeSessionResponse", nil];
 	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
 }
 @end

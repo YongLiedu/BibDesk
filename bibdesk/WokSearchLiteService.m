@@ -812,19 +812,19 @@
 - (WokServiceSoapBindingResponse *)searchUsingParameters:(WokSearchLiteService_search *)parameters;
 {
 	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"search", nil];
-	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchLiteService_search class], @"retrieveResponse", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchLiteService_searchResponse class], @"searchResponse", nil];
 	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
 }
 - (WokServiceSoapBindingResponse *)retrieveUsingParameters:(WokSearchLiteService_retrieve *)parameters;
 {
 	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"retrieve", nil];
-	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchLiteService_retrieve class], @"retrieveResponse", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchLiteService_retrieveResponse class], @"retrieveResponse", nil];
 	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
 }
 - (WokServiceSoapBindingResponse *)retrieveByIdUsingParameters:(WokSearchLiteService_retrieveById *)parameters;
 {
 	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"retrieveById", nil];
-	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchLiteService_retrieveById class], @"retrieveResponse", nil];
+	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WokSearchLiteService_retrieveByIdResponse class], @"retrieveByIdResponse", nil];
 	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
 }
 @end
