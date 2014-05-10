@@ -308,7 +308,7 @@
 									//NSAssert1(bodyObject != nil, @"Errors while parsing body %s", bodyNode->name);
 									if (bodyObject != nil) [responseBodyParts addObject:bodyObject];
 								}
-								if (xmlStrEqual(bodyNode->ns->prefix, cur->ns->prefix) && 
+								else if (xmlStrEqual(bodyNode->ns->prefix, cur->ns->prefix) && 
 									xmlStrEqual(bodyNode->name, (const xmlChar *) "Fault")) {
 									WokServiceSoapBinding_fault *bodyObject = [WokServiceSoapBinding_fault deserializeNode:bodyNode];
 									//NSAssert1(bodyObject != nil, @"Errors while parsing body %s", bodyNode->name);
