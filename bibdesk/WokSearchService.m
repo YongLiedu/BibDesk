@@ -33,12 +33,10 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "name")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.name = newChild;
+				self.name = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "sort")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.sort = newChild;
+				self.sort = [NSString deserializeNode:cur];
 			}
 		}
 	}
@@ -84,12 +82,10 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "collectionName")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.collectionName = newChild;
+				self.collectionName = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "fieldName")) {
-				id newChild = [NSString deserializeNode:cur];
-				if(newChild != nil) [self.fieldName addObject:newChild];
+				[self addFieldName:[NSString deserializeNode:cur]];
 			}
 		}
 	}
@@ -129,12 +125,10 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "key")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.key = newChild;
+				self.key = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "value")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.value = newChild;
+				self.value = [NSString deserializeNode:cur];
 			}
 		}
 	}
@@ -210,24 +204,19 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "firstRecord")) {
-				id newChild = [NSNumber deserializeNode:cur];
-				self.firstRecord = newChild;
+				self.firstRecord = [NSNumber deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "count")) {
-				id newChild = [NSNumber deserializeNode:cur];
-				self.count = newChild;
+				self.count = [NSNumber deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "sortField")) {
-				id newChild = [WokSearchService_sortField deserializeNode:cur];
-				if(newChild != nil) [self.sortField addObject:newChild];
+				[self addSortField:[WokSearchService_sortField deserializeNode:cur]];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "viewField")) {
-				id newChild = [WokSearchService_viewField deserializeNode:cur];
-				if(newChild != nil) [self.viewField addObject:newChild];
+				[self addViewField:[WokSearchService_viewField deserializeNode:cur]];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "option")) {
-				id newChild = [WokSearchService_keyValuePair deserializeNode:cur];
-				if(newChild != nil) [self.option addObject:newChild];
+				[self addOption:[WokSearchService_keyValuePair deserializeNode:cur]];
 			}
 		}
 	}
@@ -279,20 +268,16 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "databaseId")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.databaseId = newChild;
+				self.databaseId = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "uid")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.uid = newChild;
+				self.uid = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "queryLanguage")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.queryLanguage = newChild;
+				self.queryLanguage = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "retrieveParameters")) {
-				id newChild = [WokSearchService_retrieveParameters deserializeNode:cur];
-				self.retrieveParameters = newChild;
+				self.retrieveParameters = [WokSearchService_retrieveParameters deserializeNode:cur];
 			}
 		}
 	}
@@ -386,48 +371,37 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "uid")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.uid = newChild;
+				self.uid = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "docid")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.docid = newChild;
+				self.docid = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "articleId")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.articleId = newChild;
+				self.articleId = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "citedAuthor")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.citedAuthor = newChild;
+				self.citedAuthor = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "timesCited")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.timesCited = newChild;
+				self.timesCited = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "year")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.year = newChild;
+				self.year = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "page")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.page = newChild;
+				self.page = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "volume")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.volume = newChild;
+				self.volume = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "citedTitle")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.citedTitle = newChild;
+				self.citedTitle = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "citedWork")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.citedWork = newChild;
+				self.citedWork = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "hot")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.hot = newChild;
+				self.hot = [NSString deserializeNode:cur];
 			}
 		}
 	}
@@ -485,20 +459,16 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "queryId")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.queryId = newChild;
+				self.queryId = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "references")) {
-				id newChild = [WokSearchService_citedReference deserializeNode:cur];
-				if(newChild != nil) [self.references addObject:newChild];
+				[self addReferences:[WokSearchService_citedReference deserializeNode:cur]];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "recordsFound")) {
-				id newChild = [NSNumber deserializeNode:cur];
-				self.recordsFound = newChild;
+				self.recordsFound = [NSNumber deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "recordsSearched")) {
-				id newChild = [NSNumber deserializeNode:cur];
-				self.recordsSearched = newChild;
+				self.recordsSearched = [NSNumber deserializeNode:cur];
 			}
 		}
 	}
@@ -532,8 +502,7 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "return")) {
-				id newChild = [WokSearchService_citedReferencesSearchResults deserializeNode:cur];
-				self.return_ = newChild;
+				self.return_ = [WokSearchService_citedReferencesSearchResults deserializeNode:cur];
 			}
 		}
 	}
@@ -573,12 +542,10 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "queryId")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.queryId = newChild;
+				self.queryId = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "retrieveParameters")) {
-				id newChild = [WokSearchService_retrieveParameters deserializeNode:cur];
-				self.retrieveParameters = newChild;
+				self.retrieveParameters = [WokSearchService_retrieveParameters deserializeNode:cur];
 			}
 		}
 	}
@@ -618,8 +585,7 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "return")) {
-				id newChild = [WokSearchService_citedReference deserializeNode:cur];
-				if(newChild != nil) [self.return_ addObject:newChild];
+				[self addReturn_:[WokSearchService_citedReference deserializeNode:cur]];
 			}
 		}
 	}
@@ -659,12 +625,10 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "collection")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.collection = newChild;
+				self.collection = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "edition")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.edition = newChild;
+				self.edition = [NSString deserializeNode:cur];
 			}
 		}
 	}
@@ -704,12 +668,10 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "begin")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.begin = newChild;
+				self.begin = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "end")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.end = newChild;
+				self.end = [NSString deserializeNode:cur];
 			}
 		}
 	}
@@ -779,28 +741,22 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "databaseId")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.databaseId = newChild;
+				self.databaseId = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "uid")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.uid = newChild;
+				self.uid = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "editions")) {
-				id newChild = [WokSearchService_editionDesc deserializeNode:cur];
-				if(newChild != nil) [self.editions addObject:newChild];
+				[self addEditions:[WokSearchService_editionDesc deserializeNode:cur]];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "timeSpan")) {
-				id newChild = [WokSearchService_timeSpan deserializeNode:cur];
-				self.timeSpan = newChild;
+				self.timeSpan = [WokSearchService_timeSpan deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "queryLanguage")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.queryLanguage = newChild;
+				self.queryLanguage = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "retrieveParameters")) {
-				id newChild = [WokSearchService_retrieveParameters deserializeNode:cur];
-				self.retrieveParameters = newChild;
+				self.retrieveParameters = [WokSearchService_retrieveParameters deserializeNode:cur];
 			}
 		}
 	}
@@ -846,12 +802,10 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "label")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.label = newChild;
+				self.label = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "value")) {
-				id newChild = [NSString deserializeNode:cur];
-				if(newChild != nil) [self.value addObject:newChild];
+				[self addValue:[NSString deserializeNode:cur]];
 			}
 		}
 	}
@@ -921,28 +875,22 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "queryId")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.queryId = newChild;
+				self.queryId = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "recordsFound")) {
-				id newChild = [NSNumber deserializeNode:cur];
-				self.recordsFound = newChild;
+				self.recordsFound = [NSNumber deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "recordsSearched")) {
-				id newChild = [NSNumber deserializeNode:cur];
-				self.recordsSearched = newChild;
+				self.recordsSearched = [NSNumber deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "parent")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.parent = newChild;
+				self.parent = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "optionValue")) {
-				id newChild = [WokSearchService_labelValuesPair deserializeNode:cur];
-				if(newChild != nil) [self.optionValue addObject:newChild];
+				[self addOptionValue:[WokSearchService_labelValuesPair deserializeNode:cur]];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "records")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.records = newChild;
+				self.records = [NSString deserializeNode:cur];
 			}
 		}
 	}
@@ -976,8 +924,7 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "return")) {
-				id newChild = [WokSearchService_fullRecordSearchResults deserializeNode:cur];
-				self.return_ = newChild;
+				self.return_ = [WokSearchService_fullRecordSearchResults deserializeNode:cur];
 			}
 		}
 	}
@@ -1047,28 +994,22 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "databaseId")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.databaseId = newChild;
+				self.databaseId = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "uid")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.uid = newChild;
+				self.uid = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "editions")) {
-				id newChild = [WokSearchService_editionDesc deserializeNode:cur];
-				if(newChild != nil) [self.editions addObject:newChild];
+				[self addEditions:[WokSearchService_editionDesc deserializeNode:cur]];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "timeSpan")) {
-				id newChild = [WokSearchService_timeSpan deserializeNode:cur];
-				self.timeSpan = newChild;
+				self.timeSpan = [WokSearchService_timeSpan deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "queryLanguage")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.queryLanguage = newChild;
+				self.queryLanguage = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "retrieveParameters")) {
-				id newChild = [WokSearchService_retrieveParameters deserializeNode:cur];
-				self.retrieveParameters = newChild;
+				self.retrieveParameters = [WokSearchService_retrieveParameters deserializeNode:cur];
 			}
 		}
 	}
@@ -1102,8 +1043,7 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "return")) {
-				id newChild = [WokSearchService_fullRecordSearchResults deserializeNode:cur];
-				self.return_ = newChild;
+				self.return_ = [WokSearchService_fullRecordSearchResults deserializeNode:cur];
 			}
 		}
 	}
@@ -1143,12 +1083,10 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "queryId")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.queryId = newChild;
+				self.queryId = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "retrieveParameters")) {
-				id newChild = [WokSearchService_retrieveParameters deserializeNode:cur];
-				self.retrieveParameters = newChild;
+				self.retrieveParameters = [WokSearchService_retrieveParameters deserializeNode:cur];
 			}
 		}
 	}
@@ -1194,12 +1132,10 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "optionValue")) {
-				id newChild = [WokSearchService_labelValuesPair deserializeNode:cur];
-				if(newChild != nil) [self.optionValue addObject:newChild];
+				[self addOptionValue:[WokSearchService_labelValuesPair deserializeNode:cur]];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "records")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.records = newChild;
+				self.records = [NSString deserializeNode:cur];
 			}
 		}
 	}
@@ -1233,8 +1169,7 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "return")) {
-				id newChild = [WokSearchService_fullRecordData deserializeNode:cur];
-				self.return_ = newChild;
+				self.return_ = [WokSearchService_fullRecordData deserializeNode:cur];
 			}
 		}
 	}
@@ -1292,20 +1227,16 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "databaseId")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.databaseId = newChild;
+				self.databaseId = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "uid")) {
-				id newChild = [NSString deserializeNode:cur];
-				if(newChild != nil) [self.uid addObject:newChild];
+				[self addUid:[NSString deserializeNode:cur]];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "queryLanguage")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.queryLanguage = newChild;
+				self.queryLanguage = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "retrieveParameters")) {
-				id newChild = [WokSearchService_retrieveParameters deserializeNode:cur];
-				self.retrieveParameters = newChild;
+				self.retrieveParameters = [WokSearchService_retrieveParameters deserializeNode:cur];
 			}
 		}
 	}
@@ -1339,8 +1270,7 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "return")) {
-				id newChild = [WokSearchService_fullRecordSearchResults deserializeNode:cur];
-				self.return_ = newChild;
+				self.return_ = [WokSearchService_fullRecordSearchResults deserializeNode:cur];
 			}
 		}
 	}
@@ -1410,28 +1340,22 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "databaseId")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.databaseId = newChild;
+				self.databaseId = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "userQuery")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.userQuery = newChild;
+				self.userQuery = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "editions")) {
-				id newChild = [WokSearchService_editionDesc deserializeNode:cur];
-				if(newChild != nil) [self.editions addObject:newChild];
+				[self addEditions:[WokSearchService_editionDesc deserializeNode:cur]];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "symbolicTimeSpan")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.symbolicTimeSpan = newChild;
+				self.symbolicTimeSpan = [NSString deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "timeSpan")) {
-				id newChild = [WokSearchService_timeSpan deserializeNode:cur];
-				self.timeSpan = newChild;
+				self.timeSpan = [WokSearchService_timeSpan deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "queryLanguage")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.queryLanguage = newChild;
+				self.queryLanguage = [NSString deserializeNode:cur];
 			}
 		}
 	}
@@ -1471,12 +1395,10 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "queryParameters")) {
-				id newChild = [WokSearchService_queryParameters deserializeNode:cur];
-				self.queryParameters = newChild;
+				self.queryParameters = [WokSearchService_queryParameters deserializeNode:cur];
 			}
 			if(xmlStrEqual(cur->name, (const xmlChar *) "retrieveParameters")) {
-				id newChild = [WokSearchService_retrieveParameters deserializeNode:cur];
-				self.retrieveParameters = newChild;
+				self.retrieveParameters = [WokSearchService_retrieveParameters deserializeNode:cur];
 			}
 		}
 	}
@@ -1510,8 +1432,7 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "return")) {
-				id newChild = [WokSearchService_fullRecordSearchResults deserializeNode:cur];
-				self.return_ = newChild;
+				self.return_ = [WokSearchService_fullRecordSearchResults deserializeNode:cur];
 			}
 		}
 	}

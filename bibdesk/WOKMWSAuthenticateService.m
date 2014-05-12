@@ -30,8 +30,7 @@
 	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
 		if(cur->type == XML_ELEMENT_NODE) {
 			if(xmlStrEqual(cur->name, (const xmlChar *) "return")) {
-				id newChild = [NSString deserializeNode:cur];
-				self.return_ = newChild;
+				self.return_ = [NSString deserializeNode:cur];
 			}
 		}
 	}
