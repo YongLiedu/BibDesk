@@ -871,7 +871,7 @@ static void addAuthorNamesToDictionary(NSArray *names, NSMutableDictionary *pubF
             pubType = BDSKArticleString;
         } else {
             // preserve the type if it's unclear
-            pubType = [docType entryType];
+            pubType = [[docType stringByReplacingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] withString:@"-"] entryType];
 		}
     }
     
