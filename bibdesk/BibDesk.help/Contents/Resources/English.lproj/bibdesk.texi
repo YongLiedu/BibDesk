@@ -729,12 +729,12 @@ would not be necessary for this operation.
 @cindex SearchKit
 @cindex Spotlight
 
-If you use Mac OS X 10.4 (Tiger) and later, BibDesk allows you to search the local files
-associated with your bibliography.  To use this feature, select the @samp{File Content}
-item from the toolbar search field menu, and enter a term you want to find.
+BibDesk allows you to search the local files associated with your bibliography.
+To use this feature, select the @samp{File Content} item from the toolbar search field menu, 
+and enter a term you want to find.
 
 This feature is similar to Apple's Spotlight search, but limits the search scope to files
-that are associated with a particular BibTeX database.  Rankings of the relative goodness
+that are associated with a particular BibTeX database.  Rankings of the relative relevance
 of each search result are shown, together with the title of the associated BibTeX entry.
 
 Double-clicking a row in the search result window will open the associated file.  When you
@@ -742,7 +742,7 @@ clear the search text, BibDesk will automatically select the associated BibTeX i
 items in your database.
 
 While the initial search will be somewhat slow as files are indexed, subsequent searches
-will be very fast (although the index will be rebuilt when you close and reopen the document).
+will be very fast (although the index will be checked and updated when you close and reopen the document).
 For information on supported search query features (wildcards, Boolean operators), see the
 @uref{http://developer.apple.com/documentation/UserExperience/Reference/SearchKit/index.html, SearchKit Reference}.
 
