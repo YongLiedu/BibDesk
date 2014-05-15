@@ -178,13 +178,13 @@
 @synthesize delegate;
 @synthesize responseData;
 @synthesize urlConnection;
-- (id)initWithBinding:(WokServiceSoapBinding *)aBinding delegate:(id<WokServiceSoapBindingResponseDelegate>)aDelegate bodyElements:(NSDictionary *)aBodyElements responseClasses:(NSDictionary *)aResponseClasses
+- (id)initWithBinding:(WokServiceSoapBinding *)aBinding delegate:(id<WokServiceSoapBindingResponseDelegate>)aDelegate soapAction:(NSString *)aSoapAction bodyElements:(NSDictionary *)aBodyElements responseClasses:(NSDictionary *)aResponseClasses
 {
 	if ((self = [super init])) {
 		self.binding = aBinding;
 		self.bodyElements = aBodyElements;
 		self.responseClasses = aResponseClasses;
-		self.soapAction = @"";
+		self.soapAction = aSoapAction;
 		response = nil;
 		self.delegate = aDelegate;
 		self.responseData = nil;
@@ -192,6 +192,10 @@
 	}
 	
 	return self;
+}
+- (id)initWithBinding:(WokServiceSoapBinding *)aBinding delegate:(id<WokServiceSoapBindingResponseDelegate>)aDelegate bodyElements:(NSDictionary *)aBodyElements responseClasses:(NSDictionary *)aResponseClasses
+{
+	return [self initWithBinding:aBinding delegate:aDelegate soapAction:@"" bodyElements:aBodyElements responseClasses:aResponseClasses];
 }
 - (void)main
 {

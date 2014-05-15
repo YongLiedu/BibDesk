@@ -55,6 +55,7 @@
 @property (nonatomic, assign) id<WokServiceSoapBindingResponseDelegate> delegate;
 @property (nonatomic, retain) NSMutableData *responseData;
 @property (nonatomic, retain) NSURLConnection *urlConnection;
+- (id)initWithBinding:(WokServiceSoapBinding *)aBinding delegate:(id<WokServiceSoapBindingResponseDelegate>)aDelegate soapAction:(NSString *)aSoapAction bodyElements:(NSDictionary *)aBodyElements responseClasses:(NSDictionary *)aResponseClasses;
 - (id)initWithBinding:(WokServiceSoapBinding *)aBinding delegate:(id<WokServiceSoapBindingResponseDelegate>)aDelegate bodyElements:(NSDictionary *)aBodyElements responseClasses:(NSDictionary *)aResponseClasses;
 @end
 
