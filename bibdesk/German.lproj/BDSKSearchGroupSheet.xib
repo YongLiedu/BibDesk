@@ -492,7 +492,7 @@
 											<reference key="NSControlView" ref="982085043"/>
 											<int key="NSButtonFlags">1211912448</int>
 											<int key="NSButtonFlags2">0</int>
-											<object class="NSCustomResource" key="NSNormalImage" id="322332031">
+											<object class="NSCustomResource" key="NSNormalImage" id="869603919">
 												<string key="NSClassName">NSImage</string>
 												<string key="NSResourceName">NSRadioButton</string>
 											</object>
@@ -515,7 +515,7 @@
 											<int key="NSTag">1</int>
 											<int key="NSButtonFlags">1211912448</int>
 											<int key="NSButtonFlags2">0</int>
-											<reference key="NSNormalImage" ref="322332031"/>
+											<reference key="NSNormalImage" ref="869603919"/>
 											<reference key="NSAlternateImage" ref="696602042"/>
 											<string key="NSAlternateContents"/>
 											<int key="NSPeriodicDelay">400</int>
@@ -530,7 +530,7 @@
 											<int key="NSTag">2</int>
 											<int key="NSButtonFlags">1211912448</int>
 											<int key="NSButtonFlags2">0</int>
-											<reference key="NSNormalImage" ref="322332031"/>
+											<reference key="NSNormalImage" ref="869603919"/>
 											<reference key="NSAlternateImage" ref="696602042"/>
 											<string key="NSAlternateContents"/>
 											<string key="NSKeyEquivalent"/>
@@ -546,7 +546,7 @@
 											<int key="NSTag">3</int>
 											<int key="NSButtonFlags">1211912448</int>
 											<int key="NSButtonFlags2">0</int>
-											<reference key="NSNormalImage" ref="322332031"/>
+											<reference key="NSNormalImage" ref="869603919"/>
 											<reference key="NSAlternateImage" ref="696602042"/>
 											<string key="NSAlternateContents"/>
 											<int key="NSPeriodicDelay">400</int>
@@ -564,7 +564,7 @@
 										<reference key="NSSupport" ref="26"/>
 										<int key="NSButtonFlags">1211912448</int>
 										<int key="NSButtonFlags2">0</int>
-										<reference key="NSNormalImage" ref="322332031"/>
+										<reference key="NSNormalImage" ref="869603919"/>
 										<reference key="NSAlternateImage" ref="696602042"/>
 										<string key="NSAlternateContents"/>
 										<int key="NSPeriodicDelay">400</int>
@@ -1009,9 +1009,11 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				<string key="NSMaxSize">{700, 415}</string>
 			</object>
 			<object class="NSButton" id="417918520">
-				<nil key="NSNextResponder"/>
+				<reference key="NSNextResponder"/>
 				<int key="NSvFlags">268</int>
 				<string key="NSFrameSize">{42, 18}</string>
+				<reference key="NSSuperview"/>
+				<reference key="NSWindow"/>
 				<bool key="NSEnabled">YES</bool>
 				<object class="NSButtonCell" key="NSCell" id="730538631">
 					<int key="NSCellFlags">-2080244224</int>
@@ -3200,7 +3202,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 					<object class="IBToolTipAttribute" key="NS.object.0">
 						<string key="name">ToolTip</string>
 						<reference key="object" ref="417918520"/>
-						<string key="toolTip">Use Lite search server</string>
+						<string key="toolTip">Lite Search Server verwenden</string>
 					</object>
 				</object>
 				<string key="985.IBEditorWindowLastContentRect">{{0, 816}, {42, 18}}</string>
@@ -3415,14 +3417,14 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSMenu</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="42525703">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="316612553">
 						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">NSMenu_BDSKExtensions.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSMenuItem</string>
-					<reference key="sourceIdentifier" ref="42525703"/>
+					<reference key="sourceIdentifier" ref="316612553"/>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSObject</string>
@@ -3512,21 +3514,21 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSApplication</string>
 					<string key="superclassName">NSResponder</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="192208343">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="68469093">
 						<string key="majorKey">IBFrameworkSource</string>
 						<string key="minorKey">AppKit.framework/Headers/NSApplication.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSApplication</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="882052306">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="222861479">
 						<string key="majorKey">IBFrameworkSource</string>
 						<string key="minorKey">AppKit.framework/Headers/NSApplicationScripting.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSApplication</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="184422122">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="449422451">
 						<string key="majorKey">IBFrameworkSource</string>
 						<string key="minorKey">AppKit.framework/Headers/NSColorPanel.h</string>
 					</object>
@@ -3603,7 +3605,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSControl</string>
 					<string key="superclassName">NSView</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="916850955">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="499045253">
 						<string key="majorKey">IBFrameworkSource</string>
 						<string key="minorKey">AppKit.framework/Headers/NSControl.h</string>
 					</object>
@@ -3635,7 +3637,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSMenu</string>
 					<string key="superclassName">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="1040613769">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="1054000108">
 						<string key="majorKey">IBFrameworkSource</string>
 						<string key="minorKey">AppKit.framework/Headers/NSMenu.h</string>
 					</object>
@@ -3643,7 +3645,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSMenuItem</string>
 					<string key="superclassName">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="956797229">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="932926540">
 						<string key="majorKey">IBFrameworkSource</string>
 						<string key="minorKey">AppKit.framework/Headers/NSMenuItem.h</string>
 					</object>
@@ -3672,19 +3674,19 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSObject</string>
-					<reference key="sourceIdentifier" ref="192208343"/>
+					<reference key="sourceIdentifier" ref="68469093"/>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSObject</string>
-					<reference key="sourceIdentifier" ref="882052306"/>
+					<reference key="sourceIdentifier" ref="222861479"/>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSObject</string>
-					<reference key="sourceIdentifier" ref="184422122"/>
+					<reference key="sourceIdentifier" ref="449422451"/>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSObject</string>
-					<reference key="sourceIdentifier" ref="916850955"/>
+					<reference key="sourceIdentifier" ref="499045253"/>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSObject</string>
@@ -3723,7 +3725,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSObject</string>
-					<reference key="sourceIdentifier" ref="1040613769"/>
+					<reference key="sourceIdentifier" ref="1054000108"/>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSObject</string>
@@ -3769,7 +3771,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="287704807">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="702110041">
 						<string key="majorKey">IBFrameworkSource</string>
 						<string key="minorKey">AppKit.framework/Headers/NSView.h</string>
 					</object>
@@ -4161,7 +4163,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSView</string>
-					<reference key="sourceIdentifier" ref="956797229"/>
+					<reference key="sourceIdentifier" ref="932926540"/>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSView</string>
@@ -4173,7 +4175,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSView</string>
 					<string key="superclassName">NSResponder</string>
-					<reference key="sourceIdentifier" ref="287704807"/>
+					<reference key="sourceIdentifier" ref="702110041"/>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSWindow</string>
