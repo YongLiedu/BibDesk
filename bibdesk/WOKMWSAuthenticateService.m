@@ -52,13 +52,13 @@
 {
 	return @"http://auth.cxf.wokmws.thomsonreuters.com";
 }
-- (WokServiceSoapBindingResponse *)authenticateUsingParameters:(WOKMWSAuthenticateService_authenticate *)parameters;
+- (WokServiceSoapBindingResponse *)authenticateUsingParameters:(WOKMWSAuthenticateService_authenticate *)parameters
 {
 	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"authenticate", nil];
 	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WOKMWSAuthenticateService_authenticateResponse class], @"authenticateResponse", nil];
 	return [self performSynchronousOperation:[[[WokServiceSoapBindingOperation alloc] initWithBinding:self delegate:self bodyElements:bodyElements responseClasses:responseClasses] autorelease]];
 }
-- (WokServiceSoapBindingResponse *)closeSessionUsingParameters:(WOKMWSAuthenticateService_closeSession *)parameters;
+- (WokServiceSoapBindingResponse *)closeSessionUsingParameters:(WOKMWSAuthenticateService_closeSession *)parameters
 {
 	NSDictionary *bodyElements = [NSDictionary dictionaryWithObjectsAndKeys:parameters, @"closeSession", nil];
 	NSDictionary *responseClasses = [NSDictionary dictionaryWithObjectsAndKeys:[WOKMWSAuthenticateService_closeSessionResponse class], @"closeSessionResponse", nil];
