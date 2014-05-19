@@ -31,7 +31,7 @@
 @property (nonatomic, retain) NSString *authPassword;
 - (id)initWithAddress:(NSString *)anAddress namespaceURI:(NSString *)aNamespaceURI;
 - (NSString *)serializedEnvelopeUsingHeaderElements:(NSDictionary *)headerElements bodyElements:(NSDictionary *)bodyElements;
-- (void)sendHTTPCallUsingBody:(NSString *)body soapAction:(NSString *)soapAction forOperation:(WokServiceSoapBindingOperation *)operation;
+- (NSURLRequest *)requestUsingBody:(NSString *)body soapAction:(NSString *)soapAction;
 - (void)addCookie:(NSHTTPCookie *)toAdd;
 - (WokServiceSoapBindingResponse *)performSynchronousOperation:(WokServiceSoapBindingOperation *)operation;
 - (void)performAsynchronousOperation:(WokServiceSoapBindingOperation *)operation delegate:(id<WokServiceSoapBindingResponseDelegate>)responseDelegate;

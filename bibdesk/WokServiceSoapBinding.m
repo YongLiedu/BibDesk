@@ -129,7 +129,7 @@
 	xmlFreeDoc(doc);	
 	return serializedForm;
 }
-- (void)sendHTTPCallUsingBody:(NSString *)outputBody soapAction:(NSString *)soapAction forOperation:(WokServiceSoapBindingOperation *)operation
+- (NSURLRequest *)requestUsingBody:(NSString *)outputBody soapAction:(NSString *)soapAction
 {
 	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:self.address cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData timeoutInterval:self.defaultTimeout];
 	NSData *bodyData = [outputBody dataUsingEncoding:NSUTF8StringEncoding];
@@ -149,16 +149,13 @@
 		NSString *authString = [[[NSString stringWithFormat:@"%@:%@", self.authUsername, self.authPassword] dataUsingEncoding:NSUTF8StringEncoding] base64String];
 		[request setValue:[NSString stringWithFormat:@"Basic %@", authString] forHTTPHeaderField:@"Authorization"];
 	}
-		
+	
 	if(self.logXMLInOut) {
 		NSLog(@"OutputHeaders:\n%@", [request allHTTPHeaderFields]);
 		NSLog(@"OutputBody:\n%@", outputBody);
 	}
 	
-	NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request delegate:operation];
-	
-	operation.urlConnection = connection;
-	[connection release];
+	return request;
 }
 - (void) dealloc
 {
@@ -206,7 +203,9 @@
 	
 	NSString *operationXMLString = [binding serializedEnvelopeUsingHeaderElements:headerElements bodyElements:bodyElements];
 	
-	[binding sendHTTPCallUsingBody:operationXMLString soapAction:self.soapAction forOperation:self];
+	NSURLRequest *request = [binding requestUsingBody:operationXMLString soapAction:self.soapAction];
+	
+	self.urlConnection = [[[NSURLConnection alloc] initWithRequest:request delegate:self] autorelease];
 }
 - (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
