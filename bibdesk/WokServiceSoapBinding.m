@@ -73,60 +73,45 @@
 }
 - (NSString *)serializedEnvelopeUsingHeaderElements:(NSDictionary *)headerElements bodyElements:(NSDictionary *)bodyElements
 {
-	xmlDocPtr doc;
+	NSXMLElement *root = [NSXMLElement elementWithName:@"soap:Envelope"];
+	NSXMLDocument *doc = [NSXMLDocument documentWithRootElement:root];
 	
-	doc = xmlNewDoc((const xmlChar*)XML_DEFAULT_VERSION);
-	if (doc == NULL) {
+	if (doc == nil) {
 		NSLog(@"Error creating the xml document tree");
 		return @"";
 	}
 	
-	xmlNodePtr root = xmlNewDocNode(doc, NULL, (const xmlChar*)"Envelope", NULL);
-	xmlDocSetRootElement(doc, root);
+	[root addNamespace:[NSXMLNode namespaceWithName:@"soap" stringValue:@"http://schemas.xmlsoap.org/soap/envelope/"]];
 	
-	xmlNsPtr soapEnvelopeNs = xmlNewNs(root, (const xmlChar*)"http://schemas.xmlsoap.org/soap/envelope/", (const xmlChar*)"soap");
-	xmlSetNs(root, soapEnvelopeNs);
-	
-	xmlNsPtr ns2 = NULL;
+	NSXMLNode *ns = nil;
 	
 	if (self.namespaceURI != nil) {
-		ns2 = xmlNewNs(root, (const xmlChar *)[self.namespaceURI UTF8String], (const xmlChar*)"ns2");
+		ns = [NSXMLNode namespaceWithName:@"ns" stringValue:self.namespaceURI];
+		[root addNamespace:ns];
 	}
 	
 	if((headerElements != nil) && ([headerElements count] > 0)) {
-		xmlNodePtr headerNode = xmlNewDocNode(doc, soapEnvelopeNs, (const xmlChar*)"Header", NULL);
-		xmlAddChild(root, headerNode);
+		NSXMLElement *headerNode = [NSXMLElement elementWithName:@"soap:Header"];
+		[root addChild:headerNode];
 		
 		for(NSString *key in [headerElements allKeys]) {
 			id header = [headerElements objectForKey:key];
-			xmlNodePtr child = xmlAddChild(headerNode, [header xmlNodeForDoc:doc elementName:key elementNSPrefix:nil]);
-			if(ns2 != NULL) {
-				xmlSetNs(child, ns2);
-			}
+			[headerNode addChild:[header XMLNodeWithName:key prefix:[ns name]]];
 		}
 	}
 	
 	if((bodyElements != nil) && ([bodyElements count] > 0)) {
-		xmlNodePtr bodyNode = xmlNewDocNode(doc, soapEnvelopeNs, (const xmlChar*)"Body", NULL);
-		xmlAddChild(root, bodyNode);
+		NSXMLElement *bodyNode = [NSXMLElement elementWithName:@"soap:Body"];
+		[root addChild:bodyNode];
 		
 		for(NSString *key in [bodyElements allKeys]) {
 			id body = [bodyElements objectForKey:key];
-			xmlNodePtr child = xmlAddChild(bodyNode, [body xmlNodeForDoc:doc elementName:key elementNSPrefix:nil]);
-			if(ns2 != NULL) {
-				xmlSetNs(child, ns2);
-			}
+			[bodyNode addChild:[body XMLNodeWithName:key prefix:[ns name]]];
 		}
 	}
 	
-	xmlChar *buf;
-	int size;
-	xmlDocDumpFormatMemory(doc, &buf, &size, 1);
+	NSString *serializedForm = [doc XMLString];
 	
-	NSString *serializedForm = [NSString stringWithCString:(const char*)buf encoding:NSUTF8StringEncoding];
-	xmlFree(buf);
-	
-	xmlFreeDoc(doc);	
 	return serializedForm;
 }
 - (NSURLRequest *)requestUsingBody:(NSString *)outputBody soapAction:(NSString *)soapAction
@@ -241,7 +226,7 @@
 	
 	binding.cookies = cookies;
 	[cookies release];
-  if ([urlResponse.MIMEType rangeOfString:@"text/xml"].length == 0) {
+	if ([urlResponse.MIMEType rangeOfString:@"text/xml"].length == 0) {
 		NSError *error = nil;
 		[connection cancel];
 		if ([httpResponse statusCode] >= 400) {
@@ -260,7 +245,7 @@
 }
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
 {
-  if (responseData == nil) {
+	if (responseData == nil) {
 		responseData = [data mutableCopy];
 	} else {
 		[responseData appendData:data];
@@ -278,43 +263,39 @@
 {
 	if (responseData != nil && delegate != nil)
 	{
-		xmlDocPtr doc;
-		xmlNodePtr cur;
 		
 		if (binding.logXMLInOut) {
 			NSLog(@"ResponseBody:\n%@", [[[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding] autorelease]);
 		}
 		
-		doc = xmlParseMemory([responseData bytes], [responseData length]);
+		NSError *error = nil;
+		NSXMLDocument *doc = [[NSXMLDocument alloc] initWithData:responseData options:NSXMLDocumentTidyXML error:&error];
 		
-		if (doc == NULL) {
-			NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"Errors while parsing returned XML" forKey:NSLocalizedDescriptionKey];
+		if (doc == nil) {
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"Errors while parsing returned XML: %@", [error localizedDescription]] forKey:NSLocalizedDescriptionKey];
 			
 			response.error = [NSError errorWithDomain:@"WokServiceSoapBindingResponseXML" code:1 userInfo:userInfo];
-			[delegate operation:self completedWithResponse:response];
 		} else {
-			cur = xmlDocGetRootElement(doc);
-			cur = cur->children;
+			NSXMLElement *node = [doc rootElement];
 			
-			for( ; cur != NULL ; cur = cur->next) {
-				if(cur->type == XML_ELEMENT_NODE) {
+			for(node in [node children]) {
+				if([node kind] == NSXMLElementKind) {
 					
-					if(xmlStrEqual(cur->name, (const xmlChar *) "Body")) {
+					if([[node localName] isEqualToString:@"Body"]) {
 						NSMutableArray *responseBodyParts = [NSMutableArray array];
 						
-						xmlNodePtr bodyNode;
-						for(bodyNode=cur->children ; bodyNode != NULL ; bodyNode = bodyNode->next) {
-							if(bodyNode->type == XML_ELEMENT_NODE) {
-								Class responseClass = [self.responseClasses objectForKey:[NSString stringWithUTF8String:(const char *)bodyNode->name]];
+						for(NSXMLElement *bodyNode in [node children]) {
+							if([bodyNode kind] == NSXMLElementKind) {
+								Class responseClass = [self.responseClasses objectForKey:[bodyNode localName]];
 								if(responseClass != nil) {
 									id bodyObject = [responseClass deserializeNode:bodyNode];
-									//NSAssert1(bodyObject != nil, @"Errors while parsing body %s", bodyNode->name);
+									//NSAssert1(bodyObject != nil, @"Errors while parsing body %s", [bodyNode name]);
 									if (bodyObject != nil) [responseBodyParts addObject:bodyObject];
 								}
-								else if (xmlStrEqual(bodyNode->ns->prefix, cur->ns->prefix) && 
-									xmlStrEqual(bodyNode->name, (const xmlChar *) "Fault")) {
+								else if ([[bodyNode prefix] isEqualToString:[node prefix]] && 
+									[[bodyNode localName] isEqualToString:@"Fault"]) {
 									WokServiceSoapBinding_fault *bodyObject = [WokServiceSoapBinding_fault deserializeNode:bodyNode];
-									//NSAssert1(bodyObject != nil, @"Errors while parsing body %s", bodyNode->name);
+									//NSAssert1(bodyObject != nil, @"Errors while parsing body %s", [bodyNode name]);
 									if (bodyObject != nil) [responseBodyParts addObject:bodyObject];
 								}
 							}
@@ -325,10 +306,9 @@
 				}
 			}
 			
-			xmlFreeDoc(doc);
+			[doc release];
 		}
 		
-		xmlCleanupParser();
 		[delegate operation:self completedWithResponse:response];
 	}
 }
@@ -370,31 +350,31 @@
 @end
 
 @implementation WokServiceSoapBindingElement
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix
+- (NSXMLElement *)XMLNodeWithName:(NSString *)elName prefix:(NSString *)elNSPrefix
 {
 	if(elNSPrefix != nil && [elNSPrefix length] > 0)
 	{
 		elName = [NSString stringWithFormat:@"%@:%@", elNSPrefix, elName];
 	}
 	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, (const xmlChar *)[elName UTF8String], NULL);
+	NSXMLElement *node = [NSXMLElement elementWithName:elName];
 	
 	[self addElementsToNode:node];
 	
 	return node;
 }
-- (void)addElementsToNode:(xmlNodePtr)node
+- (void)addElementsToNode:(NSXMLElement *)node
 {
 }
-+ (id)deserializeNode:(xmlNodePtr)cur
++ (id)deserializeNode:(NSXMLElement *)node
 {
 	id newObject = [[self new] autorelease];
 	
-	[newObject deserializeElementsFromNode:cur];
+	[newObject deserializeElementsFromNode:node];
 	
 	return newObject;
 }
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
+- (void)deserializeElementsFromNode:(NSXMLElement *)node
 {
 }
 @end
@@ -418,72 +398,62 @@
 	
 	[super dealloc];
 }
-- (void)addElementsToNode:(xmlNodePtr)node
+- (void)addElementsToNode:(NSXMLElement *)node
 {
 	if(self.faultcode!= nil) {
-		xmlAddChild(node, [self.faultcode xmlNodeForDoc:node->doc elementName:@"faultcode" elementNSPrefix:nil]);
+		[node addChild:[self.faultcode XMLNodeWithName:@"faultcode" prefix:nil]];
 	}
 	if(self.faultstring!= nil) {
-		xmlAddChild(node, [self.faultstring xmlNodeForDoc:node->doc elementName:@"faultstring" elementNSPrefix:nil]);
+		[node addChild:[self.faultstring XMLNodeWithName:@"faultstring" prefix:nil]];
 	}
 	if(self.faultactor!= nil) {
-		xmlAddChild(node, [self.faultactor xmlNodeForDoc:node->doc elementName:@"faultactor" elementNSPrefix:nil]);
+		[node addChild:[self.faultactor XMLNodeWithName:@"faultactor" prefix:nil]];
 	}
 }
 @synthesize faultcode;
 @synthesize faultstring;
 @synthesize faultactor;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
+- (void)deserializeElementsFromNode:(NSXMLElement *)node
 {
-	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
-		if(cur->type == XML_ELEMENT_NODE) {
-			if(xmlStrEqual(cur->name, (const xmlChar *) "faultcode")) {
-				self.faultcode = [NSString deserializeNode:cur];
+	for( node in [node children] ) {
+		if([node kind] == NSXMLElementKind) {
+			if([[node localName] isEqualToString:@"faultcode"]) {
+				self.faultcode = [NSString deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "faultstring")) {
-				self.faultstring = [NSString deserializeNode:cur];
+			if([[node localName] isEqualToString:@"faultstring"]) {
+				self.faultstring = [NSString deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "faultactor")) {
-				self.faultactor = [NSString deserializeNode:cur];
+			if([[node localName] isEqualToString:@"faultactor"]) {
+				self.faultactor = [NSString deserializeNode:node];
 			}
 		}
 	}
 }
 @end
 
-@implementation NSString (WokServiceSoapBinding)
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix
+@implementation NSString (WokServiceSoapBindingElement)
+- (NSXMLElement *)XMLNodeWithName:(NSString *)elName prefix:(NSString *)elNSPrefix
 {
 	if(elNSPrefix != nil && [elNSPrefix length] > 0)
 	{
 		elName = [NSString stringWithFormat:@"%@:%@", elNSPrefix, elName];
 	}
 	
-	xmlNodePtr node = xmlNewDocNode(doc, NULL, (const xmlChar *)[elName UTF8String], (const xmlChar *)[self UTF8String]);
-	
-	return node;
+	return [NSXMLElement elementWithName:elName stringValue:self];
 }
-+ (NSString *)deserializeNode:(xmlNodePtr)cur
++ (NSString *)deserializeNode:(NSXMLElement *)node
 {
-	xmlChar *elementText = xmlNodeListGetString(cur->doc, cur->children, 1);
-	NSString *elementString = nil;
-	
-	if(elementText != NULL) {
-		elementString = [NSString stringWithUTF8String:(char*)elementText];
-		xmlFree(elementText);
-	}
-	
-	return elementString;
+	return [node stringValue];
 }
 @end
 
-@implementation NSNumber (WokServiceSoapBinding)
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix
+@implementation NSNumber (WokServiceSoapBindingElement)
+- (NSXMLElement *)XMLNodeWithName:(NSString *)elName prefix:(NSString *)elNSPrefix
 {
-	return [[self stringValue] xmlNodeForDoc:doc elementName:elName elementNSPrefix:elNSPrefix];
+	return [[self stringValue] XMLNodeWithName:elName prefix:elNSPrefix];
 }
-+ (NSNumber *)deserializeNode:(xmlNodePtr)cur
++ (NSNumber *)deserializeNode:(NSXMLElement *)node
 {
-	return [NSNumber numberWithInteger:[[NSString deserializeNode:cur] integerValue]];
+	return [NSNumber numberWithInteger:[[NSString deserializeNode:node] integerValue]];
 }
 @end

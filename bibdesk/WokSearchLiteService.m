@@ -17,26 +17,26 @@
 	
 	[super dealloc];
 }
-- (void)addElementsToNode:(xmlNodePtr)node
+- (void)addElementsToNode:(NSXMLElement *)node
 {
 	if(self.name!= nil) {
-		xmlAddChild(node, [self.name xmlNodeForDoc:node->doc elementName:@"name" elementNSPrefix:nil]);
+		[node addChild:[self.name XMLNodeWithName:@"name" prefix:nil]];
 	}
 	if(self.sort!= nil) {
-		xmlAddChild(node, [self.sort xmlNodeForDoc:node->doc elementName:@"sort" elementNSPrefix:nil]);
+		[node addChild:[self.sort XMLNodeWithName:@"sort" prefix:nil]];
 	}
 }
 @synthesize name;
 @synthesize sort;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
+- (void)deserializeElementsFromNode:(NSXMLElement *)node
 {
-	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
-		if(cur->type == XML_ELEMENT_NODE) {
-			if(xmlStrEqual(cur->name, (const xmlChar *) "name")) {
-				self.name = [NSString deserializeNode:cur];
+	for( node in [node children] ) {
+		if([node kind] == NSXMLElementKind) {
+			if([[node localName] isEqualToString:@"name"]) {
+				self.name = [NSString deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "sort")) {
-				self.sort = [NSString deserializeNode:cur];
+			if([[node localName] isEqualToString:@"sort"]) {
+				self.sort = [NSString deserializeNode:node];
 			}
 		}
 	}
@@ -62,17 +62,17 @@
 	
 	[super dealloc];
 }
-- (void)addElementsToNode:(xmlNodePtr)node
+- (void)addElementsToNode:(NSXMLElement *)node
 {
 	if(self.firstRecord!= nil) {
-		xmlAddChild(node, [self.firstRecord xmlNodeForDoc:node->doc elementName:@"firstRecord" elementNSPrefix:nil]);
+		[node addChild:[self.firstRecord XMLNodeWithName:@"firstRecord" prefix:nil]];
 	}
 	if(self.count!= nil) {
-		xmlAddChild(node, [self.count xmlNodeForDoc:node->doc elementName:@"count" elementNSPrefix:nil]);
+		[node addChild:[self.count XMLNodeWithName:@"count" prefix:nil]];
 	}
 	if(self.sortField!= nil) {
 		for(WokSearchLiteService_sortField * child in self.sortField) {
-			xmlAddChild(node, [child xmlNodeForDoc:node->doc elementName:@"sortField" elementNSPrefix:nil]);
+			[node addChild:[child XMLNodeWithName:@"sortField" prefix:nil]];
 		}
 	}
 }
@@ -83,18 +83,18 @@
 {
 	if(toAdd != nil) [sortField addObject:toAdd];
 }
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
+- (void)deserializeElementsFromNode:(NSXMLElement *)node
 {
-	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
-		if(cur->type == XML_ELEMENT_NODE) {
-			if(xmlStrEqual(cur->name, (const xmlChar *) "firstRecord")) {
-				self.firstRecord = [NSNumber deserializeNode:cur];
+	for( node in [node children] ) {
+		if([node kind] == NSXMLElementKind) {
+			if([[node localName] isEqualToString:@"firstRecord"]) {
+				self.firstRecord = [NSNumber deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "count")) {
-				self.count = [NSNumber deserializeNode:cur];
+			if([[node localName] isEqualToString:@"count"]) {
+				self.count = [NSNumber deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "sortField")) {
-				[self addSortField:[WokSearchLiteService_sortField deserializeNode:cur]];
+			if([[node localName] isEqualToString:@"sortField"]) {
+				[self addSortField:[WokSearchLiteService_sortField deserializeNode:node]];
 			}
 		}
 	}
@@ -118,26 +118,26 @@
 	
 	[super dealloc];
 }
-- (void)addElementsToNode:(xmlNodePtr)node
+- (void)addElementsToNode:(NSXMLElement *)node
 {
 	if(self.queryId!= nil) {
-		xmlAddChild(node, [self.queryId xmlNodeForDoc:node->doc elementName:@"queryId" elementNSPrefix:nil]);
+		[node addChild:[self.queryId XMLNodeWithName:@"queryId" prefix:nil]];
 	}
 	if(self.retrieveParameters!= nil) {
-		xmlAddChild(node, [self.retrieveParameters xmlNodeForDoc:node->doc elementName:@"retrieveParameters" elementNSPrefix:nil]);
+		[node addChild:[self.retrieveParameters XMLNodeWithName:@"retrieveParameters" prefix:nil]];
 	}
 }
 @synthesize queryId;
 @synthesize retrieveParameters;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
+- (void)deserializeElementsFromNode:(NSXMLElement *)node
 {
-	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
-		if(cur->type == XML_ELEMENT_NODE) {
-			if(xmlStrEqual(cur->name, (const xmlChar *) "queryId")) {
-				self.queryId = [NSString deserializeNode:cur];
+	for( node in [node children] ) {
+		if([node kind] == NSXMLElementKind) {
+			if([[node localName] isEqualToString:@"queryId"]) {
+				self.queryId = [NSString deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "retrieveParameters")) {
-				self.retrieveParameters = [WokSearchLiteService_retrieveParameters deserializeNode:cur];
+			if([[node localName] isEqualToString:@"retrieveParameters"]) {
+				self.retrieveParameters = [WokSearchLiteService_retrieveParameters deserializeNode:node];
 			}
 		}
 	}
@@ -161,14 +161,14 @@
 	
 	[super dealloc];
 }
-- (void)addElementsToNode:(xmlNodePtr)node
+- (void)addElementsToNode:(NSXMLElement *)node
 {
 	if(self.label!= nil) {
-		xmlAddChild(node, [self.label xmlNodeForDoc:node->doc elementName:@"label" elementNSPrefix:nil]);
+		[node addChild:[self.label XMLNodeWithName:@"label" prefix:nil]];
 	}
 	if(self.value!= nil) {
 		for(NSString * child in self.value) {
-			xmlAddChild(node, [child xmlNodeForDoc:node->doc elementName:@"value" elementNSPrefix:nil]);
+			[node addChild:[child XMLNodeWithName:@"value" prefix:nil]];
 		}
 	}
 }
@@ -178,15 +178,15 @@
 {
 	if(toAdd != nil) [value addObject:toAdd];
 }
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
+- (void)deserializeElementsFromNode:(NSXMLElement *)node
 {
-	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
-		if(cur->type == XML_ELEMENT_NODE) {
-			if(xmlStrEqual(cur->name, (const xmlChar *) "label")) {
-				self.label = [NSString deserializeNode:cur];
+	for( node in [node children] ) {
+		if([node kind] == NSXMLElementKind) {
+			if([[node localName] isEqualToString:@"label"]) {
+				self.label = [NSString deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "value")) {
-				[self addValue:[NSString deserializeNode:cur]];
+			if([[node localName] isEqualToString:@"value"]) {
+				[self addValue:[NSString deserializeNode:node]];
 			}
 		}
 	}
@@ -218,34 +218,34 @@
 	
 	[super dealloc];
 }
-- (void)addElementsToNode:(xmlNodePtr)node
+- (void)addElementsToNode:(NSXMLElement *)node
 {
 	if(self.uid!= nil) {
-		xmlAddChild(node, [self.uid xmlNodeForDoc:node->doc elementName:@"uid" elementNSPrefix:nil]);
+		[node addChild:[self.uid XMLNodeWithName:@"uid" prefix:nil]];
 	}
 	if(self.title!= nil) {
 		for(WokSearchLiteService_labelValuesPair * child in self.title) {
-			xmlAddChild(node, [child xmlNodeForDoc:node->doc elementName:@"title" elementNSPrefix:nil]);
+			[node addChild:[child XMLNodeWithName:@"title" prefix:nil]];
 		}
 	}
 	if(self.source!= nil) {
 		for(WokSearchLiteService_labelValuesPair * child in self.source) {
-			xmlAddChild(node, [child xmlNodeForDoc:node->doc elementName:@"source" elementNSPrefix:nil]);
+			[node addChild:[child XMLNodeWithName:@"source" prefix:nil]];
 		}
 	}
 	if(self.authors!= nil) {
 		for(WokSearchLiteService_labelValuesPair * child in self.authors) {
-			xmlAddChild(node, [child xmlNodeForDoc:node->doc elementName:@"authors" elementNSPrefix:nil]);
+			[node addChild:[child XMLNodeWithName:@"authors" prefix:nil]];
 		}
 	}
 	if(self.keywords!= nil) {
 		for(WokSearchLiteService_labelValuesPair * child in self.keywords) {
-			xmlAddChild(node, [child xmlNodeForDoc:node->doc elementName:@"keywords" elementNSPrefix:nil]);
+			[node addChild:[child XMLNodeWithName:@"keywords" prefix:nil]];
 		}
 	}
 	if(self.other!= nil) {
 		for(WokSearchLiteService_labelValuesPair * child in self.other) {
-			xmlAddChild(node, [child xmlNodeForDoc:node->doc elementName:@"other" elementNSPrefix:nil]);
+			[node addChild:[child XMLNodeWithName:@"other" prefix:nil]];
 		}
 	}
 }
@@ -275,27 +275,27 @@
 {
 	if(toAdd != nil) [other addObject:toAdd];
 }
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
+- (void)deserializeElementsFromNode:(NSXMLElement *)node
 {
-	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
-		if(cur->type == XML_ELEMENT_NODE) {
-			if(xmlStrEqual(cur->name, (const xmlChar *) "uid")) {
-				self.uid = [NSString deserializeNode:cur];
+	for( node in [node children] ) {
+		if([node kind] == NSXMLElementKind) {
+			if([[node localName] isEqualToString:@"uid"]) {
+				self.uid = [NSString deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "title")) {
-				[self addTitle:[WokSearchLiteService_labelValuesPair deserializeNode:cur]];
+			if([[node localName] isEqualToString:@"title"]) {
+				[self addTitle:[WokSearchLiteService_labelValuesPair deserializeNode:node]];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "source")) {
-				[self addSource:[WokSearchLiteService_labelValuesPair deserializeNode:cur]];
+			if([[node localName] isEqualToString:@"source"]) {
+				[self addSource:[WokSearchLiteService_labelValuesPair deserializeNode:node]];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "authors")) {
-				[self addAuthors:[WokSearchLiteService_labelValuesPair deserializeNode:cur]];
+			if([[node localName] isEqualToString:@"authors"]) {
+				[self addAuthors:[WokSearchLiteService_labelValuesPair deserializeNode:node]];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "keywords")) {
-				[self addKeywords:[WokSearchLiteService_labelValuesPair deserializeNode:cur]];
+			if([[node localName] isEqualToString:@"keywords"]) {
+				[self addKeywords:[WokSearchLiteService_labelValuesPair deserializeNode:node]];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "other")) {
-				[self addOther:[WokSearchLiteService_labelValuesPair deserializeNode:cur]];
+			if([[node localName] isEqualToString:@"other"]) {
+				[self addOther:[WokSearchLiteService_labelValuesPair deserializeNode:node]];
 			}
 		}
 	}
@@ -325,23 +325,23 @@
 	
 	[super dealloc];
 }
-- (void)addElementsToNode:(xmlNodePtr)node
+- (void)addElementsToNode:(NSXMLElement *)node
 {
 	if(self.queryId!= nil) {
-		xmlAddChild(node, [self.queryId xmlNodeForDoc:node->doc elementName:@"queryId" elementNSPrefix:nil]);
+		[node addChild:[self.queryId XMLNodeWithName:@"queryId" prefix:nil]];
 	}
 	if(self.recordsFound!= nil) {
-		xmlAddChild(node, [self.recordsFound xmlNodeForDoc:node->doc elementName:@"recordsFound" elementNSPrefix:nil]);
+		[node addChild:[self.recordsFound XMLNodeWithName:@"recordsFound" prefix:nil]];
 	}
 	if(self.recordsSearched!= nil) {
-		xmlAddChild(node, [self.recordsSearched xmlNodeForDoc:node->doc elementName:@"recordsSearched" elementNSPrefix:nil]);
+		[node addChild:[self.recordsSearched XMLNodeWithName:@"recordsSearched" prefix:nil]];
 	}
 	if(self.parent!= nil) {
-		xmlAddChild(node, [self.parent xmlNodeForDoc:node->doc elementName:@"parent" elementNSPrefix:nil]);
+		[node addChild:[self.parent XMLNodeWithName:@"parent" prefix:nil]];
 	}
 	if(self.records!= nil) {
 		for(WokSearchLiteService_liteRecord * child in self.records) {
-			xmlAddChild(node, [child xmlNodeForDoc:node->doc elementName:@"records" elementNSPrefix:nil]);
+			[node addChild:[child XMLNodeWithName:@"records" prefix:nil]];
 		}
 	}
 }
@@ -354,24 +354,24 @@
 {
 	if(toAdd != nil) [records addObject:toAdd];
 }
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
+- (void)deserializeElementsFromNode:(NSXMLElement *)node
 {
-	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
-		if(cur->type == XML_ELEMENT_NODE) {
-			if(xmlStrEqual(cur->name, (const xmlChar *) "queryId")) {
-				self.queryId = [NSString deserializeNode:cur];
+	for( node in [node children] ) {
+		if([node kind] == NSXMLElementKind) {
+			if([[node localName] isEqualToString:@"queryId"]) {
+				self.queryId = [NSString deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "recordsFound")) {
-				self.recordsFound = [NSNumber deserializeNode:cur];
+			if([[node localName] isEqualToString:@"recordsFound"]) {
+				self.recordsFound = [NSNumber deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "recordsSearched")) {
-				self.recordsSearched = [NSNumber deserializeNode:cur];
+			if([[node localName] isEqualToString:@"recordsSearched"]) {
+				self.recordsSearched = [NSNumber deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "parent")) {
-				self.parent = [WokSearchLiteService_liteRecord deserializeNode:cur];
+			if([[node localName] isEqualToString:@"parent"]) {
+				self.parent = [WokSearchLiteService_liteRecord deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "records")) {
-				[self addRecords:[WokSearchLiteService_liteRecord deserializeNode:cur]];
+			if([[node localName] isEqualToString:@"records"]) {
+				[self addRecords:[WokSearchLiteService_liteRecord deserializeNode:node]];
 			}
 		}
 	}
@@ -393,19 +393,19 @@
 	
 	[super dealloc];
 }
-- (void)addElementsToNode:(xmlNodePtr)node
+- (void)addElementsToNode:(NSXMLElement *)node
 {
 	if(self.return_!= nil) {
-		xmlAddChild(node, [self.return_ xmlNodeForDoc:node->doc elementName:@"return" elementNSPrefix:nil]);
+		[node addChild:[self.return_ XMLNodeWithName:@"return" prefix:nil]];
 	}
 }
 @synthesize return_;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
+- (void)deserializeElementsFromNode:(NSXMLElement *)node
 {
-	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
-		if(cur->type == XML_ELEMENT_NODE) {
-			if(xmlStrEqual(cur->name, (const xmlChar *) "return")) {
-				self.return_ = [WokSearchLiteService_searchResults deserializeNode:cur];
+	for( node in [node children] ) {
+		if([node kind] == NSXMLElementKind) {
+			if([[node localName] isEqualToString:@"return"]) {
+				self.return_ = [WokSearchLiteService_searchResults deserializeNode:node];
 			}
 		}
 	}
@@ -433,21 +433,21 @@
 	
 	[super dealloc];
 }
-- (void)addElementsToNode:(xmlNodePtr)node
+- (void)addElementsToNode:(NSXMLElement *)node
 {
 	if(self.databaseId!= nil) {
-		xmlAddChild(node, [self.databaseId xmlNodeForDoc:node->doc elementName:@"databaseId" elementNSPrefix:nil]);
+		[node addChild:[self.databaseId XMLNodeWithName:@"databaseId" prefix:nil]];
 	}
 	if(self.uid!= nil) {
 		for(NSString * child in self.uid) {
-			xmlAddChild(node, [child xmlNodeForDoc:node->doc elementName:@"uid" elementNSPrefix:nil]);
+			[node addChild:[child XMLNodeWithName:@"uid" prefix:nil]];
 		}
 	}
 	if(self.queryLanguage!= nil) {
-		xmlAddChild(node, [self.queryLanguage xmlNodeForDoc:node->doc elementName:@"queryLanguage" elementNSPrefix:nil]);
+		[node addChild:[self.queryLanguage XMLNodeWithName:@"queryLanguage" prefix:nil]];
 	}
 	if(self.retrieveParameters!= nil) {
-		xmlAddChild(node, [self.retrieveParameters xmlNodeForDoc:node->doc elementName:@"retrieveParameters" elementNSPrefix:nil]);
+		[node addChild:[self.retrieveParameters XMLNodeWithName:@"retrieveParameters" prefix:nil]];
 	}
 }
 @synthesize databaseId;
@@ -458,21 +458,21 @@
 }
 @synthesize queryLanguage;
 @synthesize retrieveParameters;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
+- (void)deserializeElementsFromNode:(NSXMLElement *)node
 {
-	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
-		if(cur->type == XML_ELEMENT_NODE) {
-			if(xmlStrEqual(cur->name, (const xmlChar *) "databaseId")) {
-				self.databaseId = [NSString deserializeNode:cur];
+	for( node in [node children] ) {
+		if([node kind] == NSXMLElementKind) {
+			if([[node localName] isEqualToString:@"databaseId"]) {
+				self.databaseId = [NSString deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "uid")) {
-				[self addUid:[NSString deserializeNode:cur]];
+			if([[node localName] isEqualToString:@"uid"]) {
+				[self addUid:[NSString deserializeNode:node]];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "queryLanguage")) {
-				self.queryLanguage = [NSString deserializeNode:cur];
+			if([[node localName] isEqualToString:@"queryLanguage"]) {
+				self.queryLanguage = [NSString deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "retrieveParameters")) {
-				self.retrieveParameters = [WokSearchLiteService_retrieveParameters deserializeNode:cur];
+			if([[node localName] isEqualToString:@"retrieveParameters"]) {
+				self.retrieveParameters = [WokSearchLiteService_retrieveParameters deserializeNode:node];
 			}
 		}
 	}
@@ -494,19 +494,19 @@
 	
 	[super dealloc];
 }
-- (void)addElementsToNode:(xmlNodePtr)node
+- (void)addElementsToNode:(NSXMLElement *)node
 {
 	if(self.return_!= nil) {
-		xmlAddChild(node, [self.return_ xmlNodeForDoc:node->doc elementName:@"return" elementNSPrefix:nil]);
+		[node addChild:[self.return_ XMLNodeWithName:@"return" prefix:nil]];
 	}
 }
 @synthesize return_;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
+- (void)deserializeElementsFromNode:(NSXMLElement *)node
 {
-	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
-		if(cur->type == XML_ELEMENT_NODE) {
-			if(xmlStrEqual(cur->name, (const xmlChar *) "return")) {
-				self.return_ = [WokSearchLiteService_searchResults deserializeNode:cur];
+	for( node in [node children] ) {
+		if([node kind] == NSXMLElementKind) {
+			if([[node localName] isEqualToString:@"return"]) {
+				self.return_ = [WokSearchLiteService_searchResults deserializeNode:node];
 			}
 		}
 	}
@@ -530,26 +530,26 @@
 	
 	[super dealloc];
 }
-- (void)addElementsToNode:(xmlNodePtr)node
+- (void)addElementsToNode:(NSXMLElement *)node
 {
 	if(self.collection!= nil) {
-		xmlAddChild(node, [self.collection xmlNodeForDoc:node->doc elementName:@"collection" elementNSPrefix:nil]);
+		[node addChild:[self.collection XMLNodeWithName:@"collection" prefix:nil]];
 	}
 	if(self.edition!= nil) {
-		xmlAddChild(node, [self.edition xmlNodeForDoc:node->doc elementName:@"edition" elementNSPrefix:nil]);
+		[node addChild:[self.edition XMLNodeWithName:@"edition" prefix:nil]];
 	}
 }
 @synthesize collection;
 @synthesize edition;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
+- (void)deserializeElementsFromNode:(NSXMLElement *)node
 {
-	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
-		if(cur->type == XML_ELEMENT_NODE) {
-			if(xmlStrEqual(cur->name, (const xmlChar *) "collection")) {
-				self.collection = [NSString deserializeNode:cur];
+	for( node in [node children] ) {
+		if([node kind] == NSXMLElementKind) {
+			if([[node localName] isEqualToString:@"collection"]) {
+				self.collection = [NSString deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "edition")) {
-				self.edition = [NSString deserializeNode:cur];
+			if([[node localName] isEqualToString:@"edition"]) {
+				self.edition = [NSString deserializeNode:node];
 			}
 		}
 	}
@@ -573,26 +573,26 @@
 	
 	[super dealloc];
 }
-- (void)addElementsToNode:(xmlNodePtr)node
+- (void)addElementsToNode:(NSXMLElement *)node
 {
 	if(self.begin!= nil) {
-		xmlAddChild(node, [self.begin xmlNodeForDoc:node->doc elementName:@"begin" elementNSPrefix:nil]);
+		[node addChild:[self.begin XMLNodeWithName:@"begin" prefix:nil]];
 	}
 	if(self.end!= nil) {
-		xmlAddChild(node, [self.end xmlNodeForDoc:node->doc elementName:@"end" elementNSPrefix:nil]);
+		[node addChild:[self.end XMLNodeWithName:@"end" prefix:nil]];
 	}
 }
 @synthesize begin;
 @synthesize end;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
+- (void)deserializeElementsFromNode:(NSXMLElement *)node
 {
-	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
-		if(cur->type == XML_ELEMENT_NODE) {
-			if(xmlStrEqual(cur->name, (const xmlChar *) "begin")) {
-				self.begin = [NSString deserializeNode:cur];
+	for( node in [node children] ) {
+		if([node kind] == NSXMLElementKind) {
+			if([[node localName] isEqualToString:@"begin"]) {
+				self.begin = [NSString deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "end")) {
-				self.end = [NSString deserializeNode:cur];
+			if([[node localName] isEqualToString:@"end"]) {
+				self.end = [NSString deserializeNode:node];
 			}
 		}
 	}
@@ -624,27 +624,27 @@
 	
 	[super dealloc];
 }
-- (void)addElementsToNode:(xmlNodePtr)node
+- (void)addElementsToNode:(NSXMLElement *)node
 {
 	if(self.databaseId!= nil) {
-		xmlAddChild(node, [self.databaseId xmlNodeForDoc:node->doc elementName:@"databaseId" elementNSPrefix:nil]);
+		[node addChild:[self.databaseId XMLNodeWithName:@"databaseId" prefix:nil]];
 	}
 	if(self.userQuery!= nil) {
-		xmlAddChild(node, [self.userQuery xmlNodeForDoc:node->doc elementName:@"userQuery" elementNSPrefix:nil]);
+		[node addChild:[self.userQuery XMLNodeWithName:@"userQuery" prefix:nil]];
 	}
 	if(self.editions!= nil) {
 		for(WokSearchLiteService_editionDesc * child in self.editions) {
-			xmlAddChild(node, [child xmlNodeForDoc:node->doc elementName:@"editions" elementNSPrefix:nil]);
+			[node addChild:[child XMLNodeWithName:@"editions" prefix:nil]];
 		}
 	}
 	if(self.symbolicTimeSpan!= nil) {
-		xmlAddChild(node, [self.symbolicTimeSpan xmlNodeForDoc:node->doc elementName:@"symbolicTimeSpan" elementNSPrefix:nil]);
+		[node addChild:[self.symbolicTimeSpan XMLNodeWithName:@"symbolicTimeSpan" prefix:nil]];
 	}
 	if(self.timeSpan!= nil) {
-		xmlAddChild(node, [self.timeSpan xmlNodeForDoc:node->doc elementName:@"timeSpan" elementNSPrefix:nil]);
+		[node addChild:[self.timeSpan XMLNodeWithName:@"timeSpan" prefix:nil]];
 	}
 	if(self.queryLanguage!= nil) {
-		xmlAddChild(node, [self.queryLanguage xmlNodeForDoc:node->doc elementName:@"queryLanguage" elementNSPrefix:nil]);
+		[node addChild:[self.queryLanguage XMLNodeWithName:@"queryLanguage" prefix:nil]];
 	}
 }
 @synthesize databaseId;
@@ -657,27 +657,27 @@
 @synthesize symbolicTimeSpan;
 @synthesize timeSpan;
 @synthesize queryLanguage;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
+- (void)deserializeElementsFromNode:(NSXMLElement *)node
 {
-	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
-		if(cur->type == XML_ELEMENT_NODE) {
-			if(xmlStrEqual(cur->name, (const xmlChar *) "databaseId")) {
-				self.databaseId = [NSString deserializeNode:cur];
+	for( node in [node children] ) {
+		if([node kind] == NSXMLElementKind) {
+			if([[node localName] isEqualToString:@"databaseId"]) {
+				self.databaseId = [NSString deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "userQuery")) {
-				self.userQuery = [NSString deserializeNode:cur];
+			if([[node localName] isEqualToString:@"userQuery"]) {
+				self.userQuery = [NSString deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "editions")) {
-				[self addEditions:[WokSearchLiteService_editionDesc deserializeNode:cur]];
+			if([[node localName] isEqualToString:@"editions"]) {
+				[self addEditions:[WokSearchLiteService_editionDesc deserializeNode:node]];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "symbolicTimeSpan")) {
-				self.symbolicTimeSpan = [NSString deserializeNode:cur];
+			if([[node localName] isEqualToString:@"symbolicTimeSpan"]) {
+				self.symbolicTimeSpan = [NSString deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "timeSpan")) {
-				self.timeSpan = [WokSearchLiteService_timeSpan deserializeNode:cur];
+			if([[node localName] isEqualToString:@"timeSpan"]) {
+				self.timeSpan = [WokSearchLiteService_timeSpan deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "queryLanguage")) {
-				self.queryLanguage = [NSString deserializeNode:cur];
+			if([[node localName] isEqualToString:@"queryLanguage"]) {
+				self.queryLanguage = [NSString deserializeNode:node];
 			}
 		}
 	}
@@ -701,26 +701,26 @@
 	
 	[super dealloc];
 }
-- (void)addElementsToNode:(xmlNodePtr)node
+- (void)addElementsToNode:(NSXMLElement *)node
 {
 	if(self.queryParameters!= nil) {
-		xmlAddChild(node, [self.queryParameters xmlNodeForDoc:node->doc elementName:@"queryParameters" elementNSPrefix:nil]);
+		[node addChild:[self.queryParameters XMLNodeWithName:@"queryParameters" prefix:nil]];
 	}
 	if(self.retrieveParameters!= nil) {
-		xmlAddChild(node, [self.retrieveParameters xmlNodeForDoc:node->doc elementName:@"retrieveParameters" elementNSPrefix:nil]);
+		[node addChild:[self.retrieveParameters XMLNodeWithName:@"retrieveParameters" prefix:nil]];
 	}
 }
 @synthesize queryParameters;
 @synthesize retrieveParameters;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
+- (void)deserializeElementsFromNode:(NSXMLElement *)node
 {
-	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
-		if(cur->type == XML_ELEMENT_NODE) {
-			if(xmlStrEqual(cur->name, (const xmlChar *) "queryParameters")) {
-				self.queryParameters = [WokSearchLiteService_queryParameters deserializeNode:cur];
+	for( node in [node children] ) {
+		if([node kind] == NSXMLElementKind) {
+			if([[node localName] isEqualToString:@"queryParameters"]) {
+				self.queryParameters = [WokSearchLiteService_queryParameters deserializeNode:node];
 			}
-			if(xmlStrEqual(cur->name, (const xmlChar *) "retrieveParameters")) {
-				self.retrieveParameters = [WokSearchLiteService_retrieveParameters deserializeNode:cur];
+			if([[node localName] isEqualToString:@"retrieveParameters"]) {
+				self.retrieveParameters = [WokSearchLiteService_retrieveParameters deserializeNode:node];
 			}
 		}
 	}
@@ -742,19 +742,19 @@
 	
 	[super dealloc];
 }
-- (void)addElementsToNode:(xmlNodePtr)node
+- (void)addElementsToNode:(NSXMLElement *)node
 {
 	if(self.return_!= nil) {
-		xmlAddChild(node, [self.return_ xmlNodeForDoc:node->doc elementName:@"return" elementNSPrefix:nil]);
+		[node addChild:[self.return_ XMLNodeWithName:@"return" prefix:nil]];
 	}
 }
 @synthesize return_;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
+- (void)deserializeElementsFromNode:(NSXMLElement *)node
 {
-	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
-		if(cur->type == XML_ELEMENT_NODE) {
-			if(xmlStrEqual(cur->name, (const xmlChar *) "return")) {
-				self.return_ = [WokSearchLiteService_searchResults deserializeNode:cur];
+	for( node in [node children] ) {
+		if([node kind] == NSXMLElementKind) {
+			if([[node localName] isEqualToString:@"return"]) {
+				self.return_ = [WokSearchLiteService_searchResults deserializeNode:node];
 			}
 		}
 	}

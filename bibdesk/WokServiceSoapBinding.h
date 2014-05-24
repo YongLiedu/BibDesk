@@ -1,5 +1,4 @@
 #import <Foundation/Foundation.h>
-#import <libxml/tree.h>
 
 @class WokServiceSoapBindingElement;
 @class WokServiceSoapBindingResponse;
@@ -71,10 +70,10 @@
 
 @interface WokServiceSoapBindingElement : NSObject {
 }
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
-- (void)addElementsToNode:(xmlNodePtr)node;
-+ (id)deserializeNode:(xmlNodePtr)cur;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur;
+- (NSXMLElement *)XMLNodeWithName:(NSString *)elName prefix:(NSString *)elNSPrefix;
+- (void)addElementsToNode:(NSXMLElement *)node;
++ (id)deserializeNode:(NSXMLElement *)node;
+- (void)deserializeElementsFromNode:(NSXMLElement *)node;
 @end
 
 @interface WokServiceSoapBinding_fault : WokServiceSoapBindingElement {
@@ -87,12 +86,12 @@
 @property (retain) NSString *faultactor;
 @end
 
-@interface NSString (WokServiceSoapBinding)
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
-+ (NSString *)deserializeNode:(xmlNodePtr)cur;
+@interface NSString (WokServiceSoapBindingElement)
+- (NSXMLElement *)XMLNodeWithName:(NSString *)elName prefix:(NSString *)elNSPrefix;
++ (NSString *)deserializeNode:(NSXMLElement *)node;
 @end
 
-@interface NSNumber (WokServiceSoapBinding)
-- (xmlNodePtr)xmlNodeForDoc:(xmlDocPtr)doc elementName:(NSString *)elName elementNSPrefix:(NSString *)elNSPrefix;
-+ (NSNumber *)deserializeNode:(xmlNodePtr)cur;
+@interface NSNumber (WokServiceSoapBindingElement)
+- (NSXMLElement *)XMLNodeWithName:(NSString *)elName prefix:(NSString *)elNSPrefix;
++ (NSNumber *)deserializeNode:(NSXMLElement *)node;
 @end

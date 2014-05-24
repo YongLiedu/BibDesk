@@ -18,19 +18,19 @@
 	
 	[super dealloc];
 }
-- (void)addElementsToNode:(xmlNodePtr)node
+- (void)addElementsToNode:(NSXMLElement *)node
 {
 	if(self.return_!= nil) {
-		xmlAddChild(node, [self.return_ xmlNodeForDoc:node->doc elementName:@"return" elementNSPrefix:nil]);
+		[node addChild:[self.return_ XMLNodeWithName:@"return" prefix:nil]];
 	}
 }
 @synthesize return_;
-- (void)deserializeElementsFromNode:(xmlNodePtr)cur
+- (void)deserializeElementsFromNode:(NSXMLElement *)node
 {
-	for( cur = cur->children ; cur != NULL ; cur = cur->next ) {
-		if(cur->type == XML_ELEMENT_NODE) {
-			if(xmlStrEqual(cur->name, (const xmlChar *) "return")) {
-				self.return_ = [NSString deserializeNode:cur];
+	for( node in [node children] ) {
+		if([node kind] == NSXMLElementKind) {
+			if([[node localName] isEqualToString:@"return"]) {
+				self.return_ = [NSString deserializeNode:node];
 			}
 		}
 	}
