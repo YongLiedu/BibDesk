@@ -342,9 +342,9 @@
 	return self;
 }
 - (void)dealloc {
-	self.headers = nil;
-	self.bodyParts = nil;
-	self.error = nil;	
+	if(headers != nil) [headers release];
+	if(bodyParts != nil) [bodyParts release];
+	if(error != nil) [error release];	
 	[super dealloc];
 }
 @end
