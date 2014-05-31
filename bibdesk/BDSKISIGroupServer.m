@@ -530,7 +530,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
             } else {
                 
                 // we already know that a connection can be made, so we likely don't have permission to read this edition or database
-                if ([errorString rangeOfString:@"There is a problem with your session identifier (SID)."].location != NSNotFound) {
+                if ([errorString rangeOfString:@"Server.sessionExpired"].location != NSNotFound) {
                     // this error usually indicates the session has expired, so discard the cookie to allow authentication again
                     [sessionCookie release];
                     sessionCookie = nil;
