@@ -299,7 +299,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
         // authenticate if necessary
         if ([self authenticateWithOptions:options]) {
             
-            enum operationTypes { BDSKWOKSearch, BDSKWOKCitedBy, BDSKWOKCiting, BDSKWOKRelated, BDSKWOKUid } operation = BDSKWOKSearch;
+            enum BDSKOperationTypes { BDSKWOKSearch, BDSKWOKCitedBy, BDSKWOKCiting, BDSKWOKRelated, BDSKWOKUid } operation = BDSKWOKSearch;
             static NSString *operator[5] = {@"", @"citedby:", @"citing:", @"related:", @"uid:"};
             
             // extract special BDSKWOKSearch operators
@@ -531,7 +531,7 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
                 
                 // we already know that a connection can be made, so we likely don't have permission to read this edition or database
                 if (errorString && [errorString rangeOfString:@"Server.sessionExpired"].location != NSNotFound) {
-                    // this error usually indicates the session has expired, so discard the cookie to allow authentication again
+                    // if the session has expired, the error message will include this server error code, so discard the cookie to allow authentication again
                     [sessionCookie release];
                     sessionCookie = nil;
                 }
