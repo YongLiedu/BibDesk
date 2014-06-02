@@ -2205,13 +2205,9 @@
 				F9022C6E075802E300C3F701 /* BibItem.m */,
 				F9B3405C0BBC16720072C2B0 /* BibItem_PubMedLookup.m */,
 				F97C9DBB0C44866F0002EE01 /* WSGeneratedObj.m */,
-				3B91DD45162225850088206D /* WOKMWSAuthenticateService.h */,
 				3B91DD46162225850088206D /* WOKMWSAuthenticateService.m */,
-				CEBF7AE518F2EB6300012ECD /* WokSearchLiteService.h */,
 				CEBF7AE618F2EB6300012ECD /* WokSearchLiteService.m */,
-				3B91DD47162225850088206D /* WokSearchService.h */,
 				3B91DD48162225850088206D /* WokSearchService.m */,
-				CE45896E191B91D100D1790F /* WokServiceSoapBinding.h */,
 				CE45896F191B91D100D1790F /* WokServiceSoapBinding.m */,
 			);
 			name = Data;
@@ -2790,6 +2786,10 @@
 				45DB3E4B0CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.h */,
 				F947A01A09AA80E4004C27FF /* PDFDocument_BDSKExtensions.h */,
 				CE05CF5C0D7743940034C2A8 /* WebURLsWithTitles.h */,
+				3B91DD45162225850088206D /* WOKMWSAuthenticateService.h */,
+				CEBF7AE518F2EB6300012ECD /* WokSearchLiteService.h */,
+				3B91DD47162225850088206D /* WokSearchService.h */,
+				CE45896E191B91D100D1790F /* WokServiceSoapBinding.h */,
 				F97C9DBA0C44866F0002EE01 /* WSGeneratedObj.h */,
 			);
 			name = Headers;
