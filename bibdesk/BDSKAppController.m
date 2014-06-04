@@ -827,8 +827,10 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     if (importerVersion) {
         NSDictionary *versionInfo = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKSpotlightVersionInfoKey];
         
-        SInt32 sysVersion;
-        OSStatus err = Gestalt(gestaltSystemVersion, &sysVersion);
+        // getting gestaltSystemVersion breaks on 10.10, so we simulate it using the minor and bugfix version component
+        SInt32 sysVersionMinor, sysVersionBugFix, sysVersion = 0;
+        if (noErr == Gestalt(gestaltSystemVersionMinor, &sysVersionMinor) && noErr == Gestalt(gestaltSystemVersionBugFix, &sysVersionBugFix))
+            sysVersion = 0x1000 + sysVersionMinor * 0x10 + sysVersionBugFix;
         
         BOOL runImporter = NO;
         if ([versionInfo count] == 0) {
@@ -838,7 +840,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             
             long lastSysVersion = [[versionInfo objectForKey:LAST_SYS_VERSION_KEY] longValue];
             
-            runImporter = noErr == err ? ([BDSKVersionNumber compareVersionString:lastImporterVersion toVersionString:importerVersion] == NSOrderedAscending || sysVersion > lastSysVersion) : YES;
+            runImporter = sysVersion > 0 ? ([BDSKVersionNumber compareVersionString:lastImporterVersion toVersionString:importerVersion] == NSOrderedAscending || sysVersion > lastSysVersion) : YES;
         }
         if (runImporter) {
             NSString *mdimportPath = @"/usr/bin/mdimport";
