@@ -838,7 +838,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         } else {
             NSString *lastImporterVersion = [versionInfo objectForKey:LAST_IMPORTER_VERSION_KEY];
             
-            long lastSysVersion = [[versionInfo objectForKey:LAST_SYS_VERSION_KEY] longValue];
+            int lastSysVersion = [[versionInfo objectForKey:LAST_SYS_VERSION_KEY] intValue];
             
             runImporter = sysVersion > 0 ? ([BDSKVersionNumber compareVersionString:lastImporterVersion toVersionString:importerVersion] == NSOrderedAscending || sysVersion > lastSysVersion) : YES;
         }
