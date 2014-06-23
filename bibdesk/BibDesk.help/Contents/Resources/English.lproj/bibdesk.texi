@@ -159,9 +159,9 @@ about the BibTeX file format.
 @heading Online Resources
 @itemize
 @item @uref{http://bibdesk.sourceforge.net, BibDesk Website}
-@item @uref{http://sourceforge.net/apps/mediawiki/bibdesk/index.php?title=Main_Page, BibDesk Wiki}
-@item @uref{http://sourceforge.net/apps/mediawiki/bibdesk/index.php?title=FAQ, BibDesk FAQ}
-@item @uref{http://sourceforge.net/apps/mediawiki/bibdesk/index.php?title=BibDesk_Applescripts, BibDesk AppleScript Repository}
+@item @uref{http://sourceforge.net/p/bibdesk/wiki/Main_Page, BibDesk Wiki}
+@item @uref{http://sourceforge.net/p/bibdesk/wiki/FAQ, BibDesk FAQ}
+@item @uref{http://sourceforge.net/p/bibdek/wiki/BibDesk_Applescripts, BibDesk AppleScript Repository}
 @item @uref{http://bibdesk.sourceforge.net/manual/, Online Copy of This Manual}
 @end itemize
 
@@ -2233,7 +2233,7 @@ For @uref{http://www.lyx.org/, LyX} users, Mark Reid has written an AppleScript 
 to LyX, and his script is available at @uref{http://www.threewordslong.com/projects/misc/bibdesktolyx/}.
 
 BibDesk also provides a Distributed Objects API for developers to search for publications.  
-See the @uref{http://sourceforge.net/apps/mediawiki/bibdesk/index.php?title=Other_Applications, BibDesk Wiki} for details and examples.
+See the @uref{http://sourceforge.net/p/bibdesk/wiki/Other_Applications, BibDesk Wiki} for details and examples.
 
 @c --------------------------------------------------------------------------------------
 
@@ -3516,7 +3516,7 @@ select the @menutitle{Sample Script Hook} menu item with the Option key held dow
 @abstract{Where to get Scripts for BibDesk.}
 
 Various user-contributed scripts are located or linked from the BibDesk website here:
-@uref{http://sourceforge.net/apps/mediawiki/bibdesk/index.php?title=BibDesk_Applescripts, BibDesk AppleScript Repository}.
+@uref{http://sourceforge.net/p/bibdesk/wiki/BibDesk_Applescripts, BibDesk AppleScript Repository}.
 If you have a contribution that you would like to share, please e-mail the
 @uref{mailto:bibdesk-users@@lists.sourceforge.net, BibDesk Users} mailing list with
 a link to your page, and we'll make sure it gets added!
