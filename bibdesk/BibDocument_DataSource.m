@@ -716,6 +716,7 @@
             if ([colors count] > 0) {
                 [pub setColor:[colors objectAtIndex:0]];
                 [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+                return YES;
             } else {
                 NSArray *urlsToAdd = [pboard readURLs];
                 if ([urlsToAdd count] > 0) {
