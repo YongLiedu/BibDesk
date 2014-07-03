@@ -607,7 +607,7 @@
 
 #pragma mark TableView dragging destination
 
-- (BOOL)canDropOrPasteOnSelectedGroups{
+- (BOOL)canImportToSelectedGroups{
     return [self hasLibraryGroupSelected] || 
            NSNotFound == [[self selectedGroups] indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop){
                 return [obj isStatic] == NO;
@@ -633,7 +633,7 @@
     if (hasURL && row != -1 && op == NSTableViewDropOn)
         return NSDragOperationEvery;
     
-    if ([self canDropOrPasteOnSelectedGroups] == NO)
+    if ([self canImportToSelectedGroups] == NO)
         return NSDragOperationNone;
     
     id source = [info draggingSource];
@@ -730,7 +730,7 @@
                 }
             }
             
-        } else if ([self canDropOrPasteOnSelectedGroups] == NO) {
+        } else if ([self canImportToSelectedGroups] == NO) {
             
             return NO;
             
@@ -889,7 +889,7 @@
 
 - (BOOL)tableViewCanPasteFromPasteboard:(NSTableView *)tv {
     if (tv == tableView) {
-        return [self canDropOrPasteOnSelectedGroups];
+        return [self canImportToSelectedGroups];
     }
     return NO;
 }
