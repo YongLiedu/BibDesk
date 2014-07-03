@@ -730,11 +730,7 @@
                 }
             }
             
-        } else if ([self canImportToSelectedGroups] == NO) {
-            
-            return NO;
-            
-        } else {
+        } else if ([self canImportToSelectedGroups]) {
             
             NSArray *fileURLs = [pboard readFileURLsOfTypes:nil];
             if ([fileURLs count] == 1) {
