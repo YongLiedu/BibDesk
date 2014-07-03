@@ -619,45 +619,36 @@
         return NSDragOperationNone;
     
     NSPasteboard *pboard = [info draggingPasteboard];
-    
-    if ([pboard canReadObjectForClasses:[NSArray arrayWithObject:[NSColor class]] options:[NSDictionary dictionary]]) {
-        if (row == -1 || row == [tableView numberOfRows])
-            return NSDragOperationNone;
-        else if (op == NSTableViewDropAbove)
-            [tv setDropRow:row dropOperation:NSTableViewDropOn];
-        return NSDragOperationEvery;
-    }
-    
     BOOL hasURL = [pboard canReadURL];
     
-    if (hasURL && row != -1 && op == NSTableViewDropOn)
+    if (row != -1 && op == NSTableViewDropOn && 
+        (hasURL || [pboard canReadObjectForClasses:[NSArray arrayWithObject:[NSColor class]] options:[NSDictionary dictionary]]))
         return NSDragOperationEvery;
     
     if ([self canImportToSelectedGroups] == NO)
         return NSDragOperationNone;
     
-    id source = [info draggingSource];
-    BOOL isDragFromMainTable = [source isEqual:tableView];
-    BOOL isDragFromGroupTable = [source isEqual:groupOutlineView];
-    BOOL isDragFromDrawer = [source isEqual:[drawerController tableView]];
     BOOL hasPub = [pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]];
     BOOL hasString = [pboard canReadObjectForClasses:[NSArray arrayWithObject:[NSString class]] options:[NSDictionary dictionary]];
     
     if (hasPub == NO && hasURL == NO && hasString == NO)
         return NSDragOperationNone;
     
-    if (isDragFromGroupTable && docFlags.dragFromExternalGroups && [self hasLibraryGroupSelected]) {
-        [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
+    // set drop row to -1 and NSTableViewDropOperation to NSTableViewDropOn, when we don't target specific rows http://www.corbinstreehouse.com/blog/?p=123
+    // We were checking -containsUnparseableFile here as well, but I think it makes sense to allow the user to target a specific row with any file type (including BibTeX).  Further, checking -containsUnparseableFile can be unacceptably slow (see bug #1799630), which ruins the dragging experience.
+    [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
+    
+    id source = [info draggingSource];
+    BOOL isDragFromMainTable = [source isEqual:tableView];
+    BOOL isDragFromGroupTable = [source isEqual:groupOutlineView];
+    BOOL isDragFromDrawer = [source isEqual:[drawerController tableView]];
+    
+    if (isDragFromGroupTable && docFlags.dragFromExternalGroups && [self hasLibraryGroupSelected])
         return NSDragOperationCopy;
-    }
+    
     if (isDragFromMainTable || isDragFromGroupTable || isDragFromDrawer)
         // can't copy onto same table
         return NSDragOperationNone;
-    
-    // set drop row to -1 and NSTableViewDropOperation to NSTableViewDropOn, when we don't target specific rows http://www.corbinstreehouse.com/blog/?p=123
-    // We were checking -containsUnparseableFile here as well, but I think it makes sense to allow the user to target a specific row with any file type (including BibTeX).  Further, checking -containsUnparseableFile can be unacceptably slow (see bug #1799630), which ruins the dragging experience.
-    if (row == -1 || op == NSTableViewDropAbove)
-        [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
     
     return hasPub ? NSDragOperationCopy : NSDragOperationEvery;
 }
