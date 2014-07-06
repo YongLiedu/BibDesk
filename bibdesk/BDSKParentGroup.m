@@ -194,8 +194,6 @@
 
 - (BDSKGroupType)groupType { return BDSKLibraryParentGroupType; }
 
-- (BOOL)isLibraryParent { return YES; }
-
 // do nothing; this group has a fixed order
 - (void)sortUsingDescriptors:(NSArray *)descriptors {}
 
