@@ -1160,7 +1160,7 @@
 
 #pragma mark OutlineView dragging destination
 
-#define BDSKValidDropTargetGroupType (BDSKLibraryGroupType | BDSKStaticGroupType | BDSKCategoryGroupType | BDSKParentGroupType)
+#define BDSKValidDropTargetGroupType (BDSKLibraryGroupType | BDSKStaticGroupType | BDSKCategoryGroupType | BDSKStaticParentGroupType)
 
 - (NSDragOperation)outlineView:(NSOutlineView *)outlineView validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(NSInteger)idx {
     NSPasteboard *pboard = [info draggingPasteboard];
