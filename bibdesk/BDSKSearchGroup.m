@@ -258,7 +258,7 @@ static NSDictionary *BDSKSearchGroupURLQueryKeys = nil;
     return [label length] > 0 ? label : NSLocalizedString(@"(Empty)", @"Empty group label");
 }
 
-- (BOOL)isSearch { return YES; }
+- (BDSKGroupType)groupType { return BDSKSearchGroupType; }
 
 - (BOOL)isEditable { return YES; }
 

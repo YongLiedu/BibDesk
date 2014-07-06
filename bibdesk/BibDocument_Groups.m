@@ -97,104 +97,16 @@
 
 #pragma mark Selected group types
 
-- (BOOL)hasLibraryGroupSelected{
-    return [[self selectedGroups] lastObject] == [groups libraryGroup];
-}
-
-- (BOOL)hasLastImportGroupSelected{
-    return [[self selectedGroups] containsObject:[groups lastImportGroup]];
-}
-
-- (BOOL)hasWebGroupsSelected{
-    return [[[self selectedGroups] lastObject] isWeb];
-}
-
-- (BOOL)hasSharedGroupsSelected{
-    return [[[self selectedGroups] lastObject] isShared];
-}
-
-- (BOOL)hasURLGroupsSelected{
-    return [[[self selectedGroups] lastObject] isURL];
-}
-
-- (BOOL)hasScriptGroupsSelected{
-    return [[[self selectedGroups] lastObject] isScript];
-}
-
-- (BOOL)hasSearchGroupsSelected{
-    return [[[self selectedGroups] lastObject] isSearch];
-}
-
-- (BOOL)hasSmartGroupsSelected{
+- (BOOL)hasGroupTypeSelected:(BDSKGroupType)groupType {
     return NSNotFound != [[self selectedGroups] indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
-        return [obj isSmart];
+        return (BOOL)(([obj groupType] & groupType) != 0);
     }];
 }
 
-- (BOOL)hasStaticGroupsSelected{
-    return NSNotFound != [[self selectedGroups] indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
-        return [obj isStatic];
-    }];
-}
-
-- (BOOL)hasCategoryGroupsSelected{
-    return NSNotFound != [[self selectedGroups] indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
-        return [obj isCategory];
-    }];
-}
-
-- (BOOL)hasExternalGroupsSelected{
-    return [[[self selectedGroups] lastObject] isExternal];
-}
-
-- (BOOL)hasLibraryGroupClickedOrSelected{
-    return [[self clickedOrSelectedGroups] lastObject] == [groups libraryGroup];
-}
-
-- (BOOL)hasLastImportGroupClickedOrSelected{
-    return [[self clickedOrSelectedGroups] containsObject:[groups lastImportGroup]];
-}
-
-- (BOOL)hasWebGroupsClickedOrSelected{
-    return [[[self clickedOrSelectedGroups] lastObject] isWeb];
-}
-
-- (BOOL)hasSharedGroupsClickedOrSelected{
-    return [[[self clickedOrSelectedGroups] lastObject] isShared];
-}
-
-- (BOOL)hasURLGroupsClickedOrSelected{
-    return [[[self clickedOrSelectedGroups] lastObject] isURL];
-}
-
-- (BOOL)hasScriptGroupsClickedOrSelected{
-    return [[[self clickedOrSelectedGroups] lastObject] isScript];
-}
-
-- (BOOL)hasSearchGroupsClickedOrSelected{
-    return [[[self clickedOrSelectedGroups] lastObject] isSearch];
-}
-
-- (BOOL)hasSmartGroupsClickedOrSelected{
+- (BOOL)hasGroupTypeClickedOrSelected:(BDSKGroupType)groupType {
     return NSNotFound != [[self clickedOrSelectedGroups] indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
-        return [obj isSmart];
+        return (BOOL)(([obj groupType] & groupType) != 0);
     }];
-}
-
-- (BOOL)hasStaticGroupsClickedOrSelected{
-    return NSNotFound != [[self clickedOrSelectedGroups] indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
-        return [obj isStatic];
-    }];
-}
-
-- (BOOL)hasCategoryGroupsClickedOrSelected{
-    return NSNotFound != [[self clickedOrSelectedGroups] indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
-        return [obj isCategory];
-    }];
-}
-
-- (BOOL)hasExternalGroupsClickedOrSelected{
-    return [[[self clickedOrSelectedGroups] lastObject] isExternal];
 }
 
 /* 
@@ -254,7 +166,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [self insertControlView:[searchGroupViewController view] atTop:NO];
     
     BDSKSearchGroup *group = [[self selectedGroups] firstObject];
-    BDSKASSERT([group isSearch]);
+    BDSKASSERT([group groupType] == BDSKSearchGroupType);
     [searchGroupViewController setGroup:group];
 }
 
@@ -275,7 +187,7 @@ The groupedPublications array is a subset of the publications array, developed b
     WebView *oldWebView = [webGroupViewController webView];
     
     BDSKWebGroup *group = [[self selectedGroups] firstObject];
-    BDSKASSERT([group isWeb]);
+    BDSKASSERT([group groupType] == BDSKWebGroupType);
     
     // load our start page when this was not used before, this must be done before calling [group webView]
     if ([group isWebViewLoaded] == NO)
@@ -347,7 +259,7 @@ The groupedPublications array is a subset of the publications array, developed b
     
     NSString *newSortKey = nil;
     
-    if ([self hasExternalGroupsSelected]) {
+    if ([self hasGroupTypeSelected:BDSKExternalGroupType]) {
         if ([self isDisplayingSearchButtons]) {
             
             // file content and skim notes search are not compatible with external groups
@@ -360,8 +272,8 @@ The groupedPublications array is a subset of the publications array, developed b
         
         BOOL wasSearch = [self isDisplayingSearchGroupView];
         BOOL wasWeb = [self isDisplayingWebGroupView];
-        BOOL isSearch = [self hasSearchGroupsSelected];
-        BOOL isWeb = [self hasWebGroupsSelected];
+        BOOL isSearch = [self hasGroupTypeSelected:BDSKSearchGroupType];
+        BOOL isWeb = [self hasGroupTypeSelected:BDSKWebGroupType];
         
         if (isSearch == NO && wasSearch)
             [self hideSearchGroupView];            
@@ -469,7 +381,7 @@ The groupedPublications array is a subset of the publications array, developed b
     
     if ([[group document] isEqual:self]) {
         BOOL succeeded = [[[notification userInfo] objectForKey:BDSKExternalGroupSucceededKey] boolValue];
-        BOOL isWeb = [group isWeb];
+        BOOL isWeb = [group groupType] == BDSKWebGroupType;
         
         if (isWeb == NO && [sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) {
             [self sortGroupsByKey:nil];
@@ -625,7 +537,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     if ([groupOutlineView isItemExpanded:[groups smartParent]] == NO)
         return;
     
-    BOOL needsUpdate = shouldUpdate && [self hasSmartGroupsSelected];
+    BOOL needsUpdate = shouldUpdate && [self hasGroupTypeSelected:BDSKSmartGroupType];
     BOOL hideCount = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKHideGroupCountKey];
     BOOL sortByCount = [sortGroupsKey isEqualToString:BDSKGroupCellCountKey];
     NSArray *smartGroups = [groups smartGroups];
@@ -661,9 +573,9 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSArray *array;
     
     // optimize for single selections
-    if ([selectedGroups count] == 1 && [self hasLibraryGroupSelected]) {
+    if ([selectedGroups count] == 1 && [self hasGroupTypeSelected:BDSKLibraryGroupType]) {
         array = publications;
-    } else if ([selectedGroups count] == 1 && ([self hasExternalGroupsSelected] || [self hasStaticGroupsSelected] || [self hasLastImportGroupSelected])) {
+    } else if ([selectedGroups count] == 1 && [self hasGroupTypeSelected:BDSKExternalGroupType | BDSKStaticGroupType | BDSKLastImportGroupType]) {
         array = [(id)[selectedGroups lastObject] publications];
     } else {
         // multiple selections are never shared groups, so they are contained in the publications
@@ -793,7 +705,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSString *field = [sender representedObject];
     
     id group = [[self clickedOrSelectedGroups] lastObject];
-    if ([group isCategoryParent])
+    if ([group groupType] == BDSKCategoryParentGroupType)
         [self setCurrentGroupField:field forGroup:group];
 }
 
@@ -828,7 +740,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             [array addObject:newGroupField];
         [[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKGroupFieldsKey];	
         id group = [[self clickedOrSelectedGroups] lastObject];
-        if ([group isCategoryParent])
+        if ([group groupType] == BDSKCategoryParentGroupType)
             [self setCurrentGroupField:newGroupField forGroup:group];
         else
             [self addCurrentGroupField:newGroupField];
@@ -857,7 +769,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 - (IBAction)removeCategoryParentAction:(id)sender {
     BDSKCategoryParentGroup *group = [[self clickedOrSelectedGroups] lastObject];
-    if ([group isCategoryParent])
+    if ([group groupType] == BDSKCategoryParentGroupType)
         [self removeCurrentGroupField:[group key]];
 }
 
@@ -952,7 +864,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (IBAction)addSearchBookmark:(id)sender {
-    if ([self hasSearchGroupsSelected] == NO) {
+    if ([self hasGroupTypeSelected:BDSKSearchGroupType] == NO) {
         NSBeep();
         return;
     }
@@ -1011,21 +923,21 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     BOOL didRemove = NO;
 	
 	for (BDSKGroup *group in theGroups) {
-		if ([group isSmart]) {
+		if ([group groupType] == BDSKSmartGroupType) {
 			[groups removeSmartGroup:(BDSKSmartGroup *)group];
 			didRemove = YES;
-		} else if ([group isStatic]) {
+		} else if ([group groupType] == BDSKStaticGroupType) {
 			[groups removeStaticGroup:(BDSKStaticGroup *)group];
 			didRemove = YES;
-		} else if ([group isURL]) {
+		} else if ([group groupType] == BDSKURLGroupType) {
 			[groups removeURLGroup:(BDSKURLGroup *)group];
 			didRemove = YES;
-		} else if ([group isScript]) {
+		} else if ([group groupType] == BDSKScriptGroupType) {
 			[groups removeScriptGroup:(BDSKScriptGroup *)group];
 			didRemove = YES;
-		} else if ([group isSearch]) {
+		} else if ([group groupType] == BDSKSearchGroupType) {
 			[groups removeSearchGroup:(BDSKSearchGroup *)group];
-		} else if ([group isWeb]) {
+		} else if ([group groupType] == BDSKWebGroupType) {
 			[groups removeWebGroup:(BDSKWebGroup *)group];
         }
 	}
@@ -1046,7 +958,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         return;
     }
     
-	if ([group isSmart]) {
+	if ([group groupType] == BDSKSmartGroupType) {
 		BDSKFilter *filter = [(BDSKSmartGroup *)group filter];
 		BDSKFilterController *filterController = [[BDSKFilterController alloc] initWithFilter:filter];
         [filterController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
@@ -1057,11 +969,11 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             }
         }];
         [filterController release];
-	} else if ([group isCategory]) {
+	} else if ([group groupType] == BDSKCategoryGroupType) {
         // this must be a person field
         BDSKASSERT([[group name] isKindOfClass:[BibAuthor class]]);
 		[self showPerson:(BibAuthor *)[group name]];
-	} else if ([group isURL]) {
+	} else if ([group groupType] == BDSKURLGroupType) {
         BDSKURLGroup *urlGroup = (BDSKURLGroup *)group;
         BDSKURLGroupSheetController *sheetController = [(BDSKURLGroupSheetController *)[BDSKURLGroupSheetController alloc] initWithURL:[urlGroup URL]];
         [sheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
@@ -1071,7 +983,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             }
         }];
         [sheetController release];
-	} else if ([group isScript]) {
+	} else if ([group groupType] == BDSKScriptGroupType) {
         BDSKScriptGroup *scriptGroup = (BDSKScriptGroup *)group;
         BDSKScriptGroupSheetController *sheetController = [(BDSKScriptGroupSheetController *)[BDSKScriptGroupSheetController alloc] initWithPath:[scriptGroup scriptPath] arguments:[scriptGroup scriptArguments]];
         [sheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
@@ -1084,7 +996,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             }
         }];
         [sheetController release];
-	} else if ([group isSearch]) {
+	} else if ([group groupType] == BDSKSearchGroupType) {
         BDSKSearchGroup *searchGroup = (BDSKSearchGroup *)group;
         BDSKSearchGroupSheetController *sheetController = [(BDSKSearchGroupSheetController *)[BDSKSearchGroupSheetController alloc] initWithServerInfo:[searchGroup serverInfo]];
         [sheetController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
@@ -1134,18 +1046,18 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSURL *url = nil;
     NSString *title = nil;
     
-	if ([group isExternal] == NO) {
+	if (0 == ([group groupType] & BDSKExternalGroupType)) {
 		NSBeep();
 		return;
 	} 
-    if ([group isSearch]) {
+    if ([group groupType] == BDSKSearchGroupType) {
         url = [(BDSKSearchGroup *)group bdsksearchURL];
         title = [[(BDSKSearchGroup *)group serverInfo] name];
-    } else if ([group isURL]) {
+    } else if ([group groupType] == BDSKURLGroupType) {
         url = [(BDSKURLGroup *)group URL];
-    } else if ([group isScript] && [(BDSKScriptGroup *)group scriptPath]) {
+    } else if ([group groupType] == BDSKScriptGroupType && [(BDSKScriptGroup *)group scriptPath]) {
         url = [NSURL fileURLWithPath:[(BDSKScriptGroup *)group scriptPath]];
-    } else if ([group isWeb]) {
+    } else if ([group groupType] == BDSKWebGroupType) {
         url = [(BDSKWebGroup *)group URL];
         title = [group label];
     }
@@ -1185,7 +1097,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     }
     
     // first merge in shared groups
-    if ([self hasExternalGroupsSelected])
+    if ([self hasGroupTypeSelected:BDSKExternalGroupType])
         pubs = [self mergeInPublications:pubs];
     
     group = [[[BDSKStaticGroup alloc] initWithName:name publications:pubs] autorelease];
@@ -1218,7 +1130,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     group = [[[BDSKCategoryGroup alloc] initWithName:name key:groupField] autorelease];
     
     // first merge in shared groups
-    if ([self hasExternalGroupsSelected])
+    if ([self hasGroupTypeSelected:BDSKExternalGroupType])
         pubs = [self mergeInPublications:pubs];
     
     [self addPublications:pubs toGroup:group];
@@ -1256,7 +1168,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 - (IBAction)mergeInExternalGroup:(id)sender{
     // we should have a single external group selected
     id group = [[self clickedOrSelectedGroups] lastObject];
-    if ([group isExternal] == NO) {
+    if (0 == ([group groupType] & BDSKExternalGroupType)) {
         NSBeep();
         return;
     }
@@ -1264,7 +1176,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (IBAction)mergeInExternalPublications:(id)sender{
-    if ([self hasExternalGroupsSelected] == NO || [self numberOfClickedOrSelectedPubs] == 0) {
+    if ([self hasGroupTypeSelected:BDSKExternalGroupType] == NO || [self numberOfClickedOrSelectedPubs] == 0) {
         NSBeep();
         return;
     }
@@ -1280,17 +1192,17 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         if ([group isWebViewLoaded])
             [[group webView] reload:nil];
     }
-    if ([self hasURLGroupsSelected] || [self hasScriptGroupsSelected] || [self hasSearchGroupsSelected])
+    if ([self hasGroupTypeSelected:BDSKURLGroupType | BDSKScriptGroupType | BDSKSearchGroupType])
         [[[self selectedGroups] lastObject] publications];
 }
 
 - (IBAction)refreshSelectedGroups:(id)sender{
     id group = [[self clickedOrSelectedGroups] lastObject];
-    if ([group isWeb]) {
+    if ([group groupType] == BDSKWebGroupType) {
         if ([group isWebViewLoaded])
             [[group webView] reload:nil];
         else NSBeep();
-    } else if ([group isExternal]) {
+    } else if (([group groupType] & BDSKExternalGroupType) != 0) {
         [group setPublications:nil];
         if ([[self selectedGroups] containsObject:group])
             [group publications];
@@ -1303,7 +1215,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (IBAction)addBookmark:(id)sender {
-    if ([self hasWebGroupsSelected])
+    if ([self hasGroupTypeSelected:BDSKWebGroupType])
         [[(BDSKWebGroup *)[[self selectedGroups] lastObject] webView] addBookmark:sender];
     else
         NSBeep();
@@ -1340,9 +1252,9 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (BOOL)addPublications:(NSArray *)pubs toGroup:(BDSKGroup *)group{
-    BDSKPRECONDITION([group isStatic] || [group isCategory]);
+    BDSKPRECONDITION(([group groupType] & (BDSKStaticGroupType | BDSKCategoryGroupType)) != 0);
     
-    if ([group isStatic]) {
+    if ([group groupType] == BDSKStaticGroupType) {
         [(BDSKStaticGroup *)group addPublicationsFromArray:pubs];
 		[[self undoManager] setActionName:NSLocalizedString(@"Add To Group", @"Undo action name")];
         return YES;
@@ -1352,7 +1264,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSMutableArray *oldValues = [NSMutableArray arrayWithCapacity:[pubs count]];
     NSMutableArray *newValues = [NSMutableArray arrayWithCapacity:[pubs count]];
     NSString *oldValue = nil;
-    NSString *field = [group isCategory] ? [(BDSKCategoryGroup *)group key] : nil;
+    NSString *field = [group groupType] == BDSKCategoryGroupType ? [(BDSKCategoryGroup *)group key] : nil;
     NSInteger count = 0;
     NSInteger handleInherited = BDSKOperationAsk;
 	NSInteger rv;
@@ -1410,7 +1322,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	NSString *groupName = nil;
     
     for (BDSKGroup *group in groupArray){
-		if([group isCategory] == NO && [group isStatic] == NO)
+		if(([group groupType] & (BDSKCategoryGroupType | BDSKStaticGroupType)) == 0)
 			continue;
 		
 		if (groupName == nil)
@@ -1418,7 +1330,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 		else
 			groupName = NSLocalizedString(@"selected groups", @"Partial status message");
 		
-        if ([group isStatic]) {
+        if ([group groupType] == BDSKStaticGroupType) {
             [(BDSKStaticGroup *)group removePublicationsInArray:pubs];
             [[self undoManager] setActionName:NSLocalizedString(@"Remove From Group", @"Undo action name")];
             count = [pubs count];
@@ -1493,7 +1405,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	NSInteger handleInherited = BDSKOperationAsk;
 	NSInteger rv;
 	
-	if([group isCategory] == NO)
+	if([group groupType] != BDSKCategoryGroupType)
 		return NO;
     
     NSMutableArray *changedPubs = [NSMutableArray arrayWithCapacity:[pubs count]];
@@ -1623,7 +1535,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [pubSet release];
 	
     NSTableColumn *tc = [tableView tableColumnWithIdentifier:BDSKImportOrderString];
-    if(tc && [self hasExternalGroupsSelected])
+    if(tc && [self hasGroupTypeSelected:BDSKExternalGroupType])
         [tableView setNeedsDisplayInRect:[tableView rectOfColumn:[[tableView tableColumns] indexOfObject:tc]]];
 }
 
@@ -1653,7 +1565,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 
 - (BOOL)openURL:(NSURL *)url {
     BDSKWebGroup *group = nil;
-    if ([self hasWebGroupsSelected]) {
+    if ([self hasGroupTypeSelected:BDSKWebGroupType]) {
         group = [[self selectedGroups] lastObject];
         [group setURL:url];
     } else {

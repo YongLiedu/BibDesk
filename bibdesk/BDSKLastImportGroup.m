@@ -80,9 +80,7 @@ static NSString *BDSKLastImportLocalizedString = nil;
 
 - (BOOL)isEditable { return NO; }
 
-- (BOOL)isStatic { return NO; }
-
-- (BOOL)isValidDropTarget { return NO; }
+- (BDSKGroupType)groupType { return BDSKLastImportGroupType; }
 
 - (BOOL)isEqual:(id)other { return other == self; }
 

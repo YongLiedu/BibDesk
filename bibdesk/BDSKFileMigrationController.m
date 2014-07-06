@@ -122,7 +122,7 @@
     NSArray *pubs = nil;
     if (useSelection == NO)
         pubs = [[self document] publications];
-    else if ([[self document] hasExternalGroupsSelected] == NO)
+    else if ([[self document] hasGroupTypeSelected:BDSKExternalGroupType] == NO)
         pubs = [[self document] selectedPublications];
     
     // Workaround for an AppKit bug in Tiger, the progress bar does not work after the first time it is used, so we replace it by a copy.  Apparently also in Leopard under some conditions

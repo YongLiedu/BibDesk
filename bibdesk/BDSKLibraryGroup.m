@@ -61,6 +61,6 @@ static NSString *BDSKLibraryLocalizedString = nil;
     return [[item owner] isEqual:[self document]];
 }
 
-- (BOOL)isValidDropTarget { return YES; }
+- (BDSKGroupType)groupType { return BDSKLibraryGroupType; }
 
 @end

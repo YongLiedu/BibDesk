@@ -117,7 +117,7 @@ static BOOL changingColors = NO;
 	BOOL isSingleValued;
     
     for (BDSKGroup *group in [self selectedGroups]) {
-		if ([group isCategory]){
+		if ([group groupType] == BDSKCategoryGroupType){
             groupField = [(BDSKCategoryGroup *)group key];
             isSingleValued = [groupField isSingleValuedGroupField];
             if (isSingleValued && [changedFields containsObject:groupField]) {
@@ -142,7 +142,7 @@ static BOOL changingColors = NO;
             } else if (isSingleValued) {
                 [ignoredSingleValuedFields addObject:groupField];
             }
-        } else if ([group isStatic]) {
+        } else if ([group groupType] == BDSKStaticGroupType) {
             [(BDSKStaticGroup *)group addPublication:newBI];
         }
     }
@@ -209,13 +209,13 @@ static BOOL changingColors = NO;
 - (void)removePublicationsFromSelectedGroups:(NSArray *)pubs{
 	NSArray *selectedGroups = [self selectedGroups];
 	
-	if ([self hasLibraryGroupSelected]) {
+	if ([self hasGroupTypeSelected:BDSKLibraryGroupType]) {
 		[self deletePublications:pubs];
 	} else {
 		BOOL canRemove = NO;
-        if ([self hasStaticGroupsSelected])
+        if ([self hasGroupTypeSelected:BDSKStaticGroupType])
             canRemove = YES;
-        else if (NSNotFound != [[self clickedOrSelectedGroups] indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop){ return [obj isCategory] && [[obj key] isSingleValuedGroupField] == NO; }])
+        else if (NSNotFound != [[self clickedOrSelectedGroups] indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop){ return [obj groupType] == BDSKCategoryGroupType && [[obj key] isSingleValuedGroupField] == NO; }])
             canRemove = YES;
 		if (canRemove == NO) {
 			NSBeep();
@@ -282,7 +282,7 @@ static BOOL changingColors = NO;
 
 - (void)deletePublications:(NSArray *)pubs {
 	NSInteger numPubs = [pubs count];
-    if (numPubs == 0 || [self hasExternalGroupsSelected]) {
+    if (numPubs == 0 || [self hasGroupTypeSelected:BDSKExternalGroupType]) {
         return;
     }
 	
@@ -660,7 +660,7 @@ static BOOL changingColors = NO;
 }
 
 - (void)changeColor:(id)sender {
-    if ([self hasExternalGroupsSelected] == NO && [self isDisplayingFileContentSearch] == NO && [[self selectedPublications] count] && changingColors == NO) {
+    if ([self hasGroupTypeSelected:BDSKExternalGroupType] == NO && [self isDisplayingFileContentSearch] == NO && [[self selectedPublications] count] && changingColors == NO) {
         changingColors = YES;
         [[self selectedPublications] setValue:[sender color] forKey:@"color"];
         changingColors = NO;
@@ -1076,7 +1076,7 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)chooseLinkedFile:(id)sender {
-    if ([self isDisplayingFileContentSearch] || [self hasExternalGroupsSelected] || [[self selectedPublications] count] != 1) {
+    if ([self isDisplayingFileContentSearch] || [self hasGroupTypeSelected:BDSKExternalGroupType] || [[self selectedPublications] count] != 1) {
         NSBeep();
         return;
     }
@@ -1110,7 +1110,7 @@ static BOOL changingColors = NO;
     [oPanel beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
         if (result == NSFileHandlingPanelOKButton) {
             BibItem *publication = nil;
-            if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
+            if ([self isDisplayingFileContentSearch] == NO && [self hasGroupTypeSelected:BDSKExternalGroupType] == NO) {
                 NSArray *selPubs = [self selectedPublications];
                 if ([selPubs count] == 1)
                     publication = [selPubs lastObject];
@@ -1145,7 +1145,7 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)chooseLinkedURL:(id)sender{
-    if ([self isDisplayingFileContentSearch] || [self hasExternalGroupsSelected] || [[self selectedPublications] count] != 1) {
+    if ([self isDisplayingFileContentSearch] || [self hasGroupTypeSelected:BDSKExternalGroupType] || [[self selectedPublications] count] != 1) {
         NSBeep();
         return;
     }
@@ -1164,7 +1164,7 @@ static BOOL changingColors = NO;
     [urlController beginSheetModalForWindow:documentWindow completionHandler:^(NSInteger result){
         if (result == NSOKButton) {
             BibItem *publication = nil;
-            if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
+            if ([self isDisplayingFileContentSearch] == NO && [self hasGroupTypeSelected:BDSKExternalGroupType] == NO) {
                 NSArray *selPubs = [self selectedPublications];
                 if ([selPubs count] == 1)
                     publication = [selPubs lastObject];
@@ -1396,7 +1396,7 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)showMacrosWindow:(id)sender{
-    BDSKMacroResolver *resolver = [self hasExternalGroupsSelected] ? [[[self selectedGroups] lastObject] macroResolver] : [self macroResolver];
+    BDSKMacroResolver *resolver = [self hasGroupTypeSelected:BDSKExternalGroupType] ? [[[self selectedGroups] lastObject] macroResolver] : [self macroResolver];
     BDSKMacroWindowController *controller = nil;
     NSWindowController *wc = nil;
     for (wc in [self windowControllers]) {
@@ -1505,7 +1505,7 @@ static BOOL changingColors = NO;
 #pragma mark AutoFile stuff
 
 - (IBAction)consolidateLinkedFiles:(id)sender{
-    if ([self hasExternalGroupsSelected]) {
+    if ([self hasGroupTypeSelected:BDSKExternalGroupType]) {
         NSBeep();
         return;
     }
@@ -1596,7 +1596,7 @@ static BOOL changingColors = NO;
 {
     NSUInteger numberOfSelectedPubs = [self numberOfSelectedPubs];
 	if (numberOfSelectedPubs == 0 ||
-        [self hasExternalGroupsSelected]) return;
+        [self hasGroupTypeSelected:BDSKExternalGroupType]) return;
     
     if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
         NSString *alertTitle = numberOfSelectedPubs > 1 ? NSLocalizedString(@"Really Generate Cite Keys?", @"Message in alert dialog when generating cite keys") : NSLocalizedString(@"Really Generate Cite Key?", @"Message in alert dialog when generating cite keys");
@@ -1707,7 +1707,7 @@ static BOOL changingColors = NO;
 
 - (IBAction)duplicateTitleToBooktitle:(id)sender{
 	if ([self numberOfSelectedPubs] == 0 ||
-        [self hasExternalGroupsSelected]) return;
+        [self hasGroupTypeSelected:BDSKExternalGroupType]) return;
 	
 	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Overwrite Booktitle?", @"Message in alert dialog when duplicating Title to Booktitle")
                                      defaultButton:NSLocalizedString(@"Don't Overwrite", @"Button title: overwrite Booktitle")
@@ -1773,7 +1773,7 @@ static BOOL changingColors = NO;
     BibItem **pubs;
     CFSetCallBacks callBacks = kBDSKBibItemEqualitySetCallBacks;
     
-    if ([self hasExternalGroupsSelected]) {
+    if ([self hasGroupTypeSelected:BDSKExternalGroupType]) {
         countOfItems = [publications count];
         pubs = (BibItem **)NSZoneMalloc(zone, sizeof(BibItem *) * countOfItems);
         [publications getObjects:pubs];
@@ -1830,7 +1830,7 @@ static BOOL changingColors = NO;
 
 // select duplicates, then allow user to delete/copy/whatever
 - (IBAction)selectDuplicates:(id)sender{
-    if ([self hasExternalGroupsSelected]) {
+    if ([self hasGroupTypeSelected:BDSKExternalGroupType]) {
         // for external groups we compare to the items in Library, so all duplicates should be selected
         [self selectDuplicatesAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:NULL];
     } else {

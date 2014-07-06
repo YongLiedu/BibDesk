@@ -182,7 +182,7 @@ static NSImage *createBadgedIcon(NSImage *icon, NSString *badgeName) {
 
 - (BOOL)needsUpdate { return [client needsUpdate]; }
 
-- (BOOL)isShared { return YES; }
+- (BDSKGroupType)groupType { return BDSKSharedGroupType; }
 
 - (NSString *)errorMessage { return [client errorMessage]; }
 

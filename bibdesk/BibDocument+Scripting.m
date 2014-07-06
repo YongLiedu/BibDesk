@@ -218,9 +218,9 @@
         NSMutableArray *copiedValue = [[NSMutableArray alloc] init];
         for (id group in value) {
             id copiedGroup = nil;
-            if ([group isStatic])
+            if ([group groupType] == BDSKStaticGroupType)
                 copiedGroup = [[BDSKStaticGroup alloc] initWithName:[group name] publications:([group document] == self ? [group publications] : nil)];
-            else if ([group isSmart] || [group isURL] || [group isScript] || [group isSearch] || [group isWeb])
+            else if (0 != ([group groupType] & (BDSKSmartGroupType | BDSKURLGroupType | BDSKScriptGroupType | BDSKSearchGroupType | BDSKWebGroupType)))
                 copiedGroup = [group copy];
             if (copiedGroup == nil) {
                 NSScriptCommand *cmd = [NSScriptCommand currentCommand];
@@ -334,48 +334,46 @@
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
         [cmd setScriptErrorString:NSLocalizedString(@"Cannot add group.",@"Error description")];
-        return;
-    } else if ([group isSmart]) {
+    } else if ([group groupType] == BDSKSmartGroupType) {
         [groups addSmartGroup:(BDSKSmartGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isStatic]) {
+    } else if ([group groupType] == BDSKStaticGroupType) {
         [groups addStaticGroup:(BDSKStaticGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isURL]) {
+    } else if ([group groupType] == BDSKURLGroupType) {
         [groups addURLGroup:(BDSKURLGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isScript]) {
+    } else if ([group groupType] == BDSKScriptGroupType) {
         [groups addScriptGroup:(BDSKScriptGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isSearch]) {
+    } else if ([group groupType] == BDSKSearchGroupType) {
         [groups addSearchGroup:(BDSKSearchGroup *)group];
-    } else if ([group isWeb]) {
+    } else if ([group groupType] == BDSKWebGroupType) {
         [groups addWebGroup:(BDSKWebGroup *)group];
     } else {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
         [cmd setScriptErrorString:NSLocalizedString(@"Cannot add group.",@"Error description")];
-        return;
     }
 }
 
 - (void)removeObjectFromScriptingGroupsAtIndex:(NSUInteger)idx {
     BDSKGroup *group = [[groups staticGroups] objectAtIndex:idx];
-    if ([group isSmart]) {
+    if ([group groupType] == BDSKSmartGroupType) {
         [groups removeSmartGroup:(BDSKSmartGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isStatic]) {
+    } else if ([group groupType] == BDSKStaticGroupType) {
         [groups removeStaticGroup:(BDSKStaticGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isURL]) {
+    } else if ([group groupType] == BDSKURLGroupType) {
         [groups removeURLGroup:(BDSKURLGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isScript]) {
+    } else if ([group groupType] == BDSKScriptGroupType) {
         [groups removeScriptGroup:(BDSKScriptGroup *)group];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else if ([group isSearch]) {
+    } else if ([group groupType] == BDSKSearchGroupType) {
         [groups removeSearchGroup:(BDSKSearchGroup *)group];
-    } else if ([group isWeb]) {
+    } else if ([group groupType] == BDSKWebGroupType) {
         [groups removeWebGroup:(BDSKWebGroup *)group];
     } else {
         NSScriptCommand *cmd = [NSScriptCommand currentCommand];

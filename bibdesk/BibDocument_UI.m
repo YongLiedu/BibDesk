@@ -340,15 +340,15 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         }
         [statusStr appendFormat:@"%ld %@", (long)groupPubsCount, (groupPubsCount == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message")];
         // we can have only a single external group selected at a time
-        if ([self hasWebGroupsSelected]) {
+        if ([self hasGroupTypeSelected:BDSKWebGroupType]) {
             [statusStr appendFormat:@" %@", NSLocalizedString(@"in web group", @"Partial status message")];
-        } else if ([self hasSharedGroupsSelected]) {
+        } else if ([self hasGroupTypeSelected:BDSKSharedGroupType]) {
             [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in shared group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]];
-        } else if ([self hasURLGroupsSelected]) {
+        } else if ([self hasGroupTypeSelected:BDSKURLGroupType]) {
             [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in external file group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]];
-        } else if ([self hasScriptGroupsSelected]) {
+        } else if ([self hasGroupTypeSelected:BDSKScriptGroupType]) {
             [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in script group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]];
-        } else if ([self hasSearchGroupsSelected]) {
+        } else if ([self hasGroupTypeSelected:BDSKSearchGroupType]) {
             BDSKSearchGroup *group = [[self selectedGroups] firstObject];
             [statusStr appendFormat:NSLocalizedString(@" in \"%@\" search group", @"Partial status message"), [[group serverInfo] name]];
             NSInteger matchCount = [group numberOfAvailableResults];
@@ -673,7 +673,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     if (row != -1) {
         id item = [groupOutlineView itemAtRow:row];
         
-        if ([item isCategoryParent]) {
+        if ([item groupType] == BDSKCategoryParentGroupType) {
             [menu addItemsFromMenu:groupFieldMenu];
             NSString *key = [item key];
             NSArray *fields = [[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey];
@@ -846,7 +846,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 
 - (void)handleBibItemAddDelNotification:(NSNotification *)notification{
 	BOOL isDelete = [[notification name] isEqualToString:BDSKDocDelItemNotification];
-    if(isDelete == NO && [self hasLibraryGroupSelected])
+    if(isDelete == NO && [self hasGroupTypeSelected:BDSKLibraryGroupType])
 		[self setSearchString:@""]; // clear the search when adding
 
     // update smart group counts
@@ -895,7 +895,7 @@ static BOOL searchKeyDependsOnKey(NSString *searchKey, NSString *key) {
     if (docFlags.isDocumentClosed)
         return;
     
-    BOOL displayingLocal = (NO == [self hasExternalGroupsSelected]);
+    BOOL displayingLocal = (NO == [self hasGroupTypeSelected:BDSKExternalGroupType]);
     
     if (displayingLocal && (docFlags.itemChangeMask & BDSKItemChangedFilesMask) != 0)
         [self updateFileViews];
@@ -1046,7 +1046,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [self updateFileViews];
     [self updatePreviews];
     [groupOutlineView setNeedsDisplay:YES];
-    BOOL fileViewEditable = [self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO && [[self selectedPublications] count] == 1;
+    BOOL fileViewEditable = [self isDisplayingFileContentSearch] == NO && [self hasGroupTypeSelected:BDSKExternalGroupType] == NO && [[self selectedPublications] count] == 1;
     [sideFileView setEditable:fileViewEditable];
     [bottomFileView setEditable:fileViewEditable]; 
 }

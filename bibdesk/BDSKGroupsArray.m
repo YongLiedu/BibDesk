@@ -37,7 +37,6 @@
  */
 
 #import "BDSKGroupsArray.h"
-#import "BDSKGroup.h"
 #import "BDSKParentGroup.h"
 #import "BDSKSharedGroup.h"
 #import "BDSKURLGroup.h"
@@ -321,7 +320,7 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
 
 #pragma mark Serializing
 
-- (void)setGroupsOfType:(NSInteger)groupType fromSerializedData:(NSData *)data {
+- (void)setGroupsOfType:(BDSKGroupType)groupType fromSerializedData:(NSData *)data {
 	NSError *error = nil;
 	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
 	id plist = [NSPropertyListSerialization propertyListWithData:data
@@ -375,7 +374,7 @@ NSString *BDSKGroupsArrayGroupsKey = @"groups";
     }
 }
 
-- (NSData *)serializedGroupsDataOfType:(NSInteger)groupType {
+- (NSData *)serializedGroupsDataOfType:(BDSKGroupType)groupType {
     Class groupClass = Nil;
     NSArray *groupArray = nil;
     

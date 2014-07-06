@@ -132,7 +132,7 @@
                 skIndex = [notesSearchIndex index];
             } else {
                 // we need the correct BDSKPublicationsArray for access to the identifierURLs
-                id<BDSKOwner> owner = [self hasExternalGroupsSelected] ? [[self selectedGroups] firstObject] : self;
+                id<BDSKOwner> owner = [self hasGroupTypeSelected:BDSKExternalGroupType] ? [[self selectedGroups] firstObject] : self;
                 skIndex = [[owner searchIndexes] indexForField:field];
             }
             [documentSearch searchForString:BDSKSearchKitExpressionWithString(searchString) index:skIndex selectedPublications:[self selectedPublications] scrollPositionAsPercentage:[tableView scrollPositionAsPercentage]];
@@ -180,7 +180,7 @@
         if (nil == searchButtonBar)
             [self makeSearchButtonView];
         
-        if ([self hasExternalGroupsSelected])
+        if ([self hasGroupTypeSelected:BDSKExternalGroupType])
             [self removeFileSearchItems];
         else
             [self addFileSearchItems];
@@ -281,7 +281,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
 
 - (void)search:(BDSKDocumentSearch *)aSearch foundIdentifiers:(NSSet *)identifierURLs normalizedScores:(NSDictionary *)scores;
 {
-    id<BDSKOwner> owner = [self hasExternalGroupsSelected] ? [[self selectedGroups] firstObject] : self;    
+    id<BDSKOwner> owner = [self hasGroupTypeSelected:BDSKExternalGroupType] ? [[self selectedGroups] firstObject] : self;    
     BDSKPublicationsArray *pubArray = [owner publications];    
     
     // we searched all publications, but we only want to keep the subset that's shown (if a group is selected)

@@ -257,6 +257,6 @@
     return [NSImage imageNamed:NSImageNameNetwork];
 }
 
-- (BOOL)isURL { return YES; }
+- (BDSKGroupType)groupType { return BDSKURLGroupType; }
 
 @end

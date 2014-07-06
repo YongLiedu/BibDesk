@@ -183,15 +183,13 @@
     return [name isKindOfClass:[BibAuthor class]] ? [name originalName] : [super editingStringValue];
 }
 
-- (BOOL)isCategory { return YES; }
+- (BDSKGroupType)groupType { return BDSKCategoryGroupType; }
 
 - (BOOL)isNameEditable { return YES; }
 
 - (BOOL)isEditable {
     return [key isPersonField];
 }
-
-- (BOOL)isValidDropTarget { return YES; }
 
 - (BOOL)isEmpty { return NO; }
 

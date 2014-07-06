@@ -129,7 +129,7 @@
 
 // "static" properties
 
-- (BOOL)isSmart { return YES; }
+- (BDSKGroupType)groupType { return BDSKSmartGroupType; }
 
 - (BOOL)isEditable { return YES; }
 

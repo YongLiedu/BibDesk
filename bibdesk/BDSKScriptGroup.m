@@ -236,7 +236,7 @@
     return [NSImage imageNamed:@"scriptGroup"];
 }
 
-- (BOOL)isScript { return YES; }
+- (BDSKGroupType)groupType { return BDSKScriptGroupType; }
 
 #pragma mark Running the script
 

@@ -115,9 +115,7 @@
 	return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)];
 }
 
-- (BOOL)isStatic { return YES; }
-
-- (BOOL)isValidDropTarget { return YES; }
+- (BDSKGroupType)groupType { return BDSKStaticGroupType; }
 
 - (NSArray *)publications {
     return publications;

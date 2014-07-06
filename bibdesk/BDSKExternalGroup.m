@@ -87,8 +87,6 @@ NSString *BDSKExternalGroupSucceededKey = @"succeeded";
 
 #pragma mark BDSKGroup overrides
 
-- (BOOL)isExternal { return YES; }
-
 - (BOOL)containsItem:(BibItem *)item { return [publications containsObject:item]; }
 
 #pragma mark Publications

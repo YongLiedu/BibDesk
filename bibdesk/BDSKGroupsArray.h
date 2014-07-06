@@ -37,18 +37,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKGroup.h"
 
 extern NSString *BDSKGroupsArrayGroupsKey;
-
-enum {
-    BDSKSharedGroupType,
-	BDSKURLGroupType,
-	BDSKScriptGroupType,
-	BDSKSearchGroupType,
-    BDSKSmartGroupType,
-	BDSKStaticGroupType,
-	BDSKCategoryGroupType
-};
 
 @class BDSKGroup, BDSKLibraryGroup, BDSKLastImportGroup, BDSKSmartGroup, BDSKStaticGroup, BDSKURLGroup, BDSKScriptGroup, BDSKSearchGroup, BDSKWebGroup, BDSKLibraryParentGroup, BDSKExternalParentGroup, BDSKSmartParentGroup, BDSKStaticParentGroup, BDSKCategoryParentGroup, BibDocument;
 
@@ -102,7 +93,7 @@ enum {
 
 - (BibDocument *)document;
 
-- (void)setGroupsOfType:(NSInteger)groupType fromSerializedData:(NSData *)data;
-- (NSData *)serializedGroupsDataOfType:(NSInteger)groupType;
+- (void)setGroupsOfType:(BDSKGroupType)groupType fromSerializedData:(NSData *)data;
+- (NSData *)serializedGroupsDataOfType:(BDSKGroupType)groupType;
 
 @end

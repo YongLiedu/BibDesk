@@ -96,7 +96,7 @@ static NSString *BDSKWebLocalizedString = nil;
 
 - (NSImage *)icon { return [NSImage imageNamed:@"webGroup"]; }
 
-- (BOOL)isWeb { return YES; }
+- (BDSKGroupType)groupType { return BDSKWebGroupType; }
 
 - (BOOL)isRetrieving { return [webView isLoading]; }
 

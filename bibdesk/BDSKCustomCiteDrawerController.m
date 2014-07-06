@@ -145,7 +145,7 @@
     
 	BDSKPRECONDITION(pboard == [NSPasteboard pasteboardWithName:NSDragPboard] || pboard == [NSPasteboard pasteboardWithName:NSGeneralPboard]);
 
-    [document setDragFromExternalGroups:[document hasExternalGroupsSelected]];
+    [document setDragFromExternalGroups:[document hasGroupTypeSelected:BDSKExternalGroupType]];
     
     // check the publications table to see if an item is selected, otherwise we get an error on dragging from the cite drawer
     if([pubs count] == 0){

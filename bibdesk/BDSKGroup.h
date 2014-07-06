@@ -38,6 +38,27 @@
 
 #import <Cocoa/Cocoa.h>
 
+enum {
+    BDSKLibraryGroupType = 1 << 0,
+    BDSKStaticGroupType = 1 << 1,
+    BDSKSmartGroupType = 1 << 2,
+    BDSKCategoryGroupType = 1 << 3,
+    BDSKLastImportGroupType = 1 << 4,
+    BDSKWebGroupType = 1 << 5,
+    BDSKSearchGroupType = 1 << 6,
+    BDSKSharedGroupType = 1 << 7,
+    BDSKURLGroupType = 1 << 8,
+    BDSKScriptGroupType = 1 << 9,
+    BDSKExternalGroupType = BDSKWebGroupType | BDSKSearchGroupType | BDSKSharedGroupType | BDSKURLGroupType | BDSKScriptGroupType,
+    BDSKLibraryParentGroupType = 1 << 10,
+    BDSKStaticParentGroupType = 1 << 11,
+    BDSKSmartParentGroupType = 1 << 12,
+    BDSKCategoryParentGroupType = 1 << 13,
+    BDSKExternalParentGroupType = 1 << 14,
+    BDSKParentGroupType = BDSKLibraryParentGroupType | BDSKStaticParentGroupType | BDSKSmartParentGroupType | BDSKCategoryParentGroupType | BDSKExternalParentGroupType,
+};
+typedef NSUInteger BDSKGroupType;
+
 @class BibItem, BibDocument, BDSKMacroResolver, BDSKParentGroup;
 
 // NSCoding is used only to save the group selection of non-external groups
@@ -96,81 +117,11 @@
 - (NSImage *)icon;
 
 /*!
-	@method isParent
-	@abstract Boolean, returns whether the receiver is a parent group. 
+	@method grouptType
+	@abstract enumeration, returns the type of the group. 
 	@discussion -
 */
-- (BOOL)isParent;
-
-/*!
-	@method isCategoryParent
-	@abstract Boolean, returns whether the receiver is a category parent group. 
-	@discussion -
-*/
-- (BOOL)isCategoryParent;
-
-/*!
-	@method isStatic
-	@abstract Boolean, returns whether the receiver is a static group. 
-	@discussion -
-*/
-- (BOOL)isStatic;
-
-/*!
-	@method isSmart
-	@abstract Boolean, returns whether the receiver is a smart group. 
-	@discussion -
-*/
-- (BOOL)isSmart;
-
-/*!
-	@method isCategory
-	@abstract Boolean, returns whether the receiver is a category group. 
-	@discussion -
-*/
-- (BOOL)isCategory;
-
-/*!
-	@method isShared
-	@abstract Boolean, returns whether the receiver is a shared group. 
-	@discussion -
-*/
-- (BOOL)isShared;
-
-/*!
-	@method isURL
-	@abstract Boolean, returns whether the receiver is a URL group. 
-	@discussion -
-*/
-- (BOOL)isURL;
-
-/*!
-	@method isScript
-	@abstract Boolean, returns whether the receiver is a script group. 
-	@discussion -
-*/
-- (BOOL)isScript;
-
-/*!
-	@method isSearch
-	@abstract Boolean, returns whether the receiver is a search group. 
-	@discussion -
-*/
-- (BOOL)isSearch;
-
-/*!
-	@method isWeb
-	@abstract Boolean, returns whether the receiver is a web group. 
-	@discussion -
-*/
-- (BOOL)isWeb;
-
-/*!
-	@method isExternal
-	@abstract Boolean, returns whether the receiver is an external source group (shared, URL or script). 
-	@discussion -
-*/
-- (BOOL)isExternal;
+- (BDSKGroupType)groupType;
 
 /*!
     @method     isNameEditable
@@ -195,14 +146,6 @@
     @abstract   Method for remote groups.  Returns NO by default.
 */
 - (BOOL)isRetrieving;
-
-/*!
-    @method     isValidDropTarget
-    @abstract   Some subclasses (e.g. BDSKSharedGroup) are never valid drop targets, while others are generally valid.  Returns NO by default.
-    @discussion (comprehensive description)
-    @result     (description)
-*/
-- (BOOL)isValidDropTarget;
 
 /*!
 	@method stringValue

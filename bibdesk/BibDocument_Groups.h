@@ -37,34 +37,14 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
+#import "BDSKGroup.h"
 
-@class BDSKGroup, BDSKSmartGroup, BDSKStaticGroup, BDSKExternalGroup, BDSKURLGroup, BDSKScriptGroup, BDSKWebGroup, BDSKCategoryParentGroup, BDSKFilterController, BDSKURLGroupSheetController, BDSKScriptGroupSheetController;
+@class BDSKSmartGroup, BDSKStaticGroup, BDSKExternalGroup, BDSKURLGroup, BDSKScriptGroup, BDSKWebGroup, BDSKCategoryParentGroup, BDSKFilterController, BDSKURLGroupSheetController, BDSKScriptGroupSheetController;
 
 @interface BibDocument (Groups)
 
-- (BOOL)hasLibraryGroupSelected;
-- (BOOL)hasLastImportGroupSelected;
-- (BOOL)hasWebGroupsSelected;
-- (BOOL)hasSharedGroupsSelected;
-- (BOOL)hasURLGroupsSelected;
-- (BOOL)hasScriptGroupsSelected;
-- (BOOL)hasSearchGroupsSelected;
-- (BOOL)hasSmartGroupsSelected;
-- (BOOL)hasStaticGroupsSelected;
-- (BOOL)hasCategoryGroupsSelected;
-- (BOOL)hasExternalGroupsSelected;
-
-- (BOOL)hasLibraryGroupClickedOrSelected;
-- (BOOL)hasLastImportGroupClickedOrSelected;
-- (BOOL)hasWebGroupsClickedOrSelected;
-- (BOOL)hasSharedGroupsClickedOrSelected;
-- (BOOL)hasURLGroupsClickedOrSelected;
-- (BOOL)hasScriptGroupsClickedOrSelected;
-- (BOOL)hasSearchGroupsClickedOrSelected;
-- (BOOL)hasSmartGroupsClickedOrSelected;
-- (BOOL)hasStaticGroupsClickedOrSelected;
-- (BOOL)hasCategoryGroupsClickedOrSelected;
-- (BOOL)hasExternalGroupsClickedOrSelected;
+- (BOOL)hasGroupTypeSelected:(BDSKGroupType)groupType;
+- (BOOL)hasGroupTypeClickedOrSelected:(BDSKGroupType)groupType;
 
 - (NSArray *)currentGroupFields;
 

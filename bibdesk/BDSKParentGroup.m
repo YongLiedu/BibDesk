@@ -89,8 +89,6 @@
     [super dealloc];
 }
 
-- (BOOL)isParent { return YES; }
-
 - (id)cellValue { return [self name]; }
 
 // this is used to remember expanded state, as they are usually unique we use the class, also for backward compatibility
@@ -194,6 +192,8 @@
     return self;
 }    
 
+- (BDSKGroupType)groupType { return BDSKLibraryParentGroupType; }
+
 - (BOOL)isLibraryParent { return YES; }
 
 // do nothing; this group has a fixed order
@@ -231,6 +231,8 @@
     }
     return self;
 }
+
+- (BDSKGroupType)groupType { return BDSKExternalParentGroupType; }
 
 - (NSArray *)webGroups {
     return [self childrenInRange:NSMakeRange(webGroupLocation, webGroupCount)];
@@ -335,7 +337,7 @@
     return self;
 }
 
-- (BOOL)isCategoryParent { return YES; }
+- (BDSKGroupType)groupType { return BDSKCategoryParentGroupType; }
 
 // category parents aren't unique, so we need to use a different identifier for remembering expanded state
 - (NSString *)identifier {
@@ -394,7 +396,7 @@
     [self removeChild:group];
 }
 
-- (BOOL)isValidDropTarget { return YES; }
+- (BDSKGroupType)groupType { return BDSKStaticParentGroupType; }
 
 @end
 
@@ -410,6 +412,8 @@
     }
     return self;
 }
+
+- (BDSKGroupType)groupType { return BDSKSmartParentGroupType; }
 
 // return nil if non-existent
 - (BDSKLastImportGroup *)lastImportGroup {

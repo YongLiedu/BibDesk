@@ -945,7 +945,7 @@ static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
     size_t urlGroupStrLength = strlen(urlGroupStr);
     const char *scriptGroupStr = "BibDesk Script Groups";
     size_t scriptGroupStrLength = strlen(scriptGroupStr);
-    NSInteger groupType = -1;
+    BDSKGroupType groupType = 0;
     Boolean firstValue = (groups != nil);
     
     NSStringEncoding groupsEncoding = [BDSKBibTeXParser isUnparseableEncoding:encoding] ? encoding : NSUTF8StringEncoding;
@@ -966,7 +966,7 @@ static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
             }
             
             // encoding will be UTF-8 for the plist, so make sure we use it for each line
-            tmpStr = copyCheckedString(text, field->line, filePath, (groupType != -1 ? groupsEncoding : encoding));
+            tmpStr = copyCheckedString(text, field->line, filePath, (groupType != 0 ? groupsEncoding : encoding));
             
             if(tmpStr) 
                 [commentStr appendString:tmpStr];
@@ -976,7 +976,7 @@ static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
             [tmpStr release];
         }
     }
-    if(groupType == -1){
+    if(groupType == 0){
         [frontMatter appendString:@"\n@comment{"];
         [frontMatter appendString:commentStr];
         [frontMatter appendString:@"}"];
@@ -987,7 +987,7 @@ static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
             range = [commentStr rangeOfString:@"}" options:NSBackwardsSearch];
             if(range.location != NSNotFound){
                 [commentStr deleteCharactersInRange:NSMakeRange(range.location,[commentStr length] - range.location)];
-                [groups setObject:[commentStr dataUsingEncoding:NSUTF8StringEncoding] forKey:[NSNumber numberWithInteger:groupType]];
+                [groups setObject:[commentStr dataUsingEncoding:NSUTF8StringEncoding] forKey:[NSNumber numberWithUnsignedInteger:groupType]];
             }
         }
     }

@@ -729,7 +729,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
         [dictionary setObject:NSStringFromRect([documentWindow frame]) forKey:BDSKDocumentWindowFrameKey];
         [dictionary setDouble:[groupSplitView fraction] forKey:BDSKGroupSplitViewFractionKey];
         // of the 3 splitviews, the fraction of the first divider would be considered, so fallback to the fraction from the nib
-        if (NO == [self hasWebGroupsSelected])
+        if (NO == [self hasGroupTypeSelected:BDSKWebGroupType])
             [dictionary setDouble:[splitView fraction] forKey:BDSKMainTableSplitViewFractionKey];
         [dictionary setDouble:docState.lastWebViewFraction forKey:BDSKWebViewFractionKey];
         //[dictionary setObject:[self currentGroupFields] forKey:BDSKCurrentGroupFieldsKey];
@@ -739,10 +739,10 @@ static NSOperationQueue *metadataCacheQueue = nil;
             [dictionary setUnsignedInteger:encoding forKey:BDSKDocumentStringEncodingKey];
         
         // encode groups so we can select them later with isEqual: (saving row indexes would not be as reliable)
-        [dictionary setObject:([self hasExternalGroupsSelected] ? [NSData data] : [NSKeyedArchiver archivedDataWithRootObject:[self selectedGroups]]) forKey:BDSKSelectedGroupsKey];
+        [dictionary setObject:([self hasGroupTypeSelected:BDSKExternalGroupType] ? [NSData data] : [NSKeyedArchiver archivedDataWithRootObject:[self selectedGroups]]) forKey:BDSKSelectedGroupsKey];
         
         NSArray *selectedKeys = [[self selectedPublications] valueForKey:@"citeKey"];
-        if ([selectedKeys count] == 0 || [self hasExternalGroupsSelected])
+        if ([selectedKeys count] == 0 || [self hasGroupTypeSelected:BDSKExternalGroupType])
             selectedKeys = [NSArray array];
         [dictionary setObject:selectedKeys forKey:BDSKSelectedPublicationsKey];
         [dictionary setObject:NSStringFromPoint([tableView scrollPositionAsPercentage]) forKey:BDSKDocumentScrollPercentageKey];
@@ -986,7 +986,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     [saveAccessoryController setExportSelection:NO];
     if(NSSaveToOperation == docState.currentSaveOperationType)
-        [saveAccessoryController setExportSelectionCheckButtonEnabled:[self numberOfSelectedPubs] > 0 || [self hasLibraryGroupSelected] == NO];
+        [saveAccessoryController setExportSelectionCheckButtonEnabled:[self numberOfSelectedPubs] > 0 || [self hasGroupTypeSelected:BDSKLibraryGroupType] == NO];
     
     return YES;
 }
@@ -1793,13 +1793,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         NSData *groupData;
         
         if ((groupData = [[self groups] serializedGroupsDataOfType:BDSKSmartGroupType]))
-            [oldGroups setObject:groupData forKey:[NSNumber numberWithInteger:BDSKSmartGroupType]];
+            [oldGroups setObject:groupData forKey:[NSNumber numberWithUnsignedInteger:BDSKSmartGroupType]];
         if ((groupData = [[self groups] serializedGroupsDataOfType:BDSKStaticGroupType]))
-            [oldGroups setObject:groupData forKey:[NSNumber numberWithInteger:BDSKStaticGroupType]];
+            [oldGroups setObject:groupData forKey:[NSNumber numberWithUnsignedInteger:BDSKStaticGroupType]];
         if ((groupData = [[self groups] serializedGroupsDataOfType:BDSKURLGroupType]))
-            [oldGroups setObject:groupData forKey:[NSNumber numberWithInteger:BDSKURLGroupType]];
+            [oldGroups setObject:groupData forKey:[NSNumber numberWithUnsignedInteger:BDSKURLGroupType]];
         if ((groupData = [[self groups] serializedGroupsDataOfType:BDSKScriptGroupType]))
-            [oldGroups setObject:groupData forKey:[NSNumber numberWithInteger:BDSKScriptGroupType]];
+            [oldGroups setObject:groupData forKey:[NSNumber numberWithUnsignedInteger:BDSKScriptGroupType]];
          
         [[[self undoManager] prepareWithInvocationTarget:self] setPublications:oldPubs macros:oldMacros documentInfo:documentInfo groups:oldGroups frontMatter:frontMatter encoding:[self documentStringEncoding]];
         
@@ -1833,7 +1833,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     [[self macroResolver] setMacroDefinitions:newMacros];
     // important that groups are loaded after publications, otherwise the static groups won't find their publications
     for (NSNumber *groupType in newGroups)
-        [[self groups] setGroupsOfType:[groupType integerValue] fromSerializedData:[newGroups objectForKey:groupType]];
+        [[self groups] setGroupsOfType:[groupType unsignedIntegerValue] fromSerializedData:[newGroups objectForKey:groupType]];
     [frontMatter release];
     frontMatter = [newFrontMatter retain];
     
@@ -2192,7 +2192,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if ((options & BDSKImportSelectLibrary))
         [self selectLibraryGroup:nil];    
 	[self addPublications:newPubs];
-    if ([self hasLibraryGroupSelected])
+    if ([self hasGroupTypeSelected:BDSKLibraryGroupType])
         [self selectPublications:newPubs];
     
     BOOL autoGenerate = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKCiteKeyAutogenerateKey];

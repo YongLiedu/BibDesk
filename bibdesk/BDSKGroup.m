@@ -148,29 +148,7 @@ static NSArray *noCountCellValueKeys = nil;
 	return nil;
 }
 
-- (BOOL)isParent { return NO; }
-
-- (BOOL)isCategoryParent { return NO; }
-
-- (BOOL)isStatic { return NO; }
-
-- (BOOL)isSmart { return NO; }
-
-- (BOOL)isCategory { return NO; }
-
-- (BOOL)isShared { return NO; }
-
-- (BOOL)isURL { return NO; }
-
-- (BOOL)isScript { return NO; }
-
-- (BOOL)isSearch { return NO; }
-
-- (BOOL)isWeb { return NO; }
-
-- (BOOL)isExternal { return NO; }
-
-- (BOOL)isValidDropTarget { return NO; }
+- (BDSKGroupType)groupType { return 0; }
 
 - (BOOL)isNameEditable { return NO; }
 

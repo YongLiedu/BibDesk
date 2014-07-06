@@ -63,7 +63,7 @@
 	id firstResponder = [documentWindow firstResponder];
 	if (firstResponder != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
-        [self hasExternalGroupsSelected]) {
+        [self hasGroupTypeSelected:BDSKExternalGroupType]) {
 		// no selection or selection includes shared groups
 		return NO;
 	}
@@ -105,7 +105,7 @@
         return NO;
 	if ([[documentWindow firstResponder] isEqual:tableView] == NO ||
 		[self numberOfSelectedPubs] == 0 ||
-        [self hasExternalGroupsSelected])
+        [self hasGroupTypeSelected:BDSKExternalGroupType])
 		return NO;
 	return YES;
 }
@@ -115,18 +115,18 @@
 }
 
 - (BOOL) validateDeleteSelectedPubsMenuItem:(NSMenuItem*) menuItem {
-    return ([self numberOfClickedOrSelectedPubs] > 0 && [self hasExternalGroupsSelected] == NO);
+    return ([self numberOfClickedOrSelectedPubs] > 0 && [self hasGroupTypeSelected:BDSKExternalGroupType] == NO);
 }	
 		
 - (BOOL) validateRemoveSelectedPubsMenuItem:(NSMenuItem*) menuItem {
-    if ([self numberOfClickedOrSelectedPubs] == 0 || [self hasExternalGroupsSelected])
+    if ([self numberOfClickedOrSelectedPubs] == 0 || [self hasGroupTypeSelected:BDSKExternalGroupType])
         return NO;
-    if([self hasLibraryGroupSelected])
+    if([self hasGroupTypeSelected:BDSKLibraryGroupType])
         return [self validateDeleteSelectedPubsMenuItem:menuItem];
-    if ([self hasStaticGroupsSelected])
+    if ([self hasGroupTypeSelected:BDSKStaticGroupType])
         return YES;
     // don't remove from single valued group field, as that will clear the field, which is most probably a mistake. See bug # 1435344
-    if (NSNotFound != [[self clickedOrSelectedGroups] indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop){ return [obj isCategory] && [[obj key] isSingleValuedGroupField] == NO; }])
+    if (NSNotFound != [[self clickedOrSelectedGroups] indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop){ return [obj groupType] == BDSKCategoryGroupType && [[obj key] isSingleValuedGroupField] == NO; }])
         return YES;
     return NO;
 }	
@@ -218,15 +218,15 @@
 }	
 
 - (BOOL) validateDuplicateTitleToBooktitleMenuItem:(NSMenuItem*) menuItem {
-	return ([self numberOfSelectedPubs] > 0 && [self hasExternalGroupsSelected] == NO);
+	return ([self numberOfSelectedPubs] > 0 && [self hasGroupTypeSelected:BDSKExternalGroupType] == NO);
 }
 
 - (BOOL) validateGenerateCiteKeyMenuItem:(NSMenuItem*) menuItem {
-	return ([self numberOfSelectedPubs] > 0 && [self hasExternalGroupsSelected] == NO);
+	return ([self numberOfSelectedPubs] > 0 && [self hasGroupTypeSelected:BDSKExternalGroupType] == NO);
 }	
 
 - (BOOL) validateConsolidateLinkedFilesMenuItem:(NSMenuItem*) menuItem {
-	return ([self numberOfSelectedPubs] > 0 && [self hasExternalGroupsSelected] == NO);
+	return ([self numberOfSelectedPubs] > 0 && [self hasGroupTypeSelected:BDSKExternalGroupType] == NO);
 }	
 
 - (BOOL) validateToggleShowingCustomCiteDrawerMenuItem:(NSMenuItem*) menuItem {
@@ -271,7 +271,7 @@
 }
 
 - (BOOL)validateSortForCrossrefsMenuItem:(NSMenuItem *)menuItem{
-    return ([self hasExternalGroupsSelected] == NO);
+    return ([self hasGroupTypeSelected:BDSKExternalGroupType] == NO);
 }
 
 - (BOOL)validateSelectCrossrefParentActionMenuItem:(NSMenuItem *)menuItem{
@@ -290,7 +290,7 @@
 }
 
 - (BOOL)validateCreateNewPubUsingCrossrefMenuItem:(NSMenuItem *)menuItem{
-    if([self numberOfClickedOrSelectedPubs] == 1 && [self hasExternalGroupsSelected] == NO){
+    if([self numberOfClickedOrSelectedPubs] == 1 && [self hasGroupTypeSelected:BDSKExternalGroupType] == NO){
         BibItem *selectedBI = [[self clickedOrSelectedPublications] objectAtIndex:0];
         
         // only valid if the selected pub (parent-to-be) doesn't have a crossref field
@@ -331,12 +331,12 @@
 } 
 
 - (BOOL) validateRemoveSelectedGroupsMenuItem:(NSMenuItem *)menuItem{
-    return [self hasSmartGroupsClickedOrSelected] ||
-           [self hasStaticGroupsClickedOrSelected] ||
-           [self hasURLGroupsClickedOrSelected] ||
-           [self hasScriptGroupsClickedOrSelected] ||
-           [self hasSearchGroupsClickedOrSelected] ||
-           [self hasWebGroupsClickedOrSelected];
+    return [self hasGroupTypeClickedOrSelected:BDSKSmartGroupType] ||
+           [self hasGroupTypeClickedOrSelected:BDSKStaticGroupType] ||
+           [self hasGroupTypeClickedOrSelected:BDSKURLGroupType] ||
+           [self hasGroupTypeClickedOrSelected:BDSKScriptGroupType] ||
+           [self hasGroupTypeClickedOrSelected:BDSKSearchGroupType] ||
+           [self hasGroupTypeClickedOrSelected:BDSKWebGroupType];
 } 
 
 - (BOOL) validateRenameGroupActionMenuItem:(NSMenuItem *)menuItem{
@@ -353,7 +353,7 @@
 } 
 
 - (BOOL) validateCopyGroupURLActionMenuItem:(NSMenuItem *)menuItem{
-	if ([self hasSearchGroupsClickedOrSelected] || [self hasURLGroupsClickedOrSelected] || [self hasScriptGroupsClickedOrSelected] || [self hasWebGroupsClickedOrSelected]) {
+	if ([self hasGroupTypeClickedOrSelected:BDSKSearchGroupType] || [self hasGroupTypeClickedOrSelected:BDSKURLGroupType] || [self hasGroupTypeClickedOrSelected:BDSKScriptGroupType] || [self hasGroupTypeClickedOrSelected:BDSKWebGroupType]) {
 		return YES;
 	} else {
 		return NO;
@@ -421,25 +421,25 @@
 
 - (BOOL) validateSelectPossibleDuplicatesMenuItem:(NSMenuItem *)menuItem{
     [menuItem setTitle:[NSString stringWithFormat:NSLocalizedString(@"Select Duplicates by %@", @"Menu item title"), [sortKey localizedFieldName]]];
-    return ([self hasExternalGroupsSelected] == NO);
+    return ([self hasGroupTypeSelected:BDSKExternalGroupType] == NO);
 }
 
 - (BOOL) validateSelectIncompletePublicationsMenuItem:(NSMenuItem *)menuItem{
-    return ([self hasExternalGroupsSelected] == NO);
+    return ([self hasGroupTypeSelected:BDSKExternalGroupType] == NO);
 }
 
 - (BOOL)validateEditNewStaticGroupWithSelectionMenuItem:(NSMenuItem *)menuItem {
-    [menuItem setTitle:[self hasExternalGroupsSelected] ? NSLocalizedString(@"New Static Group With Merged Selection", @"Menu item title") : NSLocalizedString(@"New Static Group With Selection", @"Menu item title")];
+    [menuItem setTitle:[self hasGroupTypeSelected:BDSKExternalGroupType] ? NSLocalizedString(@"New Static Group With Merged Selection", @"Menu item title") : NSLocalizedString(@"New Static Group With Selection", @"Menu item title")];
     return ([self numberOfSelectedPubs] > 0);
 }
 
 - (BOOL)validateEditNewCategoryGroupWithSelectionMenuItem:(NSMenuItem *)menuItem {
-    [menuItem setTitle:[self hasExternalGroupsSelected] ? NSLocalizedString(@"New Field Group With Merged Selection", @"Menu item title") : NSLocalizedString(@"New Field Group With Selection", @"Menu item title")];
+    [menuItem setTitle:[self hasGroupTypeSelected:BDSKExternalGroupType] ? NSLocalizedString(@"New Field Group With Merged Selection", @"Menu item title") : NSLocalizedString(@"New Field Group With Selection", @"Menu item title")];
     return ([self numberOfSelectedPubs] > 0 && [[self currentGroupFields] count] > 0);
 }
 
 - (BOOL)validateAddSearchBookmarkMenuItem:(NSMenuItem *)menuItem {
-    return [self hasSearchGroupsSelected];
+    return [self hasGroupTypeSelected:BDSKSearchGroupType];
 }
 
 - (BOOL)validateRevertDocumentToSavedMenuItem:(NSMenuItem *)menuItem {
@@ -478,19 +478,19 @@
 }
 
 - (BOOL)validateMergeInExternalGroupMenuItem:(NSMenuItem *)menuItem {
-    if ([self hasSharedGroupsClickedOrSelected]) {
+    if ([self hasGroupTypeClickedOrSelected:BDSKSharedGroupType]) {
         [menuItem setTitle:NSLocalizedString(@"Merge In Shared Group", @"Menu item title")];
         return YES;
-    } else if ([self hasURLGroupsClickedOrSelected]) {
+    } else if ([self hasGroupTypeClickedOrSelected:BDSKURLGroupType]) {
         [menuItem setTitle:NSLocalizedString(@"Merge In External File Group", @"Menu item title")];
         return YES;
-    } else if ([self hasScriptGroupsClickedOrSelected]) {
+    } else if ([self hasGroupTypeClickedOrSelected:BDSKScriptGroupType]) {
         [menuItem setTitle:NSLocalizedString(@"Merge In Script Group", @"Menu item title")];
         return YES;
-    } else if ([self hasSearchGroupsClickedOrSelected]) {
+    } else if ([self hasGroupTypeClickedOrSelected:BDSKSearchGroupType]) {
         [menuItem setTitle:NSLocalizedString(@"Merge In Search Group", @"Menu item title")];
         return YES;
-    } else if ([self hasWebGroupsClickedOrSelected]) {
+    } else if ([self hasGroupTypeClickedOrSelected:BDSKWebGroupType]) {
         [menuItem setTitle:NSLocalizedString(@"Merge In Web Group", @"Menu item title")];
         return YES;
     } else {
@@ -500,10 +500,10 @@
 }
 
 - (BOOL)validateMergeInExternalPublicationsMenuItem:(NSMenuItem *)menuItem {
-    if ([self hasSharedGroupsSelected]) {
+    if ([self hasGroupTypeSelected:BDSKSharedGroupType]) {
         [menuItem setTitle:NSLocalizedString(@"Merge In Shared Publications", @"Menu item title")];
         return [self numberOfClickedOrSelectedPubs] > 0;
-    } else if ([self hasURLGroupsSelected] || [self hasScriptGroupsSelected] || [self hasSearchGroupsSelected] || [self hasWebGroupsSelected]) {
+    } else if ([self hasGroupTypeSelected:BDSKURLGroupType | BDSKScriptGroupType | BDSKSearchGroupType | BDSKWebGroupType]) {
         [menuItem setTitle:NSLocalizedString(@"Merge In External Publications", @"Menu item title")];
         return [self numberOfClickedOrSelectedPubs] > 0;
     } else {
@@ -521,19 +521,19 @@
 }
 
 - (BOOL)validateRefreshSelectedGroupsMenuItem:(NSMenuItem *)menuItem {
-    if([self hasSharedGroupsClickedOrSelected]){
+    if([self hasGroupTypeClickedOrSelected:BDSKSharedGroupType]){
         [menuItem setTitle:NSLocalizedString(@"Refresh Shared Group", @"Menu item title")];
         return YES;
-    }else if([self hasURLGroupsClickedOrSelected]){
+    }else if([self hasGroupTypeClickedOrSelected:BDSKURLGroupType]){
         [menuItem setTitle:NSLocalizedString(@"Refresh External File Group", @"Menu item title")];
         return YES;
-    }else if([self hasScriptGroupsClickedOrSelected]){
+    }else if([self hasGroupTypeClickedOrSelected:BDSKScriptGroupType]){
         [menuItem setTitle:NSLocalizedString(@"Refresh Script Group", @"Menu item title")];
         return YES;
-    }else if([self hasSearchGroupsClickedOrSelected]){
+    }else if([self hasGroupTypeClickedOrSelected:BDSKSearchGroupType]){
         [menuItem setTitle:NSLocalizedString(@"Refresh Search Group", @"Menu item title")];
         return YES;
-    }else if([self hasWebGroupsClickedOrSelected]){
+    }else if([self hasGroupTypeClickedOrSelected:BDSKWebGroupType]){
         [menuItem setTitle:NSLocalizedString(@"Refresh Web Group", @"Menu item title")];
         return [[[self clickedOrSelectedGroups] lastObject] isWebViewLoaded];
     } else {
@@ -561,7 +561,7 @@
 }
 
 - (BOOL)validateAddBookmarkMenuItem:(NSMenuItem *)menuItem {
-    return [self hasWebGroupsSelected];
+    return [self hasGroupTypeSelected:BDSKWebGroupType];
 }
 
 - (BOOL)validateEmailPubCmdMenuItem:(NSMenuItem *)menuItem {

@@ -736,7 +736,7 @@ enum {
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"No document selected", @"Status message")];
         return;
-	}else if([theDocument hasExternalGroupsSelected]){
+	}else if([theDocument hasGroupTypeSelected:BDSKExternalGroupType]){
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"Cannot replace in external items", @"Status message")];
         return;
@@ -763,7 +763,7 @@ enum {
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"No document selected", @"Status message")];
         return;
-	}else if(replace && ([theDocument hasExternalGroupsSelected])){
+	}else if(replace && ([theDocument hasGroupTypeSelected:BDSKExternalGroupType])){
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"Cannot replace in external items", @"Status message")];
         return;
@@ -829,7 +829,7 @@ enum {
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"No document selected", @"Status message")];
         return;
-	}else if([theDocument hasExternalGroupsSelected]){
+	}else if([theDocument hasGroupTypeSelected:BDSKExternalGroupType]){
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"Cannot replace in external items", @"Status message")];
         return;

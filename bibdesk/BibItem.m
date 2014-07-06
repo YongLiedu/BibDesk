@@ -2913,7 +2913,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 }
 
 - (NSInteger)addToGroup:(BDSKGroup *)aGroup handleInherited:(NSInteger)operation{
-	BDSKASSERT([aGroup isCategory] && [owner isDocument]);
+	BDSKASSERT([aGroup groupType] == BDSKCategoryGroupType && [owner isDocument]);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
     
     // don't add it twice; this is typed as id because it may be a BibAuthor or NSString, so be careful
@@ -2971,7 +2971,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 }
 
 - (NSInteger)removeFromGroup:(BDSKGroup *)aGroup handleInherited:(NSInteger)operation{
-	BDSKASSERT([aGroup isCategory] && [owner isDocument]);
+	BDSKASSERT([aGroup groupType] == BDSKCategoryGroupType && [owner isDocument]);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
 	id groupName = [group name];
 	NSString *field = [group key];
@@ -3107,7 +3107,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 }
 
 - (NSInteger)replaceGroup:(BDSKGroup *)aGroup withGroupNamed:(NSString *)newGroupName handleInherited:(NSInteger)operation{
-	BDSKASSERT([aGroup isCategory] && [owner isDocument]);
+	BDSKASSERT([aGroup groupType] == BDSKCategoryGroupType && [owner isDocument]);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
 	id groupName = [group name];
 	NSString *field = [group key];

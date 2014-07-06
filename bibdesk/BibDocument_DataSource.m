@@ -156,7 +156,7 @@
                     [aCell setAlternateImage:nil];
                 }
             } else {
-                [aCell setEnabled:[self hasExternalGroupsSelected] == NO];
+                [aCell setEnabled:[self hasGroupTypeSelected:BDSKExternalGroupType] == NO];
             }
         } else if ([[aTableColumn identifier] isEqualToString:BDSKCiteKeyString]) {
             BibItem *pub = [[self shownPublications] objectAtIndex:row];
@@ -264,7 +264,7 @@
     // drag from the main table
     pubs = [shownPublications objectsAtIndexes:rowIndexes];
     
-    docFlags.dragFromExternalGroups = [self hasExternalGroupsSelected];
+    docFlags.dragFromExternalGroups = [self hasGroupTypeSelected:BDSKExternalGroupType];
 
     if(pboard == [NSPasteboard pasteboardWithName:NSDragPboard]){
         // see where we clicked in the table
@@ -607,15 +607,8 @@
 
 #pragma mark TableView dragging destination
 
-- (BOOL)canImportToSelectedGroups{
-    return [self hasLibraryGroupSelected] || 
-           NSNotFound == [[self selectedGroups] indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop){
-                return [obj isStatic] == NO;
-           }];
-}
-
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op{
-    if (tv != tableView || [self hasExternalGroupsSelected])
+    if (tv != tableView || [self hasGroupTypeSelected:BDSKExternalGroupType])
         return NSDragOperationNone;
     
     NSPasteboard *pboard = [info draggingPasteboard];
@@ -625,7 +618,7 @@
         (hasURL || [pboard canReadObjectForClasses:[NSArray arrayWithObject:[NSColor class]] options:[NSDictionary dictionary]]))
         return NSDragOperationEvery;
     
-    if ([self canImportToSelectedGroups] == NO)
+    if ([self hasGroupTypeSelected:~(BDSKLibraryGroupType | BDSKStaticGroupType)])
         return NSDragOperationNone;
     
     BOOL hasPub = [pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]];
@@ -643,7 +636,7 @@
     BOOL isDragFromGroupTable = [source isEqual:groupOutlineView];
     BOOL isDragFromDrawer = [source isEqual:[drawerController tableView]];
     
-    if (isDragFromGroupTable && docFlags.dragFromExternalGroups && [self hasLibraryGroupSelected])
+    if (isDragFromGroupTable && docFlags.dragFromExternalGroups && [self hasGroupTypeSelected:BDSKLibraryGroupType])
         return NSDragOperationCopy;
     
     if (isDragFromMainTable || isDragFromGroupTable || isDragFromDrawer)
@@ -696,7 +689,7 @@
     if (tv == tableView) {
         NSPasteboard *pboard = [info draggingPasteboard];
         
-        if ([self hasExternalGroupsSelected])
+        if ([self hasGroupTypeSelected:BDSKExternalGroupType])
             return NO;
 		
         if (row != -1) {
@@ -721,7 +714,7 @@
                 }
             }
             
-        } else if ([self canImportToSelectedGroups]) {
+        } else if (NO == [self hasGroupTypeSelected:~(BDSKLibraryGroupType | BDSKStaticGroupType)]) {
             
             NSArray *fileURLs = [pboard readFileURLsOfTypes:nil];
             if ([fileURLs count] == 1) {
@@ -740,7 +733,7 @@
                 if ([newPubs count] == 0)
                     return NO;
                 
-                if ([self hasStaticGroupsSelected]) {
+                if ([self hasGroupTypeSelected:BDSKStaticGroupType]) {
                     [[self selectedGroups] makeObjectsPerformSelector:@selector(addPublicationsFromArray:) withObject:newPubs];
                     [self selectPublications:newPubs];
                 }
@@ -842,7 +835,7 @@
 
 - (BOOL)tableView:(NSTableView *)tv canDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
 	if (tv == tableView || tv == [fileSearchController tableView]) {
-		return [self hasExternalGroupsSelected] == NO && [rowIndexes count] > 0;
+		return [self hasGroupTypeSelected:BDSKExternalGroupType] == NO && [rowIndexes count] > 0;
 	}
     return NO;
 }
@@ -857,7 +850,7 @@
 
 - (BOOL)tableView:(NSTableView *)tv canAlternateDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
 	if (tv == tableView || tv == [fileSearchController tableView]) {
-		return [self hasExternalGroupsSelected] == NO && [rowIndexes count] > 0;
+		return [self hasGroupTypeSelected:BDSKExternalGroupType] == NO && [rowIndexes count] > 0;
 	}
     return NO;
 }
@@ -865,7 +858,7 @@
 - (void)tableView:(NSTableView *)tv pasteFromPasteboard:(NSPasteboard *)pboard{
 	if (tv == tableView) {
         NSArray *newPubs = [self importPublicationsFromPasteboard:pboard options:0];
-        if ([newPubs count] && [self hasStaticGroupsSelected]) {
+        if ([newPubs count] && [self hasGroupTypeSelected:BDSKStaticGroupType]) {
             [[self selectedGroups] makeObjectsPerformSelector:@selector(addPublicationsFromArray:) withObject:newPubs];
             [self selectPublications:newPubs];
         }
@@ -876,7 +869,7 @@
 
 - (BOOL)tableViewCanPasteFromPasteboard:(NSTableView *)tv {
     if (tv == tableView) {
-        return [self canImportToSelectedGroups];
+        return NO == [self hasGroupTypeSelected:~(BDSKLibraryGroupType | BDSKStaticGroupType)];
     }
     return NO;
 }
@@ -900,7 +893,7 @@
 
 - (BOOL)tableView:(NSTableView *)tv canDuplicateRowsWithIndexes:(NSIndexSet *)rowIndexes {
     if (tv == tableView) {
-		return [self hasExternalGroupsSelected] == NO && [rowIndexes count] > 0;
+		return [self hasGroupTypeSelected:BDSKExternalGroupType] == NO && [rowIndexes count] > 0;
     }
     return NO;
 }
@@ -925,7 +918,7 @@
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item {
-    return [item isParent];
+    return 0 != ([item groupType] & BDSKParentGroupType);
 }
 
 - (id)outlineView:(NSOutlineView *)outlineView objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item {
@@ -934,7 +927,7 @@
 
 - (void)outlineView:(NSOutlineView *)outlineView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn byItem:(id)item {
     // should never receive this for parent groups
-    if ([item isParent])
+    if (0 != ([item groupType] & BDSKParentGroupType))
         return;
     
     BDSKGroup *group = item;
@@ -943,7 +936,7 @@
     NSString *newName = [object valueForKey:BDSKGroupCellStringKey];
     if([[group editingStringValue] isEqualToString:newName])  
         return;
-    if ([group isCategory]) {
+    if ([group groupType] == BDSKCategoryGroupType) {
         NSArray *pubs = [groupedPublications copy];
         // change the name of the group first, so we can preserve the selection; we need to old group info to move though
         NSString *key = [(BDSKCategoryGroup *)group key];
@@ -973,21 +966,21 @@
      so return a new instance each time.  NSOutlineView must be setting some state on the
      cell before or instead of copying it.
      */
-    return [item isParent] ? [groupOutlineView parentCell] : [tableColumn dataCell];
+    return 0 != ([item groupType] & BDSKParentGroupType) ? [groupOutlineView parentCell] : [tableColumn dataCell];
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView shouldSelectItem:(id)item {
-    return [item isParent] == NO;
+    return 0 == ([item groupType] & BDSKParentGroupType);
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView isGroupItem:(id)item {
-    return [item isParent];
+    return 0 != ([item groupType] & BDSKParentGroupType);
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView shouldEditTableColumn:(NSTableColumn *)tableColumn item:(id)item {
-    if ([item isParent] || [item isNameEditable] == NO) {
+    if (0 != ([item groupType] & BDSKParentGroupType) || [item isNameEditable] == NO) {
         return NO;
-    } else if ([item isCategory] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnRenameGroupKey]) {
+    } else if ([item groupType] == BDSKCategoryGroupType && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnRenameGroupKey]) {
         
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
                                          defaultButton:NSLocalizedString(@"OK", @"Button title")
@@ -1018,7 +1011,7 @@
 - (void)outlineView:(NSOutlineView *)outlineView willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn item:(id)item {
     BDSKGroup *group = item;
     NSProgressIndicator *spinner = nil;
-    if ([item isParent] == NO)
+    if (0 == ([item groupType] & BDSKParentGroupType))
         spinner = [self spinnerForGroup:group];
     
     if (spinner) {
@@ -1053,7 +1046,7 @@
 }
 
 - (NSIndexSet *)outlineView:(BDSKGroupOutlineView *)outlineView indexesOfRowsToHighlightInRange:(NSRange)indexRange {
-    if([self numberOfSelectedPubs] == 0 || [self hasExternalGroupsSelected])
+    if([self numberOfSelectedPubs] == 0 || [self hasGroupTypeSelected:BDSKExternalGroupType])
         return [NSIndexSet indexSet];
     
     // Use this for the indexes we're going to return
@@ -1068,7 +1061,7 @@
     
     while (groupIndex != NSNotFound) {
         BDSKGroup *group = [groupOutlineView itemAtRow:groupIndex];
-        if ([group isExternal] == NO) {
+        if (0 == ([group groupType] & BDSKExternalGroupType)) {
             for (BibItem *pub in selectedPubs) {
                 if ([group containsItem:pub]) {
                     [indexSet addIndex:groupIndex];
@@ -1083,7 +1076,7 @@
 }
 
 - (BOOL)outlineView:(BDSKGroupOutlineView *)ov isSingleSelectionItem:(id)item {
-    return [item isEqual:[groups libraryGroup]] || [item isExternal];
+    return 0 != ([item groupType] & (BDSKLibraryGroupType | BDSKExternalGroupType));
 }
 
 - (void)outlineView:(BDSKGroupOutlineView *)aTableView doubleClickedOnIconOfItem:(id)item {
@@ -1118,13 +1111,13 @@
     } else if ([items count] == 1) {
         // a single row, not necessarily the selected one
         BDSKGroup *group = [items firstObject];
-        if ([group isExternal]) {
+        if (0 != ([group groupType] & BDSKExternalGroupType)) {
             pubs = [NSArray arrayWithArray:[(id)group publications]];
-            if ([group isSearch]) {
+            if ([group groupType] == BDSKSearchGroupType) {
                 additionalFileExtensions = [NSArray arrayWithObject:@"bdsksearch"];
             }
             docFlags.dragFromExternalGroups = YES;
-        } else if ([group isParent] == NO) {
+        } else if (0 == ([group groupType] & BDSKParentGroupType)) {
             NSMutableArray *pubsInGroup = [NSMutableArray arrayWithCapacity:[publications count]];
             for (BibItem *pub in publications) {
                 if ([group containsItem:pub]) 
@@ -1167,6 +1160,8 @@
 
 #pragma mark OutlineView dragging destination
 
+#define BDSKValidDropTargetGroupType (BDSKLibraryGroupType | BDSKStaticGroupType | BDSKCategoryGroupType | BDSKParentGroupType)
+
 - (NSDragOperation)outlineView:(NSOutlineView *)outlineView validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(NSInteger)idx {
     NSPasteboard *pboard = [info draggingPasteboard];
     id source = [info draggingSource];
@@ -1179,10 +1174,10 @@
         return NSDragOperationNone;
     
     // drop a file or URL on external groups
-    if ([item isExternal] || [item isEqual:[groups externalParent]]) {
+    if (0 != ([item groupType] & (BDSKExternalGroupType | BDSKExternalParentGroupType))) {
         if (isDragFromGroupTable ||  [pboard canReadURL] == NO) {
             return NSDragOperationNone;
-        } else if ([item isWeb] && [pboard canReadFileURLOfTypes:nil] == NO){
+        } else if ([item groupType] == BDSKWebGroupType && [pboard canReadFileURLOfTypes:nil] == NO){
             return NSDragOperationEvery;
         } else {
             [outlineView setDropItem:[groups externalParent] dropChildIndex:NSOutlineViewDropOnItemIndex];
@@ -1209,7 +1204,7 @@
         idx = NSOutlineViewDropOnItemIndex;
     }
     
-    if ([item isValidDropTarget] == NO)
+    if (0 == ([item groupType] & BDSKValidDropTargetGroupType))
         return NSDragOperationNone;
     
     if (isDragFromGroupTable) {
@@ -1236,12 +1231,12 @@
 	
     NSPasteboard *pboard = [info draggingPasteboard];
     
-    if ([item isExternal] || [item isEqual:[groups externalParent]]) {
+    if (0 != ([item groupType] & (BDSKExternalGroupType | BDSKExternalParentGroupType))) {
         if ([pboard canReadURL] == NO) {
             
             return NO;
             
-        } else if ([item isWeb] && [pboard canReadFileURLOfTypes:nil] == NO) {
+        } else if ([item groupType] == BDSKWebGroupType && [pboard canReadFileURLOfTypes:nil] == NO) {
             
             NSArray *urls = [pboard readURLs];
             NSURL *url = nil;
@@ -1289,7 +1284,7 @@
         }
     }
     
-    if (idx != NSOutlineViewDropOnItemIndex || [item isValidDropTarget] == NO) {
+    if (idx != NSOutlineViewDropOnItemIndex || 0 == ([item groupType] & BDSKValidDropTargetGroupType)) {
         // shouldn't get here at this point
         return NO;
     }
@@ -1306,7 +1301,7 @@
         // we already have these publications, so we just want to add them to the group, not the document
         pubs = [pboardHelper promisedItemsForPasteboard:pboard];
     } else if (isDragFromGroupTable == NO && isDragFromDrawer == NO) {
-        BDSKImportOptions options = ([item isParent] == NO && [[self selectedGroups] containsObject:item] == NO) ? BDSKImportSelectLibrary : 0;
+        BDSKImportOptions options = (0 == ([item groupType] & BDSKParentGroupType) && [[self selectedGroups] containsObject:item] == NO) ? BDSKImportSelectLibrary : 0;
         pubs = [self importPublicationsFromPasteboard:pboard options:options];
     }
     
@@ -1340,7 +1335,7 @@
         // add to the group we're dropping on, /not/ the currently selected group; no need to add to all pubs group, though
         [self addPublications:pubs toGroup:item];
     }
-    if (isDragFromMainTable == NO && isDragFromGroupTable == NO && isDragFromDrawer == NO && [self hasLibraryGroupSelected] == NO)
+    if (isDragFromMainTable == NO && isDragFromGroupTable == NO && isDragFromDrawer == NO && [self hasGroupTypeSelected:BDSKLibraryGroupType] == NO)
         [self selectPublications:pubs];
     
     return YES;
@@ -1404,7 +1399,7 @@
 		BDSKPRECONDITION(groupCount);
         for(i = 0; i < groupCount; i++){
 			group = [ov itemAtRow:i];
-            [array addObject:[group isParent] ? @"" : [group stringValue]];
+            [array addObject:0 != ([group groupType] & BDSKParentGroupType) ? @"" : [group stringValue]];
 		}
         return array;
         
@@ -1428,7 +1423,7 @@
 - (BOOL)outlineView:(NSOutlineView *)ov canDeleteItems:(NSArray *)items {
 	if (ov == groupOutlineView) {
         return NSNotFound != [items indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop){
-            return [obj isStatic] || [obj isSmart] || [obj isSearch] || [obj isURL] || [obj isScript] || [obj isWeb];
+            return 0 != ([obj groupType] & (BDSKStaticGroupType | BDSKSmartGroupType | BDSKSearchGroupType | BDSKURLGroupType | BDSKSearchGroupType | BDSKWebGroupType));
         }];
 	}
     return NO;
@@ -1439,17 +1434,17 @@
 	if (ov == groupOutlineView) {
         NSArray *newGroups = [[NSArray alloc] initWithArray:[self selectedGroups] copyItems:YES];
         for (id group in newGroups) {
-            if ([group isStatic])
+            if ([group groupType] == BDSKStaticGroupType)
                 [groups addStaticGroup:group];
-            else if ([group isSmart])
+            else if ([group groupType] == BDSKSmartGroupType)
                 [groups addSmartGroup:group];
-            else if ([group isURL])
+            else if ([group groupType] == BDSKURLGroupType)
                 [groups addURLGroup:group];
-            else if ([group isScript])
+            else if ([group groupType] == BDSKScriptGroupType)
                 [groups addScriptGroup:group];
-            else if ([group isSearch])
+            else if ([group groupType] == BDSKSearchGroupType)
                 [groups addSearchGroup:group];
-            else if ([group isWeb])
+            else if ([group groupType] == BDSKWebGroupType)
                 [groups addWebGroup:group];
         }
         [self selectGroups:newGroups];
@@ -1461,7 +1456,7 @@
 
 - (BOOL)outlineView:(NSOutlineView *)ov canDuplicateItems:(NSArray *)items {
 	if (ov == groupOutlineView)
-		return ([self hasLibraryGroupSelected] == NO && [self hasLastImportGroupSelected] == NO && [self hasSharedGroupsSelected] == NO && [self hasCategoryGroupsSelected] == NO);
+		return ([self hasGroupTypeSelected:BDSKLibraryGroupType | BDSKLastImportGroupType | BDSKSharedGroupType | BDSKCategoryGroupType] == NO);
     return NO;
 }
 
@@ -1523,7 +1518,7 @@
         }
     }
     
-    if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO && [[self selectedPublications] count] == 1) {
+    if ([self isDisplayingFileContentSearch] == NO && [self hasGroupTypeSelected:BDSKExternalGroupType] == NO && [[self selectedPublications] count] == 1) {
         i = [menu indexOfItemWithTag:FVRemoveMenuItemTag];
         if (i != NSNotFound && theURL && [[aFileView selectionIndexes] count] == 1) {
             if ([theURL isFileURL]) {
@@ -1555,7 +1550,7 @@
 
 - (BOOL)fileView:(FVFileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation {
     BDSKASSERT(anIndex != NSNotFound);
-    if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
+    if ([self isDisplayingFileContentSearch] == NO && [self hasGroupTypeSelected:BDSKExternalGroupType] == NO) {
         NSArray *selPubs = [self selectedPublications];
         if ([selPubs count] == 1) {
             [[selPubs lastObject] moveFilesAtIndexes:aSet toIndex:anIndex];
@@ -1567,7 +1562,7 @@
 
 - (BOOL)fileView:(FVFileView *)aFileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation {
     BibItem *publication = nil;
-    if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
+    if ([self isDisplayingFileContentSearch] == NO && [self hasGroupTypeSelected:BDSKExternalGroupType] == NO) {
         NSArray *selPubs = [self selectedPublications];
         if ([selPubs count] == 1)
             publication = [selPubs lastObject];
@@ -1600,7 +1595,7 @@
 
 - (void)fileView:(FVFileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation {
     BibItem *publication = nil;
-    if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
+    if ([self isDisplayingFileContentSearch] == NO && [self hasGroupTypeSelected:BDSKExternalGroupType] == NO) {
         NSArray *selPubs = [self selectedPublications];
         if ([selPubs count] == 1)
             publication = [selPubs lastObject];
@@ -1678,7 +1673,7 @@
 
 - (BOOL)fileView:(FVFileView *)aFileView deleteURLsAtIndexes:(NSIndexSet *)indexSet {
     BibItem *publication = nil;
-    if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
+    if ([self isDisplayingFileContentSearch] == NO && [self hasGroupTypeSelected:BDSKExternalGroupType] == NO) {
         NSArray *selPubs = [self selectedPublications];
         if ([selPubs count] == 1)
             publication = [selPubs lastObject];
@@ -1693,7 +1688,7 @@
 
 - (NSDragOperation)fileView:(FVFileView *)aFileView validateDrop:(id <NSDraggingInfo>)info proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation {
     BibItem *publication = nil;
-    if ([self isDisplayingFileContentSearch] == NO && [self hasExternalGroupsSelected] == NO) {
+    if ([self isDisplayingFileContentSearch] == NO && [self hasGroupTypeSelected:BDSKExternalGroupType] == NO) {
         NSArray *selPubs = [self selectedPublications];
         if ([selPubs count] == 1)
             publication = [selPubs lastObject];
