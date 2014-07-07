@@ -498,12 +498,9 @@
     if ([self hasGroupTypeSelected:BDSKSharedGroupType]) {
         [menuItem setTitle:NSLocalizedString(@"Merge In Shared Publications", @"Menu item title")];
         return [self numberOfClickedOrSelectedPubs] > 0;
-    } else if ([self hasGroupTypeSelected:BDSKURLGroupType | BDSKScriptGroupType | BDSKSearchGroupType | BDSKWebGroupType]) {
-        [menuItem setTitle:NSLocalizedString(@"Merge In External Publications", @"Menu item title")];
-        return [self numberOfClickedOrSelectedPubs] > 0;
     } else {
         [menuItem setTitle:NSLocalizedString(@"Merge In External Publications", @"Menu item title")];
-        return NO;
+        return [self hasGroupTypeSelected:BDSKExternalGroupType] && [self numberOfClickedOrSelectedPubs] > 0;
     }
 }
 
