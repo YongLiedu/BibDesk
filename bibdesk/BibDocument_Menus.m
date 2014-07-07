@@ -331,12 +331,7 @@
 } 
 
 - (BOOL) validateRemoveSelectedGroupsMenuItem:(NSMenuItem *)menuItem{
-    return [self hasGroupTypeClickedOrSelected:BDSKSmartGroupType] ||
-           [self hasGroupTypeClickedOrSelected:BDSKStaticGroupType] ||
-           [self hasGroupTypeClickedOrSelected:BDSKURLGroupType] ||
-           [self hasGroupTypeClickedOrSelected:BDSKScriptGroupType] ||
-           [self hasGroupTypeClickedOrSelected:BDSKSearchGroupType] ||
-           [self hasGroupTypeClickedOrSelected:BDSKWebGroupType];
+    return [self hasGroupTypeClickedOrSelected:BDSKSmartGroupType | BDSKStaticGroupType | BDSKURLGroupType | BDSKScriptGroupType | BDSKSearchGroupType | BDSKWebGroupType];
 } 
 
 - (BOOL) validateRenameGroupActionMenuItem:(NSMenuItem *)menuItem{
@@ -353,7 +348,7 @@
 } 
 
 - (BOOL) validateCopyGroupURLActionMenuItem:(NSMenuItem *)menuItem{
-	if ([self hasGroupTypeClickedOrSelected:BDSKSearchGroupType] || [self hasGroupTypeClickedOrSelected:BDSKURLGroupType] || [self hasGroupTypeClickedOrSelected:BDSKScriptGroupType] || [self hasGroupTypeClickedOrSelected:BDSKWebGroupType]) {
+	if ([self hasGroupTypeClickedOrSelected:BDSKURLGroupType | BDSKScriptGroupType | BDSKSearchGroupType | BDSKWebGroupType]) {
 		return YES;
 	} else {
 		return NO;

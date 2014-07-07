@@ -1423,7 +1423,7 @@
 - (BOOL)outlineView:(NSOutlineView *)ov canDeleteItems:(NSArray *)items {
 	if (ov == groupOutlineView) {
         return NSNotFound != [items indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop){
-            return 0 != ([obj groupType] & (BDSKStaticGroupType | BDSKSmartGroupType | BDSKSearchGroupType | BDSKURLGroupType | BDSKSearchGroupType | BDSKWebGroupType));
+            return 0 != ([obj groupType] & (BDSKStaticGroupType | BDSKSmartGroupType | BDSKURLGroupType | BDSKScriptGroupType | BDSKSearchGroupType | BDSKWebGroupType));
         }];
 	}
     return NO;
@@ -1434,18 +1434,15 @@
 	if (ov == groupOutlineView) {
         NSArray *newGroups = [[NSArray alloc] initWithArray:[self selectedGroups] copyItems:YES];
         for (id group in newGroups) {
-            if ([group groupType] == BDSKStaticGroupType)
-                [groups addStaticGroup:group];
-            else if ([group groupType] == BDSKSmartGroupType)
-                [groups addSmartGroup:group];
-            else if ([group groupType] == BDSKURLGroupType)
-                [groups addURLGroup:group];
-            else if ([group groupType] == BDSKScriptGroupType)
-                [groups addScriptGroup:group];
-            else if ([group groupType] == BDSKSearchGroupType)
-                [groups addSearchGroup:group];
-            else if ([group groupType] == BDSKWebGroupType)
-                [groups addWebGroup:group];
+            switch ([group groupType]) {
+                case BDSKStaticGroupType: [groups addStaticGroup:group]; break;
+                case BDSKSmartGroupType:  [groups addSmartGroup:group];  break;
+                case BDSKURLGroupType:    [groups addURLGroup:group];    break;
+                case BDSKScriptGroupType: [groups addScriptGroup:group]; break;
+                case BDSKSearchGroupType: [groups addSearchGroup:group]; break;
+                case BDSKWebGroupType:    [groups addWebGroup:group];    break;
+                default: break;
+            }
         }
         [self selectGroups:newGroups];
         [newGroups release];

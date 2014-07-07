@@ -923,22 +923,30 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     BOOL didRemove = NO;
 	
 	for (BDSKGroup *group in theGroups) {
-		if ([group groupType] == BDSKSmartGroupType) {
-			[groups removeSmartGroup:(BDSKSmartGroup *)group];
-			didRemove = YES;
-		} else if ([group groupType] == BDSKStaticGroupType) {
-			[groups removeStaticGroup:(BDSKStaticGroup *)group];
-			didRemove = YES;
-		} else if ([group groupType] == BDSKURLGroupType) {
-			[groups removeURLGroup:(BDSKURLGroup *)group];
-			didRemove = YES;
-		} else if ([group groupType] == BDSKScriptGroupType) {
-			[groups removeScriptGroup:(BDSKScriptGroup *)group];
-			didRemove = YES;
-		} else if ([group groupType] == BDSKSearchGroupType) {
-			[groups removeSearchGroup:(BDSKSearchGroup *)group];
-		} else if ([group groupType] == BDSKWebGroupType) {
-			[groups removeWebGroup:(BDSKWebGroup *)group];
+		switch ([group groupType]) {
+            case BDSKSmartGroupType:
+                [groups removeSmartGroup:(BDSKSmartGroup *)group];
+                didRemove = YES;
+                break;
+		    case BDSKStaticGroupType:
+                [groups removeStaticGroup:(BDSKStaticGroup *)group];
+                didRemove = YES;
+                break;
+		    case BDSKURLGroupType:
+                [groups removeURLGroup:(BDSKURLGroup *)group];
+                didRemove = YES;
+                break;
+		    case BDSKScriptGroupType:
+                [groups removeScriptGroup:(BDSKScriptGroup *)group];
+                didRemove = YES;
+                break;
+		    case BDSKSearchGroupType:
+                [groups removeSearchGroup:(BDSKSearchGroup *)group];
+                break;
+		    case BDSKWebGroupType:
+                [groups removeWebGroup:(BDSKWebGroup *)group];
+                break;
+            default: break;
         }
 	}
 	if (didRemove) {
