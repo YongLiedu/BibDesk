@@ -331,7 +331,7 @@
 } 
 
 - (BOOL) validateRemoveSelectedGroupsMenuItem:(NSMenuItem *)menuItem{
-    return [self hasGroupTypeClickedOrSelected:BDSKSmartGroupType | BDSKStaticGroupType | BDSKURLGroupType | BDSKScriptGroupType | BDSKSearchGroupType | BDSKWebGroupType];
+    return [self hasGroupTypeClickedOrSelected:BDSKRemovableGroupType];
 } 
 
 - (BOOL) validateRenameGroupActionMenuItem:(NSMenuItem *)menuItem{

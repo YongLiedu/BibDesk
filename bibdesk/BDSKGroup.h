@@ -56,6 +56,7 @@ enum {
     BDSKCategoryParentGroupType = 1 << 13,
     BDSKExternalParentGroupType = 1 << 14,
     BDSKParentGroupType = BDSKLibraryParentGroupType | BDSKStaticParentGroupType | BDSKSmartParentGroupType | BDSKCategoryParentGroupType | BDSKExternalParentGroupType,
+    BDSKRemovableGroupType = BDSKStaticGroupType | BDSKSmartGroupType | BDSKWebGroupType | BDSKSearchGroupType | BDSKURLGroupType | BDSKScriptGroupType,
 };
 typedef NSUInteger BDSKGroupType;
 

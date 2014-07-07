@@ -84,6 +84,9 @@
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
 
+#define BDSKValidDropTargetGroupType (BDSKLibraryGroupType | BDSKStaticGroupType | BDSKCategoryGroupType | BDSKStaticParentGroupType)
+#define BDSKNonImportableGroupType ~(BDSKLibraryGroupType | BDSKStaticGroupType)
+
 @implementation BibDocument (DataSource)
 
 #pragma mark TableView data source
@@ -618,7 +621,7 @@
         (hasURL || [pboard canReadObjectForClasses:[NSArray arrayWithObject:[NSColor class]] options:[NSDictionary dictionary]]))
         return NSDragOperationEvery;
     
-    if ([self hasGroupTypeSelected:~(BDSKLibraryGroupType | BDSKStaticGroupType)])
+    if ([self hasGroupTypeSelected:BDSKNonImportableGroupType])
         return NSDragOperationNone;
     
     BOOL hasPub = [pboard canReadItemWithDataConformingToTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]];
@@ -714,7 +717,7 @@
                 }
             }
             
-        } else if (NO == [self hasGroupTypeSelected:~(BDSKLibraryGroupType | BDSKStaticGroupType)]) {
+        } else if (NO == [self hasGroupTypeSelected:BDSKNonImportableGroupType]) {
             
             NSArray *fileURLs = [pboard readFileURLsOfTypes:nil];
             if ([fileURLs count] == 1) {
@@ -869,7 +872,7 @@
 
 - (BOOL)tableViewCanPasteFromPasteboard:(NSTableView *)tv {
     if (tv == tableView) {
-        return NO == [self hasGroupTypeSelected:~(BDSKLibraryGroupType | BDSKStaticGroupType)];
+        return NO == [self hasGroupTypeSelected:BDSKNonImportableGroupType];
     }
     return NO;
 }
@@ -1160,8 +1163,6 @@
 
 #pragma mark OutlineView dragging destination
 
-#define BDSKValidDropTargetGroupType (BDSKLibraryGroupType | BDSKStaticGroupType | BDSKCategoryGroupType | BDSKStaticParentGroupType)
-
 - (NSDragOperation)outlineView:(NSOutlineView *)outlineView validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(NSInteger)idx {
     NSPasteboard *pboard = [info draggingPasteboard];
     id source = [info draggingSource];
@@ -1423,7 +1424,7 @@
 - (BOOL)outlineView:(NSOutlineView *)ov canDeleteItems:(NSArray *)items {
 	if (ov == groupOutlineView) {
         return NSNotFound != [items indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop){
-            return 0 != ([obj groupType] & (BDSKStaticGroupType | BDSKSmartGroupType | BDSKURLGroupType | BDSKScriptGroupType | BDSKSearchGroupType | BDSKWebGroupType));
+            return 0 != ([obj groupType] & BDSKRemovableGroupType);
         }];
 	}
     return NO;
@@ -1453,7 +1454,7 @@
 
 - (BOOL)outlineView:(NSOutlineView *)ov canDuplicateItems:(NSArray *)items {
 	if (ov == groupOutlineView)
-		return ([self hasGroupTypeSelected:BDSKLibraryGroupType | BDSKLastImportGroupType | BDSKSharedGroupType | BDSKCategoryGroupType] == NO);
+		return [self hasGroupTypeSelected:~BDSKRemovableGroupType] == NO;
     return NO;
 }
 
