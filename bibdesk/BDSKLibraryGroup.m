@@ -63,4 +63,8 @@ static NSString *BDSKLibraryLocalizedString = nil;
 
 - (BDSKGroupType)groupType { return BDSKLibraryGroupType; }
 
+- (NSArray *)publications {
+    return [[self document] publications];
+}
+
 @end

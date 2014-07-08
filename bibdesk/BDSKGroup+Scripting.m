@@ -95,14 +95,7 @@
 }
 
 - (NSArray *)scriptingPublications {
-    NSMutableArray *scriptingPublications = [NSMutableArray array];
-    
-    for (BibItem *pub in [document publications]) {
-        if ([self containsItem:pub])
-            [scriptingPublications addObject:pub];
-    }
-    
-    return scriptingPublications;
+    return [self publications];
 }
 
 - (NSArray *)authors {

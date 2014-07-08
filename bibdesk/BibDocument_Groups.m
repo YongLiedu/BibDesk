@@ -573,10 +573,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSArray *array;
     
     // optimize for single selections
-    if ([selectedGroups count] == 1 && [self hasGroupTypeSelected:BDSKLibraryGroupType]) {
-        array = publications;
-    } else if ([selectedGroups count] == 1 && [self hasGroupTypeSelected:BDSKExternalGroupType | BDSKStaticGroupType | BDSKLastImportGroupType]) {
-        array = [(id)[selectedGroups lastObject] publications];
+    if ([selectedGroups count] == 1) {
+        array = [(BDSKGroup *)[selectedGroups lastObject] publications];
     } else {
         // multiple selections are never shared groups, so they are contained in the publications
         NSMutableArray *filteredArray = [NSMutableArray arrayWithCapacity:[publications count]];

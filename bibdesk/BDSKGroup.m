@@ -209,6 +209,15 @@ static NSArray *noCountCellValueKeys = nil;
     return [[self document] macroResolver];
 }
 
+- (NSArray *)publications {
+    NSMutableArray *publications = [NSMutableArray array];
+    for (BibItem *pub in [[self document] publications]) {
+        if ([self containsItem:pub])
+            [publications addObject:pub];
+    }
+    return publications;
+}
+
 // comparisons
 
 - (NSComparisonResult)nameCompare:(BDSKGroup *)otherGroup {

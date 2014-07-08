@@ -1106,27 +1106,19 @@
     
     docFlags.dragFromExternalGroups = NO;
 	
-    if ([items containsObject:[groups libraryGroup]]) {
-        pubs = [NSArray arrayWithArray:publications];
-    } else if ([items count] > 1) {
+    if ([items count] > 1) {
         // multiple dragged rows always are the selected rows
-        pubs = [NSArray arrayWithArray:groupedPublications];
+        pubs = groupedPublications;
     } else if ([items count] == 1) {
         // a single row, not necessarily the selected one
         BDSKGroup *group = [items firstObject];
-        if (0 != ([group groupType] & BDSKExternalGroupType)) {
-            pubs = [NSArray arrayWithArray:[(id)group publications]];
-            if ([group groupType] == BDSKSearchGroupType) {
-                additionalFileExtensions = [NSArray arrayWithObject:@"bdsksearch"];
+        if (0 == ([group groupType] & BDSKParentGroupType)) {
+            pubs = [group publications];
+            if (0 != ([group groupType] & BDSKExternalGroupType)) {
+                docFlags.dragFromExternalGroups = YES;
+                if ([group groupType] == BDSKSearchGroupType)
+                    additionalFileExtensions = [NSArray arrayWithObject:@"bdsksearch"];
             }
-            docFlags.dragFromExternalGroups = YES;
-        } else if (0 == ([group groupType] & BDSKParentGroupType)) {
-            NSMutableArray *pubsInGroup = [NSMutableArray arrayWithCapacity:[publications count]];
-            for (BibItem *pub in publications) {
-                if ([group containsItem:pub]) 
-                    [pubsInGroup addObject:pub];
-            }
-            pubs = pubsInGroup;
         }
     }
     if ([pubs count] > 0) {
@@ -1137,7 +1129,8 @@
             if (templateIdx != NSNotFound)
                 dragCopyType += templateIdx;
         }
-        success = [self writePublications:pubs forDragCopyType:dragCopyType toPasteboard:pboard];
+        // we copy the publication array because we don't want any mutable array of pubs that may change later
+        success = [self writePublications:[NSArray arrayWithArray:pubs] forDragCopyType:dragCopyType toPasteboard:pboard];
     } else if ([additionalFileExtensions count] > 0) {
         success = [pboard clearContents];
     }

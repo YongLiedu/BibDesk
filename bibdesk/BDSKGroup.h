@@ -178,6 +178,8 @@ typedef NSUInteger BDSKGroupType;
 
 - (BDSKMacroResolver *)macroResolver;
 
+- (NSArray *)publications;
+
 /*!
 	@method nameCompare:
 	@abstract Compares the string value of the receiver and the otherGroup. 
