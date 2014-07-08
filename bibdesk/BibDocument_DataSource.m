@@ -1064,7 +1064,7 @@
     
     while (groupIndex != NSNotFound) {
         BDSKGroup *group = [groupOutlineView itemAtRow:groupIndex];
-        if (0 == ([group groupType] & BDSKExternalGroupType)) {
+        if (0 == ([group groupType] & (BDSKExternalGroupType | BDSKParentGroupType))) {
             for (BibItem *pub in selectedPubs) {
                 if ([group containsItem:pub]) {
                     [indexSet addIndex:groupIndex];
