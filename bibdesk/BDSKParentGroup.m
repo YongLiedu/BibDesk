@@ -89,6 +89,8 @@
     [super dealloc];
 }
 
+- (NSArray *)publications { return nil; }
+
 - (id)cellValue { return [self name]; }
 
 // this is used to remember expanded state, as they are usually unique we use the class, also for backward compatibility
