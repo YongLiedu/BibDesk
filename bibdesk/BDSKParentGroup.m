@@ -100,11 +100,11 @@
     return children;
 }
 
-- (NSArray *)childrenInRange:(NSRange)range {
-    return [children subarrayWithRange:range];
-}
-
 - (NSUInteger)numberOfChildren { return [children count]; }
+
+- (NSArray *)childrenAtIndex:(NSUInteger)idx count:(NSUInteger)aCount {
+    return [children subarrayWithRange:NSMakeRange(idx, aCount)];
+}
 
 - (void)resortInRange:(NSRange)range {
     if (sortDescriptors && range.length > 1)
@@ -235,23 +235,23 @@
 - (BDSKGroupType)groupType { return BDSKExternalParentGroupType; }
 
 - (NSArray *)webGroups {
-    return [self childrenInRange:NSMakeRange(webGroupLocation, webGroupCount)];
+    return [self childrenAtIndex:webGroupLocation count:webGroupCount];
 }
 
 - (NSArray *)searchGroups {
-    return [self childrenInRange:NSMakeRange(searchGroupLocation, searchGroupCount)];
+    return [self childrenAtIndex:searchGroupLocation count:searchGroupCount];
 }
 
 - (NSArray *)sharedGroups {
-    return [self childrenInRange:NSMakeRange(sharedGroupLocation, sharedGroupCount)];
+    return [self childrenAtIndex:sharedGroupLocation count:sharedGroupCount];
 }
 
 - (NSArray *)URLGroups {
-    return [self childrenInRange:NSMakeRange(URLGroupLocation, URLGroupCount)];
+    return [self childrenAtIndex:URLGroupLocation count:URLGroupCount];
 }
 
 - (NSArray *)scriptGroups {
-    return [self childrenInRange:NSMakeRange(scriptGroupLocation, scriptGroupCount)];
+    return [self childrenAtIndex:scriptGroupLocation count:scriptGroupCount];
 }
 
 - (void)addWebGroup:(BDSKWebGroup *)group {
@@ -423,8 +423,7 @@
 - (NSArray *)smartGroups {
     if (hasLastImportGroup == 0)
         return [self children];
-    NSRange range = NSMakeRange(1, [self numberOfChildren] - 1);
-    return [self childrenInRange:range];
+    return [self childrenAtIndex:1 count:[self numberOfChildren] - 1];
 }
 
 - (void)setLastImportedPublications:(NSArray *)pubs {
