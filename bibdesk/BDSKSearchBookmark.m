@@ -356,7 +356,7 @@ static Class BDSKSearchBookmarkClass = Nil;
 }
 
 - (NSImage *)icon {
-    return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)];
+    return [NSImage imageNamed:NSImageNameFolder];
 }
 
 - (NSArray *)children {

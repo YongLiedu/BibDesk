@@ -159,7 +159,7 @@
     if (image == nil) {
         image = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
         [image lockFocus];
-        [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)] drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+        [[NSImage imageNamed:NSImageNameFolder] drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
         [[self class] drawAddBadgeAtPoint:NSMakePoint(18.0, 18.0)];
         [image unlockFocus];
     }

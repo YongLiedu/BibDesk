@@ -112,7 +112,7 @@
 }
 
 - (NSImage *)icon {
-	return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)];
+	return [NSImage imageNamed:NSImageNameFolder];
 }
 
 - (BDSKGroupType)groupType { return BDSKStaticGroupType; }

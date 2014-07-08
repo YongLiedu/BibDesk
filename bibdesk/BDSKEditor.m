@@ -2584,7 +2584,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 		[self setStatus:NSLocalizedString(@"Linked file needs to be filed.",@"Linked file needs to be filed.")];
 		if ([[statusBar iconIdentifiers] containsObject:@"NeedsToBeFiled"] == NO) {
 			NSString *tooltip = NSLocalizedString(@"The linked file needs to be filed.", @"Tool tip message");
-			[statusBar addIcon:[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)] withIdentifier:@"NeedsToBeFiled" toolTip:tooltip];
+			[statusBar addIcon:[NSImage imageNamed:NSImageNameFolder] withIdentifier:@"NeedsToBeFiled" toolTip:tooltip];
 		}
 	} else {
 		[self setStatus:@""];
