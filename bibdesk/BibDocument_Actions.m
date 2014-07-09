@@ -1256,7 +1256,7 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)changeMainTableFont:(id)sender{
-    NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKMainTableViewFontNameKey];
+    NSString *fontName = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKMainTableViewFontNameKey];
     CGFloat fontSize = [[NSUserDefaults standardUserDefaults] doubleForKey:BDSKMainTableViewFontSizeKey];
 	[[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
     [[NSFontManager sharedFontManager] orderFrontFontPanel:sender];
@@ -1267,7 +1267,7 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)changeGroupTableFont:(id)sender{
-    NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKGroupTableViewFontNameKey];
+    NSString *fontName = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKGroupTableViewFontNameKey];
     CGFloat fontSize = [[NSUserDefaults standardUserDefaults] doubleForKey:BDSKGroupTableViewFontSizeKey];
 	[[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
     [[NSFontManager sharedFontManager] orderFrontFontPanel:sender];

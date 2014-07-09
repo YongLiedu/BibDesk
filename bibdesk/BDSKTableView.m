@@ -145,7 +145,7 @@ static char BDSKTableViewFontDefaultsObservationContext;
     NSFontManager *fontManager = [NSFontManager sharedFontManager];
     NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
     
-    NSString *fontName = [sud objectForKey:fontNamePrefKey];
+    NSString *fontName = [sud stringForKey:fontNamePrefKey];
     CGFloat fontSize = [sud doubleForKey:fontSizePrefKey];
 	NSFont *font = nil;
         
@@ -161,7 +161,7 @@ static char BDSKTableViewFontDefaultsObservationContext;
 
 - (void)tableViewFontChanged {
     if (fontNamePreferenceKey && fontSizePreferenceKey) {
-        NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:fontNamePreferenceKey];
+        NSString *fontName = [[NSUserDefaults standardUserDefaults] stringForKey:fontNamePreferenceKey];
         CGFloat fontSize = [[NSUserDefaults standardUserDefaults] doubleForKey:fontSizePreferenceKey];
         NSFont *font = nil;
         
@@ -188,7 +188,7 @@ static char BDSKTableViewFontDefaultsObservationContext;
 
 - (void)updateFontPanel:(NSNotification *)notification {
     if ([[[self window] firstResponder] isEqual:self] && fontNamePreferenceKey && fontSizePreferenceKey) {
-        NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:fontNamePreferenceKey];
+        NSString *fontName = [[NSUserDefaults standardUserDefaults] stringForKey:fontNamePreferenceKey];
         CGFloat fontSize = [[NSUserDefaults standardUserDefaults] doubleForKey:fontSizePreferenceKey];
         [[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
     }

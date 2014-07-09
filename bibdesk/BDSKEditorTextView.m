@@ -120,7 +120,7 @@ static char BDSKEditorTextViewDefaultsObservationContext;
 // used only for reading the default font from prefs and then changing the font of the text storage
 - (void)updateFontFromPreferences;
 {
-    NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKEditorFontNameKey];
+    NSString *fontName = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKEditorFontNameKey];
     CGFloat fontSize = [[NSUserDefaults standardUserDefaults] doubleForKey:BDSKEditorFontSizeKey];
     NSFont *font = nil;
     
