@@ -2036,7 +2036,7 @@ on the Desktop by hitting the @buttontitle{Dump} button.
 Consolidating linked files is undoable, so feel free to experiment.
 
 You can also AutoFile a single linked file by choosing the 
-@menutitle{AutoFile Paper} menu item in the action menu 
+@menutitle{AutoFile Linked Files} menu item in the action menu 
 of the Editor. 
 
 @c --------------------------------------------------------------------------------------
