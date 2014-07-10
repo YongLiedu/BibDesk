@@ -106,7 +106,7 @@ static NSDictionary *errorAttr = nil;
 
 + (NSString *)parseFormatForLinkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub
 {
-	NSString *localFileFormat = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKLocalFileFormatKey];
+	NSString *localFileFormat = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKLocalFileFormatKey];
     
     return [self parseFormat:localFileFormat forLinkedFile:file ofItem:pub];
 }

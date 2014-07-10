@@ -217,7 +217,7 @@ static double runLoopTimeout = 30;
     generatedDataMask = BDSKGeneratedNoneMask;
     
     // make sure the PATH environment variable is set correctly
-    NSString *texCommand = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKTeXBinPathKey];
+    NSString *texCommand = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKTeXBinPathKey];
     NSString *texCommandDir = [[BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:texCommand] stringByDeletingLastPathComponent];
 
     if (NO == [texCommandDir isEqualToString:binDirPath]) {
@@ -380,7 +380,7 @@ static double runLoopTimeout = 30;
 - (BOOL)writeTeXFileForCiteKeys:(NSArray *)citeKeys isLTB:(BOOL)ltb{
     
     NSMutableString *texFile = nil;
-    NSString *style = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKBTStyleKey];
+    NSString *style = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKBTStyleKey];
     NSStringEncoding encoding = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey];
     NSError *error = nil;
     BOOL didWrite = NO;
@@ -460,7 +460,7 @@ static double runLoopTimeout = 30;
     
     if (type & (BDSKGeneratedLaTeXMask | BDSKGeneratedLTBMask)) {
         // This task runs bibtex on our bib file 
-        NSString *command = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKBibTeXBinPathKey];
+        NSString *command = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKBibTeXBinPathKey];
         binPath = [BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:command];
         NSMutableArray *args = [NSMutableArray array];
         [args addObjectsFromArray:[BDSKShellCommandFormatter argumentsFromCommand:command]];
@@ -468,7 +468,7 @@ static double runLoopTimeout = 30;
         arguments = args;
     } else {
         // This task runs latex on our tex file 
-        NSString *command = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKTeXBinPathKey];
+        NSString *command = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKTeXBinPathKey];
         binPath = [BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:command];
         NSMutableArray *args = [NSMutableArray arrayWithObject:@"-interaction=batchmode"];
         [args addObjectsFromArray:[BDSKShellCommandFormatter argumentsFromCommand:command]];

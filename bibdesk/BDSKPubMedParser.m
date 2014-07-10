@@ -213,7 +213,7 @@
             newString = [value copy];
         } else {
 			// append to old value, using separator from prefs
-            newString = [[NSString alloc] initWithFormat:@"%@%@%@", oldString, [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey], value];
+            newString = [[NSString alloc] initWithFormat:@"%@%@%@", oldString, [[NSUserDefaults standardUserDefaults] stringForKey:BDSKDefaultGroupFieldSeparatorKey], value];
 		}
     }else{
         // the default, just set the value

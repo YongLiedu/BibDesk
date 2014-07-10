@@ -138,7 +138,7 @@
 - (void)updateNameUI
 {
     [[sharedNameField cell] setPlaceholderString:[BDSKSharingServer defaultSharingName]];
-    [sharedNameField setStringValue:[sud objectForKey:BDSKSharingNameKey]];
+    [sharedNameField setStringValue:[sud stringForKey:BDSKSharingNameKey]];
 }
 
 - (void)updateStatusUI
@@ -186,7 +186,7 @@
 // setting to the empty string will restore the default
 - (IBAction)changeSharedName:(id)sender
 {
-    NSString *oldName = [sud objectForKey:BDSKSharingNameKey] ?: @"";
+    NSString *oldName = [sud stringForKey:BDSKSharingNameKey] ?: @"";
     NSString *newName = [sender stringValue] ?: @"";
     if ([oldName isEqualToString:newName] == NO) {
         [sud setObject:newName forKey:BDSKSharingNameKey];

@@ -215,7 +215,7 @@ static NSMapTable *selectorTable = NULL;
     
     // hidden pref as support for RFE #1690155 https://sourceforge.net/tracker/index.php?func=detail&aid=1690155&group_id=61487&atid=497426
     // partially implemented; view will represent this as inherited unless it goes through -[BibItem valueOfField:inherit:], which fields like "Key" certainly will
-    NSArray *emptyFields = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKFieldsToWriteIfEmptyKey];
+    NSArray *emptyFields = [[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKFieldsToWriteIfEmptyKey];
     if ([emptyFields count])
         fieldsToWriteIfEmpty = [[NSSet alloc] initWithArray:emptyFields];
 }
@@ -1074,7 +1074,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     if ([self hasEmptyOrDefaultCiteKey] || [[owner publications] citeKeyIsUsed:suggestion byItemOtherThan:self])
         suggestion = nil;
     
-	NSString *citeKeyFormat = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKCiteKeyFormatKey];
+	NSString *citeKeyFormat = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteKeyFormatKey];
     NSString *ck = [BDSKFormatParser parseFormat:citeKeyFormat forField:BDSKCiteKeyString ofItem:self suggestion:suggestion];
 	if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKCiteKeyLowercaseKey]) {
 		ck = [ck lowercaseString];
@@ -2603,7 +2603,7 @@ static void addFilesToArray(const void *value, void *context)
     } else if([field isEqualToString:BDSKCiteseerUrlString] && [value rangeOfString:@"://"].length == 0){
         // JabRef and CiteSeer use Citeseerurl for CiteSeer links
         // cache this base URL; it's a hidden pref, so you have to quit/relaunch to set it anyway
-        baseURL = [NSURL URLWithString:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKCiteseerHostKey]];
+        baseURL = [NSURL URLWithString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteseerHostKey]];
     } else if([value hasPrefix:@"\\url{"] && [value hasSuffix:@"}"]){
         // URLs are often enclosed in a \url tex command in bibtex
         value = [value substringWithRange:NSMakeRange(5, [value length] - 6)];
@@ -2957,7 +2957,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         else if ([field isCitationField])
             [string appendString:@", "];
         else
-            [string appendString:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey]];
+            [string appendString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKDefaultGroupFieldSeparatorKey]];
     }
     
     [string appendString:groupDescription];
@@ -3287,7 +3287,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
                 if(value)
                     [item setField:BDSKDateString toValue:value];
                 
-                value = [[metadata valueForKey:PDFDocumentKeywordsAttribute] componentsJoinedByString:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey]];
+                value = [[metadata valueForKey:PDFDocumentKeywordsAttribute] componentsJoinedByString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKDefaultGroupFieldSeparatorKey]];
                 if(value)
                     [item setField:BDSKKeywordsString toValue:value];
             }

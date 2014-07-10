@@ -137,7 +137,7 @@ static void fixLegacyTableColumnIdentifiers()
 - (void)checkFormatStrings {
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
     BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
-    NSString *formatString = [sud objectForKey:BDSKCiteKeyFormatKey];
+    NSString *formatString = [sud stringForKey:BDSKCiteKeyFormatKey];
     NSString *error = nil;
     NSInteger button = 0;
     
@@ -162,7 +162,7 @@ static void fixLegacyTableColumnIdentifiers()
         }
     }
     
-    formatString = [sud objectForKey:BDSKLocalFileFormatKey];
+    formatString = [sud stringForKey:BDSKLocalFileFormatKey];
     error = nil;
     
     if ([sud boolForKey:BDSKDidMigrateLocalUrlFormatDefaultsKey] == NO) {
@@ -304,9 +304,9 @@ static void fixLegacyTableColumnIdentifiers()
     [BDSKCompletionServer sharedCompletionServer];
     
     NSString *versionString = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
-    if(![versionString isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKLastVersionLaunchedKey]])
+    if(![versionString isEqualToString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKLastVersionLaunchedKey]])
         [self showRelNotes:nil];
-    if([[NSUserDefaults standardUserDefaults] objectForKey:BDSKLastVersionLaunchedKey] == nil) // show new users the readme file; others just see the release notes
+    if([[NSUserDefaults standardUserDefaults] stringForKey:BDSKLastVersionLaunchedKey] == nil) // show new users the readme file; others just see the release notes
         [self showReadMeFile:nil];
     [[NSUserDefaults standardUserDefaults] setObject:versionString forKey:BDSKLastVersionLaunchedKey];
     
@@ -357,7 +357,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 - (BOOL)applicationShouldOpenUntitledFile:(NSApplication *)sender
 {
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
-    NSInteger option = [[sud objectForKey:BDSKStartupBehaviorKey] integerValue];
+    NSInteger option = [sud integerForKey:BDSKStartupBehaviorKey];
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKIsRelaunchKey])
         option = BDSKStartupOpenLastOpenFiles;
     switch (option) {
@@ -397,7 +397,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 
 // we don't want to reopen last open files or show an Open dialog when re-activating the app
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag {
-    NSInteger startupOption = [[[NSUserDefaults standardUserDefaults] objectForKey:BDSKStartupBehaviorKey] integerValue];
+    NSInteger startupOption = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKStartupBehaviorKey];
     return flag || (startupOption == BDSKStartupOpenUntitledFile || startupOption == BDSKStartupOpenDefaultFile);
 }
 

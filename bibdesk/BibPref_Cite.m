@@ -96,7 +96,7 @@ static char BDSKBibPrefCiteDefaultsObservationContext;
 	
     [separateCiteRadio selectCellWithTag:[sud integerForKey:BDSKSeparateCiteKey]];
     [prependTildeCheckButton setState:[sud boolForKey:BDSKCitePrependTildeKey] ? NSOnState : NSOffState];
-    [citeBracketRadio selectCellWithTag:[[sud objectForKey:BDSKCiteStartBracketKey] isEqualToString:@"{"] ? 1 : 2];
+    [citeBracketRadio selectCellWithTag:[[sud stringForKey:BDSKCiteStartBracketKey] isEqualToString:@"{"] ? 1 : 2];
     [citeStringField setStringValue:[NSString stringWithFormat:@"\\%@", citeString]];
     switch([[separateCiteRadio selectedCell] tag]){
         case 2:

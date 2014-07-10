@@ -116,7 +116,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (void)updatePapersFolderUI{
-	NSString *papersFolder = [[sud objectForKey:BDSKPapersFolderPathKey] stringByAbbreviatingWithTildeInPath];
+	NSString *papersFolder = [[sud stringForKey:BDSKPapersFolderPathKey] stringByAbbreviatingWithTildeInPath];
 	
     if ([NSString isEmptyString:papersFolder]) {
 		[papersFolderLocationTextField setStringValue:USE_DOCUMENT_FOLDER];
@@ -211,7 +211,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
         }
 	} else {
         [lastPapersFolderPath release];
-        lastPapersFolderPath = [[[sud objectForKey:BDSKPapersFolderPathKey] stringByExpandingTildeInPath] retain];
+        lastPapersFolderPath = [[[sud stringForKey:BDSKPapersFolderPathKey] stringByExpandingTildeInPath] retain];
 		[sud setObject:@"" forKey:BDSKPapersFolderPathKey];
 		[self updatePapersFolderUI];
 	}

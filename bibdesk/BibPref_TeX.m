@@ -70,7 +70,7 @@ static NSSet *standardStyles = nil;
     
     [usesTeXButton setState:[sud boolForKey:BDSKUsesTeXKey] ? NSOnState : NSOffState];
   
-    [bibTeXStyleField setStringValue:[sud objectForKey:BDSKBTStyleKey]];
+    [bibTeXStyleField setStringValue:[sud stringForKey:BDSKBTStyleKey]];
     [bibTeXStyleField setEnabled:[sud boolForKey:BDSKUsesTeXKey]];
     [encodingPopUpButton setEncoding:[sud integerForKey:BDSKTeXPreviewFileEncodingKey]];
 }
@@ -87,7 +87,7 @@ static NSSet *standardStyles = nil;
 }
 
 - (void)updateTeXPathUI{
-    NSString *teXPath = [sud objectForKey:BDSKTeXBinPathKey];
+    NSString *teXPath = [sud stringForKey:BDSKTeXBinPathKey];
     [texBinaryPathField setStringValue:teXPath];
     if ([BDSKShellCommandFormatter isValidExecutableCommand:teXPath])
         [texBinaryPathField setTextColor:[NSColor blackColor]];
@@ -103,7 +103,7 @@ static NSSet *standardStyles = nil;
 }
 
 - (void)updateBibTeXPathUI{
-    NSString *bibTeXPath = [sud objectForKey:BDSKBibTeXBinPathKey];
+    NSString *bibTeXPath = [sud stringForKey:BDSKBibTeXBinPathKey];
     [bibtexBinaryPathField setStringValue:bibTeXPath];
     if ([BDSKShellCommandFormatter isValidExecutableCommand:bibTeXPath])
         [bibtexBinaryPathField setTextColor:[NSColor blackColor]];
@@ -151,7 +151,7 @@ static NSSet *standardStyles = nil;
     if (NSAlertDefaultReturn == returnCode) {
         [sud setObject:newStyle forKey:BDSKBTStyleKey];
     } else if (NSAlertAlternateReturn == returnCode) {
-        [bibTeXStyleField setStringValue:[sud objectForKey:BDSKBTStyleKey]];
+        [bibTeXStyleField setStringValue:[sud stringForKey:BDSKBTStyleKey]];
     } else {
         [self openTeXPreviewFile:self];
     }

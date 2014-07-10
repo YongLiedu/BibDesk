@@ -241,7 +241,7 @@ static inline void addStringValueOfNodeForField(NSXMLNode *child, NSString *fiel
         return;
 
     NSMutableString *meshString = [NSMutableString new];
-    NSString *keywordSeparator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+    NSString *keywordSeparator = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKDefaultGroupFieldSeparatorKey];
     
     for (NSXMLNode *meshNode in [listNode children]) {
         if ([[meshNode name] isEqualToString:@"MeshHeading"]) {
@@ -266,7 +266,7 @@ static inline void addStringValueOfNodeForField(NSXMLNode *child, NSString *fiel
         return;
     
     NSMutableString *keywordString = [NSMutableString new];
-    NSString *keywordSeparator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+    NSString *keywordSeparator = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKDefaultGroupFieldSeparatorKey];
     
     for (NSXMLNode *keywordNode in [listNode children]) {
         

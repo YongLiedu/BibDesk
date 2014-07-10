@@ -888,7 +888,7 @@ static void addAuthorNamesToDictionary(NSArray *names, NSMutableDictionary *pubF
     addStringForXPathToDictionary(staticChild, @"./fullrecord_metadata/abstracts/abstract/abstract_text/p", @"\n\n", BDSKAbstractString, pubFields);
     
     /* get keywords */
-    NSString *keywordSeparator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+    NSString *keywordSeparator = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKDefaultGroupFieldSeparatorKey];
     addStringForXPathToDictionary(staticChild, @"./item/keywords_plus/keyword", keywordSeparator, BDSKKeywordsString, pubFields);						
     
     /* get identifiers (DOI, ISSN, ISBN) */
@@ -978,7 +978,7 @@ static void addAuthorNamesToDictionary(NSArray *names, NSMutableDictionary *pubF
             addStringToDictionaryIfNotNil([[pair value] firstObject], BDSKVolumeString, pubFields);
     }
 
-    NSString *keywordSeparator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+    NSString *keywordSeparator = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKDefaultGroupFieldSeparatorKey];
     for (pair in [self keywords]) {
         if ([[pair label] isEqualToString:@"Keywords"])
             addStringToDictionaryIfNotNil([[pair value] componentsJoinedByString:keywordSeparator], BDSKKeywordsString, pubFields);

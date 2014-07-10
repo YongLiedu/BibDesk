@@ -81,7 +81,7 @@ static NSString *__documentTypeString = @"Doc-Type";
 {
     BDSKINITIALIZE;
     correctFields = [[NSSet alloc] initWithObjects:BDSKVolumeString, @"Language", BDSKAbstractString, nil];
-    shortJournalNameString = [[[[NSUserDefaults standardUserDefaults] objectForKey:BDSKShortJournalNameFieldKey] fieldName] copy];
+    shortJournalNameString = [[[[NSUserDefaults standardUserDefaults] stringForKey:BDSKShortJournalNameFieldKey] fieldName] copy];
 }
 
 static void addKeyValueToAnnote(NSString *key, NSString *value, NSMutableDictionary *pubFields)

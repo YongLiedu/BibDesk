@@ -177,7 +177,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 + (NSString *)sharingName;
 {
     // docs say to use computer name instead of host name http://developer.apple.com/qa/qa2001/qa1228.html
-    NSString *sharingName = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKSharingNameKey];
+    NSString *sharingName = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKSharingNameKey];
     BDSKASSERT(dynamicStore);
     // default to the computer name as set in sys prefs (sharing)
     if([NSString isEmptyString:sharingName])
@@ -237,7 +237,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 - (void)handleComputerNameChangedNotification:(NSNotification *)note;
 {
     // if we're using the computer name, restart sharing so the name propagates correctly; avoid conflicts with other users' share names
-    if([NSString isEmptyString:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKSharingNameKey]])
+    if([NSString isEmptyString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKSharingNameKey]])
         [self restartSharingIfNeeded];
 }
 

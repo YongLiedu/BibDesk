@@ -689,7 +689,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     [itemTypeButton removeAllItems];
     [itemTypeButton addItemsWithTitles:[[BDSKTypeManager sharedManager] types]];
     
-    NSString *type = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKPubTypeStringKey];
+    NSString *type = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKPubTypeStringKey];
     
     [self setType:type];
     
@@ -990,7 +990,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         if([selKey isPersonField])
             separator = @" and ";
         else
-            separator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+            separator = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKDefaultGroupFieldSeparatorKey];
         selString = [NSString stringWithFormat:@"%@%@%@", oldValue, separator, selString];
     }
     
@@ -1198,7 +1198,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
             if([key isPersonField])
                 separator = @" and ";
             else
-                separator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+                separator = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKDefaultGroupFieldSeparatorKey];
             value = [NSString stringWithFormat:@"%@%@%@", oldValue, separator, value];
         }
         
@@ -1225,7 +1225,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
                 if([selKey isPersonField])
                     separator = @" and ";
                 else
-                    separator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+                    separator = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKDefaultGroupFieldSeparatorKey];
                 string = [NSString stringWithFormat:@"%@%@%@", oldValue, separator, string];
             }
             

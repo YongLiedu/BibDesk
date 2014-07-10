@@ -269,7 +269,7 @@ enum {
 }
 
 - (NSString *)field {
-    return [[NSUserDefaults standardUserDefaults] objectForKey:BDSKFindControllerLastFindAndReplaceFieldKey];
+    return [[NSUserDefaults standardUserDefaults] stringForKey:BDSKFindControllerLastFindAndReplaceFieldKey];
 }
 
 - (void)setField:(NSString *)newField {

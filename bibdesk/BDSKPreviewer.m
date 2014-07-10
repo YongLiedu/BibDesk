@@ -297,7 +297,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
             
             // now that we correctly check return codes from the NSTask, users blame us for TeX preview failures that have been failing all along, so we'll try to give them a clue to the error if possible (which may save a LART later on)
             NSSet *standardStyles = [NSSet setWithObjects:@"abbrv", @"acm", @"alpha", @"apalike", @"ieeetr", @"plain", @"siam", @"unsrt", nil];
-            NSString *btStyle = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKBTStyleKey];
+            NSString *btStyle = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKBTStyleKey];
             if([standardStyles containsObject:btStyle] == NO)
                 [errorString appendFormat:NSLocalizedString(@"***** WARNING: You are using a non-standard BibTeX style *****\nThe style \"%@\" may require additional \\usepackage commands to function correctly.\n\n", @"possible cause of TeX failure"), btStyle];
             

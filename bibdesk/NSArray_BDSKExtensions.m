@@ -183,7 +183,7 @@
 
 - (NSString *)componentsJoinedByDefaultJoinString
 {
-    return [self componentsJoinedByString:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultArrayJoinStringKey]];
+    return [self componentsJoinedByString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKDefaultArrayJoinStringKey]];
 }
 
 - (NSString *)componentsJoinedByCommaAndAnd
