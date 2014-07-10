@@ -154,7 +154,7 @@
 }
 
 - (IBAction)changeAbstractFont:(id)sender {
-    [sud setDouble:[sender fontSize] forKey:BDSKEditorFontNameKey];
+    [sud setDouble:[sender fontSize] forKey:BDSKEditorFontSizeKey];
     [sud setObject:[sender fontName] forKey:BDSKEditorFontNameKey];
 }
 
