@@ -3436,6 +3436,8 @@ It exports an RSS representation of the document in the same folder as the BibTe
         <span class="ascomment">-- get the document's file</span>
         <span class="aslangkeyword">set</span> <span class="asvariable">theDocFile</span> <span class="aslangkeyword">to the</span> <span class="asproperty">file</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocument</span>
         <span class="aslangkeyword">tell</span> <span class="asclass">application</span> <span class="asvalue">"Finder"</span>
+            <span class="ascomment">-- Finder redefines the file type, which is a mess</span>
+            <span class="aslangkeyword">set</span> <span class="asvariable">theDocFile</span> <span class="aslangkeyword">to</span> <span class="asproperty">file</span> <span class="asvariable">theDocFile</span>
             <span class="ascomment">-- extract containing folder and file name</span>
             <span class="aslangkeyword">set</span> <span class="asvariable">theFolder</span> <span class="aslangkeyword">to the</span> <span class="asproperty">container</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocFile</span>
             <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to the</span> <span class="asproperty">name</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocFile</span>
@@ -3474,6 +3476,8 @@ It exports an RSS representation of the document in the same folder as the BibTe
         @i{-- get the document's file}
         @b{set} theDocFile @b{to the} file of theDocument
         @b{tell} application "Finder"
+            @i{-- Finder redefines the file type, which is a mess}
+            @b{set} tehDocFile @b{to} file theDocFile
             @i{-- extract containing folder and file name}
             @b{set} theFolder @b{to the} container of theDocFile
             @b{set} theFileName @b{to the} name of theDocFile
