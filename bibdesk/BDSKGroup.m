@@ -218,16 +218,6 @@ static NSArray *noCountCellValueKeys = nil;
     return publications;
 }
 
-// comparisons
-
-- (NSComparisonResult)nameCompare:(BDSKGroup *)otherGroup {
-    return [[self name] sortCompare:[otherGroup name]];
-}
-
-- (NSComparisonResult)countCompare:(BDSKGroup *)otherGroup {
-	return [[self numberValue] compare:[otherGroup numberValue]];
-}
-
 - (BOOL)containsItem:(BibItem *)item { return NO; }
 
 @end

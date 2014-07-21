@@ -181,22 +181,6 @@ typedef NSUInteger BDSKGroupType;
 - (NSArray *)publications;
 
 /*!
-	@method nameCompare:
-	@abstract Compares the string value of the receiver and the otherGroup. 
-	@discussion -
-	@param otherGroup The group object to compare the receiver with.
-*/
-- (NSComparisonResult)nameCompare:(BDSKGroup *)otherGroup;
-
-/*!
-	@method nameCompare:
-	@abstract Compares the number value of the receiver and the otherGroup. 
-	@discussion -
-	@param otherGroup The group object to compare the receiver with.
-*/
-- (NSComparisonResult)countCompare:(BDSKGroup *)otherGroup;
-
-/*!
 	@method containsItem:
 	@abstract Returns a boolean indicating whether the item is contained in the group.
 	@discussion -

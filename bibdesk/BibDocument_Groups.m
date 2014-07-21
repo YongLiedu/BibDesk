@@ -1497,12 +1497,12 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
         NSSortDescriptor *countSort = [[NSSortDescriptor alloc] initWithKey:@"numberValue" ascending:!docFlags.sortGroupsDescending  selector:@selector(compare:)];
-        NSSortDescriptor *nameSort = [[NSSortDescriptor alloc] initWithKey:@"self" ascending:docFlags.sortGroupsDescending  selector:@selector(nameCompare:)];
+        NSSortDescriptor *nameSort = [[NSSortDescriptor alloc] initWithKey:@"name" ascending:docFlags.sortGroupsDescending  selector:@selector(sortCompare:)];
         sortDescriptors = [NSArray arrayWithObjects:countSort, nameSort, nil];
         [countSort release];
         [nameSort release];
     } else {
-        NSSortDescriptor *nameSort = [[NSSortDescriptor alloc] initWithKey:@"self" ascending:!docFlags.sortGroupsDescending  selector:@selector(nameCompare:)];
+        NSSortDescriptor *nameSort = [[NSSortDescriptor alloc] initWithKey:@"name" ascending:!docFlags.sortGroupsDescending  selector:@selector(sortCompare:)];
         sortDescriptors = [NSArray arrayWithObjects:nameSort, nil];
         [nameSort release];
     }
