@@ -1,4 +1,4 @@
-How To Release BibDesk
+How to Release BibDesk
 
 - make sure your working copy is up-to-date (run "svn up")
 
