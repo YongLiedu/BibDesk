@@ -179,6 +179,33 @@
     [super dealloc];
 }
 
+- (BOOL)respondsToSelector:(SEL)aSelector {
+    if (aSelector == @selector(webView:setURL:) ||
+        aSelector == @selector(webView:setIcon:) ||
+        aSelector == @selector(webView:setLoading:))
+        return [navigationDelegate respondsToSelector:aSelector];
+    else if (aSelector == @selector(webView:setTitle:) ||
+        aSelector == @selector(webView:didReceiveIcon:forFrame:) ||
+        aSelector == @selector(webView:didReceiveTitle:forFrame:) ||
+        aSelector == @selector(webView:setStatusText:) ||
+        aSelector == @selector(webViewRunModal:) ||
+        aSelector == @selector(webViewShow:) ||
+        aSelector == @selector(webViewClose:) ||
+        aSelector == @selector(webView:setFrame:) ||
+        aSelector == @selector(webView:setStatusBarVisible:))
+        return [delegate respondsToSelector:aSelector];
+    else if (aSelector == @selector(webView:didReceiveServerRedirectForProvisionalLoadForFrame:))
+        return [navigationDelegate respondsToSelector:@selector(webView:setURL:)];
+    else if (aSelector == @selector(webView:didReceiveIcon:forFrame:))
+        return [navigationDelegate respondsToSelector:@selector(webView:setIcon:)];
+    else if (aSelector == @selector(webView:didReceiveTitle:forFrame:))
+        return [delegate respondsToSelector:@selector(webView:setIcon:)];
+    else if (aSelector == @selector(webView:mouseDidMoveOverElement:modifierFlags:))
+        return [delegate respondsToSelector:@selector(webView:setStatusText:)];
+    else
+        return [super respondsToSelector:aSelector];
+}
+
 #pragma mark Accessors
 
 - (id<BDSKWebViewDelegate>)delegate { return delegate; }
