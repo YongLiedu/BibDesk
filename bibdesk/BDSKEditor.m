@@ -2728,6 +2728,19 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                 if([key isEqualToString:BDSKCrossrefString] && 
                    [publication canSetCrossref:newValue andCiteKey:[publication citeKey]] != BDSKNoCrossrefError)
                     continue;
+                if ([key hasPrefix:@"Bdsk-File-"]) {
+                    BDSKLinkedFile *aFile = [[BDSKLinkedFile alloc] initWithBase64String:newValue delegate:publication];
+                    if (aFile) {
+                        [publication insertObject:aFile inFilesAtIndex:[[publication localFiles] count]];
+                        [aFile release];
+                    }
+                } else if ([key hasPrefix:@"Bdsk-Url-"]) {
+                    BDSKLinkedFile *aURL = [[BDSKLinkedFile alloc] initWithURLString:newValue];
+                    if (aURL) {
+                        [publication insertObject:aURL inFilesAtIndex:[publication countOfFiles]];
+                        [aURL release];
+                    }
+                }
                 [publication setField:key toValue:newValue];
                 autoGenerateStatus = [self userChangedField:key from:oldValue to:newValue didAutoGenerate:autoGenerateStatus];
             }
