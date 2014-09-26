@@ -164,14 +164,19 @@
         return group;
     } else if ([class isSubclassOfClass:[BibItem class]]) {
         BibItem *item = nil;
-        NSString *bibtexString = contentsValue ?: [properties objectForKey:@"bibTeXString"];
-        if (bibtexString) {
+        NSUInteger stringType = BDSKBibTeXStringType;
+        NSString *string = [properties objectForKey:@"bibTeXString"];
+        if (contentsValue != nil) {
+            string = contentsValue;
+            stringType = BDSKUnknownStringType;
+        }
+        if (string) {
             NSError *error = nil;
-            NSArray *newPubs = [BDSKBibTeXParser itemsFromString:bibtexString owner:self error:&error];
-            if ([error isLocalErrorWithCode:kBDSKBibTeXParserFailed]) {
+            NSArray *newPubs = [BDSKStringParser itemsFromString:string ofType:stringType owner:self error:&error];
+            if (newPubs == nil || [error isLocalErrorWithCode:kBDSKBibTeXParserFailed]) {
                 NSScriptCommand *cmd = [NSScriptCommand currentCommand];
                 [cmd setScriptErrorNumber:NSInternalScriptError];
-                [cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"BibDesk failed to process the BibTeX entry %@ with error %@. It may be malformed.",@"Error description"), bibtexString, [error localizedDescription]]];
+                [cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"BibDesk failed to process the BibTeX entry %@ with error %@. It may be malformed.",@"Error description"), string, [error localizedDescription]]];
                 return nil;
             }
             item = [[newPubs objectAtIndex:0] retain];
