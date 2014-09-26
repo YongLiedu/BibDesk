@@ -164,7 +164,7 @@
         return group;
     } else if ([class isSubclassOfClass:[BibItem class]]) {
         BibItem *item = nil;
-        NSString *bibtexString = [properties objectForKey:@"bibTeXString"];
+        NSString *bibtexString = contentsValue ?: [properties objectForKey:@"bibTeXString"];
         if (bibtexString) {
             NSError *error = nil;
             NSArray *newPubs = [BDSKBibTeXParser itemsFromString:bibtexString owner:self error:&error];
