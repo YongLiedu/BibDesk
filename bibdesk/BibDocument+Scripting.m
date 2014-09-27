@@ -166,7 +166,7 @@
         BibItem *item = nil;
         NSUInteger stringType = BDSKBibTeXStringType;
         NSString *string = [properties objectForKey:@"bibTeXString"];
-        if (contentsValue != nil) {
+        if (string == nil) {
             string = contentsValue;
             stringType = BDSKUnknownStringType;
         }
