@@ -226,10 +226,13 @@ enum {
             if ([NSString isEmptyString:filteredString] && outError)
                 *outError = error ?: [NSError localErrorWithCode:kBDSKDocumentOpenError localizedDescription:NSLocalizedString(@"Unable To Open With Phony Cite Keys", @"Error description")];
         } else {
-            if ([NSString isEmptyString:filteredString] == NO) {
+            if ([NSString isEmptyString:lastSelectedFilterCommand]) {
+                filteredString = [NSString stringWithContentsOfURL:absoluteURL encoding:encoding error:NULL];
+            } else {
                 NSData *filteredData = [BDSKTask outputDataFromTaskWithLaunchPath:@"/bin/sh" arguments:[NSArray arrayWithObjects:@"-c", lastSelectedFilterCommand, nil] inputData:[NSData dataWithContentsOfURL:absoluteURL]];
                 filteredString = [[[NSString alloc] initWithData:filteredData encoding:encoding] autorelease];
-            } else if (outError) {
+            }
+            if ([NSString isEmptyString:filteredString] && outError) {
                 *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentOpenError localizedDescription:NSLocalizedString(@"Unable To Open With Filter", @"Error description")];
                 [*outError setValue:NSLocalizedString(@"Unable to read the file correctly. Please ensure that the shell command specified for filtering is correct by testing it in Terminal.app.", @"Error description") forKey:NSLocalizedRecoverySuggestionErrorKey];
             }
