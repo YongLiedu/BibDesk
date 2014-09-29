@@ -42,14 +42,14 @@
     
     id mainDocument;
     
+    NSMutableDictionary *customOpenSettings;
+    
     NSInteger openType;
-    NSStringEncoding lastSelectedEncoding;
-    NSString *lastSelectedFilterCommand;
 }
 
 - (id)mainDocument;
 
-- (NSStringEncoding)lastSelectedEncoding;
+- (NSStringEncoding)lastSelectedEncodingForURL:(NSURL *)aURL;
 
 - (IBAction)openDocumentUsingFilter:(id)sender;
 - (IBAction)openDocumentUsingPhonyCiteKeys:(id)sender;

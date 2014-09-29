@@ -54,6 +54,10 @@
 #import "BDSKOpenAccessoryViewController.h"
 #import "NSURL_BDSKExtensions.h"
 
+#define BDSKOpenTypeKey @"OpenType"
+#define BDSKEncodingKey @"Encoding"
+#define BDSKFilterKey   @"Filter"
+
 enum {
     BDSKOpenDefault,
     BDSKOpenUsingPhonyCiteKeys,
@@ -79,8 +83,8 @@ enum {
                                                      name:NSWindowDidBecomeMainNotification
                                                    object:nil];
         openType = BDSKOpenDefault;
-        lastSelectedEncoding = BDSKNoStringEncoding;
-        lastSelectedFilterCommand = nil;
+        
+        customOpenSettings = [[NSMutableDictionary alloc] init];
         
         didInitialize = YES;
     }
@@ -121,8 +125,18 @@ enum {
     [aDocument release];
 }
 
-- (NSStringEncoding)lastSelectedEncoding {
-    return lastSelectedEncoding != BDSKNoStringEncoding ? lastSelectedEncoding : [BDSKStringEncodingManager defaultEncoding];
+- (NSStringEncoding)lastSelectedEncodingForURL:(NSURL *)aURL {
+    NSNumber *encoding = [[customOpenSettings objectForKey:aURL] objectForKey:BDSKEncodingKey];
+    return encoding ? [encoding unsignedIntegerValue] : BDSKNoStringEncoding;
+}
+
+- (NSInteger)lastSelectedOpenTypeForURL:(NSURL *)aURL {
+    NSNumber *type = [[customOpenSettings objectForKey:aURL] objectForKey:BDSKOpenTypeKey];
+    return type ? [type integerValue] : BDSKOpenDefault;
+}
+
+- (NSString *)lastSelectedFilterForURL:(NSURL *)aURL {
+    return [[customOpenSettings objectForKey:aURL] objectForKey:BDSKFilterKey];
 }
 
 - (void)noteNewRecentDocument:(NSDocument *)aDocument{
@@ -141,35 +155,24 @@ enum {
     }
 }
 
-- (IBAction)openDocument:(id)sender {
-    [super openDocument:sender];
-    lastSelectedEncoding = BDSKNoStringEncoding;
-}
-
 - (IBAction)openDocumentUsingPhonyCiteKeys:(id)sender {
     openType = BDSKOpenUsingPhonyCiteKeys;
     [self openDocument:sender];
-    openType = BDSKOpenDefault;
 }
 
 - (IBAction)openDocumentUsingFilter:(id)sender {
     openType = BDSKOpenUsingFilter;
-    BDSKDESTROY(lastSelectedFilterCommand);
     [self openDocument:sender];
-    BDSKDESTROY(lastSelectedFilterCommand);
-    openType = BDSKOpenDefault;
 }
 
 - (IBAction)newTemplateDocument:(id)sender {
     openType = BDSKOpenTemplate;
-    [super newDocument:sender];
-    openType = BDSKOpenDefault;
+    [self newDocument:sender];
 }
 
 - (IBAction)openTemplateDocument:(id)sender {
     openType = BDSKOpenTemplate;
-    [super openDocument:sender];
-    openType = BDSKOpenDefault;
+    [self openDocument:sender];
 }
 
 - (NSInteger)runModalOpenPanel:(NSOpenPanel *)openPanel forTypes:(NSArray *)extensions {
@@ -199,37 +202,55 @@ enum {
     
     NSInteger result = [super runModalOpenPanel:openPanel forTypes:extensions];
     
-    if (accessoryController) {
-        if (result == NSFileHandlingPanelOKButton) {
-            lastSelectedEncoding = [accessoryController encoding];
-            
-            if (openType == BDSKOpenUsingFilter) {
-                [lastSelectedFilterCommand release];
-                lastSelectedFilterCommand = [[accessoryController filterCommand] copy];
+    if (result == NSFileHandlingPanelOKButton) {
+        NSMutableDictionary *options = [NSMutableDictionary dictionaryWithObject:[NSNumber numberWithInteger:openType] forKey:BDSKOpenTypeKey];
+        
+        if (accessoryController) {
+            if (result == NSFileHandlingPanelOKButton) {
+                [options setObject:[NSNumber numberWithUnsignedInteger:[accessoryController encoding]] forKey:BDSKEncodingKey]; 
+                if (openType == BDSKOpenUsingFilter && [accessoryController filterCommand])
+                    [options setObject:[accessoryController filterCommand] forKey:BDSKFilterKey];
             }
-        }
-        [accessoryController release];
+        } 
+        
+        for (NSURL *url in [openPanel URLs])
+            [customOpenSettings setObject:options forKey:url];
     }
+    
+    [accessoryController release];
+    
+    // reset this in case this was called from openDocumentUsingPhonyCiteKeys:, openDocumentUsingFilter:, or openTemplateDocument:
+    openType = BDSKOpenDefault;
     
     return result;
 }
 
+- (id)makeUntitledDocumentOfType:(NSString *)type error:(NSError **)outError {
+    id document = [super makeUntitledDocumentOfType:type error:outError];
+    // reset this in case this was called from openTemplateDocumentType:
+    openType = BDSKOpenDefault;
+    return document;
+}
+
 - (id)makeDocumentWithContentsOfURL:(NSURL *)absoluteURL ofType:(NSString *)typeName error:(NSError **)outError {
     id doc = nil;
-    if (openType == BDSKOpenUsingPhonyCiteKeys || openType == BDSKOpenUsingFilter) {
-        NSStringEncoding encoding = [self lastSelectedEncoding];
+    NSDictionary *options = [customOpenSettings objectForKey:absoluteURL];
+    NSInteger currentOpenType = [self lastSelectedOpenTypeForURL:absoluteURL];
+    if (currentOpenType == BDSKOpenUsingPhonyCiteKeys || currentOpenType == BDSKOpenUsingFilter) {
+        NSStringEncoding encoding = [self lastSelectedEncodingForURL:absoluteURL];
         NSString *filteredString = nil;
         
-        if (openType == BDSKOpenUsingPhonyCiteKeys) {
+        if (currentOpenType == BDSKOpenUsingPhonyCiteKeys) {
             NSError *error = nil;
             filteredString = [[NSString stringWithContentsOfURL:absoluteURL encoding:encoding error:&error] stringWithPhoneyCiteKeys:@"FixMe"];
             if ([NSString isEmptyString:filteredString] && outError)
                 *outError = error ?: [NSError localErrorWithCode:kBDSKDocumentOpenError localizedDescription:NSLocalizedString(@"Unable To Open With Phony Cite Keys", @"Error description")];
         } else {
-            if ([NSString isEmptyString:lastSelectedFilterCommand]) {
+            NSString *filter = [self lastSelectedFilterForURL:absoluteURL];
+            if ([NSString isEmptyString:filter]) {
                 filteredString = [NSString stringWithContentsOfURL:absoluteURL encoding:encoding error:NULL];
             } else {
-                NSData *filteredData = [BDSKTask outputDataFromTaskWithLaunchPath:@"/bin/sh" arguments:[NSArray arrayWithObjects:@"-c", lastSelectedFilterCommand, nil] inputData:[NSData dataWithContentsOfURL:absoluteURL]];
+                NSData *filteredData = [BDSKTask outputDataFromTaskWithLaunchPath:@"/bin/sh" arguments:[NSArray arrayWithObjects:@"-c", filter, nil] inputData:[NSData dataWithContentsOfURL:absoluteURL]];
                 filteredString = [[[NSString alloc] initWithData:filteredData encoding:encoding] autorelease];
             }
             if ([NSString isEmptyString:filteredString] && outError) {
@@ -271,22 +292,28 @@ enum {
                 fileURL = [NSURL fileURLWithPath:path];
         }
         
-        if (fileURL == nil) {
-            if(outError != nil) 
-                *outError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to find the file associated with this item.", @"Error description"), NSLocalizedDescriptionKey, nil]];
-            return nil;
-        }
+        if (fileURL != nil) {
             
-        // use a local variable in case it wasn't passed in, so we can always log this failure
-        NSError *error;
-        document = [super openDocumentWithContentsOfURL:fileURL display:displayDocument error:&error];
-        
-        if (document == nil) {
-            NSLog(@"document at URL %@ failed to open for reason: %@", fileURL, [error localizedFailureReason]);
-            // assign to the outError or we'll crash...
-            if (outError) *outError = error;
-        } else if(displayDocument && NO == [document selectItemForPartialItem:dictionary]) {
-            NSBeep();
+            NSDictionary *options = [customOpenSettings objectForKey:absoluteURL];
+            if (options)
+                [customOpenSettings setObject:options forKey:fileURL];
+            
+            // use a local variable in case it wasn't passed in, so we can always log this failure
+            NSError *error;
+            document = [super openDocumentWithContentsOfURL:fileURL display:displayDocument error:&error];
+            
+            [customOpenSettings removeObjectForKey:fileURL];
+            
+            if (document == nil) {
+                NSLog(@"document at URL %@ failed to open for reason: %@", fileURL, [error localizedFailureReason]);
+                // assign to the outError or we'll crash...
+                if (outError) *outError = error;
+            } else if(displayDocument && NO == [document selectItemForPartialItem:dictionary]) {
+                NSBeep();
+            }
+            
+        } else if (outError) {
+            *outError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to find the file associated with this item.", @"Error description"), NSLocalizedDescriptionKey, nil]];
         }
         
     } else if ([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.bdsksearch"]) {
@@ -316,10 +343,12 @@ enum {
         
         document = [super openDocumentWithContentsOfURL:absoluteURL display:displayDocument error:outError];
         
-        if (displayDocument && openType == BDSKOpenUsingPhonyCiteKeys)
+        if (displayDocument && [self lastSelectedOpenTypeForURL:absoluteURL] == BDSKOpenUsingPhonyCiteKeys)
             [(BibDocument *)document reportTemporaryCiteKeys:@"FixMe" forNewDocument:YES];
         
     }
+    
+    [customOpenSettings removeObjectForKey:absoluteURL];
     
     return document;
 }
@@ -344,7 +373,7 @@ enum {
 }
 
 - (NSString *)typeForContentsOfURL:(NSURL *)inAbsoluteURL error:(NSError **)outError {
-    if (openType == BDSKOpenTemplate)
+    if ([self lastSelectedOpenTypeForURL:inAbsoluteURL] == BDSKOpenTemplate)
         return [[[inAbsoluteURL path] pathExtension] isCaseInsensitiveEqual:@"rtf"] ? BDSKRichTextTemplateDocumentType : BDSKTextTemplateDocumentType;
     return [super typeForContentsOfURL:inAbsoluteURL error:outError];
 }

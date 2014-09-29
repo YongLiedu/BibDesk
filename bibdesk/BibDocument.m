@@ -226,7 +226,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
         memset(&docState, 0, sizeof(docState));
         
         // need to set this for new documents
-        docState.documentStringEncoding = [[NSDocumentController sharedDocumentController] lastSelectedEncoding];
+        docState.documentStringEncoding = [BDSKStringEncodingManager defaultEncoding];
         
         // these are created lazily when needed
         fileSearchController = nil;
@@ -1719,7 +1719,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
     
     // when using the Open panel this should be initialized to the selected encoding, otherwise the default encoding from the prefs, or for revert whatever it was
-    NSStringEncoding encoding = [self documentStringEncoding];
+    NSStringEncoding encoding = [[BDSKDocumentController sharedDocumentController] lastSelectedEncodingForURL:absoluteURL];
+    if (encoding == BDSKNoStringEncoding)
+        encoding = [self documentStringEncoding];
+    else
+        [self setDocumentStringEncoding:encoding];
     
     // make sure we reread the setup from extended attributes from the file, in particular on revert
     BDSKDESTROY(mainWindowSetupDictionary);
