@@ -208,7 +208,7 @@ enum {
         if (accessoryController) {
             if (result == NSFileHandlingPanelOKButton) {
                 [options setObject:[NSNumber numberWithUnsignedInteger:[accessoryController encoding]] forKey:BDSKEncodingKey]; 
-                if (openType == BDSKOpenUsingFilter && [accessoryController filterCommand])
+                if (openType == BDSKOpenUsingFilter)
                     [options setObject:[accessoryController filterCommand] forKey:BDSKFilterKey];
             }
         } 
