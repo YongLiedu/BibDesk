@@ -269,6 +269,9 @@ enum {
             
             [accessoryController release];
             
+            // reset this in case this was called from openDocumentUsingPhonyCiteKeys:, openDocumentUsingFilter:, or openTemplateDocument:
+            openType = BDSKOpenDefault;
+            
             completionHandler(result);
         }];
 }
