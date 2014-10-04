@@ -180,33 +180,34 @@ enum {
     [self openDocument:sender];
 }
 
-- (NSInteger)runModalOpenPanel:(NSOpenPanel *)openPanel forTypes:(NSArray *)extensions {
+- (BDSKOpenAccessoryViewController *)accessoryControllerForOpenPanel:(NSOpenPanel *)openPanel types:(NSArray **)types {
     NSView *accessoryView = nil;
     BDSKOpenAccessoryViewController *accessoryController = nil;
     
     switch (openType) {
         case BDSKOpenUsingPhonyCiteKeys:
-            extensions = [NSArray arrayWithObject:@"bib"];
+            *types = [NSArray arrayWithObject:@"bib"];
         case BDSKOpenDefault:
-            accessoryController = [[BDSKOpenAccessoryViewController alloc] init];
+            accessoryController = [[[BDSKOpenAccessoryViewController alloc] init] autorelease];
             accessoryView = [accessoryController openTextEncodingAccessoryView];
             break;
         case BDSKOpenUsingFilter:
-            extensions = nil;
-            accessoryController = [[BDSKOpenAccessoryViewController alloc] init];
+            *types = nil;
+            accessoryController = [[[BDSKOpenAccessoryViewController alloc] init] autorelease];
             accessoryView = [accessoryController openUsingFilterAccessoryView];
             break;
         case BDSKOpenTemplate:
-            extensions = [NSArray arrayWithObjects:@"txt", @"rtf", nil];
+            *types = [NSArray arrayWithObjects:@"txt", @"rtf", nil];
             break;
     }
     if (accessoryController) {
         [accessoryController setEncoding:[BDSKStringEncodingManager defaultEncoding]];
         [openPanel setAccessoryView:accessoryView];
     }
-    
-    NSInteger result = [super runModalOpenPanel:openPanel forTypes:extensions];
-    
+    return accessoryController;
+}
+
+- (void)openPanel:(NSOpenPanel *)openPanel usingAccessoryController:(BDSKOpenAccessoryViewController *)accessoryController didEndWithResult:(NSInteger)result {
     if (result == NSFileHandlingPanelOKButton) {
         NSMutableDictionary *options = [NSMutableDictionary dictionaryWithObject:[NSNumber numberWithInteger:openType] forKey:BDSKOpenTypeKey];
         
@@ -220,58 +221,25 @@ enum {
             [customOpenSettings setObject:options forKey:url];
     }
     
-    [accessoryController release];
-    
     // reset this in case this was called from openDocumentUsingPhonyCiteKeys:, openDocumentUsingFilter:, or openTemplateDocument:
     openType = BDSKOpenDefault;
+}
+
+- (NSInteger)runModalOpenPanel:(NSOpenPanel *)openPanel forTypes:(NSArray *)extensions {
+    BDSKOpenAccessoryViewController *accessoryController = [self accessoryControllerForOpenPanel:openPanel types:&extensions];
+    
+    NSInteger result = [super runModalOpenPanel:openPanel forTypes:extensions];
+    
+    [self openPanel:openPanel usingAccessoryController:accessoryController didEndWithResult:result];
     
     return result;
 }
 
 - (void)beginOpenPanel:(NSOpenPanel *)openPanel forTypes:(NSArray *)inTypes completionHandler:(void (^)(NSInteger result))completionHandler {
-    NSView *accessoryView = nil;
-    BDSKOpenAccessoryViewController *accessoryController = nil;
-    
-    switch (openType) {
-        case BDSKOpenUsingPhonyCiteKeys:
-            inTypes = [NSArray arrayWithObject:@"bib"];
-        case BDSKOpenDefault:
-            accessoryController = [[BDSKOpenAccessoryViewController alloc] init];
-            accessoryView = [accessoryController openTextEncodingAccessoryView];
-            break;
-        case BDSKOpenUsingFilter:
-            inTypes = nil;
-            accessoryController = [[BDSKOpenAccessoryViewController alloc] init];
-            accessoryView = [accessoryController openUsingFilterAccessoryView];
-            break;
-        case BDSKOpenTemplate:
-            inTypes = [NSArray arrayWithObjects:@"txt", @"rtf", nil];
-            break;
-    }
-    if (accessoryController) {
-        [accessoryController setEncoding:[BDSKStringEncodingManager defaultEncoding]];
-        [openPanel setAccessoryView:accessoryView];
-    }
+    BDSKOpenAccessoryViewController *accessoryController = [self accessoryControllerForOpenPanel:openPanel types:&inTypes];
     
     [super beginOpenPanel:openPanel forTypes:inTypes completionHandler:^(NSInteger result){
-            if (result == NSFileHandlingPanelOKButton) {
-                NSMutableDictionary *options = [NSMutableDictionary dictionaryWithObject:[NSNumber numberWithInteger:openType] forKey:BDSKOpenTypeKey];
-                
-                if (accessoryController) {
-                    [options setObject:[NSNumber numberWithUnsignedInteger:[accessoryController encoding]] forKey:BDSKEncodingKey]; 
-                    if (openType == BDSKOpenUsingFilter)
-                        [options setObject:[accessoryController filterCommand] forKey:BDSKFilterKey];
-                } 
-                
-                for (NSURL *url in [openPanel URLs])
-                    [customOpenSettings setObject:options forKey:url];
-            }
-            
-            [accessoryController release];
-            
-            // reset this in case this was called from openDocumentUsingPhonyCiteKeys:, openDocumentUsingFilter:, or openTemplateDocument:
-            openType = BDSKOpenDefault;
-            
+            [self openPanel:openPanel usingAccessoryController:accessoryController didEndWithResult:result];
             completionHandler(result);
         }];
 }
