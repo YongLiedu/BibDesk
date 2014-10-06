@@ -207,22 +207,19 @@ enum {
     return accessoryController;
 }
 
-- (void)openPanel:(NSOpenPanel *)openPanel usingAccessoryController:(BDSKOpenAccessoryViewController *)accessoryController didEndWithResult:(NSInteger)result {
+- (void)openPanel:(NSOpenPanel *)openPanel usingAccessoryController:(BDSKOpenAccessoryViewController *)accessoryController openType:(NSInteger)anOpenType didEndWithResult:(NSInteger)result {
     if (result == NSFileHandlingPanelOKButton) {
-        NSMutableDictionary *options = [NSMutableDictionary dictionaryWithObject:[NSNumber numberWithInteger:openType] forKey:BDSKOpenTypeKey];
+        NSMutableDictionary *options = [NSMutableDictionary dictionaryWithObject:[NSNumber numberWithInteger:anOpenType] forKey:BDSKOpenTypeKey];
         
         if (accessoryController) {
             [options setObject:[NSNumber numberWithUnsignedInteger:[accessoryController encoding]] forKey:BDSKEncodingKey]; 
-            if (openType == BDSKOpenUsingFilter)
+            if (anOpenType == BDSKOpenUsingFilter)
                 [options setObject:[accessoryController filterCommand] forKey:BDSKFilterKey];
         } 
         
         for (NSURL *url in [openPanel URLs])
             [customOpenSettings setObject:options forKey:url];
     }
-    
-    // reset this in case this was called from openDocumentUsingPhonyCiteKeys:, openDocumentUsingFilter:, or openTemplateDocument:
-    openType = BDSKOpenDefault;
 }
 
 - (NSInteger)runModalOpenPanel:(NSOpenPanel *)openPanel forTypes:(NSArray *)extensions {
@@ -230,16 +227,23 @@ enum {
     
     NSInteger result = [super runModalOpenPanel:openPanel forTypes:extensions];
     
-    [self openPanel:openPanel usingAccessoryController:accessoryController didEndWithResult:result];
+    [self openPanel:openPanel usingAccessoryController:accessoryController openType:openType didEndWithResult:result];
+    
+    // reset this in case this was called from openDocumentUsingPhonyCiteKeys:, openDocumentUsingFilter:, or openTemplateDocument:
+    openType = BDSKOpenDefault;
     
     return result;
 }
 
 - (void)beginOpenPanel:(NSOpenPanel *)openPanel forTypes:(NSArray *)inTypes completionHandler:(void (^)(NSInteger result))completionHandler {
     BDSKOpenAccessoryViewController *accessoryController = [self accessoryControllerForOpenPanel:openPanel types:&inTypes];
+    NSInteger currentOpenType = openType;
+    
+    // reset this in case this was called from openDocumentUsingPhonyCiteKeys:, openDocumentUsingFilter:, or openTemplateDocument:
+    openType = BDSKOpenDefault;
     
     [super beginOpenPanel:openPanel forTypes:inTypes completionHandler:^(NSInteger result){
-            [self openPanel:openPanel usingAccessoryController:accessoryController didEndWithResult:result];
+            [self openPanel:openPanel usingAccessoryController:accessoryController openType:currentOpenType didEndWithResult:result];
             completionHandler(result);
         }];
 }
