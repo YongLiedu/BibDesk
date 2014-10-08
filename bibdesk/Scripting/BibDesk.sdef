@@ -650,13 +650,19 @@
             <direct-parameter type="document"
                 description="The object responding to the command, the document."/>
             <parameter name="from" code="from" optional="yes"
-                description="The string or file containing publications in a supported string format. Either this or 'for search term' must be specified.">
+                description="The string or file containing publications in a supported string format. Either this, 'with', or 'for search term' must be specified.">
                 <type type="text"/>
                 <type type="file"/>
                 <cocoa key="from"/>
             </parameter>
+            <parameter name="with" code="with" optional="yes"
+                description="The file or URL to be attached to a new publication. Either this, 'from', or 'for search term' must be specified.">
+                <type type="file"/>
+                <type type="text"/>
+                <cocoa key="with"/>
+            </parameter>
             <parameter name="for search term" code="Srch" optional="yes"
-                description="The search term to search the PubMed database. Either this or 'from' must be specified.">
+                description="The search term to search the PubMed database. Either this, 'from', or 'with' must be specified.">
                 <type type="text"/>
                 <cocoa key="searchTerm"/>
             </parameter>

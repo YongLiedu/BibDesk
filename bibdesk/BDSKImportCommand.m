@@ -106,6 +106,7 @@
 	
 	// the 'from' parameters gives the template name to use
 	id string = [params objectForKey:@"from"];
+	id url = [params objectForKey:@"with"];
 	id searchTerm = [params objectForKey:@"searchTerm"];
     NSArray *pubs = nil;
     // make sure we get something
@@ -119,6 +120,18 @@
             return nil;
         }
         pubs = [BDSKStringParser itemsFromString:string ofType:BDSKUnknownStringType owner:document error:NULL];
+    } else if (url) {
+        if ([url isKindOfClass:[NSString class]])
+            url = [NSURL URLWithString:url];
+        if ([string isKindOfClass:[NSURL class]]) {
+            if ([url isFileURL])
+                pubs = [NSArray arrayWithObjects:[document publicationForFileURL:url], nil];
+            else
+                pubs = [NSArray arrayWithObjects:[document publicationForURL:url title:nil], nil];
+        } else {
+            [self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
+            return nil;
+        }
     } else if (searchTerm) {
         pubs = [NSArray arrayWithObjects:[BibItem itemWithPubMedSearchTerm:searchTerm], nil];
     } else {
