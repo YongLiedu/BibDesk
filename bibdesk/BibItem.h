@@ -822,9 +822,11 @@ enum {
 @end
 
 
-@interface BibItem (PDFMetadata)
-+ (BibItem *)itemWithPDFMetadataFromURL:(NSURL *)fileURL;
+@interface BibItem (BDSKAttachementItem)
++ (BibItem *)itemWithFileURL:(NSURL *)fileURL owner:(id<BDSKOwner>)anOwner;
++ (BibItem *)itemWithURL:(NSURL *)aURL title:(NSString *)aTitle;
 @end
+
 
 extern const CFSetCallBacks kBDSKBibItemEqualitySetCallBacks;
 extern const CFSetCallBacks kBDSKBibItemEquivalenceSetCallBacks;

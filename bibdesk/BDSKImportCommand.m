@@ -132,9 +132,9 @@
     } else if (url) {
         if ([url isKindOfClass:[NSURL class]]) {
             if ([url isFileURL])
-                pubs = [NSArray arrayWithObjects:[document publicationForFileURL:url], nil];
+                pubs = [NSArray arrayWithObjects:[BibItem itemWithFileURL:url owner:document], nil];
             else
-                pubs = [NSArray arrayWithObjects:[document publicationForURL:url title:nil], nil];
+                pubs = [NSArray arrayWithObjects:[BibItem itemWithURL:url title:nil], nil];
         } else {
             [self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
             return nil;

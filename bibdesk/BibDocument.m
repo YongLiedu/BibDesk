@@ -2096,46 +2096,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 #pragma mark -
 #pragma mark New publications from pasteboard
 
-- (BibItem *)publicationForFileURL:(NSURL *)fileURL {
-    NSError *error = nil;
-    BibItem *newBI = nil;
-    
-    fileURL = [fileURL URLByStandardizingPath];
-    
-    // most reliable metadata should be our private EA
-    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKReadExtendedAttributesKey]){
-        NSData *btData = [[SKNExtendedAttributeManager sharedNoSplitManager] extendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" atPath:[fileURL path] traverseLink:NO error:&error];
-        if(btData){
-            NSString *btString = [[NSString alloc] initWithData:btData encoding:NSUTF8StringEncoding];
-            NSArray *items = [BDSKBibTeXParser itemsFromString:btString owner:self error:&error];
-            newBI = error ? nil : [items firstObject];
-            [btString release];
-        }
-    }
-    
-    // GJ try parsing pdf to extract info that is then used to get a PubMed record
-    if(newBI == nil && [[[NSWorkspace sharedWorkspace] typeOfFile:[[[fileURL URLByStandardizingPath] URLByResolvingSymlinksInPath] path] error:NULL] isEqualToUTI:(NSString *)kUTTypePDF]){
-        if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTermKey])
-            newBI = [BibItem itemByParsingPDFAtURL:fileURL];			
-        // fall back on the least reliable metadata source (hidden pref)
-        if(newBI == nil && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldUsePDFMetadataKey])
-            newBI = [BibItem itemWithPDFMetadataFromURL:fileURL];
-    }
-    
-    if(newBI == nil)
-        newBI = [[[BibItem alloc] init] autorelease];
-    
-    [newBI addFileForURL:fileURL autoFile:NO runScriptHook:NO];
-	
-	return newBI;
-}
-
-- (BibItem *)publicationForURL:(NSURL *)aURL title:(NSString *)aTitle {
-    NSDictionary *pubFields = [NSDictionary dictionaryWithObjectsAndKeys:[[NSDate date] dateDescription], @"Lastchecked", aTitle, BDSKTitleString, nil];
-    NSArray *files = [NSArray arrayWithObjects:[BDSKLinkedFile linkedFileWithURL:aURL delegate:nil], nil];
-    return [[[BibItem alloc] initWithType:@"webpage" citeKey:nil pubFields:pubFields files:files isNew:YES] autorelease];
-}
-
 // sniff the contents of each file, returning them in an array of BibItems, while unparseable files are added to the mutable array passed as a parameter
 - (NSArray *)extractPublicationsFromFileURL:(NSURL *)fileURL verbose:(BOOL)verbose error:(NSError **)outError {
     BDSKStringType type = BDSKUnknownStringType;
@@ -2282,14 +2242,14 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                     if ([parsedItems count] > 0) {
                         [newURLPubs addObjectsFromArray:parsedItems];
                     } else {
-                        BibItem *item = [self publicationForFileURL:newURL];
+                        BibItem *item = [BibItem itemWithFileURL:newURL owner:self];
                         if (newFilePubs == nil)
                             newFilePubs = [NSMutableArray array];
                         [newURLPubs addObject:item];
                         [newFilePubs addObject:item];
                     }
                 } else {
-                    [newURLPubs addObject:[self publicationForURL:newURL title:[titles objectAtIndex:[newURLs indexOfObject:newURL]]]];
+                    [newURLPubs addObject:[BibItem itemWithURL:newURL title:[titles objectAtIndex:[newURLs indexOfObject:newURL]]]];
                 }
             }
             if ([newURLPubs count] > 0)

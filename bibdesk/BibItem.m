@@ -35,6 +35,7 @@
 
 
 #import "BibItem.h"
+#import "BibItem_PubMedLookup.h"
 #import "BDSKOwnerProtocol.h"
 #import "NSDate_BDSKExtensions.h"
 #import "BDSKGroup.h"
@@ -75,6 +76,8 @@
 #import "CFString_BDSKExtensions.h"
 #import "BDSKCFCallBacks.h"
 #import "NSCharacterSet_BDSKExtensions.h"
+#import "NSWorkSpace_BDSKExtensions.h"
+#import <SkimNotesBase/SkimNotesBase.h>
 #import <Quartz/Quartz.h>
 
 NSString *BDSKBibItemKeyKey = @"key";
@@ -3255,7 +3258,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 
 #pragma mark -
 
-@implementation BibItem (PDFMetadata)
+@implementation BibItem (BDSKAttachementItem)
 
 + (BibItem *)itemWithPDFMetadataFromURL:(NSURL *)fileURL
 {
@@ -3295,6 +3298,46 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         }
     }
     return item;
+}
+
++ (BibItem *)itemWithFileURL:(NSURL *)fileURL owner:(id<BDSKOwner>)anOwner {
+    NSError *error = nil;
+    BibItem *newBI = nil;
+    
+    fileURL = [fileURL URLByStandardizingPath];
+    
+    // most reliable metadata should be our private EA
+    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKReadExtendedAttributesKey]){
+        NSData *btData = [[SKNExtendedAttributeManager sharedNoSplitManager] extendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" atPath:[fileURL path] traverseLink:NO error:&error];
+        if(btData){
+            NSString *btString = [[NSString alloc] initWithData:btData encoding:NSUTF8StringEncoding];
+            NSArray *items = [BDSKBibTeXParser itemsFromString:btString owner:anOwner error:&error];
+            newBI = error ? nil : [items firstObject];
+            [btString release];
+        }
+    }
+    
+    // GJ try parsing pdf to extract info that is then used to get a PubMed record
+    if(newBI == nil && [[[NSWorkspace sharedWorkspace] typeOfFile:[[[fileURL URLByStandardizingPath] URLByResolvingSymlinksInPath] path] error:NULL] isEqualToUTI:(NSString *)kUTTypePDF]){
+        if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTermKey])
+            newBI = [self itemByParsingPDFAtURL:fileURL];			
+        // fall back on the least reliable metadata source (hidden pref)
+        if(newBI == nil && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldUsePDFMetadataKey])
+            newBI = [self itemWithPDFMetadataFromURL:fileURL];
+    }
+    
+    if(newBI == nil)
+        newBI = [[[self alloc] init] autorelease];
+    
+    [newBI addFileForURL:fileURL autoFile:NO runScriptHook:NO];
+	
+	return newBI;
+}
+
++ (BibItem *)itemWithURL:(NSURL *)aURL title:(NSString *)aTitle {
+    NSDictionary *pubFields = [NSDictionary dictionaryWithObjectsAndKeys:[[NSDate date] dateDescription], @"Lastchecked", aTitle, BDSKTitleString, nil];
+    NSArray *files = [NSArray arrayWithObjects:[BDSKLinkedFile linkedFileWithURL:aURL delegate:nil], nil];
+    return [[[self alloc] initWithType:@"webpage" citeKey:nil pubFields:pubFields files:files isNew:YES] autorelease];
 }
 
 @end
