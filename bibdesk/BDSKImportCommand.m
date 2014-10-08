@@ -111,7 +111,7 @@
     NSArray *pubs = nil;
     
     if ([url isKindOfClass:[NSString class]]) {
-        url = [NSURL URLWithString:url];
+        url = [url hasPrefix:@"/"] ? [NSURL fileURLWithPath:url] : [NSURL URLWithString:url];
     } else if (url && [url isKindOfClass:[NSURL class]] == NO) {
         [self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
         return nil;
