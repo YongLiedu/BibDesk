@@ -656,9 +656,9 @@
                 <cocoa key="from"/>
             </parameter>
             <parameter name="with" code="with" optional="yes"
-                description="The file or URL to be attached to a new publication. Either this, 'from', or 'for search term' must be specified.">
-                <type type="file"/>
+                description="The URL or file to be attached to a new publication. Either this, 'from', or 'for search term' must be specified.">
                 <type type="text"/>
+                <type type="file"/>
                 <cocoa key="with"/>
             </parameter>
             <parameter name="for search term" code="Srch" optional="yes"
