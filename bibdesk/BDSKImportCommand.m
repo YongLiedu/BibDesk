@@ -106,9 +106,16 @@
 	
 	// the 'from' parameters gives the template name to use
 	id string = [params objectForKey:@"from"];
-	id url = [params objectForKey:@"with"];
 	id searchTerm = [params objectForKey:@"searchTerm"];
+	id url = [params objectForKey:@"with"];
     NSArray *pubs = nil;
+    
+    if ([url isKindOfClass:[NSString class]]) {
+        url = [NSURL URLWithString:url];
+    } else if (url && [url isKindOfClass:[NSURL class]] == NO) {
+        [self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
+        return nil;
+    }
     // make sure we get something
 	if (string) {
         // make sure we get the right thing
@@ -120,10 +127,10 @@
             return nil;
         }
         pubs = [BDSKStringParser itemsFromString:string ofType:BDSKUnknownStringType owner:document error:NULL];
+    } else if (searchTerm) {
+        pubs = [NSArray arrayWithObjects:[BibItem itemWithPubMedSearchTerm:searchTerm], nil];
     } else if (url) {
-        if ([url isKindOfClass:[NSString class]])
-            url = [NSURL URLWithString:url];
-        if ([string isKindOfClass:[NSURL class]]) {
+        if ([url isKindOfClass:[NSURL class]]) {
             if ([url isFileURL])
                 pubs = [NSArray arrayWithObjects:[document publicationForFileURL:url], nil];
             else
@@ -132,14 +139,17 @@
             [self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
             return nil;
         }
-    } else if (searchTerm) {
-        pubs = [NSArray arrayWithObjects:[BibItem itemWithPubMedSearchTerm:searchTerm], nil];
     } else {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
         return nil;
 	}
-	if ([pubs count])
-    	[document importPublications:pubs options:BDSKImportAggregate | BDSKImportNoEdit];
+	if ([pubs count] > 0) {
+        if (url != nil && (string != nil || searchTerm != nil)) {
+            for (BibItem *pub in pubs)
+                [pub addFileForURL:url autoFile:NO runScriptHook:NO];
+        }
+    	[document importPublications:pubs publicationsToAutoFile:([url isFileURL] ? pubs : nil) temporaryCiteKey:nil options:BDSKImportAggregate | BDSKImportNoEdit];
+    }
 	
     return pubs ?: [NSArray array];
 }
