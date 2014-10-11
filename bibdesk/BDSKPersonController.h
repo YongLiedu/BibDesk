@@ -79,6 +79,7 @@
 - (void)setNames:(NSSet *)newNames;
 - (NSSet *)fields;
 - (void)setFields:(NSSet *)newFields;
+- (NSImage *)image;
 
 #pragma mark actions
 - (IBAction)edit:(id)sender;

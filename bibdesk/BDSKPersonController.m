@@ -57,6 +57,10 @@
     return [NSSet setWithObjects:@"document", nil];
 }
 
++ (NSSet *)keyPathsForValuesAffectingImage {
+    return [NSSet setWithObjects:@"person", nil];
+}
+
 - (NSString *)windowNibName{return @"BDSKPersonWindow";}
 
 - (id)initWithPerson:(BibAuthor *)aPerson{
@@ -288,9 +292,12 @@
     }
 }
 
-// binding directly to person.personFromAddressBook.imageData in IB doesn't work for some reason
-- (NSData *)imageData{
-    return [[person personFromAddressBook] imageData] ?: [[[NSWorkspace sharedWorkspace] iconForFileType:@"vcf"] TIFFRepresentation];
+- (NSImage *)image{
+    NSImage *image = nil;
+    NSData *data = [[person personFromAddressBook] imageData];
+    if (data)
+        image = [[[NSImage alloc] initWithData:data] autorelease];
+    return image ?: [[NSWorkspace sharedWorkspace] iconForFileType:@"vcf"];
 }
 
 #pragma mark actions
