@@ -1558,6 +1558,10 @@
                 description="Whether diacritics should be removed.">
                 <cocoa key="removeDiacritics"/>
             </property>
+            <property name="lite" code="Lite" type="boolean"
+                description="Whether to use the Lite WOK server.">
+                <cocoa key="lite"/>
+            </property>
         </record-type>
 
         <enumeration name="search server type" code="SrvT">

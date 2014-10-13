@@ -441,6 +441,10 @@
         [info setValue:[serverInfo recordSyntax] forKey:@"recordSyntax"];
         [info setValue:[serverInfo resultEncoding] forKey:@"resultEncoding"];
         [info setValue:[NSNumber numberWithBool:[serverInfo removeDiacritics]] forKey:@"removeDiacritics"];
+    } else if ([serverInfo isISI]) {
+        [info setValue:[serverInfo username] forKey:@"username"];
+        [info setValue:[serverInfo password] forKey:@"password"];
+        [info setValue:[NSNumber numberWithBool:[serverInfo isLite]] forKey:@"lite"];
     }
     
     return info;
@@ -496,16 +500,28 @@
                 [serverInfo setResultEncoding:value];
             if ((number = [info valueForKey:@"removeDiacritics"]))
                 [serverInfo setRemoveDiacritics:[number boolValue]];
+        } else if ([serverType isEqualToString:BDSKSearchGroupISI]) {
+            if ((value = [info valueForKey:@"username"]))
+                [serverInfo setUsername:value];
+            if ((value = [info valueForKey:@"password"]))
+                [serverInfo setPassword:value];
+            if ((number = [info valueForKey:@"lite"]))
+                [serverInfo setLite:[number boolValue]];
         }
     } else if (serverType) {
         NSMutableDictionary *options = nil;
         
-         if ([serverType isEqualToString:BDSKSearchGroupZoom]) {
+        if ([serverType isEqualToString:BDSKSearchGroupZoom]) {
             options = [NSMutableDictionary dictionary];
             [options setValue:[info valueForKey:@"username"] forKey:@"username"];
             [options setValue:[info valueForKey:@"password"] forKey:@"password"];
             [options setValue:[info valueForKey:@"resultEncoding"] forKey:@"resultEncoding"];
             [options setValue:[info valueForKey:@"removeDiacritics"] forKey:@"removeDiacritics"];
+        } else if ([serverType isEqualToString:BDSKSearchGroupISI]) {
+            options = [NSMutableDictionary dictionary];
+            [options setValue:[info valueForKey:@"username"] forKey:@"username"];
+            [options setValue:[info valueForKey:@"password"] forKey:@"password"];
+            [options setValue:[info valueForKey:@"lite"] forKey:@"lite"];
         }
         
         serverInfo = [[BDSKMutableServerInfo alloc] initWithType:serverType name:serverName database:database host:host port:port options:options];
