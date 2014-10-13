@@ -371,6 +371,7 @@ extern NSString *BDSKDocumentPublicationsKey;
 - (void)importPublications:(NSArray *)newPubs options:(BDSKImportOptions)options;
 - (NSArray *)importPublicationsFromPasteboard:(NSPasteboard *)pb options:(BDSKImportOptions)options;
 - (NSArray *)extractPublicationsFromFileURL:(NSURL *)fileURL verbose:(BOOL)verbose error:(NSError **)outError;
+- (NSArray *)transferredPublications:(NSArray *)array;
 
 // Private methods
 

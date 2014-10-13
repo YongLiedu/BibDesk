@@ -1247,8 +1247,8 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     if ([array count] == 0)
         return [NSArray array];
     
-    // archive and unarchive mainly to get complex strings with the correct macroResolver
-    NSArray *newPubs = [BibItem publicationsFromArchivedData:[BibItem archivedPublications:array] macroResolver:[self macroResolver]];
+    // get complex strings with the correct macroResolver
+    NSArray *newPubs = [self transferredPublications:array];
     
     [self importPublications:newPubs options:BDSKImportSelectLibrary | BDSKImportNoEdit];
 	
@@ -1552,7 +1552,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     if ([parent isImported])
         parent = nil;
     
-    NSArray *newPubs = [BibItem publicationsFromArchivedData:[BibItem archivedPublications:[NSArray arrayWithObjects:pub, parent, nil]] macroResolver:[self macroResolver]];
+    NSArray *newPubs = [self transferredPublications:[NSArray arrayWithObjects:pub, parent, nil]];
 	
     [self importPublications:newPubs options:BDSKImportAggregate | BDSKImportNoEdit];
     

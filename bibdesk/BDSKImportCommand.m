@@ -170,7 +170,7 @@
             pubs = [search searchUsingSearchTerm:searchTerm serverInfo:serverInfo];
             // we have to hand the pubs over to the document with the correct macro resolver
             if (pubs)
-                pubs = [BibItem publicationsFromArchivedData:[BibItem archivedPublications:pubs] macroResolver:[document macroResolver]];
+                pubs = [document transferredPublications:pubs];
             [search release];
         } else {
             pubs = [NSArray arrayWithObjects:[BibItem itemWithPubMedSearchTerm:searchTerm], nil];

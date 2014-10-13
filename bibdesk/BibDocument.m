@@ -2288,6 +2288,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     return newPubs;
 }
 
+- (NSArray *)transferredPublications:(NSArray *)array {
+    return [BibItem publicationsFromArchivedData:[BibItem archivedPublications:array] macroResolver:[self macroResolver]];
+}
+
 #pragma mark -
 #pragma mark BDSKItemPasteboardHelper delegate
 

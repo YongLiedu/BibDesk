@@ -204,7 +204,7 @@
 
 - (id)copyScriptingValue:(id)value forKey:(NSString *)key withProperties:(NSDictionary *)properties {
     if ([key isEqualToString:@"scriptingPublications"]) {
-        id copiedValue = [[BibItem publicationsFromArchivedData:[BibItem archivedPublications:value] macroResolver:[self macroResolver]] retain];
+        id copiedValue = [[self transferredPublications:value] retain];
         [copiedValue setValue:[self macroResolver] forKey:@"macroResolver"];
         if ([properties count]) {
             for (id item in copiedValue) {
