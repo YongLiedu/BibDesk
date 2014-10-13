@@ -666,6 +666,13 @@
                 <type type="text"/>
                 <cocoa key="searchTerm"/>
             </parameter>
+            <parameter name="using server" code="Serv" optional="yes"
+                description="The search server to use for the search term. This can be a default server name, a x-bdsk-search URL, a .bdsksearch file, or a server info record. Using this is blocking and can be slow.">
+                <type type="text"/>
+                <type type="file"/>
+                <type type="search server info"/>
+                <cocoa key="server"/>
+            </parameter>
             <result description="The publications parsed from the string format and added to the document">
                 <type type="publication" list="yes"/>
             </result>

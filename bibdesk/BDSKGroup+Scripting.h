@@ -160,6 +160,8 @@
 
 - (NSString *)scriptingServerName;
 
++ (BDSKServerInfo *)newServerInfo:(BDSKServerInfo *)oldInfo withScriptingServerInfo:(NSDictionary *)info;
+
 @end
 
 #pragma mark -

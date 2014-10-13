@@ -101,4 +101,6 @@ extern NSString *BDSKSearchGroupURLScheme;
 
 - (NSURL *)bdsksearchURL;
 
++ (NSDictionary *)dictionaryWithBdsksearchURL:(NSURL *)bdsksearchURL;
+
 @end

@@ -447,15 +447,32 @@
 }
 
 - (void)setScriptingServerInfo:(NSDictionary *)info {
-    NSString *serverType = [info objectForKey:@"type"] ?: [self type];
+    BDSKServerInfo *serverInfo = [[self class] newServerInfo:[self serverInfo] withScriptingServerInfo:info];
+    if (serverInfo != nil && [NSString isEmptyString:[serverInfo name]] == NO) {
+        [self setServerInfo:serverInfo];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Invalid server info.",@"Error description")];
+    }
+    [serverInfo release];
+}
+
+- (NSString *)scriptingServerName {
+    return [[self serverInfo] name];
+}
+
++ (BDSKServerInfo *)newServerInfo:(BDSKServerInfo *)oldInfo withScriptingServerInfo:(NSDictionary *)info {
+    NSString *serverType = [info objectForKey:@"type"] ?: [oldInfo type];
     BDSKMutableServerInfo *serverInfo = nil;
     NSString *serverName = [info valueForKey:@"name"];
     NSString *database = [info valueForKey:@"database"];
     NSString *host = [info valueForKey:@"host"];
     NSString *port = [info valueForKey:@"port"];
     
-    if ([serverType isEqualToString:[self type]]) {
-        serverInfo = [[self serverInfo] mutableCopy];
+    if ([serverType isEqualToString:[oldInfo type]]) {
+        serverInfo = [oldInfo mutableCopy];
         
         NSString *value;
         NSNumber *number;
@@ -480,7 +497,7 @@
             if ((number = [info valueForKey:@"removeDiacritics"]))
                 [serverInfo setRemoveDiacritics:[number boolValue]];
         }
-    } else {
+    } else if (serverType) {
         NSMutableDictionary *options = nil;
         
          if ([serverType isEqualToString:BDSKSearchGroupZoom]) {
@@ -497,7 +514,7 @@
     BOOL isValid = YES;
     id value, validatedValue;
     
-    if ([NSString isEmptyString:[serverInfo name]] || [NSString isEmptyString:[serverInfo database]])
+    if ([NSString isEmptyString:[serverInfo database]])
         isValid = NO;
     else if ([serverInfo isZoom] && ([NSString isEmptyString:[serverInfo host]] || [[serverInfo port] integerValue] == 0))
         isValid = NO;
@@ -509,19 +526,12 @@
             [serverInfo setValue:validatedValue forKey:key];
     }
     
-    if (isValid) {
-        [self setServerInfo:serverInfo];
-        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    } else {
-        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
-        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-        [cmd setScriptErrorString:NSLocalizedString(@"Invalid server info.",@"Error description")];
+    if (isValid == NO) {
+        [serverInfo release];
+        serverInfo = nil;
     }
-    [serverInfo release];
-}
-
-- (NSString *)scriptingServerName {
-    return [[self serverInfo] name];
+    
+    return serverInfo;
 }
 
 @end

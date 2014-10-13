@@ -75,6 +75,23 @@
 #import "BibItem_PubMedLookup.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKStringParser.h"
+#import "BDSKSearchGroup.h"
+#import "BDSKPublicationsArray.h"
+#import "BDSKServerInfo.h"
+#import "BDSKEntrezGroupServer.h"
+#import "BDSKZoomGroupServer.h"
+#import "BDSKISIGroupServer.h"
+#import "BDSKDBLPGroupServer.h"
+#import "BDSKSearchGroupServerManager.h"
+#import "BDSKGroup+Scripting.h"
+
+
+@interface BDSKImportSearch : NSObject <BDSKSearchGroup> {
+    BDSKPublicationsArray *publications;
+    BOOL importFinished;
+}
+- (NSArray *)searchUsingSearchTerm:(NSString *)searchTerm serverInfo:(BDSKServerInfo *)serverInfo;
+@end
 
 
 @implementation BDSKImportCommand
@@ -121,14 +138,43 @@
         // make sure we get the right thing
         if ([string isKindOfClass:[NSURL class]]) {
             string = [NSString stringWithContentsOfFile:[string path] guessedEncoding:0];
-        }
-        if ([string isKindOfClass:[NSString class]] == NO) {
+        } else if ([string isKindOfClass:[NSString class]] == NO) {
             [self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
             return nil;
         }
         pubs = [BDSKStringParser itemsFromString:string ofType:BDSKUnknownStringType owner:document error:NULL];
     } else if (searchTerm) {
-        pubs = [NSArray arrayWithObjects:[BibItem itemWithPubMedSearchTerm:searchTerm], nil];
+        id server = [params objectForKey:@"server"];
+        if (server) {
+            BDSKServerInfo *serverInfo = nil;
+            // the server can be a scriptingServerInfo dictionary, a .bdsksearch file URL, a x-bdsk-search URL, or a default server name
+            if ([server isKindOfClass:[NSDictionary class]]) {
+                serverInfo = [[BDSKSearchGroup newServerInfo:nil withScriptingServerInfo:server] autorelease];
+            } else if ([server isKindOfClass:[NSURL class]]) {
+                serverInfo = [[[BDSKServerInfo alloc] initWithDictionary:[NSDictionary dictionaryWithContentsOfURL:[NSURL fileURLWithPath:server]]] autorelease];
+            } else if ([server isKindOfClass:[NSString class]]) {
+                if ([server hasPrefix:@"x-bdsk-search://"]) {
+                    serverInfo = [[[BDSKServerInfo alloc] initWithDictionary:[BDSKSearchGroup dictionaryWithBdsksearchURL:[NSURL URLWithString:server]]] autorelease];
+                } else {
+                    NSArray *servers = [[BDSKSearchGroupServerManager sharedManager] servers];
+                    NSUInteger i = [[servers valueForKey:@"name"] indexOfObject:server];
+                    if (i != NSNotFound)
+                        serverInfo = [servers objectAtIndex:i];
+                }
+            } 
+            if (serverInfo == nil) {
+                [self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
+                return nil;
+            }
+            BDSKImportSearch *search = [[BDSKImportSearch alloc] init];
+            pubs = [search searchUsingSearchTerm:searchTerm serverInfo:serverInfo];
+            // we have to hand the pubs over to the document with the correct macro resolver
+            if (pubs)
+                pubs = [BibItem publicationsFromArchivedData:[BibItem archivedPublications:pubs] macroResolver:[document macroResolver]];
+            [search release];
+        } else {
+            pubs = [NSArray arrayWithObjects:[BibItem itemWithPubMedSearchTerm:searchTerm], nil];
+        }
     } else if (url) {
         if ([url isKindOfClass:[NSURL class]]) {
             if ([url isFileURL])
@@ -153,5 +199,67 @@
 	
     return pubs ?: [NSArray array];
 }
+
+@end
+
+
+@implementation BDSKImportSearch
+
+- (void)dealloc {
+    BDSKDESTROY(publications);
+    [super dealloc];
+}
+
+- (NSArray *)searchUsingSearchTerm:(NSString *)searchTerm serverInfo:(BDSKServerInfo *)serverInfo {
+    NSString *aType = [serverInfo type];
+    Class serverClass = Nil;
+    if ([aType isEqualToString:BDSKSearchGroupEntrez])
+        serverClass = [BDSKEntrezGroupServer class];
+    else if ([aType isEqualToString:BDSKSearchGroupZoom])
+        serverClass = [BDSKZoomGroupServer class];
+    else if ([aType isEqualToString:BDSKSearchGroupISI])
+        serverClass = [BDSKISIGroupServer class];
+    else if ([aType isEqualToString:BDSKSearchGroupDBLP])
+        serverClass = [BDSKDBLPGroupServer class];
+    else
+        BDSKASSERT_NOT_REACHED("unknown search group type");
+    
+    id<BDSKSearchGroupServer> server = [[serverClass alloc] initWithGroup:self serverInfo:serverInfo];
+    
+    importFinished = NO;
+    
+    [server retrieveWithSearchTerm:searchTerm];
+    
+	NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
+	while (importFinished == NO && [runLoop runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]]);
+    
+    [server terminate];
+    [server release];
+    
+    return [publications count] > 0 ? publications : nil;
+}
+
+#pragma mark BDSKSearchGroup protocol
+
+- (void)addPublications:(NSArray *)pubs {
+    if (pubs && publications == nil)
+        publications = [[BDSKPublicationsArray alloc] init];
+    [publications addObjectsFromArray:pubs];
+    importFinished = YES;
+}
+
+- (BDSKPublicationsArray *)publications { return publications; }
+
+- (BDSKMacroResolver *)macroResolver { return nil; }
+
+- (NSUndoManager *)undoManager { return nil; }
+
+- (NSURL *)fileURL { return nil; }
+
+- (NSString *)documentInfoForKey:(NSString *)key { return nil; }
+
+- (BOOL)isDocument { return NO; }
+
+- (BDSKItemSearchIndexes *)searchIndexes{ return nil; }
 
 @end
