@@ -1552,15 +1552,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     if ([parent isImported])
         parent = nil;
     
-    NSMutableData *data = [NSMutableData data];
-    NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
-    NSArray *newPubs;
-    
-    [archiver encodeObject:[NSArray arrayWithObjects:pub, parent, nil] forKey:@"publications"];
-    [archiver finishEncoding];
-    [archiver release];
-    
-    newPubs = [BibItem publicationsFromArchivedData:data macroResolver:[self macroResolver]];
+    NSArray *newPubs = [BibItem publicationsFromArchivedData:[BibItem archivedPublications:[NSArray arrayWithObjects:pub, parent, nil]] macroResolver:[self macroResolver]];
 	
     [self importPublications:newPubs options:BDSKImportAggregate | BDSKImportNoEdit];
     
