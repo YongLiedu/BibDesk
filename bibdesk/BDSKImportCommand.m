@@ -87,7 +87,7 @@
 
 
 @interface BDSKImportSearch : NSObject <BDSKSearchGroup> {
-    BDSKPublicationsArray *publications;
+    NSArray *publications;
     BOOL importFinished;
 }
 - (NSArray *)searchUsingSearchTerm:(NSString *)searchTerm serverInfo:(BDSKServerInfo *)serverInfo;
@@ -242,13 +242,13 @@
 #pragma mark BDSKSearchGroup protocol
 
 - (void)addPublications:(NSArray *)pubs {
-    if (pubs && publications == nil)
-        publications = [[BDSKPublicationsArray alloc] init];
-    [publications addObjectsFromArray:pubs];
+    BDSKDESTROY(publications);
+    if ([pubs count] > 0)
+        publications = [pubs copy];
     importFinished = YES;
 }
 
-- (BDSKPublicationsArray *)publications { return publications; }
+- (BDSKPublicationsArray *)publications { return nil; }
 
 - (BDSKMacroResolver *)macroResolver { return nil; }
 
