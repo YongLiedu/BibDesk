@@ -1569,8 +1569,8 @@
                 description="Z3950 search server.">
                 <cocoa string-value="zoom"/>
             </enumerator>
-            <enumerator name="ISI" code="ISI "
-                description="ISI Web of Sciences search server.">
+            <enumerator name="WOK" code="WOK "
+                description="Web of Knowledge search server.">
                 <cocoa string-value="isi"/>
             </enumerator>
             <enumerator name="DBLP" code="DBLP"
