@@ -47,21 +47,15 @@
 
 - (id)publication {
     id wc = [self windowController];
-    if ([wc respondsToSelector:@selector(publication)]) {
-        BibItem *pub = [wc publication];
-        if ([[pub owner] isDocument])
-            return pub;
-    }
+    if ([wc respondsToSelector:@selector(publication)])
+        return [wc publication];
     return nil;
 }
 
 - (id)author {
     id wc = [self windowController];
-    if ([wc respondsToSelector:@selector(person)]) {
-        BibAuthor *auth = [wc person];
-        if ([[[auth publication] owner] isDocument])
-            return auth;
-    }
+    if ([wc respondsToSelector:@selector(person)])
+        return [wc person];
     return nil;
 }
 
