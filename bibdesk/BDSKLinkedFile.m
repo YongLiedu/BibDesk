@@ -317,7 +317,7 @@ static Class BDSKLinkedFileClass = Nil;
     BDSKASSERT(nil == aDelegate || [aDelegate respondsToSelector:@selector(basePathForLinkedFile:)]);
     
     NSString *basePath = [aDelegate basePathForLinkedFile:self];
-    NSString *relPath = [aPath relativePathFromPath:basePath];
+    NSString *relPath = basePath ? [aPath relativePathFromPath:basePath] : nil;
     AliasHandle anAlias = BDSKPathToAliasHandle((CFStringRef)aPath, (CFStringRef)basePath);
     
     self = [self initWithAlias:anAlias relativePath:relPath delegate:aDelegate];
@@ -424,7 +424,7 @@ static Class BDSKLinkedFileClass = Nil;
         
         if (hasRef == false && alias != NULL) {
             hasRef = BDSKAliasHandleToFSRef(alias, hasBaseRef ? &baseRef : NULL, &aRef, &shouldUpdate);
-            shouldUpdate = shouldUpdate && hasBaseRef && hasRef;
+            shouldUpdate = (shouldUpdate || relativePath == nil) && hasBaseRef && hasRef;
         }
         
         if (hasRef) {
