@@ -145,10 +145,14 @@
             BDSKServerInfo *serverInfo = nil;
             // the server can be a scriptingServerInfo dictionary, a .bdsksearch file URL, a x-bdsk-search URL, or a default server name
             if ([server isKindOfClass:[NSDictionary class]]) {
-                serverInfo = [[BDSKSearchGroup newServerInfo:nil withScriptingServerInfo:server] autorelease];
+                if ([server count] == 1 && [server objectForKey:@"name"])
+                    server = [server objectForKey:@"name"];
+                else
+                    serverInfo = [[BDSKSearchGroup newServerInfo:nil withScriptingServerInfo:server] autorelease];
             } else if ([server isKindOfClass:[NSURL class]]) {
                 serverInfo = [[[BDSKServerInfo alloc] initWithDictionary:[NSDictionary dictionaryWithContentsOfURL:[NSURL fileURLWithPath:server]]] autorelease];
-            } else if ([server isKindOfClass:[NSString class]]) {
+            }
+            if ([server isKindOfClass:[NSString class]]) {
                 if ([server hasPrefix:@"x-bdsk-search://"]) {
                     serverInfo = [[[BDSKServerInfo alloc] initWithDictionary:[BDSKSearchGroup dictionaryWithBdsksearchURL:[NSURL URLWithString:server]]] autorelease];
                 } else {
