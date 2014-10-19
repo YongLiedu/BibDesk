@@ -78,10 +78,6 @@
 #import "BDSKSearchGroup.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKServerInfo.h"
-#import "BDSKEntrezGroupServer.h"
-#import "BDSKZoomGroupServer.h"
-#import "BDSKISIGroupServer.h"
-#import "BDSKDBLPGroupServer.h"
 #import "BDSKSearchGroupServerManager.h"
 #import "BDSKGroup+Scripting.h"
 
@@ -211,20 +207,7 @@
 }
 
 - (NSArray *)searchUsingSearchTerm:(NSString *)searchTerm serverInfo:(BDSKServerInfo *)serverInfo {
-    NSString *aType = [serverInfo type];
-    Class serverClass = Nil;
-    if ([aType isEqualToString:BDSKSearchGroupEntrez])
-        serverClass = [BDSKEntrezGroupServer class];
-    else if ([aType isEqualToString:BDSKSearchGroupZoom])
-        serverClass = [BDSKZoomGroupServer class];
-    else if ([aType isEqualToString:BDSKSearchGroupISI])
-        serverClass = [BDSKISIGroupServer class];
-    else if ([aType isEqualToString:BDSKSearchGroupDBLP])
-        serverClass = [BDSKDBLPGroupServer class];
-    else
-        BDSKASSERT_NOT_REACHED("unknown search group type");
-    
-    id<BDSKSearchGroupServer> server = [[serverClass alloc] initWithGroup:self serverInfo:serverInfo];
+    id<BDSKSearchGroupServer> server = [BDSKSearchGroup newServerWithGroup:self serverInfo:serverInfo];
     
     importFinished = NO;
     

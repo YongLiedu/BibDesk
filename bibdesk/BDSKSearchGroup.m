@@ -225,19 +225,7 @@ static NSDictionary *BDSKSearchGroupURLQueryKeys = nil;
 - (void)resetServerWithInfo:(BDSKServerInfo *)info {
     [server terminate];
     [server release];
-    NSString *aType = [info type];
-    Class serverClass = Nil;
-    if ([aType isEqualToString:BDSKSearchGroupEntrez])
-        serverClass = [BDSKEntrezGroupServer class];
-    else if ([aType isEqualToString:BDSKSearchGroupZoom])
-        serverClass = [BDSKZoomGroupServer class];
-    else if ([aType isEqualToString:BDSKSearchGroupISI])
-        serverClass = [BDSKISIGroupServer class];
-    else if ([aType isEqualToString:BDSKSearchGroupDBLP])
-        serverClass = [BDSKDBLPGroupServer class];
-    else
-        BDSKASSERT_NOT_REACHED("unknown search group type");
-    server = [[serverClass alloc] initWithGroup:self serverInfo:info];
+    server = [[self class] newServerWithGroup:self serverInfo:info];
 }
 
 - (void)search;
@@ -401,6 +389,22 @@ static NSDictionary *BDSKSearchGroupURLQueryKeys = nil;
     }
     
     return dictionary;
+}
+
++ (id<BDSKSearchGroupServer>)newServerWithGroup:(id<BDSKSearchGroup>)group serverInfo:(BDSKServerInfo *)info {
+    NSString *aType = [info type];
+    Class serverClass = Nil;
+    if ([aType isEqualToString:BDSKSearchGroupEntrez])
+        serverClass = [BDSKEntrezGroupServer class];
+    else if ([aType isEqualToString:BDSKSearchGroupZoom])
+        serverClass = [BDSKZoomGroupServer class];
+    else if ([aType isEqualToString:BDSKSearchGroupISI])
+        serverClass = [BDSKISIGroupServer class];
+    else if ([aType isEqualToString:BDSKSearchGroupDBLP])
+        serverClass = [BDSKDBLPGroupServer class];
+    else
+        BDSKASSERT_NOT_REACHED("unknown search group type");
+    return [[serverClass alloc] initWithGroup:self serverInfo:info];
 }
 
 @end
