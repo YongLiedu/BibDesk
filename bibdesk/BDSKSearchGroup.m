@@ -404,7 +404,7 @@ static NSDictionary *BDSKSearchGroupURLQueryKeys = nil;
         serverClass = [BDSKDBLPGroupServer class];
     else
         BDSKASSERT_NOT_REACHED("unknown search group type");
-    return [[serverClass alloc] initWithGroup:self serverInfo:info];
+    return [[serverClass alloc] initWithGroup:group serverInfo:info];
 }
 
 @end
