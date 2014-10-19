@@ -270,6 +270,9 @@ static NSString *dateFromSearchTerm(NSString *searchTerm, BOOL begin, NSRange *r
             
             BibItem *pub = [[BibItem alloc] initWithType:pubType citeKey:nil pubFields:pubFields files:files isNew:YES];
             
+            // we set the macroResolver so we know the fields of this item may refer to it, so we can prevent scripting from adding this to the wrong document
+            [pub setMacroResolver:[group macroResolver]];
+            
             [pubs addObject:pub];
             [pub release];
             [pubFields release];
