@@ -42,7 +42,7 @@
 @class BDSKGroupOutlineView;
 
 @protocol BDSKGroupOutlineViewDelegate <BDSKOutlineViewDelegate>
-- (NSIndexSet *)outlineView:(BDSKGroupOutlineView *)anOutlineView indexesOfRowsToHighlightInRange:(NSRange)indexRange;
+- (BOOL)outlineView:(BDSKGroupOutlineView *)anOutlineView shouldHighlightItem:(id)item;
 - (BOOL)outlineView:(BDSKGroupOutlineView *)anOutlineView isSingleSelectionItem:(id)item;
 - (void)outlineView:(BDSKGroupOutlineView *)anOutlineView doubleClickedOnIconOfItem:(id)item;
 - (BOOL)outlineViewShouldEditNextItemWhenEditingEnds:(BDSKGroupOutlineView *)anOutlineView;

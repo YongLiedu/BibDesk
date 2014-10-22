@@ -118,11 +118,10 @@
     [super mouseDown:theEvent];
 }
 
-- (void)drawHighlightOnRows:(NSIndexSet *)rows
+- (void)drawHighlightOnRow:(NSInteger)row
 {
-    NSParameterAssert(rows != nil);
-    
     CGFloat heightOffset = fmax(1.0, round(0.25 * [self intercellSpacing].height) - 1.0);
+    NSRect drawRect = NSInsetRect([self rectOfRow:row], 1.0, heightOffset);
     NSColor *highlightColor;
     
     if ([[self window] isMainWindow] || [[self window] isKeyWindow])
@@ -130,14 +129,7 @@
     else
         highlightColor = [NSColor disabledSourceListHighlightColor];
     
-    NSUInteger rowIndex = [rows firstIndex];
-    NSRect drawRect;
-    
-    while (rowIndex != NSNotFound) {
-        drawRect = NSInsetRect([self rectOfRow:rowIndex], 1.0, heightOffset);
-        [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:1.0 color:highlightColor];
-        rowIndex = [rows indexGreaterThanIndex:rowIndex];
-    }
+    [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:1.0 color:highlightColor];
 }
 
 - (void)reloadData
@@ -168,12 +160,12 @@
     }
 }
 
-- (void)highlightSelectionInClipRect:(NSRect)clipRect
-{
-    [super highlightSelectionInClipRect:clipRect];
-    // check this in case it's been disconnected in one of our reloading optimizations
-    if([[self delegate] respondsToSelector:@selector(outlineView:indexesOfRowsToHighlightInRange:)])
-        [self drawHighlightOnRows:[[self delegate] outlineView:self indexesOfRowsToHighlightInRange:[self rowsInRect:clipRect]]];
+- (void)drawRow:(NSInteger)row clipRect:(NSRect)clipRect {
+    if ([[self delegate] respondsToSelector:@selector(outlineView:shouldHighlightItem:)] &&
+        [self isRowSelected:row] == NO &&
+        [[self delegate] outlineView:self shouldHighlightItem:[self itemAtRow:row]])
+        [self drawHighlightOnRow:row];
+    [super drawRow:row clipRect:clipRect];
 }
 
 // make sure that certain rows are only selected as a single selection

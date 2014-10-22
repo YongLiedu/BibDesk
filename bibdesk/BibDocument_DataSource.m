@@ -1048,34 +1048,14 @@
     return [item toolTip];
 }
 
-- (NSIndexSet *)outlineView:(BDSKGroupOutlineView *)outlineView indexesOfRowsToHighlightInRange:(NSRange)indexRange {
-    if([self numberOfSelectedPubs] == 0 || [self hasGroupTypeSelected:BDSKExternalGroupType])
-        return [NSIndexSet indexSet];
-    
-    // Use this for the indexes we're going to return
-    NSMutableIndexSet *indexSet = [NSMutableIndexSet indexSet];
-    
-    // This allows us to be slightly lazy, only putting the visible group rows in the dictionary
-    NSMutableIndexSet *visibleIndexes = [NSMutableIndexSet indexSetWithIndexesInRange:indexRange];
-    [visibleIndexes removeIndexes:[groupOutlineView selectedRowIndexes]];
-    
-    NSArray *selectedPubs = [self selectedPublications];
-    NSUInteger groupIndex = [visibleIndexes firstIndex];
-    
-    while (groupIndex != NSNotFound) {
-        BDSKGroup *group = [groupOutlineView itemAtRow:groupIndex];
-        if (0 == ([group groupType] & (BDSKExternalGroupType | BDSKParentGroupType))) {
-            for (BibItem *pub in selectedPubs) {
-                if ([group containsItem:pub]) {
-                    [indexSet addIndex:groupIndex];
-                    break;
-                }
-            }
+- (BOOL)outlineView:(BDSKGroupOutlineView *)outlineView shouldHighlightItem:(id)item {
+    if ([self numberOfSelectedPubs] > 0 && ([item groupType] & (BDSKExternalGroupType | BDSKParentGroupType)) == 0) {
+        for (BibItem *pub in [self selectedPublications]) {
+            if ([item containsItem:pub])
+                return YES;
         }
-        groupIndex = [visibleIndexes indexGreaterThanIndex:groupIndex];
     }
-    
-    return indexSet;
+    return NO;
 }
 
 - (BOOL)outlineView:(BDSKGroupOutlineView *)ov isSingleSelectionItem:(id)item {
