@@ -231,19 +231,14 @@ enum {
         NSBeep();
 }
 
-- (void)highlightSelectionInClipRect:(NSRect)clipRect{
-    [super highlightSelectionInClipRect:clipRect];
-    
+- (void)drawRow:(NSInteger)row clipRect:(NSRect)clipRect {
     if ([[self delegate] respondsToSelector:@selector(tableView:highlightColorForRow:)]) {
-        NSRange visibleRows = [self rowsInRect:clipRect];
-        NSUInteger row;
-        NSColor *color;
-        NSRect rect;
-        for (row = visibleRows.location; row < NSMaxRange(visibleRows); row++) {
-            if ((color = [[self delegate] tableView:self highlightColorForRow:row])) {
+        NSColor *color = [[self delegate] tableView:self highlightColorForRow:row];
+        if (color) {
+            NSRect rect = BDSKShrinkRect([self rectOfRow:row], 1.0, NSMaxYEdge);
+            if (NSIntersectsRect(clipRect, rect)) {
                 [NSGraphicsContext saveGraphicsState];
                 [color set];
-                rect = BDSKShrinkRect([self rectOfRow:row], 1.0, NSMaxYEdge);
                 if ([self isRowSelected:row]) {
                     [NSBezierPath setDefaultLineWidth:2.0];
                     [NSBezierPath strokeHorizontalOvalInRect:NSInsetRect(rect, 2.0, 1.0)];
@@ -255,6 +250,7 @@ enum {
             }
         }
     }
+    [super drawRow:row clipRect:clipRect];
 }
 
 #pragma mark Alternating row color
