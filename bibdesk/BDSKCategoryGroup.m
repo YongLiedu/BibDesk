@@ -209,14 +209,14 @@
         [image lockFocus];
         [genericImage drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
         // hack to make the question mark dark enough to be visible
-        for(i = 0; i < 3; i++)
+        for(i = 0; i < 2; i++)
             [questionMark drawInRect:NSMakeRect(6.0, 4.0, 20.0, 20.0) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
         [image unlockFocus];
         NSImage *tinyImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
         [tinyImage lockFocus];
         [genericImage drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
         // hack to make the question mark dark enough to be visible
-        for(i = 0; i < 3; i++)
+        for(i = 0; i < 2; i++)
             [questionMark drawInRect:NSMakeRect(3.0, 1.0, 10.0, 10.0) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
         [tinyImage unlockFocus];
         [image addRepresentation:[[tinyImage representations] lastObject]];
