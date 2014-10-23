@@ -118,20 +118,6 @@
     [super mouseDown:theEvent];
 }
 
-- (void)drawHighlightOnRow:(NSInteger)row
-{
-    CGFloat heightOffset = fmax(1.0, round(0.25 * [self intercellSpacing].height) - 1.0);
-    NSRect drawRect = NSInsetRect([self rectOfRow:row], 1.0, heightOffset);
-    NSColor *highlightColor;
-    
-    if ([[self window] isMainWindow] || [[self window] isKeyWindow])
-        highlightColor = [NSColor mainSourceListHighlightColor];
-    else
-        highlightColor = [NSColor disabledSourceListHighlightColor];
-    
-    [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:1.0 color:highlightColor];
-}
-
 - (void)reloadData
 {
     NSArray *selectedItems = [self selectedItems];
@@ -163,8 +149,15 @@
 - (void)drawRow:(NSInteger)row clipRect:(NSRect)clipRect {
     if ([[self delegate] respondsToSelector:@selector(outlineView:shouldHighlightItem:)] &&
         [self isRowSelected:row] == NO &&
-        [[self delegate] outlineView:self shouldHighlightItem:[self itemAtRow:row]])
-        [self drawHighlightOnRow:row];
+        [[self delegate] outlineView:self shouldHighlightItem:[self itemAtRow:row]]) {
+        
+        CGFloat heightOffset = fmax(1.0, round(0.25 * [self intercellSpacing].height) - 1.0);
+        NSRect drawRect = NSInsetRect([self rectOfRow:row], 1.0, heightOffset);
+        NSWindow *window = [self window];
+        NSColor *highlightColor = ([window isMainWindow] || [window isKeyWindow]) ? [NSColor mainSourceListHighlightColor] : [NSColor disabledSourceListHighlightColor];
+        
+        [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:1.0 color:highlightColor];
+    }
     [super drawRow:row clipRect:clipRect];
 }
 
