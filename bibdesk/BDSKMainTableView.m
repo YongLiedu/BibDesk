@@ -235,16 +235,16 @@ enum {
     if ([[self delegate] respondsToSelector:@selector(tableView:highlightColorForRow:)]) {
         NSColor *color = [[self delegate] tableView:self highlightColorForRow:row];
         if (color) {
-            NSRect rect = BDSKShrinkRect([self rectOfRow:row], 1.0, NSMaxYEdge);
+            NSRect rect = BDSKShrinkRect(BDSKShrinkRect([self rectOfRow:row], 2.0, NSMaxYEdge), 1.0, NSMinYEdge);
             if (NSIntersectsRect(clipRect, rect)) {
                 [NSGraphicsContext saveGraphicsState];
                 [color set];
                 if ([self isRowSelected:row]) {
                     [NSBezierPath setDefaultLineWidth:2.0];
-                    [NSBezierPath strokeHorizontalOvalInRect:NSInsetRect(rect, 2.0, 1.0)];
+                    [NSBezierPath strokeHorizontalOvalInRect:NSInsetRect(rect, 1.0, 1.0)];
                     [NSBezierPath setDefaultLineWidth:1.0];
                 } else {
-                    [NSBezierPath fillHorizontalOvalInRect:NSInsetRect(rect, 1.0, 0.0)];
+                    [NSBezierPath fillHorizontalOvalInRect:rect];
                 }
                 [NSGraphicsContext restoreGraphicsState];
             }
