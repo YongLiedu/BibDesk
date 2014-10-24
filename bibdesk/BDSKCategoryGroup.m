@@ -125,7 +125,9 @@
 }
 
 - (BOOL)containsItem:(BibItem *)item {
-	if (key == nil)
+	if ([[item owner] isEqual:[self document]] == NO)
+        return NO;
+    if (key == nil)
 		return YES;
 	return [item isContainedInGroupNamed:name forField:key];
 }

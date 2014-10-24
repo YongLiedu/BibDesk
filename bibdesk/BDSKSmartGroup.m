@@ -154,7 +154,7 @@
 }
 
 - (BOOL)containsItem:(BibItem *)item {
-	return [filter testItem:item];
+	return [[item owner] isEqual:[self document]] && [filter testItem:item];
 }
 
 - (NSArray *)filterItems:(NSArray *)items {
