@@ -1049,7 +1049,9 @@
 }
 
 - (BOOL)outlineView:(BDSKGroupOutlineView *)outlineView shouldHighlightItem:(id)item {
-    if ([self numberOfSelectedPubs] > 0 && ([item groupType] & (BDSKExternalGroupType | BDSKParentGroupType)) == 0) {
+    if ([self numberOfSelectedPubs] > 0 && 
+        ([item groupType] & (BDSKExternalGroupType | BDSKParentGroupType)) == 0 && 
+        [self hasGroupTypeSelected:BDSKExternalGroupType] == NO) {
         for (BibItem *pub in [self selectedPublications]) {
             if ([item containsItem:pub])
                 return YES;
