@@ -144,7 +144,7 @@
         CIImage *ciImage = [CIImage imageWithData:[[NSImage imageNamed:NSImageNameFolderSmart] TIFFRepresentation]];
         CIFilter *hueAdjustFilter = [CIFilter filterWithName:@"CIHueAdjust"];
         CIFilter *colorControlsFilter = [CIFilter filterWithName:@"CIColorControls"];
-        [hueAdjustFilter setValue:[NSNumber numberWithDouble:3.0 * M_PI] forKey:@"inputAngle"];
+        [hueAdjustFilter setValue:[NSNumber numberWithDouble:M_PI] forKey:@"inputAngle"];
         [colorControlsFilter setDefaults];
         [colorControlsFilter setValue:[NSNumber numberWithDouble:1.3] forKey:@"inputSaturation"];
         [colorControlsFilter setValue:[NSNumber numberWithDouble:0.3] forKey:@"inputBrightness"];
