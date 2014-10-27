@@ -45,7 +45,6 @@
 #pragma mark Publication Actions
 
 - (void)addNewPubAndEdit:(BibItem *)item;
-- (void)createNewPub;
 - (void)createNewPubUsingCrossrefForItem:(BibItem *)item;
 - (IBAction)createNewPubUsingCrossrefAction:(id)sender;
 

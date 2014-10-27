@@ -161,11 +161,6 @@ static BOOL changingColors = NO;
     [self editPub:newBI];
 }
 
-- (void)createNewPub{
-    BibItem *newBI = [[[BibItem alloc] init] autorelease];
-    [self addNewPubAndEdit:newBI];
-}
-
 - (void)createNewPubUsingCrossrefForItem:(BibItem *)item{
     BibItem *newBI = [[BibItem alloc] init];
 	NSString *parentType = [item pubType];
@@ -193,7 +188,9 @@ static BOOL changingColors = NO;
     if ([NSEvent standardModifierFlags] & NSAlternateKeyMask) {
         [self createNewPubUsingCrossrefAction:sender];
     } else {
-        [self createNewPub];
+        BibItem *newBI = [[BibItem alloc] init];
+        [self addNewPubAndEdit:newBI];
+        [newBI release];
     }
 }
 
