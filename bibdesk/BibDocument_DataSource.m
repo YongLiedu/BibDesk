@@ -81,6 +81,7 @@
 #import "NSString_BDSKExtensions.h"
 #import "BDSKServerInfo.h"
 #import "NSPasteboard_BDSKExtensions.h"
+#import "NSView_BDSKExtensions.h"
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
 
@@ -818,13 +819,55 @@
 
 - (void)tableViewInsertSpace:(NSTableView *)tv {
 	if (tv == tableView || tv == [fileSearchController tableView]) {
-		[self pageDownInPreview:nil];
+        NSScrollView *scrollView = nil;
+        
+        if (bottomPreviewDisplay == BDSKPreviewDisplayText)
+            scrollView = [bottomPreviewTextView enclosingScrollView];
+        else if (bottomPreviewDisplay == BDSKPreviewDisplayFiles)
+            scrollView = [bottomFileView enclosingScrollView];
+        else if (bottomPreviewDisplay == BDSKPreviewDisplayTeX)
+            scrollView = [(BDSKZoomablePDFView *)[previewer pdfView] scrollView];
+        
+        NSPoint p = [[scrollView documentView] scrollPositionAsPercentage];
+        
+        if (p.y > 0.99 || NSHeight([scrollView documentVisibleRect]) >= NSHeight([[scrollView documentView] bounds])) { // select next row if the last scroll put us at the end
+            NSInteger i = [[tv selectedRowIndexes] lastIndex];
+            if (i == NSNotFound)
+                i = 0;
+            else if (i < [tv numberOfRows])
+                i++;
+            [tv selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
+            [tv scrollRowToVisible:i];
+        } else {
+            [scrollView pageDown:nil];
+        }
 	}
 }
 
 - (void)tableViewInsertShiftSpace:(NSTableView *)tv {
 	if (tv == tableView || tv == [fileSearchController tableView]) {
-		[self pageUpInPreview:nil];
+        NSScrollView *scrollView = nil;
+        
+        if (bottomPreviewDisplay == BDSKPreviewDisplayText)
+            scrollView = [bottomPreviewTextView enclosingScrollView];
+        else if (bottomPreviewDisplay == BDSKPreviewDisplayFiles)
+            scrollView = [bottomFileView enclosingScrollView];
+        else if (bottomPreviewDisplay == BDSKPreviewDisplayTeX)
+            scrollView = [(BDSKZoomablePDFView *)[previewer pdfView] scrollView];
+        
+        NSPoint p = [[scrollView documentView] scrollPositionAsPercentage];
+        
+        if (p.y < 0.01) { // select previous row if we're already at the top
+            NSInteger i = [[tv selectedRowIndexes] firstIndex];
+            if (i == NSNotFound)
+                i = 0;
+            else if (i > 0)
+                i--;
+            [tv selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
+            [tv scrollRowToVisible:i];
+        } else {
+            [scrollView pageUp:nil];
+        }
 	}
 }
 

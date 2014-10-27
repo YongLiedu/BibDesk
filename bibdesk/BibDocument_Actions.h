@@ -228,28 +228,6 @@
 - (IBAction)changePreviewDisplay:(id)sender;
 - (IBAction)changeSidePreviewDisplay:(id)sender;
 
-/*!
-    @method     pageDownInPreview:
-    @abstract   Page down in the lower pane of the splitview using spacebar.
-    @discussion Currently sent by the tableview, which gets keyDown: events.
-    @param      sender (description)
-*/
-- (void)pageDownInPreview:(id)sender;
-
-/*!
-    @method     pageUpInPreview:
-    @abstract   Page up in the lower pane of the splitview using spacebar.
-    @discussion Currently sent by the tableview, which gets keyDown: events.
-    @param      sender (description)
-*/
-- (void)pageUpInPreview:(id)sender;
-
-/*!
-    @method     consolidateLinkedFiles:
-    @abstract   invokes autofile. see BDSKFiler.h,m for info
-    
-*/
-
 #pragma mark Showing related info windows
 
 - (IBAction)toggleShowingCustomCiteDrawer:(id)sender;

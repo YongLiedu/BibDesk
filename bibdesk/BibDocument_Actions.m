@@ -1323,56 +1323,6 @@ static BOOL changingColors = NO;
     }
 }
 
-- (void)pageDownInPreview:(id)sender{
-    NSScrollView *scrollView = nil;
-    
-    if (bottomPreviewDisplay == BDSKPreviewDisplayText)
-        scrollView = [bottomPreviewTextView enclosingScrollView];
-    else if (bottomPreviewDisplay == BDSKPreviewDisplayFiles)
-        scrollView = [bottomFileView enclosingScrollView];
-    else if (bottomPreviewDisplay == BDSKPreviewDisplayTeX)
-        scrollView = [(BDSKZoomablePDFView *)[previewer pdfView] scrollView];
-    
-    NSPoint p = [[scrollView documentView] scrollPositionAsPercentage];
-    
-    if(p.y > 0.99 || NSHeight([scrollView documentVisibleRect]) >= NSHeight([[scrollView documentView] bounds])){ // select next row if the last scroll put us at the end
-        NSInteger i = [[tableView selectedRowIndexes] lastIndex];
-        if (i == NSNotFound)
-            i = 0;
-        else if (i < [tableView numberOfRows])
-            i++;
-        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
-        [tableView scrollRowToVisible:i];
-    }else{
-        [scrollView pageDown:sender];
-    }
-}
-
-- (void)pageUpInPreview:(id)sender{
-    NSScrollView *scrollView = nil;
-    
-    if (bottomPreviewDisplay == BDSKPreviewDisplayText)
-        scrollView = [bottomPreviewTextView enclosingScrollView];
-    else if (bottomPreviewDisplay == BDSKPreviewDisplayFiles)
-        scrollView = [bottomFileView enclosingScrollView];
-    else if (bottomPreviewDisplay == BDSKPreviewDisplayTeX)
-        scrollView = [(BDSKZoomablePDFView *)[previewer pdfView] scrollView];
-    
-    NSPoint p = [[scrollView documentView] scrollPositionAsPercentage];
-    
-    if(p.y < 0.01){ // select previous row if we're already at the top
-        NSInteger i = [[tableView selectedRowIndexes] firstIndex];
-		if (i == NSNotFound)
-			i = 0;
-		else if (i > 0)
-			i--;
-		[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
-        [tableView scrollRowToVisible:i];
-    }else{
-        [scrollView pageUp:sender];
-    }
-}
-
 #pragma mark Showing related info windows
 
 - (IBAction)toggleShowingCustomCiteDrawer:(id)sender{
