@@ -84,16 +84,8 @@
 
 - (void)editPublications:(NSArray *)pubs;
 
-/*!
-    @method editPub
-    @abstract Opens the edit window
-    @discussion Creates a bibeditor if one doesn't exist, and tells it to show itself. 
-    @param pub The BibItem that should be edited.
-*/
-- (BDSKEditor *)editPub:(BibItem *)pub;
-
-- (BDSKEditor *)editPubBeforePub:(BibItem *)pub;
-- (BDSKEditor *)editPubAfterPub:(BibItem *)pub;
+- (void)editPub:(BibItem *)pub forField:(NSString *)field;
+- (void)editPub:(BibItem *)pub;
 
 /*!
     @method editAction:

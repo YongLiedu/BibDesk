@@ -1092,11 +1092,8 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 // these methods are for crossref interaction with the table
 - (void)openParentItemForField:(NSString *)field{
     BibItem *parent = [publication crossrefParent];
-    if(parent){
-        BDSKEditor *editor = [[self document] editPub:parent];
-        if(editor && field)
-            [editor setKeyField:field];
-    }
+    if (parent)
+        [[self document] editPub:parent forField:field];
 }
 
 - (IBAction)selectCrossrefParentAction:(id)sender{

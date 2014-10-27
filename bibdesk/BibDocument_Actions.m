@@ -334,32 +334,15 @@ static BOOL changingColors = NO;
     return editor;
 }
 
-- (BDSKEditor *)editPub:(BibItem *)pub{
+- (void)editPub:(BibItem *)pub forField:(NSString *)field {
     BDSKEditor *editor = [self editorForPublication:pub create:YES];
     [editor showWindow:nil];
-    return editor;
+    if (field)
+        [editor setKeyField:field];
 }
 
-- (BDSKEditor *)editPubBeforePub:(BibItem *)pub{
-    NSUInteger idx = [shownPublications indexOfObject:pub];
-    if(idx == NSNotFound){
-        NSBeep();
-        return nil;
-    }
-    if(idx-- == 0)
-        idx = [shownPublications count] - 1;
-    return [self editPub:[shownPublications objectAtIndex:idx]];
-}
-
-- (BDSKEditor *)editPubAfterPub:(BibItem *)pub{
-    NSUInteger idx = [shownPublications indexOfObject:pub];
-    if(idx == NSNotFound){
-        NSBeep();
-        return nil;
-    }
-    if(++idx == [shownPublications count])
-        idx = 0;
-    return [self editPub:[shownPublications objectAtIndex:idx]];
+- (void)editPub:(BibItem *)pub{
+    [self editPub:pub forField:nil];
 }
 
 - (void)editPubAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
@@ -689,7 +672,10 @@ static BOOL changingColors = NO;
         return YES;
     } else if ([aLink isKindOfClass:[NSString class]]) {
         BibItem *pub = [[self publications] itemForCiteKey:aLink];
-        return pub != nil && [self editPub:pub] != nil;
+        if (pub == nil)
+            return NO;
+        [self editPub:pub];
+        return YES;
     }
     // let the next responder handle it if it was a non-file URL
     return NO;
