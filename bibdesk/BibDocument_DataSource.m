@@ -1052,10 +1052,12 @@
     if ([self numberOfSelectedPubs] > 0 && 
         ([item groupType] & (BDSKExternalGroupType | BDSKParentGroupType)) == 0 && 
         [self hasGroupTypeSelected:BDSKExternalGroupType] == NO) {
+        BOOL intersectGroups = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKIntersectGroupsKey];
         for (BibItem *pub in [self selectedPublications]) {
-            if ([item containsItem:pub])
-                return YES;
+            if ([item containsItem:pub] != intersectGroups)
+                return !intersectGroups;
         }
+        return intersectGroups;
     }
     return NO;
 }
