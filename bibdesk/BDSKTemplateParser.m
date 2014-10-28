@@ -80,7 +80,7 @@ static NSCharacterSet *invertedKeyCharacterSet = nil;
     
     BDSKINITIALIZE;
     
-    NSMutableCharacterSet *tmpSet = [[NSCharacterSet alphanumericCharacterSet] mutableCopy];
+    NSMutableCharacterSet *tmpSet = [[NSMutableCharacterSet alphanumericCharacterSet] mutableCopy];
     [tmpSet addCharactersInString:@".-_:;@#"];
     keyCharacterSet = [tmpSet copy];
     [tmpSet release];
