@@ -126,6 +126,10 @@
     return [self stringValue];
 }
 
+- (BOOL)isExternal {
+    return ([self groupType] & BDSKExternalGroupType) != 0;
+}
+
 @end
 
 #pragma mark -

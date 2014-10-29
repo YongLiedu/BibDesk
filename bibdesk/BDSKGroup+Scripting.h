@@ -67,6 +67,8 @@
 
 - (NSString *)scriptingName;
 
+- (BOOL)isExternal;
+
 @end
 
 #pragma mark -
