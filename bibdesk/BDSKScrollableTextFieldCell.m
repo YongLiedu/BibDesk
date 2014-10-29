@@ -242,8 +242,8 @@
     }
 	
 	[controlView lockFocus];
-	[leftButtonImage compositeToPoint:leftPoint operation:NSCompositeSourceOver];
-	[rightButtonImage compositeToPoint:rightPoint operation:NSCompositeSourceOver];
+	[leftButtonImage drawAtPoint:leftPoint fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+	[rightButtonImage drawAtPoint:rightPoint fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
     [controlView unlockFocus];
 }
 
