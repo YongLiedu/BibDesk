@@ -54,6 +54,7 @@
 - (IBAction)scrollForward:(id)sender;
 - (IBAction)scrollBack:(id)sender;
 
+- (BOOL)isButtonEnabled:(BDSKScrollButton)button;
 - (BOOL)isButtonHighlighted:(BDSKScrollButton)button;
 - (void)setButton:(BDSKScrollButton)button highlighted:(BOOL)highlighted;
 

@@ -145,6 +145,13 @@
 		scrollStep--;
 }
 
+- (BOOL)isButtonEnabled:(BDSKScrollButton)button {
+    if (button == BDSKScrollLeftButton)
+		return scrollStep > 0;
+	else
+		return scrollStep < maxScrollStep;
+}
+
 - (BOOL)isButtonHighlighted:(BDSKScrollButton)button {
     if (button == BDSKScrollLeftButton)
 		return isLeftButtonHighlighted;
@@ -212,7 +219,7 @@
 		if (scrollStep == maxScrollStep) 
 			textOrigin.x -= [self stringWidth] - NSWidth(textRect);
 		else
-			textOrigin.x -= 0.5f * scrollStep * NSWidth(textRect);
+			textOrigin.x -= 0.5 * scrollStep * NSWidth(textRect);
 	}
 	
 	// draw the (clipped) text
@@ -227,17 +234,15 @@
 	
     // draw the buttons
 	
-	NSImage *leftButtonImage = [[self class] scrollArrowImageForButton:BDSKScrollLeftButton 
-														   highlighted:[self isButtonHighlighted:BDSKScrollLeftButton]];
-	NSImage *rightButtonImage = [[self class] scrollArrowImageForButton:BDSKScrollRightButton
-															highlighted:[self isButtonHighlighted:BDSKScrollRightButton]];
-	
-	NSRect leftButtonRect = [self buttonRect:BDSKScrollLeftButton forBounds:cellFrame]; 
-	NSRect rightButtonRect = [self buttonRect:BDSKScrollRightButton  forBounds:cellFrame]; 
-	
+    BDSKScrollButton button;
+    
 	[controlView lockFocus];
-	[leftButtonImage drawInRect:leftButtonRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-	[rightButtonImage drawInRect:rightButtonRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+    for (button = BDSKScrollLeftButton; button <= BDSKScrollRightButton; button++) {
+        NSImage *image = [[self class] scrollArrowImageForButton:button highlighted:[self isButtonHighlighted:button]];
+        NSRect rect = [self buttonRect:button forBounds:cellFrame];
+        CGFloat f = [self isButtonEnabled:button] ? 1.0 : 0.6;
+        [image drawInRect:rect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:f];
+    }
     [controlView unlockFocus];
 }
 

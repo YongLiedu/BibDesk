@@ -81,11 +81,19 @@
 	BDSKScrollButton button = -1;
     
 	if (NSMouseInRect(mouseLoc, leftButtonRect, [self isFlipped])) {
-		buttonRect = leftButtonRect;
-		button = BDSKScrollLeftButton;
+        if ([cell isButtonEnabled:BDSKScrollLeftButton]) {
+            buttonRect = leftButtonRect;
+            button = BDSKScrollLeftButton;
+        } else {
+            return;
+        }
 	} else if (NSMouseInRect(mouseLoc, rightButtonRect, [self isFlipped])) {
-		buttonRect = rightButtonRect;
-		button = BDSKScrollRightButton;
+        if ([cell isButtonEnabled:BDSKScrollRightButton]) {
+            buttonRect = rightButtonRect;
+            button = BDSKScrollRightButton;
+        } else {
+            return;
+        }
 	} else {
 		[super mouseDown:theEvent];
 		return;
