@@ -234,16 +234,10 @@
 	
 	NSRect leftButtonRect = [self buttonRect:BDSKScrollLeftButton forBounds:cellFrame]; 
 	NSRect rightButtonRect = [self buttonRect:BDSKScrollRightButton  forBounds:cellFrame]; 
-	NSPoint leftPoint = leftButtonRect.origin;
-	NSPoint rightPoint = rightButtonRect.origin;
-	if([controlView isFlipped]){
-		leftPoint.y += leftButtonRect.size.height;
-		rightPoint.y += rightButtonRect.size.height;
-    }
 	
 	[controlView lockFocus];
-	[leftButtonImage drawAtPoint:leftPoint fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-	[rightButtonImage drawAtPoint:rightPoint fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+	[leftButtonImage drawInRect:leftButtonRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+	[rightButtonImage drawInRect:rightButtonRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
     [controlView unlockFocus];
 }
 
