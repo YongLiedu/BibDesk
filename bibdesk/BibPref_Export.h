@@ -46,7 +46,7 @@ enum {
 };
 typedef NSUInteger BDSKTemplateListType;
 
-@class BDSKTemplateOutlineView;
+@class BDSKTemplateOutlineView, BDSKTemplate;
 
 @protocol BDSKTemplateOutlineViewDelegate <BDSKOutlineViewDelegate>
 @optional
@@ -66,6 +66,7 @@ typedef NSUInteger BDSKTemplateListType;
     NSMutableArray *roles;    
     NSArray *fileTypes;    
     BDSKTemplateListType templatePrefList;
+    BDSKTemplate *draggedTemplate;
     IBOutlet NSSegmentedControl *addRemoveButton;
     IBOutlet NSMatrix *prefListRadio;
     IBOutlet NSWindow *chooseMainPageSheet;

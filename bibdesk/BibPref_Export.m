@@ -374,7 +374,9 @@
     BDSKTemplate *item = [items lastObject];
     if (pboard == [NSPasteboard pasteboardWithName:NSDragPboard] && ([item isLeaf] == NO || [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString] == NO)) {
         [pboard clearContents];
-        [pboard setData:[NSKeyedArchiver archivedDataWithRootObject:[items lastObject]] forType:BDSKPasteboardTypeTemplateRows];
+        [pboard setData:[NSData data] forType:BDSKPasteboardTypeTemplateRows];
+        [draggedTemplate release];
+        draggedTemplate = [[items lastObject] retain];
         return YES;
     }
     return NO;
@@ -400,9 +402,8 @@
     } else if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPasteboardTypeTemplateRows, nil]]) {
         if (idx == NSOutlineViewDropOnItemIndex)
             return NSDragOperationNone;
-        id dropItem = [NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:BDSKPasteboardTypeTemplateRows]];
-        if ([dropItem isLeaf]) {
-            if ([[item children] containsObject:dropItem] && idx > 0)
+        if ([draggedTemplate isLeaf]) {
+            if ([[item children] containsObject:draggedTemplate] && idx > 0)
                 return NSDragOperationMove;
         } else {
             if (item == nil)
@@ -506,31 +507,37 @@
             [outlineView expandItem:newNode];
         return YES;
     } else if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPasteboardTypeTemplateRows, nil]]) {
-        id dropItem = [NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:BDSKPasteboardTypeTemplateRows]];
-        if ([dropItem isLeaf]) {
-            NSInteger sourceIndex = [[item children] indexOfObject:dropItem];
+        if ([draggedTemplate isLeaf]) {
+            NSUInteger sourceIndex = [[item children] indexOfObject:draggedTemplate];
             if (sourceIndex == NSNotFound)
                 return NO;
-            if (sourceIndex < idx)
+            if ((NSInteger)sourceIndex < idx)
                 --idx;
-            NSMutableArray *children = [(BDSKTreeNode *)item mutableArrayValueForKey:@"children"];
-            [children removeObject:dropItem];
-            [children insertObject:dropItem atIndex:idx];
+            if ((NSInteger)sourceIndex != idx) {
+                NSMutableArray *children = [(BDSKTreeNode *)item mutableArrayValueForKey:@"children"];
+                [children removeObject:draggedTemplate];
+                [children insertObject:draggedTemplate atIndex:idx];
+            }
         } else {
-            NSInteger sourceIndex = [itemNodes indexOfObject:dropItem];
+            NSUInteger sourceIndex = [itemNodes indexOfObject:draggedTemplate];
             if (sourceIndex == NSNotFound)
                 return NO;
-            if (sourceIndex < idx)
+            if ((NSInteger)sourceIndex < idx)
                 --idx;
-            [[dropItem retain] autorelease];
-            [itemNodes removeObjectAtIndex:sourceIndex];
-            [itemNodes insertObject:dropItem atIndex:idx];
+            if ((NSInteger)sourceIndex != idx) {
+                [itemNodes removeObjectAtIndex:sourceIndex];
+                [itemNodes insertObject:draggedTemplate atIndex:idx];
+            }
         }
         [self updateUI];
-        [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:[outlineView rowForItem:dropItem]] byExtendingSelection:NO];
+        [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:[outlineView rowForItem:draggedTemplate]] byExtendingSelection:NO];
         return YES;
     }
     return NO;
+}
+
+- (void)outlineView:(NSOutlineView *)ov concludeDragOperation:(NSDragOperation)operation {
+    BDSKDESTROY(draggedTemplate);
 }
 
 #pragma mark ToolTips and Context menu
