@@ -346,7 +346,7 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
         BDSKBookmark *bookmark = (BDSKBookmark *)object;
         id newValue = [change objectForKey:NSKeyValueChangeNewKey];
         id oldValue = [change objectForKey:NSKeyValueChangeOldKey];
-        NSIndexSet *indexes = [change objectForKey:NSKeyValueChangeIndexesKey];
+        NSIndexSet *indexes = [[[change objectForKey:NSKeyValueChangeIndexesKey] copy] autorelease];
         
         if ([newValue isEqual:[NSNull null]]) newValue = nil;
         if ([oldValue isEqual:[NSNull null]]) oldValue = nil;
