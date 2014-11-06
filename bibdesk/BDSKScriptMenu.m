@@ -125,6 +125,8 @@ static void fsevents_callback(FSEventStreamRef streamRef, void *clientCallBackIn
             
             scriptMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:SCRIPTS_MENU_TITLE];
             NSMenuItem *scriptItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:SCRIPTS_MENU_TITLE action:NULL keyEquivalent:@""];
+            if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_9)
+                [[NSImage imageNamed:@"ScriptMenu"] setTemplate:YES];
             [scriptItem setImage:[NSImage imageNamed:@"ScriptMenu"]];
             [scriptItem setSubmenu:scriptMenu];
             NSInteger itemIndex = [[NSApp mainMenu] numberOfItems] - 1;
