@@ -212,30 +212,43 @@ static void destroyTemporaryDirectory()
     return lyxPipeURL;
 }
 
-- (BOOL)copyFileFromSharedSupportToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite{
-    NSString *targetPath = [[self applicationSupportDirectory] stringByAppendingPathComponent:fileName];
+- (void)copyFileFromSharedSupportToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite{
     NSString *sourcePath = [[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:fileName];
-    if ([self fileExistsAtPath:targetPath]) {
-        if (overwrite == NO)
-            return NO;
-        [self removeItemAtPath:targetPath error:NULL];
+    BOOL isDir = NO;
+    if ([self fileExistsAtPath:sourcePath isDirectory:&isDir]) {
+        NSString *targetPath = [[self applicationSupportDirectory] stringByAppendingPathComponent:fileName];
+        if (isDir) {
+            if ([self fileExistsAtPath:targetPath isDirectory:&isDir] == NO)
+                isDir = [self createDirectoryAtPath:targetPath withIntermediateDirectories:NO attributes:nil error:NULL];
+            if (isDir) {
+                for (NSString *file in [self contentsOfDirectoryAtPath:sourcePath error:NULL]) {
+                    if ([file hasPrefix:@"."] == NO)
+                        [self copyFileFromSharedSupportToApplicationSupport:[fileName stringByAppendingPathComponent:file] overwrite:overwrite];
+                }
+            }
+        } else {
+            if ([self fileExistsAtPath:targetPath]) {
+                if (overwrite == NO)
+                    return;
+                [self removeItemAtPath:targetPath error:NULL];
+            }
+            [self copyItemAtPath:sourcePath toPath:targetPath error:NULL];
+        }
     }
-    return [self copyItemAtPath:sourcePath toPath:targetPath error:NULL];
 }
 
-- (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite{
+- (void)copyFileFromSharedSupportToApplicationSupportsInDirectory:(NSString *)folderName overwrite:(BOOL)overwrite{
     NSString *applicationSupport = [self applicationSupportDirectory];
-    NSString *templates = @"Templates";
-    NSString *templatesPath = [applicationSupport stringByAppendingPathComponent:templates];
+    NSString *targetPath = [applicationSupport stringByAppendingPathComponent:folderName];
     BOOL success = YES;
     
-    if ([self fileExistsAtPath:templatesPath isDirectory:&success] == NO)
-        success = [self createDirectoryAtPath:templatesPath withIntermediateDirectories:NO attributes:nil error:NULL];
+    if ([self fileExistsAtPath:targetPath isDirectory:&success] == NO)
+        success = [self createDirectoryAtPath:targetPath withIntermediateDirectories:NO attributes:nil error:NULL];
     if (success) {
-        NSString *sourcePath = [[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:templates];
+        NSString *sourcePath = [[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:folderName];
         for (NSString *file in [self contentsOfDirectoryAtPath:sourcePath error:NULL]) {
             if ([file hasPrefix:@"."] == NO)
-                [self copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:file] overwrite:overwrite];
+                [self copyFileFromSharedSupportToApplicationSupport:[folderName stringByAppendingPathComponent:file] overwrite:overwrite];
         }
     }
 }

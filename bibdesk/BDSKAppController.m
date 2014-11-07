@@ -312,7 +312,7 @@ static void fixLegacyTableColumnIdentifiers()
     
     // copy files to application support
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    [fileManager copyAllExportTemplatesToApplicationSupportAndOverwrite:NO];        
+    [fileManager copyFileFromSharedSupportToApplicationSupport:@"Templates" overwrite:NO];        
     [fileManager copyFileFromSharedSupportToApplicationSupport:@"previewtemplate.tex" overwrite:NO];
     [fileManager copyFileFromSharedSupportToApplicationSupport:@"template.txt" overwrite:NO];   
     [fileManager copyFileFromSharedSupportToApplicationSupport:@"Bookmarks.plist" overwrite:NO];   

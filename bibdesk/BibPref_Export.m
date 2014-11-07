@@ -139,7 +139,7 @@
 
 - (void)alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     if (NSAlertDefaultReturn == returnCode)
-        [[NSFileManager defaultManager] copyAllExportTemplatesToApplicationSupportAndOverwrite:YES];
+        [[NSFileManager defaultManager] copyFileFromSharedSupportToApplicationSupport:@"Templates" overwrite:YES];
 }
 
 - (IBAction)resetDefaultFiles:(id)sender;

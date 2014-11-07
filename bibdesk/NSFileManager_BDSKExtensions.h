@@ -74,9 +74,7 @@
 - (NSURL *)downloadFolderURL;
 - (NSURL *)latestLyXPipeURL;
 
-- (BOOL)copyFileFromSharedSupportToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite;
-
-- (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite;
+- (void)copyFileFromSharedSupportToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite;
 
 - (NSString *)temporaryPathForWritingToPath:(NSString *)path error:(NSError **)outError;
 
