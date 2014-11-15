@@ -65,6 +65,7 @@
 - (double)openMetaRating;
 
 - (NSAttributedString *)linkedText;
+- (NSAttributedString *)linkedFileName;
 - (NSAttributedString *)icon;
 - (NSAttributedString *)smallIcon;
 - (NSAttributedString *)linkedIcon;

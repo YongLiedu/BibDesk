@@ -317,6 +317,10 @@
     return [[[NSAttributedString alloc] initWithString:[self absoluteString] attributeName:NSLinkAttributeName attributeValue:self] autorelease];
 }
 
+- (NSAttributedString *)linkedFileName {
+    return [[[NSAttributedString alloc] initWithString:([self isFileURL] ? [[NSFileManager defaultManager] displayNameAtPath:[self path]] : [self absoluteString]) attributeName:NSLinkAttributeName attributeValue:self] autorelease];
+}
+
 - (NSAttributedString *)icon {
     NSImage *image = [NSImage imageForURL:self];
     NSString *name = ([self isFileURL]) ? [self path] : [self relativeString];
