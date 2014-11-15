@@ -1,10 +1,10 @@
 //
-//  BDSKRuntime.h
+//  NSAnimationContext_BDSKExtensions.h
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 2/19/09.
+//  Created by Christiaan Hofman on 11/15/14.
 /*
- This software is Copyright (c) 2009-2014
+ This software is Copyright (c) 2014
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -38,25 +38,10 @@
 
 #import <Cocoa/Cocoa.h>
 
-enum {
-    BDSKAddOrReplace,
-    BDSKReplaceOnly,
-    BDSKAddOnly
-};
 
-extern IMP BDSKSetMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types, BOOL isInstance, NSInteger options);
-extern IMP BDSKSetMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector, BOOL isInstance, NSInteger options);
+@interface NSAnimationContext (BDSKExtensions)
+@end
 
-extern IMP BDSKReplaceInstanceMethodImplementation(Class aClass, SEL aSelector, IMP anImp);
-extern void BDSKAddInstanceMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types);
-
-extern IMP BDSKReplaceInstanceMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
-extern void BDSKAddInstanceMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
-
-extern IMP BDSKReplaceClassMethodImplementation(Class aClass, SEL aSelector, IMP anImp);
-extern void BDSKAddClassMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types);
-
-extern IMP BDSKReplaceClassMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
-extern void BDSKAddClassMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
-
-extern void BDSKRequestConcreteImplementation(id self, SEL aSelector);
+@interface NSAnimationContext (BDSKLionExtensions)
++ (void)runAnimationGroup:(void (^)(NSAnimationContext *context))changes completionHandler:(void (^)(void))completionHandler;
+@end

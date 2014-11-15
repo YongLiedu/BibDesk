@@ -292,6 +292,8 @@
 		CED65AC00906BE1F003EED90 /* BibPref_ScriptHooks.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65ABE0906BE1F003EED90 /* BibPref_ScriptHooks.m */; };
 		CED65DC90907A2FD003EED90 /* BDSKParseFormatCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65DC70907A2FD003EED90 /* BDSKParseFormatCommand.m */; };
 		CED65DCD0907A338003EED90 /* BDSKScriptHook+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65DCB0907A338003EED90 /* BDSKScriptHook+Scripting.m */; };
+		CED76E2D1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CED76E2B1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.h */; };
+		CED76E2E1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CED76E2C1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.m */; };
 		CEDBDE4C0F4C863500190AF5 /* BDSKPreferenceRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = CEDBDE4A0F4C863500190AF5 /* BDSKPreferenceRecord.m */; };
 		CEDBE05A0F4CDAD900190AF5 /* NSView_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEDBE0580F4CDAD900190AF5 /* NSView_BDSKExtensions.m */; };
 		CEDBE0900F4CE06600190AF5 /* ScriptMenu.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEDBE08F0F4CE06600190AF5 /* ScriptMenu.tiff */; };
@@ -1310,6 +1312,8 @@
 		CED65DC70907A2FD003EED90 /* BDSKParseFormatCommand.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKParseFormatCommand.m; sourceTree = "<group>"; };
 		CED65DCA0907A338003EED90 /* BDSKScriptHook+Scripting.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = "BDSKScriptHook+Scripting.h"; sourceTree = "<group>"; };
 		CED65DCB0907A338003EED90 /* BDSKScriptHook+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BDSKScriptHook+Scripting.m"; sourceTree = "<group>"; };
+		CED76E2B1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSAnimationContext_BDSKExtensions.h; sourceTree = "<group>"; };
+		CED76E2C1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSAnimationContext_BDSKExtensions.m; sourceTree = "<group>"; };
 		CEDBDE490F4C863500190AF5 /* BDSKPreferenceRecord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPreferenceRecord.h; sourceTree = "<group>"; };
 		CEDBDE4A0F4C863500190AF5 /* BDSKPreferenceRecord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPreferenceRecord.m; sourceTree = "<group>"; };
 		CEDBE0570F4CDAD900190AF5 /* NSView_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSView_BDSKExtensions.h; sourceTree = "<group>"; };
@@ -2063,6 +2067,7 @@
 		CE38FA7D091D210C00BCB69D /* AppKit Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				CED76E2C1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.m */,
 				F97BF0B8090AE7520063504B /* NSBezierPath_BDSKExtensions.m */,
 				CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */,
 				CEEC1A311091F31600530207 /* NSEvent_BDSKExtensions.m */,
@@ -2485,6 +2490,7 @@
 				CEA498A31481185100AB81C5 /* BDSKAddressTextFieldCell.h */,
 				45DB3E470CAADFC3001EACDA /* BDSKACMDLParser.h */,
 				CE2153D116B169A4004EB59A /* BDSKAlias.h */,
+				CED76E2B1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.h */,
 				F920DAFA075C2B69000C5FCA /* BDSKAppController+Scripting.h */,
 				F9022C5D075802E300C3F701 /* BDSKAppController.h */,
 				CEFA07F20AF0E52100A3B4B1 /* BDSKApplication.h */,
@@ -2879,6 +2885,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
+				CED76E2D1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3710,6 +3717,7 @@
 				CE280D4816C6C51600344CC8 /* BDSKSaveAccessoryViewController.m in Sources */,
 				CEBF7AE818F2EB6300012ECD /* WokSearchLiteService.m in Sources */,
 				CE458971191B91D100D1790F /* WokServiceSoapBinding.m in Sources */,
+				CED76E2E1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

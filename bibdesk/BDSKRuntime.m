@@ -44,40 +44,56 @@
 #pragma mark API
 
 // this is essentially class_replaceMethod, but handles instance/class methods, returns any inherited implementation, and can get the types from an inherited implementation
-IMP BDSKSetInstanceMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types, NSInteger options) {
+IMP BDSKSetMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types, BOOL isInstance, NSInteger options) {
     IMP imp = NULL;
     if (anImp) {
-        Method method = class_getInstanceMethod(aClass, aSelector);
+        Method method = isInstance ? class_getInstanceMethod(aClass, aSelector) : class_getClassMethod(aClass, aSelector);
         if (method) {
             imp = method_getImplementation(method);
             if (types == NULL)
                 types = method_getTypeEncoding(method);
         }
         if (types != NULL && (options != BDSKAddOnly || imp == NULL) && (options != BDSKReplaceOnly || imp != NULL))
-            class_replaceMethod(aClass, aSelector, anImp, types);
+            class_replaceMethod(isInstance ? aClass : object_getClass(aClass), aSelector, anImp, types);
     }
     return imp;
 }
 
-IMP BDSKSetInstanceMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector, NSInteger options) {
-    Method method = class_getInstanceMethod(aClass, impSelector);
-    return method ? BDSKSetInstanceMethodImplementation(aClass, aSelector, method_getImplementation(method), method_getTypeEncoding(method), options) : NULL;
+IMP BDSKSetMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector, BOOL isInstance, NSInteger options) {
+    Method method = isInstance ? class_getInstanceMethod(aClass, impSelector) : class_getClassMethod(aClass, impSelector);
+    return method ? BDSKSetMethodImplementation(aClass, aSelector, method_getImplementation(method), method_getTypeEncoding(method), isInstance, options) : NULL;
 }
 
 IMP BDSKReplaceInstanceMethodImplementation(Class aClass, SEL aSelector, IMP anImp) {
-    return BDSKSetInstanceMethodImplementation(aClass, aSelector, anImp, NULL, BDSKReplaceOnly);
+    return BDSKSetMethodImplementation(aClass, aSelector, anImp, NULL, YES, BDSKReplaceOnly);
 }
 
 void BDSKAddInstanceMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types) {
-    BDSKSetInstanceMethodImplementation(aClass, aSelector, anImp, types, BDSKAddOnly);
+    BDSKSetMethodImplementation(aClass, aSelector, anImp, types, YES, BDSKAddOnly);
 }
 
 IMP BDSKReplaceInstanceMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector) {
-    return BDSKSetInstanceMethodImplementationFromSelector(aClass, aSelector, impSelector, BDSKReplaceOnly);
+    return BDSKSetMethodImplementationFromSelector(aClass, aSelector, impSelector, YES, BDSKReplaceOnly);
 }
 
 void BDSKAddInstanceMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector) {
-    BDSKSetInstanceMethodImplementationFromSelector(aClass, aSelector, impSelector, BDSKAddOnly);
+    BDSKSetMethodImplementationFromSelector(aClass, aSelector, impSelector, YES, BDSKAddOnly);
+}
+
+IMP BDSKReplaceClassMethodImplementation(Class aClass, SEL aSelector, IMP anImp) {
+    return BDSKSetMethodImplementation(aClass, aSelector, anImp, NULL, NO, BDSKReplaceOnly);
+}
+
+void BDSKAddClassMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types) {
+    BDSKSetMethodImplementation(aClass, aSelector, anImp, types, NO, BDSKAddOnly);
+}
+
+IMP BDSKReplaceClassMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector) {
+    return BDSKSetMethodImplementationFromSelector(aClass, aSelector, impSelector, NO, BDSKReplaceOnly);
+}
+
+void BDSKAddClassMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector) {
+    BDSKSetMethodImplementationFromSelector(aClass, aSelector, impSelector, NO, BDSKAddOnly);
 }
 
 void BDSKRequestConcreteImplementation(id self, SEL aSelector) {

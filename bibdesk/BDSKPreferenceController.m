@@ -43,6 +43,7 @@
 #import "BDSKOverlayWindow.h"
 #import <Sparkle/Sparkle.h>
 #import "NSViewAnimation_BDSKExtensions.h"
+#import "NSAnimationContext_BDSKExtensions.h"
 
 #define BDSKPreferencesWindowFrameAutosaveName @"BDSKPreferencesWindow"
 
@@ -585,11 +586,6 @@ static id sharedController = nil;
     return iconView;
 }
 
-- (void)endAnimation {
-    [[[self window] contentView] setWantsLayer:NO];
-    [[self window] recalculateKeyViewLoop];
-}
-
 - (void)changeContentView:(NSView *)view from:(NSView *)oldView display:(BOOL)display {
     NSWindow *window = [self window];
     NSView *contentView = [window contentView];
@@ -618,19 +614,22 @@ static id sharedController = nil;
         duration = fmax(duration, [window animationResizeTime:contentRect]);
         [contentView setWantsLayer:YES];
         [contentView displayIfNeeded];
-        [NSAnimationContext beginGrouping];
-        [[NSAnimationContext currentContext] setDuration:duration];
-        if ([view isEqual:[self iconView]])
-            [[controlView animator] removeFromSuperview];
-        else if ([oldView isEqual:[self iconView]])
-            [[contentView animator] addSubview:controlView];
-        if ([oldView superview])
-            [[contentView animator] replaceSubview:oldView with:view];
-        else
-            [[contentView animator] addSubview:view];
-        [[window animator] setFrame:contentRect display:YES];
-        [NSAnimationContext endGrouping];
-        [self performSelector:@selector(endAnimation) withObject:nil afterDelay:duration];
+        [NSAnimationContext runAnimationGroup:^(NSAnimationContext *context){
+                [context setDuration:duration];
+                if ([view isEqual:[self iconView]])
+                    [[controlView animator] removeFromSuperview];
+                else if ([oldView isEqual:[self iconView]])
+                    [[contentView animator] addSubview:controlView];
+                if ([oldView superview])
+                    [[contentView animator] replaceSubview:oldView with:view];
+                else
+                    [[contentView animator] addSubview:view];
+                [[window animator] setFrame:contentRect display:YES];
+            }
+            completionHandler:^{
+                [[[self window] contentView] setWantsLayer:NO];
+                [[self window] recalculateKeyViewLoop];
+        }];
 	} else {
         if ([view isEqual:[self iconView]])
             [controlView removeFromSuperview];

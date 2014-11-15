@@ -1,10 +1,10 @@
 //
-//  BDSKRuntime.h
+//  NSAnimationContext_BDSKExtensions.m
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 2/19/09.
+//  Created by Christiaan Hofman on 11/15/14.
 /*
- This software is Copyright (c) 2009-2014
+ This software is Copyright (c) 2014
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -36,27 +36,28 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
+#import "NSAnimationContext_BDSKExtensions.h"
+#import "BDSKRuntime.h"
 
-enum {
-    BDSKAddOrReplace,
-    BDSKReplaceOnly,
-    BDSKAddOnly
-};
 
-extern IMP BDSKSetMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types, BOOL isInstance, NSInteger options);
-extern IMP BDSKSetMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector, BOOL isInstance, NSInteger options);
+@implementation NSAnimationContext (BDSKExtensions)
 
-extern IMP BDSKReplaceInstanceMethodImplementation(Class aClass, SEL aSelector, IMP anImp);
-extern void BDSKAddInstanceMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types);
++ (void)performCompletionHandler:(void (^)(void))completionHandler {
+    completionHandler();
+}
 
-extern IMP BDSKReplaceInstanceMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
-extern void BDSKAddInstanceMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
++ (void)SnowLeopard_runAnimationGroup:(void (^)(NSAnimationContext *context))changes completionHandler:(void (^)(void))completionHandler {
+    [self beginGrouping];
+    NSAnimationContext *context = [self currentContext];
+    changes(context);
+    NSTimeInterval duration = [context duration];
+    [self endGrouping];
+    if (completionHandler)
+        [self performSelector:@selector(performCompletionHandler:) withObject:[[completionHandler copy] autorelease] afterDelay:duration];
+}
 
-extern IMP BDSKReplaceClassMethodImplementation(Class aClass, SEL aSelector, IMP anImp);
-extern void BDSKAddClassMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types);
++ (void)load {
+    BDSKAddClassMethodImplementationFromSelector(self, @selector(runAnimationGroup:completionHandler:), @selector(SnowLeopard_runAnimationGroup:completionHandler:));
+}
 
-extern IMP BDSKReplaceClassMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
-extern void BDSKAddClassMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
-
-extern void BDSKRequestConcreteImplementation(id self, SEL aSelector);
+@end
