@@ -52,7 +52,7 @@
 }
 
 + (void)animateWithViewAnimations:(NSArray *)viewAnimations {
-    NSViewAnimation *animation = [[NSViewAnimation alloc] initWithViewAnimations:viewAnimations];
+    NSViewAnimation *animation = [[self alloc] initWithViewAnimations:viewAnimations];
     
     [animation setAnimationBlockingMode:NSAnimationBlocking];
     [animation setDuration:[self defaultAnimationTimeInterval]];
