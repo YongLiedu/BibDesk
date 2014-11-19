@@ -301,6 +301,11 @@ static id sharedController = nil;
     [self updateSearchAndShowAll:YES];
 }
 
+- (IBAction)changeFont:(id)sender {
+    if ([[self selectedPane] respondsToSelector:@selector(changeFont:)])
+        [[self selectedPane] changeFont:sender];
+}
+
 #pragma mark Categories and Panes
 
 - (NSArray *)categories {
@@ -356,7 +361,6 @@ static id sharedController = nil;
                 [oldPane didUnselect];
                 [pane didSelect];
                 [self setSelectedPaneIdentifier:identifier];
-                [self setNextResponder:pane];
                 [[window toolbar] setSelectedItemIdentifier:pane ? identifier : BDSKPreferencesToolbarShowAllItemIdentifier];
                 [helpButton setHidden:(helpBookName == nil || [pane helpAnchor] == nil) && [pane helpURL] == nil];
                 [revertButton setEnabled:[[pane initialValues] count] > 0];

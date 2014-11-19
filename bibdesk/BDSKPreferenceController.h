@@ -71,6 +71,7 @@
 - (IBAction)showNextPane:(id)sender;
 - (IBAction)showPreviousPane:(id)sender;
 - (IBAction)search:(id)sender;
+- (IBAction)changeFont:(id)sender;
 
 - (NSArray *)categories;
 - (NSArray *)panesForCategory:(NSString *)category;
