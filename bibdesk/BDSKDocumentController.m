@@ -257,7 +257,6 @@ enum {
 
 - (id)makeDocumentWithContentsOfURL:(NSURL *)absoluteURL ofType:(NSString *)typeName error:(NSError **)outError {
     id doc = nil;
-    NSDictionary *options = [customOpenSettings objectForKey:absoluteURL];
     NSInteger currentOpenType = [self lastSelectedOpenTypeForURL:absoluteURL];
     if (currentOpenType == BDSKOpenUsingPhonyCiteKeys || currentOpenType == BDSKOpenUsingFilter) {
         NSStringEncoding encoding = [self lastSelectedEncodingForURL:absoluteURL];
