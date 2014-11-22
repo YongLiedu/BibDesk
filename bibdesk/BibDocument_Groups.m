@@ -216,8 +216,8 @@ The groupedPublications array is a subset of the publications array, developed b
             webFrame.size.height = round(height * docState.lastWebViewFraction);
             previewFrame.size.height = round((height - NSHeight(webFrame)) * oldFraction);
             tableFrame.size.height = height - NSHeight(webFrame) - NSHeight(previewFrame);
-            tableFrame.origin.y = NSMaxY(previewFrame) + [splitView dividerThickness];
-            webFrame.origin.y = NSMaxY(tableFrame) + [splitView dividerThickness];
+            tableFrame.origin.y = NSMaxY(webFrame) + [splitView dividerThickness];
+            previewFrame.origin.y = NSMaxY(tableFrame) + [splitView dividerThickness];
             
             [webView setFrame:webFrame];
             [splitView addSubview:webView positioned:NSWindowBelow relativeTo:mainView];
