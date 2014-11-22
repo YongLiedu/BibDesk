@@ -39,8 +39,18 @@
 #import "NSAnimationContext_BDSKExtensions.h"
 #import "BDSKRuntime.h"
 
+#define BDSKDefaultAnimationTimeIntervalKey @"BDSKDefaultAnimationTimeInterval"
 
 @implementation NSAnimationContext (BDSKExtensions)
+
++ (NSTimeInterval)defaultAnimationTimeInterval {    
+    static NSTimeInterval defaultAnimationTimeInterval = -1.0;
+    if (defaultAnimationTimeInterval < 0.0) {
+        NSNumber *n = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultAnimationTimeIntervalKey];
+        defaultAnimationTimeInterval = n ? [n doubleValue] : 0.15;
+    }
+    return defaultAnimationTimeInterval;
+}
 
 + (void)performCompletionHandler:(void (^)(void))completionHandler {
     completionHandler();

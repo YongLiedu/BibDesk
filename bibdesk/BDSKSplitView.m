@@ -44,7 +44,7 @@
 @implementation BDSKSplitView
 
 - (void)setPosition:(CGFloat)position ofDividerAtIndex:(NSInteger)dividerIndex animate:(BOOL)animate {
-    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
+    NSTimeInterval duration = [NSAnimationContext defaultAnimationTimeInterval];
     
     if (animating) {
         return;

@@ -40,7 +40,6 @@
 
 
 @interface NSViewAnimation (BDSKExtensions)
-+ (NSTimeInterval)defaultAnimationTimeInterval;
 + (void)animateWithViewAnimations:(NSArray *)viewAnimations;
 + (void)animateResizeView:(NSView *)aView toRect:(NSRect)aRect;
 + (void)animateReplaceView:(NSView *)fadeOutView withView:(NSView *)fadeInView;

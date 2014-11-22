@@ -38,7 +38,6 @@
 
 #import "BDSKStatusBar.h"
 #import "NSGeometry_BDSKExtensions.h"
-#import "NSViewAnimation_BDSKExtensions.h"
 #import "NSAnimationContext_BDSKExtensions.h"
 
 #define LEFT_MARGIN				5.0
@@ -130,7 +129,7 @@
 	NSRect statusRect = [contentView bounds];
 	CGFloat statusHeight = NSHeight([self frame]);
     BOOL visible = (nil == [self superview]);
-    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
+    NSTimeInterval duration = [NSAnimationContext defaultAnimationTimeInterval];
 	
     statusRect.size.height = statusHeight;
 	

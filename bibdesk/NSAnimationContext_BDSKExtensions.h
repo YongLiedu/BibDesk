@@ -40,6 +40,7 @@
 
 
 @interface NSAnimationContext (BDSKExtensions)
++ (NSTimeInterval)defaultAnimationTimeInterval;
 @end
 
 @interface NSAnimationContext (BDSKLionExtensions)

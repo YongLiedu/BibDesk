@@ -77,7 +77,6 @@
 #import "NSColor_BDSKExtensions.h"
 #import "BDSKURLSheetController.h"
 #import "NSEvent_BDSKExtensions.h"
-#import "NSViewAnimation_BDSKExtensions.h"
 #import "BDSKColoredView.h"
 #import "BDSKSplitView.h"
 #import "BDSKTemplate.h"

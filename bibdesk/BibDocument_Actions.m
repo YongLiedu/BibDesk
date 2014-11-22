@@ -65,7 +65,6 @@
 #import "NSView_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSEvent_BDSKExtensions.h"
-#import "NSViewAnimation_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
 #import "NSPrintOperation_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"

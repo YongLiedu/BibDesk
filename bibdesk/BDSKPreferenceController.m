@@ -42,7 +42,6 @@
 #import "BDSKPreferenceIconView.h"
 #import "BDSKOverlayWindow.h"
 #import <Sparkle/Sparkle.h>
-#import "NSViewAnimation_BDSKExtensions.h"
 #import "NSAnimationContext_BDSKExtensions.h"
 
 #define BDSKPreferencesWindowFrameAutosaveName @"BDSKPreferencesWindow"
@@ -613,7 +612,7 @@ static id sharedController = nil;
     if ([oldView isEqual:[self iconView]])
         [overlay remove];
 	
-    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
+    NSTimeInterval duration = [NSAnimationContext defaultAnimationTimeInterval];
     if (display && duration > 0.0) {
         duration = fmax(duration, [window animationResizeTime:contentRect]);
         [contentView setWantsLayer:YES];

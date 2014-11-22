@@ -60,7 +60,6 @@
 #import "BDSKGroup.h"
 #import "BDSKSharedGroup.h"
 #import "BDSKOwnerProtocol.h"
-#import "NSViewAnimation_BDSKExtensions.h"
 #import "BDSKDocumentSearch.h"
 #import "NSView_BDSKExtensions.h"
 #import "NSDictionary_BDSKExtensions.h"
@@ -304,7 +303,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
 
 - (void)animateReplaceView:(NSView *)oldView with:(NSView *)newView {
     NSView *contentView = [oldView superview];
-    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
+    NSTimeInterval duration = [NSAnimationContext defaultAnimationTimeInterval];
     
     [newView setFrame:[oldView frame]];
     [newView setHidden:NO];
