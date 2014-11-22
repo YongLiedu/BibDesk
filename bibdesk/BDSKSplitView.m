@@ -37,7 +37,6 @@
  */
 
 #import "BDSKSplitView.h"
-#import "NSViewAnimation_BDSKExtensions.h"
 #import "NSAnimationContext_BDSKExtensions.h"
 
 
