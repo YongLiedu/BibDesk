@@ -66,6 +66,7 @@
 #import "NSDictionary_BDSKExtensions.h"
 #import "BDSKEdgeView.h"
 #import "BDSKButtonBar.h"
+#import "NSAnimationContext_BDSKExtensions.h"
 
 
 @implementation BibDocument (Search)
@@ -301,6 +302,27 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
 
 #pragma mark File Content Search
 
+- (void)animateReplaceView:(NSView *)oldView with:(NSView *)newView {
+    NSView *contentView = [oldView superview];
+    NSTimeInterval duration = [NSViewAnimation defaultAnimationTimeInterval];
+    
+    [newView setFrame:[oldView frame]];
+    [newView setHidden:NO];
+    
+    if (duration > 0.0) {
+        [contentView setWantsLayer:YES];
+        [contentView displayIfNeeded];
+        [NSAnimationContext runAnimationGroup:^(NSAnimationContext *context){
+                [context setDuration:duration];
+                [[contentView animator] replaceSubview:oldView with:newView];
+            } completionHandler:^{
+                [contentView setWantsLayer:NO];
+            }];
+    } else {
+        [contentView replaceSubview:oldView with:newView];
+    }
+}
+
 - (void)showFileContentSearch
 {
     if(fileSearchController == nil){
@@ -313,9 +335,10 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     
     [fileSearchController filterUsingURLs:[groupedPublications valueForKey:@"identifierURL"]];
     
-    [NSViewAnimation animateReplaceView:[tableView enclosingScrollView] withView:[[fileSearchController tableView] enclosingScrollView]];
     if ([fileSearchController shouldShowControlView])
         [self insertControlView:[fileSearchController controlView] atTop:NO];
+    
+    [self animateReplaceView:[tableView enclosingScrollView] with:[[fileSearchController tableView] enclosingScrollView]];
     
     [[fileSearchController tableView] setDelegate:self];
     
@@ -331,8 +354,9 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
 {
     [[fileSearchController tableView] setDelegate:nil];
     
-    [NSViewAnimation animateReplaceView:[[fileSearchController tableView] enclosingScrollView] withView:[tableView enclosingScrollView]];
     [self removeControlView:[fileSearchController controlView]];
+    
+    [self animateReplaceView:[[fileSearchController tableView] enclosingScrollView] with:[tableView enclosingScrollView]];
     
     // reconnect the searchfield
     [searchField setTarget:self];
