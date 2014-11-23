@@ -185,7 +185,7 @@
         else
             [self addFileSearchItems];
         
-        [self insertControlView:searchButtonEdgeView atTop:YES];
+        [self addControlView:searchButtonEdgeView];
         
         if ([tableView tableColumnWithIdentifier:BDSKRelevanceString] == nil)
             [tableView insertTableColumnWithIdentifier:BDSKRelevanceString atIndex:0];
@@ -335,7 +335,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [fileSearchController filterUsingURLs:[groupedPublications valueForKey:@"identifierURL"]];
     
     if ([fileSearchController shouldShowControlView])
-        [self insertControlView:[fileSearchController controlView] atTop:NO];
+        [self addControlView:[fileSearchController controlView]];
     
     [self animateReplaceView:[tableView enclosingScrollView] with:[[fileSearchController tableView] enclosingScrollView]];
     

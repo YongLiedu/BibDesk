@@ -60,7 +60,7 @@
 - (BOOL)isDisplayingSearchGroupView;
 - (BOOL)isDisplayingWebGroupView;
 
-- (void)insertControlView:(NSView *)controlView atTop:(BOOL)atTop;
+- (void)addControlView:(NSView *)controlView;
 - (void)removeControlView:(NSView *)controlView;
 
 - (NSMenu *)columnsMenu;

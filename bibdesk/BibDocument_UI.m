@@ -380,10 +380,11 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 - (BOOL)isDisplayingSearchGroupView { return [documentWindow isEqual:[[searchGroupViewController view] window]]; }
 - (BOOL)isDisplayingWebGroupView { return [documentWindow isEqual:[[webGroupViewController view] window]]; }
 
-- (void)insertControlView:(NSView *)controlView atTop:(BOOL)insertAtTop {
+- (void)addControlView:(NSView *)controlView {
     if ([documentWindow isEqual:[controlView window]])
         return;
     
+    BOOL insertAtTop = [controlView isEqual:searchButtonEdgeView];
     NSArray *views = [[mainBox subviews] copy];
     NSView *view;
     NSRect endRect = insertAtTop ? [mainBox bounds] : [splitView frame];

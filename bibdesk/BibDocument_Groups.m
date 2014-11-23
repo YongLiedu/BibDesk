@@ -163,7 +163,7 @@ The groupedPublications array is a subset of the publications array, developed b
 - (void)showSearchGroupView {
     if (nil == searchGroupViewController)
         searchGroupViewController = [[BDSKSearchGroupViewController alloc] init];
-    [self insertControlView:[searchGroupViewController view] atTop:NO];
+    [self addControlView:[searchGroupViewController view]];
     
     BDSKSearchGroup *group = [[self selectedGroups] firstObject];
     BDSKASSERT([group groupType] == BDSKSearchGroupType);
@@ -182,7 +182,7 @@ The groupedPublications array is a subset of the publications array, developed b
 - (void)showWebGroupView {
     if (webGroupViewController == nil)
         webGroupViewController = [[BDSKWebGroupViewController alloc] init];
-    [self insertControlView:[webGroupViewController view] atTop:NO];
+    [self addControlView:[webGroupViewController view]];
     
     WebView *oldWebView = [webGroupViewController webView];
     
