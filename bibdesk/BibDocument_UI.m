@@ -386,18 +386,11 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     
     NSArray *views = [[mainBox subviews] copy];
     NSView *view;
-    NSRect controlFrame = [controlView frame];
-    NSRect startRect, endRect = [splitView frame];
+    NSRect endRect = insertAtTop ? [mainBox bounds] : [splitView frame];
+    NSRect startRect = endRect;
+    NSRect controlFrame = NSMakeRect(NSMinX(endRect), NSMaxY(endRect), NSWidth(endRect), NSHeight([controlView frame]));
     
-    if (insertAtTop) {
-        for (view in views)
-            endRect = NSUnionRect(endRect, [view frame]);
-    }
-    startRect = endRect;
     startRect.size.height += NSHeight(controlFrame);
-    controlFrame.size.width = NSWidth(endRect);
-    controlFrame.origin.x = NSMinX(endRect);
-    controlFrame.origin.y = NSMaxY(endRect);
     [controlView setFrame:controlFrame];
     
     NSView *clipView = [[[NSView alloc] initWithFrame:endRect] autorelease];
@@ -433,9 +426,9 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     
     NSArray *views = [[NSArray alloc] initWithArray:[mainBox subviews] copyItems:NO];
     NSRect controlFrame = [controlView frame];
-    NSRect endRect, startRect = NSUnionRect([splitView frame], controlFrame);
+    NSRect startRect = NSUnionRect([splitView frame], controlFrame);
+    NSRect endRect = startRect;
     
-    endRect = startRect;
     endRect.size.height += NSHeight(controlFrame);
     
     NSView *clipView = [[[NSView alloc] initWithFrame:startRect] autorelease];
