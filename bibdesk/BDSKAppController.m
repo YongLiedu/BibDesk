@@ -289,6 +289,8 @@ static void fixLegacyTableColumnIdentifiers()
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification{
+    if (didCheckReopen == NO)
+        [self applicationShouldOpenUntitledFile:NSApp];
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:BDSKIsRelaunchKey];
     
     // register our help book, so it's available for methods that don't register this, e.g. the web group
@@ -393,6 +395,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         default:
             return NO;
     }
+    didCheckReopen = YES;
 }
 
 // we don't want to reopen last open files or show an Open dialog when re-activating the app

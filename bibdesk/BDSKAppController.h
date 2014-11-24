@@ -47,6 +47,7 @@
 	IBOutlet NSMenu *searchBookmarksMenu;
 	IBOutlet NSMenu *bookmarksMenu;
 	IBOutlet NSMenu *historyMenu;
+    BOOL didCheckReopen;
 }
 
 - (IBAction)visitWebSite:(id)sender;
