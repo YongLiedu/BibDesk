@@ -172,3 +172,7 @@ extern NSString *BDSKRichTextTemplateDocumentType;
 - (id <BDSKTokenFieldDelegate>)delegate;
 - (void)setDelegate:(id <BDSKTokenFieldDelegate>)newDelegate;
 @end
+
+#pragma mark -
+
+@interface BDSKFlippedView : NSView @end

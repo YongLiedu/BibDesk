@@ -78,8 +78,6 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
 
 @interface BDSKValueOrNoneTransformer : NSValueTransformer @end
 
-@interface BDSKFlippedClipView : NSClipView @end
-
 @interface BDSKTemplateDocument (BDSKPrivate)
 - (NSArray *)tokensForFields:(NSArray *)array;
 - (BDSKTypeTemplate *)addTypeTemplateForType:(NSString *)type;
@@ -241,15 +239,6 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
     [specialTokenField setDrawsBackground:NO];
     [specialTokenField setObjectValue:specialTokens];
     [itemTemplateTokenField setTokenizingCharacterSet:[NSCharacterSet characterSetWithCharactersInString:@""]];
-    
-    NSScrollView *scrollView = [specialTokenField enclosingScrollView];
-    NSView *documentView = [[scrollView documentView] retain];
-    NSClipView *clipView = [[BDSKFlippedClipView alloc] initWithFrame:[[scrollView contentView] frame]];
-    [clipView setDrawsBackground:NO];
-    [scrollView setContentView:clipView];
-    [scrollView setDocumentView:documentView];
-    [clipView release];
-    [documentView release];
     
     [self updateTokenFields];
     [self updateTextViews];
@@ -1494,7 +1483,7 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
 
 #pragma mark -
 
-@implementation BDSKFlippedClipView
+@implementation BDSKFlippedView
 - (BOOL)isFlipped { return YES; }
 @end
 
