@@ -6724,7 +6724,7 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 						<reference key="parent" ref="654049857"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">1962</int>
+						<int key="objectID">1961</int>
 						<reference key="object" ref="530562508"/>
 						<array class="NSMutableArray" key="children">
 							<reference ref="605445143"/>
@@ -6997,8 +6997,8 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 				<boolean value="YES" key="1959.IBShouldRemoveOnLegacySave"/>
 				<string key="1960.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<boolean value="YES" key="1960.IBShouldRemoveOnLegacySave"/>
-				<string key="1962.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
-				<object class="NSAffineTransform" key="1962.IBViewBoundsToFrameTransform">
+				<string key="1961.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<object class="NSAffineTransform" key="1961.IBViewBoundsToFrameTransform">
 					<bytes key="NSTransformStruct">AUNnAAC/gAAAA</bytes>
 				</object>
 				<string key="273.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -7036,7 +7036,7 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">1962</int>
+			<int key="maxID">1961</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
