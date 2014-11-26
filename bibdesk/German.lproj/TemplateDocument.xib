@@ -1478,7 +1478,7 @@ wGw</bytes>
 																									<string>NSStringPboardType</string>
 																								</object>
 																							</object>
-																							<string key="NSFrame">{{0, 78}, {667, 22}}</string>
+																							<string key="NSFrame">{{0, 78}, {667, 17}}</string>
 																							<reference key="NSSuperview" ref="7943485"/>
 																							<bool key="NSEnabled">YES</bool>
 																							<object class="NSTokenFieldCell" key="NSCell" id="540280872">
@@ -1512,7 +1512,7 @@ wGw</bytes>
 																									<string>NSStringPboardType</string>
 																								</object>
 																							</object>
-																							<string key="NSFrame">{{0, 53}, {667, 22}}</string>
+																							<string key="NSFrame">{{0, 53}, {667, 17}}</string>
 																							<reference key="NSSuperview" ref="7943485"/>
 																							<bool key="NSEnabled">YES</bool>
 																							<object class="NSTokenFieldCell" key="NSCell" id="963414551">
@@ -1541,7 +1541,7 @@ wGw</bytes>
 																									<string>NSStringPboardType</string>
 																								</object>
 																							</object>
-																							<string key="NSFrame">{{0, 28}, {667, 22}}</string>
+																							<string key="NSFrame">{{0, 28}, {667, 17}}</string>
 																							<reference key="NSSuperview" ref="7943485"/>
 																							<bool key="NSEnabled">YES</bool>
 																							<object class="NSTokenFieldCell" key="NSCell" id="76541975">
@@ -1570,7 +1570,7 @@ wGw</bytes>
 																									<string>NSStringPboardType</string>
 																								</object>
 																							</object>
-																							<string key="NSFrame">{{0, 3}, {667, 22}}</string>
+																							<string key="NSFrame">{{0, 3}, {667, 17}}</string>
 																							<reference key="NSSuperview" ref="7943485"/>
 																							<bool key="NSEnabled">YES</bool>
 																							<object class="NSTokenFieldCell" key="NSCell" id="1024542258">

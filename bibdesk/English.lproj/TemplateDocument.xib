@@ -1463,7 +1463,7 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 																							<set class="NSMutableSet" key="NSDragTypes">
 																								<string>NSStringPboardType</string>
 																							</set>
-																							<string key="NSFrame">{{0, 78}, {625, 22}}</string>
+																							<string key="NSFrame">{{0, 78}, {625, 17}}</string>
 																							<reference key="NSSuperview" ref="530562508"/>
 																							<reference key="NSNextKeyView" ref="341027017"/>
 																							<bool key="NSEnabled">YES</bool>
@@ -1494,7 +1494,7 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 																							<set class="NSMutableSet" key="NSDragTypes">
 																								<string>NSStringPboardType</string>
 																							</set>
-																							<string key="NSFrame">{{0, 53}, {625, 22}}</string>
+																							<string key="NSFrame">{{0, 53}, {625, 17}}</string>
 																							<reference key="NSSuperview" ref="530562508"/>
 																							<reference key="NSNextKeyView" ref="547951622"/>
 																							<bool key="NSEnabled">YES</bool>
@@ -1520,7 +1520,7 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 																							<set class="NSMutableSet" key="NSDragTypes">
 																								<string>NSStringPboardType</string>
 																							</set>
-																							<string key="NSFrame">{{0, 28}, {625, 22}}</string>
+																							<string key="NSFrame">{{0, 28}, {625, 17}}</string>
 																							<reference key="NSSuperview" ref="530562508"/>
 																							<reference key="NSNextKeyView" ref="605445143"/>
 																							<bool key="NSEnabled">YES</bool>
@@ -1546,7 +1546,7 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 																							<set class="NSMutableSet" key="NSDragTypes">
 																								<string>NSStringPboardType</string>
 																							</set>
-																							<string key="NSFrame">{{0, 3}, {625, 22}}</string>
+																							<string key="NSFrame">{{0, 3}, {625, 17}}</string>
 																							<reference key="NSSuperview" ref="530562508"/>
 																							<reference key="NSNextKeyView" ref="28404458"/>
 																							<bool key="NSEnabled">YES</bool>
@@ -7036,7 +7036,7 @@ ZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">1961</int>
+			<int key="maxID">1963</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
