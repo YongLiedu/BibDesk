@@ -222,21 +222,9 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
     frame.size.height = 39.0;
     [itemTemplateTokenField setFrame:frame];
     
-    [requiredTokenField setEditable:NO];
-    [requiredTokenField setBezeled:NO];
-    [requiredTokenField setDrawsBackground:NO];
     [requiredTokenField setObjectValue:[[typeTemplates objectAtIndex:defaultTypeIndex] requiredTokens]];
-    [optionalTokenField setEditable:NO];
-    [optionalTokenField setBezeled:NO];
-    [optionalTokenField setDrawsBackground:NO];
     [optionalTokenField setObjectValue:[[typeTemplates objectAtIndex:defaultTypeIndex] optionalTokens]];
-    [defaultTokenField setEditable:NO];
-    [defaultTokenField setBezeled:NO];
-    [defaultTokenField setDrawsBackground:NO];
     [defaultTokenField setObjectValue:defaultTokens];
-    [specialTokenField setEditable:NO];
-    [specialTokenField setBezeled:NO];
-    [specialTokenField setDrawsBackground:NO];
     [specialTokenField setObjectValue:specialTokens];
     [itemTemplateTokenField setTokenizingCharacterSet:[NSCharacterSet characterSetWithCharactersInString:@""]];
     
