@@ -583,7 +583,7 @@ static NSDictionary *errorAttr = nil;
 				{
                 	// words
                     NSString *key = nil;
-                    NSString *sepChars = nil;
+                    NSString *sepChars = @" ";
                     NSString *slash = (isLocalFile) ? @"-" : @"/";
                     NSString *sep = nil;
                     if ([scanner scanString:@"{" intoString:NULL] &&
