@@ -279,7 +279,6 @@
     [toolbar setVisible:YES];
 	
     [documentWindow makeFirstResponder:searchField];
-    [searchField selectText:sender];
 }
 
 @end
