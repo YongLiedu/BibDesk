@@ -278,7 +278,7 @@
         [toolbar setDisplayMode:NSToolbarDisplayModeIconAndLabel];
     [toolbar setVisible:YES];
 	
-    [documentWindow makeFirstResponder:searchField];
+    [searchField selectText:nil];
 }
 
 @end
