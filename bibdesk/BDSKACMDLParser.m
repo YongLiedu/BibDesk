@@ -4,7 +4,7 @@
 //
 //  Created by Douglas Stebila on 3/3/11.
 /*
- This software is Copyright (c) 2010-2014
+ This software is Copyright (c) 2010-2015
  Douglas Stebila. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without

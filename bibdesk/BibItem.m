@@ -1,7 +1,7 @@
 //  BibItem.m
 //  Created by Michael McCracken on Tue Dec 18 2001.
 /*
- This software is Copyright (c) 2001-2014
+ This software is Copyright (c) 2001-2015
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
