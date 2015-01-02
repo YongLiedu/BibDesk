@@ -2,7 +2,7 @@
 #import <Foundation/Foundation.h>
 //  Created by Adam Maxwell on 09/26/04.
 /*
- This software is Copyright (c) 2004-2014
+ This software is Copyright (c) 2004-2015
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
