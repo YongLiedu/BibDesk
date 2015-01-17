@@ -159,36 +159,35 @@ static NSMapTable *scrollViewPlacardViews = NULL;
 @implementation BDSKPlacardView
 
 - (void)drawRect:(NSRect)aRect {
-    NSImage *bgImage = [NSImage imageNamed:floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6 ? @"Scroller_Background_Lion" : @"Scroller_Background"];
-    NSImage *divImage = [NSImage imageNamed:floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6 ? @"Scroller_Divider_Lion" : @"Scroller_Divider"];
+    NSImage *bgImage = [NSImage imageNamed:floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_8 ? @"Scroller_Yosemite" : floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6 ? @"Scroller_Lion" : @"Scroller"];
     NSRect bgSrcRect = {NSZeroPoint, [bgImage size]};
-    NSRect divSrcRect = {NSZeroPoint, [divImage size]};
-    NSRect leftRect, rightRect, leftSrcRect, rightSrcRect, midSrcRect = bgSrcRect;
+    NSRect leftRect, rightRect, leftSrcRect, rightSrcRect, midSrcRect, divSrcRect = bgSrcRect;
     NSRect midRect = [self bounds];
     NSRect divRect = midRect;
     CGFloat width = NSHeight(bgSrcRect);
     
     divRect.size.width = 1.0;
-    midSrcRect.origin.x = floor(NSWidth(midSrcRect) / 2.0);
-    midSrcRect.size.width = 1.0;
+    divSrcRect.origin.x = floor(NSWidth(midSrcRect) / 2.0);
+    divSrcRect.size.width = 1.0;
     NSDivideRect(bgSrcRect, &rightSrcRect, &bgSrcRect, width, NSMaxXEdge);
     NSDivideRect(bgSrcRect, &leftSrcRect, &bgSrcRect, width, NSMinXEdge);
     NSDivideRect(midRect, &rightRect, &midRect, width, NSMaxXEdge);
     NSDivideRect(midRect, &leftRect, &midRect, width, NSMinXEdge);
+    midSrcRect = rightSrcRect;
+    midSrcRect.size.width = 1.0;
     
     [bgImage drawInRect:leftRect fromRect:leftSrcRect operation:NSCompositeSourceOver fraction:1.0];
     [bgImage drawInRect:rightRect fromRect:rightSrcRect operation:NSCompositeSourceOver fraction:1.0];
     if (NSWidth(midRect) > 0)
         [bgImage drawInRect:midRect fromRect:midSrcRect operation:NSCompositeSourceOver fraction:1.0];
     
+    NSEnumerator *viewEnum = [[self subviews] objectEnumerator];
+    NSView *view;
     CGFloat f = [[self window] isMainWindow] || [[self window] isKeyWindow] ? 1.0 : 0.33333;
-    BOOL isFirst = YES;
-    for (NSView *view in [self subviews]) {
-        if (isFirst == NO) {
-            divRect.origin.x = NSMinX([view frame]);
-            [divImage drawInRect:divRect fromRect:divSrcRect operation:NSCompositeSourceOver fraction:f];
-        }
-        isFirst = NO;
+    [viewEnum nextObject];
+    while ((view = [viewEnum nextObject])) {
+        divRect.origin.x = NSMinX([view frame]);
+        [bgImage drawInRect:divRect fromRect:divSrcRect operation:NSCompositeSourceOver fraction:f];
     }
 }
 
