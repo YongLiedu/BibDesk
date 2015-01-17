@@ -80,10 +80,8 @@
 		CE0391F90F6166FB001808EA /* importBadge.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE0391F80F6166FA001808EA /* importBadge.tiff */; };
 		CE03C0CB127D751D00F62F51 /* BDSKWebViewModalDialogController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE03C0C9127D751D00F62F51 /* BDSKWebViewModalDialogController.m */; };
 		CE044A4512667EB500CE55C4 /* BDSKDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE044A4312667EB500CE55C4 /* BDSKDownloadManager.m */; };
-		CE04583D0FB6FBBF003CAF5D /* Scroller_Divider.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE04583B0FB6FBBF003CAF5D /* Scroller_Divider.tiff */; };
 		CE04583E0FB6FBBF003CAF5D /* Scroller_Background.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE04583C0FB6FBBF003CAF5D /* Scroller_Background.tiff */; };
 		CE071ED10F213EB300244F5C /* BDSKArxivParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE071ECF0F213EB300244F5C /* BDSKArxivParser.m */; };
-		CE0928D613FFC1D7008A6A69 /* Scroller_Divider_Lion.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE0928D513FFC1D7008A6A69 /* Scroller_Divider_Lion.tiff */; };
 		CE0928D813FFC1DC008A6A69 /* Scroller_Background_Lion.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE0928D713FFC1DC008A6A69 /* Scroller_Background_Lion.tiff */; };
 		CE095D52135C52B5000E4396 /* BDSKSelectCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE095D50135C52B5000E4396 /* BDSKSelectCommand.m */; };
 		CE09CEA70DDEF65E00F3F2FE /* BDSKCompletionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE09CEA50DDEF65E00F3F2FE /* BDSKCompletionManager.m */; };
@@ -294,6 +292,7 @@
 		CED65DCD0907A338003EED90 /* BDSKScriptHook+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65DCB0907A338003EED90 /* BDSKScriptHook+Scripting.m */; };
 		CED76E2D1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CED76E2B1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.h */; };
 		CED76E2E1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CED76E2C1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.m */; };
+		CEDAA3D61A6AAF4D0006878D /* Scroller_Background_Yosemite.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEDAA3D51A6AAF4D0006878D /* Scroller_Background_Yosemite.tiff */; };
 		CEDBDE4C0F4C863500190AF5 /* BDSKPreferenceRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = CEDBDE4A0F4C863500190AF5 /* BDSKPreferenceRecord.m */; };
 		CEDBE05A0F4CDAD900190AF5 /* NSView_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEDBE0580F4CDAD900190AF5 /* NSView_BDSKExtensions.m */; };
 		CEDBE0900F4CE06600190AF5 /* ScriptMenu.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEDBE08F0F4CE06600190AF5 /* ScriptMenu.tiff */; };
@@ -845,12 +844,10 @@
 		CE03C0C9127D751D00F62F51 /* BDSKWebViewModalDialogController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKWebViewModalDialogController.m; sourceTree = "<group>"; };
 		CE044A4212667EB500CE55C4 /* BDSKDownloadManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKDownloadManager.h; sourceTree = "<group>"; };
 		CE044A4312667EB500CE55C4 /* BDSKDownloadManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKDownloadManager.m; sourceTree = "<group>"; };
-		CE04583B0FB6FBBF003CAF5D /* Scroller_Divider.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Scroller_Divider.tiff; sourceTree = "<group>"; };
 		CE04583C0FB6FBBF003CAF5D /* Scroller_Background.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Scroller_Background.tiff; sourceTree = "<group>"; };
 		CE05CF5C0D7743940034C2A8 /* WebURLsWithTitles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebURLsWithTitles.h; sourceTree = "<group>"; };
 		CE071ECE0F213EB300244F5C /* BDSKArxivParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKArxivParser.h; sourceTree = "<group>"; };
 		CE071ECF0F213EB300244F5C /* BDSKArxivParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKArxivParser.m; sourceTree = "<group>"; };
-		CE0928D513FFC1D7008A6A69 /* Scroller_Divider_Lion.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Scroller_Divider_Lion.tiff; sourceTree = "<group>"; };
 		CE0928D713FFC1DC008A6A69 /* Scroller_Background_Lion.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Scroller_Background_Lion.tiff; sourceTree = "<group>"; };
 		CE095D4F135C52B5000E4396 /* BDSKSelectCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSelectCommand.h; sourceTree = "<group>"; };
 		CE095D50135C52B5000E4396 /* BDSKSelectCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSelectCommand.m; sourceTree = "<group>"; };
@@ -1314,6 +1311,7 @@
 		CED65DCB0907A338003EED90 /* BDSKScriptHook+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BDSKScriptHook+Scripting.m"; sourceTree = "<group>"; };
 		CED76E2B1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSAnimationContext_BDSKExtensions.h; sourceTree = "<group>"; };
 		CED76E2C1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSAnimationContext_BDSKExtensions.m; sourceTree = "<group>"; };
+		CEDAA3D51A6AAF4D0006878D /* Scroller_Background_Yosemite.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Scroller_Background_Yosemite.tiff; sourceTree = "<group>"; };
 		CEDBDE490F4C863500190AF5 /* BDSKPreferenceRecord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPreferenceRecord.h; sourceTree = "<group>"; };
 		CEDBDE4A0F4C863500190AF5 /* BDSKPreferenceRecord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPreferenceRecord.m; sourceTree = "<group>"; };
 		CEDBE0570F4CDAD900190AF5 /* NSView_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSView_BDSKExtensions.h; sourceTree = "<group>"; };
@@ -2465,10 +2463,9 @@
 				F9022DBA0758088000C3F701 /* startup.tiff */,
 				F9022DBB0758088000C3F701 /* TinyFile.tiff */,
 				CE3A24190B750424006B64D3 /* webGroup.tiff */,
-				CE04583B0FB6FBBF003CAF5D /* Scroller_Divider.tiff */,
 				CE04583C0FB6FBBF003CAF5D /* Scroller_Background.tiff */,
-				CE0928D513FFC1D7008A6A69 /* Scroller_Divider_Lion.tiff */,
 				CE0928D713FFC1DC008A6A69 /* Scroller_Background_Lion.tiff */,
+				CEDAA3D51A6AAF4D0006878D /* Scroller_Background_Yosemite.tiff */,
 			);
 			path = Images;
 			sourceTree = "<group>";
@@ -3195,7 +3192,6 @@
 				CE0391910F612ED5001808EA /* sharing.tiff in Resources */,
 				CE0391F90F6166FB001808EA /* importBadge.tiff in Resources */,
 				CEF8F8DF0F93519700948A88 /* WebGroupStartPage.html in Resources */,
-				CE04583D0FB6FBBF003CAF5D /* Scroller_Divider.tiff in Resources */,
 				CE04583E0FB6FBBF003CAF5D /* Scroller_Background.tiff in Resources */,
 				CEB5D6071072AE360001C135 /* AutoFile.xib in Resources */,
 				CEB5D6081072AE360001C135 /* AutoFileProgress.xib in Resources */,
@@ -3255,11 +3251,11 @@
 				CEF1D6BD117F01C60069E249 /* postprocess-nontitle.py in Resources */,
 				CE2F057211B51FA7001B0AE0 /* BDSKOpenAccessoryView.xib in Resources */,
 				CEF52DD8126C7869006E904B /* WebGroupDownloads.html in Resources */,
-				CE0928D613FFC1D7008A6A69 /* Scroller_Divider_Lion.tiff in Resources */,
 				CE0928D813FFC1DC008A6A69 /* Scroller_Background_Lion.tiff in Resources */,
 				CEB2A71C16401085001A9D6A /* BibDesk.help in Resources */,
 				CE280D6D16C6CB8700344CC8 /* BDSKSaveAccessoryView.xib in Resources */,
 				CE0C5C7816F37C8E00F53653 /* FieldSheet.xib in Resources */,
+				CEDAA3D61A6AAF4D0006878D /* Scroller_Background_Yosemite.tiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
