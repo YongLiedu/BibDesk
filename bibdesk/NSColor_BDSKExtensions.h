@@ -47,6 +47,8 @@
 + (NSColor *)mainSourceListHighlightColor;
 + (NSColor *)disabledSourceListHighlightColor;
 
++ (NSColor *)sourceListBackgroundColor;
+
 + (NSColor *)colorWithFourByteString:(NSString *)string;
 - (id)fourByteStringValue;
 
