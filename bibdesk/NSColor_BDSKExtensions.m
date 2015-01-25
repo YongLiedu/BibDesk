@@ -42,6 +42,8 @@
 @implementation NSColor (BDSKExtensions)
 
 + (NSArray *)alternateControlAlternatingRowBackgroundColors {
+    if ([NSColor currentControlTint] == NSGraphiteControlTint)
+        return [self controlAlternatingRowBackgroundColors];
     static NSArray *altColors = nil;
     if (altColors == nil)
         altColors = [[NSArray alloc] initWithObjects:[NSColor controlBackgroundColor], [NSColor colorWithCalibratedRed:0.934203 green:0.991608 blue:0.953552 alpha:1.0], nil];
