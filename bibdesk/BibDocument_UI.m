@@ -75,6 +75,7 @@
 #import "BDSKMacroResolver.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKServerInfo.h"
+#import "NSColor_BDSKExtensions.h"
 
 #define BDSKDisableMigrationWarningKey @"BDSKDisableMigrationWarning"
 
@@ -1082,6 +1083,12 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [self selectedFileURLs];
 }
 
+- (void)handleControlTintDidChangeNotification:(NSNotification *)notification{
+    if ([self hasGroupTypeSelected:BDSKExternalGroupType])
+        [tableView setAlternatingRowBackgroundColors:[NSColor alternateControlAlternatingRowBackgroundColors]];
+}
+
+
 - (void)handleCustomFieldsDidChangeNotification:(NSNotification *)notification{
     [publications makeObjectsPerformSelector:@selector(customFieldsDidChange:) withObject:notification];
     [tableView setupTableColumnsWithIdentifiers:[tableView tableColumnIdentifiers]];
@@ -1169,6 +1176,10 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [nc addObserver:self
            selector:@selector(handleApplicationDidBecomeActiveNotification:)
                name:NSApplicationDidBecomeActiveNotification
+             object:nil];
+    [nc addObserver:self
+           selector:@selector(handleControlTintDidChangeNotification:)
+               name:NSControlTintDidChangeNotification
              object:nil];
     [nc addObserver:self
            selector:@selector(handleTemporaryFileMigrationNotification:)
