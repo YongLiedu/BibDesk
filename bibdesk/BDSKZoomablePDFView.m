@@ -311,9 +311,10 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
 }
 
 - (void)setScaleFactor:(CGFloat)newScaleFactor {
-    NSPoint scrollPoint = (NSPoint)[self scrollPositionAsPercentage];
+    NSView *docView = [[[self documentView] enclosingScrollView] documentView];
+    NSPoint scrollPoint = [docView scrollPositionAsPercentage];
 	[self setScaleFactor:newScaleFactor adjustPopup:YES];
-    [self setScrollPositionAsPercentage:scrollPoint];
+    [docView setScrollPositionAsPercentage:scrollPoint];
 }
 
 - (void)setScaleFactor:(CGFloat)newScaleFactor adjustPopup:(BOOL)flag {
