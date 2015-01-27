@@ -336,6 +336,12 @@ static BDSKPreviewer *sharedPreviewer = nil;
     [pdfView setDocument:pdfDocument];
     [pdfDocument release];
     
+    NSScrollView *scrollView = [[pdfView documentView] enclosingScrollView];
+    NSClipView *clipView = [scrollView contentView];
+    NSRect clipRect = [clipView bounds];
+    clipRect.origin.y = [clipView isFlipped] ? NSMinY([[scrollView documentView] frame]) : NSMaxY([[scrollView documentView] frame]) - NSHeight(clipRect);
+    [clipView scrollPoint:clipRect.origin];
+    
 	[logView setString:@""];
 	[logView setTextContainerInset:NSMakeSize(20,20)];  // pad the edges of the text
     [logView setString:logString];
