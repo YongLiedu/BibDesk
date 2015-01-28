@@ -57,7 +57,7 @@
 	BibItem *pub = [params objectForKey:@"from"];
 	BOOL check = [[params objectForKey:@"check"] boolValue];
     NSUInteger i = indexNumber ? [indexNumber unsignedIntegerValue] - 1 : 0;
-    BOOL isFile = field == nil;
+    BOOL isFile = field == NO;
     
 	if (formatString == nil || params == nil) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
@@ -70,6 +70,7 @@
 	
 	if (field == nil) {
         field = BDSKLocalFileString;
+        isFile = YES;
     } else if ([field isKindOfClass:[BDSKField class]]) {
 		if (pub == nil) {
 			pub = [(BDSKField *)field publication];
