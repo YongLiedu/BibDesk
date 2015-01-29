@@ -794,8 +794,6 @@ enum {
 
 - (BDSKFieldCollection *)URLFields;
 
-- (BOOL)isValidLocalFilePath:(NSString *)proposedPath;
-
 - (void)customFieldsDidChange:(NSNotification *)aNotification;
 
 - (void)duplicateTitleToBooktitleOverwriting:(BOOL)overwrite;

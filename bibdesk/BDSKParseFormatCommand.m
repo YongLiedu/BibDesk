@@ -101,10 +101,6 @@
 	}
     
     BOOL isFileField = [field isLocalFileField];
-    NSString *papersFolderPath = nil;
-    if (isFileField || isFile)
-        papersFolderPath = [BDSKFormatParser folderPathForFilingPapersFromDocumentAtPath:[[[pub owner] fileURL] path]];
-	
     BDSKLinkedFile *file = nil;
     if (isFile)
         file = [[pub localFiles] objectAtIndex:i];
@@ -142,17 +138,12 @@
     }
     
     NSString *suggestion = nil;
-    if ([field isEqualToString:BDSKCiteKeyString]) {
+    if ([field isEqualToString:BDSKCiteKeyString])
         suggestion = [pub citeKey];
-    } else if (isFileField) {
+    else if (isFileField)
         suggestion = [[pub localFileURLForField:field] path];
-        if ([suggestion hasPrefix:[papersFolderPath stringByAppendingString:@"/"]]) 
-            suggestion = [suggestion substringFromIndex:[papersFolderPath length]];
-        else
-            suggestion = nil;
-    } else if (isFile == NO) {
+    else if (isFile == NO)
         suggestion = [pub valueOfField:field inherit:NO];
-    }
     
 	NSString *string = nil;
     
@@ -162,9 +153,7 @@
         string = [BDSKFormatParser parseFormat:formatString forField:field ofItem:pub suggestion:suggestion];
 	
 	if (isFileField)
-		return [[NSURL fileURLWithPath:[papersFolderPath stringByAppendingPathComponent:string]] absoluteString];
-	else if (isFile)
-		return [papersFolderPath stringByAppendingPathComponent:string];
+		return [[NSURL fileURLWithPath:string] absoluteString];
 	else
         return string;
 }

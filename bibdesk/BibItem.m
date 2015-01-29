@@ -1078,11 +1078,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         suggestion = nil;
     
 	NSString *citeKeyFormat = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteKeyFormatKey];
-    NSString *ck = [BDSKFormatParser parseFormat:citeKeyFormat forField:BDSKCiteKeyString ofItem:self suggestion:suggestion];
-	if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKCiteKeyLowercaseKey]) {
-		ck = [ck lowercaseString];
-	}
-	return ck;
+    return [BDSKFormatParser parseFormat:citeKeyFormat forField:BDSKCiteKeyString ofItem:self suggestion:suggestion];
 }
 
 - (BOOL)hasEmptyOrDefaultCiteKey{
@@ -2774,25 +2770,11 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 
 #pragma mark AutoFile support
 
-- (BOOL)isValidLocalFilePath:(NSString *)proposedPath{
-    if ([NSString isEmptyString:proposedPath])
-        return NO;
-    NSString *papersFolderPath = [BDSKFormatParser folderPathForFilingPapersFromDocumentAtPath:[[owner fileURL] path]];
-    // NSFileManager need aliases resolved for existence checks
-    papersFolderPath = [[NSFileManager defaultManager] resolveAliasesInPath:papersFolderPath];
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKLocalFileLowercaseKey])
-        proposedPath = [proposedPath lowercaseString];
-    return ([[NSFileManager defaultManager] fileExistsAtPath:[papersFolderPath stringByAppendingPathComponent:proposedPath]] == NO);
-}
-
 - (NSURL *)suggestedURLForLinkedFile:(BDSKLinkedFile *)file
 {
-    NSString *papersFolderPath = [BDSKFormatParser folderPathForFilingPapersFromDocumentAtPath:[[owner fileURL] path]];
-    
-	NSString *relativeFile = [BDSKFormatParser parseFormatForLinkedFile:file ofItem:self];
-	if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKLocalFileLowercaseKey])
-		relativeFile = [relativeFile lowercaseString];
-	return [NSURL fileURLWithPath:[papersFolderPath stringByAppendingPathComponent:relativeFile]];
+	NSString *localFileFormat = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKLocalFileFormatKey];
+	NSString *path = [BDSKFormatParser parseFormat:localFileFormat forLinkedFile:file ofItem:self];
+	return [NSURL fileURLWithPath:path];
 }
 
 - (BOOL)canSetURLForLinkedFile:(BDSKLinkedFile *)file

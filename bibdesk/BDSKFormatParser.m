@@ -48,6 +48,7 @@
 #import "BDSKStringNode.h"
 #import "BDSKLinkedFile.h"
 #import "BDSKAppController.h"
+#import "NSFileManager_BDSKExtensions.h"
 
 
 @implementation BDSKFormatParser
@@ -94,34 +95,14 @@ static NSDictionary *errorAttr = nil;
     errorAttr = [[NSDictionary alloc] initWithObjectsAndKeys:font, NSFontAttributeName, [NSColor redColor], NSForegroundColorAttributeName, nil];
 }
 
-+ (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub
-{
-    return [self parseFormat:format forField:fieldName ofItem:pub suggestion:nil];
-}
-
 + (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub suggestion:(NSString *)suggestion
 {
     return [self parseFormat:format forField:fieldName linkedFile:nil ofItem:pub suggestion:suggestion];
 }
 
-+ (NSString *)parseFormatForLinkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub
-{
-	NSString *localFileFormat = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKLocalFileFormatKey];
-    
-    return [self parseFormat:localFileFormat forLinkedFile:file ofItem:pub];
-}
-
 + (NSString *)parseFormat:(NSString *)format forLinkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub
 {
-    NSString *papersFolderPath = [self folderPathForFilingPapersFromDocumentAtPath:[[[pub owner] fileURL] path]];
-    
-    NSString *oldPath = [[file URL] path];
-    if ([oldPath hasPrefix:[papersFolderPath stringByAppendingString:@"/"]]) 
-        oldPath = [oldPath substringFromIndex:[papersFolderPath length] + 1];
-    else
-        oldPath = nil;
-      
-    return [self parseFormat:format forField:BDSKLocalFileString linkedFile:file ofItem:pub suggestion:oldPath];
+    return [self parseFormat:format forField:BDSKLocalFileString linkedFile:file ofItem:pub suggestion:[[file URL] path]];
 }
 
 + (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName linkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub suggestion:(NSString *)suggestion
@@ -129,13 +110,14 @@ static NSDictionary *errorAttr = nil;
     NSMutableString *parsedStr = [NSMutableString string];
 	NSString *prefixStr = nil;
 	NSScanner *scanner = [NSScanner scannerWithString:format];
-    NSUInteger uniqueNumber;
+    NSUInteger uniqueNumber = 0;
 	unichar specifier, nextChar, uniqueSpecifier = 0;
     NSString *uniqueSeparator = nil;
 	NSCharacterSet *slashCharSet = [NSCharacterSet characterSetWithCharactersInString:@"/"];
 	BOOL isLocalFile = [fieldName isLocalFileField] || [fieldName isEqualToString:BDSKLocalFileString];
-	
-	[scanner setCharactersToBeSkipped:nil];
+    NSString *papersFolderPath = nil;
+    
+    [scanner setCharactersToBeSkipped:nil];
 	
 	while (NO == [scanner isAtEnd]) {
 		// scan non-specifier parts
@@ -803,6 +785,30 @@ static NSDictionary *errorAttr = nil;
 		}
 	}
 	
+    if (([fieldName isEqualToString:BDSKCiteKeyString] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKCiteKeyLowercaseKey]) ||
+        (isLocalFile && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKLocalFileLowercaseKey])) {
+        [parsedStr setString:[parsedStr lowercaseString]];
+        prefixStr = [prefixStr lowercaseString];
+        if (uniqueSpecifier == 'U')
+            uniqueSpecifier = 'u';
+    }
+	
+    if (isLocalFile) {
+        papersFolderPath = [self folderPathForFilingPapersFromDocumentAtPath:[[[pub owner] fileURL] path]];
+        if ([suggestion hasPrefix:[papersFolderPath stringByAppendingString:@"/"]])
+            suggestion = [suggestion substringFromIndex:[papersFolderPath length] + 1];
+        else
+            suggestion = nil;
+        while ([prefixStr hasPrefix:@"/"])
+            prefixStr = [prefixStr substringFromIndex:1];
+    }
+    
+    // make sure we don't return an empty string for cite key or local file
+    if ([NSString isEmptyString:parsedStr] && [NSString isEmptyString:prefixStr] && uniqueSpecifier == 0) {
+        uniqueSpecifier = 'n';
+        prefixStr = @"";
+    }
+    
 	if (uniqueSpecifier != 0) {
         NSString *suggestedUnique = nil;
         NSUInteger prefixLength = [prefixStr length];
@@ -840,11 +846,14 @@ static NSDictionary *errorAttr = nil;
         if (suggestedUnique && [suggestedUnique rangeOfCharacterFromSet:nonUniqueChars].location == NSNotFound) {
             [parsedStr setString:suggestion];
         } else {
+            // we need to resolve aliases in the papers folder to be able to check for existing files
+            NSString *resolvedPapersFolderPath = isLocalFile ? [[NSFileManager defaultManager] resolveAliasesInPath:papersFolderPath] : nil;
             [parsedStr setString:[self uniqueString:prefixStr 
                                              suffix:parsedStr
                                           separator:uniqueSeparator
                                            forField:fieldName
                                              ofItem:pub
+                                           inFolder:resolvedPapersFolderPath
                                       numberOfChars:uniqueNumber 
                                                from:fromChar
                                                  to:toChar 
@@ -852,16 +861,7 @@ static NSDictionary *errorAttr = nil;
         }
 	}
 	
-	if([NSString isEmptyString:parsedStr]) {
-		NSInteger i = 0;
-        NSString *string = nil;
-		do {
-			string = [@"empty" stringByAppendingFormat:@"%ld", (long)i++];
-		} while (NO == [self stringIsValid:string forField:fieldName ofItem:pub]);
-		return string;
-	} else {
-	   return parsedStr;
-	}
+	return isLocalFile ? [papersFolderPath stringByAppendingPathComponent:parsedStr] : parsedStr;
 }
 
 // returns a 'valid' string rather than a 'unique' one
@@ -870,6 +870,7 @@ static NSDictionary *errorAttr = nil;
                  separator:(NSString *)separator
 				  forField:(NSString *)fieldName 
 					ofItem:(id <BDSKParseableItem>)pub
+			      inFolder:(NSString *)papersFolderPath 
 			 numberOfChars:(NSUInteger)number 
 					  from:(unichar)fromChar 
 						to:(unichar)toChar 
@@ -882,8 +883,8 @@ static NSDictionary *errorAttr = nil;
 		for (c = fromChar; c <= toChar; c++) {
 			// try with the first added char set to c
 			uniqueStr = [baseStr stringByAppendingFormat:@"%@%C", separator ?: @"", c];
-			uniqueStr = [self uniqueString:uniqueStr suffix:suffix separator:nil forField:fieldName ofItem:pub numberOfChars:number - 1 from:fromChar to:toChar force:NO];
-			if ([self stringIsValid:uniqueStr forField:fieldName ofItem:pub])
+			uniqueStr = [self uniqueString:uniqueStr suffix:suffix separator:nil forField:fieldName ofItem:pub inFolder:papersFolderPath numberOfChars:number - 1 from:fromChar to:toChar force:NO];
+			if ([self stringIsValid:uniqueStr forField:fieldName ofItem:pub inFolder:papersFolderPath])
 				return uniqueStr;
 		}
 	}
@@ -891,9 +892,9 @@ static NSDictionary *errorAttr = nil;
 		uniqueStr = [baseStr stringByAppendingString:suffix];
 	}
 	
-	if (force && NO == [self stringIsValid:uniqueStr forField:fieldName ofItem:pub]) {
+	if (force && NO == [self stringIsValid:uniqueStr forField:fieldName ofItem:pub inFolder:papersFolderPath]) {
 		// not unique yet, so try with 1 more char
-		return [self uniqueString:baseStr suffix:suffix separator:separator forField:fieldName ofItem:pub numberOfChars:number + 1 from:fromChar to:toChar force:YES];
+		return [self uniqueString:baseStr suffix:suffix separator:separator forField:fieldName ofItem:pub inFolder:papersFolderPath numberOfChars:number + 1 from:fromChar to:toChar force:YES];
 	}
 	
 	return uniqueStr;
@@ -901,15 +902,17 @@ static NSDictionary *errorAttr = nil;
 
 // this might be changed when more fields are available
 // do we want to add character checks as in CiteKeyFormatter?
-+ (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub
++ (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub inFolder:(NSString *)papersFolderPath
 {
 	if ([fieldName isEqualToString:BDSKCiteKeyString]) {
 		return [pub isValidCiteKey:proposedStr];
 	}
 	else if ([fieldName isEqualToString:BDSKLocalFileString] || [fieldName isLocalFileField]) {
-		return [pub isValidLocalFilePath:proposedStr];
+		if ([NSString isEmptyString:proposedStr])
+            return NO;
+        return ([[NSFileManager defaultManager] fileExistsAtPath:[papersFolderPath stringByAppendingPathComponent:proposedStr]] == NO);
 	}
-	else if ([[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKRemoteURLFieldsKey] containsObject:fieldName]) {
+	else if ([fieldName isRemoteURLField]) {
 		if ([NSString isEmptyString:proposedStr])
 			return NO;
 		return YES;

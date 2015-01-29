@@ -49,7 +49,6 @@
 - (NSArray *)peopleArrayForField:(NSString *)field;
 - (NSURL *)localFileURLForField:(NSString *)field;
 - (BOOL)isValidCiteKey:(NSString *)key;
-- (BOOL)isValidLocalFilePath:(NSString *)key;
 - (id<BDSKOwner>)owner;
 @end
 
@@ -67,13 +66,10 @@
     @param pub The BibItem for which to parse the format
 	@result The parsed format string 
 */
-+ (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub;
 
 + (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub suggestion:(NSString *)suggestion;
 
 + (NSString *)parseFormat:(NSString *)format forLinkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub;
-
-+ (NSString *)parseFormatForLinkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub;
 
 + (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName linkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub suggestion:(NSString *)suggestion;
 
@@ -85,6 +81,7 @@
     @param suffix The string to add as a suffix to the unique string
     @param fieldName The name of the field (e.g. "Author")
 	@param pub The item for which to get a unique value
+	@param papersFolderPath The papers folder for linked files
 	@param number The number of characters to add, when force is YES the minimal number
 	@param fromChar The first character in the range to use
 	@param toChar The last character of the range to use
@@ -96,6 +93,7 @@
                  separator:(NSString *)separator
 				  forField:(NSString *)fieldName 
 					ofItem:(id <BDSKParseableItem>)pub
+			      inFolder:(NSString *)papersFolderPath 
 			 numberOfChars:(NSUInteger)number 
 					  from:(unichar)fromChar 
 						to:(unichar)toChar 
@@ -108,8 +106,9 @@
 	@param proposedStr The trial string to check for validity
     @param fieldName The name of the field (e.g. "Author")
 	@param pub The item for which to check validity
+	@param papersFolderPath The papers folder for linked files
 */
-+ (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub;
++ (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub inFolder:(NSString *)papersFolderPath;
 
 /*!
  @method stringBySanitizingString:forField:

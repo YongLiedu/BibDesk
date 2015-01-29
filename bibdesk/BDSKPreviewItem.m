@@ -133,25 +133,16 @@
 
 - (BOOL)isValidCiteKey:(NSString *)key { return YES; }
 
-- (BOOL)isValidLocalFilePath:(NSString *)path { return YES; }
-
 - (NSString *)suggestedLocalFilePath {
-    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
-	NSString *localFileFormat = [sud stringForKey:BDSKLocalFileFormatKey];
-    NSString *papersFolderPath = [BDSKFormatParser folderPathForFilingPapersFromDocumentAtPath:[[owner fileURL] path]];
-	NSString *relativeFile = [BDSKFormatParser parseFormat:localFileFormat forField:BDSKLocalFileString linkedFile:linkedFile ofItem:self suggestion:nil];
-	if ([sud boolForKey:BDSKLocalFileLowercaseKey])
-		relativeFile = [relativeFile lowercaseString];
-    return [[papersFolderPath stringByAppendingPathComponent:relativeFile] stringByAbbreviatingWithTildeInPath];
+	NSString *localFileFormat = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKLocalFileFormatKey];
+	NSString *path = [BDSKFormatParser parseFormat:localFileFormat forLinkedFile:linkedFile ofItem:self];
+    return [path stringByAbbreviatingWithTildeInPath];
 }
 
 - (NSString *)suggestedCiteKey {
-    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
-	NSString *citeKeyFormat = [sud stringForKey:BDSKCiteKeyFormatKey];
-	NSString *ck = [BDSKFormatParser parseFormat:citeKeyFormat forField:BDSKCiteKeyString ofItem:self];
-	if ([sud boolForKey:BDSKCiteKeyLowercaseKey])
-		ck = [ck lowercaseString];
-	return ck;
+	NSString *citeKeyFormat = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteKeyFormatKey];
+	NSString *key = [BDSKFormatParser parseFormat:citeKeyFormat forField:BDSKCiteKeyString ofItem:self suggestion:nil];
+	return key;
 }
 
 - (id<BDSKOwner>)owner { return owner; }
