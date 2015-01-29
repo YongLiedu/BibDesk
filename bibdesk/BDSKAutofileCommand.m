@@ -86,7 +86,7 @@
         }
         if ([location isAbsolutePath] == NO) {
             NSString *papersFolderPath = [BDSKFormatParser folderPathForFilingPapersFromDocumentAtPath:[[doc fileURL] path]];
-            [papersFolderPath stringByAppendingPathComponent:location]; 
+            location = [papersFolderPath stringByAppendingPathComponent:location]; 
         }
         NSArray *paperInfos = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:[localFiles objectAtIndex:i], BDSKFilerFileKey, pub, BDSKFilerPublicationKey, location, BDSKFilerNewPathKey, nil]];
         if ([[BDSKFiler sharedFiler] movePapers:paperInfos forField:BDSKLocalFileString fromDocument:doc options:mask])
