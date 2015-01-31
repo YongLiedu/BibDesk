@@ -83,8 +83,7 @@
 	@param pub The item for which to get a unique value
 	@param papersFolderPath The papers folder for linked files
 	@param number The number of characters to add, when force is YES the minimal number
-	@param fromChar The first character in the range to use
-	@param toChar The last character of the range to use
+	@param charRange The character range to use
 	@param force Determines whether to allow for more characters to force a unique key
 	@result A string value for field in type that starts with baseString and is unique when force is YES
 */
@@ -95,8 +94,7 @@
 					ofItem:(id <BDSKParseableItem>)pub
 			      inFolder:(NSString *)papersFolderPath 
 			 numberOfChars:(NSUInteger)number 
-					  from:(unichar)fromChar 
-						to:(unichar)toChar 
+                 fromRange:(NSRange)charRange 
 					 force:(BOOL)force;
 
 /*!

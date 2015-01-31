@@ -825,22 +825,19 @@ static NSDictionary *errorAttr = nil;
             }
         }
         NSCharacterSet *nonUniqueChars = nil;
-        unichar fromChar = 0, toChar = 0;
+        NSRange charRange = NSMakeRange(0, 0);
 		switch (uniqueSpecifier) {
 			case 'u':
                 nonUniqueChars = nonLowercaseLetterCharSet;
-                fromChar = 'a';
-                toChar = 'z';
+                charRange = NSMakeRange('a', 26);
 				break;
 			case 'U':
                 nonUniqueChars = nonUppercaseLetterCharSet;
-                fromChar = 'A';
-                toChar = 'Z';
+                charRange = NSMakeRange('A', 26);
 				break;
 			case 'n':
                 nonUniqueChars = nonDecimalDigitCharSet;
-                fromChar = '0';
-                toChar = '9';
+                charRange = NSMakeRange('0', 10);
 				break;
 		}
         if (suggestedUnique && [suggestedUnique rangeOfCharacterFromSet:nonUniqueChars].location == NSNotFound) {
@@ -855,8 +852,7 @@ static NSDictionary *errorAttr = nil;
                                              ofItem:pub
                                            inFolder:resolvedPapersFolderPath
                                       numberOfChars:uniqueNumber 
-                                               from:fromChar
-                                                 to:toChar 
+                                          fromRange:charRange 
                                               force:(uniqueNumber == 0)]];
         }
 	}
@@ -872,18 +868,17 @@ static NSDictionary *errorAttr = nil;
 					ofItem:(id <BDSKParseableItem>)pub
 			      inFolder:(NSString *)papersFolderPath 
 			 numberOfChars:(NSUInteger)number 
-					  from:(unichar)fromChar 
-						to:(unichar)toChar 
+                 fromRange:(NSRange)charRange 
 					 force:(BOOL)force {
 	
 	NSString *uniqueStr = nil;
 	unichar c;
 	
 	if (number > 0) {
-		for (c = fromChar; c <= toChar; c++) {
+		for (c = charRange.location; c <= NSMaxRange(charRange); c++) {
 			// try with the first added char set to c
 			uniqueStr = [baseStr stringByAppendingFormat:@"%@%C", separator ?: @"", c];
-			uniqueStr = [self uniqueString:uniqueStr suffix:suffix separator:nil forField:fieldName ofItem:pub inFolder:papersFolderPath numberOfChars:number - 1 from:fromChar to:toChar force:NO];
+			uniqueStr = [self uniqueString:uniqueStr suffix:suffix separator:nil forField:fieldName ofItem:pub inFolder:papersFolderPath numberOfChars:number - 1 fromRange:charRange force:NO];
 			if ([self stringIsValid:uniqueStr forField:fieldName ofItem:pub inFolder:papersFolderPath])
 				return uniqueStr;
 		}
@@ -894,7 +889,7 @@ static NSDictionary *errorAttr = nil;
 	
 	if (force && NO == [self stringIsValid:uniqueStr forField:fieldName ofItem:pub inFolder:papersFolderPath]) {
 		// not unique yet, so try with 1 more char
-		return [self uniqueString:baseStr suffix:suffix separator:separator forField:fieldName ofItem:pub inFolder:papersFolderPath numberOfChars:number + 1 from:fromChar to:toChar force:YES];
+		return [self uniqueString:baseStr suffix:suffix separator:separator forField:fieldName ofItem:pub inFolder:papersFolderPath numberOfChars:number + 1 fromRange:charRange force:YES];
 	}
 	
 	return uniqueStr;
