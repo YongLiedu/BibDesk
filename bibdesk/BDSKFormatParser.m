@@ -53,10 +53,6 @@
 
 @implementation BDSKFormatParser
 
-static NSCharacterSet *nonLowercaseLetterCharSet = nil;
-static NSCharacterSet *nonUppercaseLetterCharSet = nil;
-static NSCharacterSet *nonDecimalDigitCharSet = nil;
-
 static NSCharacterSet *validSpecifierChars = nil;
 static NSCharacterSet *validParamSpecifierChars = nil;
 static NSCharacterSet *validUniqueSpecifierChars = nil;
@@ -71,11 +67,17 @@ static NSDictionary *argAttr = nil;
 static NSDictionary *textAttr = nil;
 static NSDictionary *errorAttr = nil;
 
+static inline BOOL stringHasCharacterNotInRange(NSString *string, NSRange range) {
+    NSUInteger i, iMax = [string length];
+    for (i = 0; i < iMax; i++) {
+        if (NSLocationInRange([string characterAtIndex:i], range) == NO)
+            return YES;
+    }
+    return NO;
+}
+
 + (void)initialize {
     BDSKINITIALIZE;
-    nonLowercaseLetterCharSet = [[[NSCharacterSet characterSetWithRange:NSMakeRange('a',26)] invertedSet] copy];
-    nonUppercaseLetterCharSet = [[[NSCharacterSet characterSetWithRange:NSMakeRange('A',26)] invertedSet] copy];
-    nonDecimalDigitCharSet = [[[NSCharacterSet characterSetWithRange:NSMakeRange('0',10)] invertedSet] copy];
     
     validSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTmyYlLeEbkfwcsirRduUn0123456789%[]"] retain];
     validParamSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTkfwciuUn"] retain];
@@ -824,23 +826,13 @@ static NSDictionary *errorAttr = nil;
                     suggestedUnique = nil;
             }
         }
-        NSCharacterSet *nonUniqueChars = nil;
         NSRange charRange = NSMakeRange(0, 0);
 		switch (uniqueSpecifier) {
-			case 'u':
-                nonUniqueChars = nonLowercaseLetterCharSet;
-                charRange = NSMakeRange('a', 26);
-				break;
-			case 'U':
-                nonUniqueChars = nonUppercaseLetterCharSet;
-                charRange = NSMakeRange('A', 26);
-				break;
-			case 'n':
-                nonUniqueChars = nonDecimalDigitCharSet;
-                charRange = NSMakeRange('0', 10);
-				break;
+			case 'u': charRange = NSMakeRange('a', 26); break;
+			case 'U': charRange = NSMakeRange('A', 26); break;
+			case 'n': charRange = NSMakeRange('0', 10); break;
 		}
-        if (suggestedUnique && [suggestedUnique rangeOfCharacterFromSet:nonUniqueChars].location == NSNotFound) {
+        if (suggestedUnique && stringHasCharacterNotInRange(suggestedUnique, charRange) == NO) {
             [parsedStr setString:suggestion];
         } else {
             // we need to resolve aliases in the papers folder to be able to check for existing files
