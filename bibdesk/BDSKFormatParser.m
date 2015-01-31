@@ -114,7 +114,7 @@ static NSDictionary *errorAttr = nil;
 	unichar specifier, nextChar, uniqueSpecifier = 0;
     NSString *uniqueSeparator = nil;
 	NSCharacterSet *slashCharSet = [NSCharacterSet characterSetWithCharactersInString:@"/"];
-	BOOL isLocalFile = [fieldName isLocalFileField] || [fieldName isEqualToString:BDSKLocalFileString];
+	BOOL isLocalFile = [fieldName isGeneralLocalFileField];
     NSString *papersFolderPath = nil;
     
     [scanner setCharactersToBeSkipped:nil];
@@ -902,7 +902,7 @@ static NSDictionary *errorAttr = nil;
 	if ([fieldName isEqualToString:BDSKCiteKeyString]) {
 		return [pub isValidCiteKey:proposedStr];
 	}
-	else if ([fieldName isEqualToString:BDSKLocalFileString] || [fieldName isLocalFileField]) {
+	else if ([fieldName isGeneralLocalFileField]) {
 		if ([NSString isEmptyString:proposedStr])
             return NO;
         return ([[NSFileManager defaultManager] fileExistsAtPath:[papersFolderPath stringByAppendingPathComponent:proposedStr]] == NO);
@@ -934,7 +934,7 @@ static NSDictionary *errorAttr = nil;
 		
 		return newString;
 	}
-	else if ([fieldName isEqualToString:BDSKLocalFileString] || [fieldName isLocalFileField]) {
+	else if ([fieldName isGeneralLocalFileField]) {
 		
 		if ([NSString isEmptyString:string]) {
 			return @"";
@@ -944,7 +944,7 @@ static NSDictionary *errorAttr = nil;
 		
 		return newString;
 	}
-	else if ([[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKRemoteURLFieldsKey] containsObject:fieldName]) {
+	else if ([fieldName isGeneralRemoteURLField]) {
 		
 		if ([NSString isEmptyString:string]) {
 			return @"";
@@ -983,7 +983,7 @@ static NSDictionary *errorAttr = nil;
 		newString = [newString lossyASCIIString];
 		newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
 	}
-	else if ([fieldName isEqualToString:BDSKLocalFileString] || [fieldName isLocalFileField]) {
+	else if ([fieldName isGeneralLocalFileField]) {
 		cleanOption = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKLocalFileCleanOptionKey];
 		
 		if (cleanOption >= 3)
@@ -1072,7 +1072,7 @@ static NSDictionary *errorAttr = nil;
 			}
 			foundUnique = YES;
 		}
-		else if ([validLocalFileSpecifierChars characterIsMember:specifier] && [fieldName isEqualToString:BDSKLocalFileString] == NO && [fieldName isLocalFileField] == NO) {
+		else if ([validLocalFileSpecifierChars characterIsMember:specifier] && [fieldName isGeneralLocalFileField] == NO) {
 			errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Specifier %%%C is only valid in format for local file.", @"Error description"), specifier];
 			break;
 		}
