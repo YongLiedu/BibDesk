@@ -3306,6 +3306,7 @@
 			);
 			inputPaths = (
 				"$(DERIVED_FILE_DIR)/BibDeskHelp/English.lproj/BibDeskHelp.html",
+				"$(SRCROOT)/BibDesk.help",
 			);
 			name = "Run Script: Copy Help";
 			outputPaths = (
