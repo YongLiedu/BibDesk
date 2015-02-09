@@ -307,6 +307,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
     BDSKDESTROY(documentSearch);
     BDSKDESTROY(mainWindowSetupDictionary);
     BDSKDESTROY(groupSpinners);
+    BDSKDESTROY(previewURLs);
     [super dealloc];
 }
 

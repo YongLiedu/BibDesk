@@ -251,11 +251,15 @@ extern NSString *BDSKDocumentPublicationsKey;
         unsigned int        isAnimating:1;
         unsigned int        ignoreSelectionChange:1;
         unsigned int        ignoreGroupSelectionChange:1;
+        unsigned int        controllingQLPreviewPanel:1;
+        unsigned int        controllingFVPreviewPanel:1;
     } docFlags;
     
     NSDictionary *mainWindowSetupDictionary;
     
     NSURL *saveTargetURL;
+    
+    NSArray *previewURLs;
     
     BDSKFileMigrationController *migrationController;
     

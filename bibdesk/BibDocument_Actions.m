@@ -1040,20 +1040,16 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)previewAction:(id)sender {
-    NSArray *theURLs = [sender representedObject];
-    if (theURLs == nil) {
-        theURLs = [self clickedOrSelectedFileURLs];
-        if ([theURLs count] == 0)
-            theURLs = [[self clickedOrSelectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
-    }
-    FVPreviewer *qlPreviewer = [FVPreviewer sharedPreviewer];
-    if ([theURLs count] == 1) {
-        [qlPreviewer setWebViewContextMenuDelegate:self];
-        [qlPreviewer previewURL:[theURLs lastObject] forIconInRect:NSZeroRect];
-    }
-    else if ([theURLs count] > 0) {
-        [qlPreviewer setWebViewContextMenuDelegate:nil];
-        [qlPreviewer previewFileURLs:theURLs];
+    if (docFlags.controllingFVPreviewPanel || docFlags.controllingQLPreviewPanel) {
+        [self stopPreviewing];
+    } else {
+        NSArray *theURLs = [sender representedObject];
+        if (theURLs == nil) {
+            theURLs = [self clickedOrSelectedFileURLs];
+            if ([theURLs count] == 0)
+                theURLs = [[self clickedOrSelectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
+        }
+        [self previewURLs:theURLs];
     }
 }
 

@@ -836,8 +836,91 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     }
 }
 
+#pragma mark Quick Look support
+
+- (void)previewURLs:(NSArray *)theURLs {
+    if ([theURLs count] == 1 && [FVPreviewer useQuickLookForURL:[theURLs lastObject]] == NO) {
+        NSRect iconRect = NSZeroRect;
+        if (docFlags.controllingQLPreviewPanel) {
+            iconRect = [[QLPreviewPanel sharedPreviewPanel] frame];
+            [[QLPreviewPanel sharedPreviewPanel] performSelector:@selector(orderOut:) withObject:nil afterDelay:0.0];
+        }
+        if ([[FVPreviewer sharedPreviewer] isPreviewing] && docFlags.controllingFVPreviewPanel == NO) {
+            [[FVPreviewer sharedPreviewer] stopPreviewing];
+        }
+        [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:self];
+        [[FVPreviewer sharedPreviewer] previewURL:[theURLs lastObject] forIconInRect:iconRect];    
+        docFlags.controllingFVPreviewPanel = YES;
+    } else if ([theURLs count] == 0) {
+        [self stopPreviewing];
+    } else {
+        [previewURLs release];
+        previewURLs = [theURLs copy];
+        if (docFlags.controllingQLPreviewPanel) {
+            if ([[FVPreviewer sharedPreviewer] isPreviewing]) {
+                [[FVPreviewer sharedPreviewer] stopPreviewing];
+            }
+            [[QLPreviewPanel sharedPreviewPanel] reloadData];
+            [[QLPreviewPanel sharedPreviewPanel] refreshCurrentPreviewItem];
+        } else {
+            // the QL preview panel uses the responder chain, so make sure a file view does not steal it from us
+            if ([[documentWindow firstResponder] isEqual:bottomFileView ] || [[documentWindow firstResponder] isEqual:sideFileView])
+                [documentWindow makeFirstResponder:[self isDisplayingFileContentSearch] ? [fileSearchController tableView] : tableView]; 
+            if ([[FVPreviewer sharedPreviewer] isPreviewing]) {
+                [[FVPreviewer sharedPreviewer] stopPreviewing];
+            }
+            [[QLPreviewPanel sharedPreviewPanel] makeKeyAndOrderFront:nil]; 
+        }
+    }
+}
+
+- (void)stopPreviewing {
+    if ([[FVPreviewer sharedPreviewer] isPreviewing]) {
+        [[FVPreviewer sharedPreviewer] stopPreviewing];
+    } else if (docFlags.controllingQLPreviewPanel) {
+        [[QLPreviewPanel sharedPreviewPanel] orderOut:nil];
+        [[QLPreviewPanel sharedPreviewPanel] setDataSource:nil];
+        [[QLPreviewPanel sharedPreviewPanel] setDelegate:nil];
+        BDSKDESTROY(previewURLs);
+    }
+}
+
+- (BOOL)acceptsPreviewPanelControl:(QLPreviewPanel *)panel {
+    return YES;
+}
+
+- (void)beginPreviewPanelControl:(QLPreviewPanel *)panel {
+    docFlags.controllingQLPreviewPanel = YES;
+    [[QLPreviewPanel sharedPreviewPanel] setDataSource:self];
+    [[QLPreviewPanel sharedPreviewPanel] setDelegate:self];
+    [[QLPreviewPanel sharedPreviewPanel] reloadData];    
+}
+
+- (void)endPreviewPanelControl:(QLPreviewPanel *)panel {
+    docFlags.controllingQLPreviewPanel = NO;
+    [[QLPreviewPanel sharedPreviewPanel] setDataSource:nil];
+    [[QLPreviewPanel sharedPreviewPanel] setDelegate:nil];
+    BDSKDESTROY(previewURLs);
+}
+
+- (NSInteger)numberOfPreviewItemsInPreviewPanel:(QLPreviewPanel *)panel {
+    return [previewURLs count];
+}
+
+- (id <QLPreviewItem>)previewPanel:(QLPreviewPanel *)panel previewItemAtIndex:(NSInteger)idx {
+    return [previewURLs objectAtIndex:idx];
+}
+
 #pragma mark -
 #pragma mark Notification handlers
+
+- (void)handlePreviewerWillClose:(NSNotification *)aNote {
+    /*
+     Necessary to reset in case of the window close button, which doesn't go through
+     our action methods.
+     */
+    docFlags.controllingFVPreviewPanel = NO;
+}
 
 - (void)handleBibItemAddDelNotification:(NSNotification *)notification{
 	BOOL isDelete = [[notification name] isEqualToString:BDSKDocDelItemNotification];
@@ -1189,6 +1272,10 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [nc addObserver:self
            selector:@selector(handleCustomFieldsDidChangeNotification:)
                name:BDSKCustomFieldsChangedNotification
+             object:nil];
+    [nc addObserver:self
+           selector:@selector(handlePreviewerWillClose:)
+               name:FVPreviewerWillCloseNotification
              object:nil];
     // Header says NSNotificationSuspensionBehaviorCoalesce is the default if suspensionBehavior isn't specified, but at least on 10.5 it appears to be NSNotificationSuspensionBehaviorDeliverImmediately.
     [[NSDistributedNotificationCenter defaultCenter] 

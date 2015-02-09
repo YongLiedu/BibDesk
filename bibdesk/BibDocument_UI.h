@@ -37,10 +37,11 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import <Quartz/Quartz.h>
 #import "BibDocument.h"
 
 
-@interface BibDocument (UI) <NSSplitViewDelegate, NSMenuDelegate>
+@interface BibDocument (UI) <NSSplitViewDelegate, NSMenuDelegate, QLPreviewPanelDataSource, QLPreviewPanelDelegate>
 
 - (void)updatePreviews;
 - (void)updatePreviewer:(BDSKPreviewer *)aPreviewer;
@@ -70,5 +71,8 @@
 - (void)endObserving;
 
 - (void)handleTableSelectionChangedNotification:(NSNotification *)notification;
+
+- (void)previewURLs:(NSArray *)urls;
+- (void)stopPreviewing;
 
 @end
