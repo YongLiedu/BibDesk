@@ -1040,10 +1040,10 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)previewAction:(id)sender {
-    if (docFlags.controllingFVPreviewPanel || docFlags.controllingQLPreviewPanel) {
+    NSArray *theURLs = [sender representedObject];
+    if ((docFlags.controllingFVPreviewPanel || docFlags.controllingQLPreviewPanel) && theURLs == nil) {
         [self stopPreviewing];
     } else {
-        NSArray *theURLs = [sender representedObject];
         if (theURLs == nil) {
             theURLs = [self clickedOrSelectedFileURLs];
             if ([theURLs count] == 0)
