@@ -550,15 +550,10 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 }
 
 - (IBAction)previewAction:(id)sender {
-    NSArray *theURLs = [publication valueForKeyPath:@"files.URL"];
-    FVPreviewer *previewer = [FVPreviewer sharedPreviewer];
-    if ([theURLs count] == 1) {
-        [previewer setWebViewContextMenuDelegate:self];
-        [previewer previewURL:[theURLs lastObject] forIconInRect:NSZeroRect];
-    }
-    else if ([theURLs count] > 0) {
-        [previewer setWebViewContextMenuDelegate:nil];
-        [previewer previewFileURLs:theURLs];
+    if (editorFlags.controllingFVPreviewPanel || editorFlags.controllingQLPreviewPanel) {
+        [self stopPreviewing];
+    } else {
+        [self previewURLs:[publication valueForKeyPath:@"files.URL"]];
     }
 }
 
@@ -1800,6 +1795,78 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     [array sortUsingSelector:@selector(sortCompare:)];
     
     return array;
+}
+
+#pragma mark Quick Look support
+
+- (void)previewURLs:(NSArray *)theURLs {
+    if ([theURLs count] == 1 && [FVPreviewer useQuickLookForURL:[theURLs lastObject]] == NO) {
+        NSRect previewRect = NSZeroRect;
+        if (editorFlags.controllingQLPreviewPanel) {
+            previewRect = [[QLPreviewPanel sharedPreviewPanel] frame];
+            [[QLPreviewPanel sharedPreviewPanel] performSelector:@selector(orderOut:) withObject:nil afterDelay:0.0];
+        }
+        if ([[FVPreviewer sharedPreviewer] isPreviewing] && editorFlags.controllingFVPreviewPanel == NO) {
+            [[FVPreviewer sharedPreviewer] stopPreviewing];
+        }
+        [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:self];
+        [[FVPreviewer sharedPreviewer] previewURL:[theURLs lastObject] forIconInRect:previewRect];    
+        editorFlags.controllingFVPreviewPanel = YES;
+    } else if ([theURLs count] == 0) {
+        [self stopPreviewing];
+    } else {
+        if (editorFlags.controllingQLPreviewPanel) {
+            if ([[FVPreviewer sharedPreviewer] isPreviewing]) {
+                [[FVPreviewer sharedPreviewer] stopPreviewing];
+            }
+            [[QLPreviewPanel sharedPreviewPanel] reloadData];
+            [[QLPreviewPanel sharedPreviewPanel] refreshCurrentPreviewItem];
+        } else {
+            // the QL preview panel uses the responder chain, so make sure a file view does not steal it from us
+            if ([[[self window] firstResponder] isEqual:fileView]) {
+                [[self window] makeFirstResponder:[self window]]; 
+            }
+            if ([[FVPreviewer sharedPreviewer] isPreviewing]) {
+                [[FVPreviewer sharedPreviewer] stopPreviewing];
+            }
+            [[QLPreviewPanel sharedPreviewPanel] makeKeyAndOrderFront:nil]; 
+        }
+    }
+}
+
+- (void)stopPreviewing {
+    if ([[FVPreviewer sharedPreviewer] isPreviewing]) {
+        [[FVPreviewer sharedPreviewer] stopPreviewing];
+    } else if (editorFlags.controllingQLPreviewPanel) {
+        [[QLPreviewPanel sharedPreviewPanel] orderOut:nil];
+        [[QLPreviewPanel sharedPreviewPanel] setDataSource:nil];
+        [[QLPreviewPanel sharedPreviewPanel] setDelegate:nil];
+    }
+}
+
+- (BOOL)acceptsPreviewPanelControl:(QLPreviewPanel *)panel {
+    return YES;
+}
+
+- (void)beginPreviewPanelControl:(QLPreviewPanel *)panel {
+    editorFlags.controllingQLPreviewPanel = YES;
+    [[QLPreviewPanel sharedPreviewPanel] setDataSource:self];
+    [[QLPreviewPanel sharedPreviewPanel] setDelegate:self];
+    [[QLPreviewPanel sharedPreviewPanel] reloadData];    
+}
+
+- (void)endPreviewPanelControl:(QLPreviewPanel *)panel {
+    editorFlags.controllingQLPreviewPanel = NO;
+    [[QLPreviewPanel sharedPreviewPanel] setDataSource:nil];
+    [[QLPreviewPanel sharedPreviewPanel] setDelegate:nil];
+}
+
+- (NSInteger)numberOfPreviewItemsInPreviewPanel:(QLPreviewPanel *)panel {
+    return [[publication valueForKeyPath:@"files.URL"] count];
+}
+
+- (id <QLPreviewItem>)previewPanel:(QLPreviewPanel *)panel previewItemAtIndex:(NSInteger)idx {
+    return [[publication valueForKeyPath:@"files.URL"] objectAtIndex:idx];
 }
 
 #pragma mark Key field

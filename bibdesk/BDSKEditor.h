@@ -44,6 +44,7 @@
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKCitationFormatter.h"
 #import <FileView/FileView.h>
+#import <Quartz/Quartz.h>
 
 @class BDSKRatingButton, BDSKRatingButtonCell, BDSKStatusBar, BDSKZoomablePDFView, BDSKEditorTableView;
 @class BDSKComplexStringEditor, BDSKCiteKeyFormatter;
@@ -54,7 +55,7 @@
     @abstract WindowController for the edit window
     @discussion Subclass of the NSWindowController class, This handles making, reversing and keeping track of changes to the BibItem, and displaying a nice GUI.
 */
-@interface BDSKEditor : NSWindowController <NSWindowDelegate, NSTableViewDelegate, NSTableViewDataSource, NSSplitViewDelegate, NSControlTextEditingDelegate, BDSKStatusBarDelegate, BDSKComplexStringFormatterDelegate, BDSKCitationFormatterDelegate, FVFileViewDelegate, FVFileViewDataSource> {
+@interface BDSKEditor : NSWindowController <NSWindowDelegate, NSTableViewDelegate, NSTableViewDataSource, NSSplitViewDelegate, NSControlTextEditingDelegate, BDSKStatusBarDelegate, BDSKComplexStringFormatterDelegate, BDSKCitationFormatterDelegate, FVFileViewDelegate, FVFileViewDataSource, QLPreviewPanelDelegate, QLPreviewPanelDataSource> {
 	IBOutlet NSSplitView *mainSplitView;
 	IBOutlet NSSplitView *fileSplitView;
     IBOutlet NSPopUpButton *bibTypeButton;
@@ -126,6 +127,8 @@
         unsigned int isEditing:1;
         unsigned int isAnimating:1;
         unsigned int didSetupFields:1;
+        unsigned int controllingQLPreviewPanel:1;
+        unsigned int controllingFVPreviewPanel:1;
     } editorFlags;
 }
 
@@ -307,6 +310,9 @@
 - (NSUndoManager *)undoManager;
 
 - (void)deleteURLsAtIndexes:(NSIndexSet *)indexSet moveToTrash:(NSInteger)moveToTrash;
+
+- (void)previewURLs:(NSArray *)theURLs;
+- (void)stopPreviewing;
 
 #pragma mark Person controller
 
