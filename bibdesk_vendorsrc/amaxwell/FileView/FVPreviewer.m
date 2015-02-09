@@ -544,47 +544,59 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
             // raises on nil
             [theWindow setTitleWithRepresentedFilename:@""];
         }
+        
+        if ([theWindow isVisible]) {
+            // don't animate the window if it's already on-screen
+            
+            // select the new view
+            [contentView selectFirstTabViewItem:nil];
+            // highlight around button isn't drawn unless the window is key, which happens randomly unless we force it here
+            [theWindow makeKeyAndOrderFront:nil];
+            [theWindow makeFirstResponder:fullScreenButton];
+            
+        } else {
+            
+            NSRect newWindowFrame = [self savedFrame];            
+            [theWindow setAlphaValue:0.0];
+            [theWindow makeKeyAndOrderFront:nil];
+            
+            // select the new view and set the window's frame in order to get the view's new frame
+            [contentView selectFirstTabViewItem:nil];
+            NSRect oldWindowFrame = [theWindow frame];
+            [theWindow setFrame:newWindowFrame display:YES];
+            
+            // cache the new view to an image
+            NSBitmapImageRep *imageRep = [newView bitmapImageRepForCachingDisplayInRect:[newView bounds]];
+            [newView cacheDisplayInRect:[newView bounds] toBitmapImageRep:imageRep];
+            [[self window] setFrame:oldWindowFrame display:NO];
+            NSImage *image = [[NSImage alloc] initWithSize:[imageRep size]];
+            [image addRepresentation:imageRep];
+            [animationView setImage:image];
+            [image release];
+            
+            [contentView selectLastTabViewItem:nil];
+            
+            // animate ~30 fps for 0.3 seconds
+            NSViewAnimation *animation = [[NSViewAnimation alloc] initWithDuration:0.3 animationCurve:NSAnimationEaseIn]; 
+            [animation setFrameRate:30.0];
+            [animation setAnimationBlockingMode:NSAnimationBlocking];
+            NSMutableDictionary *windowDict = [NSMutableDictionary dictionary];
+            [windowDict setObject:theWindow forKey:NSViewAnimationTargetKey];
+            [windowDict setObject:NSViewAnimationFadeInEffect forKey:NSViewAnimationEffectKey];
 
-        // don't reset the window frame if it's already on-screen
-        NSRect newWindowFrame = [theWindow isVisible] ? [theWindow frame] : [self savedFrame];            
-        [theWindow setAlphaValue:0.0];
-        [[self window] makeKeyAndOrderFront:nil];
-        
-        // select the new view and set the window's frame in order to get the view's new frame
-        [contentView selectFirstTabViewItem:nil];
-        NSRect oldWindowFrame = [[self window] frame];
-        [[self window] setFrame:newWindowFrame display:YES];
-        
-        // cache the new view to an image
-        NSBitmapImageRep *imageRep = [newView bitmapImageRepForCachingDisplayInRect:[newView bounds]];
-        [newView cacheDisplayInRect:[newView bounds] toBitmapImageRep:imageRep];
-        [[self window] setFrame:oldWindowFrame display:NO];
-        NSImage *image = [[NSImage alloc] initWithSize:[imageRep size]];
-        [image addRepresentation:imageRep];
-        [animationView setImage:image];
-        [image release];
-        
-        [contentView selectLastTabViewItem:nil];
-        
-        // animate ~30 fps for 0.3 seconds
-        NSViewAnimation *animation = [[NSViewAnimation alloc] initWithDuration:0.3 animationCurve:NSAnimationEaseIn]; 
-        [animation setFrameRate:30.0];
-        [animation setAnimationBlockingMode:NSAnimationBlocking];
-        NSMutableDictionary *windowDict = [NSMutableDictionary dictionary];
-        [windowDict setObject:theWindow forKey:NSViewAnimationTargetKey];
-        [windowDict setObject:NSViewAnimationFadeInEffect forKey:NSViewAnimationEffectKey];
-
-        // if we had a previously saved frame in the defaults database, set it as the target
-        if (NO == NSEqualRects(newWindowFrame, NSZeroRect)) {            
-            [windowDict setObject:[NSValue valueWithRect:[theWindow frame]] forKey:NSViewAnimationStartFrameKey];
-            [windowDict setObject:[NSValue valueWithRect:newWindowFrame] forKey:NSViewAnimationEndFrameKey]; 
+            // if we had a previously saved frame in the defaults database, set it as the target
+            if (NO == NSEqualRects(newWindowFrame, NSZeroRect)) {            
+                [windowDict setObject:[NSValue valueWithRect:[theWindow frame]] forKey:NSViewAnimationStartFrameKey];
+                [windowDict setObject:[NSValue valueWithRect:newWindowFrame] forKey:NSViewAnimationEndFrameKey]; 
+            }
+            
+            [animation setViewAnimations:[NSArray arrayWithObject:windowDict]];
+            [animation setDelegate:self];
+            closeAfterAnimation = NO;
+            [animation startAnimation];
+            [animation release];
+            
         }
-        
-        [animation setViewAnimations:[NSArray arrayWithObject:windowDict]];
-        [animation setDelegate:self];
-        closeAfterAnimation = NO;
-        [animation startAnimation];
-        [animation release];  
         
         [(_FVPreviewerWindow *)[self window] resetKeyStatus];
     }
