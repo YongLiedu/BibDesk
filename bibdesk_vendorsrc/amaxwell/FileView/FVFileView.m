@@ -3574,7 +3574,7 @@ static NSRect _rectWithCorners(const NSPoint aPoint, const NSPoint bPoint) {
 
 - (IBAction)previewAction:(id)sender;
 {
-    if ([[FVPreviewer sharedPreviewer] isPreviewing] || _fvFlags.controllingQLPreviewPanel) {
+    if (_fvFlags.controllingSharedPreviewer || _fvFlags.controllingQLPreviewPanel) {
         [self _stopPreviewing];
     }
     else if ([_selectionIndexes count] == 1) {
@@ -4032,6 +4032,9 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
     else
 #endif
     {
+        if ([[FVPreviewer sharedPreviewer] isPreviewing] && _fvFlags.controllingSharedPreviewer == NO) {
+            [[FVPreviewer sharedPreviewer] stopPreviewing];
+        }
         [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:nil];
         [[FVPreviewer sharedPreviewer] previewFileURLs:iconURLs];
         _fvFlags.controllingSharedPreviewer = YES;
@@ -4050,6 +4053,9 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
             [[QLPreviewPanelClass sharedPreviewPanel] performSelector:@selector(orderOut:) withObject:nil afterDelay:0.0];
         }
 #endif
+        if ([[FVPreviewer sharedPreviewer] isPreviewing] && _fvFlags.controllingSharedPreviewer == NO) {
+            [[FVPreviewer sharedPreviewer] stopPreviewing];
+        }
         [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:[self delegate]];
         [[FVPreviewer sharedPreviewer] previewURL:aURL forIconInRect:iconRect];    
         _fvFlags.controllingSharedPreviewer = YES;
