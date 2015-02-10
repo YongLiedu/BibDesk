@@ -607,23 +607,23 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
     FVAPIParameterAssert(nil != absoluteURL);
     [self setCurrentURL:absoluteURL];
 
-    // set up a rect in the middle of the main screen for a default value from which to animate
+    // don't animate the window size for zero icon rect
     if (NSEqualRects(screenRect, NSZeroRect)) {
         previousIconFrame = NSZeroRect;
-        screenRect.size = NSMakeSize(128, 128);
-        NSRect visibleFrame = [[NSScreen mainScreen] visibleFrame];
-        screenRect.origin = NSMakePoint(NSMidX(visibleFrame) - NSWidth(screenRect) / 2, NSMidY(visibleFrame) - NSHeight(screenRect) / 2);
+        screenRect = [self savedFrame];
     }
     // we have a valid rect, but enforce a minimum window size of 128 x 128
-    else if (NSHeight(screenRect) < 128 || NSWidth(screenRect) < 128) {
-        screenRect.size.height = 128;
-        screenRect.size.width = 128;
+    else {
+        if (NSHeight(screenRect) < 128)
+            screenRect.size.height = 128;
+        if (NSWidth(screenRect) < 128)
+            screenRect.size.width = 128;
+        // closing the window will animate back to this frame
+        previousIconFrame = screenRect;
     }
-    // closing the window will animate back to this frame
-    previousIconFrame = screenRect;
     
     // if currently on screen, this will screw up the saved frame
-    if ([[self window] isVisible] == NO)
+    if ([[self window] isVisible] == NO && NSIsEmptyRect(screenRect) == NO)
         [[self window] setFrame:screenRect display:NO];
     [self _previewURL:absoluteURL];
 }
