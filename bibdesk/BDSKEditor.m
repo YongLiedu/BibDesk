@@ -553,7 +553,10 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     if (editorFlags.controllingFVPreviewPanel || editorFlags.controllingQLPreviewPanel) {
         [self stopPreviewing];
     } else {
-        [self previewURLs:[publication valueForKeyPath:@"files.URL"]];
+        NSArray *theURLs = [publication valueForKeyPath:@"localFiles.URL"];
+        if ([theURLs count] == 0)
+            theURLs = [publication valueForKeyPath:@"remoteURLs.URL"];
+        [self previewURLs:theURLs];
     }
 }
 
@@ -2492,6 +2495,14 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     [[publication files] valueForKey:@"URL"];
 }
 
+- (void)handlePreviewerWillClose:(NSNotification *)aNote {
+    /*
+     Necessary to reset in case of the window close button, which doesn't go through
+     our action methods.
+     */
+    editorFlags.controllingFVPreviewPanel = NO;
+}
+
 #pragma mark document interaction
 	
 - (void)bibWillBeRemoved:(NSNotification *)notification{
@@ -3566,6 +3577,10 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
            selector:@selector(matrixFrameDidChange:)
                name:NSViewBoundsDidChangeNotification
              object:view];
+    [nc addObserver:self
+           selector:@selector(handlePreviewerWillClose:)
+               name:FVPreviewerWillCloseNotification
+             object:nil];
 }
 
 
