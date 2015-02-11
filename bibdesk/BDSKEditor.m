@@ -1865,11 +1865,14 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 }
 
 - (NSInteger)numberOfPreviewItemsInPreviewPanel:(QLPreviewPanel *)panel {
-    return [[publication valueForKeyPath:@"files.URL"] count];
+    return [[publication localFiles] count] ?: [[publication remoteURLs] count];
 }
 
 - (id <QLPreviewItem>)previewPanel:(QLPreviewPanel *)panel previewItemAtIndex:(NSInteger)idx {
-    return [[publication valueForKeyPath:@"files.URL"] objectAtIndex:idx];
+    NSArray *files = [publication localFiles];
+    if ([files count] == 0)
+        files = [publication remoteURLs];
+    return [[files objectAtIndex:idx] URL];
 }
 
 #pragma mark Key field
