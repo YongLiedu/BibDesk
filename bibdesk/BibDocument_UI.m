@@ -894,6 +894,13 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     [[QLPreviewPanel sharedPreviewPanel] setDataSource:self];
     [[QLPreviewPanel sharedPreviewPanel] setDelegate:self];
     [[QLPreviewPanel sharedPreviewPanel] reloadData];    
+    if ([previewURLs count] == 0) {
+        NSArray *theURLs = [self clickedOrSelectedFileURLs];
+        if ([theURLs count] == 0)
+            theURLs = [[self clickedOrSelectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
+        [previewURLs retain];
+        previewURLs = [theURLs retain];
+    }
 }
 
 - (void)endPreviewPanelControl:(QLPreviewPanel *)panel {
