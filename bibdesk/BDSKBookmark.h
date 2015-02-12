@@ -56,7 +56,7 @@ typedef NSInteger BDSKBookmarkType;
 - (id)initWithURL:(NSURL *)aURL name:(NSString *)aName;
 - (id)initFolderWithChildren:(NSArray *)aChildren name:(NSString *)aName;
 - (id)initFolderWithName:(NSString *)aName;
-- (id)initRootWithChildren:(NSArray *)aChildren;
+- (id)initRootWithChildrenDictionaries:(NSArray *)dictionaries;
 - (id)initSeparator;
 - (id)initWithDictionary:(NSDictionary *)dictionary;
 

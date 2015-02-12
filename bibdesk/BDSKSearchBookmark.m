@@ -109,7 +109,7 @@ static Class BDSKSearchBookmarkClass = Nil;
     return nil;
 }
 
-- (id)initRootWithChildren:(NSArray *)aChildren {
+- (id)initRootWithChildrenDictionaries:(NSArray *)dictionaries {
     BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
 }
@@ -195,8 +195,17 @@ static Class BDSKSearchBookmarkClass = Nil;
     return [self initFolderWithChildren:[NSArray array] label:aLabel];
 }
 
-- (id)initRootWithChildren:(NSArray *)aChildren {
-    return (id)[[BDSKRootSearchBookmark alloc] initFolderWithChildren:aChildren label:NSLocalizedString(@"Searches Menu", @"Menu item title")];
+- (id)initRootWithChildrenDictionaries:(NSArray *)dictionaries {
+    NSMutableArray *newChildren = [NSMutableArray array];
+    BDSKSearchBookmark *child;
+    for (NSDictionary *dict in dictionaries) {
+        if ((child = [[BDSKSearchBookmark alloc] initWithDictionary:dict])) {
+            [newChildren addObject:child];
+            [child release];
+        } else
+            NSLog(@"Failed to read child bookmark: %@", dict);
+    }
+    return (id)[[BDSKRootSearchBookmark alloc] initFolderWithChildren:newChildren label:NSLocalizedString(@"Searches Menu", @"Menu item title")];
 }
 
 - (id)initSeparator {

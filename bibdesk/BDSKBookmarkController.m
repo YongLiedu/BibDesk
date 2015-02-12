@@ -96,21 +96,10 @@ static id sharedBookmarkController = nil;
         if (self) {
             undoManager = nil;
             
-            NSMutableArray *bookmarks = [NSMutableArray array];
-            NSString *applicationSupportPath = [[NSFileManager defaultManager] applicationSupportDirectory]; 
-            NSString *bookmarksPath = [applicationSupportPath stringByAppendingPathComponent:@"Bookmarks.plist"];
-            if ([[NSFileManager defaultManager] fileExistsAtPath:bookmarksPath]) {
-                for (NSDictionary *dict in [NSArray arrayWithContentsOfFile:bookmarksPath]) {
-                    BDSKBookmark *bookmark = [[BDSKBookmark alloc] initWithDictionary:dict];
-                    if (bookmark) {
-                        [bookmarks addObject:bookmark];
-                        [bookmark release];
-                    } else
-                        NSLog(@"Failed to read bookmark: %@", dict);
-                }
-            }
+            NSString *bookmarksPath = [[[NSFileManager defaultManager] applicationSupportDirectory] stringByAppendingPathComponent:@"Bookmarks.plist"];
+            NSArray *bookmarksData = [NSArray arrayWithContentsOfFile:bookmarksPath];
             
-            bookmarkRoot = [[BDSKBookmark alloc] initRootWithChildren:bookmarks];
+            bookmarkRoot = [[BDSKBookmark alloc] initRootWithChildrenDictionaries:bookmarksData];
             [self startObservingBookmarks:[NSArray arrayWithObject:bookmarkRoot]];
             
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminateNotification:) name:NSApplicationWillTerminateNotification object:nil];

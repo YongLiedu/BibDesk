@@ -55,7 +55,7 @@ typedef NSInteger BDSKSearchBookmarkType;
 
 - (id)initFolderWithChildren:(NSArray *)aChildren label:(NSString *)aLabel;
 - (id)initFolderWithLabel:(NSString *)aLabel;
-- (id)initRootWithChildren:(NSArray *)aChildren;
+- (id)initRootWithChildrenDictionaries:(NSArray *)dictionaries;
 - (id)initSeparator;
 - (id)initWithInfo:(NSDictionary *)aDictionary label:(NSString *)aLabel;
 - (id)initWithDictionary:(NSDictionary *)dictionary;
