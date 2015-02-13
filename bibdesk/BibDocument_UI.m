@@ -918,6 +918,14 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     return [previewURLs objectAtIndex:idx];
 }
 
+- (BOOL)previewPanel:(QLPreviewPanel *)panel handleEvent:(NSEvent *)event {
+    if ([event type] == NSKeyDown && [[documentWindow firstResponder] respondsToSelector:@selector(keyDown:)]) {
+        [[documentWindow firstResponder] keyDown:event];
+        return YES;
+    }
+    return NO;
+}
+
 #pragma mark -
 #pragma mark Notification handlers
 

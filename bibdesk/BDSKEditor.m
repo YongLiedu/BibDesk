@@ -1875,6 +1875,14 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     return [[files objectAtIndex:idx] URL];
 }
 
+- (BOOL)previewPanel:(QLPreviewPanel *)panel handleEvent:(NSEvent *)event {
+    if ([event type] == NSKeyDown && [[[self window] firstResponder] respondsToSelector:@selector(keyDown:)]) {
+        [[[self window] firstResponder] keyDown:event];
+        return YES;
+    }
+    return NO;
+}
+
 #pragma mark Key field
 
 - (NSString *)keyField{
