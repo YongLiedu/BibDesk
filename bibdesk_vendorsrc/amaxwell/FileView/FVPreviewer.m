@@ -76,6 +76,10 @@ NSString * const FVPreviewerWillCloseNotification = @"FVPreviewerWillCloseNotifi
     
     // everything from here on safely assumes a file URL
     
+    // !!! Early return; 10.7 and later support text selection in QL preview via a hidden pref set in +[FileView initialize].
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6)
+        return YES;    
+    
     OSStatus err = noErr;
     
     FSRef fileRef;

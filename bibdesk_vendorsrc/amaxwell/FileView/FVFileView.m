@@ -225,8 +225,8 @@ typedef NSInteger NSScrollerStyle;
         QLPreviewPanelClass = NSClassFromString(@"QLPreviewPanel");
 #endif
     
-    // QTMovie raises if +initialize isn't sent on the AppKit thread
-    [QTMovie class];
+    // Hidden pref; 10.7 and later http://mjtsai.com/blog/2012/03/12/qlenabletextselection/
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"QLEnableTextSelection"];
 }
 
 + (NSColor *)defaultBackgroundColor
