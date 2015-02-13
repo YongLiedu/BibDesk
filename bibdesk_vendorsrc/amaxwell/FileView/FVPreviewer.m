@@ -69,16 +69,16 @@ NSString * const FVPreviewerWillCloseNotification = @"FVPreviewerWillCloseNotifi
      or else we'll end up using qlmanage unintentionally.
      */
     
+    // !!! Early return; 10.7 and later support text selection in QL preview via a hidden pref set in +[FileView initialize].
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6)
+        return YES;    
+    
     // early return
     NSSet *webviewSchemes = [NSSet setWithObjects:@"http", @"https", @"ftp", nil];
     if ([aURL scheme] && [webviewSchemes containsObject:[aURL scheme]])
         return NO;
     
     // everything from here on safely assumes a file URL
-    
-    // !!! Early return; 10.7 and later support text selection in QL preview via a hidden pref set in +[FileView initialize].
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6)
-        return YES;    
     
     OSStatus err = noErr;
     
