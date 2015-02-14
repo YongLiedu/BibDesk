@@ -516,7 +516,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         NSString *title = [url isFileURL] ? [[NSFileManager defaultManager] displayNameAtPath:[url path]] : [url absoluteString];
         NSMenuItem *item = [submenu addItemWithTitle:title action:[anItem action] keyEquivalent:@""];
         [item setTarget:[anItem target]];
-        [item setRepresentedObject:url];
+        [item setRepresentedObject:[anItem representedObject] ? [NSArray arrayWithObject:url] : url];
     }
     [anItem setSubmenu:submenu];
 }
@@ -595,6 +595,8 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                     item = [menu addItemWithTitle:NSLocalizedString(@"Quick Look", @"Menu item title") action:@selector(previewAction:) keyEquivalent:@""];
                     [item setTarget:self];
                     [item setRepresentedObject:linkedURLs];
+                    if (isSingle == NO)
+                        addSubmenuForURLsToItem(linkedURLs, item);
                     item = [menu addItemWithTitle:isSingle ? NSLocalizedString(@"Open Linked File", @"Menu item title") : NSLocalizedString(@"Open Linked Files", @"Menu item title") action:@selector(openLinkedFile:) keyEquivalent:@""];
                     [item setTarget:self];
                     if (isSingle == NO)
@@ -624,6 +626,8 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
                     item = [menu addItemWithTitle:NSLocalizedString(@"Quick Look", @"Menu item title") action:@selector(previewAction:) keyEquivalent:@""];
                     [item setTarget:self];
                     [item setRepresentedObject:linkedURLs];
+                    if (isSingle == NO)
+                        addSubmenuForURLsToItem(linkedURLs, item);
                     item = [menu addItemWithTitle:isSingle ? NSLocalizedString(@"Open URL in Browser", @"Menu item title") : NSLocalizedString(@"Open URLs in Browser", @"Menu item title") action:@selector(openLinkedURL:) keyEquivalent:@""];
                     [item setTarget:self];
                     if (isSingle == NO)
