@@ -889,6 +889,17 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     }
 }
 
+- (void)updatePreviewing {
+    BDSKDESTROY(previewURLs);
+    NSArray *theURLs = [self clickedOrSelectedFileURLs];
+    if ([theURLs count] == 0)
+        theURLs = [[self clickedOrSelectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
+    if ([theURLs count] == 0)
+        [self stopPreviewing];
+    else
+        [self previewURLs:theURLs];
+}
+
 - (BOOL)acceptsPreviewPanelControl:(QLPreviewPanel *)panel {
     return YES;
 }
@@ -994,9 +1005,12 @@ static BOOL searchKeyDependsOnKey(NSString *searchKey, NSString *key) {
     
     BOOL displayingLocal = (NO == [self hasGroupTypeSelected:BDSKExternalGroupType]);
     
-    if (displayingLocal && (docFlags.itemChangeMask & BDSKItemChangedFilesMask) != 0)
+    if (displayingLocal && (docFlags.itemChangeMask & BDSKItemChangedFilesMask) != 0) {
         [self updateFileViews];
-
+        if (docFlags.controllingFVPreviewPanel || docFlags.controllingQLPreviewPanel)
+            [self updatePreviewing];
+    }
+    
     BOOL shouldUpdateGroups = [[self currentGroupFields] count] > 0 && (docFlags.itemChangeMask & BDSKItemChangedGroupFieldMask) != 0;
     
     // allow updating a smart group if it's selected
@@ -1146,6 +1160,8 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     BOOL fileViewEditable = [self isDisplayingFileContentSearch] == NO && [self hasGroupTypeSelected:BDSKExternalGroupType] == NO && [[self selectedPublications] count] == 1;
     [sideFileView setEditable:fileViewEditable];
     [bottomFileView setEditable:fileViewEditable]; 
+    if (docFlags.controllingFVPreviewPanel || docFlags.controllingQLPreviewPanel)
+        [self updatePreviewing];
 }
 
 - (void)handleFlagsChangedNotification:(NSNotification *)notification{
