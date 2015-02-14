@@ -891,9 +891,9 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 
 - (void)updatePreviewing {
     BDSKDESTROY(previewURLs);
-    NSArray *theURLs = [self clickedOrSelectedFileURLs];
+    NSArray *theURLs = [self selectedFileURLs];
     if ([theURLs count] == 0)
-        theURLs = [[self clickedOrSelectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
+        theURLs = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
     if ([theURLs count] == 0)
         [self stopPreviewing];
     else
@@ -910,9 +910,9 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     [[QLPreviewPanel sharedPreviewPanel] setDelegate:self];
     [[QLPreviewPanel sharedPreviewPanel] reloadData];    
     if ([previewURLs count] == 0) {
-        NSArray *theURLs = [self clickedOrSelectedFileURLs];
+        NSArray *theURLs = [self selectedFileURLs];
         if ([theURLs count] == 0)
-            theURLs = [[self clickedOrSelectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
+            theURLs = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
         [previewURLs retain];
         previewURLs = [theURLs retain];
     }
