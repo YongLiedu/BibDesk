@@ -1847,6 +1847,13 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     }
 }
 
+- (void)updatePreviewing {
+    NSArray *theURLs = [publication valueForKeyPath:@"localFiles.URL"];
+    if ([theURLs count] == 0)
+        theURLs = [publication valueForKeyPath:@"remoteURLs.URL"];
+    [self previewURLs:theURLs];
+}
+
 - (BOOL)acceptsPreviewPanelControl:(QLPreviewPanel *)panel {
     return YES;
 }
@@ -2333,9 +2340,11 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 	if([changeKey isEqualToString:BDSKLocalFileString]){
         [fileView reloadIcons];
         [self synchronizeWindowTitleWithDocumentName];
+        [self updatePreviewing];
     }
 	else if([changeKey isEqualToString:BDSKRemoteURLString]){
         [fileView reloadIcons];
+        [self updatePreviewing];
     }
 	else if([changeKey isEqualToString:BDSKPubTypeString]){
 		[self resetFieldsIfNeeded];
