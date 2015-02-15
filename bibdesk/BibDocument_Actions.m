@@ -1040,17 +1040,10 @@ static BOOL changingColors = NO;
 }
 
 - (IBAction)previewAction:(id)sender {
-    NSArray *theURLs = [sender representedObject];
-    if ((docFlags.controllingFVPreviewPanel || docFlags.controllingQLPreviewPanel) && theURLs == nil) {
+    if ((docFlags.controllingFVPreviewPanel || docFlags.controllingQLPreviewPanel) && [sender representedObject] == nil)
         [self stopPreviewing];
-    } else {
-        if (theURLs == nil) {
-            theURLs = [self clickedOrSelectedFileURLs];
-            if ([theURLs count] == 0)
-                theURLs = [[self clickedOrSelectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
-        }
-        [self previewURLs:theURLs];
-    }
+    else
+        [self previewURLs:[sender representedObject]];
 }
 
 - (IBAction)chooseLinkedFile:(id)sender {

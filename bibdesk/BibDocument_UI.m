@@ -842,7 +842,20 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 
 #pragma mark Quick Look support
 
+- (NSArray *)previewURLs {
+    if (previewURLs)
+        return previewURLs;
+    NSArray *theURLs = [self selectedFileURLs];
+    if ([theURLs count] == 0)
+        theURLs = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
+    return theURLs;
+}
+
 - (void)previewURLs:(NSArray *)theURLs {
+    BDSKDESTROY(previewURLs);
+    BOOL useSelected = (theURLs == nil);
+    if (useSelected)
+        theURLs = [self previewURLs];
     if ([theURLs count] == 1 && [FVPreviewer useQuickLookForURL:[theURLs lastObject]] == NO) {
         NSRect iconRect = NSZeroRect;
         if (docFlags.controllingQLPreviewPanel) {
@@ -858,8 +871,8 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     } else if ([theURLs count] == 0) {
         [self stopPreviewing];
     } else {
-        [previewURLs release];
-        previewURLs = [theURLs copy];
+        if (useSelected == NO)
+            previewURLs = [theURLs copy];
         if (docFlags.controllingQLPreviewPanel) {
             if ([[FVPreviewer sharedPreviewer] isPreviewing]) {
                 [[FVPreviewer sharedPreviewer] stopPreviewing];
@@ -889,17 +902,6 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     }
 }
 
-- (void)updatePreviewing {
-    BDSKDESTROY(previewURLs);
-    NSArray *theURLs = [self selectedFileURLs];
-    if ([theURLs count] == 0)
-        theURLs = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
-    if ([theURLs count] == 0)
-        [self stopPreviewing];
-    else
-        [self previewURLs:theURLs];
-}
-
 - (BOOL)acceptsPreviewPanelControl:(QLPreviewPanel *)panel {
     return YES;
 }
@@ -909,13 +911,6 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     [[QLPreviewPanel sharedPreviewPanel] setDataSource:self];
     [[QLPreviewPanel sharedPreviewPanel] setDelegate:self];
     [[QLPreviewPanel sharedPreviewPanel] reloadData];    
-    if ([previewURLs count] == 0) {
-        NSArray *theURLs = [self selectedFileURLs];
-        if ([theURLs count] == 0)
-            theURLs = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
-        [previewURLs retain];
-        previewURLs = [theURLs retain];
-    }
 }
 
 - (void)endPreviewPanelControl:(QLPreviewPanel *)panel {
@@ -926,11 +921,11 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 }
 
 - (NSInteger)numberOfPreviewItemsInPreviewPanel:(QLPreviewPanel *)panel {
-    return [previewURLs count];
+    return [[self previewURLs] count];
 }
 
 - (id <QLPreviewItem>)previewPanel:(QLPreviewPanel *)panel previewItemAtIndex:(NSInteger)idx {
-    return [previewURLs objectAtIndex:idx];
+    return [[self previewURLs] objectAtIndex:idx];
 }
 
 - (BOOL)previewPanel:(QLPreviewPanel *)panel handleEvent:(NSEvent *)event {
@@ -1008,7 +1003,7 @@ static BOOL searchKeyDependsOnKey(NSString *searchKey, NSString *key) {
     if (displayingLocal && (docFlags.itemChangeMask & BDSKItemChangedFilesMask) != 0) {
         [self updateFileViews];
         if (docFlags.controllingFVPreviewPanel || docFlags.controllingQLPreviewPanel)
-            [self updatePreviewing];
+            [self previewURLs:nil];
     }
     
     BOOL shouldUpdateGroups = [[self currentGroupFields] count] > 0 && (docFlags.itemChangeMask & BDSKItemChangedGroupFieldMask) != 0;
@@ -1161,7 +1156,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [sideFileView setEditable:fileViewEditable];
     [bottomFileView setEditable:fileViewEditable]; 
     if (docFlags.controllingFVPreviewPanel || docFlags.controllingQLPreviewPanel)
-        [self updatePreviewing];
+        [self previewURLs:nil];
 }
 
 - (void)handleFlagsChangedNotification:(NSNotification *)notification{
