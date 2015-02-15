@@ -213,8 +213,8 @@
 
 - (BOOL) validatePreviewActionMenuItem:(NSMenuItem*) menuItem {
     return ([[menuItem representedObject] count] ||
-            [[self clickedOrSelectedFileURLs] count] ||
-            [[[self clickedOrSelectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs"] count]);
+            [[self selectedFileURLs] count] ||
+            [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs"] count]);
 }	
 
 - (BOOL) validateDuplicateTitleToBooktitleMenuItem:(NSMenuItem*) menuItem {
