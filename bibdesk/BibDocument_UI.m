@@ -848,7 +848,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
     NSArray *theURLs = [self selectedFileURLs];
     if ([theURLs count] == 0)
         theURLs = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
-    return theURLs;
+    return [theURLs count] == 0 ? nil : theURLs;
 }
 
 - (void)previewURLs:(NSArray *)theURLs {
@@ -868,8 +868,6 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
         [[FVPreviewer sharedPreviewer] setWebViewContextMenuDelegate:self];
         [[FVPreviewer sharedPreviewer] previewURL:[theURLs lastObject] forIconInRect:iconRect];    
         docFlags.controllingFVPreviewPanel = YES;
-    } else if ([theURLs count] == 0) {
-        [self stopPreviewing];
     } else {
         if (useSelected == NO)
             previewURLs = [theURLs copy];
