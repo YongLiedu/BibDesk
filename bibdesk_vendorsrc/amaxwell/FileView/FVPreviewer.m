@@ -661,10 +661,10 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
     [[NSWorkspace sharedWorkspace] openURL:currentURL];
 }
 
-// esc is typically bound to complete: instead of cancel: in a textview
+// esc is typically bound to complete: instead of cancelOperation: in a textview
 - (BOOL)textView:(NSTextView *)aTextView doCommandBySelector:(SEL)aSelector
 {
-    if (@selector(cancel:) == aSelector || @selector(complete:) == aSelector) {
+    if (@selector(cancelOperation:) == aSelector || @selector(cancel:) == aSelector || @selector(complete:) == aSelector) {
         [self stopPreviewing];
         return YES;
     }
@@ -672,7 +672,7 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
 }
 
 // end up getting this via the responder chain for most views
-- (void)cancel:(id)sender
+- (void)cancelOperation:(id)sender
 {
     // !!! since this is now part of the API, make sure it's save to call
     if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)

@@ -126,6 +126,6 @@ extern NSString * const FVPreviewerWillCloseNotification;
 /** Cancel preview or fullscreen.
  
  If full screen window is displayed, will transition to normal window.  If normal window is displayed, will close previewer. */
-- (void)cancel:(id)sender;
+- (void)cancelOperation:(id)sender;
 
 @end

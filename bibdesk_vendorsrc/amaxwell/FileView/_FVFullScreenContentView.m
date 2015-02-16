@@ -70,9 +70,9 @@
         
         if (ch == 0x001b || ch == 0x0020) {
             if ([[self window] delegate]) 
-                [(FVPreviewer *)[[self window] delegate] cancel:self];
+                [(FVPreviewer *)[[self window] delegate] cancelOperation:self];
             else
-                [_windowDelegate cancel:self];
+                [_windowDelegate cancelOperation:self];
         }
         
     }
