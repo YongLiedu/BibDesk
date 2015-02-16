@@ -3408,11 +3408,12 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     NSInteger numEntries = [[typeMan booleanFieldsSet] count] + [[typeMan triStateFieldsSet] count] + [[typeMan ratingFieldsSet] count];
     NSSize size = [[matrix enclosingScrollView] frame].size;
     NSSize spacing = [matrix intercellSpacing];
-    NSInteger numRows, numCols = MIN(floor((size.width + spacing.width) / (cellSize.width + spacing.width)), numEntries);
+    CGFloat colWidth = fmax(cellSize.width + spacing.width, 1.0);
+    NSInteger numRows, numCols = MIN(floor((size.width + spacing.width) / colWidth), numEntries);
     numCols = MAX(numCols, 1);
     numRows = ceil(numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
     if (numRows * (cellSize.height + spacing.height) > 190.0 + spacing.height) {
-        numCols = MIN(floor((size.width - [NSScroller scrollerWidth] + spacing.width) / (cellSize.width + spacing.width)), numEntries);
+        numCols = MIN(floor((size.width - [NSScroller scrollerWidth] + spacing.width) / colWidth), numEntries);
         numRows = ceil(numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
     }
     if (columns)
