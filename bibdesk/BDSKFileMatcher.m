@@ -437,6 +437,10 @@ static id sharedInstance = nil;
     return iconRect;
 }
 
+- (NSImage *)previewPanel:(QLPreviewPanel *)panel transitionImageForPreviewItem:(id <QLPreviewItem>)item contentRect:(NSRect *)contentRect {
+    return [(id)item valueForKey:BDSKTextWithIconImageKey];
+}
+
 - (BOOL)previewPanel:(QLPreviewPanel *)panel handleEvent:(NSEvent *)event {
     if ([event type] == NSKeyDown) {
         [outlineView keyDown:event];
