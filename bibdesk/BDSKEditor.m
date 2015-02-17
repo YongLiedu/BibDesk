@@ -3411,10 +3411,10 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     CGFloat colWidth = fmax(cellSize.width + spacing.width, 1.0);
     NSInteger numRows, numCols = MIN(floor((size.width + spacing.width) / colWidth), numEntries);
     numCols = MAX(numCols, 1);
-    numRows = ceil(numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
+    numRows = (numEntries + numCols - 1) / numCols;
     if (numRows * (cellSize.height + spacing.height) > 190.0 + spacing.height) {
         numCols = MIN(floor((size.width - [NSScroller scrollerWidth] + spacing.width) / colWidth), numEntries);
-        numRows = ceil(numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
+        numRows = (numEntries + numCols - 1) / numCols;
     }
     if (columns)
         *columns = numCols;
