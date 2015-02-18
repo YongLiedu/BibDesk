@@ -4217,6 +4217,19 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
     return iconRect;
 }
 
+- (NSImage *)previewPanel:(QLPreviewPanel *)panel transitionImageForPreviewItem:(id <QLPreviewItem>)item contentRect:(NSRect *)contentRect {
+    NSImage *image = nil;
+    NSUInteger i = [_orderedURLs indexOfObject:item];
+    if (i != NSNotFound) {
+        NSRect iconRect = {NSZeroPoint, _iconSize};
+        image = [[[NSImage alloc] initWithSize:iconRect.size] autorelease];
+        [image lockFocus];
+        [[self iconAtIndex:i] drawInRect:iconRect ofContext:[[NSGraphicsContext currentContext] graphicsPort]];
+        [image unlockFocus];
+    }
+    return image;
+}
+
 #endif
 
 #pragma mark Accessibility
