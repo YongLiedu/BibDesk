@@ -4207,9 +4207,9 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
 
 - (NSRect)previewPanel:(QLPreviewPanel *)panel sourceFrameOnScreenForPreviewItem:(id <QLPreviewItem>)item;
 {
-    NSUInteger r, c;
     NSRect iconRect = NSZeroRect;
-    if ([self numberOfPreviewItemsInPreviewPanel:panel] == 1 && [self _getGridRow:&r column:&c ofIndex:[_selectionIndexes lastIndex]]) {
+    NSUInteger r, c, i = [_orderedURLs indexOfObject:item];
+    if (i != NSNotFound && [self _getGridRow:&r column:&c ofIndex:i]) {
         iconRect = [self _rectOfIconInRow:r column:c];
         iconRect = [self convertRect:iconRect toView:nil];
         iconRect.origin = [[self window] convertBaseToScreen:iconRect.origin];
