@@ -4221,7 +4221,7 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
     NSImage *image = nil;
     NSUInteger i = [_orderedURLs indexOfObject:item];
     if (i != NSNotFound) {
-        NSRect iconRect = {NSZeroPoint, _iconSize};
+        NSRect iconRect = NSMakeRect(0.0, 0.0, ceil(_iconSize.width), ceil(_iconSize.height));
         image = [[[NSImage alloc] initWithSize:iconRect.size] autorelease];
         [image lockFocus];
         [[self iconAtIndex:i] drawInRect:iconRect ofContext:[[NSGraphicsContext currentContext] graphicsPort]];
