@@ -290,7 +290,6 @@
 		CED65AC00906BE1F003EED90 /* BibPref_ScriptHooks.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65ABE0906BE1F003EED90 /* BibPref_ScriptHooks.m */; };
 		CED65DC90907A2FD003EED90 /* BDSKParseFormatCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65DC70907A2FD003EED90 /* BDSKParseFormatCommand.m */; };
 		CED65DCD0907A338003EED90 /* BDSKScriptHook+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65DCB0907A338003EED90 /* BDSKScriptHook+Scripting.m */; };
-		CED76E2D1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CED76E2B1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.h */; };
 		CED76E2E1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CED76E2C1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.m */; };
 		CEDAA3D61A6AAF4D0006878D /* Scroller_Background_Yosemite.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEDAA3D51A6AAF4D0006878D /* Scroller_Background_Yosemite.tiff */; };
 		CEDBDE4C0F4C863500190AF5 /* BDSKPreferenceRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = CEDBDE4A0F4C863500190AF5 /* BDSKPreferenceRecord.m */; };
@@ -2882,7 +2881,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				CED76E2D1A17CCC000D1ACA4 /* NSAnimationContext_BDSKExtensions.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
