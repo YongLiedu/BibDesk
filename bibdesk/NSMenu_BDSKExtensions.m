@@ -367,8 +367,10 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
     if (NSEqualSizes(srcSize, dstSize)) {
         [self setImage:image];
     } else {
-        NSImage *newImage = [image copy];
-        [image setSize:dstSize];
+        NSImage *newImage = [[NSImage alloc] initWithSize:dstSize];
+        [newImage lockFocus];
+        [image drawInRect:NSMakeRect(0.0, 0.0, lineHeight, lineHeight) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+        [newImage unlockFocus];
         [self setImage:newImage];
         [newImage release];
     }
