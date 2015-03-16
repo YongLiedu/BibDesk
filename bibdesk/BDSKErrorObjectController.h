@@ -38,7 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BibDocument, BibItem, BDSKErrorObject, BDSKErrorManager, BDSKErrorEditor, BDSKFilteringArrayController, BDSKTableView;
+@class BibDocument, BibItem, BDSKErrorObject, BDSKErrorManager, BDSKErrorEditor, BDSKTableView;
 
 @interface BDSKErrorObjectController : NSWindowController <NSTableViewDelegate, NSTableViewDataSource> {
     NSMutableArray *errors;
@@ -47,9 +47,12 @@
     
     NSUInteger lastIndex;
     
+    BDSKErrorManager *filterManager;
+    BOOL hideWarnings;
+    
     // error-handling stuff:
     IBOutlet BDSKTableView *errorTableView;
-    IBOutlet BDSKFilteringArrayController *errorsController;
+    IBOutlet NSArrayController *errorsController;
     BOOL handledNonIgnorableError;
 }
 
@@ -68,6 +71,11 @@
 - (void)removeObjectFromManagersAtIndex:(NSUInteger)theIndex;
 - (void)addManager:(BDSKErrorManager *)manager;
 - (void)removeManager:(BDSKErrorManager *)manager;
+
+- (BDSKErrorManager *)filterManager;
+- (void)setFilterManager:(BDSKErrorManager *)manager;
+- (BOOL)hideWarnings;
+- (void)setHideWarnings:(BOOL)flag;
 
 // called from the tableView doubleclick
 - (void)showEditorForErrorObject:(BDSKErrorObject *)errObj;
@@ -90,19 +98,5 @@
 - (void)endObservingErrorsForDocument:(BibDocument *)document pasteDragData:(NSData *)data;
 
 - (void)reportError:(BDSKErrorObject *)error;
-
-@end
-
-#pragma mark -
-
-@interface BDSKFilteringArrayController : NSArrayController {
-    BDSKErrorManager *filterManager;
-    BOOL hideWarnings;
-}
-
-- (BDSKErrorManager *)filterManager;
-- (void)setFilterManager:(BDSKErrorManager *)manager;
-- (BOOL)hideWarnings;
-- (void)setHideWarnings:(BOOL)flag;
 
 @end

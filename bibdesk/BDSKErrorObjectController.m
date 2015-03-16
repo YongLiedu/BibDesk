@@ -82,12 +82,12 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     BDSKPRECONDITION(sharedErrorObjectController == nil);
     self = [super initWithWindowNibName:@"BDSKErrorPanel"];
     if (self) {
-        errors = [[NSMutableArray alloc] initWithCapacity:10];
-        managers = [[NSMutableArray alloc] initWithCapacity:4];
+        errors = [[NSMutableArray alloc] init];
+        managers = [[NSMutableArray alloc] initWithObjects:[BDSKErrorManager allItemsErrorManager], nil];
         lastIndex = 0;
         handledNonIgnorableError = NO;
-        
-        [managers addObject:[BDSKErrorManager allItemsErrorManager]];
+        filterManager = [[BDSKErrorManager allItemsErrorManager] retain];
+        hideWarnings = NO;
         
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleRemoveDocumentNotification:)
@@ -118,9 +118,25 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     
     [errorTableView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:YES];
     [errorTableView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:NO];
-    
-    [errorsController setFilterManager:[BDSKErrorManager allItemsErrorManager]];
-    [errorsController setHideWarnings:NO];
+}
+
+- (void)updateFilter {
+    NSPredicate *predicate = nil;
+    NSPredicate *warningsPredicate = nil;
+    NSPredicate *managerPredicate = nil;
+    if (hideWarnings)
+        warningsPredicate = [NSPredicate predicateWithFormat:@"isIgnorableWarning == FALSE"];
+    if (filterManager && filterManager != [BDSKErrorManager allItemsErrorManager])
+        managerPredicate = [[NSPredicate predicateWithFormat:@"editor.manager == $filterManager"] predicateWithSubstitutionVariables:[NSDictionary dictionaryWithObject:filterManager forKey:@"filterManager"]];
+    if (warningsPredicate) {
+        if (managerPredicate)
+            predicate = [NSCompoundPredicate andPredicateWithSubpredicates:[NSArray arrayWithObjects:warningsPredicate, managerPredicate, nil]];
+        else
+            predicate = warningsPredicate;
+    } else {
+        predicate = managerPredicate;
+    }
+    [errorsController setFilterPredicate:predicate];
 }
 
 #pragma mark Accessors
@@ -175,10 +191,35 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 - (void)removeManager:(BDSKErrorManager *)manager{
-    if ([errorsController filterManager] == manager)
-        [errorsController setFilterManager:[BDSKErrorManager allItemsErrorManager]];
+    if ([self filterManager] == manager)
+        [self setFilterManager:[BDSKErrorManager allItemsErrorManager]];
     [manager setErrorController:nil];
     [self removeObjectFromManagersAtIndex:[managers indexOfObject:manager]];
+}
+
+#pragma mark | filters
+
+- (BDSKErrorManager *)filterManager {
+    return filterManager;
+}
+
+- (void)setFilterManager:(BDSKErrorManager *)manager {
+    if (filterManager != manager) {
+        [filterManager release];
+        filterManager = [manager retain];
+		[self updateFilter];
+    }
+}
+
+- (BOOL)hideWarnings {
+    return hideWarnings;
+}
+
+- (void)setHideWarnings:(BOOL)flag {
+    if(hideWarnings != flag) {
+        hideWarnings = flag;
+		[self updateFilter];
+    }
 }
 
 #pragma mark Getting editors
@@ -447,59 +488,6 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     [pboard clearContents];
     [pboard writeObjects:[NSArray arrayWithObjects:s, nil]];
     return YES;
-}
-
-@end
-
-#pragma mark -
-#pragma mark Array controller for error objects
-
-@implementation BDSKFilteringArrayController
-
-- (NSArray *)arrangeObjects:(NSArray *)objects {
-    BDSKErrorManager *manager = filterManager == [BDSKErrorManager allItemsErrorManager] ? nil : filterManager;
-    if(hideWarnings || manager){
-        NSMutableArray *matchedObjects = [NSMutableArray arrayWithCapacity:[objects count]];
-        
-        for (id item in objects) {
-            if(manager && manager != [[item editor] manager])
-                continue;
-            if(hideWarnings && [item isIgnorableWarning])
-                continue;
-            [matchedObjects addObject:item];
-        }
-        
-        objects = matchedObjects;
-    }
-    return [super arrangeObjects:objects];
-}
-
-- (void)dealloc {
-    [self setFilterManager: nil];    
-    [super dealloc];
-}
-
-- (BDSKErrorManager *)filterManager {
-	return filterManager;
-}
-
-- (void)setFilterManager:(BDSKErrorManager *)manager {
-    if (filterManager != manager) {
-        [filterManager release];
-        filterManager = [manager retain];
-		[self rearrangeObjects];
-    }
-}
-
-- (BOOL)hideWarnings {
-    return hideWarnings;
-}
-
-- (void)setHideWarnings:(BOOL)flag {
-    if(hideWarnings != flag) {
-        hideWarnings = flag;
-		[self rearrangeObjects];
-    }
 }
 
 @end
