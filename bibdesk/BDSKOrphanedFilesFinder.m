@@ -583,24 +583,14 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 @implementation BDSKOrphanedFilesArrayController
 
-- (void)updateTemplateMenu
-{
-    NSMenu *menu = [[[searchField cell] searchMenuTemplate] copyWithZone:[NSMenu menuZone]];
-    [[menu itemAtIndex:0] setState:(showsMatches ? NSOnState : NSOffState)];
-    [[menu itemAtIndex:1] setState:(showsMatches ? NSOffState : NSOnState)];
-    [[searchField cell] setSearchMenuTemplate:menu];
-    [menu release];
-}
-
 - (void)awakeFromNib
 {
     showsMatches = YES;
-    [self updateTemplateMenu];   
 }
 
 - (void)dealloc
 {
-    [self setSearchString:nil];
+    BDSKDESTROY(searchString);
     [super dealloc];
 }
 
@@ -615,14 +605,12 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 - (IBAction)showMatches:(id)sender;
 {
     showsMatches = YES;
-    [self updateTemplateMenu];
     [self rearrangeObjects];
 }
 
 - (IBAction)hideMatches:(id)sender;
 {
     showsMatches = NO;
-    [self updateTemplateMenu];
     [self rearrangeObjects];
 }
 
@@ -641,6 +629,19 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     }
     
     return [super arrangeObjects:array];
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
+    if ([menuItem action] == @selector(hideMatches:)) {
+        [menuItem setState:showsMatches? NSOffState : NSOnState];
+        return YES;
+    } else if ([menuItem action] == @selector(showMatches:)) {
+        [menuItem setState:showsMatches? NSOnState : NSOffState];
+        return YES;
+    } else if ([[BDSKOrphanedFilesArrayController superclass] instancesRespondToSelector:@selector(validateMenuItem:)]) {
+        return [super validateMenuItem:menuItem];
+    }
+    return YES;
 }
 
 @end
