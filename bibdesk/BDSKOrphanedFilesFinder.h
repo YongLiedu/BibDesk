@@ -40,17 +40,19 @@
 #import <Quartz/Quartz.h>
 #import "BDSKTableView.h"
 
-@class BDSKTableView, BDSKOrphanedFilesArrayController;
+@class BDSKTableView;
 
 @interface BDSKOrphanedFilesFinder : NSWindowController <NSTableViewDelegate, NSTableViewDataSource, QLPreviewPanelDataSource, QLPreviewPanelDelegate> {
     IBOutlet BDSKTableView *tableView;
     IBOutlet NSButton *refreshButton;
-    IBOutlet BDSKOrphanedFilesArrayController *arrayController;
+    IBOutlet NSArrayController *arrayController;
     IBOutlet NSProgressIndicator *progressIndicator;
     IBOutlet NSTextField *statusField;
     IBOutlet NSMenu *contextMenu;
     IBOutlet NSButton *matchButton;
     NSMutableArray *orphanedFiles;
+    NSString *searchString;
+    BOOL showsMatches;
     BOOL wasLaunched;
     NSArray *draggedFiles;
     NSMutableArray *foundFiles;
@@ -71,6 +73,7 @@
 - (IBAction)showFile:(id)sender;
 - (IBAction)moveToTrash:(id)sender;
 - (IBAction)search:(id)sender;
+- (IBAction)showMatches:(id)sender;
 
 - (NSArray *)orphanedFiles;
 - (NSUInteger)countOfOrphanedFiles;
@@ -78,21 +81,9 @@
 - (void)insertObject:(id)obj inOrphanedFilesAtIndex:(NSUInteger)theIndex;
 - (void)removeObjectFromOrphanedFilesAtIndex:(NSUInteger)theIndex;
 
-- (BOOL)wasLaunched;
-
-@end
-
-@interface BDSKOrphanedFilesArrayController : NSArrayController
-{
-    NSString *searchString;
-    BOOL showsMatches;
-    IBOutlet NSSearchField *searchField;
-    NSString *statusMessage;
-}
-
-- (void)setSearchString:(NSString *)aString;
 - (NSString *)searchString;
-- (IBAction)showMatches:(id)sender;
-- (IBAction)hideMatches:(id)sender;
+- (void)setSearchString:(NSString *)newSearchString;
+
+- (BOOL)wasLaunched;
 
 @end

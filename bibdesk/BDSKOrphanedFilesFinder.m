@@ -91,6 +91,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
         orphanedFiles = [[NSMutableArray alloc] init];
         wasLaunched = NO;
         foundFiles = [[NSMutableArray alloc] initWithCapacity:32];
+        showsMatches = YES;
         keepEnumerating = 0;
         allFilesEnumerated = 0;
     }
@@ -177,6 +178,20 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     return knownFiles;
 }
 
+- (void)updateFilter {
+    NSPredicate *predicate = nil;
+    if ([NSString isEmptyString:searchString] == NO) {
+        if (showsMatches)
+            predicate = [NSPredicate predicateWithFormat:@"path CONTAINS[CD] %@", searchString];
+        else
+            predicate = [NSPredicate predicateWithFormat:@"NOT ( path CONTAINS[CD] %@ )", searchString];
+    }
+    [arrayController setFilterPredicate:predicate];
+    NSUInteger count = [[arrayController arrangedObjects] count];
+    NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%ld orphaned file found", @"Status message"), (long)count] : [NSString stringWithFormat:NSLocalizedString(@"%ld orphaned files found", @"Status message"), (long)count];
+    [statusField setStringValue:message];
+}
+
 - (IBAction)refreshOrphanedFiles:(id)sender{
     
     NSString *papersFolderPath = [[self baseURL] path];
@@ -202,12 +217,15 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 - (IBAction)search:(id)sender{
-    [arrayController setSearchString:[sender stringValue]];
-    [arrayController rearrangeObjects];
-    NSUInteger count = [[arrayController arrangedObjects] count];
-    NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%ld orphaned file found", @"Status message"), (long)count] : [NSString stringWithFormat:NSLocalizedString(@"%ld orphaned files found", @"Status message"), (long)count];
-    [statusField setStringValue:message];
+    [self setSearchString:[sender stringValue]];
+    [self updateFilter];
 }    
+
+- (IBAction)showMatches:(id)sender;
+{
+    showsMatches = [sender tag];
+    [self updateFilter];
+}
 
 - (IBAction)previewAction:(id)sender
 {
@@ -220,6 +238,9 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
     if ([menuItem action] == @selector(previewAction:)) {
         return [[tableView selectedRowIndexes] count] > 0;
+    } else if ([menuItem action] == @selector(showMatches:)) {
+        [menuItem setState:showsMatches == [menuItem tag] ? NSOnState : NSOffState];
+        return YES;
     }
     return YES;
 }
@@ -244,6 +265,16 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (void)removeObjectFromOrphanedFilesAtIndex:(NSUInteger)theIndex {
     [orphanedFiles removeObjectAtIndex:theIndex];
+}
+
+- (NSString *)searchString {
+    return searchString;
+}
+
+- (void)setSearchString:(NSString *)aString;
+{
+    [searchString autorelease];
+    searchString = [aString copy];
 }
 
 - (BOOL)wasLaunched {
@@ -554,94 +585,5 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 - (BOOL)allFilesEnumerated { OSMemoryBarrier(); return (BOOL)(1 == allFilesEnumerated); }
 
 - (void)stopEnumerating { OSAtomicCompareAndSwap32Barrier(1, 0, &keepEnumerating); }
-
-@end
-
-#pragma mark -
-#pragma mark Array controller subclass for searching
-
-@interface NSURL (BDSKPathSearch)
-- (BOOL)pathContainsSubstring:(NSString *)aString;
-@end
-
-@implementation NSURL (BDSKPathSearch)
-
-// compare case-insensitive and non-literal
-- (BOOL)pathContainsSubstring:(NSString *)aString;
-{
-    CFURLRef theURL = (CFURLRef)self;
-    CFStringRef path = CFURLCopyFileSystemPath(theURL, kCFURLPOSIXPathStyle);
-    BOOL found = NO;
-    if(path){
-        found = CFStringFindWithOptions(path, (CFStringRef)aString, CFRangeMake(0, CFStringGetLength(path)), kCFCompareNonliteral | kCFCompareCaseInsensitive, NULL);
-        CFRelease(path);
-    }
-    return found;
-}
-
-@end
-
-@implementation BDSKOrphanedFilesArrayController
-
-- (void)awakeFromNib
-{
-    showsMatches = YES;
-}
-
-- (void)dealloc
-{
-    BDSKDESTROY(searchString);
-    [super dealloc];
-}
-
-- (void)setSearchString:(NSString *)aString;
-{
-    [searchString autorelease];
-    searchString = [aString copy];
-}
-
-- (NSString *)searchString { return searchString; }
-
-- (IBAction)showMatches:(id)sender;
-{
-    showsMatches = YES;
-    [self rearrangeObjects];
-}
-
-- (IBAction)hideMatches:(id)sender;
-{
-    showsMatches = NO;
-    [self rearrangeObjects];
-}
-
-- (NSArray *)arrangeObjects:(NSArray *)objects
-{
-    if([NSString isEmptyString:searchString])
-        return [super arrangeObjects:objects];
-    
-    NSMutableArray *array = [[objects mutableCopy] autorelease];
-    NSUInteger i = [array count];
-    BOOL itemMatches;
-    while(i--){
-        itemMatches = [[array objectAtIndex:i] pathContainsSubstring:searchString];
-        if((itemMatches && showsMatches == NO) || (itemMatches == NO && showsMatches))
-            [array removeObjectAtIndex:i];
-    }
-    
-    return [super arrangeObjects:array];
-}
-
-- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
-    if ([menuItem action] == @selector(hideMatches:)) {
-        [menuItem setState:showsMatches? NSOffState : NSOnState];
-        return YES;
-    } else if ([menuItem action] == @selector(showMatches:)) {
-        [menuItem setState:showsMatches? NSOnState : NSOffState];
-        return YES;
-    } else if ([[BDSKOrphanedFilesArrayController superclass] instancesRespondToSelector:@selector(validateMenuItem:)]) {
-        return [super validateMenuItem:menuItem];
-    }
-    return YES;
-}
 
 @end
