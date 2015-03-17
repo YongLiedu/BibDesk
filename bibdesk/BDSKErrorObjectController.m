@@ -136,16 +136,6 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     } else {
         predicate = managerPredicate;
     }
-    if (filterManager && filterManager != [BDSKErrorManager allItemsErrorManager]) {
-        NSString *format = nil;
-        if (hideWarnings)
-            format = @"( isIgnorableWarning == FALSE ) AND ( editor.manager == $filterManager )";
-        else
-            format = @"editor.manager == $filterManager";
-        predicate = [[NSPredicate predicateWithFormat:format] predicateWithSubstitutionVariables:[NSDictionary dictionaryWithObject:filterManager forKey:@"filterManager"]];
-    } else if (hideWarnings) {
-        predicate = [NSPredicate predicateWithFormat:@"isIgnorableWarning == FALSE"];
-    }
     [errorsController setFilterPredicate:predicate];
 }
 
