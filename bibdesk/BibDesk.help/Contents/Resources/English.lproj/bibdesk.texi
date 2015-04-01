@@ -1772,7 +1772,7 @@ first initials (as opposed to first names) are typically used, as in
 
 For more focused searching, Entrez allows terms to be combined using
 Boolean operators. According to the Entrez documentation, available at
-@uref{http://www.ncbi.nlm.nih.gov/books/bv.fcgi?rid=helpentrez.section.EntrezHelp.Boolean_Operators,Boolean Operators},
+@uref{http://www.ncbi.nlm.nih.gov/books/NBK3827/#pubmedhelp.Combining_search_terms_with_B,Boolean Operators},
 these must be entered as follows.
 
 @multitable {AND:} {}
@@ -1830,7 +1830,7 @@ Other useful extensions include the following.
 @end multitable
 
 Complete documentation of the extensions is provided at 
-@uref{http://www.ncbi.nlm.nih.gov/books/bv.fcgi?rid=helppubmed.section.pubmedhelp.Search_Field_Descrip, Search Field Description and Tags}.
+@uref{http://www.ncbi.nlm.nih.gov/books/NBK3827/#pubmedhelp.Search_Field_Descriptions_and, Search Field Description and Tags}.
 
 @c --------------------------------------------------------------------------------------
 
