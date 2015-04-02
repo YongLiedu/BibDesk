@@ -733,7 +733,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
         if (NO == [self hasGroupTypeSelected:BDSKWebGroupType])
             [dictionary setDouble:[splitView fraction] forKey:BDSKMainTableSplitViewFractionKey];
         [dictionary setDouble:docState.lastWebViewFraction forKey:BDSKWebViewFractionKey];
-        //[dictionary setObject:[self currentGroupFields] forKey:BDSKCurrentGroupFieldsKey];
+        [dictionary setObject:[self currentGroupFields] forKey:BDSKCurrentGroupFieldsKey];
         
         // we can't just use -documentStringEncoding, because that may be different for SaveTo
         if (encoding != BDSKNoStringEncoding)
