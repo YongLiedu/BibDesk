@@ -73,12 +73,8 @@
             if (canHide && dividerIndex == 0) {
                 size2.width -= thickness;
                 if (size2.width < 0.0) {
-                    size1.width += size2.width;
-                    size2.width = 0.0;
-                    if (size1.width < 0.0) {
-                        [self setPosition:position ofDividerAtIndex:dividerIndex];
-                        return;
-                    }
+                    [self setPosition:position ofDividerAtIndex:dividerIndex];
+                    return;
                 }
             }
             [view1 setFrameSize:size1];
@@ -90,12 +86,8 @@
             if (canHide && dividerIndex == (NSInteger)[[self subviews] count] - 2) {
                 size1.width -= thickness;
                 if (size1.width < 0.0) {
-                    size2.width += size1.width;
-                    size1.width = 0.0;
-                    if (size2.width < 0.0) {
-                        [self setPosition:position ofDividerAtIndex:dividerIndex];
-                        return;
-                    }
+                    [self setPosition:position ofDividerAtIndex:dividerIndex];
+                    return;
                 }
             }
             [view2 setFrameSize:size2];
@@ -119,12 +111,8 @@
             if (canHide && dividerIndex == 0) {
                 size2.height -= thickness;
                 if (size2.height < 0.0) {
-                    size1.height += size2.height;
-                    size2.height = 0.0;
-                    if (size1.height < 0.0) {
-                        [self setPosition:position ofDividerAtIndex:dividerIndex];
-                        return;
-                    }
+                    [self setPosition:position ofDividerAtIndex:dividerIndex];
+                    return;
                 }
             }
             [view1 setFrameSize:size1];
@@ -136,12 +124,8 @@
             if (canHide && dividerIndex == (NSInteger)[[self subviews] count] - 2) {
                 size1.height -= thickness;
                 if (size1.height < 0.0) {
-                    size2.height += size1.height;
-                    size1.height = 0.0;
-                    if (size2.height < 0.0) {
-                        [self setPosition:position ofDividerAtIndex:dividerIndex];
-                        return;
-                    }
+                    [self setPosition:position ofDividerAtIndex:dividerIndex];
+                    return;
                 }
             }
             [view2 setFrameSize:size2];
