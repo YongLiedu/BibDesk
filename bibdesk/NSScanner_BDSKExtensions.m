@@ -169,10 +169,10 @@
                 break;
             }
         }
-    } else if ([self scanString:@"true" intoString:NULL] || [self scanString:@"yes" intoString:NULL]) {
+    } else if ([self scanString:@"true" intoString:NULL]) {
         // boolean
         tmpObject = [NSNumber numberWithBool:YES];
-    } else if ([self scanString:@"false" intoString:NULL] || [self scanString:@"no" intoString:NULL]) {
+    } else if ([self scanString:@"false" intoString:NULL]) {
         // boolean
         tmpObject = [NSNumber numberWithBool:NO];
     } else { // or should we raise an exception?
