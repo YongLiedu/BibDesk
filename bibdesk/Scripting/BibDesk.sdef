@@ -972,7 +972,7 @@
                 <cocoa key="scriptingDate"/>
             </property>  
             <property name="publication month" code="pmon" type="text"
-			description="Month of publication.">
+                description="Month of publication.">
                 <cocoa key="month"/>
             </property>  
             <property name="publication year" code="pyer" type="text"
