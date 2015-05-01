@@ -476,7 +476,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     if (fileURL)
         urls = [NSArray arrayWithObject:fileURL];
     else
-        urls = [publication valueForKeyPath:@"remoteURLs.URL"];
+        urls = [publication valueForKeyPath:@"localFiles.URL"];
     
     for (fileURL in urls) {
         if ([fileURL isEqual:[NSNull null]] == NO) {
