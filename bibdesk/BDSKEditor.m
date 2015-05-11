@@ -1996,10 +1996,10 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
                                      informativeTextWithFormat:NSLocalizedString(@"The value was inherited from the item linked to by the Crossref field. Do you want to overwrite the inherited value?", @"Informative text in alert dialog")];
             [alert setShowsSuppressionButton:YES];
             
+            NSInteger rv = [alert runModal];
+            
             if ([[alert suppressionButton] state] == NSOnState)
                 [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnEditInheritedKey];
-            
-            NSInteger rv = [alert runModal];
             
             if (rv == NSAlertAlternateReturn) {
                 canEdit = NO;
