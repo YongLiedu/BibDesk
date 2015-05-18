@@ -28,6 +28,7 @@
             <displayattrs>
                 kMDItemTitle
                 kMDItemAuthors
+                kMDItemEditors
                 net_sourceforge_bibdesk_container
                 net_sourceforge_bibdesk_citekey
                 net_sourceforge_bibdesk_pubtype

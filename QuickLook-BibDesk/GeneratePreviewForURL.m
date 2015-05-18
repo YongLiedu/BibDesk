@@ -91,6 +91,8 @@ OSStatus GeneratePreviewForURL(void *thisInterface, QLPreviewRequestRef preview,
                 
                 if ([key isEqualToString:(NSString *)kMDItemAuthors] && [obj respondsToSelector:@selector(componentsJoinedByString:)])
                     value = [obj componentsJoinedByString:@" and "];
+                else if ([key isEqualToString:(NSString *)kMDItemEditors] && [obj respondsToSelector:@selector(componentsJoinedByString:)])
+                    value = [obj componentsJoinedByString:@" and "];
                 else if ([key isEqualToString:(NSString *)kMDItemWhereFroms] && [obj respondsToSelector:@selector(lastObject)])
                     value = [obj lastObject];
                 else if ([key isEqualToString:@"net_sourceforge_bibdesk_owningfilepath"])

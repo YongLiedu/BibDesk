@@ -1551,7 +1551,9 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     // this is what shows up in search results
     [info setObject:value ?: @"Unknown" forKey:(NSString *)kMDItemDisplayName];
 
-    [info setObject:[[self pubAuthorsOrEditors] valueForKey:@"normalizedName"] forKey:(NSString *)kMDItemAuthors];
+    [info setObject:[[self pubAuthors] valueForKey:@"normalizedName"] forKey:(NSString *)kMDItemAuthors];
+    
+    [info setObject:[[self pubEditors] valueForKey:@"normalizedName"] forKey:(NSString *)kMDItemEditors];
 
     if(value = [[self valueOfField:BDSKAbstractString] stringByRemovingTeX])
         [info setObject:value forKey:(NSString *)kMDItemDescription];

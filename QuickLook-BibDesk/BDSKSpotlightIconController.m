@@ -134,6 +134,7 @@ static void addDictionariesFromMultivaluedAttribute(NSMutableArray *array, NSStr
     addDictionaryWithAttributeAndValue(values, @"Title:", [anItem valueForKey:(NSString *)kMDItemTitle]);
     addDictionaryWithAttributeAndValue(values, @"Year:", [dateFormatter stringFromDate:[anItem valueForKey:@"net_sourceforge_bibdesk_publicationdate"]]);
     addDictionariesFromMultivaluedAttribute(values, @"Authors:", [anItem valueForKey:(NSString *)kMDItemAuthors]);
+    addDictionariesFromMultivaluedAttribute(values, @"Editors:", [anItem valueForKey:(NSString *)kMDItemEditors]);
     addDictionariesFromMultivaluedAttribute(values, @"Keywords:", [anItem valueForKey:(NSString *)kMDItemKeywords]);
     
     while ([values count] < 10)
