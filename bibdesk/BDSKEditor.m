@@ -1848,10 +1848,12 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 }
 
 - (void)updatePreviewing {
-    NSArray *theURLs = [publication valueForKeyPath:@"localFiles.URL"];
-    if ([theURLs count] == 0)
-        theURLs = [publication valueForKeyPath:@"remoteURLs.URL"];
-    [self previewURLs:theURLs];
+    if (editorFlags.controllingFVPreviewPanel || editorFlags.controllingQLPreviewPanel) {
+        NSArray *theURLs = [publication valueForKeyPath:@"localFiles.URL"];
+        if ([theURLs count] == 0)
+            theURLs = [publication valueForKeyPath:@"remoteURLs.URL"];
+        [self previewURLs:theURLs];
+    }
 }
 
 - (BOOL)acceptsPreviewPanelControl:(QLPreviewPanel *)panel {
