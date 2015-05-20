@@ -3046,14 +3046,13 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op{
     if ([tv isEqual:tableView]) {
-        if (row == -1)
-            row = [tableView numberOfRows] - 1;
-        else if (op ==  NSTableViewDropAbove)
+        if (op ==  NSTableViewDropAbove) {
             row = fmin(row, [tableView numberOfRows] - 1);
-        [tableView setDropRow:row dropOperation:NSTableViewDropOn];
+            [tableView setDropRow:row dropOperation:NSTableViewDropOn];
+        }
         
         NSPasteboard *pboard = [info draggingPasteboard];
-        NSString *field = [fields objectAtIndex:row];
+        NSString *field = row == -1 ? nil : [fields objectAtIndex:row];
         
         if ([info draggingSource] == tableView) {
             return NSDragOperationNone;
@@ -3068,6 +3067,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         } else if ([field isRemoteURLField]) {
             if ([pboard canReadURL])
                 return NSDragOperationEvery;
+        } else {
+            [tableView setDropRow:-1 dropOperation:NSTableViewDropOn];
+            return [self draggingUpdated:info];
         }
     }
     return NSDragOperationNone;
@@ -3076,7 +3078,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op{
     if ([tv isEqual:tableView]) {
         NSPasteboard *pboard = [info draggingPasteboard];
-        NSString *field = [fields objectAtIndex:row];
+        NSString *field = row == -1 ? nil : [fields objectAtIndex:row];
         
         if ([field isEqualToString:BDSKCrossrefString]){
             if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, nil]]) {
@@ -3160,6 +3162,8 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                 [self recordChangingField:field toValue:[[urls objectAtIndex:0] absoluteString]];
                 return YES;
             }
+        } else {
+            return [self performDragOperation:info];
         }
     }
     return NO;
