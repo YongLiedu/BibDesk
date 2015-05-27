@@ -98,6 +98,7 @@
 
 - (void)dealloc {
     [webDelegate setDelegate:nil];
+    [webDelegate setNavigationDelegate:nil];
     [self setFrameLoadDelegate:nil];
     [self setUIDelegate:nil];
     [self setEditingDelegate:nil];
