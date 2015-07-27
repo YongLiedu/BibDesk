@@ -247,7 +247,7 @@
 		0867D690FE84028FC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0440;
+				LastUpgradeCheck = 0640;
 			};
 			buildConfigurationList = F9ABEBF0086E102800741FC5 /* Build configuration list for PBXProject "BTParse" */;
 			compatibilityVersion = "Xcode 3.2";
