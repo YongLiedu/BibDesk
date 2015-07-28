@@ -191,7 +191,7 @@ zzsyn(char *        text,
       if (zzset_deg (eset) == 1)
           strncat (msg, "expected ", sizeof(msg) - strlen(msg) - 1);
       else
-          strncat (msg, "expected one of: ", sizeof(msg));
+          strncat (msg, "expected one of: ", sizeof(msg) - strlen(msg) - 1);
 
       append_token_set (msg, eset);
    }
