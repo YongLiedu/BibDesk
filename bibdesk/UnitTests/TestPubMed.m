@@ -244,9 +244,7 @@
 }
 
 - (void)testStringByExtractingPIIFromString{
-	NSString *textWithPII=[NSString stringWithFormat:@"%@ PII: %@ some random gibberish &\t\n",
-						   [NSString stringWithString:textFromBenton2009],
-						   [NSString stringWithString:originalPII]];
+	NSString *textWithPII=[NSString stringWithFormat:@"%@ PII: %@ some random gibberish &\t\n",textFromBenton2009,originalPII];
 
 	STAssertEqualObjects([originalPII stringByExtractingPIIFromString],originalPII,nil);
 	STAssertEqualObjects([textWithPII stringByExtractingPIIFromString],originalPII,nil);

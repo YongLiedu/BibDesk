@@ -331,12 +331,6 @@
 		CEF52DD8126C7869006E904B /* WebGroupDownloads.html in Resources */ = {isa = PBXBuildFile; fileRef = CEF52DD6126C7869006E904B /* WebGroupDownloads.html */; };
 		CEF5366B1192EFE400027C3C /* BDSKNotesOutlineView.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF536691192EFE400027C3C /* BDSKNotesOutlineView.m */; };
 		CEF546100F56BDDB008A630F /* BDSKStringArrayFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5460E0F56BDDB008A630F /* BDSKStringArrayFormatter.m */; };
-		CEF5C0420F546ADB00DBC864 /* TestBDSKRISParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C0270F5469E300DBC864 /* TestBDSKRISParser.m */; };
-		CEF5C0430F546ADC00DBC864 /* TestBDSKTypeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C0290F5469E300DBC864 /* TestBDSKTypeManager.m */; };
-		CEF5C0440F546ADC00DBC864 /* TestBibItem.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C02B0F5469E300DBC864 /* TestBibItem.m */; };
-		CEF5C0450F546ADD00DBC864 /* TestComplexString.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C02D0F5469E300DBC864 /* TestComplexString.m */; };
-		CEF5C0460F546ADE00DBC864 /* TestPubMed.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C02F0F5469E300DBC864 /* TestPubMed.m */; };
-		CEF5C0470F546ADF00DBC864 /* TestUnitTest.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C0310F5469E300DBC864 /* TestUnitTest.m */; };
 		CEF63D0A10888A5A000A31E2 /* BDSKSeparatorCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF63D0810888A5A000A31E2 /* BDSKSeparatorCell.m */; };
 		CEF71ADB0B91BBCB003A2771 /* BDSKNotesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF71AD90B91BBCB003A2771 /* BDSKNotesWindowController.m */; };
 		CEF7295709CC88AB00802D48 /* BDSKFieldSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF7295509CC88AB00802D48 /* BDSKFieldSheetController.m */; };
@@ -361,8 +355,6 @@
 		CEFEF0ED11C23F1F0050350D /* BDSKCompletionServer.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFEF0EB11C23F1F0050350D /* BDSKCompletionServer.m */; };
 		CEFF3180110B27ED0098DD17 /* BDSKFilerErrorController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFF317E110B27ED0098DD17 /* BDSKFilerErrorController.m */; };
 		CEFF6D4210C14D7D006CFC80 /* BDSKExternalGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFF6D4010C14D7D006CFC80 /* BDSKExternalGroup.m */; };
-		EF902DA60F12410300E5DE14 /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE30758095000C3F701 /* AGRegex.framework */; };
-		EF902DA70F12410300E5DE14 /* BTParse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9ABEC9E086E11B500741FC5 /* BTParse.framework */; };
 		F9022C4A0758027800C3F701 /* BDSKCiteKeyFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C390758027800C3F701 /* BDSKCiteKeyFormatter.m */; };
 		F9022C4B0758027800C3F701 /* BDSKConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C3B0758027800C3F701 /* BDSKConverter.m */; };
 		F9022C4E0758027800C3F701 /* BDSKMainTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C410758027800C3F701 /* BDSKMainTableView.m */; };
@@ -601,13 +593,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
 			remoteInfo = FileView;
-		};
-		EF168E280F113753002F4D9F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 8D1107260486CEB800E47090;
-			remoteInfo = BibDesk;
 		};
 		F911D6B30CFE8E420009C77B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1411,7 +1396,6 @@
 		CEFF317E110B27ED0098DD17 /* BDSKFilerErrorController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFilerErrorController.m; sourceTree = "<group>"; };
 		CEFF6D3F10C14D7D006CFC80 /* BDSKExternalGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKExternalGroup.h; sourceTree = "<group>"; };
 		CEFF6D4010C14D7D006CFC80 /* BDSKExternalGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKExternalGroup.m; sourceTree = "<group>"; };
-		EF168DDD0F11325B002F4D9F /* UnitTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnitTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EF168DDE0F11325B002F4D9F /* UnitTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "UnitTests-Info.plist"; sourceTree = "<group>"; };
 		F9022C380758027800C3F701 /* BDSKCiteKeyFormatter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCiteKeyFormatter.h; sourceTree = "<group>"; };
 		F9022C390758027800C3F701 /* BDSKCiteKeyFormatter.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKCiteKeyFormatter.m; sourceTree = "<group>"; };
@@ -1715,15 +1699,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		EF168DDA0F11325B002F4D9F /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				EF902DA60F12410300E5DE14 /* AGRegex.framework in Frameworks */,
-				EF902DA70F12410300E5DE14 /* BTParse.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -1778,7 +1753,6 @@
 			isa = PBXGroup;
 			children = (
 				8D1107320486CEB800E47090 /* BibDesk.app */,
-				EF168DDD0F11325B002F4D9F /* UnitTests.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2924,25 +2898,6 @@
 			productReference = 8D1107320486CEB800E47090 /* BibDesk.app */;
 			productType = "com.apple.product-type.application";
 		};
-		EF168DDC0F11325B002F4D9F /* UnitTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = EF168DE20F11325B002F4D9F /* Build configuration list for PBXNativeTarget "UnitTests" */;
-			buildPhases = (
-				EF168DD80F11325B002F4D9F /* Resources */,
-				EF168DD90F11325B002F4D9F /* Sources */,
-				EF168DDA0F11325B002F4D9F /* Frameworks */,
-				EF168DDB0F11325B002F4D9F /* ShellScript */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				EF168E290F113753002F4D9F /* PBXTargetDependency */,
-			);
-			name = UnitTests;
-			productName = UnitTests;
-			productReference = EF168DDD0F11325B002F4D9F /* UnitTests.octest */;
-			productType = "com.apple.product-type.bundle.ocunit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -3004,7 +2959,6 @@
 				8D1107260486CEB800E47090 /* BibDesk */,
 				F98870CE07580E5F001D4D49 /* HeaderDoc */,
 				F98870D407580E94001D4D49 /* DiskImage */,
-				EF168DDC0F11325B002F4D9F /* UnitTests */,
 			);
 		};
 /* End PBXProject section */
@@ -3257,13 +3211,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		EF168DD80F11325B002F4D9F /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXRezBuildPhase section */
@@ -3313,19 +3260,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "HELP_NAME=\"BibDeskHelp\"\n\nSOURCE=\"${DERIVED_FILE_DIR}/${HELP_NAME}\";\nTARGET=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/BibDesk.help/Contents/Resources\";\n\ncd \"${TARGET}\"\n\nfor LOC_DIR in *.lproj; do\n\tLOC_SOURCE=\"${SOURCE}/${LOC_DIR}\";\n\tLOC_TARGET=\"${TARGET}/${LOC_DIR}\";\n\tif [ -d \"${LOC_SOURCE}\" ]; then\n\t\techo \"*** Copying help files from ${LOC_SOURCE} to ${LOC_TARGET} ***\";\n\t\t/bin/rm -rf \"${LOC_TARGET}/\"*.html;\n\t\t/bin/cp -Rf \"${LOC_SOURCE}/\"*.html \"${LOC_TARGET}\";\n\t\t[ -f \"${LOC_SOURCE}/${HELP_NAME}.helpindex\" ] && \\\n\t\t\t/bin/cp -f \"${LOC_SOURCE}/${HELP_NAME}.helpindex\" \"${LOC_TARGET}\";\n\tfi;\ndone;\n";
-		};
-		EF168DDB0F11325B002F4D9F /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# Use a different bundle identifier, so we're independent of our preference settings\nBUNDLE_IDENTIFIER=edu.ucsd.cs.mmccrack.bibdesk.test\nBIBDESK_INFO=\"${BUILT_PRODUCTS_DIR}/BibDesk.app/Contents/Info\"\ndefaults write \"${BIBDESK_INFO}\" CFBundleIdentifier ${BUNDLE_IDENTIFIER}\nplutil -convert xml1 \"${BIBDESK_INFO}.plist\"\n\n# Start with a clean set of preferences, but prevent some initial windows\nrm -f ~/Library/Preferences/${BUNDLE_IDENTIFIER}.plist\ndefaults write ${BUNDLE_IDENTIFIER} \"Startup Behavior\" -integer 1\ndefaults write ${BUNDLE_IDENTIFIER} \"Last launched version number\" `defaults read \"${BIBDESK_INFO}\" CFBundleShortVersionString`\ndefaults write ${BUNDLE_IDENTIFIER} BDSKShowedLeopardInputManagerAlert -bool true\ndefaults write ${BUNDLE_IDENTIFIER} SUEnableAutomaticChecks -bool false\n\n# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n\n# Remeove the modified Info.plist, because Xcode doesn't replace it otherwise\nrm \"${BIBDESK_INFO}.plist\"\n";
 		};
 		F95C5E850D10E52400C81970 /* Run Script: Codesign */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3716,19 +3650,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		EF168DD90F11325B002F4D9F /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				CEF5C0420F546ADB00DBC864 /* TestBDSKRISParser.m in Sources */,
-				CEF5C0430F546ADC00DBC864 /* TestBDSKTypeManager.m in Sources */,
-				CEF5C0440F546ADC00DBC864 /* TestBibItem.m in Sources */,
-				CEF5C0450F546ADD00DBC864 /* TestComplexString.m in Sources */,
-				CEF5C0460F546ADE00DBC864 /* TestPubMed.m in Sources */,
-				CEF5C0470F546ADF00DBC864 /* TestUnitTest.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -3756,11 +3677,6 @@
 			isa = PBXTargetDependency;
 			name = FileView;
 			targetProxy = CEFC1F860F6AD7A800B2AEE6 /* PBXContainerItemProxy */;
-		};
-		EF168E290F113753002F4D9F /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 8D1107260486CEB800E47090 /* BibDesk */;
-			targetProxy = EF168E280F113753002F4D9F /* PBXContainerItemProxy */;
 		};
 		F9AF562C0BEA4160009B16D5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -4438,60 +4354,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		EF168DDF0F11325B002F4D9F /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/BibDesk.app/Contents/MacOS/BibDesk";
-				COMBINE_HIDPI_IMAGES = YES;
-				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Cocoa.framework/Headers/Cocoa.h";
-				INFOPLIST_FILE = "UnitTests/UnitTests-Info.plist";
-				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Cocoa,
-					"-framework",
-					SenTestingKit,
-				);
-				PRODUCT_NAME = UnitTests;
-				TEST_HOST = "$(BUNDLE_LOADER)";
-				WRAPPER_EXTENSION = octest;
-			};
-			name = Debug;
-		};
-		EF168DE00F11325B002F4D9F /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
-				COMBINE_HIDPI_IMAGES = YES;
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Cocoa.framework/Headers/Cocoa.h";
-				INFOPLIST_FILE = "UnitTests/UnitTests-Info.plist";
-				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Cocoa,
-					"-framework",
-					SenTestingKit,
-				);
-				PRODUCT_NAME = UnitTests;
-				WRAPPER_EXTENSION = octest;
-				ZERO_LINK = NO;
-			};
-			name = Release;
-		};
 		F993F1BD08553A61007A7657 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
@@ -4631,15 +4493,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		EF168DE20F11325B002F4D9F /* Build configuration list for PBXNativeTarget "UnitTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				EF168DDF0F11325B002F4D9F /* Debug */,
-				EF168DE00F11325B002F4D9F /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		F993F1BC08553A61007A7657 /* Build configuration list for PBXNativeTarget "BibDesk" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
