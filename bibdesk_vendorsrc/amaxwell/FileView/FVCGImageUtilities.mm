@@ -1069,14 +1069,14 @@ CGImageRef FVCGCreateResampledImageOfSize(CGImageRef image, const NSSize desired
 // always returns false on 10.4
 static inline bool __FVCanUseIndexedColorSpaces()
 {
-    return (NULL != CGColorSpaceGetColorTable && NULL != CGColorSpaceGetColorTableCount && NULL != CGColorSpaceGetBaseColorSpace);
+    return (NULL != &CGColorSpaceGetColorTable && NULL != &CGColorSpaceGetColorTableCount && NULL != &CGColorSpaceGetBaseColorSpace);
 }
 
 // CGColorSpaceGetColorSpaceModel is in 10.4 and 10.5 CoreGraphics framework; not sure what it does, since it returns 1 for an indexed colorspace
 
 CGColorSpaceModel __FVGetColorSpaceModelOfColorSpace(CGColorSpaceRef colorSpace)
 {
-    if (NULL != CGColorSpaceGetModel) return CGColorSpaceGetModel(colorSpace);    
+    if (NULL != &CGColorSpaceGetModel) return CGColorSpaceGetModel(colorSpace);
     CGColorSpaceRef devRGB = CGColorSpaceCreateDeviceRGB();
     // if not RGB, return unknown so we can punt by redrawing into a new bitmap context
     CGColorSpaceModel model = kCGColorSpaceModelUnknown;

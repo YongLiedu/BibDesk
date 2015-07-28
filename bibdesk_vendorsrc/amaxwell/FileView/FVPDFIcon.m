@@ -60,7 +60,7 @@ static CGLayerRef   _pageLayer = NULL;
     _pageLayer = CGLayerCreateWithContext(context, layerSize, NULL);
     context = CGLayerGetContext(_pageLayer);
     CGColorRef color = NULL;
-    if (NULL != &kCGColorWhite && NULL != CGColorGetConstantColor) {
+    if (NULL != kCGColorWhite && NULL != &CGColorGetConstantColor) {
         color = CGColorRetain(CGColorGetConstantColor(kCGColorWhite));
     }
     else {

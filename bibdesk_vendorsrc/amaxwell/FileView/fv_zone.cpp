@@ -509,7 +509,7 @@ static void __fv_zone_free_allocation_locked(fv_zone_t *zone, fv_allocation_t *a
     
     // signal for collection if needed (lock not required, no effect if not blocking on the condition)
     if (zone->_freeSize > FV_COLLECT_THRESHOLD) {
-        if (NULL == dispatch_async_f) {
+        if (NULL == &dispatch_async_f) {
             pthread_cond_signal(&_collectorCond);
         }
         else {
@@ -1005,7 +1005,7 @@ static void *__fv_zone_collector_thread(void *unused)
 
 static void __initialize_collector_thread()
 {    
-    if (NULL == dispatch_source_create) {
+    if (NULL == &dispatch_source_create) {
         // create a thread to do periodic cleanup so memory usage doesn't get out of hand
         pthread_attr_t attr;
         pthread_attr_init(&attr);

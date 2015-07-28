@@ -44,7 +44,7 @@
 
 static inline bool __FVCGCanSaveIndexedSpaces(void)
 {
-    return (NULL != CGColorSpaceGetColorTableCount && NULL != CGColorSpaceGetColorTable && NULL != CGColorSpaceGetBaseColorSpace);
+    return (NULL != &CGColorSpaceGetColorTableCount && NULL != &CGColorSpaceGetColorTable && NULL != &CGColorSpaceGetBaseColorSpace);
 }
 
 - (id)initWithColorSpace:(CGColorSpaceRef)colorSpace;

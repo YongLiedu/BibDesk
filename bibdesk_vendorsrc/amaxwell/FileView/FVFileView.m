@@ -2577,8 +2577,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     NSRect bounds = [self bounds];
     
     NSImage *newImage = [[[NSImage alloc] initWithSize:bounds.size] autorelease];
-    [newImage setFlipped:YES];
-    [newImage lockFocus];
+    [newImage lockFocusFlipped:YES];
     [self _drawIconsInRows:NSMakeRange(rMin, rMax + 1 - rMin) columns:NSMakeRange(cMin, cMax + 1 - cMax) forDragImage:YES];
     [newImage unlockFocus];
     
