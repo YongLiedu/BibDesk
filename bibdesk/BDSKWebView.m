@@ -400,7 +400,7 @@
     if ([delegate respondsToSelector:@selector(webViewCreateWebView:)])
         view = [delegate webViewCreateWebView:sender];
     if (view == nil)
-        view = [[BDSKNewWebWindowHandler sharedHandler] webView];
+        view = [(BDSKNewWebWindowHandler *)[BDSKNewWebWindowHandler sharedHandler] webView];
     if (request)
         [[view mainFrame] loadRequest:request];
     return view;
@@ -470,7 +470,7 @@
 - (void)webView:(WebView *)sender runOpenPanelForFileButtonWithResultListener:(id < WebOpenPanelResultListener >)resultListener {
     NSOpenPanel *openPanel = [NSOpenPanel openPanel];
     if ([openPanel runModal] == NSFileHandlingPanelOKButton)
-        [resultListener chooseFilename:[openPanel filename]];
+        [resultListener chooseFilename:[[openPanel URL] path]];
     else
         [resultListener cancel];
 }
@@ -488,7 +488,7 @@
         NSInteger returnCode = [savePanel runModal];
         if (returnCode == NSFileHandlingPanelCancelButton)
             return;
-        filename = [savePanel filename];
+        filename = [[savePanel URL] path];
     }
     [[dataSource data] writeToFile:filename atomically:YES];
 }

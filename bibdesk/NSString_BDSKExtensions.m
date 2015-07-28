@@ -294,7 +294,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
         string = [[stringClass allocWithZone:[self zone]] initWithData:data encoding:NSMacOSRomanStringEncoding];
     
     [data release];
-    [self release];
+    [[self init] release];
     return string;
 }
 

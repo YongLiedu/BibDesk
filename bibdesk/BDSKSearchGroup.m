@@ -225,7 +225,7 @@ static NSDictionary *BDSKSearchGroupURLQueryKeys = nil;
 - (void)resetServerWithInfo:(BDSKServerInfo *)info {
     [server terminate];
     [server release];
-    server = [[self class] newServerWithGroup:self serverInfo:info];
+    server = [[self class] copyServerWithGroup:self serverInfo:info];
 }
 
 - (void)search;
@@ -391,7 +391,7 @@ static NSDictionary *BDSKSearchGroupURLQueryKeys = nil;
     return dictionary;
 }
 
-+ (id<BDSKSearchGroupServer>)newServerWithGroup:(id<BDSKSearchGroup>)group serverInfo:(BDSKServerInfo *)info {
++ (id<BDSKSearchGroupServer>)copyServerWithGroup:(id<BDSKSearchGroup>)group serverInfo:(BDSKServerInfo *)info {
     NSString *aType = [info type];
     Class serverClass = Nil;
     if ([aType isEqualToString:BDSKSearchGroupEntrez])

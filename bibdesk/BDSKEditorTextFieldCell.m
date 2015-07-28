@@ -89,7 +89,7 @@
     [super dealloc];
 }
 
-- (NSUInteger)hitTestForEvent:(NSEvent *)event inRect:(NSRect)cellFrame ofView:(NSView *)controlView
+- (NSCellHitResult)hitTestForEvent:(NSEvent *)event inRect:(NSRect)cellFrame ofView:(NSView *)controlView
 {
     NSUInteger hit = [super hitTestForEvent:event inRect:cellFrame ofView:controlView];
     // super returns 0 for button clicks, so -[NSTableView mouseDown:] doesn't track the cell

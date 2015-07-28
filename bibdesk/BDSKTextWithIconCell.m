@@ -196,7 +196,7 @@ static id nonNullObjectValueForKey(id object, id stringObject, NSString *key) {
     [super selectWithFrame:[self textRectForBounds:aRect] inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
 }
 
-- (NSUInteger)hitTestForEvent:(NSEvent *)event inRect:(NSRect)cellFrame ofView:(NSView *)controlView {
+- (NSCellHitResult)hitTestForEvent:(NSEvent *)event inRect:(NSRect)cellFrame ofView:(NSView *)controlView {
     NSRect textRect = [self textRectForBounds:cellFrame];
     NSPoint mouseLoc = [controlView convertPoint:[event locationInWindow] fromView:nil];
     NSUInteger hit = NSCellHitNone;

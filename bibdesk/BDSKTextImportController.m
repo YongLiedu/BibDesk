@@ -440,7 +440,7 @@
 
     [sPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
         if (result == NSFileHandlingPanelOKButton) {
-            NSURL *fileURL = [NSURL fileURLWithPath:[sPanel filename]];
+            NSURL *fileURL = [sPanel URL];
             if ([[[[webView mainFrame] dataSource] data] writeToURL:fileURL atomically:YES]) {
                 [[self publication] addFileForURL:fileURL autoFile:YES runScriptHook:NO];
                 [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
@@ -907,7 +907,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
     NSInteger returnCode = [sPanel runModal];
     if (returnCode == NSFileHandlingPanelOKButton) {
-        [download setDestination:[sPanel filename] allowOverwrite:YES];
+        [download setDestination:[[sPanel URL] path] allowOverwrite:YES];
     } else {
         [self cancelDownload];
     }

@@ -57,8 +57,7 @@
             NSImage *tmpImage = [[NSImage alloc] initWithSize:rect.size];
             NSImage *dragImage = [[NSImage alloc] initWithSize:rect.size];
             
-            [tmpImage setFlipped:YES];
-            [tmpImage lockFocus];
+            [tmpImage lockFocusFlipped:YES];
             [self drawWithFrame:rect inView:nil];
             [tmpImage unlockFocus];
             [dragImage lockFocus];

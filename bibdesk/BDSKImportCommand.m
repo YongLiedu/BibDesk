@@ -211,7 +211,7 @@
 }
 
 - (NSArray *)searchUsingSearchTerm:(NSString *)searchTerm serverInfo:(BDSKServerInfo *)serverInfo {
-    id<BDSKSearchGroupServer> server = [BDSKSearchGroup newServerWithGroup:self serverInfo:serverInfo];
+    id<BDSKSearchGroupServer> server = [BDSKSearchGroup copyServerWithGroup:self serverInfo:serverInfo];
     
     importFinished = NO;
     

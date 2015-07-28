@@ -103,6 +103,6 @@ extern NSString *BDSKSearchGroupURLScheme;
 
 + (NSDictionary *)dictionaryWithBdsksearchURL:(NSURL *)bdsksearchURL;
 
-+ (id<BDSKSearchGroupServer>)newServerWithGroup:(id<BDSKSearchGroup>)group serverInfo:(BDSKServerInfo *)info;
++ (id<BDSKSearchGroupServer>)copyServerWithGroup:(id<BDSKSearchGroup>)group serverInfo:(BDSKServerInfo *)info;
 
 @end

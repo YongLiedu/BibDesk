@@ -141,7 +141,7 @@
 	return nil;
 }    
 
-- (NSUInteger)draggingSourceOperationMaskForLocal:(BOOL)isLocal{ 
+- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal{
     return isLocal ? NSDragOperationNone : NSDragOperationCopy; 
 }
 

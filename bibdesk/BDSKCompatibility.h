@@ -50,3 +50,13 @@
 #ifndef NSAppKitVersionNumber10_9
     #define NSAppKitVersionNumber10_9 1265
 #endif
+
+
+#ifndef NS_DESIGNATED_INITIALIZER
+#define NS_DESIGNATED_INITIALIZER
+#endif
+
+
+#ifndef MAC_OS_X_VERSION_10_10
+typedef NSUInteger NSCellHitResult;
+#endif

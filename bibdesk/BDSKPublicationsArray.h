@@ -46,7 +46,7 @@
     NSMutableDictionary *itemsForIdentifierURLs;
 }
 
-- (id)initWithArray:(NSArray *)anArray;
+- (id)initWithArray:(NSArray *)anArray NS_DESIGNATED_INITIALIZER;
 
 - (BibItem *)itemForCiteKey:(NSString *)key;
 - (NSArray *)allItemsForCiteKey:(NSString *)key;

@@ -70,6 +70,18 @@ static NSUInteger caseInsensitiveStringHash(const void *item, NSUInteger (*size)
     return [self initWithArray:nil];
 }
 
+// don't use, just implement to avoid compiler warning
+- (id)initWithCapacity:(NSUInteger)numItems;
+{
+    return [self initWithArray:nil];
+}
+
+// don't use, just implement to avoid compiler warning
+- (id)initWithCoder:(NSCoder *)aDecoder;
+{
+    return [self initWithArray:nil];
+}
+
 // custom initializers should be explicitly defined in concrete subclasses to be supported, we should not rely on inheritance
 - (id)initWithArray:(NSArray *)anArray;
 {

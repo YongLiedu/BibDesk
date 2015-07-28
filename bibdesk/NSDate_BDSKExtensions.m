@@ -107,7 +107,7 @@
     if([yearString isComplex])
         yearString = [(BDSKStringNode *)[[yearString nodes] objectAtIndex:0] value];
     if ([NSString isEmptyString:yearString]) {
-        [[super init] release];
+        [[self init] release];
         return nil;
     } else {
         if([monthString isComplex]) {

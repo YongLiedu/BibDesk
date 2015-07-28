@@ -1363,7 +1363,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     NSURL *fileURL;
     BDSKAlias *alias;
     
-    if (LSSharedFileListCreate != WEAK_NULL) {
+    if (&LSSharedFileListCreate != WEAK_NULL) {
         
         LSSharedFileListRef fileList = LSSharedFileListCreate(kCFAllocatorDefault, kLSSharedFileListRecentDocumentItems, NULL);
         if (NULL == fileList) {
