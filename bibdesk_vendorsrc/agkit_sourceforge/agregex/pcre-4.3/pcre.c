@@ -866,14 +866,14 @@ Returns:    TRUE or FALSE
 static BOOL
 is_counted_repeat(const uschar *p, compile_data *cd)
 {
-if ((digitab[*p++] && ctype_digit) == 0) return FALSE;
+if ((digitab[*p++] & ctype_digit) == 0) return FALSE;
 while ((digitab[*p] & ctype_digit) != 0) p++;
 if (*p == '}') return TRUE;
 
 if (*p++ != ',') return FALSE;
 if (*p == '}') return TRUE;
 
-if ((digitab[*p++] && ctype_digit) == 0) return FALSE;
+if ((digitab[*p++] & ctype_digit) == 0) return FALSE;
 while ((digitab[*p] & ctype_digit) != 0) p++;
 
 return (*p == '}');
@@ -2626,7 +2626,7 @@ for (;; ptr++)
         if a digit follows ( then there will just be digits until ) because
         the syntax was checked in the first pass. */
 
-        else if ((digitab[ptr[1]] && ctype_digit) != 0)
+        else if ((digitab[ptr[1]] & ctype_digit) != 0)
           {
           int condref;                 /* Don't amalgamate; some compilers */
           condref = *(++ptr) - '0';    /* grumble at autoincrement in declaration */
