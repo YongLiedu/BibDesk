@@ -2931,7 +2931,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 	
     // groupName may be an author object, so convert it to a string
     // if the groupName is an empty object (author or string), use the empty string as description since stringValue would be "Empty field"
-    NSString *groupDescription = [group isEmpty] ? @"" : [groupName respondsToSelector:@selector(originalName)] ? [groupName originalName] : [groupName stringValue];
+    NSString *groupDescription = [group isEmpty] ? @"" : [groupName respondsToSelector:@selector(originalName)] ? [groupName originalName] : [group stringValue];
 	NSMutableString *string = [[NSMutableString alloc] initWithCapacity:[groupDescription length] + [oldString length] + 1];
 
     // we set the type and journal field, add to other fields if needed
