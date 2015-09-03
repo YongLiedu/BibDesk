@@ -867,7 +867,7 @@ static inline BOOL stringHasCharacterNotInRange(NSString *string, NSRange range)
 	unichar c;
 	
 	if (number > 0) {
-		for (c = charRange.location; c <= NSMaxRange(charRange); c++) {
+		for (c = charRange.location; c < NSMaxRange(charRange); c++) {
 			// try with the first added char set to c
 			uniqueStr = [baseStr stringByAppendingFormat:@"%@%C", separator ?: @"", c];
 			uniqueStr = [self uniqueString:uniqueStr suffix:suffix separator:nil forField:fieldName ofItem:pub inFolder:papersFolderPath numberOfChars:number - 1 fromRange:charRange force:NO];
