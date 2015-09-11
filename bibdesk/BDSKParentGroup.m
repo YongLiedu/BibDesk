@@ -185,7 +185,7 @@
 
 - (id)init {
     // all-encompassing, non-expandable name
-    self = [self initWithName:NSLocalizedString(@"GROUPS", @"source list group row title")];
+    self = [self initWithName:NSLocalizedString(@"Groups", @"source list group row title")];
     if (self) {
         BDSKGroup *libraryGroup = [[BDSKLibraryGroup alloc] init];
         [self insertChild:libraryGroup atIndex:0];
@@ -215,7 +215,7 @@
 #define scriptGroupLocation webGroupCount + searchGroupCount + sharedGroupCount + URLGroupCount
 
 - (id)init {
-    self = [self initWithName:NSLocalizedString(@"EXTERNAL", @"source list group row title")];
+    self = [self initWithName:NSLocalizedString(@"External", @"source list group row title")];
     if (self) {
         webGroupCount = 0;
         sharedGroupCount = 0;
@@ -330,7 +330,7 @@
 @implementation BDSKCategoryParentGroup
 
 - (id)initWithKey:(NSString *)aKey {
-    self = [self initWithName:[aKey uppercaseString]];
+    self = [self initWithName:aKey];
     if (self) {
         key = [aKey retain];
     }
@@ -381,7 +381,7 @@
 @implementation BDSKStaticParentGroup
 
 - (id)init {
-    return [self initWithName:NSLocalizedString(@"STATIC", @"source list group row title")];
+    return [self initWithName:NSLocalizedString(@"Static", @"source list group row title")];
 }
 
 - (NSArray *)staticGroups {
@@ -406,7 +406,7 @@
 @implementation BDSKSmartParentGroup
 
 - (id)init {
-    self = [self initWithName:NSLocalizedString(@"SMART", @"source list group row title")];
+    self = [self initWithName:NSLocalizedString(@"Smart", @"source list group row title")];
     if (self) {
         hasLastImportGroup = NO;
     }
