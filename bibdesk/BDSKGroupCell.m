@@ -376,7 +376,15 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
     
     if ([self label]) {
         textRect = BDSKSliceRect(textRect, [self labelHeight], [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
-        [labelCell drawInteriorWithFrame:textRect inView:controlView];
+        id object = [[self objectValue] retain];
+        font = [[self font] retain];
+        [super setObjectValue:[labelCell stringValue]];
+        [super setFont:[labelCell font]];
+        [super drawInteriorWithFrame:textRect inView:controlView];
+        [super setObjectValue:object];
+        [super setFont:font];
+        [object release];
+        [font release];
     }
     
     // Draw the image
