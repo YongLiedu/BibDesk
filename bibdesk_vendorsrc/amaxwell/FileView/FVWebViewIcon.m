@@ -80,7 +80,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
     // default value of 5, with valid range (0, 50)
     // however this seems to lead to a lot of crashes on Mavericks, so we disable it there
     if (nil == maxViews) {
-        _maxWebViews = floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_8 ? 0 : 5;
+        _maxWebViews = (NSInteger)floor(NSAppKitVersionNumber) == NSAppKitVersionNumber10_9 ? 0 : 5;
     }
     else if ([maxViews integerValue] > 50) {
         FVLog(@"Limiting number of webviews to 50 (FVWebIconMaximumNumberOfWebViews = %@)", maxViews);
