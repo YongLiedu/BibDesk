@@ -83,6 +83,8 @@ static BDSKGroupCellFormatter *groupCellFormatter = nil;
     countString = [[NSMutableAttributedString alloc] init];
     if ([self formatter] == nil)
         [self setFormatter:groupCellFormatter];
+    // 10.10 makes the text gray for the default controlTextColor
+    [self setTextColor:[NSColor blackColor]];
 }
 
 - (id)initTextCell:(NSString *)aString {
@@ -376,15 +378,7 @@ static id nonNullObjectValueForKey(id object, NSString *key) {
     
     if ([self label]) {
         textRect = BDSKSliceRect(textRect, [self labelHeight], [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
-        id object = [[self objectValue] retain];
-        font = [[self font] retain];
-        [super setObjectValue:[labelCell stringValue]];
-        [super setFont:[labelCell font]];
-        [super drawInteriorWithFrame:textRect inView:controlView];
-        [super setObjectValue:object];
-        [super setFont:font];
-        [object release];
-        [font release];
+        [labelCell drawInteriorWithFrame:textRect inView:controlView];
     }
     
     // Draw the image
