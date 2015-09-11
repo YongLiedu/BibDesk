@@ -65,6 +65,8 @@
 }
 
 + (NSColor *)mainSourceListHighlightColor {
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_9)
+        return [self disabledSourceListHighlightColor];
     static NSColor *color = nil;
     static NSColor *graphiteColor = nil;
     if ([NSColor currentControlTint] == NSGraphiteControlTint) {
