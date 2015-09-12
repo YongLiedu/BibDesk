@@ -147,7 +147,7 @@
         [self setReleasedWhenClosed:NO];
         [self setBackgroundColor:[NSColor clearColor]];
         [self setOpaque:NO];
-        [self setHasShadow:YES];
+        [self setHasShadow:floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_9];
         _slider = [[FVSlider alloc] initWithFrame:NSMakeRect(0,0,50,10)];
         [_slider setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
         [[self contentView] addSubview:_slider];
