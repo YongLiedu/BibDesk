@@ -159,7 +159,7 @@ static NSMapTable *scrollViewPlacardViews = NULL;
 @implementation BDSKPlacardView
 
 - (void)drawRect:(NSRect)aRect {
-    NSImage *bgImage = [NSImage imageNamed:floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_8 ? @"Scroller_Yosemite" : floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6 ? @"Scroller_Lion" : @"Scroller"];
+    NSImage *bgImage = [NSImage imageNamed:floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_8 ? @"Scroller_Background_Yosemite" : floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6 ? @"Scroller_Background_Lion" : @"Scroller_Background"];
     NSRect bgSrcRect = {NSZeroPoint, [bgImage size]};
     NSRect leftRect, rightRect, leftSrcRect, rightSrcRect, midSrcRect, divSrcRect = bgSrcRect;
     NSRect midRect = [self bounds];
