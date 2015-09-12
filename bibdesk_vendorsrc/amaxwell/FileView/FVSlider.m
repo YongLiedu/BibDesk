@@ -73,24 +73,28 @@
         [outerPath fill];
     }
     
-    // draw the track
-    NSRect track = NSInsetRect(aRect, 4.0, 4.0);
-    radius = NSHeight(track) / 2;
-    NSBezierPath *innerPath = [NSBezierPath fv_bezierPathWithRoundRect:track xRadius:radius yRadius:radius];
-    [innerPath addClip];
-    if (gradientClass) {
-        id gradient = [[[gradientClass alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.3] endingColor:[NSColor colorWithCalibratedWhite:0.3 alpha:0.3]] autorelease];
-        [gradient drawInBezierPath:innerPath angle:angle];
-    } else {
-        [[NSColor colorWithCalibratedWhite:0.0 alpha:0.2] setFill];
-        [innerPath fill];
+    if (NSHeight(aRect) > 8.0) {
+        
+        // draw the track
+        NSRect track = NSInsetRect(aRect, 4.0, 4.0);
+        radius = NSHeight(track) / 2;
+        NSBezierPath *innerPath = [NSBezierPath fv_bezierPathWithRoundRect:track xRadius:radius yRadius:radius];
+        [innerPath addClip];
+        if (gradientClass) {
+            id gradient = [[[gradientClass alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.3] endingColor:[NSColor colorWithCalibratedWhite:0.3 alpha:0.3]] autorelease];
+            [gradient drawInBezierPath:innerPath angle:angle];
+        } else {
+            [[NSColor colorWithCalibratedWhite:0.0 alpha:0.2] setFill];
+            [innerPath fill];
+        }
+        
+        // draw a dark outline for the track
+        [[NSColor colorWithCalibratedWhite:0.0 alpha:0.2] setStroke];
+        [innerPath setLineWidth:1.5];
+        [innerPath stroke];
+        [innerPath setLineWidth:1.0];
+        
     }
-    
-    // draw a dark outline for the track
-    [[NSColor colorWithCalibratedWhite:0.0 alpha:0.2] setStroke];
-    [innerPath setLineWidth:1.5];
-    [innerPath stroke];
-    [innerPath setLineWidth:1.0];
     
     // if we don't save/restore, the knob gets clipped
     [NSGraphicsContext restoreGraphicsState];
