@@ -590,8 +590,8 @@
         if (size.width > MAX_DRAG_IMAGE_WIDTH)
             size.width = MAX_DRAG_IMAGE_WIDTH;
         
-		size.width += 2 * point.x;
-		size.height += 2 * point.y;
+        size.width = ceil(size.width + 2.0 * point.x);
+        size.height = ceil(size.height + 2.0 * point.y);
 		rect.size = size;
 		
 		image = [[[NSImage alloc] initWithSize:size] autorelease];
