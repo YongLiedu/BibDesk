@@ -45,8 +45,8 @@
 {
     NSBezierPath *path = [NSBezierPath bezierPathWithRoundedRect:NSInsetRect(rect, 0.5 * lineWidth, 0.5 * lineWidth) xRadius:radius yRadius:radius];
     [path setLineWidth:lineWidth];
-    [[color colorWithAlphaComponent:0.2] setFill];
-    [[color colorWithAlphaComponent:0.8] setStroke];
+    [[color colorWithAlphaComponent:0.15] setFill];
+    [[color colorWithAlphaComponent:0.7] setStroke];
     [path fill];
     [path stroke];
 }
