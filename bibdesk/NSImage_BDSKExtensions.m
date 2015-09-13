@@ -386,7 +386,7 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
         } else {
             // small image, draw it outside the corner
             countRect.origin = NSMakePoint(NSMaxX(targetRect), 0.0);
-            size.width += NSWidth(countRect) + countOffset;
+            size.width += ceil(NSWidth(countRect)) + countOffset;
             size.height += countOffset;
             targetRect.origin.y += countOffset;
         }
