@@ -50,7 +50,8 @@
 
 - (NSSize)cellSizeForBounds:(NSRect)aRect {
     NSSize cellSize = [super cellSizeForBounds:aRect];
-    cellSize.height = fmin(cellSize.height + 1.0, NSHeight(aRect));
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_9)
+        cellSize.height = fmin(cellSize.height + 1.0, NSHeight(aRect));
     return cellSize;
 }
 
