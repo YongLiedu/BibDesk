@@ -44,6 +44,10 @@
 
 + (Class)formatterClass { return Nil; }
 
+- (NSTextFieldBezelStyle)bezelStyle {
+    return floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_9 ? NSTextFieldRoundedBezel : [super bezelStyle];
+}
+
 - (NSSize)cellSizeForBounds:(NSRect)aRect {
     NSSize cellSize = [super cellSizeForBounds:aRect];
     cellSize.height = fmin(cellSize.height + 1.0, NSHeight(aRect));
@@ -55,41 +59,51 @@
 }
 
 - (NSRect)adjustedFrame:(NSRect)aRect inView:(NSView *)controlView {
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_9)
+        return aRect;
     return BDSKShrinkRect(aRect, 1.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
 }
 
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
-	NSRect outlineRect = [self adjustedFrame:cellFrame inView:controlView];
-    NSRect outerShadowRect, innerShadowRect;
-	NSGradient *gradient = nil;
-    
-    outerShadowRect = BDSKSliceRect(cellFrame, 10.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
-    innerShadowRect = BDSKSliceRect(NSInsetRect(cellFrame, 1.0, 1.0), 10.0, [controlView isFlipped] ? NSMinYEdge : NSMaxYEdge);
-    
-	[[NSColor colorWithCalibratedWhite:1.0 alpha:0.394] set];
-	[[NSBezierPath bezierPathWithRoundedRect:outerShadowRect xRadius:3.6 yRadius:3.6] fill];
-	
-	if ([[controlView window] isMainWindow] || [[controlView window] isKeyWindow])
-		gradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.24 alpha:1.0] endingColor:[NSColor colorWithCalibratedWhite:0.374 alpha:1.0]];
-	else
-		gradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.55 alpha:1.0] endingColor:[NSColor colorWithCalibratedWhite:0.558 alpha:1.0]];
-	[gradient drawInBezierPath:[NSBezierPath bezierPathWithRoundedRect:outlineRect xRadius:3.6 yRadius:3.6] angle:[controlView isFlipped] ? 90.0 : 270.0];
-	[gradient release];
-    
-	[[NSColor colorWithCalibratedWhite:0.88 alpha:1.0] set];
-	[[NSBezierPath bezierPathWithRoundedRect:innerShadowRect xRadius:2.9 yRadius:2.9] fill];
-	
-	[[NSColor whiteColor] set];
-	[[NSBezierPath bezierPathWithRoundedRect:NSInsetRect(cellFrame, 1.0, 2.0) xRadius:2.6 yRadius:2.6] fill];
-	
-    [self drawInteriorWithFrame:cellFrame inView:controlView];
-    
-	if ([self showsFirstResponder]) {	
-		[NSGraphicsContext saveGraphicsState];
-		NSSetFocusRingStyle(NSFocusRingOnly);
-		[[NSBezierPath bezierPathWithRoundedRect:outlineRect xRadius:3.6 yRadius:3.6] fill]; 
-		[NSGraphicsContext restoreGraphicsState];
-	}
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_9) {
+        
+        [super drawWithFrame:cellFrame inView:controlView];
+        
+    } else {
+        
+        NSRect outlineRect = [self adjustedFrame:cellFrame inView:controlView];
+        NSRect outerShadowRect, innerShadowRect;
+        NSGradient *gradient = nil;
+        
+        outerShadowRect = BDSKSliceRect(cellFrame, 10.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
+        innerShadowRect = BDSKSliceRect(NSInsetRect(cellFrame, 1.0, 1.0), 10.0, [controlView isFlipped] ? NSMinYEdge : NSMaxYEdge);
+        
+        [[NSColor colorWithCalibratedWhite:1.0 alpha:0.394] set];
+        [[NSBezierPath bezierPathWithRoundedRect:outerShadowRect xRadius:3.6 yRadius:3.6] fill];
+        
+        if ([[controlView window] isMainWindow] || [[controlView window] isKeyWindow])
+            gradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.24 alpha:1.0] endingColor:[NSColor colorWithCalibratedWhite:0.374 alpha:1.0]];
+        else
+            gradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.55 alpha:1.0] endingColor:[NSColor colorWithCalibratedWhite:0.558 alpha:1.0]];
+        [gradient drawInBezierPath:[NSBezierPath bezierPathWithRoundedRect:outlineRect xRadius:3.6 yRadius:3.6] angle:[controlView isFlipped] ? 90.0 : 270.0];
+        [gradient release];
+        
+        [[NSColor colorWithCalibratedWhite:0.88 alpha:1.0] set];
+        [[NSBezierPath bezierPathWithRoundedRect:innerShadowRect xRadius:2.9 yRadius:2.9] fill];
+        
+        [[NSColor whiteColor] set];
+        [[NSBezierPath bezierPathWithRoundedRect:NSInsetRect(cellFrame, 1.0, 2.0) xRadius:2.6 yRadius:2.6] fill];
+        
+        [self drawInteriorWithFrame:cellFrame inView:controlView];
+        
+        if ([self showsFirstResponder]) {	
+            [NSGraphicsContext saveGraphicsState];
+            NSSetFocusRingStyle(NSFocusRingOnly);
+            [[NSBezierPath bezierPathWithRoundedRect:outlineRect xRadius:3.6 yRadius:3.6] fill]; 
+            [NSGraphicsContext restoreGraphicsState];
+        }
+        
+    }
 }
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
