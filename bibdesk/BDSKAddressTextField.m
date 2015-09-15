@@ -49,9 +49,12 @@
 }
 
 - (void)makeButton {
+    CGFloat offset = BUTTON_MARGIN;
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_9)
+        offset += 1.0;
     NSRect rect, bounds = [self bounds];
     rect.origin.x = NSMaxX(bounds) - BUTTON_SIZE - BUTTON_MARGIN;
-    rect.origin.y = [self isFlipped] ? NSMinY(bounds) + BUTTON_MARGIN : NSMaxY(bounds) - BUTTON_SIZE - BUTTON_MARGIN;
+    rect.origin.y = [self isFlipped] ? NSMinY(bounds) + offset : NSMaxY(bounds) - BUTTON_SIZE - offset;
     rect.size.width = rect.size.height = BUTTON_SIZE;
     button = [[NSButton alloc] initWithFrame:rect];
     [button setButtonType:NSMomentaryChangeButton];
