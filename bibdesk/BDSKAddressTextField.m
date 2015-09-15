@@ -40,7 +40,8 @@
 #import "BDSKAddressTextFieldCell.h"
 
 #define BUTTON_SIZE 16.0
-#define BUTTON_MARGIN 3.0
+#define BUTTON_MARGIN_X 3.0
+#define BUTTON_MARGIN_Y 2.0
 
 @implementation BDSKAddressTextField
 
@@ -49,12 +50,9 @@
 }
 
 - (void)makeButton {
-    CGFloat offset = BUTTON_MARGIN;
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_9)
-        offset += 1.0;
-    NSRect rect, bounds = [self bounds];
-    rect.origin.x = NSMaxX(bounds) - BUTTON_SIZE - BUTTON_MARGIN;
-    rect.origin.y = [self isFlipped] ? NSMinY(bounds) + offset : NSMaxY(bounds) - BUTTON_SIZE - offset;
+    NSRect rect, bounds = [[self cell] adjustedFrame:[self bounds] inView:self];
+    rect.origin.x = NSMaxX(bounds) - BUTTON_SIZE - BUTTON_MARGIN_X;
+    rect.origin.y = [self isFlipped] ? NSMaxY(bounds) - BUTTON_SIZE - BUTTON_MARGIN_Y : NSMinY(bounds) + BUTTON_MARGIN_Y;
     rect.size.width = rect.size.height = BUTTON_SIZE;
     button = [[NSButton alloc] initWithFrame:rect];
     [button setButtonType:NSMomentaryChangeButton];
