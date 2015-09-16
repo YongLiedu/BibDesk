@@ -49,25 +49,29 @@
     return [BDSKAddressTextFieldCell class];
 }
 
-- (void)makeButton {
-    NSRect rect, bounds = [[self cell] adjustedFrame:[self bounds] inView:self];
-    rect.origin.x = NSMaxX(bounds) - BUTTON_SIZE - BUTTON_MARGIN_X;
-    rect.origin.y = [self isFlipped] ? NSMaxY(bounds) - BUTTON_SIZE - BUTTON_MARGIN_Y : NSMinY(bounds) + BUTTON_MARGIN_Y;
-    rect.size.width = rect.size.height = BUTTON_SIZE;
-    button = [[NSButton alloc] initWithFrame:rect];
-    [button setButtonType:NSMomentaryChangeButton];
-    [button setBordered:NO];
-    [button setImagePosition:NSImageOnly];
-    [[button cell] setImageScaling:NSImageScaleProportionallyDown];
-    [button setAutoresizingMask:NSViewMinXMargin | NSViewMaxYMargin];
-    [button setRefusesFirstResponder:YES];
-    [self addSubview:button];
+- (void)commonInit {
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_9)
+        [[self cell] setBezelStyle:NSTextFieldRoundedBezel];
+    if (button == nil) {
+        NSRect rect, bounds = [[self cell] adjustedFrame:[self bounds] inView:self];
+        rect.origin.x = NSMaxX(bounds) - BUTTON_SIZE - BUTTON_MARGIN_X;
+        rect.origin.y = [self isFlipped] ? NSMaxY(bounds) - BUTTON_SIZE - BUTTON_MARGIN_Y : NSMinY(bounds) + BUTTON_MARGIN_Y;
+        rect.size.width = rect.size.height = BUTTON_SIZE;
+        button = [[NSButton alloc] initWithFrame:rect];
+        [button setButtonType:NSMomentaryChangeButton];
+        [button setBordered:NO];
+        [button setImagePosition:NSImageOnly];
+        [[button cell] setImageScaling:NSImageScaleProportionallyDown];
+        [button setAutoresizingMask:NSViewMinXMargin | NSViewMaxYMargin];
+        [button setRefusesFirstResponder:YES];
+        [self addSubview:button];
+    }
 }
 
 - (id)initWithFrame:(NSRect)frameRect {
     self = [super initWithFrame:frameRect];
     if (self) {
-        [self makeButton];
+        [self commonInit];
     }
     return self;
 }
@@ -96,8 +100,7 @@
             [myCell release];
         }
         button = [[aDecoder decodeObjectForKey:@"button"] retain];
-        if (button == nil)
-            [self makeButton];
+        [self commonInit];
     }
     return self;
 }
@@ -122,7 +125,7 @@
 }
 
 - (void)viewWillMoveToWindow:(NSWindow *)newWindow {
-    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_9) {
+    if ([[self cell] bezelStyle] == NSTextFieldRoundedBezel) {
         NSWindow *oldWindow = [self window];
         if (oldWindow) {
             NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];

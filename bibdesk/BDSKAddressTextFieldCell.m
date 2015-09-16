@@ -44,13 +44,9 @@
 
 + (Class)formatterClass { return Nil; }
 
-- (NSTextFieldBezelStyle)bezelStyle {
-    return floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_9 ? NSTextFieldRoundedBezel : [super bezelStyle];
-}
-
 - (NSSize)cellSizeForBounds:(NSRect)aRect {
     NSSize cellSize = [super cellSizeForBounds:aRect];
-    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_9)
+    if ([self bezelStyle] != NSTextFieldRoundedBezel)
         cellSize.height = fmin(cellSize.height + 1.0, NSHeight(aRect));
     return cellSize;
 }
@@ -60,13 +56,13 @@
 }
 
 - (NSRect)adjustedFrame:(NSRect)aRect inView:(NSView *)controlView {
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_9)
+    if ([self bezelStyle] == NSTextFieldRoundedBezel)
         return aRect;
     return BDSKShrinkRect(aRect, 1.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
 }
 
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_9) {
+    if ([self bezelStyle] == NSTextFieldRoundedBezel) {
         
         [super drawWithFrame:cellFrame inView:controlView];
         
