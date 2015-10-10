@@ -732,7 +732,7 @@ static BOOL changingColors = NO;
         
         for (BibItem *pub in [self clickedOrSelectedPublications]) {
             if ((fileURL = [pub localFileURLForField:field]))
-                [[NSWorkspace sharedWorkspace]  selectFile:[fileURL path] inFileViewerRootedAtPath:nil];
+                [[NSWorkspace sharedWorkspace]  selectFile:[fileURL path] inFileViewerRootedAtPath:@""];
         }
     }
     [field release];
@@ -905,7 +905,7 @@ static BOOL changingColors = NO;
         NSArray *urls = [(NSArray *)contextInfo autorelease] ?: [self clickedOrSelectedFileURLs];
         for (NSURL *fileURL in urls) {
             if ([fileURL isEqual:[NSNull null]] == NO) {
-                [[NSWorkspace sharedWorkspace]  selectFile:[fileURL path] inFileViewerRootedAtPath:nil];
+                [[NSWorkspace sharedWorkspace]  selectFile:[fileURL path] inFileViewerRootedAtPath:@""];
             }
         }
     }
