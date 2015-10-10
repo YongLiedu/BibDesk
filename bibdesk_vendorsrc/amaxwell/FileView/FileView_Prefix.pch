@@ -98,6 +98,17 @@ typedef float CGFloat;
 @end
 #endif
 
+#ifndef MAC_OS_X_VERSION_10_11
+@protocol WebFrameloadDelegate <NSObject>
+@end
+@protocol WebPolicyDelegate <NSObject>
+@end
+@protocol WebResourceLoadDelegate <NSObject>
+@end
+@protocol WebUIDelegate <NSObject>
+@end
+#endif
+
 #ifndef DEBUG
 #if !defined(NS_BLOCK_ASSERTIONS)
 #define NS_BLOCK_ASSERTIONS 1

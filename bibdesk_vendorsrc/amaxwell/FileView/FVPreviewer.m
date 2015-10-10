@@ -51,6 +51,9 @@ NSString * const FVPreviewerWillCloseNotification = @"FVPreviewerWillCloseNotifi
 @end
 #endif
 
+@interface FVPreviewer () <WebFrameLoadDelegate>
+@end
+
 @implementation FVPreviewer
 
 + (FVPreviewer *)sharedPreviewer;

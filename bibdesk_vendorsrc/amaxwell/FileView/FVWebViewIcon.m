@@ -60,6 +60,9 @@
 
 @end
 
+@interface FVWebViewIcon () <WebFrameLoadDelegate, WebPolicyDelegate, WebResourceLoadDelegate>
+@end
+
 @implementation FVWebViewIcon
 
 // limit number of loading views to keep memory usage down; size is tunable

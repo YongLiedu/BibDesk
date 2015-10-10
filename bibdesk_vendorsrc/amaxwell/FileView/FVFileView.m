@@ -2549,7 +2549,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     return mask;
 }
 
-- (void)dragImage:(NSImage *)anImage at:(NSPoint)viewLocation offset:(NSSize)unused event:(NSEvent *)event pasteboard:(NSPasteboard *)pboard source:(id)sourceObj slideBack:(BOOL)slideFlag;
+- (void)dragImageForEvent:(NSEvent *)event pasteboard:(NSPasteboard *)pboard;
 {
     NSUInteger r, c, cMin = NSUIntegerMax, cMax = 0, rMin = NSUIntegerMax, rMax = 0;
     NSUInteger i = [_selectionIndexes firstIndex];
@@ -2590,7 +2590,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     
     NSPoint dragPoint = NSMakePoint(NSMinX(rect), NSMaxY(rect));
     
-    [super dragImage:dragImage at:dragPoint offset:unused event:event pasteboard:pboard source:sourceObj slideBack:slideFlag];
+    [super dragImage:dragImage at:dragPoint offset:NSZeroSize event:event pasteboard:pboard source:self slideBack:YES];
 }
 
 #pragma mark Drop target
@@ -3249,8 +3249,7 @@ static NSRect _rectWithCorners(const NSPoint aPoint, const NSPoint bPoint) {
             // Finder will create weblocs for us unless schemes are mixed (gives a stupid file busy error message)
             
             if (FVWriteURLsToPasteboard(selectedURLs, pboard)) {
-                // OK to pass nil for the image, since we totally ignore it anyway
-                [self dragImage:nil at:p offset:NSZeroSize event:event pasteboard:pboard source:self slideBack:YES];
+                [self dragImageForEvent:event pasteboard:pboard];
             }
         }
         else {
@@ -3538,7 +3537,7 @@ static NSRect _rectWithCorners(const NSPoint aPoint, const NSPoint bPoint) {
 
 - (IBAction)revealInFinder:(id)sender
 {
-    [[NSWorkspace sharedWorkspace] selectFile:[[[self _selectedURLs] lastObject] path] inFileViewerRootedAtPath:nil];
+    [[NSWorkspace sharedWorkspace] selectFile:[[[self _selectedURLs] lastObject] path] inFileViewerRootedAtPath:@""];
 }
 
 - (IBAction)openSelectedURLs:(id)sender
