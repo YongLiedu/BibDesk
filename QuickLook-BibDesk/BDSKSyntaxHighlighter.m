@@ -51,7 +51,7 @@
 + (NSData *)RTFDataWithBibTeXString:(NSString *)aString;
 {
     NSAttributedString *attrString = [self highlightedStringWithBibTeXString:aString];
-    return [attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil];
+    return [attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:[NSDictionary dictionaryWithObjectsAndKeys:NSRTFTextDocumentType, NSDocumentTypeDocumentAttribute, nil]];
 }
 
 static inline Boolean isLeftBrace(UniChar ch) { return ch == '{'; }
