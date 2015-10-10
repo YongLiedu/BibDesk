@@ -227,7 +227,7 @@
 		0867D690FE84028FC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0640;
+				LastUpgradeCheck = 0700;
 			};
 			buildConfigurationList = F93566970912D572002B6957 /* Build configuration list for PBXProject "AGRegex" */;
 			compatibilityVersion = "Xcode 3.2";
