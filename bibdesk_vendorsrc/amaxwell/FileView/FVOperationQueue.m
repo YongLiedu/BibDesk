@@ -127,9 +127,12 @@ static Class FVOperationQueueClass = Nil;
 
 @implementation FVPlaceholderOperationQueue
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 - (id)init {
     return (id)[[FVConcreteOperationQueue allocWithZone:[self zone]] init];
 }
+#pragma clang diagnostic pop
 
 - (id)retain { return self; }
 
