@@ -430,6 +430,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ENABLE_TESTABILITY = YES;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 			};
