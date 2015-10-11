@@ -1164,7 +1164,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 		
 		[self setPubFields:newFields];
 		
-		NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:nil]; // cmh: maybe not the best info, but handled correctly
+		NSDictionary *notifInfo = [NSDictionary dictionary]; // cmh: maybe not the best info, but handled correctly
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 															object:self
 														  userInfo:notifInfo];

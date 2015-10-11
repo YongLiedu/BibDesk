@@ -100,11 +100,12 @@ enum {
 + (NSImage *)cornerColumnsImage {
     static NSImage *cornerColumnsImage = nil;
     if (cornerColumnsImage == nil) {
+        NSView *view = nil;
         cornerColumnsImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 17.0)];
         [cornerColumnsImage lockFocus];
         NSCell *cell = [[[NSTableHeaderCell alloc] initTextCell:@""] autorelease];
-        [cell drawWithFrame:NSMakeRect(0.0, 0.0, 16.0, 17.0) inView:nil];
-        [cell drawWithFrame:NSMakeRect(0.0, 0.0, 1.0, 17.0) inView:nil];
+        [cell drawWithFrame:NSMakeRect(0.0, 0.0, 16.0, 17.0) inView:view];
+        [cell drawWithFrame:NSMakeRect(0.0, 0.0, 1.0, 17.0) inView:view];
         NSBezierPath *path = [NSBezierPath bezierPath];
         [path moveToPoint:NSMakePoint(7.0, 5.5)];
         [path lineToPoint:NSMakePoint(3.5, 5.5)];

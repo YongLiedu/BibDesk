@@ -40,6 +40,11 @@
 #import "NSPasteboard_BDSKExtensions.h"
 
 
+@interface NSDocumentController (BDSKDeprecated1)
+// we don't want this to be flagged as deprecated, because Apple's replacement using UTIs is too buggy, and there's no replacement for this method
+- (NSArray *)fileExtensionsFromType:(NSString *)documentTypeName;
+@end
+
 @implementation BDSKFileMatchConfigController
 
 - (id)init

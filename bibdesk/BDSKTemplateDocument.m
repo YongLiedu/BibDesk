@@ -288,7 +288,7 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
     NSData *data = nil;
     if (richText) {
         NSAttributedString *attrString = [self attributedString];
-        data = [attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil];
+        data = [attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:[NSDictionary dictionaryWithObjectsAndKeys:NSRTFTextDocumentType, NSDocumentTypeDocumentAttribute, nil]];
     } else {
         data = [[self string] dataUsingEncoding:NSUTF8StringEncoding];
     }
@@ -304,7 +304,7 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
     richText = [typeName isEqualToString:BDSKRichTextTemplateDocumentType];
     
     if ([self isRichText]) {
-        attrString = [[[NSAttributedString alloc] initWithData:data options:nil documentAttributes:NULL error:NULL] autorelease];
+        attrString = [[[NSAttributedString alloc] initWithData:data options:[NSDictionary dictionary] documentAttributes:NULL error:NULL] autorelease];
         str = [attrString string];
     } else {
         str = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];

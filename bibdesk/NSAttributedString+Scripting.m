@@ -43,7 +43,7 @@
 @implementation NSAttributedString (BDSKScripting)
 
 - (NSString *)scriptingName {
-    return [[self RTFFromRange:NSMakeRange(0, [self length]) documentAttributes:nil] hexString];
+    return [[self RTFFromRange:NSMakeRange(0, [self length]) documentAttributes:[NSDictionary dictionaryWithObjectsAndKeys:NSRTFTextDocumentType, NSDocumentTypeDocumentAttribute, nil]] hexString];
 }
 
 - (NSTextStorage *)scriptingRichText {
@@ -67,7 +67,7 @@
 @implementation NSTextStorage (BDSKScripting)
 
 - (id)scriptingRTF {
-    return [self RTFFromRange:NSMakeRange(0, [self length]) documentAttributes:nil];
+    return [self RTFFromRange:NSMakeRange(0, [self length]) documentAttributes:[NSDictionary dictionaryWithObjectsAndKeys:NSRTFTextDocumentType, NSDocumentTypeDocumentAttribute, nil]];
 }
 
 - (void)setScriptingRTF:(id)data {

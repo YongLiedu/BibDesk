@@ -663,7 +663,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     [layoutManager retain];			// Temporarily remove layout manager so it doesn't do any work while loading
     [text removeLayoutManager:layoutManager];
     [text beginEditing];			// Bracket with begin/end editing for efficiency
-    [text readFromURL:url options:nil documentAttributes:NULL];	// Read!
+    [text readFromURL:url options:[NSDictionary dictionary] documentAttributes:NULL];	// Read!
     [text endEditing];
     [text addLayoutManager:layoutManager];	// Hook layout manager back up
     [layoutManager release];

@@ -403,7 +403,7 @@
         if (idx == NSOutlineViewDropOnItemIndex)
             return NSDragOperationNone;
         if ([draggedTemplate isLeaf]) {
-            if ([[item children] containsObject:draggedTemplate] && idx > 0)
+            if ([(NSArray *)[item children] containsObject:draggedTemplate] && idx > 0)
                 return NSDragOperationMove;
         } else {
             if (item == nil)
@@ -508,7 +508,7 @@
         return YES;
     } else if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPasteboardTypeTemplateRows, nil]]) {
         if ([draggedTemplate isLeaf]) {
-            NSUInteger sourceIndex = [[item children] indexOfObject:draggedTemplate];
+            NSUInteger sourceIndex = [(NSArray *)[item children] indexOfObject:draggedTemplate];
             if (sourceIndex == NSNotFound)
                 return NO;
             if ((NSInteger)sourceIndex < idx)

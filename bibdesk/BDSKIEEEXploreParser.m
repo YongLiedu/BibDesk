@@ -225,7 +225,7 @@ static NSMutableArray *_finishedDownloads = nil;
          Using stringByConvertingHTMLToTeX will screw up too much stuff here, so that's not really an option.
          */
         
-        NSAttributedString * attrString = [[[NSAttributedString alloc] initWithHTML:[download result] options:nil documentAttributes:NULL] autorelease];
+        NSAttributedString * attrString = [[[NSAttributedString alloc] initWithHTML:[download result] options:[NSDictionary dictionary] documentAttributes:NULL] autorelease];
         NSString * bibTeXString = [[attrString string] stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
         
         /*

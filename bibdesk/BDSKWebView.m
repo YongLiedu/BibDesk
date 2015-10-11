@@ -55,7 +55,7 @@
 
 #pragma mark -
 
-@interface BDSKWebDelegate : NSObject {
+@interface BDSKWebDelegate : NSObject <WebFrameLoadDelegate, WebUIDelegate> {
     id <BDSKWebViewDelegate> delegate;
     id <BDSKWebViewNavigationDelegate> navigationDelegate;
     NSUndoManager *undoManager;    
@@ -72,7 +72,7 @@
 #pragma mark -
 
 // workaround for loading a URL from a javasecript window.open event http://stackoverflow.com/questions/270458/cocoa-webkit-having-window-open-javascipt-links-opening-in-an-instance-of-safa
-@interface BDSKNewWebWindowHandler : NSObject {
+@interface BDSKNewWebWindowHandler : NSObject <WebPolicyDelegate> {
     WebView *webView;
 }
 + (id)sharedHandler;
@@ -155,7 +155,7 @@
 - (void)revealLink:(id)sender {
 	NSURL *linkURL = (NSURL *)[[sender representedObject] objectForKey:WebElementLinkURLKey];
     if ([linkURL isFileURL])
-        [[NSWorkspace sharedWorkspace] selectFile:[linkURL path] inFileViewerRootedAtPath:nil];
+        [[NSWorkspace sharedWorkspace] selectFile:[linkURL path] inFileViewerRootedAtPath:@""];
     else
         NSBeep();
 }

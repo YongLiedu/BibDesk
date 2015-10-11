@@ -333,7 +333,7 @@ static void fsevents_callback(FSEventStreamRef streamRef, void *clientCallBackIn
                                              defaultButton:NSLocalizedString(@"OK", @"Button title")
                                            alternateButton:NSLocalizedString(@"Show", @"Button title")
                                                otherButton:nil
-                                 informativeTextWithFormat:nil];
+                                 informativeTextWithFormat:@""];
             if ([alert runModal] == NSAlertAlternateReturn) {
                 [wm selectFile:scriptFilename inFileViewerRootedAtPath:@""];
             }

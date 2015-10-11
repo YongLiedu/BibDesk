@@ -480,7 +480,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     
     for (fileURL in urls) {
         if ([fileURL isEqual:[NSNull null]] == NO) {
-            [[NSWorkspace sharedWorkspace]  selectFile:[fileURL path] inFileViewerRootedAtPath:nil];
+            [[NSWorkspace sharedWorkspace]  selectFile:[fileURL path] inFileViewerRootedAtPath:@""];
         }
     }
 }
@@ -1729,7 +1729,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
             NSString *folderPath = [path stringByDeletingLastPathComponent];
             NSString *fileName = [path lastPathComponent];
             NSInteger tag = 0;
-            [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:folderPath destination:nil files:[NSArray arrayWithObjects:fileName, nil] tag:&tag];
+            [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:folderPath destination:@"" files:[NSArray arrayWithObjects:fileName, nil] tag:&tag];
         }
     }
 }

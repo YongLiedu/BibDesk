@@ -308,7 +308,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
         if(type == 1)
             [ws openLinkedURL:[NSURL fileURLWithPath:path]];
         else
-            [ws selectFile:path inFileViewerRootedAtPath:nil];
+            [ws selectFile:path inFileViewerRootedAtPath:@""];
     }
 }   
 
@@ -320,7 +320,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
             NSString *folderPath = [path stringByDeletingLastPathComponent];
             NSString *fileName = [path lastPathComponent];
             NSInteger tag = 0;
-            [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:folderPath destination:nil files:[NSArray arrayWithObjects:fileName, nil] tag:&tag];
+            [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:folderPath destination:@"" files:[NSArray arrayWithObjects:fileName, nil] tag:&tag];
         }
     }
 }

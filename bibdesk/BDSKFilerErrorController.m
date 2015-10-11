@@ -185,13 +185,13 @@
             if(statusFlag & BDSKSourceFileDoesNotExistErrorMask)
                 return;
             path = [[[dict objectForKey:BDSKFilerFileKey] URL] path];
-            [[NSWorkspace sharedWorkspace]  selectFile:path inFileViewerRootedAtPath:nil];
+            [[NSWorkspace sharedWorkspace]  selectFile:path inFileViewerRootedAtPath:@""];
             break;
         case 1:
             if(!(statusFlag & BDSKTargetFileExistsErrorMask))
                 return;
             path = [dict objectForKey:BDSKFilerNewPathKey];
-            [[NSWorkspace sharedWorkspace]  selectFile:path inFileViewerRootedAtPath:nil];
+            [[NSWorkspace sharedWorkspace]  selectFile:path inFileViewerRootedAtPath:@""];
             break;
         case 2:
             pub = [dict objectForKey:BDSKFilerPublicationKey];

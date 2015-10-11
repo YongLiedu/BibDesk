@@ -171,7 +171,7 @@
                     }
                     image = [[NSImage alloc] initWithSize:iconRect.size];
                     [image lockFocus];
-                    [[self cell] drawInteriorWithFrame:NSMakeRect(-NSMinX(iconRect), -NSMinY(iconRect), NSMaxX(iconRect), boundsHeight) inView:nil];
+                    [[self cell] drawInteriorWithFrame:NSMakeRect(-NSMinX(iconRect), -NSMinY(iconRect), NSMaxX(iconRect), boundsHeight) inView:self];
                     [image unlockFocus];
                     dragImage = [[[NSImage alloc] initWithSize:iconRect.size] autorelease];
                     [dragImage lockFocus];

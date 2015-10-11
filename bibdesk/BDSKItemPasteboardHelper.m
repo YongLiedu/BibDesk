@@ -195,7 +195,7 @@
                                 [pageString release];
                         }
                         [attrString endEditing];
-                        data = [attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil];
+                        data = [attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:[NSDictionary dictionaryWithObjectsAndKeys:NSRTFTextDocumentType, NSDocumentTypeDocumentAttribute, nil]];
                         [attrString release];
                         [pdfDoc release];
                     }

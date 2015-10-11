@@ -216,7 +216,7 @@
 }
 
 - (BOOL)canConnect {
-    CFNetDiagnosticRef diagnostic = CFNetDiagnosticCreateWithURL(NULL, (CFURLRef)self);
+    CFNetDiagnosticRef diagnostic = CFNetDiagnosticCreateWithURL(kCFAllocatorDefault, (CFURLRef)self);
     
     NSString *details;
     CFNetDiagnosticStatus status = CFNetDiagnosticCopyNetworkStatusPassively(diagnostic, (CFStringRef *)&details);
