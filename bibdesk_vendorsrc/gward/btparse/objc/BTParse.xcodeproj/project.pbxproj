@@ -325,6 +325,7 @@
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				LIBRARY_STYLE = DYNAMIC;
 				MACH_O_TYPE = mh_dylib;
+				PRODUCT_BUNDLE_IDENTIFIER = net.sourceforge.bibdesk.btparse;
 				PRODUCT_NAME = BTParse;
 				WRAPPER_EXTENSION = framework;
 				ZERO_LINK = NO;
@@ -346,6 +347,7 @@
 				LIBRARY_STYLE = DYNAMIC;
 				MACH_O_TYPE = mh_dylib;
 				OTHER_LDFLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = net.sourceforge.bibdesk.btparse;
 				PRODUCT_NAME = BTParse;
 				WRAPPER_EXTENSION = framework;
 				ZERO_LINK = NO;

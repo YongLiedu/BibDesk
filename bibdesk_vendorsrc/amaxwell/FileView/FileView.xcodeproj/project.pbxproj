@@ -891,6 +891,7 @@
 				IBC_STRIP_NIBS = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "@executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.mac.amaxwell.fileview;
 				PRODUCT_NAME = FileView;
 				WRAPPER_EXTENSION = framework;
 				ZERO_LINK = NO;
@@ -911,6 +912,7 @@
 				IBC_STRIP_NIBS = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "@executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.mac.amaxwell.fileview;
 				PRODUCT_NAME = FileView;
 				WRAPPER_EXTENSION = framework;
 				ZERO_LINK = NO;

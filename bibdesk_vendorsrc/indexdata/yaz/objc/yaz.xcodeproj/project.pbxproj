@@ -1272,6 +1272,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = yaz_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = net.sourceforge.bibdesk.yaz;
 				PRODUCT_NAME = yaz;
 				WRAPPER_EXTENSION = framework;
 				ZERO_LINK = NO;
@@ -1292,6 +1293,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = yaz_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = net.sourceforge.bibdesk.yaz;
 				PRODUCT_NAME = yaz;
 				WRAPPER_EXTENSION = framework;
 			};
