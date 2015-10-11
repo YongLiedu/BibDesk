@@ -262,6 +262,7 @@
 				LIBRARY_STYLE = Bundle;
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = net.sourceforge.bibdesk.bibimporter;
 				PRODUCT_NAME = BibImporter;
 				WRAPPER_EXTENSION = mdimporter;
 			};
@@ -276,6 +277,7 @@
 				LIBRARY_STYLE = Bundle;
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = net.sourceforge.bibdesk.bibimporter;
 				PRODUCT_NAME = BibImporter;
 				WRAPPER_EXTENSION = mdimporter;
 			};
