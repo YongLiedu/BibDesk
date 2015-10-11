@@ -837,6 +837,7 @@
 		CE095D50135C52B5000E4396 /* BDSKSelectCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSelectCommand.m; sourceTree = "<group>"; };
 		CE09CEA40DDEF65E00F3F2FE /* BDSKCompletionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKCompletionManager.h; sourceTree = "<group>"; };
 		CE09CEA50DDEF65E00F3F2FE /* BDSKCompletionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKCompletionManager.m; sourceTree = "<group>"; };
+		CE0A7E6D1BCAB00600E4AD29 /* SkimNotesBase.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SkimNotesBase.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE0AB6FE14BB019400638C8F /* BDSKMASParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKMASParser.h; sourceTree = "<group>"; };
 		CE0AB6FF14BB019400638C8F /* BDSKMASParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKMASParser.m; sourceTree = "<group>"; };
 		CE0B3B3A1292E1A500BA05EB /* BDSKErrorObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKErrorObject.m; sourceTree = "<group>"; };
@@ -1149,7 +1150,6 @@
 		CE97A3B90A28F19A00CF2DF3 /* Templates */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Templates; sourceTree = "<group>"; };
 		CE9F853E0956A2C50073FCAD /* BDSKFieldEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFieldEditor.h; sourceTree = "<group>"; };
 		CE9F853F0956A2C50073FCAD /* BDSKFieldEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFieldEditor.m; sourceTree = "<group>"; };
-		CEA451600E47C88E00D161AD /* SkimNotes.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SkimNotes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEA4989F1481183600AB81C5 /* BDSKAddressTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKAddressTextField.h; sourceTree = "<group>"; };
 		CEA498A01481183600AB81C5 /* BDSKAddressTextField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKAddressTextField.m; sourceTree = "<group>"; };
 		CEA498A31481185100AB81C5 /* BDSKAddressTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKAddressTextFieldCell.h; sourceTree = "<group>"; };
@@ -1959,7 +1959,7 @@
 				F9022DE30758095000C3F701 /* AGRegex.framework */,
 				F9ABEC9E086E11B500741FC5 /* BTParse.framework */,
 				CE2BB5920E0BE1370090E848 /* FileView.framework */,
-				CEA451600E47C88E00D161AD /* SkimNotes.framework */,
+				CE0A7E6D1BCAB00600E4AD29 /* SkimNotesBase.framework */,
 				CEB34C3F0F5D496A0037E086 /* Sparkle.framework */,
 			);
 			name = "Embedded Frameworks";
