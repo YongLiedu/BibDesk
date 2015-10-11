@@ -269,6 +269,7 @@
 				IBC_STRIP_NIBS = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = /Library/QuickLook;
+				PRODUCT_BUNDLE_IDENTIFIER = net.sourceforge.bibdesk.quicklookgenerator;
 				PRODUCT_NAME = BibDesk;
 				WRAPPER_EXTENSION = qlgenerator;
 				ZERO_LINK = YES;
@@ -285,6 +286,7 @@
 				IBC_STRIP_NIBS = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = /Library/QuickLook;
+				PRODUCT_BUNDLE_IDENTIFIER = net.sourceforge.bibdesk.quicklookgenerator;
 				PRODUCT_NAME = BibDesk;
 				WRAPPER_EXTENSION = qlgenerator;
 			};
