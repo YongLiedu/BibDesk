@@ -142,13 +142,43 @@
 
 #pragma mark Downloading
 
-- (void)downloadDidCreateDestination:(NSString *)path
+- (void)retrievePublications;
+{
+    NSURL *theURL = [self URL];
+    if ([theURL isFileURL]) {
+        NSString *path = [[theURL fileURLByResolvingAliases] path];
+        BOOL isDir = NO;
+        if([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir] && NO == isDir){
+            [self download:URLDownload didCreateDestination:path];
+            [self downloadDidFinish:URLDownload];
+        } else {
+            NSError *error = [NSError mutableLocalErrorWithCode:kBDSKFileNotFound localizedDescription:nil];
+            if (isDir)
+                [error setValue:NSLocalizedString(@"URL points to a directory instead of a file", @"Error description") forKey:NSLocalizedDescriptionKey];
+            else
+                [error setValue:NSLocalizedString(@"The URL points to a file that does not exist", @"Error description") forKey:NSLocalizedDescriptionKey];
+            [error setValue:[theURL path] forKey:NSFilePathErrorKey];
+            [self download:URLDownload didFailWithError:error];
+        }
+    } else {
+        NSURLRequest *request = [NSURLRequest requestWithURL:theURL];
+        // we use a WebDownload since it's supposed to add authentication dialog capability
+        if ([self isRetrieving])
+            [URLDownload cancel];
+        [URLDownload release];
+        URLDownload = [[WebDownload alloc] initWithRequest:request delegate:self];
+        [URLDownload setDestination:[[NSFileManager defaultManager] temporaryFileWithBasename:nil] allowOverwrite:NO];
+        isRetrieving = YES;
+    }
+}
+
+- (void)download:(NSURLDownload *)download didCreateDestination:(NSString *)path
 {
     [filePath autorelease];
     filePath = [path copy];
 }
 
-- (void)downloadDidFinish
+- (void)downloadDidFinish:(NSURLDownload *)download
 {
     isRetrieving = NO;
     failedDownload = NO;
@@ -180,7 +210,7 @@
     [self setPublications:pubs];
 }
 
-- (void)downloadDidFailWithError:(NSError *)error
+- (void)download:(NSURLDownload *)download didFailWithError:(NSError *)error
 {
     isRetrieving = NO;
     failedDownload = YES;
@@ -190,50 +220,6 @@
     
     // redraw 
     [self setPublications:nil];
-}
-
-- (void)download:(NSURLDownload *)download didCreateDestination:(NSString *)path {
-    [self downloadDidCreateDestination:path];
-}
-
-- (void)downloadDidFinish:(NSURLDownload *)download
-{
-    [self downloadDidFinish];
-}
-
-- (void)download:(NSURLDownload *)download didFailWithError:(NSError *)error
-{
-    [self downloadDidFailWithError:error];
-}
-
-- (void)retrievePublications;
-{
-    NSURL *theURL = [self URL];
-    if ([theURL isFileURL]) {
-        NSString *path = [[theURL fileURLByResolvingAliases] path];
-        BOOL isDir = NO;
-        if([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir] && NO == isDir){
-            [self downloadDidCreateDestination:path];
-            [self downloadDidFinish];
-        } else {
-            NSError *error = [NSError mutableLocalErrorWithCode:kBDSKFileNotFound localizedDescription:nil];
-            if (isDir)
-                [error setValue:NSLocalizedString(@"URL points to a directory instead of a file", @"Error description") forKey:NSLocalizedDescriptionKey];
-            else
-                [error setValue:NSLocalizedString(@"The URL points to a file that does not exist", @"Error description") forKey:NSLocalizedDescriptionKey];
-            [error setValue:[theURL path] forKey:NSFilePathErrorKey];
-            [self downloadDidFailWithError:error];
-        }
-    } else {
-        NSURLRequest *request = [NSURLRequest requestWithURL:theURL];
-        // we use a WebDownload since it's supposed to add authentication dialog capability
-        if ([self isRetrieving])
-            [URLDownload cancel];
-        [URLDownload release];
-        URLDownload = [[WebDownload alloc] initWithRequest:request delegate:self];
-        [URLDownload setDestination:[[NSFileManager defaultManager] temporaryFileWithBasename:nil] allowOverwrite:NO];
-        isRetrieving = YES;
-    }
 }
 
 #pragma mark Accessors
