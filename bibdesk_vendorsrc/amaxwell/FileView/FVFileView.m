@@ -2590,7 +2590,7 @@ static NSArray * _wordsFromAttributedString(NSAttributedString *attributedString
     
     NSPoint dragPoint = NSMakePoint(NSMinX(rect), NSMaxY(rect));
     
-    [super dragImage:dragImage at:dragPoint offset:NSZeroSize event:event pasteboard:pboard source:self slideBack:YES];
+    [self dragImage:dragImage at:dragPoint offset:NSZeroSize event:event pasteboard:pboard source:self slideBack:YES];
 }
 
 #pragma mark Drop target
