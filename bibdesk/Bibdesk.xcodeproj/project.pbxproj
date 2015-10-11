@@ -762,7 +762,7 @@
 		3B91DD46162225850088206D /* WOKMWSAuthenticateService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WOKMWSAuthenticateService.m; sourceTree = "<group>"; };
 		3B91DD47162225850088206D /* WokSearchService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WokSearchService.h; sourceTree = "<group>"; };
 		3B91DD48162225850088206D /* WokSearchService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WokSearchService.m; sourceTree = "<group>"; };
-		3B91DD55162229B70088206D /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
+		3B91DD55162229B70088206D /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = /usr/lib/libxml2.dylib; sourceTree = "<absolute>"; };
 		3D0D76B0084898C100A495A5 /* BibPref_Crossref.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibPref_Crossref.h; sourceTree = "<group>"; };
 		3D0D76B1084898C100A495A5 /* BibPref_Crossref.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibPref_Crossref.m; sourceTree = "<group>"; };
 		3D4373AC07FB3E960007BA84 /* gear.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = gear.tiff; sourceTree = "<group>"; };
