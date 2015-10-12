@@ -814,7 +814,7 @@ static void addSubmenuForURLsToItem(NSArray *urls, NSMenuItem *anItem) {
 }
 
 - (void)splitViewDidResizeSubviews:(NSNotification *)aNotification {
-    if ([[aNotification object] isEqual:groupSplitView] || [aNotification object] == nil) {
+    if ([[aNotification object] isEqual:groupSplitView] || aNotification == nil) {
         NSArray *subviews = [groupSplitView subviews];
         BOOL isLeftHidden = [groupSplitView isSubviewCollapsed:[subviews objectAtIndex:0]];
         BOOL isRightHidden = [groupSplitView isSubviewCollapsed:[subviews objectAtIndex:2]];

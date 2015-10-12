@@ -50,14 +50,16 @@
 	[tableView setTarget:self];
 	[tableView setDoubleAction:@selector(showOrChooseScriptFile:)];
     [tableView registerForDraggedTypes:[NSArray arrayWithObjects:(NSString *)kUTTypeFileURL, NSFilenamesPboardType, nil]];
-	[self tableViewSelectionDidChange:[NSNotification notificationWithName:NSTableViewSelectionDidChangeNotification object:nil]];
+    NSNotification *note = nil;
+    [self tableViewSelectionDidChange:note];
 	[tableView reloadData];
 }
 
 - (void)defaultsDidRevert {
     // reset UI, but only if we loaded the nib
     if ([self isViewLoaded]) {
-        [self tableViewSelectionDidChange:[NSNotification notificationWithName:NSTableViewSelectionDidChangeNotification object:nil]];
+        NSNotification *note = nil;
+        [self tableViewSelectionDidChange:note];
         [tableView reloadData];
     }
 }

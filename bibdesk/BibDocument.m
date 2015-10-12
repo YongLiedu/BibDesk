@@ -456,7 +456,8 @@ static NSOperationQueue *metadataCacheQueue = nil;
     if (fract >= 0)
         [splitView setFraction:fract];
     
-    [self splitViewDidResizeSubviews:[NSNotification notificationWithName:NSSplitViewDidResizeSubviewsNotification object:nil]];
+    NSNotification *note = nil;
+    [self splitViewDidResizeSubviews:note];
     
     docState.lastWebViewFraction = [xattrDefaults doubleForKey:BDSKWebViewFractionKey defaultValue:0.0];
     
