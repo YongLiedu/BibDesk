@@ -49,12 +49,6 @@
 #import "BDSKRuntime.h"
 
 
-@interface WebView (BDSKSnowLeopardDeclarations)
-- (void)reloadFromOrigin:(id)sender;
-@end
-
-#pragma mark -
-
 @interface BDSKWebDelegate : NSObject <WebFrameLoadDelegate, WebUIDelegate> {
     id <BDSKWebViewDelegate> delegate;
     id <BDSKWebViewNavigationDelegate> navigationDelegate;
@@ -130,7 +124,7 @@
 #pragma mark Actions
 
 - (IBAction)reload:(id)sender {
-    if (([NSEvent standardModifierFlags] & NSShiftKeyMask) && [self respondsToSelector:@selector(reloadFromOrigin:)])
+    if (([NSEvent standardModifierFlags] & NSShiftKeyMask) != 0)
 		[super reloadFromOrigin:sender];
     else
         [super reload:self];
