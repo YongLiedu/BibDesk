@@ -51,8 +51,10 @@ NSString * const FVPreviewerWillCloseNotification = @"FVPreviewerWillCloseNotifi
 @end
 #endif
 
+#ifdef MAC_OS_X_VERSION_10_11
 @interface FVPreviewer () <WebFrameLoadDelegate>
 @end
+#endif
 
 @implementation FVPreviewer
 

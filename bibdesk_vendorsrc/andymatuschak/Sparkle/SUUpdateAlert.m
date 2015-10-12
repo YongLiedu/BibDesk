@@ -11,8 +11,10 @@
 #import "SUHost.h"
 #import <WebKit/WebKit.h>
 
+#ifdef MAC_OS_X_VERSION_10_11
 @interface SUUpdateAlert () <WebFrameLoadDelegate, WebPolicyDelegate>
 @end
+#endif
 
 @implementation SUUpdateAlert
 

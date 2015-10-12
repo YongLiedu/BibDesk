@@ -60,8 +60,10 @@
 
 @end
 
+#ifdef MAC_OS_X_VERSION_10_11
 @interface FVWebViewIcon () <WebFrameLoadDelegate, WebPolicyDelegate, WebResourceLoadDelegate>
 @end
+#endif
 
 @implementation FVWebViewIcon
 
