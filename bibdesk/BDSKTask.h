@@ -50,15 +50,6 @@
  
  */
 
-#ifndef MAC_OS_X_VERSION_10_6
-enum {
-    NSTaskTerminationReasonExit = 1,
-    NSTaskTerminationReasonUncaughtSignal = 2
-};
-typedef NSInteger NSTaskTerminationReason;
-#endif
-
-
 @interface BDSKTask : NSTask {
 @private
     NSString                *_launchPath;

@@ -29,12 +29,12 @@
 
     #define BDSK_BUNDLE_IDENTIFIER @"edu.ucsd.cs.mmccrack.bibdesk"
 
-    #ifndef MAC_OS_X_VERSION_10_7
+    #if !defined(MAC_OS_X_VERSION_10_7) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_7
     @protocol NSURLDownloadDelegate <NSObject>
     @end
     #endif
 
-    #ifndef MAC_OS_X_VERSION_10_11
+    #if !defined(MAC_OS_X_VERSION_10_11) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_11
     @protocol NSSearchFieldDelegate <NSTextFieldDelegate>
     @end
     @protocol WebFrameloadDelegate <NSObject>
