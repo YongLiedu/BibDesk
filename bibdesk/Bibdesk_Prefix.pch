@@ -37,7 +37,7 @@
     #if !defined(MAC_OS_X_VERSION_10_11) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_11
     @protocol NSSearchFieldDelegate <NSTextFieldDelegate>
     @end
-    @protocol WebFrameloadDelegate <NSObject>
+    @protocol WebFrameLoadDelegate <NSObject>
     @end
     @protocol WebPolicyDelegate <NSObject>
     @end
