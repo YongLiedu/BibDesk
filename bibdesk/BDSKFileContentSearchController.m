@@ -59,9 +59,6 @@
 #import "NSTableView_BDSKExtensions.h"
 
 
-@interface BDSKFileContentSearchController () <NSSearchFieldDelegate>
-@end
-
 @implementation BDSKFileContentSearchController
 
 - (id)initForOwner:(id<BDSKOwner>)owner
