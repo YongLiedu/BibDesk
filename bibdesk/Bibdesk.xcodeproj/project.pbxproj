@@ -40,7 +40,6 @@
 		27AFAF9D080D1E1B0096F5D2 /* BDSKTextImportController.m in Sources */ = {isa = PBXBuildFile; fileRef = 27AFAF9B080D1E1B0096F5D2 /* BDSKTextImportController.m */; };
 		3B91DD52162225850088206D /* WOKMWSAuthenticateService.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD46162225850088206D /* WOKMWSAuthenticateService.m */; };
 		3B91DD54162225850088206D /* WokSearchService.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B91DD48162225850088206D /* WokSearchService.m */; };
-		3B91DD56162229B70088206D /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B91DD55162229B70088206D /* libxml2.dylib */; };
 		3D0D76B3084898C100A495A5 /* BibPref_Crossref.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D0D76B1084898C100A495A5 /* BibPref_Crossref.m */; };
 		3D4373AD07FB3E960007BA84 /* gear.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 3D4373AC07FB3E960007BA84 /* gear.tiff */; };
 		3D44F5630812A91D003C67F0 /* BDSKFormatParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D44F5610812A91D003C67F0 /* BDSKFormatParser.m */; };
@@ -1695,7 +1694,6 @@
 				CE94C0DA10A8F2A2002634D2 /* SkimNotesBase.framework in Frameworks */,
 				CEB34C490F5D49BD0037E086 /* Sparkle.framework in Frameworks */,
 				CEED306C0F4ED3410078E87A /* libz.dylib in Frameworks */,
-				3B91DD56162229B70088206D /* libxml2.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
