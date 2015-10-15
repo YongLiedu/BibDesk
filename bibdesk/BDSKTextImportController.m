@@ -541,14 +541,6 @@
     }
 }
 
-static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
-    for (NSValue *range in ranges) {
-        if (NSMaxRange([range rangeValue]) > max)
-            return NO;
-    }
-    return YES;
-}
-
 - (void)finalizeChangesPreservingSelection:(BOOL)shouldPreserveSelection{
     NSResponder *firstResponder = [[self window] firstResponder];
     

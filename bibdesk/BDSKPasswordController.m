@@ -90,7 +90,7 @@
         err = SecKeychainAddGenericPassword(NULL, strlen(nameCString), nameCString, strlen(userNameCString), userNameCString, strlen(passwordData), passwordData, NULL);    
         result = (err == noErr);
     } else {
-        NSLog(@"Error %d occurred setting password", err);
+        NSLog(@"Error %d occurred setting password", (int)err);
     }
     return result;
 }

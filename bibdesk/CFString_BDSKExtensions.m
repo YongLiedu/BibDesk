@@ -654,7 +654,7 @@ CFStringRef __BDXMLCreateStringInCFEncoding(CFStringRef sourceString, CFStringEn
                 ch = composedCharacter[componentIndex];
             }
 
-            CFStringAppendFormat(resultString, NULL, CFSTR("&#%u;"), ch);
+            CFStringAppendFormat(resultString, NULL, CFSTR("&#%u;"), (unsigned int)ch);
         }
         free(composedCharacter);
         composedCharacter = NULL;
