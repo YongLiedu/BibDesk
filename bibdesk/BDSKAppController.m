@@ -231,6 +231,49 @@ static void fixLegacyTableColumnIdentifiers()
 
 }
 
+- (void)checkTeXPaths {
+    NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSString *library = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSLocalDomainMask, YES) lastObject];
+    NSString *newTexbinPath = [NSString pathWithComponents:[NSArray arrayWithObjects:library, @"TeX", @"texbin", nil]];
+    NSString *oldTexbinPath = @"/usr/texbin/";
+    BOOL isDir = NO;
+    BOOL newTexbinPathExists = [fm fileExistsAtPath:newTexbinPath isDirectory:&isDir] && isDir;
+    
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_10_MAX) {
+        if (newTexbinPathExists && [sud boolForKey:BDSKUsesTeXKey]) {
+            NSString *texCmdPath = [sud stringForKey:BDSKTeXBinPathKey];
+            NSString *bibtexCmdPath = [sud stringForKey:BDSKBibTeXBinPathKey];
+            NSDictionary *initialValues = [[NSUserDefaultsController sharedUserDefaultsController] initialValues];
+            NSString *newTexCmdPath = [initialValues objectForKey:BDSKTeXBinPathKey];
+            NSString *newBibtexCmdPath = [initialValues objectForKey:BDSKBibTeXBinPathKey];
+            
+            if (([texCmdPath hasPrefix:oldTexbinPath] || [bibtexCmdPath hasPrefix:oldTexbinPath]) &&
+                [fm isExecutableFileAtPath:newTexCmdPath] && [fm isExecutableFileAtPath:newBibtexCmdPath]) {
+                
+                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"TeX installation changed", @"Message in alert dialog when detecting old texbin")
+                                                 defaultButton:NSLocalizedString(@"Change", @"Button title")
+                                               alternateButton:NSLocalizedString(@"Cancel", @"Button title")
+                                                   otherButton:NSLocalizedString(@"Go to Preferences", @"Button title")
+                                     informativeTextWithFormat:@"Your TeX preferences need to be adjusted for new Apple requirements. Would you like to change your TeX programs to their new default locations, or set them manually in the Preferences?"];
+                NSInteger rv = [alert runModal];
+                
+                if (rv == NSAlertDefaultReturn) {
+                    [sud setObject:newTexCmdPath forKey:BDSKTeXBinPathKey];
+                    [sud setObject:newBibtexCmdPath forKey:BDSKBibTeXBinPathKey];
+                } else if (rv == NSAlertOtherReturn) {
+                    [[BDSKPreferenceController sharedPreferenceController] showWindow:nil];
+                    [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.TeX"];
+                }
+            }
+        }
+    } else if (newTexbinPathExists == NO && [fm fileExistsAtPath:oldTexbinPath isDirectory:&isDir] && isDir) {
+        NSString *oldTexCmdPath = [oldTexbinPath stringByAppendingPathComponent:@"pdflatex"];
+        NSString *oldBibtexCmdPath = [oldTexbinPath stringByAppendingPathComponent:@"bibtex"];
+        NSDictionary *oldDefaults = [NSDictionary dictionaryWithObjectsAndKeys:oldTexCmdPath, BDSKTeXBinPathKey, oldBibtexCmdPath, BDSKBibTeXBinPathKey, nil];
+        [sud registerDefaults:oldDefaults];
+    }
+}
 
 #pragma mark Application delegate
 
@@ -322,6 +365,8 @@ static void fixLegacyTableColumnIdentifiers()
     NSString *scriptsPath = [[fileManager applicationSupportDirectory] stringByAppendingPathComponent:@"Scripts"];
     if ([fileManager fileExistsAtPath:scriptsPath] == NO)
         [fileManager createDirectoryAtPath:scriptsPath withIntermediateDirectories:NO attributes:nil error:NULL];
+    
+    [self checkTeXPaths];
     
     // Ensure the previewer and TeX task get created now in order to avoid a spurious "unable to copy helper file" warning when quit->document window closes->first call to [BDSKPreviewer sharedPreviewer]
     if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey])

@@ -401,13 +401,13 @@
 				<key>initialValues</key>
 				<dict>
 					<key>BibTeX Binary Path</key>
-					<string>/usr/texbin/bibtex</string>
+					<string>/Library/TeX/texbin/bibtex</string>
 					<key>BibTeX Style</key>
 					<string>abbrv</string>
 					<key>Character encoding for TeX preview file</key>
 					<integer>1</integer>
 					<key>TeX Binary Path</key>
-					<string>/usr/texbin/pdflatex</string>
+					<string>/Library/TeX/texbin/pdflatex</string>
 					<key>Uses TeX</key>
 					<false/>
 				</dict>
