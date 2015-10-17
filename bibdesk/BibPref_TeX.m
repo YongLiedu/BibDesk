@@ -47,6 +47,8 @@
 
 #define BDSK_TEX_DOWNLOAD_URL @"http://tug.org/mactex/"
 
+static char BDSKBibPrefTeXDefaultsObservationContext;
+
 static NSSet *standardStyles = nil;
 
 
@@ -83,7 +85,26 @@ static NSSet *standardStyles = nil;
     [bibtexBinaryPathField setDelegate:self];
     [formatter release];
     
+    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKTeXBinPathKey] options:0 context:&BDSKBibPrefTeXDefaultsObservationContext];
+    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKBibTeXBinPathKey] options:0 context:&BDSKBibPrefTeXDefaultsObservationContext];
+    
     [self updateUI];
+}
+
+- (void)dealloc{
+    @try {
+        [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKTeXBinPathKey]];
+        [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKBibTeXBinPathKey]];
+    }
+    @catch (id e) {}
+    [super dealloc];
+}
+
+- (void)defaultsDidRevert {
+    // reset UI, but only if we loaded the nib
+    if ([self isViewLoaded]) {
+        [self updateUI];
+    }
 }
 
 - (void)updateTeXPathUI{
@@ -93,13 +114,6 @@ static NSSet *standardStyles = nil;
         [texBinaryPathField setTextColor:[NSColor blackColor]];
     else
         [texBinaryPathField setTextColor:[NSColor redColor]];
-}
-
-- (void)defaultsDidRevert {
-    // reset UI, but only if we loaded the nib
-    if ([self isViewLoaded]) {
-         [self updateUI];
-    }
 }
 
 - (void)updateBibTeXPathUI{
@@ -113,12 +127,10 @@ static NSSet *standardStyles = nil;
 
 -(IBAction)changeTexBinPath:(id)sender{
     [sud setObject:[sender stringValue] forKey:BDSKTeXBinPathKey];
-    [self updateTeXPathUI];
 }
 
 - (IBAction)changeBibTexBinPath:(id)sender{
     [sud setObject:[sender stringValue] forKey:BDSKBibTeXBinPathKey];
-    [self updateBibTeXPathUI];
 }
 
 - (IBAction)changeUsesTeX:(id)sender{
@@ -249,6 +261,20 @@ static NSSet *standardStyles = nil;
 
 - (IBAction)changeDefaultTeXEncoding:(id)sender{
     [sud setInteger:[(BDSKEncodingPopUpButton *)sender encoding] forKey:BDSKTeXPreviewFileEncodingKey];        
+}
+
+#pragma mark KVO
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if (context == &BDSKBibPrefTeXDefaultsObservationContext) {
+        NSString *key = [keyPath substringFromIndex:7];
+        if ([key isEqualToString:BDSKTeXBinPathKey])
+            [self updateTeXPathUI];
+        else if ([key isEqualToString:BDSKBibTeXBinPathKey])
+            [self updateBibTeXPathUI];
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
 }
 
 @end

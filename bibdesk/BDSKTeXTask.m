@@ -44,6 +44,7 @@
 #import "BDSKShellCommandFormatter.h"
 #import "NSSet_BDSKExtensions.h"
 #import "BDSKTask.h"
+#import "BDSKPreferenceController.h"
 
 #define BDSKTeXTaskRunLoopTimeoutKey @"BDSKTeXTaskRunLoopTimeout"
 
@@ -94,6 +95,8 @@ enum {
 - (BDSKTeXSubTask *)taskForGeneratedType:(NSUInteger)type;
 
 - (BOOL)invokePendingTasks;
+
+- (void)checkTeXPaths;
 
 @end
 
@@ -213,6 +216,8 @@ static double runLoopTimeout = 30;
 - (BOOL)runWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys generatedTypes:(NSInteger)flag{
 	if ([delegate respondsToSelector:@selector(texTaskShouldStartRunning:)] && [delegate texTaskShouldStartRunning:self] == NO)
         return NO;
+    
+    [self checkTeXPaths];
     
     generatedDataMask = BDSKGeneratedNoneMask;
     
@@ -528,6 +533,48 @@ static double runLoopTimeout = 30;
     }
     
     return success;
+}
+
+- (void)checkTeXPaths {
+    static BOOL didShowTeXPathsAlert = NO;
+    
+    if (didShowTeXPathsAlert == NO && floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_10_MAX) {
+        NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
+        NSFileManager *fm = [NSFileManager defaultManager];
+        NSString *library = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSLocalDomainMask, YES) lastObject];
+        NSString *newTexbinPath = [NSString pathWithComponents:[NSArray arrayWithObjects:library, @"TeX", @"texbin", nil]];
+        NSString *oldTexbinPath = @"/usr/texbin/";
+        BOOL isDir = NO;
+        
+        if ([fm fileExistsAtPath:newTexbinPath isDirectory:&isDir] && isDir) {
+            NSString *texCmdPath = [sud stringForKey:BDSKTeXBinPathKey];
+            NSString *bibtexCmdPath = [sud stringForKey:BDSKBibTeXBinPathKey];
+            NSDictionary *initialValues = [[NSUserDefaultsController sharedUserDefaultsController] initialValues];
+            NSString *newTexCmdPath = [initialValues objectForKey:BDSKTeXBinPathKey];
+            NSString *newBibtexCmdPath = [initialValues objectForKey:BDSKBibTeXBinPathKey];
+            
+            if (([texCmdPath hasPrefix:oldTexbinPath] || [bibtexCmdPath hasPrefix:oldTexbinPath]) &&
+                [fm isExecutableFileAtPath:newTexCmdPath] && [fm isExecutableFileAtPath:newBibtexCmdPath]) {
+                
+                didShowTeXPathsAlert = YES;
+                
+                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"TeX installation changed", @"Message in alert dialog when detecting old texbin")
+                                                 defaultButton:NSLocalizedString(@"Change", @"Button title")
+                                               alternateButton:NSLocalizedString(@"Cancel", @"Button title")
+                                                   otherButton:NSLocalizedString(@"Go to Preferences", @"Button title")
+                                     informativeTextWithFormat:@"Your TeX preferences need to be adjusted for new Apple requirements. Would you like to change your TeX programs to their new default locations, or set them manually in the Preferences?"];
+                NSInteger rv = [alert runModal];
+                
+                if (rv == NSAlertDefaultReturn) {
+                    [sud setObject:newTexCmdPath forKey:BDSKTeXBinPathKey];
+                    [sud setObject:newBibtexCmdPath forKey:BDSKBibTeXBinPathKey];
+                } else if (rv == NSAlertOtherReturn) {
+                    [[BDSKPreferenceController sharedPreferenceController] showWindow:nil];
+                    [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.TeX"];
+                }
+            }
+        }
+    }
 }
 
 @end
