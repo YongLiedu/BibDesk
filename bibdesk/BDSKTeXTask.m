@@ -217,7 +217,11 @@ static double runLoopTimeout = 30;
 	if ([delegate respondsToSelector:@selector(texTaskShouldStartRunning:)] && [delegate texTaskShouldStartRunning:self] == NO)
         return NO;
     
-    [self checkTeXPaths];
+    static BOOL didCheckTeXPaths = NO;
+    if (didCheckTeXPaths == NO) {
+        didCheckTeXPaths  =YES;
+        [self checkTeXPaths];
+    }
     
     generatedDataMask = BDSKGeneratedNoneMask;
     
@@ -536,9 +540,7 @@ static double runLoopTimeout = 30;
 }
 
 - (void)checkTeXPaths {
-    static BOOL didShowTeXPathsAlert = NO;
-    
-    if (didShowTeXPathsAlert == NO && floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_10_MAX) {
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_10_MAX) {
         NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
         NSFileManager *fm = [NSFileManager defaultManager];
         NSString *library = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSLocalDomainMask, YES) lastObject];
@@ -549,25 +551,30 @@ static double runLoopTimeout = 30;
         if ([fm fileExistsAtPath:newTexbinPath isDirectory:&isDir] && isDir) {
             NSString *texCmdPath = [sud stringForKey:BDSKTeXBinPathKey];
             NSString *bibtexCmdPath = [sud stringForKey:BDSKBibTeXBinPathKey];
-            NSDictionary *initialValues = [[NSUserDefaultsController sharedUserDefaultsController] initialValues];
-            NSString *newTexCmdPath = [initialValues objectForKey:BDSKTeXBinPathKey];
-            NSString *newBibtexCmdPath = [initialValues objectForKey:BDSKBibTeXBinPathKey];
             
-            if (([texCmdPath hasPrefix:oldTexbinPath] || [bibtexCmdPath hasPrefix:oldTexbinPath]) &&
-                [fm isExecutableFileAtPath:newTexCmdPath] && [fm isExecutableFileAtPath:newBibtexCmdPath]) {
-                
-                didShowTeXPathsAlert = YES;
+            if ([texCmdPath hasPrefix:oldTexbinPath])
+                texCmdPath = [newTexbinPath stringByAppendingPathComponent:[texCmdPath substringFromIndex:[oldTexbinPath length]]];
+            else
+                texCmdPath = nil;
+            if ([bibtexCmdPath hasPrefix:oldTexbinPath])
+                bibtexCmdPath = [newTexbinPath stringByAppendingPathComponent:[bibtexCmdPath substringFromIndex:[oldTexbinPath length]]];
+            else
+                bibtexCmdPath = nil;
+            
+            if (texCmdPath || bibtexCmdPath) {
                 
                 NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"TeX installation changed", @"Message in alert dialog when detecting old texbin")
                                                  defaultButton:NSLocalizedString(@"Change", @"Button title")
                                                alternateButton:NSLocalizedString(@"Cancel", @"Button title")
                                                    otherButton:NSLocalizedString(@"Go to Preferences", @"Button title")
-                                     informativeTextWithFormat:@"Your TeX preferences need to be adjusted for new Apple requirements. Would you like to change your TeX programs to their new default locations, or set them manually in the Preferences?"];
+                                     informativeTextWithFormat:NSLocalizedString(@"Your TeX preferences need to be adjusted for new Apple requirements. Would you like to change your TeX programs to their new location in /Library/TeX/texbin, or set them manually in the Preferences?", @"Informative text in alert dialog")];
                 NSInteger rv = [alert runModal];
                 
                 if (rv == NSAlertDefaultReturn) {
-                    [sud setObject:newTexCmdPath forKey:BDSKTeXBinPathKey];
-                    [sud setObject:newBibtexCmdPath forKey:BDSKBibTeXBinPathKey];
+                    if (texCmdPath)
+                        [sud setObject:texCmdPath forKey:BDSKTeXBinPathKey];
+                    if (bibtexCmdPath)
+                        [sud setObject:bibtexCmdPath forKey:BDSKBibTeXBinPathKey];
                 } else if (rv == NSAlertOtherReturn) {
                     [[BDSKPreferenceController sharedPreferenceController] showWindow:nil];
                     [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.TeX"];
