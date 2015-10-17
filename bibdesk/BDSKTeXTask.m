@@ -538,7 +538,7 @@ static double runLoopTimeout = 30;
 - (void)checkTeXPaths {
     static BOOL didShowTeXPathsAlert = NO;
     
-    if (didShowTeXPathsAlert == NO && floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_10_MAX) {
+    if (didShowTeXPathsAlert == NO && floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_10_MAX) {
         NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
         NSFileManager *fm = [NSFileManager defaultManager];
         NSString *library = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSLocalDomainMask, YES) lastObject];
