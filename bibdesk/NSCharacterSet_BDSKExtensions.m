@@ -41,12 +41,20 @@
 @implementation NSCharacterSet (BDSKExtensions)
 
 + (id)curlyBraceCharacterSet;
-{  
+{
     static NSCharacterSet *curlyBraceCharacterSet = nil;
     if (curlyBraceCharacterSet == nil)
         curlyBraceCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@"{}"] copy];
-    return curlyBraceCharacterSet; 
-}    
+    return curlyBraceCharacterSet;
+}
+
++ (id)TeXSpecialsCharacterSet;
+{
+    static NSCharacterSet *curlyBraceCharacterSet = nil;
+    if (curlyBraceCharacterSet == nil)
+        curlyBraceCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@"&%"] copy];
+    return curlyBraceCharacterSet;
+}
 
 + (id)commaCharacterSet;
 {

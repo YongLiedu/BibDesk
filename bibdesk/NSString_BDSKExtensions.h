@@ -520,5 +520,6 @@ An inline buffer is used for speed in accessing each character.
 - (void)replaceOccurrencesOfCharactersInSet:(NSCharacterSet *)set withString:(NSString *)replaceString;
 - (void)appendStrings:(NSString *)first, ...;
 - (void)backslashEscapeCharactersInSet:(NSCharacterSet *)charSet;
+- (void)backslashUnescapeCharactersInSet:(NSCharacterSet *)charSet;
 
 @end

@@ -41,6 +41,7 @@
 @interface NSCharacterSet (BDSKExtensions)
 
 + (id)curlyBraceCharacterSet;
++ (id)TeXSpecialsCharacterSet;
 + (id)commaCharacterSet;
 + (id)searchStringSeparatorCharacterSet;
 + (id)upAndDownArrowCharacterSet;

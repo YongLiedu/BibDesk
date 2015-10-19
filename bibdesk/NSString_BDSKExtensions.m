@@ -365,6 +365,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
         foundRange = [mutableString rangeOfTeXCommandInRange:searchRange];
     }
     [mutableString deleteCharactersInCharacterSet:[NSCharacterSet curlyBraceCharacterSet]];
+    [mutableString backslashUnescapeCharactersInSet:[NSCharacterSet TeXSpecialsCharacterSet]];
     return mutableString;
 }
 
@@ -568,9 +569,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 {
     static NSCharacterSet *charSet = nil;
     // We could really go crazy with this, but the main need is to escape characters that commonly appear in titles and journal names when importing from z39.50 and other non-RIS/non-BibTeX search group sources.  Those sources aren't processed by the HTML->TeX path that's used for RIS, since they generally don't have embedded HTML.
-    if (nil == charSet)
-        charSet = [[NSCharacterSet characterSetWithCharactersInString:@"%&"] copy];
-    return [self stringByBackslashEscapingCharactersInSet:charSet];
+    return [self stringByBackslashEscapingCharactersInSet:[NSCharacterSet TeXSpecialsCharacterSet]];
 }
 
 - (NSString *)stringByBackslashEscapingCharactersInSet:(NSCharacterSet *)charSet;
@@ -1924,6 +1923,27 @@ http://home.planet.nl/~faase009/GNU.txt
             r = [self rangeOfCharacterFromSet:charSet options:NSLiteralSearch range:NSMakeRange(start, [self length] - start)];
         } else {
             // this one was already escaped, so advance a character and repeat the search, unless that puts us over the end
+            if (r.location < [self length]) {
+                start = r.location + 1;
+                r = [self rangeOfCharacterFromSet:charSet options:NSLiteralSearch range:NSMakeRange(start, [self length] - start)];
+            } else {
+                r = NSMakeRange(NSNotFound, 0);
+            }
+        }
+    }
+}
+
+- (void)backslashUnescapeCharactersInSet:(NSCharacterSet *)charSet {
+    NSRange r = [self rangeOfCharacterFromSet:charSet options:NSLiteralSearch];
+    while (r.length) {
+        NSUInteger start;
+        if (r.location > 0 && [self characterAtIndex:(r.location - 1)] == '\\') {
+            // remove the backslash
+            [self replaceCharactersInRange:NSMakeRange(r.location, 1) withString:@""];
+            start = r.location;
+            r = [self rangeOfCharacterFromSet:charSet options:NSLiteralSearch range:NSMakeRange(start, [self length] - start)];
+        } else {
+            // this one was not escaped, so advance a character and repeat the search, unless that puts us over the end
             if (r.location < [self length]) {
                 start = r.location + 1;
                 r = [self rangeOfCharacterFromSet:charSet options:NSLiteralSearch range:NSMakeRange(start, [self length] - start)];
