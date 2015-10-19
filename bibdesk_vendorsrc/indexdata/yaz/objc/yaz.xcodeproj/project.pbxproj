@@ -25,9 +25,7 @@
 		8DC2EF570486A6940098B216 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */; };
 		F90103040B45F0AC00F7444F /* libxslt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F90103030B45F0AC00F7444F /* libxslt.dylib */; };
 		F91876AE0B409E7900D75891 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F91876AD0B409E7900D75891 /* libxml2.dylib */; };
-		F92B955D0B4381470089909F /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F92B955C0B4381470089909F /* libcrypto.dylib */; };
 		F937812E0B43207800ECCB3A /* objc_default.bib in Resources */ = {isa = PBXBuildFile; fileRef = F937812D0B43207800ECCB3A /* objc_default.bib */; };
-		F93784AC0B43800800ECCB3A /* libssl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F93784AB0B43800800ECCB3A /* libssl.dylib */; };
 		F9982A3F0B6A934C0029F374 /* backend.h in Headers */ = {isa = PBXBuildFile; fileRef = F99829ED0B6A934B0029F374 /* backend.h */; };
 		F9982A400B6A934C0029F374 /* ccl.h in Headers */ = {isa = PBXBuildFile; fileRef = F99829EE0B6A934B0029F374 /* ccl.h */; };
 		F9982A410B6A934C0029F374 /* ccl_xml.h in Headers */ = {isa = PBXBuildFile; fileRef = F99829EF0B6A934B0029F374 /* ccl_xml.h */; };
@@ -551,8 +549,6 @@
 				8DC2EF570486A6940098B216 /* Cocoa.framework in Frameworks */,
 				F91876AE0B409E7900D75891 /* libxml2.dylib in Frameworks */,
 				F9B8FE150B41984A00A5A615 /* libiconv.dylib in Frameworks */,
-				F93784AC0B43800800ECCB3A /* libssl.dylib in Frameworks */,
-				F92B955D0B4381470089909F /* libcrypto.dylib in Frameworks */,
 				F90103040B45F0AC00F7444F /* libxslt.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
