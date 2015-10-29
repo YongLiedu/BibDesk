@@ -84,7 +84,7 @@
 #import "NSDate_BDSKExtensions.h"
 
 #define WEB_URL @"http://bibdesk.sourceforge.net/"
-#define WIKI_URL @"http://sourceforge.net/bibdesk/wiki/"
+#define WIKI_URL @"http://sourceforge.net/p/bibdesk/wiki/Main_Page/"
 #define BUG_TRACKER_URL @"http://sourceforge.net/p/bibdesk/bugs/"
 #define RFE_TRACKER_URL @"http://sourceforge.net/p/bibdesk/feature-requests/"
 
