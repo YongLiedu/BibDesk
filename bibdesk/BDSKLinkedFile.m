@@ -41,6 +41,7 @@
 #import "BDSKRuntime.h"
 #import "NSData_BDSKExtensions.h"
 
+#define BDSKSaveLinkedFilesAsRelativePathOnlyKey @"BDSKSaveLinkedFilesAsRelativePathOnly"
 
 static void BDSKDisposeAliasHandle(AliasHandle inAlias);
 static AliasHandle BDSKDataToAliasHandle(CFDataRef inData);
@@ -92,12 +93,14 @@ static AliasHandle BDSKPathToAliasHandle(CFStringRef inPath, CFStringRef inBaseP
 
 static BDSKPlaceholderLinkedFile *defaultPlaceholderLinkedFile = nil;
 static Class BDSKLinkedFileClass = Nil;
+static BOOL saveRelativePathOnly = NO;
 
 + (void)initialize
 {
     BDSKINITIALIZE;
     BDSKLinkedFileClass = self;
     defaultPlaceholderLinkedFile = (BDSKPlaceholderLinkedFile *)NSAllocateObject([BDSKPlaceholderLinkedFile class], 0, NSDefaultMallocZone());
+    saveRelativePathOnly = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKSaveLinkedFilesAsRelativePathOnlyKey];
 }
 
 + (id)allocWithZone:(NSZone *)aZone
@@ -254,10 +257,7 @@ static Class BDSKLinkedFileClass = Nil;
 {
     BDSKASSERT(nil == aDelegate || [aDelegate respondsToSelector:@selector(basePathForLinkedFile:)]);
     self = [super init];
-    if (anAlias == NULL) {
-        [self release];
-        self = nil;
-    } else if (self == nil) {
+    if (self == nil) {
         BDSKDisposeAliasHandle(anAlias);
     } else {
         fileRef = NULL; // this is updated lazily, as we don't know the base path at this point
@@ -320,11 +320,16 @@ static Class BDSKLinkedFileClass = Nil;
     NSString *relPath = basePath ? [aPath relativePathFromPath:basePath] : nil;
     AliasHandle anAlias = BDSKPathToAliasHandle((CFStringRef)aPath, (CFStringRef)basePath);
     
-    self = [self initWithAlias:anAlias relativePath:relPath delegate:aDelegate];
-    if (self) {
-        if (basePath)
-            // this initalizes the FSRef and update the alias
-            [self updateFileRef];
+    if (anAlias == NULL) {
+        [self release];
+        self = nil;
+    } else {
+        self = [self initWithAlias:anAlias relativePath:relPath delegate:aDelegate];
+        if (self) {
+            if (basePath)
+                // this initalizes the FSRef and update the alias
+                [self updateFileRef];
+        }
     }
     return self;
 }
@@ -513,10 +518,13 @@ static Class BDSKLinkedFileClass = Nil;
 
 - (NSString *)stringRelativeToPath:(NSString *)newBasePath;
 {
-    NSData *data = [self aliasDataRelativeToPath:newBasePath];
+    BOOL noAlias = saveRelativePathOnly && newBasePath != nil;
+    if (newBasePath == nil)
+        newBasePath = [delegate basePathForLinkedFile:self];
+    NSData *data = noAlias ? nil : [self aliasDataRelativeToPath:newBasePath];
     NSString *path = [self path];
     path = path && newBasePath ? [path relativePathFromPath:newBasePath] : relativePath;
-    NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:data, @"aliasData", path, @"relativePath", nil];
+    NSDictionary *dictionary = data ? [NSDictionary dictionaryWithObjectsAndKeys:data, @"aliasData", path, @"relativePath", nil] : [NSDictionary dictionaryWithObjectsAndKeys:path, @"relativePath", nil];
     return [[NSKeyedArchiver archivedDataWithRootObject:dictionary] base64String];
 }
 

@@ -1819,7 +1819,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 }
 
 - (NSString *)bibTeXStringWithOptions:(NSInteger)options{
-    NSData *data = [self bibTeXDataWithOptions:options relativeToPath:[self basePath] encoding:NSUTF8StringEncoding error:NULL];
+    NSData *data = [self bibTeXDataWithOptions:options relativeToPath:nil encoding:NSUTF8StringEncoding error:NULL];
     NSString *btString = nil;
     if (nil != data)
         btString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
