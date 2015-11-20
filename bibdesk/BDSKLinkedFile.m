@@ -257,7 +257,10 @@ static BOOL saveRelativePathOnly = NO;
 {
     BDSKASSERT(nil == aDelegate || [aDelegate respondsToSelector:@selector(basePathForLinkedFile:)]);
     self = [super init];
-    if (self == nil) {
+    if (anAlias == nil && relPath == nil) {
+        [self release];
+        self = nil;
+    } else if (self == nil) {
         BDSKDisposeAliasHandle(anAlias);
     } else {
         fileRef = NULL; // this is updated lazily, as we don't know the base path at this point
@@ -272,8 +275,6 @@ static BOOL saveRelativePathOnly = NO;
 
 - (id)initWithAliasData:(NSData *)data relativePath:(NSString *)relPath delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 {
-    BDSKASSERT(nil != data);
-    
     AliasHandle anAlias = BDSKDataToAliasHandle((CFDataRef)data);
     return [self initWithAlias:anAlias relativePath:relPath delegate:aDelegate];
 }
@@ -524,6 +525,8 @@ static BOOL saveRelativePathOnly = NO;
     NSData *data = noAlias ? nil : [self aliasDataRelativeToPath:newBasePath];
     NSString *path = [self path];
     path = path && newBasePath ? [path relativePathFromPath:newBasePath] : relativePath;
+    if (path == nil && noAlias)
+        data = [self aliasDataRelativeToPath:newBasePath];
     NSDictionary *dictionary = data ? [NSDictionary dictionaryWithObjectsAndKeys:data, @"aliasData", path, @"relativePath", nil] : [NSDictionary dictionaryWithObjectsAndKeys:path, @"relativePath", nil];
     return [[NSKeyedArchiver archivedDataWithRootObject:dictionary] base64String];
 }
