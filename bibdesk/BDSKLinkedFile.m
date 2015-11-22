@@ -255,7 +255,9 @@ static BOOL saveRelativePathOnly = NO;
 // takes possession of anAlias, even if it fails
 - (id)initWithAlias:(AliasHandle)anAlias relativePath:(NSString *)relPath delegate:(id<BDSKLinkedFileDelegate>)aDelegate;
 {
+    BDSKASSERT(nil != anAlias || nil != relPath);
     BDSKASSERT(nil == aDelegate || [aDelegate respondsToSelector:@selector(basePathForLinkedFile:)]);
+    
     self = [super init];
     if (anAlias == nil && relPath == nil) {
         [self release];
