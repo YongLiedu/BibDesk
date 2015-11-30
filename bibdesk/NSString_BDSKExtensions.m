@@ -567,7 +567,6 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 
 - (NSString *)stringByBackslashEscapingTeXSpecials;
 {
-    static NSCharacterSet *charSet = nil;
     // We could really go crazy with this, but the main need is to escape characters that commonly appear in titles and journal names when importing from z39.50 and other non-RIS/non-BibTeX search group sources.  Those sources aren't processed by the HTML->TeX path that's used for RIS, since they generally don't have embedded HTML.
     return [self stringByBackslashEscapingCharactersInSet:[NSCharacterSet TeXSpecialsCharacterSet]];
 }
