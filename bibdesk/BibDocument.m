@@ -775,7 +775,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
                 [groupsToExpand addObject:[parent identifier]];
             
         }
-        [dictionary removeObjectForKey:BDSKDocumentGroupsToExpandKey];
+        [dictionary setObject:groupsToExpand forKey:BDSKDocumentGroupsToExpandKey];
         
         NSError *error;
         
