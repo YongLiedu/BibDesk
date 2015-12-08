@@ -1938,7 +1938,7 @@ http://home.planet.nl/~faase009/GNU.txt
         NSUInteger start;
         if (r.location > 0 && [self characterAtIndex:(r.location - 1)] == '\\') {
             // remove the backslash
-            [self replaceCharactersInRange:NSMakeRange(r.location, 1) withString:@""];
+            [self replaceCharactersInRange:NSMakeRange(r.location - 1, 1) withString:@""];
             start = r.location;
             r = [self rangeOfCharacterFromSet:charSet options:NSLiteralSearch range:NSMakeRange(start, [self length] - start)];
         } else {
