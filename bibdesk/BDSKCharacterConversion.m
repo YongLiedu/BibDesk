@@ -3,7 +3,7 @@
 //
 //  Created by Christiaan Hofman on 5/4/05.
 /*
- This software is Copyright (c) 2005-2015
+ This software is Copyright (c) 2005 -2016
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
