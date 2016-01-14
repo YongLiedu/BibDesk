@@ -269,7 +269,8 @@ enum { BDSKMoveToTrashAsk = -1, BDSKMoveToTrashNo = 0, BDSKMoveToTrashYes = 1 };
 	
     [self updateCiteKeyDuplicateWarning];
     
-    [[fileView enclosingScrollView] setBackgroundColor:[fileView backgroundColor]];
+    if ([fileView backgroundColor])
+        [[fileView enclosingScrollView] setBackgroundColor:[fileView backgroundColor]];
     [fileView setDisplayMode:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKEditorFileViewDisplayModeKey]];
     [fileView setIconScale:[[NSUserDefaults standardUserDefaults] doubleForKey:BDSKEditorFileViewIconScaleKey]];
     [fileView addObserver:self forKeyPath:@"iconScale" options:0 context:&BDSKEditorObservationContext];

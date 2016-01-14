@@ -506,7 +506,8 @@ static NSOperationQueue *metadataCacheQueue = nil;
     [groupOutlineView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:YES];
     [groupOutlineView setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
     
-    [[sideFileView enclosingScrollView] setBackgroundColor:[sideFileView backgroundColor]];
+    if ([sideFileView backgroundColor])
+        [[sideFileView enclosingScrollView] setBackgroundColor:[sideFileView backgroundColor]];
     [bottomFileView setBackgroundColor:[[NSColor controlAlternatingRowBackgroundColors] lastObject]];
     [[bottomFileView enclosingScrollView] setBackgroundColor:[bottomFileView backgroundColor]];
     
