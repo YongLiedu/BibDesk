@@ -498,9 +498,8 @@ static NSOperationQueue *metadataCacheQueue = nil;
         [groups addCategoryParent:[[[BDSKCategoryParentGroup alloc] initWithKey:groupField] autorelease]];
     
     [tableView setDoubleAction:@selector(editPubOrOpenURLAction:)];
-    NSArray *dragTypes = [NSArray arrayWithObjects:BDSKPasteboardTypePublications, (NSString *)kUTTypeURL, (NSString *)kUTTypeFileURL, NSFilenamesPboardType, NSURLPboardType, NSPasteboardTypeString, NSPasteboardTypeColor, nil];
-    [tableView registerForDraggedTypes:dragTypes];
-    [groupOutlineView registerForDraggedTypes:dragTypes];
+    [tableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, (NSString *)kUTTypeURL, (NSString *)kUTTypeFileURL, NSFilenamesPboardType, NSURLPboardType, NSPasteboardTypeString, NSPasteboardTypeColor, nil]];
+    [groupOutlineView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPasteboardTypePublications, (NSString *)kUTTypeURL, (NSString *)kUTTypeFileURL, NSFilenamesPboardType, NSURLPboardType, NSPasteboardTypeString, nil]];
     [tableView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:YES];
     [tableView setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
     [groupOutlineView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:YES];
