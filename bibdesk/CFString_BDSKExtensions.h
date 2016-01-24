@@ -52,6 +52,8 @@ extern CFHashCode BDCaseInsensitiveStringHash(const void *value);
 extern Boolean  BDIsNewlineCharacter(UniChar c);
 extern Boolean BDStringHasAccentedCharacters(CFStringRef string);
 
+extern CFRange BDRangeOfTeXCommand(CFStringRef string, CFRange searchRange);
+
 extern CFStringRef BDXMLCreateStringWithEntityReferencesInCFEncoding(CFStringRef string, CFStringEncoding encoding);
 
 static inline Boolean BDIsEmptyString(CFStringRef aString)

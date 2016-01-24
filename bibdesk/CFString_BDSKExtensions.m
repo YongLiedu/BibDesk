@@ -85,12 +85,14 @@ static inline CFIndex __BDSKGetStopwordCount(void) { return stopWordCache->numbe
 #define STACK_BUFFER_SIZE 256
 
 static CFCharacterSetRef whitespaceCharacterSet = NULL;
+static CFCharacterSetRef newlineCharacterSet = NULL;
 static CFCharacterSetRef punctuationCharacterSet = NULL;
 
 __attribute__((constructor))
 static void initializeStaticCharacterSets(void)
 {
     whitespaceCharacterSet = CFRetain(CFCharacterSetGetPredefined(kCFCharacterSetWhitespace));
+    newlineCharacterSet = CFRetain(CFCharacterSetGetPredefined(kCFCharacterSetNewline));
     punctuationCharacterSet = CFRetain(CFCharacterSetGetPredefined(kCFCharacterSetPunctuation));
 }
 
@@ -105,6 +107,12 @@ static inline
 BOOL __BDCharacterIsWhitespace(UniChar c)
 {
     return __BDCharacterIsContainedInASCIISet(c, whitespaceCharacterSet);
+}
+
+static inline
+BOOL __BDCharacterIsNewline(UniChar c)
+{
+    return __BDCharacterIsContainedInASCIISet(c, newlineCharacterSet);
 }
 
 static inline
@@ -276,19 +284,19 @@ void __BDDeleteTeXCommandsForSorting(CFMutableStringRef mutableString)
     if(mutableString == nil)
         return;
     
-    NSRange searchRange = NSMakeRange(0, CFStringGetLength(mutableString));
-    NSRange cmdRange;
+    CFRange searchRange = CFRangeMake(0, CFStringGetLength(mutableString));
+    CFRange cmdRange;
     NSUInteger startLoc;
         
     // This will find and remove the commands such as \textit{some word} that can confuse the sort order;
     // unfortunately, we can't remove things like {\textit some word}, since it could also be something
     // like {\LaTeX is great}, so this is a compromise
-    while( (cmdRange = [(NSMutableString *)mutableString rangeOfTeXCommandInRange:searchRange]).location != NSNotFound){
+    while( (cmdRange = BDRangeOfTeXCommand(mutableString, searchRange)).location != kCFNotFound){
         // delete the command
-        [(NSMutableString *)mutableString deleteCharactersInRange:cmdRange];
+        CFStringDelete(mutableString, cmdRange);
         startLoc = cmdRange.location;
         searchRange.location = startLoc;
-        searchRange.length = [(NSMutableString *)mutableString length] - startLoc;
+        searchRange.length = CFStringGetLength(mutableString) - startLoc;
     }
 }
 
@@ -403,7 +411,7 @@ CFStringRef __BDStringCreateByNormalizingWhitespaceAndNewlines(CFAllocatorRef al
             if(!ignoreNextNewline)  
                 buffer[bufCnt++] = '\n';
             ignoreNextNewline = NO;
-        } else if(BDIsNewlineCharacter(ch)){
+        } else if(__BDCharacterIsNewline(ch)){
             ignoreNextNewline = NO;
             buffer[bufCnt++] = '\n';
         } else { 
@@ -809,12 +817,6 @@ Boolean BDStringFindCharacter(CFStringRef string, UniChar character, CFRange sea
     return FALSE;
 }
 
-Boolean BDIsNewlineCharacter(UniChar c)
-{
-    // minor optimization: check for an ASCII character, since those are most common in TeX
-    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember((CFCharacterSetRef)[NSCharacterSet newlineCharacterSet], c) );
-}
-
 Boolean BDStringHasAccentedCharacters(CFStringRef string)
 {
     CFMutableStringRef mutableString = CFStringCreateMutableCopy(CFGetAllocator(string), CFStringGetLength(string), string);
@@ -832,6 +834,37 @@ CFStringRef BDXMLCreateStringWithEntityReferencesInCFEncoding(CFStringRef string
     CFStringRef result = __BDXMLCreateStringInCFEncoding(tmpString, encoding);
     CFRelease(tmpString);
     return result;
+}
+
+
+CFRange BDRangeOfTeXCommand(CFStringRef string, CFRange searchRange)
+{
+    static CFCharacterSetRef nonLetterCharacterSet = NULL;
+    
+    if (NULL == nonLetterCharacterSet) {
+        CFMutableCharacterSetRef letterCFCharacterSet = CFCharacterSetCreateMutableCopy(CFAllocatorGetDefault(), CFCharacterSetGetPredefined(kCFCharacterSetLetter));
+        CFCharacterSetInvert(letterCFCharacterSet);
+        nonLetterCharacterSet = CFCharacterSetCreateCopy(CFAllocatorGetDefault(), letterCFCharacterSet);
+        CFRelease(letterCFCharacterSet);
+    }
+    
+    CFRange cmdStartRange, cmdEndRange;
+    CFIndex endLoc = searchRange.location + searchRange.length;
+    
+    while(searchRange.length > 4 && BDStringFindCharacter(string, '\\', searchRange, &cmdStartRange) &&
+          CFStringFindCharacterFromSet(string, nonLetterCharacterSet, CFRangeMake(cmdStartRange.location + 1, endLoc - cmdStartRange.location - 1), 0, &cmdEndRange)){
+        // if the char right behind the backslash is a non-letter char, it's a one-letter command
+        if(cmdEndRange.location == cmdStartRange.location + 1)
+            cmdEndRange.location++;
+        // see if we found a left brace, we ignore commands like \LaTeX{} which we want to keep
+        if('{' == CFStringGetCharacterAtIndex(string, cmdEndRange.location) &&
+           '}' != CFStringGetCharacterAtIndex(string, cmdEndRange.location + 1))
+            return CFRangeMake(cmdStartRange.location, cmdEndRange.location - cmdStartRange.location);
+        
+        searchRange = CFRangeMake(cmdEndRange.location, endLoc - cmdEndRange.location);
+    }
+    
+    return CFRangeMake(kCFNotFound, 0);
 }
 
 #pragma mark Mutable Strings

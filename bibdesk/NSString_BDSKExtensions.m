@@ -536,33 +536,9 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 
 - (NSRange)rangeOfTeXCommandInRange:(NSRange)searchRange;
 {
-    static CFCharacterSetRef nonLetterCharacterSet = NULL;
-    
-    if (NULL == nonLetterCharacterSet) {
-        CFMutableCharacterSetRef letterCFCharacterSet = CFCharacterSetCreateMutableCopy(CFAllocatorGetDefault(), CFCharacterSetGetPredefined(kCFCharacterSetLetter));
-        CFCharacterSetInvert(letterCFCharacterSet);
-        nonLetterCharacterSet = CFCharacterSetCreateCopy(CFAllocatorGetDefault(), letterCFCharacterSet);
-        CFRelease(letterCFCharacterSet);
-    }
-    
-    CFRange bsSearchRange = *(CFRange*)&searchRange;
-    CFRange cmdStartRange, cmdEndRange;
-    CFIndex endLoc = NSMaxRange(searchRange);    
-    
-    while(bsSearchRange.length > 4 && BDStringFindCharacter((CFStringRef)self, '\\', bsSearchRange, &cmdStartRange) &&
-          CFStringFindCharacterFromSet((CFStringRef)self, nonLetterCharacterSet, CFRangeMake(cmdStartRange.location + 1, endLoc - cmdStartRange.location - 1), 0, &cmdEndRange)){
-        // if the char right behind the backslash is a non-letter char, it's a one-letter command
-        if(cmdEndRange.location == cmdStartRange.location + 1)
-            cmdEndRange.location++;
-        // see if we found a left brace, we ignore commands like \LaTeX{} which we want to keep
-        if('{' == CFStringGetCharacterAtIndex((CFStringRef)self, cmdEndRange.location) && 
-           '}' != CFStringGetCharacterAtIndex((CFStringRef)self, cmdEndRange.location + 1))
-            return NSMakeRange(cmdStartRange.location, cmdEndRange.location - cmdStartRange.location);
-        
-        bsSearchRange = CFRangeMake(cmdEndRange.location, endLoc - cmdEndRange.location);
-    }
-    
-    return NSMakeRange(NSNotFound, 0);
+    CFRange cfSearchRange = CFRangeMake(searchRange.location == NSNotFound ? kCFNotFound : searchRange.location, searchRange.length);
+    CFRange range = BDRangeOfTeXCommand((CFStringRef)self, cfSearchRange);
+    return NSMakeRange(range.location == kCFNotFound ? NSNotFound : range.location, range.length);
 }
 
 - (NSString *)stringByBackslashEscapingTeXSpecials;
