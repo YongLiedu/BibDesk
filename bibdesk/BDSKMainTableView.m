@@ -132,14 +132,15 @@ enum {
     lastMouseDownRow = -1;
     lastMouseDownColumn = -1;
     
-	[self setHeaderView:[[[BDSKMainTableHeaderView alloc] initWithFrame:[[self headerView] frame]] autorelease]];	
-    NSRect cornerViewFrame = [[self cornerView] frame];
-    BDSKImagePopUpButton *cornerViewButton = [[BDSKImagePopUpButton alloc] initWithFrame:cornerViewFrame];
-    [cornerViewButton setPullsDown:YES];
-    [[cornerViewButton cell] setArrowPosition:NSPopUpNoArrow];
-    [[cornerViewButton cell] setAltersStateOfSelectedItem:NO];
-    [self setCornerView:cornerViewButton];
-    [cornerViewButton release];
+	[self setHeaderView:[[[BDSKMainTableHeaderView alloc] initWithFrame:[[self headerView] frame]] autorelease]];
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_6) {
+        BDSKImagePopUpButton *cornerViewButton = [[BDSKImagePopUpButton alloc] init];
+        [cornerViewButton setPullsDown:YES];
+        [[cornerViewButton cell] setArrowPosition:NSPopUpNoArrow];
+        [[cornerViewButton cell] setAltersStateOfSelectedItem:NO];
+        [self setCornerView:cornerViewButton];
+        [cornerViewButton release];
+    }
     
     BDSKTypeSelectHelper *aTypeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
     [aTypeSelectHelper setCyclesSimilarResults:YES];
