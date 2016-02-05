@@ -676,6 +676,7 @@ enum {
 
 - (void)tableColumnDidMove:(NSNotification *)note {
     [self updateColumnsMenuUpdatingButton:YES];
+    [[NSUserDefaults standardUserDefaults] setObject:[[[self tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString] forKey:BDSKShownColsNamesKey];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{

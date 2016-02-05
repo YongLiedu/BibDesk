@@ -226,14 +226,6 @@
     }
 }
 
-
-- (void)tableViewColumnDidMove:(NSNotification *)notification{
-	if ([notification object] == tableView) {
-        [[NSUserDefaults standardUserDefaults] setObject:[[[tableView tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString]
-                                                          forKey:BDSKShownColsNamesKey];
-    }
-}
-
 - (void)tableView:(NSTableView *)tv didClickTableColumn:(NSTableColumn *)tableColumn{
 	// check whether this is the right kind of table view and don't re-sort when we have a contextual menu click
     if (tableView == tv && [[NSApp currentEvent] type] != NSRightMouseDown) {
