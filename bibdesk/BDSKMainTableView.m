@@ -83,6 +83,7 @@ enum {
 
 - (NSImage *)headerImageForField:(NSString *)field;
 - (NSString *)headerTitleForField:(NSString *)field;
+- (void)updateTableColumnDefaults;
 - (void)columnsMenuSelectTableColumn:(id)sender;
 - (void)columnsMenuAddTableColumn:(id)sender;
 - (void)updateColumnsMenuUpdatingButton:(BOOL)updateButton;
@@ -303,7 +304,7 @@ enum {
     return type;
 }
 
-- (id)newDataCellForColumnType:(NSInteger)columnType {
+- (NSCell *)newDataCellForColumnType:(NSInteger)columnType {
     id cell = nil;
     
     switch(columnType) {
@@ -374,37 +375,29 @@ enum {
     return cell;
 }
 
-- (NSTableColumn *)newConfiguredTableColumnForField:(NSString *)colName {
-    BDSKTableColumn *tc = [(BDSKTableColumn *)[self tableColumnWithIdentifier:colName] retain];
-    id dataCell = [tc dataCell];
-    NSInteger columnType = [self columnTypeForField:colName];
+- (NSTableColumn *)newConfiguredTableColumnForField:(NSString *)identifier {
+    BDSKTableColumn *tc = [[BDSKTableColumn alloc] initWithIdentifier:identifier];
+    NSInteger columnType = [self columnTypeForField:identifier];
+    NSCell *dataCell = [self newDataCellForColumnType:columnType];
     
-    if(tc == nil){
-        // it is a new column, so create it
-        tc = [[BDSKTableColumn alloc] initWithIdentifier:colName];
-        [tc setResizingMask:(NSTableColumnAutoresizingMask | NSTableColumnUserResizingMask)];
-        [tc setEditable:NO];
-        [tc setMinWidth:16.0];
-        [tc setMaxWidth:1000.0];
-    }
-    
-    // this may be called in response to a field type change, so the cell may also need to change, even if the column is already in the tableview
-    if (dataCell == nil || [tc columnType] != columnType) {
-        dataCell = [self newDataCellForColumnType:columnType];
-        [tc setDataCell:dataCell];
-        [dataCell release];
-        [tc setColumnType:columnType];
-    }
+    [tc setResizingMask:(NSTableColumnAutoresizingMask | NSTableColumnUserResizingMask)];
+    [tc setEditable:NO];
+    [tc setMinWidth:16.0];
+    [tc setMaxWidth:1000.0];
+    [tc setDataCell:dataCell];
+    [tc setColumnType:columnType];
+    [dataCell release];
 
+    NSTableHeaderCell *headerCell = [tc headerCell];
     NSImage *image;
     NSString *title;
-    id headerCell = [tc headerCell];
-    if(image = [self headerImageForField:colName])
+    
+    if ((image = [self headerImageForField:identifier]))
         [headerCell setImage:image];
-    else if(title = [self headerTitleForField:colName])
+    else if ((title = [self headerTitleForField:identifier]))
         [headerCell setStringValue:title];
     else
-        [headerCell setStringValue:[[NSBundle mainBundle] localizedStringForKey:colName value:@"" table:@"BibTeXKeys"]];
+        [headerCell setStringValue:[[NSBundle mainBundle] localizedStringForKey:identifier value:@"" table:@"BibTeXKeys"]];
     
     if (columnType != BDSKColumnTypeText && columnType != BDSKColumnTypeLinkedFile && columnType != BDSKColumnTypeRelevance)
         [tc setWidth:fmax([dataCell cellSize].width, [headerCell cellSize].width)];
@@ -413,70 +406,74 @@ enum {
 }
 
 - (void)setupTableColumnsWithIdentifiers:(NSArray *)identifiers {
-    
-    NSTableColumn *tc;
-    NSNumber *tcWidth;
-    
     NSDictionary *defaultTableColumnWidths = nil;
     if ([[self delegate] respondsToSelector:@selector(defaultColumnWidthsForTableView:)])
         defaultTableColumnWidths = [[self delegate] defaultColumnWidthsForTableView:self];
     
-    NSMutableArray *columns = [[NSMutableArray alloc] initWithCapacity:[identifiers count]];
+    while ([self numberOfColumns] > 0)
+        [self removeTableColumn:[[self tableColumns] objectAtIndex:0]];
 	
-	for (NSString *colName in identifiers) {
-		tc = [self newConfiguredTableColumnForField:colName];
+	for (NSString *identifier in identifiers) {
+		NSTableColumn *tc = [self newConfiguredTableColumnForField:identifier];
+        NSNumber *tcWidth;
         
-        if ([colName isEqualToString:BDSKImportOrderString] == NO && (tcWidth = [defaultTableColumnWidths objectForKey:colName]))
+        if ([identifier isEqualToString:BDSKImportOrderString] == NO &&
+            (tcWidth = [defaultTableColumnWidths objectForKey:identifier]))
             [tc setWidth:[tcWidth doubleValue]];
 		
-		[columns addObject:tc];
+		[self addTableColumn:tc];
         [tc release];
 	}
     
-    NSTableColumn *highlightedColumn = [self highlightedTableColumn];
-    if ([columns containsObject:highlightedColumn] == NO)
-        highlightedColumn = nil;
-	NSIndexSet *selectedRows = [self selectedRowIndexes];
-    
-    [self removeAllTableColumns];
-    for (NSTableColumn *column in columns)
-        [self addTableColumn:column];
-    [columns release];
-    [self selectRowIndexes:selectedRows byExtendingSelection:NO];
-    [self setHighlightedTableColumn:highlightedColumn]; 
     [self tableViewFontChanged];
     [self updateColumnsMenuUpdatingButton:YES];
 }
 
+- (void)updateTableColumnTypes {
+    for (BDSKTableColumn *tc in [self tableColumns]) {
+        NSInteger columnType = [self columnTypeForField:[tc identifier]];
+        if ([tc columnType] != columnType) {
+            NSCell *dataCell = [self newDataCellForColumnType:columnType];
+            [tc setDataCell:dataCell];
+            [tc setColumnType:columnType];
+            [dataCell release];
+        }
+    }
+    [self tableViewFontChanged];
+}
+
 - (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(NSUInteger)idx {
-    NSMutableArray *shownColumns = [NSMutableArray arrayWithArray:[self tableColumnIdentifiers]];
-    NSUInteger oldIndex = [shownColumns indexOfObject:identifier];
-    
-    // Check if an object already exists in the tableview, remove the old one if it does
-    // This means we can't have a column more than once.
-    if (oldIndex != NSNotFound) {
-        if (idx > oldIndex)
-            idx--;
-        else if (oldIndex == idx)
-            return;
-        [shownColumns removeObject:identifier];
+    // we don't want duplicate columns, so don't add when it's already present
+    if ([self tableColumnWithIdentifier:identifier] == nil) {
+        NSTableColumn *tc = [self newConfiguredTableColumnForField:identifier];
+        NSNumber *tcWidth;
+        
+        if ([identifier isEqualToString:BDSKImportOrderString] == NO &&
+            [[self delegate] respondsToSelector:@selector(defaultColumnWidthsForTableView:)] &&
+            (tcWidth = [[[self delegate] defaultColumnWidthsForTableView:self] objectForKey:identifier]))
+            [tc setWidth:[tcWidth doubleValue]];
+        
+        [self addTableColumn:tc];
+        [tc release];
     }
     
-    [shownColumns insertObject:identifier atIndex:idx];
+    NSInteger i = [self columnWithIdentifier:identifier];
+    if (i >= 0 && (NSInteger)idx != i) {
+        ignoreMovedColumn = YES;
+        [self moveColumn:i toColumn:idx];
+        ignoreMovedColumn = NO;
+    }
     
-    [self setupTableColumnsWithIdentifiers:shownColumns];
+    [self tableViewFontChanged];
+    [self updateColumnsMenuUpdatingButton:YES];
 }
 
 - (void)removeTableColumnWithIdentifier:(NSString *)identifier {
-    NSMutableArray *shownColumns = [NSMutableArray arrayWithArray:[self tableColumnIdentifiers]];
-
-    // Check if an object already exists in the tableview.
-    if ([shownColumns containsObject:identifier] == NO)
-        return;
-    
-    [shownColumns removeObject:identifier];
-    
-    [self setupTableColumnsWithIdentifiers:shownColumns];
+    NSTableColumn *tc = [self tableColumnWithIdentifier:identifier];
+    if (tc) {
+        [self removeTableColumn:tc];
+        [self updateColumnsMenuUpdatingButton:YES];
+    }
 }
 
 - (NSMenu *)columnsMenu{
@@ -490,11 +487,6 @@ enum {
 }
 
 #pragma mark Convenience methods
-
-- (void)removeAllTableColumns {
-    while ([self numberOfColumns] > 0)
-        [self removeTableColumn:[[self tableColumns] objectAtIndex:0]];
-}
 
 - (NSArray *)tableColumnIdentifiers { return [[self tableColumns] valueForKey:@"identifier"]; }
 
@@ -602,12 +594,17 @@ enum {
 	return [headerTitleCache objectForKey:field];
 }
 
+- (void)updateTableColumnDefaults {
+    NSArray *shownColumnIdentifiers = [[[self tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString];
+    [[NSUserDefaults standardUserDefaults] setObject:shownColumnIdentifiers forKey:BDSKShownColsNamesKey];
+}
+
 - (void)columnsMenuSelectTableColumn:(id)sender{
     if ([sender state] == NSOnState)
         [self removeTableColumnWithIdentifier:[sender representedObject]];
     else
         [self insertTableColumnWithIdentifier:[sender representedObject] atIndex:[self numberOfColumns]];
-    [[NSUserDefaults standardUserDefaults] setObject:[[[self tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString] forKey:BDSKShownColsNamesKey];
+    [self updateTableColumnDefaults];
 }
 
 - (void)columnsMenuAddTableColumn:(id)sender{
@@ -620,9 +617,9 @@ enum {
                                                                              label:NSLocalizedString(@"Name of column to add:", @"Label for adding column")];
 	[addFieldController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
         NSString *newColumnName = [addFieldController chosenField];
-        if (newColumnName && result == NSOKButton) {
+        if (result == NSOKButton && newColumnName && [[self tableColumnIdentifiers] containsObject:newColumnName] == NO) {
             [self insertTableColumnWithIdentifier:newColumnName atIndex:[self numberOfColumns]];
-            [[NSUserDefaults standardUserDefaults] setObject:[[[self tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString] forKey:BDSKShownColsNamesKey];
+            [self updateTableColumnDefaults];
         }
     }];
 }
@@ -675,8 +672,10 @@ enum {
 }
 
 - (void)tableColumnDidMove:(NSNotification *)note {
-    [self updateColumnsMenuUpdatingButton:YES];
-    [[NSUserDefaults standardUserDefaults] setObject:[[[self tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString] forKey:BDSKShownColsNamesKey];
+    if (ignoreMovedColumn == NO) {
+        [self updateColumnsMenuUpdatingButton:YES];
+        [self updateTableColumnDefaults];
+    }
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{

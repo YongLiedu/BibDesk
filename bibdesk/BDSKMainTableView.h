@@ -63,6 +63,7 @@
     NSArray *alternatingRowBackgroundColors;
     NSInteger lastMouseDownRow;
     NSInteger lastMouseDownColumn;
+    BOOL ignoreMovedColumn;
 }
 
 - (NSInteger)lastMouseDownRow;
@@ -75,8 +76,8 @@
 - (NSMenu *)columnsMenu;
 - (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(NSUInteger)index;
 - (void)removeTableColumnWithIdentifier:(NSString *)identifier;
+- (void)updateTableColumnTypes;
 
-- (void)removeAllTableColumns;
 - (NSArray *)tableColumnIdentifiers;
 - (void)scrollRowToCenter:(NSUInteger)row;
 

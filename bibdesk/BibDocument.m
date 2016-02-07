@@ -470,7 +470,6 @@ static NSOperationQueue *metadataCacheQueue = nil;
     [[tableView enclosingScrollView] setFrame:frameRect];
     
     // TableView setup
-    [tableView removeAllTableColumns];
     
     [tableView setFontNamePreferenceKey:BDSKMainTableViewFontNameKey];
     [tableView setFontSizePreferenceKey:BDSKMainTableViewFontSizeKey];
