@@ -290,7 +290,7 @@ The groupedPublications array is a subset of the publications array, developed b
             [self showSearchGroupView];
         }
         [tableView setAlternatingRowBackgroundColors:[NSColor alternateControlAlternatingRowBackgroundColors]];
-        [tableView insertTableColumnWithIdentifier:BDSKImportOrderString atIndex:0];
+        [tableView addTableColumnWithIdentifier:BDSKImportOrderString];
         
     } else {
         if ([self isDisplayingSearchButtons]) {

@@ -442,7 +442,7 @@ enum {
     [self tableViewFontChanged];
 }
 
-- (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(NSUInteger)idx {
+- (void)addTableColumnWithIdentifier:(NSString *)identifier {
     // we don't want duplicate columns, so don't add when it's already present
     if ([self tableColumnWithIdentifier:identifier] == nil) {
         NSTableColumn *tc = [self newConfiguredTableColumnForField:identifier];
@@ -457,11 +457,14 @@ enum {
         [tc release];
     }
     
-    NSInteger i = [self columnWithIdentifier:identifier];
-    if (i >= 0 && (NSInteger)idx != i) {
-        ignoreMovedColumn = YES;
-        [self moveColumn:i toColumn:idx];
-        ignoreMovedColumn = NO;
+    // Import Order and Relevance columns should be inserted as the first column
+    if ([identifier isEqualToString:BDSKImportOrderString] || [identifier isEqualToString:BDSKRelevanceString]) {
+        NSInteger i = [self columnWithIdentifier:identifier];
+        if (i > 0) {
+            ignoreMovedColumn = YES;
+            [self moveColumn:i toColumn:0];
+            ignoreMovedColumn = NO;
+        }
     }
     
     [self tableViewFontChanged];
@@ -603,7 +606,7 @@ enum {
     if ([sender state] == NSOnState)
         [self removeTableColumnWithIdentifier:[sender representedObject]];
     else
-        [self insertTableColumnWithIdentifier:[sender representedObject] atIndex:[self numberOfColumns]];
+        [self addTableColumnWithIdentifier:[sender representedObject]];
     [self updateTableColumnDefaults];
 }
 
@@ -618,7 +621,7 @@ enum {
 	[addFieldController beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
         NSString *newColumnName = [addFieldController chosenField];
         if (result == NSOKButton && newColumnName && [[self tableColumnIdentifiers] containsObject:newColumnName] == NO) {
-            [self insertTableColumnWithIdentifier:newColumnName atIndex:[self numberOfColumns]];
+            [self addTableColumnWithIdentifier:newColumnName];
             [self updateTableColumnDefaults];
         }
     }];

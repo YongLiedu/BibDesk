@@ -188,7 +188,7 @@
         [self addControlView:searchButtonEdgeView];
         
         if ([tableView tableColumnWithIdentifier:BDSKRelevanceString] == nil)
-            [tableView insertTableColumnWithIdentifier:BDSKRelevanceString atIndex:0];
+            [tableView addTableColumnWithIdentifier:BDSKRelevanceString];
         
         if ([[searchButtonBar representedObjectOfSelectedButton] isEqualToString:BDSKAllFieldsString] == NO)
             [searchButtonBar selectButtonWithRepresentedObject:BDSKAllFieldsString];

@@ -74,7 +74,7 @@
 
 - (void)setupTableColumnsWithIdentifiers:(NSArray *)identifiers;
 - (NSMenu *)columnsMenu;
-- (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(NSUInteger)index;
+- (void)addTableColumnWithIdentifier:(NSString *)identifier;
 - (void)removeTableColumnWithIdentifier:(NSString *)identifier;
 - (void)updateTableColumnTypes;
 
