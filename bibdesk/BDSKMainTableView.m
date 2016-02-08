@@ -544,7 +544,7 @@ enum {
         [paperclip setTemplate:NO];
         NSImage *url = [[[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericURLIcon)] copy] autorelease];
         [url setSize:size];
-        NSImage *color = [[[NSImage imageNamed:@"colors"] copy] autorelease];
+        NSImage *color = [[[NSImage imageNamed:NSImageNameColorPanel] copy] autorelease];
         [color setSize:size];
         NSImage *crossref = [[[NSImage imageNamed:NSImageNameFollowLinkFreestandingTemplate] copy] autorelease];
         [crossref setSize:size];
