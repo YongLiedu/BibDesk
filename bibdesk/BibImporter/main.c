@@ -3,7 +3,7 @@
 //  BibImporter
 //
 //  Created by Adam Maxwell on 09/26/04.
-//  Copyright (c) 2004-2015 Adam R. Maxwell. All rights reserved.
+//  Copyright (c) 2004-2016 Adam R. Maxwell. All rights reserved.
 //
 
 

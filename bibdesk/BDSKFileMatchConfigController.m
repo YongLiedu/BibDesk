@@ -1,5 +1,5 @@
 /*
- This software is Copyright (c) 2006-2015
+ This software is Copyright (c) 2006-2016
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
