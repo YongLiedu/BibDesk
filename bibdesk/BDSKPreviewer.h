@@ -106,22 +106,6 @@ typedef NSInteger BDSKPreviewState;
 - (void)displayPreviewsForState:(BDSKPreviewState)state success:(BOOL)success;
 
 /*!
-    @method     PDFData
-    @abstract   Returns the PDF data in the preview if it is valid. Otherwise returns nil.
-    @discussion Any data is considered invalid if the previews were reset, our window is not visible, 
-		or there are updates waiting. This should be thread safe. 
-*/
-- (NSData *)PDFData;
-
-/*!
-    @method     LaTeXString
-    @abstract   Returns the LaTeX string for the preview if it is valid. Otherwise returns nil.
-    @discussion Any data is considered invalid if the previews were reset, our window is not visible, 
-		or there are updates waiting. This should be thread safe. 
-*/
-- (NSString *)LaTeXString;
-
-/*!
     @method     handleApplicationWillTerminate:
     @abstract   Perform cleanup actions here, since this object never gets deallocated.
     @discussion (comprehensive description)

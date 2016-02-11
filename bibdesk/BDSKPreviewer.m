@@ -288,7 +288,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
         
         logString = [texTask logFileString] ?: NSLocalizedString(@"Unable to read log file from TeX run.", @"Preview message");
         
-		pdfData = [self PDFData];
+		pdfData = [texTask PDFData];
         if(success == NO || pdfData == nil){
 			// show the TeX log file in the view
 			NSMutableString *errorString = [[NSMutableString alloc] initWithCapacity:200];
@@ -376,20 +376,6 @@ static BDSKPreviewer *sharedPreviewer = nil;
         // if we didn't have success, the drawing method will show the log file
         [self displayPreviewsForState:BDSKShowingPreviewState success:success];
     }
-}
-
-#pragma mark Data accessors
-
-- (NSData *)PDFData{
-	if(previewState != BDSKShowingPreviewState || [self isVisible] == NO)
-        return nil;
-    return [texTask PDFData];
-}
-
-- (NSString *)LaTeXString{
-	if(previewState != BDSKShowingPreviewState || [self isVisible] == NO)
-        return nil;
-    return [texTask LaTeXString];
 }
 
 #pragma mark Cleanup
