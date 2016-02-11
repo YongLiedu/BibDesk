@@ -370,7 +370,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 	}	
 }
 
-- (void)texTask:(BDSKTeXTask *)texTask finishedWithResult:(BOOL)success{
+- (void)texTask:(BDSKTeXTask *)aTexTask finishedWithResult:(BOOL)success{
     // ignore this task if we finished a task that was running when the previews were reset
 	if(previewState != BDSKEmptyPreviewState) {
         // if we didn't have success, the drawing method will show the log file
