@@ -59,10 +59,7 @@ enum {
     BDSKPreviewerTabIndexLog,
 };
 
-static NSData *emptyPDFData();
-static NSData *errorMessagePDFData();
-static NSData *emptyMessagePDFData();
-static NSData *generatingMessagePDFData();
+static NSData *defaultPDFDataForState(BDSKPreviewState state);
 
 @implementation BDSKPreviewer
 
@@ -140,7 +137,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
     }
         
     // empty document to avoid problem when zoom is set to auto
-    PDFDocument *pdfDoc = [[[PDFDocument alloc] initWithData:emptyPDFData()] autorelease];
+    PDFDocument *pdfDoc = [[[PDFDocument alloc] initWithData:defaultPDFDataForState(BDSKUnknownPreviewState)] autorelease];
     [pdfView setDocument:pdfDoc];
     
     [pdfView setDisplaysPageBreaks:NO];
@@ -300,19 +297,12 @@ static BDSKPreviewer *sharedPreviewer = nil;
 			[errorString appendString:logString];
             logString = errorString;
             
-            if(pdfData == nil)
-                pdfData = errorMessagePDFData();
 		}
         
-	}else if(state == BDSKEmptyPreviewState){
-		
-		pdfData = emptyMessagePDFData();
-		
-	}else if(state == BDSKWaitingPreviewState){
-		
-		pdfData = generatingMessagePDFData();
-		
 	}
+    
+    if(pdfData == nil)
+        pdfData = defaultPDFDataForState(state);
 	
 	BDSKPOSTCONDITION(pdfData != nil);
 	
@@ -397,53 +387,33 @@ static BDSKPreviewer *sharedPreviewer = nil;
 @end
 
 
-static NSData *createPDFDataWithStringAndColor(NSString *string, NSColor *color) {
-    NSRect rect = NSMakeRect(0.0, 0.0, 612.0, 792.0);
-    NSTextView *textView = [[NSTextView alloc] initWithFrame:rect];
-    [textView setVerticallyResizable:YES];
-    [textView setHorizontallyResizable:NO];
-    [textView setTextContainerInset:NSMakeSize(20.0, 20.0)];
-    
-    NSTextStorage *textStorage = [textView textStorage];
-    [textStorage beginEditing];
-    if (string)
-        [[textStorage mutableString] setString:string];
-    [textStorage addAttribute:NSFontAttributeName value:[NSFont userFontOfSize:0.0] range:NSMakeRange(0, [textStorage length])];
-    if (color)
-        [textStorage addAttribute:NSForegroundColorAttributeName value:color range:NSMakeRange(0, [textStorage length])];
-    [textStorage endEditing];
-	
-    NSData *data = [textView dataWithPDFInsideRect:rect];
-    
-    [textView release];
-    
-    return [data retain];
-}
-
-static NSData *emptyPDFData() {
-    static NSData *emptyPDFData = nil;
-    if (emptyPDFData == nil)
-        emptyPDFData = createPDFDataWithStringAndColor(@"", nil);
-    return emptyPDFData;
-}
-
-static NSData *errorMessagePDFData() {
-    static NSData *errorMessagePDFData = nil;
-    if (errorMessagePDFData == nil)
-        errorMessagePDFData = createPDFDataWithStringAndColor(NSLocalizedString(@"***** ERROR:  unable to create preview *****\n\nsee the logs in the TeX Preview window", @"Preview message"), [NSColor redColor]);
-    return errorMessagePDFData;
-}
-
-static NSData *emptyMessagePDFData() {
-    static NSData *emptyMessagePDFData = nil;
-    if (emptyMessagePDFData == nil)
-        emptyMessagePDFData = createPDFDataWithStringAndColor(NSLocalizedString(@"No items are selected.", @"Preview message"), [NSColor grayColor]);
-    return emptyMessagePDFData;
-}
-
-static NSData *generatingMessagePDFData() {
-    static NSData *generatingMessagePDFData = nil;
-    if (generatingMessagePDFData == nil)
-        generatingMessagePDFData = createPDFDataWithStringAndColor([NSLocalizedString(@"Generating preview", @"Preview message") stringByAppendingEllipsis], [NSColor grayColor]);
-    return generatingMessagePDFData;
+static NSData *defaultPDFDataForState(BDSKPreviewState state) {
+    static NSArray *defaultPDFDataArray = nil;
+    if (defaultPDFDataArray == nil) {
+        NSRect rect = NSMakeRect(0.0, 0.0, 612.0, 792.0);
+        NSTextView *textView = [[NSTextView alloc] initWithFrame:rect];
+        [textView setVerticallyResizable:YES];
+        [textView setHorizontallyResizable:NO];
+        [textView setTextContainerInset:NSMakeSize(20.0, 20.0)];
+        [textView setFont:[NSFont userFontOfSize:0.0]];
+        NSMutableArray *array = [NSMutableArray array];
+        
+        [array addObject:[textView dataWithPDFInsideRect:rect]];
+        
+        [textView setTextColor:[NSColor grayColor]];
+        [textView setString:NSLocalizedString(@"No items are selected.", @"Preview message")];
+        [array addObject:[textView dataWithPDFInsideRect:rect]];
+        
+        [textView setString:[NSLocalizedString(@"Generating preview", @"Preview message") stringByAppendingEllipsis]];
+        [array addObject:[textView dataWithPDFInsideRect:rect]];
+        
+        [textView setTextColor:[NSColor redColor]];
+        [textView setString:NSLocalizedString(@"***** ERROR:  unable to create preview *****\n\nsee the logs in the TeX Preview window", @"Preview message")];
+        [array addObject:[textView dataWithPDFInsideRect:rect]];
+        
+        [textView release];
+        
+        defaultPDFDataArray = [array copy];
+    }
+    return [defaultPDFDataArray objectAtIndex:state + 1];
 }
