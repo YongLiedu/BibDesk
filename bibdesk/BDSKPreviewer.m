@@ -258,7 +258,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
     NSAssert2([NSThread isMainThread], @"-[%@ %@] must be called from the main thread!", [self class], NSStringFromSelector(_cmd));
     
     // From Shark: if we were waiting before, and we're still waiting, there's nothing to do.  This is a big performance win when scrolling the main tableview selection, primarily because changing the text storage of rtfPreviewView ends up calling fixFontAttributes.  This in turn causes a disk hit at the ATS cache due to +[NSFont coveredCharacterCache], and parsing the binary plist uses lots of memory.
-    if (BDSKWaitingPreviewState == previewState && BDSKWaitingPreviewState == state)
+    if (state == previewState && state != BDSKShowingPreviewState)
         return;
     
 	previewState = state;
@@ -270,7 +270,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
         [progressIndicator stopAnimation:nil];
 	
     // if we're offscreen, no point in doing any extra work; we want to be able to reset offscreen though
-    if(![self isVisible] && state != BDSKEmptyPreviewState){
+    if(NO == [self isVisible] && state != BDSKEmptyPreviewState){
         return;
     }
 	
@@ -287,7 +287,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 		pdfData = [texTask PDFData];
         if(success == NO || pdfData == nil){
 			// show the TeX log file in the view
-			NSMutableString *errorString = [[NSMutableString alloc] initWithCapacity:200];
+			NSMutableString *errorString = [NSMutableString string];
 			[errorString appendString:NSLocalizedString(@"TeX preview generation failed.  Please review the log below to determine the cause.", @"Preview message")];
 			[errorString appendString:@"\n\n"];
             
@@ -298,7 +298,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
                 [errorString appendFormat:NSLocalizedString(@"***** WARNING: You are using a non-standard BibTeX style *****\nThe style \"%@\" may require additional \\usepackage commands to function correctly.\n\n", @"possible cause of TeX failure"), btStyle];
             
 			[errorString appendString:logString];
-            logString = [errorString autorelease];
+            logString = errorString;
             
             if(pdfData == nil)
                 pdfData = errorMessagePDFData();
@@ -306,14 +306,10 @@ static BDSKPreviewer *sharedPreviewer = nil;
         
 	}else if(state == BDSKEmptyPreviewState){
 		
-        logString = @"";
-        
 		pdfData = emptyMessagePDFData();
 		
 	}else if(state == BDSKWaitingPreviewState){
 		
-        logString = @"";
-        
 		pdfData = generatingMessagePDFData();
 		
 	}
