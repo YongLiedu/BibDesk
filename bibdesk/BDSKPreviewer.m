@@ -422,6 +422,8 @@ static NSData *createPDFDataWithStringAndColor(NSString *string, NSColor *color)
 
 static NSData *emptyPDFData() {
     static NSData *emptyPDFData = nil;
+    if (emptyPDFData == nil)
+        emptyPDFData = createPDFDataWithStringAndColor(@"", nil);
     return emptyPDFData;
 }
 
