@@ -59,7 +59,10 @@ enum {
     BDSKPreviewerTabIndexLog,
 };
 
-static NSData *createPDFDataWithStringAndColor(NSString *string, NSColor *color);
+static NSData *emptyPDFData();
+static NSData *errorMessagePDFData();
+static NSData *emptyMessagePDFData();
+static NSData *generatingMessagePDFData();
 
 @implementation BDSKPreviewer
 
@@ -137,11 +140,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
     }
         
     // empty document to avoid problem when zoom is set to auto
-    static NSData *emptyPDFData = nil;
-    if (emptyPDFData == nil)
-        emptyPDFData = createPDFDataWithStringAndColor(@"", nil);
-    
-    PDFDocument *pdfDoc = [[[PDFDocument alloc] initWithData:emptyPDFData] autorelease];
+    PDFDocument *pdfDoc = [[[PDFDocument alloc] initWithData:emptyPDFData()] autorelease];
     [pdfView setDocument:pdfDoc];
     
     [pdfView setDisplaysPageBreaks:NO];
@@ -279,9 +278,6 @@ static BDSKPreviewer *sharedPreviewer = nil;
     
     NSString *logString = @"";
     NSData *pdfData = nil;
-	static NSData *errorMessagePDFData = nil;
-	static NSData *emptyMessagePDFData = nil;
-	static NSData *generatingMessagePDFData = nil;
 	
 	// get the data to display
 	if(state == BDSKShowingPreviewState){
@@ -304,28 +300,21 @@ static BDSKPreviewer *sharedPreviewer = nil;
 			[errorString appendString:logString];
             logString = [errorString autorelease];
             
-            if(pdfData == nil) {
-                if (errorMessagePDFData)
-                    errorMessagePDFData = createPDFDataWithStringAndColor(NSLocalizedString(@"***** ERROR:  unable to create preview *****\n\nsee the logs in the TeX Preview window", @"Preview message"), [NSColor redColor]);
-                pdfData = errorMessagePDFData;
-            }
+            if(pdfData == nil)
+                pdfData = errorMessagePDFData();
 		}
         
 	}else if(state == BDSKEmptyPreviewState){
 		
         logString = @"";
         
-		if (emptyMessagePDFData == nil)
-			emptyMessagePDFData = createPDFDataWithStringAndColor(NSLocalizedString(@"No items are selected.", @"Preview message"), [NSColor grayColor]);
-		pdfData = emptyMessagePDFData;
+		pdfData = emptyMessagePDFData();
 		
 	}else if(state == BDSKWaitingPreviewState){
 		
         logString = @"";
         
-		if (generatingMessagePDFData == nil)
-			generatingMessagePDFData = createPDFDataWithStringAndColor([NSLocalizedString(@"Generating preview", @"Preview message") stringByAppendingEllipsis], [NSColor grayColor]);
-		pdfData = generatingMessagePDFData;
+		pdfData = generatingMessagePDFData();
 		
 	}
 	
@@ -433,4 +422,30 @@ static NSData *createPDFDataWithStringAndColor(NSString *string, NSColor *color)
     [textView release];
     
     return [data retain];
+}
+
+static NSData *emptyPDFData() {
+    static NSData *emptyPDFData = nil;
+    return emptyPDFData;
+}
+
+static NSData *errorMessagePDFData() {
+    static NSData *errorMessagePDFData = nil;
+    if (errorMessagePDFData == nil)
+        errorMessagePDFData = createPDFDataWithStringAndColor(NSLocalizedString(@"***** ERROR:  unable to create preview *****\n\nsee the logs in the TeX Preview window", @"Preview message"), [NSColor redColor]);
+    return errorMessagePDFData;
+}
+
+static NSData *emptyMessagePDFData() {
+    static NSData *emptyMessagePDFData = nil;
+    if (emptyMessagePDFData == nil)
+        emptyMessagePDFData = createPDFDataWithStringAndColor(NSLocalizedString(@"No items are selected.", @"Preview message"), [NSColor grayColor]);
+    return emptyMessagePDFData;
+}
+
+static NSData *generatingMessagePDFData() {
+    static NSData *generatingMessagePDFData = nil;
+    if (generatingMessagePDFData == nil)
+        generatingMessagePDFData = createPDFDataWithStringAndColor([NSLocalizedString(@"Generating preview", @"Preview message") stringByAppendingEllipsis], [NSColor grayColor]);
+    return generatingMessagePDFData;
 }
