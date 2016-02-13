@@ -41,7 +41,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKTeXTask.h"
 
-@class PDFView, BDSKZoomablePDFView, BDSKTeXTask, BDSKOverlayPanel, BDSKTeXTask;
+@class PDFView, BDSKZoomablePDFView, BDSKTeXTask, BDSKOverlayPanel;
 
 enum {
 	BDSKUnknownPreviewState = -1,
