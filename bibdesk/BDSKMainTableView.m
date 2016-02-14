@@ -129,7 +129,7 @@ enum {
     return cornerColumnsImage;
 }
 
-- (void)awakeFromNib{
+- (void)commonInit{
     lastMouseDownRow = -1;
     lastMouseDownColumn = -1;
     
@@ -150,6 +150,22 @@ enum {
     [aTypeSelectHelper release];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tableColumnDidMove:) name:NSTableViewColumnDidMoveNotification object:self];
+}
+
+- (id)initWithCoder:(NSCoder *)decoder {
+    self = [super initWithCoder:decoder];
+    if (self) {
+        [self commonInit];
+    }
+    return self;
+}
+
+- (id)initWithFrame:(NSRect)frameRect {
+    self = [super initWithFrame:frameRect];
+    if (self) {
+        [self commonInit];
+    }
+    return self;
 }
 
 - (void)dealloc{
