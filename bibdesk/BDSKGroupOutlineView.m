@@ -56,14 +56,7 @@
 
 @implementation BDSKGroupOutlineView
 
-- (void)dealloc
-{
-    BDSKDESTROY(parentCell);
-    [super dealloc];
-}
-
-- (void)awakeFromNib
-{
+- (void)commonInit {
     BDSKTypeSelectHelper *aTypeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
     [aTypeSelectHelper setCyclesSimilarResults:NO];
     [aTypeSelectHelper setMatchesPrefix:NO];
@@ -72,6 +65,28 @@
     
     // the source list style sets the vertical spacing to 0, but using the default spacing gives the same result as Mail
     [self setIntercellSpacing:NSMakeSize(3.0, 2.0)];
+}
+
+- (id)initWithCoder:(NSCoder *)decoder {
+    self = [super initWithCoder:decoder];
+    if (self) {
+        [self commonInit];
+    }
+    return self;
+}
+
+- (id)initWithFrame:(NSRect)frameRect {
+    self = [super initWithFrame:frameRect];
+    if (self) {
+        [self commonInit];
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    BDSKDESTROY(parentCell);
+    [super dealloc];
 }
 
 - (NSRect)frameOfOutlineCellAtRow:(NSInteger)row

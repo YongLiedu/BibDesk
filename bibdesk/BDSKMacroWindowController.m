@@ -725,12 +725,28 @@
 
 @implementation BDSKMacroTableView
 
-- (void)awakeFromNib{
+- (void)commonInit {
     BDSKTypeSelectHelper *aTypeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
     [aTypeSelectHelper setCyclesSimilarResults:YES];
     [aTypeSelectHelper setMatchesPrefix:NO];
     [self setTypeSelectHelper:aTypeSelectHelper];
     [aTypeSelectHelper release];
+}
+
+- (id)initWithCoder:(NSCoder *)decoder {
+    self = [super initWithCoder:decoder];
+    if (self) {
+        [self commonInit];
+    }
+    return self;
+}
+
+- (id)initWithFrame:(NSRect)frameRect {
+    self = [super initWithFrame:frameRect];
+    if (self) {
+        [self commonInit];
+    }
+    return self;
 }
 
 - (void)dealloc{

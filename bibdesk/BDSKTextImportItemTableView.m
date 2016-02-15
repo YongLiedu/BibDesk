@@ -49,6 +49,29 @@
 
 @implementation BDSKTextImportItemTableView
 
+- (void)commonInit {
+    BDSKTypeSelectHelper *aTypeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
+    [aTypeSelectHelper setCyclesSimilarResults:YES];
+    [self setTypeSelectHelper:aTypeSelectHelper];
+    [aTypeSelectHelper release];
+}
+
+- (id)initWithCoder:(NSCoder *)decoder {
+    self = [super initWithCoder:decoder];
+    if (self) {
+        [self commonInit];
+    }
+    return self;
+}
+
+- (id)initWithFrame:(NSRect)frameRect {
+    self = [super initWithFrame:frameRect];
+    if (self) {
+        [self commonInit];
+    }
+    return self;
+}
+
 - (BOOL)isInTemporaryTypeSelectMode {
     return temporaryTypeSelectMode;
 }
@@ -154,13 +177,6 @@
 - (BOOL)resignFirstResponder {
     [self endTemporaryTypeSelectMode];
     return [super resignFirstResponder];
-}
-
-- (void)awakeFromNib{
-    BDSKTypeSelectHelper *aTypeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
-    [aTypeSelectHelper setCyclesSimilarResults:YES];
-    [self setTypeSelectHelper:aTypeSelectHelper];
-    [aTypeSelectHelper release];
 }
 
 - (void)textDidEndEditing:(NSNotification *)aNotification {
