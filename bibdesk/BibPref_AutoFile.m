@@ -85,7 +85,9 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
     [self updateFormatPresetUI];
 }
 
-- (void)awakeFromNib{
+- (void)loadView {
+    [super loadView];
+    
 	BDSKFormatStringFormatter *formatter = [[BDSKFormatStringFormatter alloc] initWithField:BDSKLocalFileString];
     [formatSheetField setFormatter:formatter];
 	[formatter release];

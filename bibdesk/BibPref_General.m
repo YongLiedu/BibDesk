@@ -56,7 +56,9 @@ static char BDSKBibPrefGeneralUpdaterObservationContext;
 
 @implementation BibPref_General
 
-- (void)awakeFromNib{
+- (void)loadView {
+    [super loadView];
+    
     [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnDeleteKey] options:0 context:&BDSKBibPrefGeneralDefaultsObservationContext];
     [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnRemovalFromGroupKey] options:0 context:&BDSKBibPrefGeneralDefaultsObservationContext];
     [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnRenameGroupKey] options:0 context:&BDSKBibPrefGeneralDefaultsObservationContext];

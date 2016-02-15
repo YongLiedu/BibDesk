@@ -64,7 +64,9 @@
     return @"BDSKCustomCiteDrawer";
 }
 
-- (void)awakeFromNib{
+- (void)loadView {
+    [super loadView];
+    
     [drawer setParentWindow:[document windowForSheet]];
     NSSize drawerSize = [drawer contentSize];
     drawerSize.width = 100.0;

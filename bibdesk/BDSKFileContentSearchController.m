@@ -95,8 +95,9 @@
     [super dealloc];
 }
 
-- (void)awakeFromNib
-{
+- (void)loadView {
+    [super loadView];
+    
     [tableView setTarget:self];
     [tableView setDoubleAction:@selector(tableAction:)];
     

@@ -51,7 +51,9 @@ static char BDSKBibPrefCrossrefDefaultsObservationContext;
 
 @implementation BibPref_Crossref
 
-- (void)awakeFromNib{
+- (void)loadView {
+    [super loadView];
+    
     typesArray = [[NSMutableArray alloc] initWithCapacity:4];
 	[typesArray setArray:[sud arrayForKey:BDSKTypesForDuplicateBooktitleKey]];
     BDSKTypeNameFormatter *typeNameFormatter = [[BDSKTypeNameFormatter alloc] init];

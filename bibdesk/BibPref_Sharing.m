@@ -66,8 +66,9 @@
     [self updateStatusUI];
 }
 
-- (void)awakeFromNib
-{
+- (void)loadView {
+    [super loadView];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSharingNameChanged:) name:BDSKComputerNameChangedNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSharingNameChanged:) name:BDSKSharingNameChangedNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSharingStatusChanged:) name:BDSKSharingStatusChangedNotification object:nil];

@@ -46,7 +46,9 @@
 
 @implementation BibPref_ScriptHooks
 
-- (void)awakeFromNib{
+- (void)loadView {
+    [super loadView];
+    
 	[tableView setTarget:self];
 	[tableView setDoubleAction:@selector(showOrChooseScriptFile:)];
     [tableView registerForDraggedTypes:[NSArray arrayWithObjects:(NSString *)kUTTypeFileURL, NSFilenamesPboardType, nil]];

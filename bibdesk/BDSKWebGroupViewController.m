@@ -71,7 +71,9 @@
     [super dealloc];
 }
 
-- (void)awakeFromNib {
+- (void)loadView {
+    [super loadView];
+    
     // navigation views
     [collapsibleView setMinSize:[collapsibleView frame].size];
     [collapsibleView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];

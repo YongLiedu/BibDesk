@@ -110,7 +110,9 @@ static char BDSKConditionControllerObservationContext;
     [super dealloc];
 }
 
-- (void)awakeFromNib {
+- (void)loadView {
+    [super loadView];
+    
     [[dateComparisonPopUp superview] retain];
     [[attachmentComparisonPopUp superview] retain];
     [[comparisonPopUp superview] retain];

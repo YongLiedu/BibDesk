@@ -55,7 +55,9 @@
 
 @implementation BibPref_Display
 
-- (void)awakeFromNib{
+- (void)loadView {
+    [super loadView];
+    
     [previewMaxNumberComboBox addItemsWithObjectValues:[NSArray arrayWithObjects:NSLocalizedString(@"All", @"Display all items in preview"), @"1", @"5", @"10", @"20", nil]];
     [ignoredSortTermsField setFormatter:[[[BDSKStringArrayFormatter alloc] init] autorelease]];
     

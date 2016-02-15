@@ -77,7 +77,9 @@ static NSSet *standardStyles = nil;
     [encodingPopUpButton setEncoding:[sud integerForKey:BDSKTeXPreviewFileEncodingKey]];
 }
 
-- (void)awakeFromNib{
+- (void)loadView {
+    [super loadView];
+    
     BDSKShellCommandFormatter *formatter = [[BDSKShellCommandFormatter alloc] init];
     [texBinaryPathField setFormatter:formatter];
     [texBinaryPathField setDelegate:self];

@@ -53,7 +53,9 @@ static char BDSKBibPrefCiteDefaultsObservationContext;
 
 @implementation BibPref_Cite
 
-- (void)awakeFromNib{
+- (void)loadView {
+    [super loadView];
+    
     BDSKDragCopyCiteKeyFormatter *formatter = [[BDSKDragCopyCiteKeyFormatter alloc] init];
     [citeStringField setFormatter:formatter];
     [citeStringField setDelegate:self];

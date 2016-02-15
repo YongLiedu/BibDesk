@@ -83,8 +83,9 @@
     [self updateUI];
 }
 
-- (void)awakeFromNib
-{    
+- (void)loadView {
+    [super loadView];
+    
     [outlineView setAutosaveExpandedItems:YES];
     
     // Default behavior is to expand column 0, which slides column 1 outside the clip view; since we only have one expandable column, this is more annoying than helpful.

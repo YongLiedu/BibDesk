@@ -54,7 +54,9 @@
     [super dealloc];
 }
 
-- (void)awakeFromNib {
+- (void)loadView {
+    [super loadView];
+    
     [collapsibleView setMinSize:[collapsibleView frame].size];
     [collapsibleView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
     BDSKEdgeView *edgeView = (BDSKEdgeView *)[self view];

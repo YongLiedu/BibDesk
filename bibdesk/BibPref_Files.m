@@ -53,7 +53,9 @@
 
 @implementation BibPref_Files
 
-- (void)awakeFromNib {
+- (void)loadView {
+    [super loadView];
+    
     [self updateAutoSaveUI];
     
     [encodingPopUp setEncoding:[sud integerForKey:BDSKDefaultStringEncodingKey]];

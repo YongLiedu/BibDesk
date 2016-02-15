@@ -190,7 +190,9 @@ static NSSet *alwaysDisabledFields = nil;
     [self updateDeleteButton];
 }
 
-- (void)awakeFromNib{
+- (void)loadView {
+    [super loadView];
+    
     BDSKFieldNameFormatter *fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
     [[[[defaultFieldsTableView tableColumns] objectAtIndex:0] dataCell] setFormatter:fieldNameFormatter];
     [fieldNameFormatter release];
