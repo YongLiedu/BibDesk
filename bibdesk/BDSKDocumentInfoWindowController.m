@@ -74,7 +74,7 @@
 	[addRemoveButton setEnabled:[tableView numberOfSelectedRows] > 0 forSegment:1];
 }
 
-- (void)awakeFromNib{
+- (void)windowDidLoad{
     [tableView reloadData];
     [self updateButtons];
 }

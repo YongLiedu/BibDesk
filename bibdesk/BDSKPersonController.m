@@ -95,11 +95,7 @@
     [super dealloc];
 }
 
-- (void)awakeFromNib{
-	if ([NSWindowController instancesRespondToSelector:@selector(awakeFromNib)]){
-        [super awakeFromNib];
-	}
-    
+- (void)windowDidLoad{
     [publicationTableView setFontNamePreferenceKey:BDSKPersonTableViewFontNameKey];
     [publicationTableView setFontSizePreferenceKey:BDSKPersonTableViewFontSizeKey];
 	

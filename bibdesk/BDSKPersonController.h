@@ -68,7 +68,6 @@
 
 #pragma mark initialization
 - (id)initWithPerson:(BibAuthor *)aPerson;
-- (void)awakeFromNib;
 
 #pragma mark accessors
 - (BibAuthor *)person;

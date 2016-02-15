@@ -92,7 +92,7 @@
     [super dealloc];
 }
 
-- (void)awakeFromNib
+- (void)windowDidLoad
 {
     [self setWindowFrameAutosaveNameOrCascade:BDSKFileMigrationFrameAutosaveName];
     [tableView setDoubleAction:@selector(editPublication:)];

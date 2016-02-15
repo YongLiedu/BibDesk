@@ -71,7 +71,7 @@
     [super dealloc];
 }
 
-- (void)awakeFromNib {
+- (void)windowDidLoad {
     [urlField registerForDraggedTypes:[NSArray arrayWithObjects:(NSString *)kUTTypeURL, (NSString *)kUTTypeFileURL, NSFilenamesPboardType, NSURLPboardType, nil]];
 }
 

@@ -118,7 +118,7 @@ static id sharedInstance = nil;
     [super dealloc];
 }
 
-- (void)awakeFromNib
+- (void)windowDidLoad
 {
     [self setWindowFrameAutosaveName:@"Orphaned File Matcher Panel"];
     
@@ -788,14 +788,29 @@ static NSDictionary *attributes = nil;
     [super dealloc];
 }
 
-- (void)awakeFromNib
+- (void)commonInit
 {
-    if ([[BDSKGroupingOutlineView superclass] instancesRespondToSelector:_cmd])
-        [super awakeFromNib];
-    
     // colors similar to Spotlight's window: darker blue at bottom, lighter at top
     topColor = [[NSColor colorWithCalibratedRed:106.0/255.0 green:158.0/255.0 blue:238.0/255.0 alpha:1.0] retain];
     bottomColor = [[NSColor colorWithCalibratedRed:72.0/255.0 green:139.0/255.0 blue:244.0/255.0 alpha:1.0] retain];
+}
+
+- (id)initWithFrame:(NSRect)frameRect
+{
+    self = [super initWithFrame:frameRect];
+    if (self) {
+        [self commonInit];
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)decoder
+{
+    self = [super initWithCoder:decoder];
+    if (self) {
+        [self commonInit];
+    }
+    return self;
 }
 
 // these accessors are bound to the hidden color wells in the nib, which allow playing with the colors easily

@@ -93,7 +93,7 @@
 	return @"BDSKFilter";
 }
 
-- (void)awakeFromNib {
+- (void)windowDidLoad {
     for (BDSKConditionController *controller in conditionControllers)
         [conditionsView addView:[controller view]];
 	[self updateUI];

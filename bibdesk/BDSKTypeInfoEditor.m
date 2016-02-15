@@ -72,7 +72,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
     return self;
 }
 
-- (void)awakeFromNib
+- (void)windowDidLoad
 {
     // we want to be able to reorder the items
 	[typeTableView registerForDraggedTypes:[NSArray arrayWithObject:BDSKPasteboardTypeInfoRows]];

@@ -74,7 +74,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
     return self;
 }
 
-- (void)awakeFromNib {
+- (void)windowDidLoad {
 	texFormatter = [[BDSKTeXFormatter alloc] init];
     NSTableColumn *tc = [tableView tableColumnWithIdentifier:@"roman"];
     [[tc dataCell] setFormatter:[[[BDSKRomanCharacterFormatter alloc] init] autorelease]];
