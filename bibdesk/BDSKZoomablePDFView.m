@@ -68,7 +68,6 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.0, 0.1, 0.2, 0.25, 0.35, 0.5, 
     self = [super initWithFrame:frameRect];
     if (self) {
         scalePopUpButton = nil;
-        pinchZoomFactor = 1.0;
         [self makeScalePopUpButton];
     }
     return self;
@@ -78,7 +77,6 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.0, 0.1, 0.2, 0.25, 0.35, 0.5, 
     self = [super initWithCoder:decoder];
     if (self) {
         scalePopUpButton = nil;
-        pinchZoomFactor = 1.0;
         [self makeScalePopUpButton];
     }
     return self;
@@ -394,26 +392,20 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
 - (void)beginGestureWithEvent:(NSEvent *)theEvent {
     if ([[BDSKZoomablePDFView superclass] instancesRespondToSelector:_cmd])
         [super beginGestureWithEvent:theEvent];
-    pinchZoomFactor = 1.0;
+    startScale = [self scaleFactor];
 }
 
 - (void)endGestureWithEvent:(NSEvent *)theEvent {
-    if (fabs(pinchZoomFactor - 1.0) > 0.1)
-        [self setScaleFactor:fmax(pinchZoomFactor * [self scaleFactor], BDSKMinDefaultScaleMenuFactor)];
-    pinchZoomFactor = 1.0;
+    if (fabs(startScale - [self scaleFactor]) > 0.001)
+        [self setScaleFactor:fmax([self scaleFactor], BDSKMinDefaultScaleMenuFactor)];
     if ([[BDSKZoomablePDFView superclass] instancesRespondToSelector:_cmd])
         [super endGestureWithEvent:theEvent];
 }
 
 - (void)magnifyWithEvent:(NSEvent *)theEvent {
     if ([theEvent respondsToSelector:@selector(magnification)]) {
-        pinchZoomFactor *= 1.0 + fmax(-0.5, fmin(1.0 , [theEvent magnification]));
-        CGFloat scaleFactor = pinchZoomFactor * [self scaleFactor];
-        NSUInteger i = [self indexForScaleFactor:fmax(scaleFactor, BDSKMinDefaultScaleMenuFactor)];
-        if (i != [self indexForScaleFactor:[self scaleFactor]]) {
-            [self setScaleFactor:BDSKDefaultScaleMenuFactors[i]];
-            pinchZoomFactor = scaleFactor / [self scaleFactor];
-        }
+        CGFloat magnifyFactor = (1.0 + fmax(-0.5, fmin(1.0 , [theEvent magnification])));
+        [super setScaleFactor:magnifyFactor * [self scaleFactor]];
     }
 }
 

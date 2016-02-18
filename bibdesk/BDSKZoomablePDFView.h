@@ -42,7 +42,7 @@
 
 @interface BDSKZoomablePDFView : PDFView {
     NSPopUpButton *scalePopUpButton;
-    CGFloat pinchZoomFactor;
+    CGFloat startScale;
 }
 
 - (NSScrollView *)scrollView;
