@@ -83,6 +83,11 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.1, 0.2, 0.25, 0.35, 0.5, 0.6, 
     return self;
 }
 
+- (void)viewDidMoveToSuperview {
+    [super viewDidMoveToSuperview];
+    [self makeScalePopUpButton];
+}
+
 - (IBAction)printSelection:(id)sender {
     NSPrintInfo *printInfo = [[[[self window] windowController] document] printInfo];
     if (printInfo == nil)
@@ -104,7 +109,7 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
 }
 
 - (void)makeScalePopUpButton {
-    if (scalePopUpButton == nil) {
+    if (scalePopUpButton == nil && [self enclosingScrollView]) {
         [[self enclosingScrollView] setHasHorizontalScroller:YES];
         
         // create it
