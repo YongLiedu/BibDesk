@@ -68,6 +68,7 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.1, 0.2, 0.25, 0.35, 0.5, 0.6, 
     if (self) {
 		scaleFactor = 1.0;
         pinchZoomFactor = 1.0;
+        [self makeScalePopUpButton];
     }
     return self;
 }
@@ -77,15 +78,9 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.1, 0.2, 0.25, 0.35, 0.5, 0.6, 
     if (self) {
 		scaleFactor = 1.0;
         pinchZoomFactor = 1.0;
+        [self makeScalePopUpButton];
     }
     return self;
-}
-
-- (void)awakeFromNib
-{
-    // make sure we have a horizontal scroller to show the popup
-    [self makeScalePopUpButton];
-    [[self enclosingScrollView] setAutohidesScrollers:NO];
 }
 
 - (IBAction)printSelection:(id)sender {
