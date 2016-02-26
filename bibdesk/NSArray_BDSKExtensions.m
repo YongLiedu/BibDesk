@@ -51,11 +51,6 @@
     return nonEmptyArray;
 }
 
-- (id)firstObject;
-{
-    return [self count] > 0 ? [self objectAtIndex:0] : nil;
-}
-
 - (id)secondObject;
 {
     return [self count] > 1 ? [self objectAtIndex:1] : nil;

@@ -43,7 +43,6 @@
 
 - (id)nonEmpty;
 
-- (id)firstObject;
 - (id)secondObject;
 - (id)thirdObject;
 - (id)fourthObject;
