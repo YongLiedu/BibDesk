@@ -64,7 +64,7 @@
         if ([doc isDocument] == NO)
             doc = [(id)doc document];
         if (doc == nil)
-            doc = [[NSApp orderedDocuments] firstObject];
+            doc = (BibDocument *)[[NSApp orderedDocuments] firstObject];
         [doc selectPublications:dP];
     } else if ([firstObject isKindOfClass:[BDSKGroup class]]) {
         doc = [firstObject document];
