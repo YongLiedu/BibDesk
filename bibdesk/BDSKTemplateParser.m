@@ -445,10 +445,11 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 
             } else if (type == BDSKCollectionTemplateTagType) {
                 
+                NSArray *itemTemplate = nil;
+                NSInteger idx = 0;
+                id prevItem = nil;
+                
                 if ([keyValue conformsToProtocol:@protocol(NSFastEnumeration)]) {
-                    NSArray *itemTemplate = nil;
-                    NSInteger idx = 0;
-                    id prevItem = nil;
                     for (id item in keyValue) {
                         if (prevItem) {
                             if (itemTemplate == nil)
@@ -461,14 +462,17 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                         }
                         prevItem = item;
                     }
-                    if (prevItem) {
-                        itemTemplate = [tag itemTemplate];
-                        [delegate templateParserWillParseTemplate:itemTemplate usingObject:prevItem];
-                        keyValue = [self stringFromTemplateArray:itemTemplate usingObject:prevItem atIndex:++idx delegate:delegate];
-                        [delegate templateParserDidParseTemplate:itemTemplate usingObject:prevItem];
-                        if (keyValue != nil)
-                            [result appendString:keyValue];
-                    }
+                } else if ([keyValue isNotEmpty]) {
+                    prevItem = keyValue;
+                    idx = -1;
+                }
+                if (prevItem) {
+                    itemTemplate = [tag itemTemplate];
+                    [delegate templateParserWillParseTemplate:itemTemplate usingObject:prevItem];
+                    keyValue = [self stringFromTemplateArray:itemTemplate usingObject:prevItem atIndex:++idx delegate:delegate];
+                    [delegate templateParserDidParseTemplate:itemTemplate usingObject:prevItem];
+                    if (keyValue != nil)
+                        [result appendString:keyValue];
                 }
                 
             } else {
@@ -746,11 +750,12 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 
             } else if (type == BDSKCollectionTemplateTagType) {
                 
+                NSAttributedString *tmpAttrStr = nil;
+                NSArray *itemTemplate = nil;
+                NSInteger idx = 0;
+                id prevItem = nil;
+                
                 if ([keyValue conformsToProtocol:@protocol(NSFastEnumeration)]) {
-                    NSAttributedString *tmpAttrStr = nil;
-                    NSArray *itemTemplate = nil;
-                    NSInteger idx = 0;
-                    id prevItem = nil;
                     for (id item in keyValue) {
                         if (prevItem) {
                             if (itemTemplate == nil)
@@ -763,14 +768,17 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                         }
                         prevItem = item;
                     }
-                    if (prevItem) {
-                        itemTemplate = [tag itemTemplate];
-                        [delegate templateParserWillParseTemplate:itemTemplate usingObject:prevItem];
-                        tmpAttrStr = [self attributedStringFromTemplateArray:itemTemplate usingObject:prevItem atIndex:++idx delegate:delegate];
-                        [delegate templateParserDidParseTemplate:itemTemplate usingObject:prevItem];
-                        if (tmpAttrStr != nil)
-                            [result appendAttributedString:tmpAttrStr];
-                    }
+                } else if ([keyValue isNotEmpty]) {
+                    prevItem = keyValue;
+                    idx = -1;
+                }
+                if (prevItem) {
+                    itemTemplate = [tag itemTemplate];
+                    [delegate templateParserWillParseTemplate:itemTemplate usingObject:prevItem];
+                    tmpAttrStr = [self attributedStringFromTemplateArray:itemTemplate usingObject:prevItem atIndex:++idx delegate:delegate];
+                    [delegate templateParserDidParseTemplate:itemTemplate usingObject:prevItem];
+                    if (tmpAttrStr != nil)
+                        [result appendAttributedString:tmpAttrStr];
                 }
                 
             } else {
