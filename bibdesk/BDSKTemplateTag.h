@@ -52,6 +52,10 @@ enum {
     BDSKTemplateTagMatchContain,
     BDSKTemplateTagMatchSmaller,
     BDSKTemplateTagMatchSmallerOrEqual,
+    BDSKTemplateTagMatchLarger,
+    BDSKTemplateTagMatchLargerOrEqual,
+    BDSKTemplateTagMatchNotEqual,
+    BDSKTemplateTagMatchNotContain
 };
 typedef NSInteger BDSKTemplateTagMatchType;
 

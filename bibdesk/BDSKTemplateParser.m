@@ -53,6 +53,10 @@
 #define CONDITION_TAG_CONTAIN           @"~"
 #define CONDITION_TAG_SMALLER           @"<"
 #define CONDITION_TAG_SMALLER_OR_EQUAL  @"<="
+#define CONDITION_TAG_LARGER            @"!<="
+#define CONDITION_TAG_LARGER_OR_EQUAL   @"!<"
+#define CONDITION_TAG_NOT_EQUAL         @"!="
+#define CONDITION_TAG_NOT_CONTAIN       @"!~"
 
 /*
         value tag: <$key/>
@@ -125,15 +129,27 @@ static inline NSString *compareConditionTagWithKeyPath(NSString *keyPath, BDSKTe
     static NSMutableDictionary *containConditionDict = nil;
     static NSMutableDictionary *smallerConditionDict = nil;
     static NSMutableDictionary *smallerOrEqualConditionDict = nil;
+    static NSMutableDictionary *largerConditionDict = nil;
+    static NSMutableDictionary *largerOrEqualConditionDict = nil;
+    static NSMutableDictionary *notEqualConditionDict = nil;
+    static NSMutableDictionary *notContainConditionDict = nil;
     switch (matchType) {
         case BDSKTemplateTagMatchEqual:
             return templateTagWithKeyPathAndDelims(&equalConditionDict, keyPath, ALT_TAG_OPEN_DELIM, CONDITION_TAG_EQUAL);
         case BDSKTemplateTagMatchContain:
             return templateTagWithKeyPathAndDelims(&containConditionDict, keyPath, ALT_TAG_OPEN_DELIM, CONDITION_TAG_CONTAIN);
         case BDSKTemplateTagMatchSmaller:
-            return templateTagWithKeyPathAndDelims(&smallerOrEqualConditionDict, keyPath, ALT_TAG_OPEN_DELIM, CONDITION_TAG_SMALLER_OR_EQUAL);
-        case BDSKTemplateTagMatchSmallerOrEqual:
             return templateTagWithKeyPathAndDelims(&smallerConditionDict, keyPath, ALT_TAG_OPEN_DELIM, CONDITION_TAG_SMALLER);
+        case BDSKTemplateTagMatchSmallerOrEqual:
+            return templateTagWithKeyPathAndDelims(&smallerOrEqualConditionDict, keyPath, ALT_TAG_OPEN_DELIM, CONDITION_TAG_SMALLER_OR_EQUAL);
+        case BDSKTemplateTagMatchLarger:
+            return templateTagWithKeyPathAndDelims(&largerConditionDict, keyPath, ALT_TAG_OPEN_DELIM, CONDITION_TAG_LARGER);
+        case BDSKTemplateTagMatchLargerOrEqual:
+            return templateTagWithKeyPathAndDelims(&largerOrEqualConditionDict, keyPath, ALT_TAG_OPEN_DELIM, CONDITION_TAG_LARGER_OR_EQUAL);
+        case BDSKTemplateTagMatchNotEqual:
+            return templateTagWithKeyPathAndDelims(&notEqualConditionDict, keyPath, ALT_TAG_OPEN_DELIM, CONDITION_TAG_NOT_EQUAL);
+        case BDSKTemplateTagMatchNotContain:
+            return templateTagWithKeyPathAndDelims(&notContainConditionDict, keyPath, ALT_TAG_OPEN_DELIM, CONDITION_TAG_NOT_CONTAIN);
         default:
             return nil;
     }
@@ -194,6 +210,8 @@ static inline BOOL matchesCondition(NSString *keyValue, NSString *matchString, B
                 return NO == [keyValue isNotEmpty];
             case BDSKTemplateTagMatchSmaller:
                 return NO;
+            case BDSKTemplateTagMatchLargerOrEqual:
+                return YES;
             default:
                 return [keyValue isNotEmpty];
         }
@@ -208,6 +226,14 @@ static inline BOOL matchesCondition(NSString *keyValue, NSString *matchString, B
                 return [stringValue compare:matchString options:NSCaseInsensitiveSearch | NSNumericSearch] == NSOrderedAscending;
             case BDSKTemplateTagMatchSmallerOrEqual:
                 return [stringValue compare:matchString options:NSCaseInsensitiveSearch | NSNumericSearch] != NSOrderedDescending;
+            case BDSKTemplateTagMatchLarger:
+                return [stringValue compare:matchString options:NSCaseInsensitiveSearch | NSNumericSearch] == NSOrderedDescending;
+            case BDSKTemplateTagMatchLargerOrEqual:
+                return [stringValue compare:matchString options:NSCaseInsensitiveSearch | NSNumericSearch] != NSOrderedAscending;
+            case BDSKTemplateTagMatchNotEqual:
+                return [stringValue isCaseInsensitiveEqual:matchString] == NO;
+            case BDSKTemplateTagMatchNotContain:
+                return [stringValue rangeOfString:matchString options:NSCaseInsensitiveSearch].location == NSNotFound;
             default:
                 return NO;
         }
@@ -334,6 +360,14 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                     matchType = BDSKTemplateTagMatchSmallerOrEqual;
                 else if ([scanner scanString:CONDITION_TAG_SMALLER intoString:NULL])
                     matchType = BDSKTemplateTagMatchSmaller;
+                else if ([scanner scanString:CONDITION_TAG_LARGER intoString:NULL])
+                    matchType = BDSKTemplateTagMatchLarger;
+                else if ([scanner scanString:CONDITION_TAG_LARGER_OR_EQUAL intoString:NULL])
+                    matchType = BDSKTemplateTagMatchLargerOrEqual;
+                else if ([scanner scanString:CONDITION_TAG_NOT_EQUAL intoString:NULL])
+                    matchType = BDSKTemplateTagMatchNotEqual;
+                else if ([scanner scanString:CONDITION_TAG_NOT_CONTAIN intoString:NULL])
+                    matchType = BDSKTemplateTagMatchNotContain;
                 
                 if (matchType != BDSKTemplateTagMatchOther)
                     [scanner scanUpToString:CONDITION_TAG_CLOSE_DELIM intoString:&matchString];
@@ -603,6 +637,14 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                     matchType = BDSKTemplateTagMatchSmallerOrEqual;
                 else if ([scanner scanString:CONDITION_TAG_SMALLER intoString:NULL])
                     matchType = BDSKTemplateTagMatchSmaller;
+                else if ([scanner scanString:CONDITION_TAG_LARGER intoString:NULL])
+                    matchType = BDSKTemplateTagMatchLarger;
+                else if ([scanner scanString:CONDITION_TAG_LARGER_OR_EQUAL intoString:NULL])
+                    matchType = BDSKTemplateTagMatchLargerOrEqual;
+                else if ([scanner scanString:CONDITION_TAG_NOT_EQUAL intoString:NULL])
+                    matchType = BDSKTemplateTagMatchNotEqual;
+                else if ([scanner scanString:CONDITION_TAG_NOT_CONTAIN intoString:NULL])
+                    matchType = BDSKTemplateTagMatchNotContain;
                 
                 if (matchType != BDSKTemplateTagMatchOther)
                     [scanner scanUpToString:CONDITION_TAG_CLOSE_DELIM intoString:&matchString];
