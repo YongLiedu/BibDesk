@@ -92,10 +92,11 @@ static NSCharacterSet *invertedKeyCharacterSet = nil;
     
     BDSKINITIALIZE;
     
-    NSMutableCharacterSet *tmpSet = [[NSMutableCharacterSet alphanumericCharacterSet] mutableCopy];
-    [tmpSet addCharactersInString:@".-_:;@#"];
+    NSMutableCharacterSet *tmpSet = [NSMutableCharacterSet characterSetWithRange:NSMakeRange('a', 26)];
+    [tmpSet addCharactersInRange:NSMakeRange('A', 26)];
+    [tmpSet addCharactersInRange:NSMakeRange('0', 10)];
+    [tmpSet addCharactersInString:@".-_@#"];
     keyCharacterSet = [tmpSet copy];
-    [tmpSet release];
     
     invertedKeyCharacterSet = [[keyCharacterSet invertedSet] copy];
 }
