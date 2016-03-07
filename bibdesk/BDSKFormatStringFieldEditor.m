@@ -63,33 +63,19 @@
 
 - (void)recolorText
 {
-    NSTextStorage *textStorage = [self textStorage];
-    NSUInteger length = [textStorage length];
-    
-    NSRange range;
-    NSDictionary *attributes;
-    
-    range.length = 0;
-    range.location = 0;
-	
     // get the attributed string from the format parser
     NSAttributedString *attrString = nil;
     NSString *format = [[[self string] copy] autorelease]; // pass a copy so we don't change the backing store of our text storage
     [BDSKFormatParser validateFormat:&format attributedFormat:&attrString forField:parseField error:NULL];   
     
-	if ([[self string] isEqualToString:[attrString string]] == NO) 
-		return;
-    
     // get the attributes of the parsed string and apply them to our NSTextStorage; it may not be safe to set it directly at this point
-    NSUInteger start = 0;
-    while(start < length){
-        
-        attributes = [attrString attributesAtIndex:start effectiveRange:&range];        
-        [textStorage setAttributes:attributes range:range];
-        
-        start += range.length;
+    if ([[self string] isEqualToString:[attrString string]]) {
+        NSTextStorage *textStorage = [self textStorage];
+        [attrString enumerateAttributesInRange:NSMakeRange(0, [attrString length]) options:0 usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop){
+            [textStorage setAttributes:attrs range:range];
+        }];
     }
-}    
+}
 
 // this is a convenient override point that gets called often enough to recolor everything
 - (void)setSelectedRange:(NSRange)charRange
