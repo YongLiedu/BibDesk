@@ -1261,10 +1261,9 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
         while (NSMaxRange(range) < length) {
             id token;
             NSFont *font = [text attribute:NSFontAttributeName atIndex:range.location longestEffectiveRange:&range inRange:NSMakeRange(range.location, length - range.location)];
-            if (allowText && [font isEqual:defaultFont]) {
-                token = [[(BDSKRichTextTemplateTag *)tag attributedText] string];
-            } else {
-                token = [[[BDSKTextToken alloc] initWithTitle:[text string]] autorelease];
+            token = [[text string] substringWithRange:range];
+            if (allowText == NO || [font isEqual:defaultFont] == NO) {
+                token = [[[BDSKTextToken alloc] initWithTitle:token] autorelease];
                 [self setFont:font ofToken:token defaultFont:defaultFont];
             }
             [tokens addObject:token];
