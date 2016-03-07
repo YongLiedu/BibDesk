@@ -1262,7 +1262,7 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
             id token;
             NSFont *font = [text attribute:NSFontAttributeName atIndex:range.location longestEffectiveRange:&range inRange:NSMakeRange(range.location, length - range.location)];
             token = [[text string] substringWithRange:range];
-            if (allowText == NO || [font isEqual:defaultFont] == NO) {
+            if ((allowText == NO || [font isEqual:defaultFont] == NO) && font) {
                 token = [[[BDSKTextToken alloc] initWithTitle:token] autorelease];
                 [self setFont:font ofToken:token defaultFont:defaultFont];
             }
