@@ -1255,19 +1255,15 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
     NSMutableArray *tokens = [NSMutableArray array];
     if (defaultFont) {
         NSAttributedString *text = [(BDSKRichTextTemplateTag *)tag attributedText];
-        NSUInteger length = [text length];
-        NSRange range = NSMakeRange(0, 0);
-        
-        while (NSMaxRange(range) < length) {
-            id token;
-            NSFont *font = [text attribute:NSFontAttributeName atIndex:range.location longestEffectiveRange:&range inRange:NSMakeRange(range.location, length - range.location)];
-            token = [[text string] substringWithRange:range];
-            if ((allowText == NO || [font isEqual:defaultFont] == NO) && font) {
+        NSString *textString = [text string];
+        [text enumerateAttribute:NSFontAttributeName inRange:NSMakeRange(0, [text length]) options:0 usingBlock:^(id font, NSRange range, BOOL *stop){
+            id token = [textString substringWithRange:range];
+            if (allowText == NO || (font && [font isEqual:defaultFont] == NO)) {
                 token = [[[BDSKTextToken alloc] initWithTitle:token] autorelease];
                 [self setFont:font ofToken:token defaultFont:defaultFont];
             }
             [tokens addObject:token];
-        }
+        }];
     } else if (allowText) {
         [tokens addObject:[(BDSKTextTemplateTag *)tag text]];
     } else {

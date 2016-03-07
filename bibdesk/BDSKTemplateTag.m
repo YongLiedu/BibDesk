@@ -53,18 +53,15 @@ static inline BDSKAttributeTemplate *copyTemplateForLink(id aLink, NSRange range
 }
 
 static inline NSArray *copyTemplatesForLinksFromAttributedString(NSAttributedString *attrString) {
-    NSRange range = NSMakeRange(0, 0);
-    NSUInteger len = [attrString length];
     NSMutableArray *templates = [[NSMutableArray alloc] init];
-    BDSKAttributeTemplate *linkTemplate;
     
-    while (NSMaxRange(range) < len) {
-        id aLink = [attrString attribute:NSLinkAttributeName atIndex:NSMaxRange(range) longestEffectiveRange:&range inRange:NSMakeRange(NSMaxRange(range), len - NSMaxRange(range))];
-        if ((linkTemplate = copyTemplateForLink(aLink, range))) {
+    [attrString enumerateAttribute:NSLinkAttributeName inRange:NSMakeRange(0, [attrString length]) options:0 usingBlock:^(id aLink, NSRange range, BOOL *stop) {
+        BDSKAttributeTemplate *linkTemplate = copyTemplateForLink(aLink, range);
+        if (linkTemplate) {
             [templates addObject:linkTemplate];
             [linkTemplate release];
         }
-    }
+    }];
     if ([templates count] == 0)
         BDSKDESTROY(templates);
     return templates;
