@@ -1338,7 +1338,7 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
         NSArray *tokens;
         if ([keys count] != 2 || [[keys objectAtIndex:0] isEqualToString:@"fields"] == NO)
             return nil;
-        if ((tokens = [self tokensForTextTag:tag allowText:NO defaultFont:defaultFont])) {
+        if ((tokens = [self tokensForTextTag:[nonemptyTemplate lastObject] allowText:NO defaultFont:defaultFont])) {
             if ([tokens count] == 1) {
                 token = [tokens lastObject];
                 [token setField:[keys lastObject]];
