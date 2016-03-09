@@ -655,7 +655,6 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                     
                     // condition template tag
                     endTag = endConditionTagWithKeyPath(keyPath);
-                    altTag = altConditionTagWithKeyPath(keyPath);
                     start = [scanner scanLocation];
                     [scanner scanUpToString:endTag intoString:&subTemplateString];
                     if ([scanner scanString:endTag intoString:NULL]) {
