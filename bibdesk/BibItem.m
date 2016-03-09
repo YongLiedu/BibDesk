@@ -2163,6 +2163,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     [s appendString:@"</urls>"];
     
     AddXMLField(@"electronic-resource-num",BDSKDoiString);
+    AddXMLField(@"pmid",@"Pmid");
     
     AddXMLField(@"abstract",BDSKAbstractString);
     AddXMLField(@"research-notes",BDSKAnnoteString);
