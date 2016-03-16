@@ -75,8 +75,15 @@
 
 - (NSDictionary *)dictionaryValue {
     NSString *aName = [[self stringValue] stringByEscapingGroupPlistEntities];
-	NSString *keys = [(tmpKeys ?: [[self publications] valueForKeyPath:@"@distinctUnionOfObjects.citeKey"]) componentsJoinedByString:@","];
-    return [NSDictionary dictionaryWithObjectsAndKeys:aName, @"group name", keys, @"keys", nil];
+    NSMutableArray *keys = [NSMutableArray arrayWithArray:tmpKeys];
+    if (tmpKeys == nil) {
+        for (BibItem *item in [self publications]) {
+            NSString *aKey = [item citeKey];
+            if ([keys containsObject:aKey] == NO)
+                [keys addObject:aKey];
+        }
+    }
+    return [NSDictionary dictionaryWithObjectsAndKeys:aName, @"group name", [keys componentsJoinedByString:@","], @"keys", nil];
 }
 
 // we don't really care about the publications for unarchoving, as we only use NSCoding to remember group selection
