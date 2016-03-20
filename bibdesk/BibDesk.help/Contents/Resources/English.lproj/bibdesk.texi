@@ -1029,7 +1029,7 @@ icon and choosing @menutitle{Quick Look}.
 Control-clicking in the file icon pane (region marked ``Drop Files Here'')
 will give more options for adding and viewing files or URLs.
 
-You can also add any file or URL field by dragging a web it to the 
+You can also add any file or URL by dragging a it to the
 file icon pane. 
  
 The @buttontitle{Annote} and @buttontitle{Abstract} tabs provide access to larger text areas
@@ -1272,7 +1272,7 @@ and it can be added.
 @cindex Local File
 @cindex drag and drop, files
 
-The Local File column is the column with the column with a paperclip icon in the header. 
+The Local File column is the column with a paperclip icon in the header.
 
 The Local File column displays a paperclip icon and the number of attached files when files are attached.
 If one of the linked files could not be found, the paperclip will be displayed in red.
@@ -1284,17 +1284,23 @@ The linked files can also be dragged from the table to the Finder in order to co
 or it can be dragged into a specific application in the Dock to open the file in a specific application 
 or perhaps mail it as an attachment.
 
+Note that there can also be a different column for local file fields such as the Local-Url field,
+which has a little file icon in the header, and has some behavior similar to the Local File column.
+
 @cindex Remote URL
 @cindex drag and drop, Remote URL
 @subheading Remote URL
 
-The Remote URL column is the column with the column with an @@-sign in the header. 
+The Remote URL column is the column with the column with a webloc icon in the header.
 
-Similarly, the Remote URL column displays a little webloc icon (a file icon with an @@-sign) 
+The Remote URL column displays a little webloc icon (a file icon with an @@-sign)
 when the one or more URLs are attached to the pubblication. The column then also displays the number of linked URLs. 
 
 Double-clicking a cell in the Remote URL column will open the first linked remote URL 
 in your default browser application.   
+
+Note that there can also be a different column for remote URL fields such as the Url field,
+which has an @@-character in the header, and has some behavior similar to the Remote URL column.
 
 @subheading Publication Date
 @cindex Publication Date
