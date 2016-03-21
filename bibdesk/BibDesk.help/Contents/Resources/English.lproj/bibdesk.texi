@@ -1291,16 +1291,16 @@ which has a little file icon in the header, and has some behavior similar to the
 @cindex drag and drop, Remote URL
 @subheading Remote URL
 
-The Remote URL column is the column with the column with a webloc icon in the header.
+The Remote URL column is the column with the column with a URL icon (an @@-sign on a spring) in the header.
 
-The Remote URL column displays a little webloc icon (a file icon with an @@-sign)
+The Remote URL column displays a little URL icon
 when the one or more URLs are attached to the pubblication. The column then also displays the number of linked URLs. 
 
 Double-clicking a cell in the Remote URL column will open the first linked remote URL 
 in your default browser application.   
 
 Note that there can also be a different column for remote URL fields such as the Url field,
-which has an @@-character in the header, and has some behavior similar to the Remote URL column.
+which has an @@-sign in the header, and has some behavior similar to the Remote URL column.
 
 @subheading Publication Date
 @cindex Publication Date
