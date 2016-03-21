@@ -1330,6 +1330,8 @@
 		CEF1817E0CEB701F00716E85 /* Bookmarks.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Bookmarks.plist; sourceTree = "<group>"; };
 		CEF1D6BA117F01C60069E249 /* applehelp.init */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = applehelp.init; path = BibDeskHelp/applehelp.init; sourceTree = "<group>"; };
 		CEF1D6BB117F01C60069E249 /* postprocess-nontitle.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; name = "postprocess-nontitle.py"; path = "BibDeskHelp/postprocess-nontitle.py"; sourceTree = "<group>"; };
+		CEF2AEF11CA04BBA00E9E78A /* English */ = {isa = PBXFileReference; lastKnownFileType = text; name = English; path = BibDesk.help/Contents/Resources/English.lproj/bibdesk.texi; sourceTree = "<group>"; };
+		CEF2AF001CA04BC100E9E78A /* English */ = {isa = PBXFileReference; lastKnownFileType = text; name = English; path = BibDesk.help/Contents/Resources/English.lproj/version.texi; sourceTree = "<group>"; };
 		CEF2EEE40F3462A900A7989E /* NSColor_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSColor_BDSKExtensions.h; sourceTree = "<group>"; };
 		CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSColor_BDSKExtensions.m; sourceTree = "<group>"; };
 		CEF52DD7126C7869006E904B /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = English; path = English.lproj/WebGroupDownloads.html; sourceTree = "<group>"; };
@@ -1769,6 +1771,8 @@
 			children = (
 				CEF1D6BA117F01C60069E249 /* applehelp.init */,
 				CEF1D6BB117F01C60069E249 /* postprocess-nontitle.py */,
+				CEF2AEF01CA04BBA00E9E78A /* bibdesk.texi */,
+				CEF2AEFF1CA04BC100E9E78A /* version.texi */,
 			);
 			name = "Help Sources";
 			sourceTree = "<group>";
@@ -4287,6 +4291,22 @@
 				CE3D8DBB125E69BB00AE0232 /* German */,
 			);
 			name = TextImport.xib;
+			sourceTree = "<group>";
+		};
+		CEF2AEF01CA04BBA00E9E78A /* bibdesk.texi */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CEF2AEF11CA04BBA00E9E78A /* English */,
+			);
+			name = bibdesk.texi;
+			sourceTree = "<group>";
+		};
+		CEF2AEFF1CA04BC100E9E78A /* version.texi */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CEF2AF001CA04BC100E9E78A /* English */,
+			);
+			name = version.texi;
 			sourceTree = "<group>";
 		};
 		CEF52DD6126C7869006E904B /* WebGroupDownloads.html */ = {
