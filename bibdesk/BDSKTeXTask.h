@@ -53,7 +53,7 @@ enum {
 - (void)texTask:(BDSKTeXTask *)texTask finishedWithResult:(BOOL)success;
 @end
 
-@class BDSKTeXPath, BDSKTeXSubTask;
+@class BDSKTeXPath, BDSKTaskAndGeneratedType;
 
 @interface BDSKTeXTask : NSObject {	
     NSString *texTemplatePath;
@@ -63,7 +63,7 @@ enum {
 	
 	id<BDSKTeXTaskDelegate> delegate;
     
-    BDSKTeXSubTask *currentTask;
+    BDSKTaskAndGeneratedType *currentTask;
     
     NSMutableArray *pendingTasks;
     

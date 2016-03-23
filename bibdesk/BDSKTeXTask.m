@@ -55,10 +55,12 @@ enum {
 	BDSKGeneratedPDFMask = 1 << 2,
 };
 
-@interface BDSKTeXSubTask : BDSKTask {
+@interface BDSKTaskAndGeneratedType : NSObject {
+    NSTask *task;
     NSUInteger generatedType;
 }
-- (void)setGeneratedType:(NSUInteger)type;
+- (id)initWithTask:(NSTask *)aTask generatedType:(NSUInteger)type;
+- (NSTask *)task;
 - (NSUInteger)generatedType;
 @end
 
@@ -92,7 +94,7 @@ enum {
 
 - (void)removeFilesFromPreviousRun;
 
-- (BDSKTeXSubTask *)taskForGeneratedType:(NSUInteger)type;
+- (BDSKTaskAndGeneratedType *)taskForGeneratedType:(NSUInteger)type;
 
 - (BOOL)invokePendingTasks;
 
@@ -200,8 +202,8 @@ static double runLoopTimeout = 30;
 }
 
 - (void)cancel {
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSTaskDidTerminateNotification object:currentTask];
-    [currentTask terminate];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSTaskDidTerminateNotification object:[currentTask task]];
+    [[currentTask task] terminate];
     BDSKDESTROY(currentTask);
     [pendingTasks removeAllObjects];
 }
@@ -463,7 +465,7 @@ static double runLoopTimeout = 30;
         [fm removeItemAtPath:path error:NULL];
 }
 
-- (BDSKTeXSubTask *)taskForGeneratedType:(NSUInteger)type {
+- (BDSKTaskAndGeneratedType *)taskForGeneratedType:(NSUInteger)type {
     NSString *binPath = nil;
     NSArray *arguments = nil;
     
@@ -485,20 +487,19 @@ static double runLoopTimeout = 30;
         arguments = args;
     }
     
-    BDSKTeXSubTask *task = [[[BDSKTeXSubTask alloc] init] autorelease];
+    NSTask *task = [[[NSTask alloc] init] autorelease];
     [task setCurrentDirectoryPath:[texPath workingDirectory]];
     [task setLaunchPath:binPath];
     [task setArguments:arguments];
     [task setEnvironment:environment];
     [task setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
     [task setStandardError:[NSFileHandle fileHandleWithNullDevice]];
-    [task setGeneratedType:type];
     
-    return task;
+    return [[[BDSKTaskAndGeneratedType alloc] initWithTask:task generatedType:type] autorelease];
 }
 
 - (void)taskFinished:(NSNotification *)notification{
-    NSParameterAssert([notification object] == currentTask);
+    NSParameterAssert([notification object] == [currentTask task]);
     NSParameterAssert(NO == synchronous);
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NSTaskDidTerminateNotification object:[notification object]];
     BOOL success = ([[notification object] terminationStatus] == 0);
@@ -522,18 +523,18 @@ static double runLoopTimeout = 30;
     currentTask = [[pendingTasks lastObject] retain];
     [pendingTasks removeLastObject];
     
-    [currentTask launch];
+    [[currentTask task] launch];
     
     if (synchronous) {
-        [currentTask waitUntilExit];
-        success = (0 == [currentTask terminationStatus]);
+        [[currentTask task] waitUntilExit];
+        success = (0 == [[currentTask task] terminationStatus]);
         if (success) {
             generatedDataMask |= [currentTask generatedType];
             if ([pendingTasks count] > 0)
                 success = [self invokePendingTasks];
         }
     } else if (currentTask) {
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(taskFinished:) name:NSTaskDidTerminateNotification object:currentTask];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(taskFinished:) name:NSTaskDidTerminateNotification object:[currentTask task]];
     }
     
     return success;
@@ -621,17 +622,28 @@ static double runLoopTimeout = 30;
 
 #pragma mark -
 
-@implementation BDSKTeXSubTask
+@implementation BDSKTaskAndGeneratedType
 
 - (id)init {
+    return [self initWithTask:nil generatedType:BDSKGeneratedNoneMask];
+}
+
+- (id)initWithTask:(NSTask *)aTask generatedType:(NSUInteger)type {
     self = [super init];
     if (self) {
-        generatedType = BDSKGeneratedNoneMask;
+        task = [aTask retain];
+        generatedType = type;
     }
     return self;
 }
 
-- (void)setGeneratedType:(NSUInteger)type { generatedType = type; }
+- (void)dealloc {
+    BDSKDESTROY(task);
+    [super dealloc];
+}
+
+- (NSTask *)task { return task; }
+
 - (NSUInteger)generatedType { return generatedType; };
 
 @end
