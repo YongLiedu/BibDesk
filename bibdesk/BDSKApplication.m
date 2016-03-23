@@ -44,9 +44,10 @@
 @implementation BDSKApplication
 
 - (IBAction)terminate:(id)sender {
-    NSArray *fileURLs = [[NSDocumentController sharedDocumentController] documents];
-    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[fileURLs count]];
-    for (NSURL *fileURL in fileURLs){
+    NSArray *docs = [self orderedDocuments];
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[docs count]];
+    for (NSDocument *doc in docs){
+        NSURL *fileURL = [doc fileURL];
         NSData *data = [[BDSKAlias aliasWithURL:fileURL] data];
         [array addObject:[NSDictionary dictionaryWithObjectsAndKeys:[fileURL path], @"fileName", data, @"_BDAlias", nil]];
     }

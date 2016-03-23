@@ -402,7 +402,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             {
                 NSArray *files = [sud objectForKey:BDSKLastOpenFileNamesKey];
                 NSURL *fileURL;
-                for (NSDictionary *dict in files){ 
+                for (NSDictionary *dict in [files reverseObjectEnumerator]){
                     fileURL = [[BDSKAlias aliasWithData:[dict objectForKey:@"_BDAlias"]] fileURL] ?: [NSURL fileURLWithPath:[dict objectForKey:@"fileName"]];
                     if(fileURL)
                         [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:fileURL display:YES error:NULL];
