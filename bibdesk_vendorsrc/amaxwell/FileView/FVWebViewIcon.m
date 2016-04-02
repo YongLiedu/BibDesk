@@ -152,7 +152,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
     // if this is not an http or file URL, return a finder icon instead
     if (0 == _maxWebViews || (NO == [[self class] _isSupportedScheme:[aURL scheme]] && NO == [aURL isFileURL])) {
         NSZone *zone = [self zone];
-        [super dealloc];
+        [self release];
         self = (id)[[FVFinderIcon allocWithZone:zone] initWithURL:aURL];
     }
     else if ((self = [super init])) {

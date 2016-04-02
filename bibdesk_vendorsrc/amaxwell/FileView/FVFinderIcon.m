@@ -112,7 +112,7 @@
 - (id)initWithURLScheme:(NSString *)scheme;
 {
     NSParameterAssert(nil != scheme);
-    [super dealloc];
+    [self release];
         
     if ([scheme hasPrefix:@"http"])
         self = [[FVHTTPURLIcon sharedIcon] retain];
@@ -129,7 +129,7 @@
 {
     // missing file icon
     if (nil == theURL) {
-        [super dealloc];
+        [self release];
         self = [[FVMissingFinderIcon sharedIcon] retain];
     }
     else if ([theURL isFileURL] == NO && [theURL scheme] != nil) {

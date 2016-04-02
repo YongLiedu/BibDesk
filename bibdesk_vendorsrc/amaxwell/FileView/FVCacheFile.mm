@@ -151,7 +151,7 @@ static NSInteger FVCacheLogLevel = 0;
         }
         else {
             NSLog(@"*** ERROR *** unable to open file %@", _path);
-            [super dealloc];
+            [self release];
             self = nil;
         }
         free(tempName);
@@ -165,11 +165,11 @@ static NSInteger FVCacheLogLevel = 0;
 - (void)dealloc
 {
     // owner is responsible for calling -closeFile at the appropriate time, and _readers is deleted in closeFile
-    if (-1 != _fileDescriptor)
-        NSLog(@"*** WARNING *** failed to close %@ before deallocating; leaking file descriptor", self);
+    //if (-1 != _fileDescriptor)
+    //    NSLog(@"*** WARNING *** failed to close %@ before deallocating; leaking file descriptor", self);
     [_cacheName release];
     [_path release];
-    delete [] _deflateBuffer;
+    if (_deflateBuffer) delete [] _deflateBuffer;
     [_writeLock release];
     [_offsetTable release];
     [_eventTable release];

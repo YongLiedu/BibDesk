@@ -217,7 +217,7 @@ static void *__FVThread_main(void *obj);
         pthread_attr_destroy(&attr);
         
         if (0 != err) {
-            [super dealloc];
+            [self release];
             self = nil;
         }
         // return immediately; performSelector:withObject:argument: will block if necessary until the thread is running

@@ -83,7 +83,7 @@ static BOOL FVQLIconDisabled = NO;
 {
     NSURL *originalURL = [theURL retain];
     if (FVQLIconDisabled) {
-        [super dealloc];
+        [self release];
         self = nil;
     }
     else if ((self = [super initWithURL:theURL])) {

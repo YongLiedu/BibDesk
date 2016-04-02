@@ -69,7 +69,7 @@ static volatile uint32_t _allocatedBytes = 0;
     if (self) {
         buffer = NSZoneMalloc([self zone], sizeof(vImage_Buffer));
         if (NULL == buffer) {
-            [super dealloc];
+            [self release];
             self = nil;
         }
         else {
@@ -88,11 +88,11 @@ static volatile uint32_t _allocatedBytes = 0;
                 swap = OSAtomicCompareAndSwap32Barrier(_allocatedBytes, _allocatedBytes + _bufferSize, (int32_t *)&_allocatedBytes);
             } while (false == swap);    
 #endif
-            _freeBufferOnDealloc = YES;
             if (NULL == buffer->data) {
-                NSZoneFree([self zone], buffer);
-                [super dealloc];
+                [self release];
                 self = nil;
+            } else {
+                _freeBufferOnDealloc = YES;
             }
         }
     }
@@ -139,7 +139,7 @@ static volatile uint32_t _allocatedBytes = 0;
         swap = OSAtomicCompareAndSwap32Barrier(_allocatedBytes, _allocatedBytes - _bufferSize, (int32_t *)&_allocatedBytes);
     } while (false == swap);    
 #endif
-    NSZoneFree([self zone], buffer);
+    if (buffer != NULL) NSZoneFree([self zone], buffer);
     [super dealloc];
 }
 
