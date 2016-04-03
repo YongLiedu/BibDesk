@@ -165,11 +165,11 @@
             err = FSGetCatalogInfo(&fileRef, kIconServicesCatalogInfoMask, &catInfo, &name, NULL, NULL);
         
         if (NO == _drawsLinkBadge && noErr == err && targetUTI && UTTypeEqual(targetUTI, kUTTypeFolder) && (((FolderInfo *)&catInfo.finderInfo)->finderFlags & kHasCustomIcon) == 0) {            
-            [super dealloc];
+            [self release];
             self = [[FVGenericFolderIcon sharedIcon] retain];
         }
         else if (NO == _drawsLinkBadge && isSavedSearch) {
-            [super dealloc];
+            [self release];
             self = [[FVSavedSearchIcon sharedIcon] retain];
         }
         else {
