@@ -48,7 +48,7 @@ enum {
 };
 typedef NSInteger NSScrollerStyle;
 
-@interface NSScroller (SKLionDeclarations)
+@interface NSScroller (BDSKLionDeclarations)
 + (NSScrollerStyle)preferredScrollerStyle;
 - (NSScrollerStyle)scrollerStyle;
 - (void)setScrollerStyle:(NSScrollerStyle)newScrollerStyle;
