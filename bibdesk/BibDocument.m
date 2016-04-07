@@ -1118,17 +1118,33 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     docState.currentSaveOperationType = saveOperation;
     saveTargetURL = [[absoluteURL filePathURL] copy];
     
-    NSInvocation *invocation = nil;
-    if (delegate && didSaveSelector) {
-        invocation = [NSInvocation invocationWithTarget:delegate selector:didSaveSelector];
-        [invocation setArgument:&contextInfo atIndex:4];
+    if (saveOperation != NSAutosaveOperation) {
+        NSInvocation *invocation = nil;
+        if (delegate && didSaveSelector) {
+            invocation = [NSInvocation invocationWithTarget:delegate selector:didSaveSelector];
+            [invocation setArgument:&contextInfo atIndex:4];
+        }
+        NSDictionary *info = [[NSDictionary alloc] initWithObjectsAndKeys:typeName, @"typeName", invocation, @"callback", nil];
+        delegate = self;
+        didSaveSelector = @selector(document:didSave:contextInfo:);
+        contextInfo = info;
     }
-    NSDictionary *info = [[NSDictionary alloc] initWithObjectsAndKeys:typeName, @"typeName", invocation, @"callback", nil];
-    [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation delegate:self didSaveSelector:@selector(document:didSave:contextInfo:) contextInfo:info];
+    [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
 }
 
+// Unfortunately autosave does not get through saveToURL:ofType:forSaveOperation:delegate:didSaveSelector:contextInfo:
+// on newer systems, so we have to do this separately
 - (void)autosaveDocumentWithDelegate:(id)delegate didAutosaveSelector:(SEL)didAutosaveSelector contextInfo:(void *)contextInfo {
     docState.currentSaveOperationType = NSAutosaveOperation;
+    
+    NSInvocation *invocation = nil;
+    if (delegate && didAutosaveSelector) {
+        invocation = [NSInvocation invocationWithTarget:delegate selector:didAutosaveSelector];
+        [invocation setArgument:&contextInfo atIndex:4];
+    }
+    NSDictionary *info = [[NSDictionary alloc] initWithObjectsAndKeys:[self fileType], @"typeName", invocation, @"callback", nil];
+    
+    [super autosaveDocumentWithDelegate:delegate didAutosaveSelector:@selector(document:didSave:contextInfo:) contextInfo:info];
 }
 
 - (BOOL)writeToURL:(NSURL *)fileURL ofType:(NSString *)docType error:(NSError **)outError{
@@ -1137,6 +1153,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     // callers are responsible for making sure all edits are committed
     NSParameterAssert([self commitPendingEdits]);
+    
+    if (saveTargetURL == nil && docState.currentSaveOperationType == NSAutosaveOperation)
+        saveTargetURL = [[self autosavedContentsFileURL] retain];
     
     if ([docType isEqualToString:BDSKArchiveDocumentType])
         success = [self writeArchiveToURL:fileURL error:&nsError];
