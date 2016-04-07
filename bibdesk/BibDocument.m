@@ -164,6 +164,10 @@ NSString *BDSKDocumentPublicationsKey = @"publications";
 
 #pragma mark -
 
+@interface NSDocument (SKLionDeclarations)
+- (void)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation completionHandler:(void (^)(NSError *))completionHandler;
+@end
+
 @interface NSDocument (BDSKPrivateExtensions)
 // declare a private NSDocument method so we can override it
 - (void)changeSaveType:(id)sender;
