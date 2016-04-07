@@ -1127,6 +1127,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation delegate:self didSaveSelector:@selector(document:didSave:contextInfo:) contextInfo:info];
 }
 
+- (void)autosaveDocumentWithDelegate:(id)delegate didAutosaveSelector:(SEL)didAutosaveSelector contextInfo:(void *)contextInfo {
+    docState.currentSaveOperationType = NSAutosaveOperation;
+}
+
 - (BOOL)writeToURL:(NSURL *)fileURL ofType:(NSString *)docType error:(NSError **)outError{
     BOOL success = YES;
     NSError *nsError = nil;
