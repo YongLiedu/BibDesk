@@ -1113,38 +1113,42 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
 }
 
-- (void)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo {
+// This is always used for saving on 10.7+, while the next one is not used for autosave
+- (void)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation completionHandler:(void (^)(NSError *))completionHandler {
+    
     // Override so we can determine if this is an autosave in writeToURL:ofType:error:.
     docState.currentSaveOperationType = saveOperation;
     saveTargetURL = [[absoluteURL filePathURL] copy];
     
-    if (saveOperation != NSAutosaveOperation) {
+    NSDictionary *info = [[NSDictionary alloc] initWithObjectsAndKeys:typeName, @"typeName", nil];
+    
+    [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation completionHandler:^(NSError *errorOrNil){
+        [self document:self didSave:errorOrNil == nil contextInfo:info];
+        if (completionHandler)
+            completionHandler(errorOrNil);
+    }];
+}
+
+- (void)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo {
+    
+    // This is used on 10.6, but not for autosave on 10.7+, so we use the above on 10.7+
+    if ([NSDocument instancesRespondToSelector:@selector(saveToURL:ofType:forSaveOperation:completionHandler:)] == NO) {
+        // Override so we can determine if this is an autosave in writeToURL:ofType:error:.
+        docState.currentSaveOperationType = saveOperation;
+        saveTargetURL = [[absoluteURL filePathURL] copy];
+        
         NSInvocation *invocation = nil;
         if (delegate && didSaveSelector) {
             invocation = [NSInvocation invocationWithTarget:delegate selector:didSaveSelector];
             [invocation setArgument:&contextInfo atIndex:4];
         }
         NSDictionary *info = [[NSDictionary alloc] initWithObjectsAndKeys:typeName, @"typeName", invocation, @"callback", nil];
+        
         delegate = self;
         didSaveSelector = @selector(document:didSave:contextInfo:);
         contextInfo = info;
     }
     [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
-}
-
-// Unfortunately autosave does not get through saveToURL:ofType:forSaveOperation:delegate:didSaveSelector:contextInfo:
-// on newer systems, so we have to do this separately
-- (void)autosaveDocumentWithDelegate:(id)delegate didAutosaveSelector:(SEL)didAutosaveSelector contextInfo:(void *)contextInfo {
-    docState.currentSaveOperationType = NSAutosaveOperation;
-    
-    NSInvocation *invocation = nil;
-    if (delegate && didAutosaveSelector) {
-        invocation = [NSInvocation invocationWithTarget:delegate selector:didAutosaveSelector];
-        [invocation setArgument:&contextInfo atIndex:4];
-    }
-    NSDictionary *info = [[NSDictionary alloc] initWithObjectsAndKeys:[self fileType], @"typeName", invocation, @"callback", nil];
-    
-    [super autosaveDocumentWithDelegate:delegate didAutosaveSelector:@selector(document:didSave:contextInfo:) contextInfo:info];
 }
 
 - (BOOL)writeToURL:(NSURL *)fileURL ofType:(NSString *)docType error:(NSError **)outError{
@@ -1153,9 +1157,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     // callers are responsible for making sure all edits are committed
     NSParameterAssert([self commitPendingEdits]);
-    
-    if (saveTargetURL == nil && docState.currentSaveOperationType == NSAutosaveOperation)
-        saveTargetURL = [[self autosavedContentsFileURL] retain];
     
     if ([docType isEqualToString:BDSKArchiveDocumentType])
         success = [self writeArchiveToURL:fileURL error:&nsError];
