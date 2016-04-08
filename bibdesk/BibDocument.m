@@ -127,6 +127,7 @@
 #import "NSAttributedString_BDSKExtensions.h"
 #import "NSPasteboard_BDSKExtensions.h"
 #import "BDSKSaveAccessoryViewController.h"
+#import "BDSKRuntime.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -164,13 +165,23 @@ NSString *BDSKDocumentPublicationsKey = @"publications";
 
 #pragma mark -
 
+@interface NSDocument (BDSKPrivateExtensions)
+// declare a private NSDocument method so we can override it
+- (void)changeSaveType:(id)sender;
+@end
+
 @interface NSDocument (SKLionDeclarations)
 - (void)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation completionHandler:(void (^)(NSError *))completionHandler;
 @end
 
-@interface NSDocument (BDSKPrivateExtensions)
-// declare a private NSDocument method so we can override it
-- (void)changeSaveType:(id)sender;
+@interface NSDocument (SKSnowLeopardDeprecated)
+- (BOOL)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError;
+@end
+
+@interface BibDocument (BDSKPrivateExtensions)
+- (void)SL_saveToURL:(NSURL *)url ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo;
+- (void)SL_autosaveDocumentWithDelegate:(id)delegate didAutosaveSelector:(SEL)didAutosaveSelector contextInfo:(void *)contextInfo;
+- (BOOL)SL_saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError;
 @end
 
 @implementation BibDocument
@@ -183,6 +194,12 @@ static NSOperationQueue *metadataCacheQueue = nil;
 
 + (void)initialize {
     BDSKINITIALIZE;
+    
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_6) {
+        BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(saveToURL:ofType:forSaveOperation:delegate:didSaveSelector:contextInfo:), @selector(SL_saveToURL:ofType:forSaveOperation:delegate:didSaveSelector:contextInfo:));
+        BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(autosaveDocumentWithDelegate:didAutosaveSelector:contextInfo:), @selector(SL_autosaveDocumentWithDelegate:didAutosaveSelector:contextInfo:));
+        BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(saveToURL:ofType:forSaveOperation:error:), @selector(SL_saveToURL:ofType:forSaveOperation:error:));
+    }
     
     metadataCacheQueue = [[NSOperationQueue alloc] init];
     [metadataCacheQueue setMaxConcurrentOperationCount:1];
@@ -1117,7 +1134,8 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }
 }
 
-// This is always used for saving on 10.7+, while the next one is not used for autosave
+// This is always used for saving on 10.7+, but does not exist on 10.6
+// saveToURL:forSaveOperation:delegate:didSaveSelector:contextInfo: does not seem to be used by autosave, though perhaps on 10.6?
 - (void)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation completionHandler:(void (^)(NSError *))completionHandler {
     
     // Override so we can determine if this is an autosave in writeToURL:ofType:error:.
@@ -1133,26 +1151,39 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     }];
 }
 
-- (void)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo {
-    
-    // This is used on 10.6, but not for autosave on 10.7+, so we use the above on 10.7+
-    if ([NSDocument instancesRespondToSelector:@selector(saveToURL:ofType:forSaveOperation:completionHandler:)] == NO) {
-        // Override so we can determine if this is an autosave in writeToURL:ofType:error:.
-        docState.currentSaveOperationType = saveOperation;
-        saveTargetURL = [[absoluteURL filePathURL] copy];
-        
+// On 10.6 the situation is not so clear to me, not sure if this method is always used for saving, probably not for autosave
+- (void)SL_saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo {
+    // if this method is called in autosave on 10.6, then we already have the callback
+    if (saveOperation != NSAutosaveOperation) {
         NSInvocation *invocation = nil;
         if (delegate && didSaveSelector) {
             invocation = [NSInvocation invocationWithTarget:delegate selector:didSaveSelector];
             [invocation setArgument:&contextInfo atIndex:4];
         }
-        NSDictionary *info = [[NSDictionary alloc] initWithObjectsAndKeys:typeName, @"typeName", invocation, @"callback", nil];
-        
         delegate = self;
         didSaveSelector = @selector(document:didSave:contextInfo:);
-        contextInfo = info;
+        contextInfo = [[NSDictionary alloc] initWithObjectsAndKeys:typeName, @"typeName", invocation, @"callback", nil];
     }
     [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
+}
+
+- (void)SL_autosaveDocumentWithDelegate:(id)delegate didAutosaveSelector:(SEL)didAutosaveSelector contextInfo:(void *)contextInfo {
+    NSInvocation *invocation = nil;
+    if (delegate && didAutosaveSelector) {
+        invocation = [NSInvocation invocationWithTarget:delegate selector:didAutosaveSelector];
+        [invocation setArgument:&contextInfo atIndex:4];
+    }
+    contextInfo = [[NSDictionary alloc] initWithObjectsAndKeys:[self fileType], @"typeName", invocation, @"callback", nil];
+    [super autosaveDocumentWithDelegate:self didAutosaveSelector:@selector(document:didSave:contextInfo:) contextInfo:contextInfo];
+}
+
+// The autosave method doesn't know the target URL, while this method is always used for saving,
+// so we need to get it from here
+- (BOOL)SL_saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError {
+    // Override so we can determine if this is an autosave in writeToURL:ofType:error:.
+    docState.currentSaveOperationType = saveOperation;
+    saveTargetURL = [[absoluteURL filePathURL] copy];
+    return [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
 }
 
 - (BOOL)writeToURL:(NSURL *)fileURL ofType:(NSString *)docType error:(NSError **)outError{
