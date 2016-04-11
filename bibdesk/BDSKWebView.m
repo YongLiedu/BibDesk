@@ -239,9 +239,6 @@
     if (frame == [sender mainFrame]) {
         [self webView:sender setIcon:nil];
         [self webView:sender setTitle:[NSLocalizedString(@"Loading", @"Placeholder web group label") stringByAppendingEllipsis]];
-        
-        if ([[frame provisionalDataSource] unreachableURL] == nil)
-            [self webView:sender setURL:[[[[sender mainFrame] provisionalDataSource] request] URL]];
     }
     [self webView:sender setLoading:[sender isLoading]];
     
@@ -259,7 +256,7 @@
         }
         [self webView:sender setIcon:[sender mainFrameIcon]];
         [self webView:sender setTitle:title];
-        [self webView:sender setURL:url];
+        [self webView:sender setURL:url];NSLog(@"%@",url);
     }
     [self webView:sender setLoading:[sender isLoading]];
     if ([delegate respondsToSelector:@selector(webView:didFinishLoadForFrame:)])
