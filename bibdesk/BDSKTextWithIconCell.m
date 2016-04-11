@@ -129,7 +129,7 @@ static id nonNullObjectValueForKey(id object, id stringObject, NSString *key) {
     
     if ([self isBordered])
         border = NSHeight(aRect) - BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERED + BORDER_BETWEEN_IMAGE_AND_TEXT_BORDERED;
-    if ([self isBezeled])
+    else if ([self isBezeled])
         border = NSHeight(aRect) - BORDER_BETWEEN_EDGE_AND_IMAGE_BEZELED + BORDER_BETWEEN_IMAGE_AND_TEXT_BEZELED;
     else
         border = NSHeight(aRect) - 1 + BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERLESS + BORDER_BETWEEN_IMAGE_AND_TEXT_BORDERLESS;
