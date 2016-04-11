@@ -252,13 +252,14 @@
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame{
 
     if (frame == [sender mainFrame]) {
+        NSURL *url = [[[frame dataSource] request] URL];
         NSString *title = [sender mainFrameTitle];
         if ([NSString isEmptyString:title]) {
-            NSURL *url = [[[frame dataSource] request] URL];
             title = [url isFileURL] ? [[url path] lastPathComponent] : [[url absoluteString] stringByReplacingPercentEscapes];
         }
         [self webView:sender setIcon:[sender mainFrameIcon]];
         [self webView:sender setTitle:title];
+        [self webView:sender setURL:url];
     }
     [self webView:sender setLoading:[sender isLoading]];
     if ([delegate respondsToSelector:@selector(webView:didFinishLoadForFrame:)])
