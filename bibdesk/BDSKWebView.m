@@ -180,8 +180,6 @@
         aSelector == @selector(webView:setLoading:))
         return [navigationDelegate respondsToSelector:aSelector];
     else if (aSelector == @selector(webView:setTitle:) ||
-        aSelector == @selector(webView:didReceiveIcon:forFrame:) ||
-        aSelector == @selector(webView:didReceiveTitle:forFrame:) ||
         aSelector == @selector(webView:setStatusText:) ||
         aSelector == @selector(webViewRunModal:) ||
         aSelector == @selector(webViewShow:) ||
@@ -194,7 +192,7 @@
     else if (aSelector == @selector(webView:didReceiveIcon:forFrame:))
         return [navigationDelegate respondsToSelector:@selector(webView:setIcon:)];
     else if (aSelector == @selector(webView:didReceiveTitle:forFrame:))
-        return [delegate respondsToSelector:@selector(webView:setIcon:)];
+        return [delegate respondsToSelector:@selector(webView:setTitle:)];
     else if (aSelector == @selector(webView:mouseDidMoveOverElement:modifierFlags:))
         return [delegate respondsToSelector:@selector(webView:setStatusText:)];
     else
