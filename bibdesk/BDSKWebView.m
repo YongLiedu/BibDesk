@@ -521,8 +521,8 @@ static id sharedHandler = nil;
 }
 
 - (void)webView:(WebView *)sender decidePolicyForNavigationAction:(NSDictionary *)actionInformation request:(NSURLRequest *)request frame:(WebFrame *)frame decisionListener:(id<WebPolicyDecisionListener>)listener {
-    [[NSWorkspace sharedWorkspace] openURL:[actionInformation objectForKey:WebActionOriginalURLKey]];
     [listener ignore];
+    [[NSWorkspace sharedWorkspace] openURL:[request URL]];
 }
 
 - (WebView *)webView {
