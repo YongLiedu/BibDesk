@@ -256,7 +256,7 @@
         }
         [self webView:sender setIcon:[sender mainFrameIcon]];
         [self webView:sender setTitle:title];
-        [self webView:sender setURL:url];NSLog(@"%@",url);
+        [self webView:sender setURL:url];
     }
     [self webView:sender setLoading:[sender isLoading]];
     if ([delegate respondsToSelector:@selector(webView:didFinishLoadForFrame:)])
