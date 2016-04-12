@@ -237,9 +237,6 @@
     if (frame == [sender mainFrame]) {
         [self webView:sender setIcon:nil];
         [self webView:sender setTitle:[NSLocalizedString(@"Loading", @"Placeholder web group label") stringByAppendingEllipsis]];
-        
-        if ([[frame provisionalDataSource] unreachableURL] == nil)
-            [self webView:sender setURL:[[[[sender mainFrame] provisionalDataSource] request] URL]];
     }
     [self webView:sender setLoading:[sender isLoading]];
     
@@ -247,17 +244,21 @@
         [delegate webView:sender didStartLoadForFrame:frame];
 }
 
+- (void)webView:(WebView *)sender didCommitLoadForFrame:(WebFrame *)frame {
+    if (frame == [sender mainFrame])
+        [self webView:sender setURL:[[[[sender mainFrame] dataSource] request] URL]];
+}
+
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame{
 
     if (frame == [sender mainFrame]) {
-        NSURL *url = [[[frame dataSource] request] URL];
         NSString *title = [sender mainFrameTitle];
         if ([NSString isEmptyString:title]) {
+            NSURL *url = [[[frame dataSource] request] URL];
             title = [url isFileURL] ? [[url path] lastPathComponent] : [[url absoluteString] stringByReplacingPercentEscapes];
         }
         [self webView:sender setIcon:[sender mainFrameIcon]];
         [self webView:sender setTitle:title];
-        [self webView:sender setURL:url];
     }
     [self webView:sender setLoading:[sender isLoading]];
     if ([delegate respondsToSelector:@selector(webView:didFinishLoadForFrame:)])
@@ -276,17 +277,12 @@
     if ([[error domain] isEqualToString:WebKitErrorDomain] == NO || [error code] != 204) {
         NSURL *url = [[[frame provisionalDataSource] request] URL];
         NSString *errorHTML = [NSString stringWithFormat:@"<html><title>%@</title><body><h1>%@</h1></body></html>", NSLocalizedString(@"Error", @"Placeholder web group label"), [error localizedDescription]];
-        [frame loadAlternateHTMLString:errorHTML baseURL:nil forUnreachableURL:url];
+        [frame loadAlternateHTMLString:errorHTML baseURL:url forUnreachableURL:url];
     }
 }
 
 - (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
     [self webView:sender didFailLoadWithError:error forFrame:frame];
-}
-
-- (void)webView:(WebView *)sender didReceiveServerRedirectForProvisionalLoadForFrame:(WebFrame *)frame{
-    if (frame == [sender mainFrame])
-        [self webView:sender setURL:[[[frame provisionalDataSource] request] URL]];
 }
 
 - (void)webView:(WebView *)sender didReceiveIcon:(NSImage *)image forFrame:(WebFrame *)frame{
