@@ -52,7 +52,7 @@
 }
 
 - (NSRect)textRectForBounds:(NSRect)aRect {
-    return BDSKShrinkRect([super textRectForBounds:aRect], 17.0, NSMaxXEdge);
+    return BDSKShrinkRect([super textRectForBounds:aRect], [self bezelStyle] == NSTextFieldRoundedBezel ? 9.0 : 17.0, NSMaxXEdge);
 }
 
 - (NSRect)adjustedFrame:(NSRect)aRect inView:(NSView *)controlView {

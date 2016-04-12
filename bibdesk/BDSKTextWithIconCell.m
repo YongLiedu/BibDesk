@@ -58,6 +58,7 @@ static id nonNullObjectValueForKey(id object, id stringObject, NSString *key) {
 #define BORDER_BETWEEN_IMAGE_AND_TEXT_BORDERED (-1.0)
 #define BORDER_BETWEEN_EDGE_AND_IMAGE_BEZELED (3.0)
 #define BORDER_BETWEEN_IMAGE_AND_TEXT_BEZELED (-2.0)
+#define BORDER_BETWEEN_IMAGE_AND_TEXT_BEZELED_ROUNDED (-10.0)
 #define IMAGE_OFFSET (1.0)
 
 + (Class)formatterClass {
@@ -115,10 +116,12 @@ static id nonNullObjectValueForKey(id object, id stringObject, NSString *key) {
     NSSize cellSize = [super cellSizeForBounds:aRect];
     if ([self isBordered])
         cellSize.width += cellSize.height - BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERED + BORDER_BETWEEN_IMAGE_AND_TEXT_BORDERED;
-    else if ([self isBezeled])
-        cellSize.width += cellSize.height - BORDER_BETWEEN_EDGE_AND_IMAGE_BEZELED + BORDER_BETWEEN_IMAGE_AND_TEXT_BEZELED;
-    else
+    else if ([self isBezeled] == NO)
         cellSize.width += cellSize.height - 1 + BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERLESS + BORDER_BETWEEN_IMAGE_AND_TEXT_BORDERLESS;
+    else if ([self bezelStyle] == NSTextFieldRoundedBezel)
+        cellSize.width += cellSize.height - BORDER_BETWEEN_EDGE_AND_IMAGE_BEZELED + BORDER_BETWEEN_IMAGE_AND_TEXT_BEZELED_ROUNDED;
+    else
+        cellSize.width += cellSize.height - BORDER_BETWEEN_EDGE_AND_IMAGE_BEZELED + BORDER_BETWEEN_IMAGE_AND_TEXT_BEZELED;
     cellSize.width = fmin(cellSize.width, NSWidth(aRect));
     cellSize.height = fmin(cellSize.height, NSHeight(aRect));
     return cellSize;
@@ -129,10 +132,12 @@ static id nonNullObjectValueForKey(id object, id stringObject, NSString *key) {
     
     if ([self isBordered])
         border = NSHeight(aRect) - BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERED + BORDER_BETWEEN_IMAGE_AND_TEXT_BORDERED;
-    else if ([self isBezeled])
-        border = NSHeight(aRect) - BORDER_BETWEEN_EDGE_AND_IMAGE_BEZELED + BORDER_BETWEEN_IMAGE_AND_TEXT_BEZELED;
-    else
+    else if ([self isBezeled] == NO)
         border = NSHeight(aRect) - 1 + BORDER_BETWEEN_EDGE_AND_IMAGE_BORDERLESS + BORDER_BETWEEN_IMAGE_AND_TEXT_BORDERLESS;
+    else if ([self bezelStyle] == NSTextFieldRoundedBezel)
+        border = NSHeight(aRect) - BORDER_BETWEEN_EDGE_AND_IMAGE_BEZELED + BORDER_BETWEEN_IMAGE_AND_TEXT_BEZELED_ROUNDED;
+    else
+        border = NSHeight(aRect) - BORDER_BETWEEN_EDGE_AND_IMAGE_BEZELED + BORDER_BETWEEN_IMAGE_AND_TEXT_BEZELED;
     
     return BDSKShrinkRect(aRect, border, NSMinXEdge);
 }
