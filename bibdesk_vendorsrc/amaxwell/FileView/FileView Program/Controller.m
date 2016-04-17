@@ -69,7 +69,7 @@
 - (void)awakeFromNib
 {
     NSString *base = [@"~/Desktop" stringByStandardizingPath];
-    NSArray *files = [[NSFileManager defaultManager] directoryContentsAtPath:base];
+    NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:base error:NULL];
     NSString *path;
     NSUInteger i, iMax = [files count];
     for (i = 0; i < iMax; i++) {
@@ -116,7 +116,7 @@
 
 - (NSString *)fileView:(FVFileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
 {
-    return [NSString stringWithFormat:@"Check pq for %d", anIndex];
+    return [NSString stringWithFormat:@"Check pq for %lu", (unsigned long)anIndex];
 }
 
 - (void)fileView:(FVFileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
@@ -140,7 +140,7 @@
     // reduce idx by the number of smaller indexes in aSet
     if (anIndex > 0) {
         NSRange range = NSMakeRange(0, anIndex);
-        unsigned int buffer[anIndex];
+        NSUInteger buffer[anIndex];
         anIndex -= [aSet getIndexes:buffer maxCount:anIndex inIndexRange:&range];
     }
     [arrayController removeObjectsAtArrangedObjectIndexes:aSet];
