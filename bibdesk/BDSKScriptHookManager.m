@@ -58,6 +58,8 @@ NSString *BDSKWillGenerateCiteKeyScriptHookName = @"Will Generate Cite Key";
 NSString *BDSKDidGenerateCiteKeyScriptHookName = @"Did Generate Cite Key";
 NSString *BDSKImportPublicationsScriptHookName = @"Import Publications";
 NSString *BDSKSaveDocumentScriptHookName = @"Save Document";
+NSString *BDSKOpenDocumentScriptHookName = @"Open Document";
+NSString *BDSKRevertDocumentScriptHookName = @"Revert Document";
 
 static BDSKScriptHookManager *sharedManager = nil;
 static NSArray *scriptHookNames = nil;
@@ -81,7 +83,9 @@ static NSArray *scriptHookNames = nil;
 														   BDSKWillGenerateCiteKeyScriptHookName, 
 														   BDSKDidGenerateCiteKeyScriptHookName, 
                                                            BDSKImportPublicationsScriptHookName, 
-														   BDSKSaveDocumentScriptHookName, nil];
+                                                           BDSKSaveDocumentScriptHookName,
+                                                           BDSKOpenDocumentScriptHookName,
+                                                           BDSKRevertDocumentScriptHookName, nil];
     }
     return scriptHookNames;
 }

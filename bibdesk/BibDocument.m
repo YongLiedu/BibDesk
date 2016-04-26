@@ -329,6 +329,9 @@ static NSOperationQueue *metadataCacheQueue = nil;
 }
 
 - (void)showWindows{
+    NSWindowController *windowController = [[self windowControllers] firstObject];
+    BOOL wasVisible = [windowController isWindowLoaded] && [[windowController window] isVisible];
+    
     [super showWindows];
     
     // Get the search string keyword if available (Spotlight passes this)
@@ -382,6 +385,11 @@ static NSOperationQueue *metadataCacheQueue = nil;
         else
             [alert beginSheetModalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(migrationAlertDidEnd:returnCode:contextInfo:) contextInfo:NULL];
     }
+    
+    if (wasVisible == NO)
+        [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKOpenDocumentScriptHookName
+                                                     forPublications:publications
+                                                            document:self];
 }
 
 - (void)windowControllerDidLoadNib:(NSWindowController *) aController
@@ -1957,6 +1965,15 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         if (outError) *outError = error;
         return NO;
     }
+}
+
+- (BOOL)revertToContentsOfURL:(NSURL *)absoluteURL ofType:(NSString *)typeName error:(NSError **)outError {
+    BOOL success = [super revertToContentsOfURL:absoluteURL ofType:typeName error:outError];
+    if (success)
+        [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKRevertDocumentScriptHookName
+                                                     forPublications:publications
+                                                            document:self];
+    return success;
 }
 
 #pragma mark -

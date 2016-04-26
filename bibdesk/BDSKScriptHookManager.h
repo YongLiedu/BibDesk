@@ -49,6 +49,8 @@ extern NSString *BDSKWillGenerateCiteKeyScriptHookName;
 extern NSString *BDSKDidGenerateCiteKeyScriptHookName;
 extern NSString *BDSKImportPublicationsScriptHookName;
 extern NSString *BDSKSaveDocumentScriptHookName;
+extern NSString *BDSKOpenDocumentScriptHookName;
+extern NSString *BDSKRevertDocumentScriptHookName;
 
 
 @class BibDocument;
