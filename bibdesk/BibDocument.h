@@ -52,10 +52,10 @@
 @class BDSKItemSearchIndexes, BDSKNotesSearchIndex, BDSKFileMigrationController, BDSKDocumentSearch;
 
 enum {
-	BDSKOperationIgnore = NSAlertDefaultReturn, // 1
-	BDSKOperationSet = NSAlertAlternateReturn, // 0
-	BDSKOperationAppend = NSAlertOtherReturn, // -1
-	BDSKOperationAsk = NSAlertErrorReturn, // -2
+	BDSKOperationIgnore = 0,
+	BDSKOperationSet = 1,
+	BDSKOperationAppend = 2,
+	BDSKOperationAsk = 3
 };
 
 // these should correspond to the tags of copy-as menu items, as well as the default drag/copy type
