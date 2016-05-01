@@ -1438,7 +1438,7 @@ static BOOL changingColors = NO;
     
 	NSInteger rv = [alert runModal];
     
-    if (rv != NSAlertSecondButtonReturn) {
+    if (rv != NSAlertAlternateReturn) {
         // first we make sure all edits are committed
         if ([self commitPendingEdits]) {
             NSArray *selectedFiles = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"];
