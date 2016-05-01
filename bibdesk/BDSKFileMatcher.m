@@ -192,7 +192,9 @@ static id sharedInstance = nil;
     if (nil == pubs) {
         BibDocument *doc = [[NSDocumentController sharedDocumentController] mainDocument];
         if (nil == doc) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"No front document", @"") defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:NSLocalizedString(@"You need to open a document in order to match publications.", @"")];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"No front document", @"")];
+            [alert setInformativeText:NSLocalizedString(@"You need to open a document in order to match publications.", @"")];
             [alert runModal];
             return;
         }

@@ -283,11 +283,9 @@ static NSPasteboardItem *pasteboardItemForType(NSPasteboard *pboard, NSString *t
     
     // only show the panel once; this may be called when closing/quitting after seeing the warning
     if (NO == didAlert && NO == isValid) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable to access clipboard", @"alert title for system problem")
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The system clipboard is not working.  If restarting your system does not solve this problem, please report a bug using BibDesk's Help menu.", @"error message when copy/paste fails")];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Unable to access clipboard", @"alert title for system problem")];
+        [alert setInformativeText:NSLocalizedString(@"The system clipboard is not working.  If restarting your system does not solve this problem, please report a bug using BibDesk's Help menu.", @"error message when copy/paste fails")];
         [alert runModal];
         didAlert = YES;
     }

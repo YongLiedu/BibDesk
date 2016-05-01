@@ -307,21 +307,19 @@ static void fsevents_callback(FSEventStreamRef streamRef, void *clientCallBackIn
         NSAppleEventDescriptor *result;
         script = [[[NSAppleScript alloc] initWithContentsOfURL:[NSURL fileURLWithPath:scriptFilename] error:&errorDictionary] autorelease];
         if (script == nil) {
-            NSAlert *alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:NSLocalizedString(@"The script file '%@' could not be opened.", @"Message in alert dialog when failing to load script"), scriptName]
-                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"Informative text in alert dialog"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:[NSString stringWithFormat:NSLocalizedString(@"The script file '%@' could not be opened.", @"Message in alert dialog when failing to load script"), scriptName]];
+            [alert setInformativeText:[NSString stringWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"Informative text in alert dialog"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]]];
             [alert runModal];
         } else {
             result = [script executeAndReturnError:&errorDictionary];
             if (result == nil && [[errorDictionary objectForKey:NSAppleScriptErrorMessage] integerValue] != -128) {
-                NSAlert *alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:NSLocalizedString(@"The script '%@' could not complete.", @"Message in alert dialog when failing to execute script"), scriptName]
-                                                 defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                               alternateButton:NSLocalizedString(@"Edit Script", @"Button title")
-                                                   otherButton:nil
-                                     informativeTextWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"Informative text in alert dialog"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
-                if ([alert runModal] == NSAlertAlternateReturn) {
+                NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+                [alert setMessageText:[NSString stringWithFormat:NSLocalizedString(@"The script '%@' could not complete.", @"Message in alert dialog when failing to execute script"), scriptName]];
+                [alert setInformativeText:[NSString stringWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"Informative text in alert dialog"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]]];
+                [alert addButtonWithTitle:NSLocalizedString(@"OK", @"Button title")];
+                [alert addButtonWithTitle:NSLocalizedString(@"Edit Script", @"Button title")];
+                if ([alert runModal] == NSAlertSecondButtonReturn) {
                     [wm openFile:scriptFilename];
                 }
             }
@@ -329,12 +327,11 @@ static void fsevents_callback(FSEventStreamRef streamRef, void *clientCallBackIn
     } else if ([wm isApplicationAtPath:scriptFilename]) {
         BOOL result = [wm launchApplication:scriptFilename];
         if (result == NO) {
-            NSAlert *alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:NSLocalizedString(@"The application '%@' could not be launched.", @"Message in alert dialog when failing to launch an app"), scriptName]
-                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                           alternateButton:NSLocalizedString(@"Show", @"Button title")
-                                               otherButton:nil
-                                 informativeTextWithFormat:@""];
-            if ([alert runModal] == NSAlertAlternateReturn) {
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:[NSString stringWithFormat:NSLocalizedString(@"The application '%@' could not be launched.", @"Message in alert dialog when failing to launch an app"), scriptName]];
+            [alert addButtonWithTitle:NSLocalizedString(@"OK", @"Button title")];
+            [alert addButtonWithTitle:NSLocalizedString(@"Show", @"Button title")];
+            if ([alert runModal] == NSAlertSecondButtonReturn) {
                 [wm selectFile:scriptFilename inFileViewerRootedAtPath:@""];
             }
         }

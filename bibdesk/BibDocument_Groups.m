@@ -724,11 +724,9 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         
         if([newGroupField isInvalidGroupField] || [newGroupField isEqualToString:@""]){
             [[addFieldController window] orderOut:nil];
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Field", @"Message in alert dialog when choosing an invalid group field")
-                                             defaultButton:nil
-                                           alternateButton:nil
-                                               otherButton:nil
-                                informativeTextWithFormat:@"%@", [NSString stringWithFormat:NSLocalizedString(@"The field \"%@\" can not be used for groups.", @"Informative text in alert dialog"), [newGroupField localizedFieldName]]];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Invalid Field", @"Message in alert dialog when choosing an invalid group field")];
+            [alert setInformativeText:[NSString stringWithFormat:NSLocalizedString(@"The field \"%@\" can not be used for groups.", @"Informative text in alert dialog"), [newGroupField localizedFieldName]]];
             [alert beginSheetModalForWindow:documentWindow modalDelegate:self didEndSelector:NULL contextInfo:NULL];
             return;
         }
@@ -1290,17 +1288,15 @@ static void addObjectToSetAndBag(const void *value, void *context) {
                 [newValues addObject:[pub valueOfField:field]];
             }
 		}else if(rv == BDSKOperationAsk){
-			NSString *otherButton = nil;
-			if(field && [field isSingleValuedGroupField] == NO)
-				otherButton = NSLocalizedString(@"Append", @"Button title");
-			
-			NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
-                                             defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
-                                           alternateButton:NSLocalizedString(@"Set", @"Button title")
-                                               otherButton:otherButton
-                                 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")];
+            [alert setInformativeText:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
+            [alert addButtonWithTitle:NSLocalizedString(@"Don't Change", @"Button title")];
+            [alert addButtonWithTitle:NSLocalizedString(@"Set", @"Button title")];
+            if (field && [field isSingleValuedGroupField] == NO)
+                [alert addButtonWithTitle:NSLocalizedString(@"Append", @"Button title")];
 			rv = [alert runModal];
-			handleInherited = rv;
+            handleInherited = rv == NSAlertSecondButtonReturn ? BDSKOperationSet : rv == NSAlertThirdButtonReturn ? BDSKOperationAppend : BDSKOperationIgnore;
 			if(handleInherited != BDSKOperationIgnore){
                 [pub addToGroup:group handleInherited:handleInherited];
                 count++;
@@ -1369,13 +1365,13 @@ static void addObjectToSetAndBag(const void *value, void *context) {
                     [newValues addObject:[pub valueOfField:field]];
                 }
 			}else if(rv == BDSKOperationAsk){
-				NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
-                                                 defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
-                                               alternateButton:nil
-                                                   otherButton:NSLocalizedString(@"Remove", @"Button title")
-                                     informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
+                NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+                [alert setMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")];
+                [alert setInformativeText:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
+                [alert addButtonWithTitle:NSLocalizedString(@"Don't Change", @"Button title")];
+                [alert addButtonWithTitle:NSLocalizedString(@"Remove", @"Button title")];
 				rv = [alert runModal];
-				handleInherited = rv;
+                handleInherited = rv == NSAlertSecondButtonReturn ? BDSKOperationAppend : BDSKOperationIgnore;
 				if(handleInherited != BDSKOperationIgnore){
 					[pub removeFromGroup:group handleInherited:handleInherited];
                     tmpCount++;
@@ -1432,13 +1428,13 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             [oldValues addObject:oldValue ?: @""];
             [newValues addObject:[pub valueOfField:field]];
         }else if(rv == BDSKOperationAsk){
-			NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
-                                             defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
-                                           alternateButton:nil
-                                               otherButton:NSLocalizedString(@"Remove", @"Button title")
-                                 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")];
+            [alert setInformativeText:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
+            [alert addButtonWithTitle:NSLocalizedString(@"Don't Change", @"Button title")];
+            [alert addButtonWithTitle:NSLocalizedString(@"Remove", @"Button title")];
 			rv = [alert runModal];
-			handleInherited = rv;
+            handleInherited = rv == NSAlertSecondButtonReturn ? BDSKOperationAppend : BDSKOperationIgnore;
 			if(handleInherited != BDSKOperationIgnore){
 				[pub replaceGroup:group withGroupNamed:newGroupName handleInherited:handleInherited];
                 count++;

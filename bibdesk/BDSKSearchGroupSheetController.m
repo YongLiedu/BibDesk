@@ -235,11 +235,9 @@
         
         NSArray *servers = [[BDSKSearchGroupServerManager sharedManager] servers];
         if ([[servers valueForKey:@"name"] containsObject:[[self serverInfo] name]]) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Server Name", @"Message in alert dialog when adding a search group server with a duplicate name")
-                                             defaultButton:nil
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"A default server with the specified name already exists. Edit and Set the default server or use a different name.", @"Informative text in alert dialog when adding a search group server server with a duplicate name")];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Duplicate Server Name", @"Message in alert dialog when adding a search group server with a duplicate name")];
+            [alert setInformativeText:NSLocalizedString(@"A default server with the specified name already exists. Edit and Set the default server or use a different name.", @"Informative text in alert dialog when adding a search group server server with a duplicate name")];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
             return;
         }
@@ -275,11 +273,9 @@
         NSUInteger idx = [serverPopup indexOfSelectedItem];
         NSUInteger existingIndex = [[[[BDSKSearchGroupServerManager sharedManager] servers] valueForKey:@"name"] indexOfObject:[serverPopup titleOfSelectedItem]];
         if (existingIndex != NSNotFound && existingIndex != idx) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Server Name", @"Message in alert dialog when setting a search group server with a duplicate name")
-                                             defaultButton:nil
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"Another default server with the specified name already exists. Edit and Set the default server or use a different name.", @"Informative text in alert dialog when setting a search group server server with a duplicate name")];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Duplicate Server Name", @"Message in alert dialog when setting a search group server with a duplicate name")];
+            [alert setInformativeText:NSLocalizedString(@"Another default server with the specified name already exists. Edit and Set the default server or use a different name.", @"Informative text in alert dialog when setting a search group server server with a duplicate name")];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
             return;
         }
@@ -292,18 +288,16 @@
         [editButton setToolTip:NSLocalizedString(@"Set the selected default server settings", @"Tool tip message")];
         [self setEditable:YES];
         
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Edit Server Setting", @"Message in alert dialog when editing default search group server")
-                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"After editing, commit by choosing Set.", @"Informative text in alert dialog when editing default search group server")];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Edit Server Setting", @"Message in alert dialog when editing default search group server")];
+        [alert setInformativeText:NSLocalizedString(@"After editing, commit by choosing Set.", @"Informative text in alert dialog when editing default search group server")];
         [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
 }
 
 - (void)resetAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 {
-    if (returnCode == NSAlertDefaultReturn) {
+    if (returnCode == NSAlertFirstButtonReturn) {
         [[BDSKSearchGroupServerManager sharedManager] resetServers];
         [self reloadServersSelectingServerNamed:DEFAULT_SERVER_NAME];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchGroupServersDidChangeNotification object:self];
@@ -312,11 +306,11 @@
 
 - (IBAction)resetServers:(id)sender;
 {
-    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset Servers", @"Message in alert dialog when resetting default search group servers")
-                                     defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                   alternateButton:NSLocalizedString(@"Cancel", @"Button title")
-                                       otherButton:nil
-                         informativeTextWithFormat:NSLocalizedString(@"This will restore the default server settings to their original values. This action cannot be undone.", @"Informative text in alert dialog when resetting default search group servers")];
+    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+    [alert setMessageText:NSLocalizedString(@"Reset Servers", @"Message in alert dialog when resetting default search group servers")];
+    [alert setInformativeText:NSLocalizedString(@"This will restore the default server settings to their original values. This action cannot be undone.", @"Informative text in alert dialog when resetting default search group servers")];
+    [alert addButtonWithTitle:NSLocalizedString(@"OK", @"Button title")];
+    [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Button title")];
     [alert beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:@selector(resetAlertDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 }
 
@@ -426,11 +420,9 @@
         message = NSLocalizedString(@"Unable to create a search group with an empty server name, address, database or port", @"Informative text in alert dialog when search group is invalid");
     }
     if (message) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Empty value", @"Message in alert dialog when data for a search group is invalid")
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:@"%@", message];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Empty value", @"Message in alert dialog when data for a search group is invalid")];
+        [alert setInformativeText:message];
         [alert beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:NULL contextInfo:NULL];
         return NO;
     }

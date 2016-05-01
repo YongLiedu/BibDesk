@@ -374,11 +374,9 @@ typedef struct _BDSKSharingClientFlags {
 - (NSInteger)runAuthenticationFailedAlert;
 {
     NSAssert([NSThread isMainThread] == 1, @"runAuthenticationFailedAlert must be run from the main thread");
-    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Authentication Failed", @"Message in alert dialog when authentication failed")
-                                     defaultButton:nil
-                                   alternateButton:nil
-                                       otherButton:nil
-                         informativeTextWithFormat:NSLocalizedString(@"Incorrect password for BibDesk Sharing on server %@.  Reselect to try again.", @"Informative text in alert dialog"), [service name]];
+    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+    [alert setMessageText:NSLocalizedString(@"Authentication Failed", @"Message in alert dialog when authentication failed")];
+    [alert setInformativeText:[NSString stringWithFormat:NSLocalizedString(@"Incorrect password for BibDesk Sharing on server %@.  Reselect to try again.", @"Informative text in alert dialog"), [service name]]];
     return [alert runModal];
 }
 

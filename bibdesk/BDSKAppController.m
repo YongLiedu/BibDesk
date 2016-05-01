@@ -159,14 +159,14 @@ static void fixLegacyTeXPaths() {
         [sud setObject:formatString forKey:BDSKCiteKeyFormatKey];
         [btm setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
     }else{
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"The autogeneration format for Cite Key is invalid.", @"Message in alert dialog when detecting invalid cite key format")
-                                         defaultButton:NSLocalizedString(@"Go to Preferences", @"Button title")
-                                       alternateButton:NSLocalizedString(@"Revert to Default", @"Button title")
-                                           otherButton:nil
-                             informativeTextWithFormat:@"%@", error];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"The autogeneration format for Cite Key is invalid.", @"Message in alert dialog when detecting invalid cite key format")];
+        [alert setInformativeText:error];
+        [alert addButtonWithTitle:NSLocalizedString(@"Go to Preferences", @"Button title")];
+        [alert addButtonWithTitle:NSLocalizedString(@"Revert to Default", @"Button title")];
         [alert setAlertStyle:NSCriticalAlertStyle];
         button = [alert runModal];
-        if (button == NSAlertAlternateReturn){
+        if (button == NSAlertSecondButtonReturn){
             formatString = [[[NSUserDefaultsController sharedUserDefaultsController] initialValues] objectForKey:BDSKCiteKeyFormatKey];
             [sud setObject:formatString forKey:BDSKCiteKeyFormatKey];
             [btm setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
@@ -224,19 +224,21 @@ static void fixLegacyTeXPaths() {
             [btm setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:fixedFormatString]];
             otherButton = NSLocalizedString(@"Fix", @"Button title");
         }
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"The autogeneration format for local files is invalid.", @"Message in alert dialog when detecting invalid local file format")
-                                         defaultButton:NSLocalizedString(@"Go to Preferences", @"Button title")
-                                       alternateButton:NSLocalizedString(@"Revert to Default", @"Button title")
-                                           otherButton:otherButton
-                             informativeTextWithFormat:@"%@", error];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"The autogeneration format for local files is invalid.", @"Message in alert dialog when detecting invalid local file format")];
+        [alert setInformativeText:error];
+        [alert addButtonWithTitle:NSLocalizedString(@"Go to Preferences", @"Button title")];
+        [alert addButtonWithTitle:NSLocalizedString(@"Revert to Default", @"Button title")];
+        if (otherButton)
+            [alert addButtonWithTitle:otherButton];
         [alert setAlertStyle:NSCriticalAlertStyle];
         button = [alert runModal];
-        if (button == NSAlertDefaultReturn) {
+        if (button == NSAlertFirstButtonReturn) {
             [sud setObject:fixedFormatString forKey:BDSKLocalFileFormatKey];
             [btm setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:fixedFormatString]];
             [[BDSKPreferenceController sharedPreferenceController] showWindow:nil];
             [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.autofile"];
-        } else if (button == NSAlertAlternateReturn) {
+        } else if (button == NSAlertSecondButtonReturn) {
             formatString = [[[NSUserDefaultsController sharedUserDefaultsController] initialValues] objectForKey:BDSKLocalFileFormatKey];			
             [sud setObject:formatString forKey:BDSKLocalFileFormatKey];
             [btm setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];

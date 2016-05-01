@@ -217,11 +217,11 @@ static BDSKPreviewer *sharedPreviewer = nil;
 	[progressOverlay orderFront:sender];
 	[(BibDocument *)[[NSDocumentController sharedDocumentController] currentDocument] updatePreviewer:self];
     if(![[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey]){
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Previewing is Disabled.", @"Message in alert dialog when showing preview with TeX preview disabled")
-                                         defaultButton:NSLocalizedString(@"Yes", @"Button title")
-                                       alternateButton:NSLocalizedString(@"No", @"Button title")
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"TeX previewing must be enabled in BibDesk's preferences in order to use this feature.  Would you like to open the preference pane now?", @"Informative text in alert dialog")];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Previewing is Disabled.", @"Message in alert dialog when showing preview with TeX preview disabled")];
+        [alert setInformativeText:NSLocalizedString(@"TeX previewing must be enabled in BibDesk's preferences in order to use this feature.  Would you like to open the preference pane now?", @"Informative text in alert dialog")];
+        [alert addButtonWithTitle:NSLocalizedString(@"Yes", @"Button title")];
+        [alert addButtonWithTitle:NSLocalizedString(@"No", @"Button title")];
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:self
                          didEndSelector:@selector(shouldShowTeXPreferences:returnCode:contextInfo:)
@@ -231,7 +231,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 }
 
 - (void)shouldShowTeXPreferences:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if(returnCode == NSAlertDefaultReturn){
+    if(returnCode == NSAlertFirstButtonReturn){
         [[BDSKPreferenceController sharedPreferenceController] showWindow:nil];
         [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.TeX"];
     }else{

@@ -395,11 +395,9 @@ static NSSet *alwaysDisabledFields = nil;
             error = [NSString stringWithFormat:NSLocalizedString(@"The file \"%@\" is neither a BibTeX bibliography file nor a BibTeX style file.", @"Informative text in alert dialog"), object];
         }
         if (error) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Macro File", @"Message in alert dialog when adding an invalid global macros file")
-                                             defaultButton:nil
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:@"%@", error];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Invalid Macro File", @"Message in alert dialog when adding an invalid global macros file")];
+            [alert setInformativeText:error];
             [alert beginSheetModalForWindow:globalMacroFileSheet modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         } else {
             [globalMacroFiles replaceObjectAtIndex:row withObject:object];

@@ -176,7 +176,9 @@ static NSString *hostInfoString()
         [[textView textStorage] addAttribute:NSFontAttributeName value:[NSFont userFixedPitchFontOfSize:10.0f] range:NSMakeRange(0, [[textView textStorage] length])];
         [self showWindow:nil];
         
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"An Error Occurred", @"Message in alert dialog when an error occurs") defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:NSLocalizedString(@"The following diagnostic information may be useful to the application developer.  Please report this error.", @"Informative text in alert dialog when an error occurs")];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"An Error Occurred", @"Message in alert dialog when an error occurs") ];
+        [alert setInformativeText:NSLocalizedString(@"The following diagnostic information may be useful to the application developer.  Please report this error.", @"Informative text in alert dialog when an error occurs")];
         [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
     @catch(id exception){

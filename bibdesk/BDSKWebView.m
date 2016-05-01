@@ -445,15 +445,19 @@
 }
 
 - (void)webView:(WebView *)sender runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WebFrame *)frame {
-    NSString *title = [self alertTitleForFrame:frame];
-    NSAlert *alert = [NSAlert alertWithMessageText:title defaultButton:NSLocalizedString(@"OK", @"Button title") alternateButton:nil otherButton:nil informativeTextWithFormat:@"%@", message];
+    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+    [alert setMessageText:[self alertTitleForFrame:frame]];
+    [alert setInformativeText:message];
     [alert runModal];
 }
 
 - (BOOL)webView:(WebView *)sender runJavaScriptConfirmPanelWithMessage:(NSString *)message initiatedByFrame:(WebFrame *)frame {
-    NSString *title = [self alertTitleForFrame:frame];
-    NSAlert *alert = [NSAlert alertWithMessageText:title defaultButton:NSLocalizedString(@"OK", @"Button title") alternateButton:NSLocalizedString(@"Cancel", @"Button title") otherButton:nil informativeTextWithFormat:@"%@", message];
-    return NSAlertDefaultReturn == [alert runModal];
+    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+    [alert setMessageText:[self alertTitleForFrame:frame]];
+    [alert setInformativeText:message];
+    [alert addButtonWithTitle:NSLocalizedString(@"OK", @"Button title")];
+    [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Button title")];
+    return NSAlertFirstButtonReturn == [alert runModal];
 }
 
 - (void)webView:(WebView *)sender runOpenPanelForFileButtonWithResultListener:(id < WebOpenPanelResultListener >)resultListener {

@@ -1020,16 +1020,16 @@
         return NO;
     } else if ([item groupType] == BDSKCategoryGroupType && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnRenameGroupKey]) {
         
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
-                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title")
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"This action will change the %@ field in %ld items. Do you want to proceed?", @"Informative text in alert dialog"), [[(BDSKCategoryGroup *)item key] localizedFieldName], (long)[groupedPublications count]];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")];
+        [alert setInformativeText:[NSString stringWithFormat:NSLocalizedString(@"This action will change the %@ field in %ld items. Do you want to proceed?", @"Informative text in alert dialog"), [[(BDSKCategoryGroup *)item key] localizedFieldName], (long)[groupedPublications count]]];
+        [alert addButtonWithTitle:NSLocalizedString(@"OK", @"Button title")];
+        [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Button title")];
         [alert setShowsSuppressionButton:YES];
         NSInteger rv = [alert runModal];
         if ([[alert suppressionButton] state] == NSOnState)
             [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnRenameGroupKey];
-        if (rv == NSAlertAlternateReturn)
+        if (rv == NSAlertSecondButtonReturn)
             return NO;
     }
     return YES;
@@ -1638,7 +1638,7 @@
     if (alert && [[alert suppressionButton] state] == NSOnState)
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKAskToTrashFilesKey];
     NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
-    if (returnCode == NSAlertAlternateReturn) {
+    if (returnCode == NSAlertSecondButtonReturn) {
         for (NSURL *url in fileURLs) {
             NSString *path = [url path];
             NSString *folderPath = [path stringByDeletingLastPathComponent];
@@ -1665,13 +1665,13 @@
     }
     if ([fileURLs count]) {
         if (moveToTrash == 1) {
-            [self trashAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[fileURLs retain]];
+            [self trashAlertDidEnd:nil returnCode:NSAlertSecondButtonReturn contextInfo:[fileURLs retain]];
         } else if (moveToTrash == -1) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Move Files to Trash?", @"Message in alert dialog when deleting a file")
-                                             defaultButton:NSLocalizedString(@"No", @"Button title")
-                                           alternateButton:NSLocalizedString(@"Yes", @"Button title")
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"Do you want to move the removed files to the trash?", @"Informative text in alert dialog")];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Move Files to Trash?", @"Message in alert dialog when deleting a file")];
+            [alert setInformativeText:NSLocalizedString(@"Do you want to move the removed files to the trash?", @"Informative text in alert dialog")];
+            [alert addButtonWithTitle:NSLocalizedString(@"No", @"Button title")];
+            [alert addButtonWithTitle:NSLocalizedString(@"Yes", @"Button title")];
             [alert setShowsSuppressionButton:YES];
             [alert beginSheetModalForWindow:documentWindow
                               modalDelegate:self 

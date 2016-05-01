@@ -423,11 +423,9 @@ static NSArray *minimumCoverForBookmarks(NSArray *items) {
     } else if ([tcID isEqualToString:@"url"]) {
         NSURL *theURL = [(NSString *)object length] == 0 ? nil : [NSURL URLWithString:object];
         if (theURL == nil) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid URL", @"Message in alert dialog when setting an invalid URL") 
-                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"\"%@\" is not a valid URL.", @"Informative text in alert dialog"), object];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Invalid URL", @"Message in alert dialog when setting an invalid URL")];
+            [alert setInformativeText:[NSString stringWithFormat:NSLocalizedString(@"\"%@\" is not a valid URL.", @"Informative text in alert dialog"), object]];
             [alert beginSheetModalForWindow:[self window]
                               modalDelegate:nil
                              didEndSelector:NULL

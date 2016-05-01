@@ -127,7 +127,7 @@
 }
 
 - (void)templateAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if (returnCode == NSAlertAlternateReturn)
+    if (returnCode == NSAlertSecondButtonReturn)
         return;
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSString *templateFilePath = [[sud stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath];
@@ -139,12 +139,12 @@
 }
 
 - (IBAction)resetTemplateFile:(id)sender{
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset the default template file to its original value?", @"Message in alert dialog when resetting bibtex template files") 
-									 defaultButton:NSLocalizedString(@"OK", @"Button title") 
-								   alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
-									   otherButton:nil 
-						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will restore the original content of the template file.", @"Informative text in alert dialog")];
-	[alert beginSheetModalForWindow:[[self view] window] 
+    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+    [alert setMessageText:NSLocalizedString(@"Reset the default template file to its original value?", @"Message in alert dialog when resetting bibtex template files")];
+	[alert setInformativeText:NSLocalizedString(@"Choosing Reset will restore the original content of the template file.", @"Informative text in alert dialog")];
+    [alert addButtonWithTitle:NSLocalizedString(@"OK", @"Button title")];
+    [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Button title")];
+	[alert beginSheetModalForWindow:[[self view] window]
 					  modalDelegate:self
 					 didEndSelector:@selector(templateAlertDidEnd:returnCode:contextInfo:) 
 						contextInfo:NULL];
@@ -155,7 +155,7 @@
 }
 
 - (void)conversionsAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if (returnCode == NSAlertAlternateReturn)
+    if (returnCode == NSAlertSecondButtonReturn)
         return;
     NSFileManager *fileManager = [NSFileManager defaultManager];
 	NSString *conversionsFilePath = [[fileManager applicationSupportDirectory] stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
@@ -166,12 +166,12 @@
 }
 
 - (IBAction)resetConversions:(id)sender{
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset character conversions to their original value?", @"Message in alert dialog when resetting custom character conversions") 
-									 defaultButton:NSLocalizedString(@"OK", @"Button title") 
-								   alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
-									   otherButton:nil 
-						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will erase all custom character conversions.", @"Informative text in alert dialog")];
-	[alert beginSheetModalForWindow:[[self view] window] 
+    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+    [alert setMessageText:NSLocalizedString(@"Reset character conversions to their original value?", @"Message in alert dialog when resetting custom character conversions")];
+	[alert setInformativeText:NSLocalizedString(@"Choosing Reset will erase all custom character conversions.", @"Informative text in alert dialog")];
+    [alert addButtonWithTitle:NSLocalizedString(@"OK", @"Button title")];
+    [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Button title")];
+	[alert beginSheetModalForWindow:[[self view] window]
 					  modalDelegate:self
 					 didEndSelector:@selector(conversionsAlertDidEnd:returnCode:contextInfo:) 
 						contextInfo:NULL];

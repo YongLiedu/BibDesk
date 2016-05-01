@@ -313,11 +313,9 @@
             
             if(url == nil){
                 [[urlSheetController window] orderOut:nil];
-                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error", @"Message in alert dialog when error occurs")
-                                                 defaultButton:nil
-                                               alternateButton:nil
-                                                   otherButton:nil
-                                     informativeTextWithFormat:NSLocalizedString(@"Mac OS X does not recognize this as a valid URL.  Please re-enter the address and try again.", @"Informative text in alert dialog")];
+                NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+                [alert setMessageText:NSLocalizedString(@"Error", @"Message in alert dialog when error occurs")];
+                [alert setInformativeText:NSLocalizedString(@"Mac OS X does not recognize this as a valid URL.  Please re-enter the address and try again.", @"Informative text in alert dialog")];
                 [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
             } else {        
                 [webView setURL:url];
@@ -396,11 +394,9 @@
 }
 
 - (IBAction)showCiteKeyWarning:(id)sender{
-    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Cite Key", @"Message in alert dialog when duplicate citye key was found")
-                                     defaultButton:nil
-                                   alternateButton:nil
-                                       otherButton:nil
-                         informativeTextWithFormat:NSLocalizedString(@"The citation key you entered is either already used in this document or is empty. Please provide a unique one.", @"Informative text in alert dialog")];
+    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+    [alert setMessageText:NSLocalizedString(@"Duplicate Cite Key", @"Message in alert dialog when duplicate citye key was found")];
+    [alert setInformativeText:NSLocalizedString(@"The citation key you entered is either already used in this document or is empty. Please provide a unique one.", @"Informative text in alert dialog")];
     [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 }
 
@@ -461,11 +457,9 @@
 		download = [[WebDownload alloc] initWithRequest:[NSURLRequest requestWithURL:linkURL] delegate:self];
 	}
 	if (!download) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid or Unsupported URL", @"Message in alert dialog when unable to download file for Local-Url")
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The URL to download is either invalid or unsupported.", @"Informative text in alert dialog")];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Invalid or Unsupported URL", @"Message in alert dialog when unable to download file for Local-Url")];
+        [alert setInformativeText:NSLocalizedString(@"The URL to download is either invalid or unsupported.", @"Informative text in alert dialog")];
         [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 	}
 }
@@ -939,11 +933,9 @@
         errorDescription = NSLocalizedString(@"An error occured during download.", @"Informative text in alert dialog");
     }
     
-    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Download Failed", @"Message in alert dialog when download failed")
-                                     defaultButton:nil
-                                   alternateButton:nil
-                                       otherButton:nil
-                         informativeTextWithFormat:@"%@", errorDescription];
+    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+    [alert setMessageText:NSLocalizedString(@"Download Failed", @"Message in alert dialog when download failed")];
+    [alert setInformativeText:errorDescription];
     [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 }
 
@@ -1394,17 +1386,17 @@
         
         if([metaTagDict count]){
             if([[self publication] hasBeenEdited]){
-                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Autofill bibliography information", @"Message in alert dialog when trying to auto-fill information in text import") 
-                                                 defaultButton:NSLocalizedString(@"Yes", @"Button title")
-                                               alternateButton:NSLocalizedString(@"No", @"Button title")
-                                                   otherButton:nil
-                                     informativeTextWithFormat:NSLocalizedString(@"Do you want me to autofill information from Dublin Core META tags? This may overwrite fields that are already set.", @"Informative text in alert dialog")];
+                NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+                [alert setMessageText:NSLocalizedString(@"Autofill bibliography information", @"Message in alert dialog when trying to auto-fill information in text import")];
+                [alert setInformativeText:NSLocalizedString(@"Do you want me to autofill information from Dublin Core META tags? This may overwrite fields that are already set.", @"Informative text in alert dialog")];
+                [alert addButtonWithTitle:NSLocalizedString(@"Yes", @"Button title")];
+                [alert addButtonWithTitle:NSLocalizedString(@"NO", @"Button title")];
                 [alert beginSheetModalForWindow:[self window]
                                   modalDelegate:self
                                  didEndSelector:@selector(autoDiscoverFromFrameAlertDidEnd:returnCode:contextInfo:)
                                     contextInfo:metaTagDict];
             }else{
-                [self autoDiscoverFromFrameAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:metaTagDict];
+                [self autoDiscoverFromFrameAlertDidEnd:nil returnCode:NSAlertFirstButtonReturn contextInfo:metaTagDict];
             }
         }else{
             [metaTagDict release];
@@ -1416,7 +1408,7 @@
     NSDictionary *metaTagDict = [(NSDictionary *)contextInfo autorelease];
     BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
     
-    if(returnCode == NSAlertAlternateReturn)
+    if(returnCode == NSAlertSecondButtonReturn)
         return;
     
     for (NSString *metaName in metaTagDict) {
@@ -1481,22 +1473,22 @@
         return;
     
     if([[self publication] hasBeenEdited]){
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Autofill bibliography information", @"Message in alert dialog when trying to auto-fill information in text import") 
-                                         defaultButton:NSLocalizedString(@"Yes", @"Button title")
-                                       alternateButton:NSLocalizedString(@"No", @"Button title")
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"Do you want me to autofill information from the text? This may overwrite fields that are already set.", @"Informative text in alert dialog")];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Autofill bibliography information", @"Message in alert dialog when trying to auto-fill information in text import")];
+        [alert setInformativeText:NSLocalizedString(@"Do you want me to autofill information from the text? This may overwrite fields that are already set.", @"Informative text in alert dialog")];
+        [alert addButtonWithTitle:NSLocalizedString(@"Yes", @"Button title")];
+        [alert addButtonWithTitle:NSLocalizedString(@"No", @"Button title")];
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:self
                          didEndSelector:@selector(autoDiscoverFromStringAlertDidEnd:returnCode:contextInfo:)
                             contextInfo:[[pubs objectAtIndex:0] retain]];
     }else{
-        [self autoDiscoverFromStringAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:[[pubs objectAtIndex:0] retain]];
+        [self autoDiscoverFromStringAlertDidEnd:nil returnCode:NSAlertFirstButtonReturn contextInfo:[[pubs objectAtIndex:0] retain]];
     }
 }
 
 - (void)autoDiscoverFromStringAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if(returnCode == NSAlertDefaultReturn){
+    if(returnCode == NSAlertFirstButtonReturn){
         BibItem *pub = [(BibItem *)contextInfo autorelease];
         BibItem *item = [self publication];
         

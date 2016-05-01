@@ -564,19 +564,20 @@ static double runLoopTimeout = 30;
             
             if (texCmdPath || bibtexCmdPath) {
                 
-                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"TeX installation changed", @"Message in alert dialog when detecting old texbin")
-                                                 defaultButton:NSLocalizedString(@"Change", @"Button title")
-                                               alternateButton:NSLocalizedString(@"Cancel", @"Button title")
-                                                   otherButton:NSLocalizedString(@"Go to Preferences", @"Button title")
-                                     informativeTextWithFormat:NSLocalizedString(@"Your TeX preferences need to be adjusted for new Apple requirements. Would you like to change your TeX programs to their new location in /Library/TeX/texbin, or set them manually in the Preferences?", @"Informative text in alert dialog")];
+                NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+                [alert setMessageText:NSLocalizedString(@"TeX installation changed", @"Message in alert dialog when detecting old texbin")];
+                [alert setInformativeText:NSLocalizedString(@"Your TeX preferences need to be adjusted for new Apple requirements. Would you like to change your TeX programs to their new location in /Library/TeX/texbin, or set them manually in the Preferences?", @"Informative text in alert dialog")];
+                [alert addButtonWithTitle:NSLocalizedString(@"Change", @"Button title")];
+                [alert addButtonWithTitle:NSLocalizedString(@"Go to Preferences", @"Button title")];
+                [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Button title")];
                 NSInteger rv = [alert runModal];
                 
-                if (rv == NSAlertDefaultReturn) {
+                if (rv == NSAlertFirstButtonReturn) {
                     if (texCmdPath)
                         [sud setObject:texCmdPath forKey:BDSKTeXBinPathKey];
                     if (bibtexCmdPath)
                         [sud setObject:bibtexCmdPath forKey:BDSKBibTeXBinPathKey];
-                } else if (rv == NSAlertOtherReturn) {
+                } else if (rv == NSAlertSecondButtonReturn) {
                     [[BDSKPreferenceController sharedPreferenceController] showWindow:nil];
                     [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.TeX"];
                 }

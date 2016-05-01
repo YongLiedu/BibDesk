@@ -88,12 +88,12 @@ static BDSKFiler *sharedFiler = nil;
         
         if (exists == NO || isDir == NO) {
             // The directory isn't there or isn't a directory, so pop up an alert.
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Papers Folder doesn't exist", @"Message in alert dialog when unable to find Papers Folder")
-                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                           alternateButton:NSLocalizedString(@"Go to Preferences", @"Button title")
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The Papers Folder you've chosen either doesn't exist or isn't a folder. Any files you have dragged in will be linked to in their original location. Press \"Go to Preferences\" to set the Papers Folder.", @"Informative text in alert dialog")];
-            if ([alert runModal] == NSAlertAlternateReturn){
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Papers Folder doesn't exist", @"Message in alert dialog when unable to find Papers Folder")];
+            [alert setInformativeText:NSLocalizedString(@"The Papers Folder you've chosen either doesn't exist or isn't a folder. Any files you have dragged in will be linked to in their original location. Press \"Go to Preferences\" to set the Papers Folder.", @"Informative text in alert dialog")];
+            [alert addButtonWithTitle:NSLocalizedString(@"OK", @"Button title")];
+            [alert addButtonWithTitle:NSLocalizedString(@"Go to Preferences", @"Button title")];
+            if ([alert runModal] == NSAlertSecondButtonReturn){
                 [[BDSKPreferenceController sharedPreferenceController] showWindow:self];
                 [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.autofile"];
             }
@@ -306,13 +306,13 @@ static BDSKFiler *sharedFiler = nil;
             NSString *fileType = [[self attributesOfItemAtPath:resolvedPath error:NULL] fileType];
             if([fileType isEqualToString:NSFileTypeDirectory] && [[NSWorkspace sharedWorkspace] isFilePackageAtPath:resolvedPath] == NO && force == NO && 
                [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnMoveFolderKey]){
-                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Really Move Folder?", @"Message in alert dialog when trying to auto file a folder")
-                                                 defaultButton:NSLocalizedString(@"Move", @"Button title")
-                                               alternateButton:NSLocalizedString(@"Don't Move", @"Button title") 
-                                                   otherButton:nil
-                                     informativeTextWithFormat:NSLocalizedString(@"AutoFile is about to move the folder \"%@\" to \"%@\". Do you want to move the folder?", @"Informative text in alert dialog"), path, newPath];
+                NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+                [alert setMessageText:NSLocalizedString(@"Really Move Folder?", @"Message in alert dialog when trying to auto file a folder")];
+                [alert setInformativeText:[NSString stringWithFormat:NSLocalizedString(@"AutoFile is about to move the folder \"%@\" to \"%@\". Do you want to move the folder?", @"Informative text in alert dialog"), path, newPath]];
+                [alert addButtonWithTitle:NSLocalizedString(@"Move", @"Button title")];
+                [alert addButtonWithTitle:NSLocalizedString(@"Don't Move", @"Button title")];
                 [alert setShowsSuppressionButton:YES];
-                ignoreMove = (NSAlertAlternateReturn == [alert runModal]);
+                ignoreMove = (NSAlertSecondButtonReturn == [alert runModal]);
                 if([[alert suppressionButton] state] == NSOnState)
                     [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnMoveFolderKey];
             }

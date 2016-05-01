@@ -151,11 +151,9 @@
     
     // check the publications table to see if an item is selected, otherwise we get an error on dragging from the cite drawer
     if([pubs count] == 0){
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Nothing selected in document", @"Message in alert dialog when trying to drag from drawer with empty selection") 
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"You need to select an item in the document before dragging from the cite drawer.", @"Informative text in alert dialog")];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Nothing selected in document", @"Message in alert dialog when trying to drag from drawer with empty selection")];
+        [alert setInformativeText:NSLocalizedString(@"You need to select an item in the document before dragging from the cite drawer.", @"Informative text in alert dialog")];
         [alert beginSheetModalForWindow:[drawer parentWindow] modalDelegate:nil didEndSelector:nil contextInfo:NULL];
         return NO;
     }

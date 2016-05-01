@@ -419,14 +419,14 @@ static inline BOOL getTemplateRanges(NSString *str, NSRange *prefixRangePtr, NSR
 
 - (BOOL)undoManagerShouldUndoChange:(id)sender{
 	if (![self isDocumentEdited]) {
-		NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog") 
-                                         defaultButton:NSLocalizedString(@"Yes", @"Button title") 
-                                       alternateButton:NSLocalizedString(@"No", @"Button title") 
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"You are about to undo past the last point this file was saved. Do you want to do this?", @"Informative text in alert dialog") ];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")];
+        [alert setInformativeText:NSLocalizedString(@"You are about to undo past the last point this file was saved. Do you want to do this?", @"Informative text in alert dialog")];
+        [alert addButtonWithTitle:NSLocalizedString(@"Yes", @"Button title")];
+        [alert addButtonWithTitle:NSLocalizedString(@"No", @"Button title")];
 
 		NSInteger rv = [alert runModal];
-		if (rv == NSAlertAlternateReturn)
+		if (rv == NSAlertSecondButtonReturn)
 			return NO;
 	}
 	return YES;

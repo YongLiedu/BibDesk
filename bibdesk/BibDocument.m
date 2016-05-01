@@ -324,7 +324,7 @@ static NSOperationQueue *metadataCacheQueue = nil;
     if ([[alert suppressionButton] state] == NSOnState)
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:BDSKDisableMigrationWarningKey];
     
-    if (NSAlertDefaultReturn == returnCode)
+    if (NSAlertFirstButtonReturn == returnCode)
         [self migrateFiles:self];
 }
 
@@ -369,11 +369,11 @@ static NSOperationQueue *metadataCacheQueue = nil;
         docFlags.displayMigrationAlert = NO;
         // If a single file was migrated, this alert will be shown even if all other BibItems already use BDSKLinkedFile.  However, I think that's an edge case, since the user had to manually add that pub in a text editor or by setting the local-url field.  Items imported or added in BD will already use BDSKLinkedFile, so this notification won't be posted.
         NSString *verify = NSLocalizedString(@"Verify", @"button title for migration alert");
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Local File and URL fields have been automatically converted", @"warning in document")
-                                          defaultButton:verify 
-                                        alternateButton:NSLocalizedString(@"Later", @"") 
-                                            otherButton:nil
-                              informativeTextWithFormat:NSLocalizedString(@"These fields are being deprecated.  BibDesk now uses a more flexible storage format in place of these fields.  Choose \"%@\" to manually verify the conversion and optionally remove the old fields.  Conversion can be done at any time from the \"%@\" menu.  See the Defaults preferences for more options.", @"alert text"), verify, NSLocalizedString(@"Database", @"Database main menu title")];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Local File and URL fields have been automatically converted", @"warning in document")];
+        [alert setInformativeText:[NSString stringWithFormat:NSLocalizedString(@"These fields are being deprecated.  BibDesk now uses a more flexible storage format in place of these fields.  Choose \"%@\" to manually verify the conversion and optionally remove the old fields.  Conversion can be done at any time from the \"%@\" menu.  See the Defaults preferences for more options.", @"alert text"), verify, NSLocalizedString(@"Database", @"Database main menu title")]];
+        [alert addButtonWithTitle:NSLocalizedString(@"Verify", @"button title for migration alert")];
+        [alert addButtonWithTitle:NSLocalizedString(@"Later", @"")];
         
         // @@ Should we show a check button? If the user saves the doc as-is, it'll have local-url and bdsk-file fields in it, and there will be no warning the next time it's opened.  Someone who uses a script hook to convert bdsk-file back to local-url won't want to see it, though.
         [alert setShowsSuppressionButton:YES];
@@ -604,14 +604,14 @@ static NSOperationQueue *metadataCacheQueue = nil;
 
 - (BOOL)undoManagerShouldUndoChange:(id)sender{
 	if (![self isDocumentEdited]) {
-		NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog") 
-                                         defaultButton:NSLocalizedString(@"Yes", @"Button title") 
-                                       alternateButton:NSLocalizedString(@"No", @"Button title") 
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"You are about to undo past the last point this file was saved. Do you want to do this?", @"Informative text in alert dialog") ];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")];
+        [alert setInformativeText:NSLocalizedString(@"You are about to undo past the last point this file was saved. Do you want to do this?", @"Informative text in alert dialog")];
+        [alert addButtonWithTitle:NSLocalizedString(@"Yes", @"Button title")];
+        [alert addButtonWithTitle:NSLocalizedString(@"No", @"Button title")];
 
 		NSInteger rv = [alert runModal];
-		if (rv == NSAlertAlternateReturn)
+		if (rv == NSAlertSecondButtonReturn)
 			return NO;
 	}
 	return YES;
@@ -1776,22 +1776,23 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [error setValue:[NSNumber numberWithUnsignedInteger:encoding] forKey:NSStringEncodingErrorKey];
         
         // If we allow the user to reopen here, NSDocumentController puts up an open failure here when we return NO from this instance, and the message appears after the successfully opened file is on-screen...which is confusing, to say the least.
-        NSAlert *encodingAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Incorrect encoding", @"error title when opening file")
-                                                 defaultButton:NSLocalizedString(@"Cancel", @"Button title")
-                                               alternateButton:NSLocalizedString(@"Ignore", @"Button title")
-                                                   otherButton:NSLocalizedString(@"Reopen", @"Button title")
-                                     informativeTextWithFormat:@"%@", [NSString stringWithFormat:NSLocalizedString(@"The document will be opened with encoding %@, but it was previously saved with encoding %@.  You should cancel opening and then reopen with the correct encoding.", @"Informative text in alert dialog when opening a document with different encoding"), [NSString localizedNameOfStringEncoding:encoding], [NSString localizedNameOfStringEncoding:encodingFromFile]]];
-        rv = [encodingAlert runModal];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Incorrect encoding", @"error title when opening file")];
+        [alert setInformativeText:[NSString stringWithFormat:NSLocalizedString(@"The document will be opened with encoding %@, but it was previously saved with encoding %@.  You should cancel opening and then reopen with the correct encoding.", @"Informative text in alert dialog when opening a document with different encoding"), [NSString localizedNameOfStringEncoding:encoding], [NSString localizedNameOfStringEncoding:encodingFromFile]]];
+        [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Button title")];
+        [alert addButtonWithTitle:NSLocalizedString(@"Reopen", @"Button title")];
+        [alert addButtonWithTitle:NSLocalizedString(@"Ignore", @"Button title")];
+        rv = [alert runModal];
 
-        if (rv == NSAlertDefaultReturn) {
+        if (rv == NSAlertFirstButtonReturn) {
             // the user said to give up
             if (outError) *outError = error; 
             return NO;
-        }else if (rv == NSAlertAlternateReturn){
-            NSLog(@"User ignored encoding alert");
-        }else if (rv == NSAlertOtherReturn){
+        }else if (rv == NSAlertSecondButtonReturn){
             // we just use the encoding whach was used for saving
             encoding = encodingFromFile;
+        }else if (rv == NSAlertThirdButtonReturn){
+            NSLog(@"User ignored encoding alert");
         }
     }
     
@@ -2001,7 +2002,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 - (void)temporaryCiteKeysAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
     NSString *tmpKey = [(NSString *)contextInfo autorelease];
-    if(returnCode == NSAlertDefaultReturn){
+    if(returnCode == NSAlertFirstButtonReturn){
         NSArray *selItems = [self selectedPublications];
         [self selectPublications:[[self publications] allItemsForCiteKey:tmpKey]];
         [self generateCiteKeysForPublications:[self selectedPublications]];
@@ -2024,11 +2025,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSString *infoFormat = isNew ? NSLocalizedString(@"This document was opened using the temporary cite key \"%@\" for the selected publications.  In order to use your file with BibTeX, you must generate valid cite keys for all of these items.  Do you want me to do this now?", @"Informative text in alert dialog")
                             : NSLocalizedString(@"New items are added using the temporary cite key \"%@\".  In order to use your file with BibTeX, you must generate valid cite keys for these items.  Do you want me to do this now?", @"Informative text in alert dialog");
     
-    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Temporary Cite Keys", @"Message in alert dialog when opening a file with temporary cite keys") 
-                                     defaultButton:NSLocalizedString(@"Generate", @"Button title") 
-                                   alternateButton:NSLocalizedString(@"Don't Generate", @"Button title") 
-                                       otherButton:nil
-                         informativeTextWithFormat:infoFormat, tmpKey];
+    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+    [alert setMessageText:NSLocalizedString(@"Temporary Cite Keys", @"Message in alert dialog when opening a file with temporary cite keys")];
+    [alert setInformativeText:[NSString stringWithFormat:infoFormat, tmpKey]];
+    [alert addButtonWithTitle:NSLocalizedString(@"Generate", @"Button title")];
+    [alert addButtonWithTitle:NSLocalizedString(@"Don't Generate", @"Button title")];
     if ([documentWindow attachedSheet])
         [self temporaryCiteKeysAlertDidEnd:alert returnCode:[alert runModal] contextInfo:[tmpKey retain]];
     else
@@ -2249,11 +2250,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if (tmpCiteKey != nil) {
         [self reportTemporaryCiteKeys:tmpCiteKey forNewDocument:NO];
     } else if (hasDuplicateCiteKey) { // should we do this when we don't edit?
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Cite Key", @"Message in alert dialog when duplicate citye key was found") 
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"One or more items you added have a cite key which is either already used in this document. You should provide a unique one.", @"Informative text in alert dialog")];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Duplicate Cite Key", @"Message in alert dialog when duplicate citye key was found")];
+        [alert setInformativeText:NSLocalizedString(@"One or more items you added have a cite key which is either already used in this document. You should provide a unique one.", @"Informative text in alert dialog")];
         // don't begin a sheet, because the edit command may have one put up already
         [alert runModal];
     }

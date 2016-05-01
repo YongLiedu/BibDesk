@@ -106,11 +106,9 @@
     NSArray *fileInfoDicts = [[self errorInfoDicts] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"select == YES"]];
     
     if ([fileInfoDicts count] == 0) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Nothing Selected", @"Message in alert dialog when retrying to autofile without selection")
-                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"Please select the items you want to auto file again or press Done.", @"Informative text in alert dialog")];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Nothing Selected", @"Message in alert dialog when retrying to autofile without selection")];
+        [alert setInformativeText:NSLocalizedString(@"Please select the items you want to auto file again or press Done.", @"Informative text in alert dialog")];
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:nil
                          didEndSelector:NULL 

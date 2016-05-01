@@ -320,7 +320,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 }
 
 - (void)warningSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    canEditDefaultTypes = returnCode == NSOKButton;
+    canEditDefaultTypes = returnCode == NSAlertFirstButtonReturn;
     [canEditDefaultTypesButton setState:canEditDefaultTypes ? NSOnState : NSOffState];
     
     [typeTableView reloadData];
@@ -331,11 +331,11 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 - (IBAction)changeCanEditDefaultTypes:(id)sender {
     if ([sender state] == NSOnState) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Are you sure you want to edit default types?", @"Message in alert dialog")
-                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title")
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"Changing the default bibtex types and fields can give misleading information.", @"Informative text in alert dialog")];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Are you sure you want to edit default types?", @"Message in alert dialog")];
+        [alert setInformativeText:NSLocalizedString(@"Changing the default bibtex types and fields can give misleading information.", @"Informative text in alert dialog")];
+        [alert addButtonWithTitle:NSLocalizedString(@"OK", @"Button title")];
+        [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Button title")];
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:self
                          didEndSelector:@selector(warningSheetDidEnd:returnCode:contextInfo:)

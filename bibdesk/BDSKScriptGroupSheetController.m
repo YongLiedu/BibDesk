@@ -170,11 +170,9 @@
     
     NSString *errorMessage;
     if ([self isValidScriptFileAtPath:path error:&errorMessage] == NO) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Script Path", @"Message in alert dialog when path for script group is invalid")
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                            informativeTextWithFormat:@"%@", errorMessage];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Invalid Script Path", @"Message in alert dialog when path for script group is invalid")];
+        [alert setInformativeText:errorMessage];
         [alert beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:NULL contextInfo:NULL];
         return NO;
     }

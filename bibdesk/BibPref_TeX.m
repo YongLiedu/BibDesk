@@ -149,11 +149,9 @@ static NSSet *standardStyles = nil;
 
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)string errorDescription:(NSString *)error
 {
-    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Path",@"Message in alert dialog when binary path for TeX preview is invalid")
-                                     defaultButton:nil
-                                   alternateButton:nil
-                                       otherButton:nil
-                         informativeTextWithFormat:@"%@", error];
+    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+    [alert setMessageText:NSLocalizedString(@"Invalid Path",@"Message in alert dialog when binary path for TeX preview is invalid")];
+    [alert setInformativeText:error];
     [alert beginSheetModalForWindow:[[self view] window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         
     // allow the user to end editing and ignore the warning, since TeX may not be installed
@@ -162,12 +160,12 @@ static NSSet *standardStyles = nil;
 
 - (void)styleAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     NSString *newStyle = [(id)contextInfo autorelease];
-    if (NSAlertDefaultReturn == returnCode) {
+    if (NSAlertFirstButtonReturn == returnCode) {
         [sud setObject:newStyle forKey:BDSKBTStyleKey];
-    } else if (NSAlertAlternateReturn == returnCode) {
-        [bibTeXStyleField setStringValue:[sud stringForKey:BDSKBTStyleKey]];
-    } else {
+    } else if (NSAlertSecondButtonReturn == returnCode) {
         [self openTeXPreviewFile:self];
+    } else {
+        [bibTeXStyleField setStringValue:[sud stringForKey:BDSKBTStyleKey]];
     }
 }
 
@@ -184,11 +182,12 @@ static NSSet *standardStyles = nil;
         if ([standardStyles containsObject:newStyle]){
             [sud setObject:[sender stringValue] forKey:BDSKBTStyleKey];
         } else {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"This is a not a standard BibTeX style", @"Message in alert dialog")
-                                             defaultButton:NSLocalizedString(@"Use Anyway", @"Button title")
-                                           alternateButton:NSLocalizedString(@"Use Previous", @"Button title")
-                                               otherButton:NSLocalizedString(@"Edit TeX template", @"Button title")
-                                 informativeTextWithFormat:NSLocalizedString(@"This style is not one of the standard 8 BibTeX styles.  As such, it may require editing the TeX template manually to add necessary \\usepackage commands.", @"Informative text in alert dialog")];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"This is a not a standard BibTeX style", @"Message in alert dialog")];
+            [alert setInformativeText:NSLocalizedString(@"This style is not one of the standard 8 BibTeX styles.  As such, it may require editing the TeX template manually to add necessary \\usepackage commands.", @"Informative text in alert dialog")];
+            [alert addButtonWithTitle:NSLocalizedString(@"Use Anyway", @"Button title")];
+            [alert addButtonWithTitle:NSLocalizedString(@"Edit TeX template", @"Button title")];
+            [alert addButtonWithTitle:NSLocalizedString(@"Use Previous", @"Button title")];
             // for the help delegate method
             [alert setShowsHelp:YES];
             [alert setDelegate:self];
@@ -202,7 +201,7 @@ static NSSet *standardStyles = nil;
 
 - (void)openTemplateFailureSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode path:(void *)path{
     [(id)path autorelease];
-    if(returnCode == NSAlertDefaultReturn)
+    if(returnCode == NSAlertFirstButtonReturn)
         [[NSWorkspace sharedWorkspace] selectFile:path inFileViewerRootedAtPath:@""];
 }
 
@@ -220,11 +219,11 @@ static NSSet *standardStyles = nil;
     url = [NSURL fileURLWithPath:path];
     
     if([[NSWorkspace sharedWorkspace] openURL:url] == NO && [[NSWorkspace sharedWorkspace] openURLs:[NSArray arrayWithObject:url] withAppBundleIdentifier:@"com.apple.textedit" options:0 additionalEventParamDescriptor:nil launchIdentifiers:NULL] == NO) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable to Open File", @"Message in alert dialog when unable to open file")
-                                         defaultButton:NSLocalizedString(@"Reveal", @"Button title")
-                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title")
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The system was unable to find an application to open the TeX template file.  Choose \"Reveal\" to show the template in the Finder.", @"Informative text in alert dialog")];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Unable to Open File", @"Message in alert dialog when unable to open file")];
+        [alert setInformativeText:NSLocalizedString(@"The system was unable to find an application to open the TeX template file.  Choose \"Reveal\" to show the template in the Finder.", @"Informative text in alert dialog")];
+        [alert addButtonWithTitle:NSLocalizedString(@"Reveal", @"Button title")];
+        [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Button title")];
         [alert beginSheetModalForWindow:[[self view] window]
                           modalDelegate:self
                          didEndSelector:@selector(openTemplateFailureSheetDidEnd:returnCode:path:)
@@ -233,7 +232,7 @@ static NSSet *standardStyles = nil;
 }
 
 - (void)alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
-    if (returnCode == NSAlertAlternateReturn)
+    if (returnCode == NSAlertSecondButtonReturn)
         return;
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSString *applicationSupportPath = [[NSFileManager defaultManager] applicationSupportDirectory];
@@ -246,12 +245,12 @@ static NSSet *standardStyles = nil;
 }
 
 - (IBAction)resetTeXPreviewFile:(id)sender{
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset TeX template to its original value?", @"Message in alert dialog when resetting preview TeX template file") 
-									 defaultButton:NSLocalizedString(@"OK", @"Button title") 
-								   alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
-									   otherButton:nil 
-						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will revert the TeX template file to its original content.", @"Informative text in alert dialog")];
-	[alert beginSheetModalForWindow:[[self view] window] 
+    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+    [alert setMessageText:NSLocalizedString(@"Reset TeX template to its original value?", @"Message in alert dialog when resetting preview TeX template file")];
+	[alert setInformativeText:NSLocalizedString(@"Choosing Reset will revert the TeX template file to its original content.", @"Informative text in alert dialog")];
+    [alert addButtonWithTitle:NSLocalizedString(@"OK", @"Button title")];
+    [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Button title")];
+	[alert beginSheetModalForWindow:[[self view] window]
 					  modalDelegate:self
 					 didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) 
 						contextInfo:NULL];

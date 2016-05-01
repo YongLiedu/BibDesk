@@ -418,11 +418,9 @@
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [tableView editColumn:0 row:row withEvent:nil select:YES];
     		
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Empty Macro", @"Message in alert dialog when entering empty macro key") 
-                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The macro can not be empty.", @"Informative text in alert dialog when entering empty macro key")];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Empty Macro", @"Message in alert dialog when entering empty macro key")];
+            [alert setInformativeText:NSLocalizedString(@"The macro can not be empty.", @"Informative text in alert dialog when entering empty macro key")];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return;
 		}
@@ -432,11 +430,9 @@
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [tableView editColumn:0 row:row withEvent:nil select:YES];
     		
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Macro", @"Message in alert dialog when entering duplicate macro key") 
-                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The macro key must be unique.", @"Informative text in alert dialog when entering duplicate macro key")];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Duplicate Macro", @"Message in alert dialog when entering duplicate macro key")];
+            [alert setInformativeText:NSLocalizedString(@"The macro key must be unique.", @"Informative text in alert dialog when entering duplicate macro key")];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return;
 		}
@@ -446,11 +442,9 @@
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [tableView editColumn:0 row:row withEvent:nil select:YES];
     		
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Circular Macro", @"Message in alert dialog when entering macro with circular definition") 
-                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @"Informative text in alert dialog")];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Circular Macro", @"Message in alert dialog when entering macro with circular definition")];
+            [alert setInformativeText:NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @"Informative text in alert dialog")];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return;
 		}
@@ -475,11 +469,9 @@
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [tableView editColumn:0 row:row withEvent:nil select:YES];
     		
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Circular Macro", @"Message in alert dialog when entering macro with circular definition") 
-                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @"Informative text in alert dialog")];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Circular Macro", @"Message in alert dialog when entering macro with circular definition")];
+            [alert setInformativeText:NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @"Informative text in alert dialog")];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return;
 		}
@@ -647,11 +639,9 @@
     }
     
     if(hadCircular){
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Circular Macros", @"Message in alert dialog when entering macro with circular definition") 
-                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"Some macros you tried to add would lead to circular definitions and were ignored.", @"Informative text in alert dialog")];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Circular Macros", @"Message in alert dialog when entering macro with circular definition")];
+        [alert setInformativeText:NSLocalizedString(@"Some macros you tried to add would lead to circular definitions and were ignored.", @"Informative text in alert dialog")];
         [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
     return YES;

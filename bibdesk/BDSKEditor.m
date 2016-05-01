@@ -328,11 +328,9 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     NSParameterAssert(currentEditedView);
     BOOL rv = ([[currentEditedView string] isStringTeXQuotingBalancedWithBraces:YES connected:NO]);
     if (NO == rv) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
-                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @"Informative text in alert dialog")];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value")];
+        [alert setInformativeText:NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @"Informative text in alert dialog")];
         
         [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];   
     }
@@ -563,21 +561,17 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 
 - (IBAction)showCiteKeyWarning:(id)sender{
     if ([publication hasEmptyOrDefaultCiteKey]) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Cite Key Not Set", @"Message in alert dialog when duplicate citye key was found") 
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The cite key has not been set. Please provide one.", @"Informative text in alert dialog")];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Cite Key Not Set", @"Message in alert dialog when duplicate citye key was found")];
+        [alert setInformativeText:NSLocalizedString(@"The cite key has not been set. Please provide one.", @"Informative text in alert dialog")];
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:nil
                          didEndSelector:NULL
                             contextInfo:NULL];
     } else if ([publication isValidCiteKey:[publication citeKey]] == NO) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Cite Key", @"Message in alert dialog when duplicate citye key was found") 
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The cite key you entered is either already used in this document. Please provide a unique one.", @"Informative text in alert dialog")];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Duplicate Cite Key", @"Message in alert dialog when duplicate citye key was found")];
+         [alert setInformativeText:NSLocalizedString(@"The cite key you entered is either already used in this document. Please provide a unique one.", @"Informative text in alert dialog")];
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:nil
                          didEndSelector:NULL
@@ -856,7 +850,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 	if([[alert suppressionButton] state] == NSOnState)
 		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnCiteKeyChangeKey];
     
-    if(returnCode == NSAlertAlternateReturn)
+    if(returnCode == NSAlertSecondButtonReturn)
         return;
     
     // remove the sheet in case we get an alert
@@ -878,12 +872,10 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     
     NSString *crossref = [publication valueOfField:BDSKCrossrefString inherit:NO];
     if (crossref != nil && [crossref isCaseInsensitiveEqual:newKey]) {
-        NSAlert *nsAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Could not generate cite key", @"Message in alert dialog when failing to generate cite key") 
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The cite key for \"%@\" could not be generated because the generated key would be the same as the crossref key.", @"Informative text in alert dialog"), oldKey];
-        [nsAlert beginSheetModalForWindow:[self window]
+        alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Could not generate cite key", @"Message in alert dialog when failing to generate cite key")];
+        [alert setInformativeText:[NSString stringWithFormat:NSLocalizedString(@"The cite key for \"%@\" could not be generated because the generated key would be the same as the crossref key.", @"Informative text in alert dialog"), oldKey]];
+        [alert beginSheetModalForWindow:[self window]
                             modalDelegate:nil
                            didEndSelector:NULL
                               contextInfo:NULL];
@@ -916,11 +908,11 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     
     if([publication hasEmptyOrDefaultCiteKey] == NO && 
        [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Really Generate Cite Key?", @"Message in alert dialog when generating cite keys")
-                                         defaultButton:NSLocalizedString(@"Generate", @"Button title")
-                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"This action will generate a new cite key for the publication.  This action is undoable.", @"Informative text in alert dialog")];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Really Generate Cite Key?", @"Message in alert dialog when generating cite keys")];
+        [alert setInformativeText:NSLocalizedString(@"This action will generate a new cite key for the publication.  This action is undoable.", @"Informative text in alert dialog")];
+        [alert addButtonWithTitle:NSLocalizedString(@"Generate", @"Button title")];
+        [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Button title")];
         [alert setShowsSuppressionButton:YES];
         
         // use didDismissSelector or else we can have sheets competing for the window
@@ -929,7 +921,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
                          didEndSelector:@selector(generateCiteKeyAlertDidEnd:returnCode:contextInfo:) 
                             contextInfo:NULL];
     } else {
-        [self generateCiteKeyAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:NULL];
+        [self generateCiteKeyAlertDidEnd:nil returnCode:NSAlertFirstButtonReturn contextInfo:NULL];
     }
 }
 
@@ -942,13 +934,13 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     else
         files = [NSArray arrayWithObject:[publication objectInFilesAtIndex:anIndex]];
     
-    if (returnCode == NSAlertAlternateReturn)
+    if (returnCode == NSAlertSecondButtonReturn)
         return;
     
     // remove the sheet in case we get an alert
     [[alert window] orderOut:nil];
     
-    if (returnCode == NSAlertOtherReturn) {
+    if (returnCode == NSAlertThirdButtonReturn) {
         NSMutableArray *tmpFiles = [NSMutableArray array];
         
         for (BDSKLinkedFile *file in files) {
@@ -998,17 +990,19 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 			message = NSLocalizedString(@"Not all fields needed for generating the file location are set. Do you want me to file the paper now using the available fields, cancel autofile for this paper, or wait until the necessary fields are set?", @"Informative text in alert dialog"),
 			otherButton = NSLocalizedString(@"Wait", @"Button title");
 		}
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog") 
-                                         defaultButton:NSLocalizedString(@"File Now", @"Button title")
-                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title")
-                                           otherButton:otherButton
-                             informativeTextWithFormat:@"%@", message];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")];
+        [alert setInformativeText:message];
+        [alert addButtonWithTitle:NSLocalizedString(@"File Now", @"Button title")];
+        [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Button title")];
+        if (otherButton)
+            [alert addButtonWithTitle:otherButton];
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:self
                          didEndSelector:@selector(consolidateAlertDidEnd:returnCode:contextInfo:) 
                             contextInfo:(void *)anIndex];
 	} else {
-        [self consolidateAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:(void *)anIndex];
+        [self consolidateAlertDidEnd:nil returnCode:NSAlertFirstButtonReturn contextInfo:(void *)anIndex];
     }
 }
 
@@ -1724,7 +1718,7 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     if (alert && [[alert suppressionButton] state] == NSOnState)
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKAskToTrashFilesKey];
     NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
-    if (returnCode == NSAlertAlternateReturn) {
+    if (returnCode == NSAlertSecondButtonReturn) {
         for (NSURL *url in fileURLs) {
             NSString *path = [url path];
             NSString *folderPath = [path stringByDeletingLastPathComponent];
@@ -1750,13 +1744,13 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     }
     if ([fileURLs count]) {
         if (moveToTrash == BDSKMoveToTrashYes) {
-            [self trashAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[fileURLs retain]];
+            [self trashAlertDidEnd:nil returnCode:NSAlertSecondButtonReturn contextInfo:[fileURLs retain]];
         } else if (moveToTrash == BDSKMoveToTrashAsk) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Move Files to Trash?", @"Message in alert dialog when deleting a file")
-                                             defaultButton:NSLocalizedString(@"No", @"Button title")
-                                           alternateButton:NSLocalizedString(@"Yes", @"Button title")
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"Do you want to move the removed files to the trash?", @"Informative text in alert dialog")];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Move Files to Trash?", @"Message in alert dialog when deleting a file")];
+            [alert setInformativeText:NSLocalizedString(@"Do you want to move the removed files to the trash?", @"Informative text in alert dialog")];
+            [alert addButtonWithTitle:NSLocalizedString(@"No", @"Button title")];
+            [alert addButtonWithTitle:NSLocalizedString(@"Yes", @"Button title")];
             [alert setShowsSuppressionButton:YES];
             [alert beginSheetModalForWindow:[self window]
                               modalDelegate:self 
@@ -1992,11 +1986,12 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         
         if([value isInherited] &&
            [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnEditInheritedKey]){
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
-                                                 defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                               alternateButton:NSLocalizedString(@"Cancel", @"Button title")
-                                                   otherButton:NSLocalizedString(@"Edit Parent", @"Button title")
-                                     informativeTextWithFormat:NSLocalizedString(@"The value was inherited from the item linked to by the Crossref field. Do you want to overwrite the inherited value?", @"Informative text in alert dialog")];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")];
+            [alert setInformativeText:NSLocalizedString(@"The value was inherited from the item linked to by the Crossref field. Do you want to overwrite the inherited value?", @"Informative text in alert dialog")];
+            [alert addButtonWithTitle:NSLocalizedString(@"OK", @"Button title")];
+            [alert addButtonWithTitle:NSLocalizedString(@"Edit Parent", @"Button title")];
+            [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Button title")];
             [alert setShowsSuppressionButton:YES];
             
             NSInteger rv = [alert runModal];
@@ -2004,9 +1999,9 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
             if ([[alert suppressionButton] state] == NSOnState)
                 [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnEditInheritedKey];
             
-            if (rv == NSAlertAlternateReturn) {
+            if (rv == NSAlertThirdButtonReturn) {
                 canEdit = NO;
-            } else if (rv == NSAlertOtherReturn) {
+            } else if (rv == NSAlertSecondButtonReturn) {
                 [self openParentItemForField:field];
                 canEdit = NO;
             }
@@ -2039,40 +2034,33 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         NSString *fieldName = [fields objectAtIndex:[tableView editedRow]];
 		if ([fieldName isEqualToString:BDSKCrossrefString]) {
             // this may occur if the cite key formatter fails to format
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Key", @"Message in alert dialog when entering invalid Crossref key") 
-                                             defaultButton:nil
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:@"%@", error];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Invalid Crossref Key", @"Message in alert dialog when entering invalid Crossref key")];
+            [alert setInformativeText:error];
             
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 		} else if ([fieldName isCitationField]) {
             // this may occur if the citation formatter fails to format
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Citation Key", @"Message in alert dialog when entering invalid Crossref key") 
-                                             defaultButton:nil
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:@"%@", error];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Invalid Citation Key", @"Message in alert dialog when entering invalid Crossref key")];
+            [alert setInformativeText:error];
             
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         } else if (NO == [tableCellFormatter editAsComplexString]) {
 			// this is a simple string, an error means that there are unbalanced braces
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
-                                             defaultButton:nil
-                                           alternateButton:nil
-                                               otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @"Informative text in alert dialog")];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value")];
+            [alert setInformativeText:NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @"Informative text in alert dialog")];
+            
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         }
         
 	} else if (control == citeKeyField) {
         // !!! may have to revisit this with strict invalid keys?
         // this may occur if the cite key formatter fails to format
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Cite Key", @"Message in alert dialog when enetring invalid cite key") 
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:@"%@", error];        
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Invalid Cite Key", @"Message in alert dialog when enetring invalid cite key")];
+        [alert setInformativeText:error];
         [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
     return accept;
@@ -2101,11 +2089,9 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
                 message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"Informative text in alert dialog");
             
             if (message) {
-                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Message in alert dialog when entering an invalid Crossref key") 
-                                                 defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                               alternateButton:nil
-                                                   otherButton:nil
-                                     informativeTextWithFormat:@"%@", message];
+                NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+                [alert setMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Message in alert dialog when entering an invalid Crossref key")];
+                [alert setInformativeText:message];
                 
                 [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
                 endEdit = NO;
@@ -2137,15 +2123,15 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         }
         
         if (message) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
-                                             defaultButton:defaultButton
-                                           alternateButton:cancelButton
-                                               otherButton:nil
-                                 informativeTextWithFormat:@"%@", message];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value")];
+            [alert setInformativeText:message];
+            [alert addButtonWithTitle:defaultButton];
+            [alert addButtonWithTitle:cancelButton];
             
             NSInteger rv = [alert runModal];
             
-            if (rv == NSAlertDefaultReturn) {
+            if (rv == NSAlertFirstButtonReturn) {
                 [control setStringValue:[[control stringValue] stringByReplacingCharactersInSet:invalidSet withString:@""]];
                 endEdit = NO;
             } else {
@@ -2788,11 +2774,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"Informative text in alert dialog");
 		
 		if (message) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Message in alert dialog when entering an invalid Crossref key") 
-                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                           alternateButton:nil
-                                               otherButton:nil
-                                  informativeTextWithFormat:@"%@", message];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Message in alert dialog when entering an invalid Crossref key")];
+            [alert setInformativeText:message];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return NO;
 		}
@@ -2874,9 +2858,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (void)shouldCloseAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo{
     switch (returnCode){
-        case NSAlertOtherReturn:
+        case NSAlertSecondButtonReturn:
             break; // do nothing
-        case NSAlertAlternateReturn:
+        case NSAlertThirdButtonReturn:
             // we have a hard retain until -[BDSKEditor dealloc]
             [[self document] removePublication:publication];
             // now fall through to default
@@ -2917,11 +2901,13 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     }
 	
     if (errMsg) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning!", @"Message in alert dialog")
-                                         defaultButton:NSLocalizedString(@"Keep", @"Button title")
-                                       alternateButton:discardMsg
-                                           otherButton:NSLocalizedString(@"Edit", @"Button title")
-                              informativeTextWithFormat:@"%@", errMsg];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Warning!", @"Message in alert dialog")];
+        [alert setInformativeText:errMsg];
+        [alert addButtonWithTitle:NSLocalizedString(@"Keep", @"Button title")];
+        [alert addButtonWithTitle:NSLocalizedString(@"Edit", @"Button title")];
+        if (discardMsg)
+            [alert addButtonWithTitle:discardMsg];
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:self 
                          didEndSelector:@selector(shouldCloseAlertDidEnd:returnCode:contextInfo:) 
@@ -3102,11 +3088,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                     message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"Informative text in alert dialog");
                 
                 if (message) {
-                    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Message in alert dialog when entering an invalid Crossref key") 
-                                                     defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                                   alternateButton:nil
-                                                       otherButton:nil
-                                          informativeTextWithFormat:@"%@", message];
+                    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+                    [alert setMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Message in alert dialog when entering an invalid Crossref key")];
+                    [alert setInformativeText:message];
                     [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
                     return NO;
                 }

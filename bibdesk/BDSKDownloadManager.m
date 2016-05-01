@@ -159,11 +159,9 @@ static id sharedManager = nil;
         [downloads removeObject:download];
     
     NSString *errorDescription = [error localizedDescription] ?: NSLocalizedString(@"An error occured during download.", @"Informative text in alert dialog");
-    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Download Failed", @"Message in alert dialog when download failed")
-                                     defaultButton:nil
-                                   alternateButton:nil
-                                       otherButton:nil
-                         informativeTextWithFormat:@"%@", errorDescription];
+    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+    [alert setMessageText:NSLocalizedString(@"Download Failed", @"Message in alert dialog when download failed")];
+    [alert setInformativeText:errorDescription];
     [alert runModal];
 }
 

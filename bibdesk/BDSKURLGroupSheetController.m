@@ -136,11 +136,9 @@
 			return NO;
     
     if ([NSString isEmptyString:urlString]) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Empty URL", @"Message in alert dialog when URL for external file group is invalid")
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                            informativeTextWithFormat:NSLocalizedString(@"Unable to create a group with an empty string", @"Informative text in alert dialog when URL for external file group is invalid")];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Empty URL", @"Message in alert dialog when URL for external file group is invalid")];
+        [alert setInformativeText:NSLocalizedString(@"Unable to create a group with an empty string", @"Informative text in alert dialog when URL for external file group is invalid")];
         [alert beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:NULL contextInfo:NULL];
         return NO;
     }

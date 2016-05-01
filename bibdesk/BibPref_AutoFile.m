@@ -232,11 +232,9 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 // presently just used to display the warning if the path for autofile was invalid
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)string errorDescription:(NSString *)error{
     if(error != nil) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Entry", @"Message in alert dialog when entering invalid entry")
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:@"%@", error];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert setMessageText:NSLocalizedString(@"Invalid Entry", @"Message in alert dialog when entering invalid entry")];
+        [alert setInformativeText:error];
         [alert beginSheetModalForWindow:[[self view] window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
     return NO;
@@ -384,17 +382,19 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		otherButton = NSLocalizedString(@"Revert to Last", @"Button title");
 	}
 	
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Local File Format", @"Message in alert dialog when entering invalid Local File format") 
-                                     defaultButton:NSLocalizedString(@"Keep Editing", @"Button title") 
-                                   alternateButton:NSLocalizedString(@"Revert to Default", @"Button title") 
-                                       otherButton:otherButton
-                         informativeTextWithFormat:@"%@", error];
+    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+    [alert setMessageText:NSLocalizedString(@"Invalid Local File Format", @"Message in alert dialog when entering invalid Local File format")];
+    [alert setInformativeText:error];
+    [alert addButtonWithTitle:NSLocalizedString(@"Keep Editing", @"Button title")];
+    [alert addButtonWithTitle:NSLocalizedString(@"Revert to Default", @"Button title")];
+    if (otherButton)
+        [alert addButtonWithTitle:otherButton];
 	NSInteger rv = [alert runModal];
 	
-	if (rv == NSAlertDefaultReturn){
+	if (rv == NSAlertFirstButtonReturn){
 		[formatSheetField selectText:self];
 		return NO;
-	} else if (rv == NSAlertAlternateReturn){
+	} else if (rv == NSAlertSecondButtonReturn){
 		formatString = [[sudc initialValues] objectForKey:BDSKLocalFileFormatKey];
 		[sud setObject:formatString forKey:BDSKLocalFileFormatKey];
 		[[BDSKTypeManager sharedManager] setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
@@ -419,11 +419,9 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		msg = NSLocalizedString(@"The format string you entered contains invalid format specifiers.", @"Informative text in alert dialog");
 	}
 	
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Local File Format", @"Message in alert dialog when entering invalid Local File format") 
-									 defaultButton:NSLocalizedString(@"OK", @"Button title") 
-								   alternateButton:nil 
-									   otherButton:nil 
-						 informativeTextWithFormat:@"%@", msg];
+    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+    [alert setMessageText:NSLocalizedString(@"Invalid Local File Format", @"Message in alert dialog when entering invalid Local File format")];
+    [alert setInformativeText:msg];
 	[alert beginSheetModalForWindow:formatSheet 
 					  modalDelegate:nil
 					 didEndSelector:NULL 

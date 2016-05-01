@@ -170,11 +170,9 @@
             [tv selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [tableView editColumn:0 row:row withEvent:nil select:YES];
     		
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Empty Key", @"Message in alert dialog when trying to set an empty string for a key")
-                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The key can not be empty.", @"Informative text in alert dialog when trying to set an empty string for a key")];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Empty Key", @"Message in alert dialog when trying to set an empty string for a key")];
+            [alert setInformativeText:NSLocalizedString(@"The key can not be empty.", @"Informative text in alert dialog when trying to set an empty string for a key")];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return;
 		}
@@ -185,11 +183,9 @@
                 [tv selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
                 [tableView editColumn:0 row:row withEvent:nil select:YES];
                 
-                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Key", @"Message in alert dialog when trying to add a duplicate key")
-                                                 defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                               alternateButton:nil
-                                                   otherButton:nil
-                                     informativeTextWithFormat:NSLocalizedString(@"The key must be unique.", @"Informative text in alert dialog when trying to add a duplicate key")];
+                NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+                [alert setMessageText:NSLocalizedString(@"Duplicate Key", @"Message in alert dialog when trying to add a duplicate key")];
+                [alert setInformativeText:NSLocalizedString(@"The key must be unique.", @"Informative text in alert dialog when trying to add a duplicate key")];
                 [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			}
             return;
@@ -204,11 +200,9 @@
         if([value isEqualToString:object]) return;
         
         if([value isStringTeXQuotingBalancedWithBraces:YES connected:NO] == NO){
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unbalanced Braces", @"Message in alert dialog when trying to set a value with unbalanced braces")
-                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"Braces must be balanced within the value.", @"Informative text in alert dialog")];
+            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            [alert setMessageText:NSLocalizedString(@"Unbalanced Braces", @"Message in alert dialog when trying to set a value with unbalanced braces")];
+            [alert setInformativeText:NSLocalizedString(@"Braces must be balanced within the value.", @"Informative text in alert dialog")];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
             
             [tv reloadData];

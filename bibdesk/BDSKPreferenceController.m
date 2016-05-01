@@ -201,7 +201,7 @@ static id sharedController = nil;
 #pragma mark Actions
 
 - (void)revertPaneSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSAlertDefaultReturn) {
+    if (returnCode == NSAlertFirstButtonReturn) {
         NSDictionary *initialValues = [[self selectedPane] initialValues];
         if ([initialValues count])
             [[[NSUserDefaultsController sharedUserDefaultsController] values] setValuesForKeysWithDictionary:initialValues];
@@ -211,11 +211,11 @@ static id sharedController = nil;
 
 - (IBAction)revertPaneDefaults:(id)sender {
     NSString *label = [self localizedLabelForIdentifier:[self selectedPaneIdentifier]];
-    NSAlert *alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:NSLocalizedString(@"Reset %@ preferences to their original values?", @"Message in alert dialog when pressing Reset All button"), label]
-                                     defaultButton:NSLocalizedString(@"Reset", @"Button title")
-                                   alternateButton:NSLocalizedString(@"Cancel", @"Button title")
-                                       otherButton:nil
-                         informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will restore all settings in this pane to the state they were in when the application was first installed.", @"Informative text in alert dialog when pressing Reset All button")];
+    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+    [alert setMessageText:[NSString stringWithFormat:NSLocalizedString(@"Reset %@ preferences to their original values?", @"Message in alert dialog when pressing Reset All button"), label]];
+    [alert setInformativeText:NSLocalizedString(@"Choosing Reset will restore all settings in this pane to the state they were in when the application was first installed.", @"Informative text in alert dialog when pressing Reset All button")];
+    [alert addButtonWithTitle:NSLocalizedString(@"Reset", @"Button title")];
+    [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Button title")];
     [alert beginSheetModalForWindow:[self window]
                       modalDelegate:self
                      didEndSelector:@selector(revertPaneSheetDidEnd:returnCode:contextInfo:)
@@ -225,7 +225,7 @@ static id sharedController = nil;
 }
 
 - (void)revertAllSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSAlertDefaultReturn) {
+    if (returnCode == NSAlertFirstButtonReturn) {
         [[NSUserDefaultsController sharedUserDefaultsController] revertToInitialValues:nil];
         NSTimeInterval interval = [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"SUScheduledCheckInterval"] doubleValue];
         [[SUUpdater sharedUpdater] setUpdateCheckInterval:interval];
@@ -235,11 +235,11 @@ static id sharedController = nil;
 }
 
 - (IBAction)revertAllDefaults:(id)sender {
-    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset all preferences to their original values?", @"Message in alert dialog when pressing Reset All button") 
-                                     defaultButton:NSLocalizedString(@"Reset", @"Button title")
-                                   alternateButton:NSLocalizedString(@"Cancel", @"Button title")
-                                       otherButton:nil
-                         informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will restore all settings to the state they were in when the application was first installed.", @"Informative text in alert dialog when pressing Reset All button")];
+    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+    [alert setMessageText:NSLocalizedString(@"Reset all preferences to their original values?", @"Message in alert dialog when pressing Reset All button")];
+    [alert setInformativeText:NSLocalizedString(@"Choosing Reset will restore all settings to the state they were in when the application was first installed.", @"Informative text in alert dialog when pressing Reset All button")];
+    [alert addButtonWithTitle:NSLocalizedString(@"Reset", @"Button title")];
+    [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Button title")];
     [alert beginSheetModalForWindow:[self window]
                       modalDelegate:self
                      didEndSelector:@selector(revertAllSheetDidEnd:returnCode:contextInfo:)
