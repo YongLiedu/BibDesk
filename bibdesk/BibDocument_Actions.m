@@ -129,10 +129,10 @@ static BOOL changingColors = NO;
                 NSAlert *alert = [[[NSAlert alloc] init] autorelease];
                 [alert setMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")];
                 [alert setInformativeText:NSLocalizedString(@"The new item has a group value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
-                [alert addButtonWithTitle:NSLocalizedString(@"Don't Change", @"Button title")];
-                [alert addButtonWithTitle:NSLocalizedString(@"Append", @"Button title")];
+                [[alert addButtonWithTitle:NSLocalizedString(@"Don't Change", @"Button title")] setTag:BDSKOperationIgnore];
+                [[alert addButtonWithTitle:NSLocalizedString(@"Append", @"Button title")] setTag:BDSKOperationAppend];
                 // "Set" would end up choosing an arbitrary one
-                handleInherited = [alert runModal] == NSAlertFirstButtonReturn ? BDSKOperationIgnore : BDSKOperationAppend;
+                handleInherited = [alert runModal];
                 if (handleInherited != BDSKOperationIgnore) {
                     [newBI addToGroup:group handleInherited:handleInherited];
                     [changedFields addObject:groupField];

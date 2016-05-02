@@ -1291,12 +1291,12 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             NSAlert *alert = [[[NSAlert alloc] init] autorelease];
             [alert setMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")];
             [alert setInformativeText:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
-            [alert addButtonWithTitle:NSLocalizedString(@"Don't Change", @"Button title")];
-            [alert addButtonWithTitle:NSLocalizedString(@"Set", @"Button title")];
+            [[alert addButtonWithTitle:NSLocalizedString(@"Don't Change", @"Button title")] setTag:BDSKOperationIgnore];
             if (field && [field isSingleValuedGroupField] == NO)
-                [alert addButtonWithTitle:NSLocalizedString(@"Append", @"Button title")];
+                [[alert addButtonWithTitle:NSLocalizedString(@"Append", @"Button title")] setTag:BDSKOperationAppend];
+            [[alert addButtonWithTitle:NSLocalizedString(@"Set", @"Button title")] setTag:BDSKOperationSet];
 			rv = [alert runModal];
-            handleInherited = rv == NSAlertSecondButtonReturn ? BDSKOperationSet : rv == NSAlertThirdButtonReturn ? BDSKOperationAppend : BDSKOperationIgnore;
+            handleInherited = rv;
 			if(handleInherited != BDSKOperationIgnore){
                 [pub addToGroup:group handleInherited:handleInherited];
                 count++;
@@ -1368,10 +1368,10 @@ static void addObjectToSetAndBag(const void *value, void *context) {
                 NSAlert *alert = [[[NSAlert alloc] init] autorelease];
                 [alert setMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")];
                 [alert setInformativeText:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
-                [alert addButtonWithTitle:NSLocalizedString(@"Don't Change", @"Button title")];
-                [alert addButtonWithTitle:NSLocalizedString(@"Remove", @"Button title")];
+                [[alert addButtonWithTitle:NSLocalizedString(@"Don't Change", @"Button title")] setTag:BDSKOperationIgnore];
+                [[alert addButtonWithTitle:NSLocalizedString(@"Remove", @"Button title")] setTag:BDSKOperationAppend];
 				rv = [alert runModal];
-                handleInherited = rv == NSAlertSecondButtonReturn ? BDSKOperationAppend : BDSKOperationIgnore;
+                handleInherited = rv;
 				if(handleInherited != BDSKOperationIgnore){
 					[pub removeFromGroup:group handleInherited:handleInherited];
                     tmpCount++;
@@ -1431,10 +1431,10 @@ static void addObjectToSetAndBag(const void *value, void *context) {
             NSAlert *alert = [[[NSAlert alloc] init] autorelease];
             [alert setMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")];
             [alert setInformativeText:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
-            [alert addButtonWithTitle:NSLocalizedString(@"Don't Change", @"Button title")];
-            [alert addButtonWithTitle:NSLocalizedString(@"Remove", @"Button title")];
+            [[alert addButtonWithTitle:NSLocalizedString(@"Don't Change", @"Button title")] setTag:BDSKOperationIgnore];
+            [[alert addButtonWithTitle:NSLocalizedString(@"Remove", @"Button title")] setTag:BDSKOperationAppend];
 			rv = [alert runModal];
-            handleInherited = rv == NSAlertSecondButtonReturn ? BDSKOperationAppend : BDSKOperationIgnore;
+            handleInherited = rv;
 			if(handleInherited != BDSKOperationIgnore){
 				[pub replaceGroup:group withGroupNamed:newGroupName handleInherited:handleInherited];
                 count++;
