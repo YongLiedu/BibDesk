@@ -934,13 +934,13 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
     else
         files = [NSArray arrayWithObject:[publication objectInFilesAtIndex:anIndex]];
     
-    if (returnCode == NSAlertSecondButtonReturn)
+    if (returnCode == NSAlertThirdButtonReturn)
         return;
     
     // remove the sheet in case we get an alert
     [[alert window] orderOut:nil];
     
-    if (returnCode == NSAlertThirdButtonReturn) {
+    if (returnCode == NSAlertSecondButtonReturn) {
         NSMutableArray *tmpFiles = [NSMutableArray array];
         
         for (BDSKLinkedFile *file in files) {
@@ -994,9 +994,9 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
         [alert setMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")];
         [alert setInformativeText:message];
         [alert addButtonWithTitle:NSLocalizedString(@"File Now", @"Button title")];
-        [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Button title")];
         if (otherButton)
             [alert addButtonWithTitle:otherButton];
+        [[alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Button title")] setTag:NSAlertThirdButtonReturn];
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:self
                          didEndSelector:@selector(consolidateAlertDidEnd:returnCode:contextInfo:) 

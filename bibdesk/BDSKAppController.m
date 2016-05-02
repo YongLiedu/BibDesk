@@ -228,9 +228,9 @@ static void fixLegacyTeXPaths() {
         [alert setMessageText:NSLocalizedString(@"The autogeneration format for local files is invalid.", @"Message in alert dialog when detecting invalid local file format")];
         [alert setInformativeText:error];
         [alert addButtonWithTitle:NSLocalizedString(@"Go to Preferences", @"Button title")];
-        [alert addButtonWithTitle:NSLocalizedString(@"Revert to Default", @"Button title")];
         if (otherButton)
             [alert addButtonWithTitle:otherButton];
+        [[alert addButtonWithTitle:NSLocalizedString(@"Revert to Default", @"Button title")] setTag:NSAlertThirdButtonReturn];
         [alert setAlertStyle:NSCriticalAlertStyle];
         button = [alert runModal];
         if (button == NSAlertFirstButtonReturn) {
@@ -238,7 +238,7 @@ static void fixLegacyTeXPaths() {
             [btm setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:fixedFormatString]];
             [[BDSKPreferenceController sharedPreferenceController] showWindow:nil];
             [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.autofile"];
-        } else if (button == NSAlertSecondButtonReturn) {
+        } else if (button == NSAlertThirdButtonReturn) {
             formatString = [[[NSUserDefaultsController sharedUserDefaultsController] initialValues] objectForKey:BDSKLocalFileFormatKey];			
             [sud setObject:formatString forKey:BDSKLocalFileFormatKey];
             [btm setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];

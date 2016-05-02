@@ -386,15 +386,15 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
     [alert setMessageText:NSLocalizedString(@"Invalid Local File Format", @"Message in alert dialog when entering invalid Local File format")];
     [alert setInformativeText:error];
     [alert addButtonWithTitle:NSLocalizedString(@"Keep Editing", @"Button title")];
-    [alert addButtonWithTitle:NSLocalizedString(@"Revert to Default", @"Button title")];
     if (otherButton)
         [alert addButtonWithTitle:otherButton];
+    [[alert addButtonWithTitle:NSLocalizedString(@"Revert to Default", @"Button title")] setTag:NSAlertThirdButtonReturn];
 	NSInteger rv = [alert runModal];
 	
 	if (rv == NSAlertFirstButtonReturn){
 		[formatSheetField selectText:self];
 		return NO;
-	} else if (rv == NSAlertSecondButtonReturn){
+	} else if (rv == NSAlertThirdButtonReturn){
 		formatString = [[sudc initialValues] objectForKey:BDSKLocalFileFormatKey];
 		[sud setObject:formatString forKey:BDSKLocalFileFormatKey];
 		[[BDSKTypeManager sharedManager] setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
