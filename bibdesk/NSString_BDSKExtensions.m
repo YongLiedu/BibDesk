@@ -370,6 +370,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
         foundRange = [mutableString rangeOfTeXCommandInRange:searchRange];
     }
     [mutableString deleteUnescapedCharactersInCharacterSet:[NSCharacterSet curlyBraceCharacterSet]];
+    [mutableString backslashUnescapeCharactersInSet:[NSCharacterSet curlyBraceCharacterSet]];
     [mutableString backslashUnescapeCharactersInSet:[NSCharacterSet TeXSpecialsCharacterSet]];
     return mutableString;
 }
