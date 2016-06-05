@@ -96,7 +96,6 @@
 	}
 	
 	// the 'for' parameter can select the items to template
-	NSArray *publications = [document publications];
     id obj = [params objectForKey:@"for"];
     NSArray *items = nil;
 	if (obj) {
@@ -117,7 +116,7 @@
 		}
 		
 	} else {
-        items = publications;
+        items = [document publications];
     }
 	
 	// the 'in' parameter can select the items context to template
@@ -129,7 +128,9 @@
             items = [NSArray arrayWithObject:obj];
 		} else if ([obj isKindOfClass:[NSArray class]]) {
             id lastObject = [obj lastObject];
-            if ([lastObject isKindOfClass:[BibItem class]] == NO && [lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
+            if ([lastObject isKindOfClass:[BibItem class]])
+                items = obj;
+            else if ([lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
                 items = [obj valueForKey:@"objectsByEvaluatingSpecifier"];
         } else {
 			// wrong kind of argument
@@ -205,7 +206,6 @@
 	}
 	
 	// the 'for' parameter can select the items to template
-	NSArray *publications = [document publications];
     id obj = [params objectForKey:@"for"];
     NSArray *items = nil;
 	if (obj) {
@@ -226,7 +226,7 @@
 		}
 		
 	} else {
-        items = publications;
+        items = [document publications];
     }
 	
 	// the 'in' parameter can select the items context to template
@@ -238,7 +238,9 @@
             items = [NSArray arrayWithObject:obj];
 		} else if ([obj isKindOfClass:[NSArray class]]) {
             id lastObject = [obj lastObject];
-            if ([lastObject isKindOfClass:[BibItem class]] == NO && [lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
+            if ([lastObject isKindOfClass:[BibItem class]])
+                items = obj;
+            else if ([lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
                 items = [obj valueForKey:@"objectsByEvaluatingSpecifier"];
         } else {
 			// wrong kind of argument
