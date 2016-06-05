@@ -347,7 +347,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 }
 
 - (NSString *)stringByRemovingCurlyBraces{
-    return [self stringByReplacingCharactersInSet:[NSCharacterSet curlyBraceCharacterSet] withString:@""];
+    return [self stringByDeletingCharactersInSet:[NSCharacterSet curlyBraceCharacterSet]];
 }
 
 - (NSString *)stringByRemovingTeX{
