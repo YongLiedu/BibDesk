@@ -214,7 +214,9 @@
             items = [NSArray arrayWithObject:obj];
 		} else if ([obj isKindOfClass:[NSArray class]]) {
             id lastObject = [obj lastObject];
-            if ([lastObject isKindOfClass:[BibItem class]] == NO && [lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
+            if ([lastObject isKindOfClass:[BibItem class]])
+                items = obj;
+            else if ([lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
                 items = [obj valueForKey:@"objectsByEvaluatingSpecifier"];
         } else {
 			// wrong kind of argument
