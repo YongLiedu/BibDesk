@@ -50,10 +50,10 @@
 
 + (id)TeXSpecialsCharacterSet;
 {
-    static NSCharacterSet *curlyBraceCharacterSet = nil;
-    if (curlyBraceCharacterSet == nil)
-        curlyBraceCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@"&%"] copy];
-    return curlyBraceCharacterSet;
+    static NSCharacterSet *TeXSpecialsCharacterSet = nil;
+    if (TeXSpecialsCharacterSet == nil)
+        TeXSpecialsCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@"&%"] copy];
+    return TeXSpecialsCharacterSet;
 }
 
 + (id)commaCharacterSet;

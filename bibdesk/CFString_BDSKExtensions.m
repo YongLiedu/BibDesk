@@ -427,10 +427,10 @@ CFStringRef __BDStringCreateByNormalizingWhitespaceAndNewlines(CFAllocatorRef al
 
 static inline void
 __BDDeleteCharactersInCharacterSet(CFMutableStringRef theString, CFCharacterSetRef charSet)
-{    
+{
     CFStringInlineBuffer inlineBuffer;
     CFIndex length = CFStringGetLength(theString);
-    CFIndex cnt = 0;
+    CFIndex cnt;
     
     // create an immutable copy to use with the inline buffer
     CFStringRef myCopy = CFStringCreateCopy(kCFAllocatorDefault, theString);
@@ -438,7 +438,7 @@ __BDDeleteCharactersInCharacterSet(CFMutableStringRef theString, CFCharacterSetR
     UniChar ch;
     
     CFIndex delCnt = 0;
-    while(cnt < length){
+    for(cnt = 0; cnt < length; cnt++){
         ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
         if(CFCharacterSetIsCharacterMember(charSet, ch)){
             // remove from the mutable string; we have to keep track of our index in the copy and the original
@@ -446,7 +446,37 @@ __BDDeleteCharactersInCharacterSet(CFMutableStringRef theString, CFCharacterSetR
         } else {
             delCnt++;
         }
-        cnt++;
+    }
+    CFRelease(myCopy); // dispose of our temporary copy
+}
+
+static inline void
+__BDDeleteUnescapedCharactersInCharacterSet(CFMutableStringRef theString, CFCharacterSetRef charSet)
+{
+    CFStringInlineBuffer inlineBuffer;
+    CFIndex length = CFStringGetLength(theString);
+    CFIndex cnt;
+    Boolean wasBackslash = false;
+    
+    // create an immutable copy to use with the inline buffer
+    CFStringRef myCopy = CFStringCreateCopy(kCFAllocatorDefault, theString);
+    CFStringInitInlineBuffer(myCopy, &inlineBuffer, CFRangeMake(0, length));
+    UniChar ch;
+    
+    CFIndex delCnt = 0;
+    for(cnt = 0; cnt < length; cnt++){
+        ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
+        if(ch == '\\' && wasBackslash == false){
+            delCnt++;
+            wasBackslash = true;
+        } else if(CFCharacterSetIsCharacterMember(charSet, ch) && wasBackslash == false){
+            // remove from the mutable string; we have to keep track of our index in the copy and the original
+            CFStringDelete(theString, CFRangeMake(delCnt, 1));
+            wasBackslash = false;
+        } else {
+            delCnt++;
+            wasBackslash = false;
+        }
     }
     CFRelease(myCopy); // dispose of our temporary copy
 }
@@ -457,7 +487,7 @@ __BDReplaceCharactersInCharacterSet(CFMutableStringRef theString, CFCharacterSet
     CFStringInlineBuffer inlineBuffer;
     CFIndex length = CFStringGetLength(theString);
     CFIndex replacementLength = CFStringGetLength(replacement);
-    CFIndex cnt = 0;
+    CFIndex cnt;
     
     // create an immutable copy to use with the inline buffer
     CFStringRef myCopy = CFStringCreateCopy(kCFAllocatorDefault, theString);
@@ -465,7 +495,7 @@ __BDReplaceCharactersInCharacterSet(CFMutableStringRef theString, CFCharacterSet
     UniChar ch;
     
     CFIndex delCnt = 0;
-    while(cnt < length){
+    for(cnt = 0; cnt < length; cnt++){
         ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
         if(CFCharacterSetIsCharacterMember(charSet, ch)){
             // replace in the mutable string; we have to keep track of our index in the copy and the original
@@ -474,7 +504,6 @@ __BDReplaceCharactersInCharacterSet(CFMutableStringRef theString, CFCharacterSet
         } else {
             delCnt++;
         }
-        cnt++;
     }
     CFRelease(myCopy); // dispose of our temporary copy
 }
@@ -879,6 +908,10 @@ void BDDeleteArticlesForSorting(CFMutableStringRef mutableString){ __BDDeleteArt
 
 void BDDeleteCharactersInCharacterSet(CFMutableStringRef mutableString, CFCharacterSetRef charSet){
     __BDDeleteCharactersInCharacterSet(mutableString, charSet);
+}
+
+void BDDeleteUnescapedCharactersInCharacterSet(CFMutableStringRef mutableString, CFCharacterSetRef charSet){
+    __BDDeleteUnescapedCharactersInCharacterSet(mutableString, charSet);
 }
 
 void BDReplaceCharactersInCharacterSet(CFMutableStringRef mutableString, CFCharacterSetRef charSet, CFStringRef replacement){

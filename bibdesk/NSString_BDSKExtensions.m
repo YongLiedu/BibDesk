@@ -347,7 +347,12 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 }
 
 - (NSString *)stringByRemovingCurlyBraces{
-    return [self stringByDeletingCharactersInSet:[NSCharacterSet curlyBraceCharacterSet]];
+    NSCharacterSet *removeSet = [NSCharacterSet curlyBraceCharacterSet];
+    if ([self rangeOfCharacterFromSet:removeSet].length == 0)
+        return self;
+    NSMutableString *string = [self mutableCopy];
+    [string deleteUnescapedCharactersInCharacterSet:removeSet];
+    return [string autorelease];
 }
 
 - (NSString *)stringByRemovingTeX{
@@ -364,7 +369,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
         searchRange.location = foundRange.location;
         foundRange = [mutableString rangeOfTeXCommandInRange:searchRange];
     }
-    [mutableString deleteCharactersInCharacterSet:[NSCharacterSet curlyBraceCharacterSet]];
+    [mutableString deleteUnescapedCharactersInCharacterSet:[NSCharacterSet curlyBraceCharacterSet]];
     [mutableString backslashUnescapeCharactersInSet:[NSCharacterSet TeXSpecialsCharacterSet]];
     return mutableString;
 }
@@ -1868,6 +1873,10 @@ http://home.planet.nl/~faase009/GNU.txt
 
 - (void)deleteCharactersInCharacterSet:(NSCharacterSet *)characterSet {
     BDDeleteCharactersInCharacterSet((CFMutableStringRef)self, (CFCharacterSetRef)characterSet);
+}
+
+- (void)deleteUnescapedCharactersInCharacterSet:(NSCharacterSet *)characterSet {
+    BDDeleteUnescapedCharactersInCharacterSet((CFMutableStringRef)self, (CFCharacterSetRef)characterSet);
 }
 
 - (void)replaceOccurrencesOfCharactersInSet:(NSCharacterSet *)set withString:(NSString *)replaceString {
