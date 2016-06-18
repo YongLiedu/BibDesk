@@ -139,15 +139,15 @@ static NSMutableArray *_waitingList = nil;
     return view;
 }
 
-+ (void)_addIconToWaitingList:(FVWebViewIcon *)icon
+- (void)_waitForWebViewAvailable
 {
-    if ([_waitingList containsObject:icon] == NO)
-        [_waitingList addObject:icon];
+    if ([_waitingList containsObject:self] == NO)
+        [_waitingList addObject:self];
 }
 
-+ (void)_removeIconFromWaitingList:(FVWebViewIcon *)icon
+- (void)_stopWaitingForWebViewAvailable
 {
-    [_waitingList removeObject:icon];
+    [_waitingList removeObject:self];
 }
 
 + (void)_webViewAvailable
@@ -207,7 +207,7 @@ static NSMutableArray *_waitingList = nil;
     FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
 
     // in case we get -releaseResources or -dealloc while waiting for another webview
-    [[self class] _removeIconFromWaitingList:self];
+    [self _stopWaitingForWebViewAvailable];
     if (nil != _webView) {
         [_webView setPolicyDelegate:nil];
         [_webView setFrameLoadDelegate:nil];
@@ -562,7 +562,7 @@ static NSMutableArray *_waitingList = nil;
         _webView = [[self class] _newWebView];
 
     if (nil == _webView) {
-        [[self class] _addIconToWaitingList:self];
+        [self _waitForWebViewAvailable];
     }
     else {
         
