@@ -70,7 +70,7 @@
 // limit number of loading views to keep memory usage down; size is tunable
 static int8_t _maxWebViews = 0;
 static int8_t _numberOfWebViews = 0;
-static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconWebViewAvailableNotificationName";
+static NSMutableArray *_waitingList = nil;
 
 #define IDLE    0
 #define LOADING 1
@@ -83,9 +83,8 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
     NSNumber *maxViews = [[NSUserDefaults standardUserDefaults] objectForKey:@"FVWebIconMaximumNumberOfWebViews"];
     
     // default value of 5, with valid range (0, 50)
-    // however this seems to lead to a lot of crashes on Mavericks and later, so we disable it there
     if (nil == maxViews) {
-        _maxWebViews = (NSInteger)floor(NSAppKitVersionNumber) == NSAppKitVersionNumber10_9 ? 0 : 5;
+        _maxWebViews = 5;
     }
     else if ([maxViews integerValue] > 50) {
         FVLog(@"Limiting number of webviews to 50 (FVWebIconMaximumNumberOfWebViews = %@)", maxViews);
@@ -98,6 +97,8 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
         // negative values
         _maxWebViews = 0;
     }
+    
+    _waitingList = (NSMutableArray *)CFArrayCreateMutable(NULL, 0, NULL);
 }
 
 // size of the view frame; large enough to fit a reasonably sized page
@@ -136,6 +137,29 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
             [prefs setCacheModel:WebCacheModelDocumentBrowser];
     }
     return view;
+}
+
++ (void)_addIconToWaitingList:(FVWebViewIcon *)icon
+{
+    if ([_waitingList containsObject:icon] == NO)
+        [_waitingList addObject:icon];
+}
+
++ (void)_removeIconFromWaitingList:(FVWebViewIcon *)icon
+{
+    [_waitingList removeObject:icon];
+}
+
++ (void)_webViewAvailable
+{
+    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
+    if ([_waitingList count] > 0) {
+        // work on a copy, as renderOffscreenOnMainThread can modify the waiting list
+        NSArray *icons = [_waitingList copy];
+        [_waitingList removeAllObjects];
+        [icons makeObjectsPerformSelector:@selector(renderOffscreenOnMainThread)];
+        [icons release];
+    }
 }
 
 + (BOOL)_isSupportedScheme:(NSString *)scheme
@@ -183,7 +207,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
     FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
 
     // in case we get -releaseResources or -dealloc while waiting for another webview
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:FVWebIconWebViewAvailableNotificationName object:[self class]];
+    [[self class] _removeIconFromWaitingList:self];
     if (nil != _webView) {
         [_webView setPolicyDelegate:nil];
         [_webView setFrameLoadDelegate:nil];
@@ -198,7 +222,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
         _numberOfWebViews--;
         _webView = nil;
         // notify observers that _numberOfWebViews has been decremented
-        [[NSNotificationCenter defaultCenter] postNotificationName:FVWebIconWebViewAvailableNotificationName object:[self class]];
+        [[self class] _webViewAvailable];
     }
 }
 
@@ -538,7 +562,7 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
         _webView = [[self class] _newWebView];
 
     if (nil == _webView) {
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleWebViewAvailableNotification:) name:FVWebIconWebViewAvailableNotificationName object:[self class]];
+        [[self class] _addIconToWaitingList:self];
     }
     else {
         
@@ -552,13 +576,6 @@ static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconW
         NSURLRequest *request = [NSURLRequest requestWithURL:_httpURL cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:60.0];
         [[_webView mainFrame] loadRequest:request];        
     }
-}
-
-- (void)_handleWebViewAvailableNotification:(NSNotification *)aNotification
-{
-    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:FVWebIconWebViewAvailableNotificationName object:[self class]];
-    [self renderOffscreenOnMainThread];
 }
 
 - (NSString *)debugDescription
