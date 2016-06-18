@@ -229,7 +229,7 @@ static NSMutableArray *_waitingList = nil;
 - (void)dealloc
 {
     // typically on the main thread here, but not guaranteed; can never be called during a load anyway
-    if (pthread_main_np() != 0) {
+    if (pthread_main_np() == 0) {
         [self performSelectorOnMainThread:@selector(_releaseWebView) withObject:nil waitUntilDone:YES modes:[NSArray arrayWithObject:(id)kCFRunLoopCommonModes]];
     }
     else {
