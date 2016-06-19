@@ -139,29 +139,6 @@ static NSMutableArray *_waitingList = nil;
     return view;
 }
 
-- (void)_waitForWebViewAvailable
-{
-    if ([_waitingList containsObject:self] == NO)
-        [_waitingList addObject:self];
-}
-
-- (void)_stopWaitingForWebViewAvailable
-{
-    [_waitingList removeObject:self];
-}
-
-+ (void)_webViewAvailable
-{
-    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
-    if ([_waitingList count] > 0) {
-        // work on a copy, as renderOffscreenOnMainThread can modify the waiting list
-        NSArray *icons = [_waitingList copy];
-        [_waitingList removeAllObjects];
-        [icons makeObjectsPerformSelector:@selector(renderOffscreenOnMainThread)];
-        [icons release];
-    }
-}
-
 + (BOOL)_isSupportedScheme:(NSString *)scheme
 {
     NSString *lcString = [scheme lowercaseString];
@@ -202,12 +179,37 @@ static NSMutableArray *_waitingList = nil;
     return self;
 }
 
+- (void)_startWebView
+{
+    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
+    // !!! Was seeing occasional assertion failures here with the new operation queue setup; it's likely to be a race with releaseResources:.  Should be eliminated with the new condition lock scheme.
+    NSAssert(nil == _webView, @"*** Render error *** _startWebView called when _webView already exists");
+    
+    if (nil == _webView)
+        _webView = [[self class] _newWebView];
+    
+    if (nil != _webView) {
+        // See also http://lists.apple.com/archives/quicklook-dev/2007/Nov/msg00047.html
+        // Note: changed from blocking to non-blocking; we now just keep state and rely on the delegate methods.
+        
+        [_webView setFrameLoadDelegate:self];
+        [_webView setPolicyDelegate:self];
+        [_webView setResourceLoadDelegate:self];
+        
+        NSURLRequest *request = [NSURLRequest requestWithURL:_httpURL cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:60.0];
+        [[_webView mainFrame] loadRequest:request];
+    }
+    else if ([_waitingList containsObject:self] == NO) {
+        [_waitingList addObject:self];
+    }
+}
+
 - (void)_releaseWebView
 {
     FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
 
     // in case we get -releaseResources or -dealloc while waiting for another webview
-    [self _stopWaitingForWebViewAvailable];
+    [_waitingList removeObject:self];
     if (nil != _webView) {
         [_webView setPolicyDelegate:nil];
         [_webView setFrameLoadDelegate:nil];
@@ -221,8 +223,14 @@ static NSMutableArray *_waitingList = nil;
         [_redirectedFrames removeAllObjects];
         _numberOfWebViews--;
         _webView = nil;
-        // notify observers that _numberOfWebViews has been decremented
-        [[self class] _webViewAvailable];
+        // notify waiting icons that _numberOfWebViews has been decremented
+        if ([_waitingList count] > 0) {
+            // work on a copy, as _startWebView can modify the waiting list
+            NSArray *icons = [_waitingList copy];
+            [_waitingList removeAllObjects];
+            [icons makeObjectsPerformSelector:@selector(_startWebView)];
+            [icons release];
+        }
     }
 }
 
@@ -552,32 +560,6 @@ static NSMutableArray *_waitingList = nil;
     [[challenge sender] continueWithoutCredentialForAuthenticationChallenge:challenge];
 }
 
-- (void)renderOffscreenOnMainThread 
-{ 
-    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);   
-    // !!! Was seeing occasional assertion failures here with the new operation queue setup; it's likely to be a race with releaseResources:.  Should be eliminated with the new condition lock scheme.
-    NSAssert(nil == _webView, @"*** Render error *** renderOffscreenOnMainThread called when _webView already exists");
-    
-    if (nil == _webView)
-        _webView = [[self class] _newWebView];
-
-    if (nil == _webView) {
-        [self _waitForWebViewAvailable];
-    }
-    else {
-        
-        // See also http://lists.apple.com/archives/quicklook-dev/2007/Nov/msg00047.html
-        // Note: changed from blocking to non-blocking; we now just keep state and rely on the delegate methods.
-        
-        [_webView setFrameLoadDelegate:self];
-        [_webView setPolicyDelegate:self];
-        [_webView setResourceLoadDelegate:self];
-        
-        NSURLRequest *request = [NSURLRequest requestWithURL:_httpURL cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:60.0];
-        [[_webView mainFrame] loadRequest:request];        
-    }
-}
-
 - (NSString *)debugDescription
 {
     NSAssert1([self tryLock], @"*** threading violation *** failed to lock before %@", NSStringFromSelector(_cmd));
@@ -609,7 +591,7 @@ static NSMutableArray *_waitingList = nil;
         
         // make sure needsRenderForSize: knows that we're actively rendering, so renderOffscreen doesn't get called again
         [_condLock unlockWithCondition:LOADING];
-        [self performSelectorOnMainThread:@selector(renderOffscreenOnMainThread) withObject:nil waitUntilDone:NO modes:[NSArray arrayWithObject:(id)kCFRunLoopCommonModes]];        
+        [self performSelectorOnMainThread:@selector(_startWebView) withObject:nil waitUntilDone:NO modes:[NSArray arrayWithObject:(id)kCFRunLoopCommonModes]];
         [_condLock lockWhenCondition:LOADED];
         
         CGImageRef fullImage = NULL, thumbnail = NULL;
