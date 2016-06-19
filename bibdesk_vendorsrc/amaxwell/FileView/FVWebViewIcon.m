@@ -436,9 +436,8 @@ static NSMutableArray *_waitingList = nil;
         [self _releaseWebView];
         [_condLock unlockWithCondition:LOADED];
         
+        // return to -renderOffscreen for scaling and caching
     }
-    
-    // return to -renderOffscreen for scaling and caching
 }
 
 /*
