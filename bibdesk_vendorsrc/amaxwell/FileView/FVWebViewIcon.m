@@ -104,41 +104,6 @@ static NSMutableArray *_waitingList = nil;
 // size of the view frame; large enough to fit a reasonably sized page
 + (NSSize)_webViewSize { return NSMakeSize(1000, 900); }
 
-// return nil if _maxWebViews is exceeded
-+ (WebView *)_newWebView
-{
-    FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
-    FVAPIParameterAssert(_maxWebViews > 0);
-    WebView *view = nil;
-    if (_numberOfWebViews < _maxWebViews) {
-        NSSize size = [self _webViewSize];
-        view = [[WebView alloc] initWithFrame:NSMakeRect(0, 0, size.width, size.height)];
-        _numberOfWebViews++;
-        
-        
-        NSString *prefIdentifier = [NSString stringWithFormat:@"%@.%@", [[NSBundle bundleForClass:self] bundleIdentifier], self];
-        [view setPreferencesIdentifier:prefIdentifier];
-        
-        WebPreferences *prefs = [view preferences];
-        [prefs setPlugInsEnabled:NO];
-        [prefs setJavaEnabled:NO];
-        [prefs setJavaScriptCanOpenWindowsAutomatically:NO];
-        [prefs setJavaScriptEnabled:NO];
-        [prefs setAllowsAnimatedImages:NO];
-        [prefs setPrivateBrowsingEnabled:YES];
-        
-        /*
-         WebCacheModelDocumentViewer is the most memory-efficient setting; remote resources are still cached to disk,
-         supposedly, but in practice this doesn't seem to happen (or else they're pruned too early).  Using 
-         WebCacheModelDocumentBrowser gives much better performance, and memory usage is the same or less, particularly
-         if you have multiple pages loading the same resources (e.g., many ScienceDirect thumbnails).
-         */
-        if ([prefs respondsToSelector:@selector(setCacheModel:)])
-            [prefs setCacheModel:WebCacheModelDocumentBrowser];
-    }
-    return view;
-}
-
 + (BOOL)_isSupportedScheme:(NSString *)scheme
 {
     NSString *lcString = [scheme lowercaseString];
@@ -184,9 +149,34 @@ static NSMutableArray *_waitingList = nil;
     FVAPIAssert1(pthread_main_np() != 0, @"*** threading violation *** %s requires main thread", __func__);
     // !!! Was seeing occasional assertion failures here with the new operation queue setup; it's likely to be a race with releaseResources:.  Should be eliminated with the new condition lock scheme.
     NSAssert(nil == _webView, @"*** Render error *** _startWebView called when _webView already exists");
+    FVAPIParameterAssert(_maxWebViews > 0);
     
-    if (nil == _webView)
-        _webView = [[self class] _newWebView];
+    if (nil == _webView && _numberOfWebViews < _maxWebViews) {
+        NSSize size = [[self class] _webViewSize];
+        _webView = [[WebView alloc] initWithFrame:NSMakeRect(0, 0, size.width, size.height)];
+        _numberOfWebViews++;
+        
+        
+        NSString *prefIdentifier = [NSString stringWithFormat:@"%@.%@", [[NSBundle bundleForClass:[self class]] bundleIdentifier], [self class]];
+        [_webView setPreferencesIdentifier:prefIdentifier];
+        
+        WebPreferences *prefs = [_webView preferences];
+        [prefs setPlugInsEnabled:NO];
+        [prefs setJavaEnabled:NO];
+        [prefs setJavaScriptCanOpenWindowsAutomatically:NO];
+        [prefs setJavaScriptEnabled:NO];
+        [prefs setAllowsAnimatedImages:NO];
+        [prefs setPrivateBrowsingEnabled:YES];
+        
+        /*
+         WebCacheModelDocumentViewer is the most memory-efficient setting; remote resources are still cached to disk,
+         supposedly, but in practice this doesn't seem to happen (or else they're pruned too early).  Using
+         WebCacheModelDocumentBrowser gives much better performance, and memory usage is the same or less, particularly
+         if you have multiple pages loading the same resources (e.g., many ScienceDirect thumbnails).
+         */
+        if ([prefs respondsToSelector:@selector(setCacheModel:)])
+            [prefs setCacheModel:WebCacheModelDocumentBrowser];
+    }
     
     if (nil != _webView) {
         // See also http://lists.apple.com/archives/quicklook-dev/2007/Nov/msg00047.html
