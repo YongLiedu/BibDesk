@@ -386,7 +386,7 @@ static NSMutableArray *_waitingList = nil;
     FVAPIAssert1([_webView fv_isLoading] == NO, @"%s called while webview was loading", __func__);
 
     // release resources called after page finished loading; it calls main thread to cancel webview and we deadlock
-    if ([_condLock tryLockWhenCondition:LOADING] == NO) {
+    if ([_condLock tryLockWhenCondition:LOADING]) {
         
         // display the main frame's view directly to avoid showing the scrollers
         WebFrameView *view = [[_webView mainFrame] frameView];
