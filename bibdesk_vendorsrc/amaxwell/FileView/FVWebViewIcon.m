@@ -386,56 +386,57 @@ static NSMutableArray *_waitingList = nil;
     FVAPIAssert1([_webView fv_isLoading] == NO, @"%s called while webview was loading", __func__);
 
     // release resources called after page finished loading; it calls main thread to cancel webview and we deadlock
-    if ([_condLock tryLockWhenCondition:LOADING] == NO)
-        return;
-    
-    // display the main frame's view directly to avoid showing the scrollers
-    WebFrameView *view = [[_webView mainFrame] frameView];
-    [view setAllowsScrolling:NO];
-    
-    // actual size of the view
-    NSSize size = [[self class] _webViewSize];
-    
-    FVBitmapContext *bitmapContext = [FVBitmapContext bitmapContextWithSize:size];
-    CGContextRef context = [bitmapContext graphicsPort];
-    CGContextClearRect(context, CGRectMake(0, 0, size.width, size.height));
-    NSGraphicsContext *nsContext = [_webView isFlipped] ? [bitmapContext flippedGraphicsContext] : [bitmapContext graphicsContext];
-    
-    [NSGraphicsContext saveGraphicsState];
-    
-    [NSGraphicsContext setCurrentContext:nsContext];
-    [nsContext saveGraphicsState];
-    [[NSColor whiteColor] setFill];
-    NSRect rect = NSMakeRect(0, 0, size.width, size.height);
-    [[NSBezierPath fv_bezierPathWithRoundRect:rect xRadius:5 yRadius:5] fill];
-    [nsContext restoreGraphicsState];
-
-    [_webView setFrame:NSInsetRect(rect, 10, 10)];
-    
-    CGContextSaveGState(context);
-    CGContextTranslateCTM(context, 10, 10);
-    
-    /*
-     Force document layout.  This was added as a workaround for a bug introduced with Safari 4.0.3 on 10.5.8, 
-     where setAllowsScrolling:NO caused a white page to be drawn.  Interestingly, it also fixes some prior
-     display problems with sciencedirect.com thumbnails, so it's likely that setAllowsScrolling: has never
-     worked correctly.  Note that [[view documentView] setNeedsLayout:] is not sufficient, so I conclude that
-     displayRectIgnoringOpacity:inContext: doesn't go through drawRect: (impossible), or the WebDocumentView
-     protocol is not correctly implemented.
-     */
-    [[view documentView] layout];
-    [_webView displayRectIgnoringOpacity:[_webView bounds] inContext:nsContext];
-    CGContextRestoreGState(context);
-    
-    [NSGraphicsContext restoreGraphicsState];
-    
-    // temporary CGImage from the full webview
-    CGImageRelease(_viewImage);
-    _viewImage = CGBitmapContextCreateImage(context);
+    if ([_condLock tryLockWhenCondition:LOADING] == NO) {
         
-    // clear out the webview, since we won't need it again
-    [self _releaseWebView];
-    [_condLock unlockWithCondition:LOADED];
+        // display the main frame's view directly to avoid showing the scrollers
+        WebFrameView *view = [[_webView mainFrame] frameView];
+        [view setAllowsScrolling:NO];
+        
+        // actual size of the view
+        NSSize size = [[self class] _webViewSize];
+        
+        FVBitmapContext *bitmapContext = [FVBitmapContext bitmapContextWithSize:size];
+        CGContextRef context = [bitmapContext graphicsPort];
+        CGContextClearRect(context, CGRectMake(0, 0, size.width, size.height));
+        NSGraphicsContext *nsContext = [_webView isFlipped] ? [bitmapContext flippedGraphicsContext] : [bitmapContext graphicsContext];
+        
+        [NSGraphicsContext saveGraphicsState];
+        
+        [NSGraphicsContext setCurrentContext:nsContext];
+        [nsContext saveGraphicsState];
+        [[NSColor whiteColor] setFill];
+        NSRect rect = NSMakeRect(0, 0, size.width, size.height);
+        [[NSBezierPath fv_bezierPathWithRoundRect:rect xRadius:5 yRadius:5] fill];
+        [nsContext restoreGraphicsState];
+
+        [_webView setFrame:NSInsetRect(rect, 10, 10)];
+        
+        CGContextSaveGState(context);
+        CGContextTranslateCTM(context, 10, 10);
+        
+        /*
+         Force document layout.  This was added as a workaround for a bug introduced with Safari 4.0.3 on 10.5.8, 
+         where setAllowsScrolling:NO caused a white page to be drawn.  Interestingly, it also fixes some prior
+         display problems with sciencedirect.com thumbnails, so it's likely that setAllowsScrolling: has never
+         worked correctly.  Note that [[view documentView] setNeedsLayout:] is not sufficient, so I conclude that
+         displayRectIgnoringOpacity:inContext: doesn't go through drawRect: (impossible), or the WebDocumentView
+         protocol is not correctly implemented.
+         */
+        [[view documentView] layout];
+        [_webView displayRectIgnoringOpacity:[_webView bounds] inContext:nsContext];
+        CGContextRestoreGState(context);
+        
+        [NSGraphicsContext restoreGraphicsState];
+        
+        // temporary CGImage from the full webview
+        CGImageRelease(_viewImage);
+        _viewImage = CGBitmapContextCreateImage(context);
+            
+        // clear out the webview, since we won't need it again
+        [self _releaseWebView];
+        [_condLock unlockWithCondition:LOADED];
+        
+    }
     
     // return to -renderOffscreen for scaling and caching
 }
