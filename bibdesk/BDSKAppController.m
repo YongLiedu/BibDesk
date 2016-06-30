@@ -377,6 +377,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 
 - (BOOL)applicationShouldOpenUntitledFile:(NSApplication *)sender
 {
+    didCheckReopen = YES;
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
     NSInteger option = [sud integerForKey:BDSKStartupBehaviorKey];
     if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKIsRelaunchKey])
@@ -414,7 +415,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         default:
             return NO;
     }
-    didCheckReopen = YES;
 }
 
 // we don't want to reopen last open files or show an Open dialog when re-activating the app
