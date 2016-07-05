@@ -432,6 +432,9 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 }    
 
 - (NSMenu *)applicationDockMenu:(NSApplication *)sender{
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6)
+        return nil;
+    
     NSMenu *menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@""] autorelease];
     NSMenu *submenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@""];
 
