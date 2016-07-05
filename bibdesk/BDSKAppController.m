@@ -379,9 +379,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 {
     didCheckReopen = YES;
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
-    NSInteger option = [sud integerForKey:BDSKStartupBehaviorKey];
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKIsRelaunchKey])
-        option = BDSKStartupOpenLastOpenFiles;
+    NSInteger option = [sud boolForKey:BDSKIsRelaunchKey] ? BDSKStartupOpenLastOpenFiles : [sud integerForKey:BDSKStartupBehaviorKey];
     switch (option) {
         case BDSKStartupOpenUntitledFile:
             return YES;
