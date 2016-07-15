@@ -84,7 +84,7 @@ static NSMutableArray *_waitingList = nil;
     
     // default value of 5, with valid range (0, 50)
     if (nil == maxViews) {
-        _maxWebViews = (NSInteger)floor(NSAppKitVersionNumber) == NSAppKitVersionNumber10_9 ? 0 : 5;
+        _maxWebViews = 5;
     }
     else if ([maxViews integerValue] > 50) {
         FVLog(@"Limiting number of webviews to 50 (FVWebIconMaximumNumberOfWebViews = %@)", maxViews);
