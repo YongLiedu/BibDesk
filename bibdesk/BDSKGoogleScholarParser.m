@@ -154,8 +154,10 @@
         
         NSString *hrefValue = [googSearchResult stringValueOfAttribute:@"href"];
         
+        if ([hrefValue hasPrefix:@"http"] == NO)
+            hrefValue = [NSString stringWithFormat:@"http://%@%@", [url host], hrefValue];
         
-        NSURL *btURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@%@", [url host], hrefValue]];
+        NSURL *btURL = [NSURL URLWithString:hrefValue];
         
         NSURLRequest *request = [NSURLRequest requestWithURL:btURL cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:60.0];
         NSURLResponse *response;
