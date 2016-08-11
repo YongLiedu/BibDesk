@@ -1,11 +1,11 @@
 //
-// BDSKStringParser.h
-// Bibdesk
+//  BDSKDOIParser.h
+//  Bibdesk
 //
-// Created by Adam Maxwell on 02/07/06.
+//  Created by Christiaan Hofman on 8/11/16.
 /*
- This software is Copyright (c) 2006-2016
- Adam Maxwell. All rights reserved.
+ This software is Copyright (c) 2016
+ Christiaan Hofman. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
@@ -19,7 +19,7 @@
  the documentation and/or other materials provided with the
  distribution.
  
- - Neither the name of Adam Maxwell nor the names of any
+ - Neither the name of Christiaan Hofman nor the names of any
  contributors may be used to endorse or promote products derived
  from this software without specific prior written permission.
  
@@ -37,44 +37,7 @@
  */
 
 #import <Foundation/Foundation.h>
+#import "BDSKStringParser.h"
 
-enum {
-	BDSKUnknownStringType = -1, 
-	BDSKBibTeXStringType, 
-	BDSKNoKeyBibTeXStringType, 
-	BDSKPubMedStringType, 
-	BDSKRISStringType, 
-	BDSKMARCStringType, 
-	BDSKReferenceMinerStringType, 
-	BDSKJSTORStringType, 
-	BDSKWOSStringType, 
-	BDSKDublinCoreStringType,
-    BDSKReferStringType,
-    BDSKMODSStringType,
-    BDSKSciFinderStringType,
-    BDSKPubMedXMLStringType,
-    BDSKDOIStringType
-};
-typedef NSInteger BDSKStringType;
-
-@protocol BDSKOwner;
-
-@interface BDSKStringParser : NSObject
-// passing BDSKUnknownStringType will use the appropriate -contentStringType
-+ (BOOL)canParseString:(NSString *)string ofType:(BDSKStringType)stringType;
-// only for non-BibTeX string types
-+ (NSArray *)itemsFromString:(NSString *)string ofType:(BDSKStringType)stringType error:(NSError **)outError;
-// all string types including BibTeX
-+ (NSArray *)itemsFromString:(NSString *)string ofType:(BDSKStringType)stringType owner:(id <BDSKOwner>)owner error:(NSError **)outError;
-@end
-
-
-@protocol BDSKStringParser <NSObject>
-+ (BOOL)canParseString:(NSString *)string;
-+ (NSArray *)itemsFromString:(NSString *)string error:(NSError **)outError;
-@end
-
-
-@interface NSString (BDSKStringParserExtensions)
-- (BDSKStringType)contentStringType;
+@interface BDSKDOIParser : NSObject <BDSKStringParser>
 @end

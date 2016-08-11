@@ -159,6 +159,8 @@
 		CE4A0E141115ABEF000A95C5 /* BDSKServiceProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4A0E121115ABEF000A95C5 /* BDSKServiceProvider.m */; };
 		CE4D85290C3A8C8F002C20CB /* BDSKAutofileCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4D85270C3A8C8E002C20CB /* BDSKAutofileCommand.m */; };
 		CE51922109E5755600E97C3A /* BDSKFindFieldEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = CE51921F09E5755600E97C3A /* BDSKFindFieldEditor.m */; };
+		CE522F751D5CA7FE00348D7D /* BDSKDOIParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CE522F731D5CA7FD00348D7D /* BDSKDOIParser.h */; };
+		CE522F761D5CA7FE00348D7D /* BDSKDOIParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE522F741D5CA7FE00348D7D /* BDSKDOIParser.m */; };
 		CE564D260AECBA5B002F0A24 /* NSScanner_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE564D240AECBA5B002F0A24 /* NSScanner_BDSKExtensions.m */; };
 		CE565BC00AEF848B002F0A24 /* BDSKPublicationsArray.m in Sources */ = {isa = PBXBuildFile; fileRef = CE565BBE0AEF848B002F0A24 /* BDSKPublicationsArray.m */; };
 		CE56D6510A2DAB55003CE000 /* BDSKDocumentController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE56D6500A2DAB55003CE000 /* BDSKDocumentController.m */; };
@@ -1039,6 +1041,8 @@
 		CE4D85270C3A8C8E002C20CB /* BDSKAutofileCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKAutofileCommand.m; sourceTree = "<group>"; };
 		CE51921E09E5755600E97C3A /* BDSKFindFieldEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFindFieldEditor.h; sourceTree = "<group>"; };
 		CE51921F09E5755600E97C3A /* BDSKFindFieldEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFindFieldEditor.m; sourceTree = "<group>"; };
+		CE522F731D5CA7FD00348D7D /* BDSKDOIParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKDOIParser.h; sourceTree = "<group>"; };
+		CE522F741D5CA7FE00348D7D /* BDSKDOIParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKDOIParser.m; sourceTree = "<group>"; };
 		CE564D230AECBA5B002F0A24 /* NSScanner_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSScanner_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE564D240AECBA5B002F0A24 /* NSScanner_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSScanner_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE565BBD0AEF848B002F0A24 /* BDSKPublicationsArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPublicationsArray.h; sourceTree = "<group>"; };
@@ -2248,6 +2252,7 @@
 				45DB3E4A0CAADFC3001EACDA /* BDSKCiteULikeParser.m */,
 				6CAEE4CB0F98EC63009EA5FE /* BDSKCOinSParser.m */,
 				F9022C3B0758027800C3F701 /* BDSKConverter.m */,
+				CE522F741D5CA7FE00348D7D /* BDSKDOIParser.m */,
 				CE966C6F0B47CF25003BAB9A /* BDSKDublinCoreXMLParser.m */,
 				3D44F5610812A91D003C67F0 /* BDSKFormatParser.m */,
 				45BB77520CAC74AE00F6299B /* BDSKGoogleScholarParser.m */,
@@ -2505,6 +2510,7 @@
 				F97198C10DADD32F00CA57AA /* BDSKDBLPWebServices.h */,
 				CE56D67B0A2DAB66003CE000 /* BDSKDocumentController.h */,
 				CE23915F0A334890009F3A5B /* BDSKDocumentInfoWindowController.h */,
+				CE522F731D5CA7FD00348D7D /* BDSKDOIParser.h */,
 				CE044A4212667EB500CE55C4 /* BDSKDownloadManager.h */,
 				CE966C6E0B47CF25003BAB9A /* BDSKDublinCoreXMLParser.h */,
 				CEFA0F4C0AF1400900A3B4B1 /* BDSKOwnerProtocol.h */,
@@ -2856,6 +2862,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE522F751D5CA7FE00348D7D /* BDSKDOIParser.h in Headers */,
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3425,6 +3432,7 @@
 				CE38FB91091D94A100BCB69D /* BDSKFilterController.m in Sources */,
 				F9E07C8509202309007BCDD4 /* BibDocument_Groups.m in Sources */,
 				F9E07C9009202345007BCDD4 /* BibDocument_Search.m in Sources */,
+				CE522F761D5CA7FE00348D7D /* BDSKDOIParser.m in Sources */,
 				CE21D10B09208B9D0075E607 /* BDSKGroup.m in Sources */,
 				CE77A7FE0923BEBA0019D901 /* NSTableView_BDSKExtensions.m in Sources */,
 				CEF942120926458C00750FFA /* BDSKPathColorTransformer.m in Sources */,

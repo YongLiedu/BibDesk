@@ -50,8 +50,10 @@
 #import "BDSKMODSParser.h"
 #import "BDSKSciFinderParser.h"
 #import "BDSKPubMedXMLParser.h"
+#import "BDSKDOIParser.h"
 #import "BDSKRuntime.h"
 #import "BDSKErrorObjectController.h"
+#import "NSURL_BDSKExtensions.h"
 
 @implementation BDSKStringParser
 
@@ -69,6 +71,7 @@ static Class classForType(BDSKStringType stringType)
         case BDSKMODSStringType:            return [BDSKMODSParser class];
         case BDSKSciFinderStringType:       return [BDSKSciFinderParser class];
         case BDSKPubMedXMLStringType:       return [BDSKPubMedXMLParser class];
+        case BDSKDOIStringType:             return [BDSKDOIParser class];
         default:                            return Nil;
     }
 }
@@ -162,6 +165,8 @@ static Class classForType(BDSKStringType stringType)
         return BDSKSciFinderStringType;
     if([BDSKPubMedXMLParser canParseString:self])
         return BDSKPubMedXMLStringType;
+    if([BDSKDOIParser canParseString:self])
+        return BDSKDOIStringType;
 	// don't check DC, as the check is too unreliable
     return BDSKUnknownStringType;
 }
