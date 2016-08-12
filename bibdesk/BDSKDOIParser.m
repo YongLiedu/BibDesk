@@ -40,6 +40,7 @@
 #import "BDSKBibTeXParser.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
+#import "BibItem.h"
 
 @implementation BDSKDOIParser
 
@@ -52,32 +53,11 @@
 // See http://www.crossref.org/CrossTech/2011/11/turning_dois_into_formatted_ci.html
 
 + (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError{
-    // DOI manual says this is a safe URL to resolve with for the foreseeable future
-    NSURL *baseURL = [NSURL URLWithString:@"http://dx.doi.org/"];
-    // remove any text prefix, which is not required for a valid DOI, but may be present; DOI starts with "10"
-    // http://www.doi.org/handbook_2000/enumeration.html#2.2
-    NSRange range = [itemString rangeOfCharacterFromSet:[NSCharacterSet decimalDigitCharacterSet]];
-    if(range.length && range.location > 0)
-        itemString = [itemString substringFromIndex:range.location];
-    itemString = [itemString stringByAddingPercentEscapes];
-    NSURL *doiURL = [[NSURL URLWithStringByNormalizingPercentEscapes:itemString baseURL:baseURL] absoluteURL];
+    BibItem *item = [BibItem itemWithDOI:itemString];
     
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:doiURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:1.0];
-    [request setValue:@"text/bibliography; style=bibtex" forHTTPHeaderField:@"Accept"];
-    NSURLResponse *response = nil;
-    NSError *error = nil;
-    NSData *result = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-    NSString *bibtexString = nil;
-    NSArray *items = nil;
+    if (item == nil && outError) *outError = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unable to get bibtex data for DOI", @"Error description")];
     
-    if (result)
-        bibtexString = [[[[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding] autorelease] stringByRemovingSurroundingWhitespace];
-    if ([BDSKBibTeXParser canParseString:bibtexString])
-        items = [BDSKBibTeXParser itemsFromString:bibtexString owner:nil error:&error];
-    
-    if ([items count] == 0 && outError) *outError = error ?: [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unable to get bibtex data for DOI", @"Error description")];
-    
-    return items;
+    return item ? [NSArray arrayWithObject:item] : nil;
 }
 
 @end

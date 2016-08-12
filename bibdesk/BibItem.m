@@ -3285,6 +3285,40 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     return item;
 }
 
++ (BibItem *)itemWithDOI:(NSString *)doi {
+    BibItem *item = nil;
+    NSURL *doiURL = nil;
+    
+    if ([doi hasCaseInsensitivePrefix:@"http://"] || [doi hasCaseInsensitivePrefix:@"https://"]) {
+        // it's already a DOI URL string
+        doiURL = [NSURL URLWithString:doi];
+    } else {
+        // DOI manual says this is a safe URL to resolve with for the foreseeable future
+        NSURL *baseURL = [NSURL URLWithString:@"http://dx.doi.org/"];
+        // remove any text prefix, which is not required for a valid DOI, but may be present; DOI starts with "10"
+        // http://www.doi.org/handbook_2000/enumeration.html#2.2
+        NSRange range = [doi rangeOfCharacterFromSet:[NSCharacterSet decimalDigitCharacterSet]];
+        if(range.length && range.location > 0)
+            doi = [doi substringFromIndex:range.location];
+        doi = [doi stringByAddingPercentEscapes];
+        doiURL = [[NSURL URLWithStringByNormalizingPercentEscapes:doi baseURL:baseURL] absoluteURL];
+    }
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:doiURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:1.0];
+    [request setValue:@"text/bibliography; style=bibtex" forHTTPHeaderField:@"Accept"];
+    NSURLResponse *response = nil;
+    NSError *error = nil;
+    NSData *result = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+    NSString *bibtexString = nil;
+    
+    if (result)
+        bibtexString = [[[[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding] autorelease] stringByRemovingSurroundingWhitespace];
+    if ([BDSKBibTeXParser canParseString:bibtexString])
+        item = [[BDSKBibTeXParser itemsFromString:bibtexString owner:nil error:&error] firstObject];
+    
+    return item;
+}
+
 + (BibItem *)itemWithFileURL:(NSURL *)fileURL owner:(id<BDSKOwner>)anOwner {
     NSError *error = nil;
     BibItem *newBI = nil;
@@ -3320,9 +3354,23 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 }
 
 + (BibItem *)itemWithURL:(NSURL *)aURL title:(NSString *)aTitle {
-    NSDictionary *pubFields = [NSDictionary dictionaryWithObjectsAndKeys:[[NSDate date] dateDescription], @"Lastchecked", aTitle, BDSKTitleString, nil];
-    NSArray *files = [NSArray arrayWithObjects:[BDSKLinkedFile linkedFileWithURL:aURL delegate:nil], nil];
-    return [[[self alloc] initWithType:@"webpage" citeKey:nil pubFields:pubFields files:files isNew:YES] autorelease];
+    BibItem *item = nil;
+    
+    // first try to see if this a DOI URL
+    NSString *host = [[aURL host] lowercaseString];
+    if ([host isEqualToString:@"dx.doi.org"] || [host isEqualToString:@"doi.org"]) {
+        item = [self itemWithDOI:[aURL absoluteString]];
+        [item addFileForURL:aURL autoFile:NO runScriptHook:NO];
+    }
+    
+    // by default create a webpage item
+    if (item == nil) {
+        NSDictionary *pubFields = [NSDictionary dictionaryWithObjectsAndKeys:[[NSDate date] dateDescription], @"Lastchecked", aTitle, BDSKTitleString, nil];
+        NSArray *files = [NSArray arrayWithObjects:[BDSKLinkedFile linkedFileWithURL:aURL delegate:nil], nil];
+        item = [[[self alloc] initWithType:@"webpage" citeKey:nil pubFields:pubFields files:files isNew:YES] autorelease];
+    }
+    
+    return item;
 }
 
 @end
