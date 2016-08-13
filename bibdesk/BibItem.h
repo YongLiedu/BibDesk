@@ -822,8 +822,8 @@ enum {
 
 @interface BibItem (BDSKAttachementItem)
 + (BibItem *)itemWithFileURL:(NSURL *)fileURL owner:(id<BDSKOwner>)anOwner;
-+ (BibItem *)itemWithURL:(NSURL *)aURL title:(NSString *)aTitle;
-+ (BibItem *)itemWithDOI:(NSString *)doi;
++ (BibItem *)itemWithURL:(NSURL *)aURL title:(NSString *)aTitle owner:(id<BDSKOwner>)anOwner;
++ (BibItem *)itemWithDOI:(NSString *)doi owner:(id<BDSKOwner>)anOwner;
 @end
 
 

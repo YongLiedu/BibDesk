@@ -180,7 +180,7 @@
             if ([url isFileURL])
                 pubs = [NSArray arrayWithObjects:[BibItem itemWithFileURL:url owner:document], nil];
             else
-                pubs = [NSArray arrayWithObjects:[BibItem itemWithURL:url title:nil], nil];
+                pubs = [NSArray arrayWithObjects:[BibItem itemWithURL:url title:nil owner:document], nil];
         } else {
             [self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
             return nil;

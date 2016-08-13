@@ -2293,7 +2293,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                         [newFilePubs addObject:item];
                     }
                 } else {
-                    [newURLPubs addObject:[BibItem itemWithURL:newURL title:[titles objectAtIndex:[newURLs indexOfObject:newURL]]]];
+                    [newURLPubs addObject:[BibItem itemWithURL:newURL title:[titles objectAtIndex:[newURLs indexOfObject:newURL]] owner:self]];
                 }
             }
             if ([newURLPubs count] > 0)

@@ -3285,7 +3285,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     return item;
 }
 
-+ (BibItem *)itemWithDOI:(NSString *)doi {
++ (BibItem *)itemWithDOI:(NSString *)doi owner:(id<BDSKOwner>)anOwner {
     BibItem *item = nil;
     NSURL *doiURL = nil;
     
@@ -3308,14 +3308,15 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     [request setValue:@"text/bibliography; style=bibtex" forHTTPHeaderField:@"Accept"];
     NSURLResponse *response = nil;
     NSError *error = nil;
-    NSData *result = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+    NSData *btData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
     NSString *bibtexString = nil;
     
-    if (result)
-        bibtexString = [[[[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding] autorelease] stringByRemovingSurroundingWhitespace];
-    if ([BDSKBibTeXParser canParseString:bibtexString])
-        item = [[BDSKBibTeXParser itemsFromString:bibtexString owner:nil error:&error] firstObject];
-    
+    if (btData) {
+        bibtexString = [[[[NSString alloc] initWithData:btData encoding:NSUTF8StringEncoding] autorelease] stringByRemovingSurroundingWhitespace];
+        if (bibtexString)
+            item = [[BDSKBibTeXParser itemsFromString:bibtexString owner:anOwner error:&error] firstObject];
+    }
+
     return item;
 }
 
@@ -3353,13 +3354,13 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 	return newBI;
 }
 
-+ (BibItem *)itemWithURL:(NSURL *)aURL title:(NSString *)aTitle {
++ (BibItem *)itemWithURL:(NSURL *)aURL title:(NSString *)aTitle owner:(id<BDSKOwner>)anOwner {
     BibItem *item = nil;
     
     // first try to see if this a DOI URL
     NSString *host = [[aURL host] lowercaseString];
     if ([host isEqualToString:@"dx.doi.org"] || [host isEqualToString:@"doi.org"]) {
-        item = [self itemWithDOI:[aURL absoluteString]];
+        item = [self itemWithDOI:[aURL absoluteString] owner:anOwner];
         [item addFileForURL:aURL autoFile:NO runScriptHook:NO];
     }
     

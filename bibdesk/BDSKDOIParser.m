@@ -53,7 +53,7 @@
 // See http://www.crossref.org/CrossTech/2011/11/turning_dois_into_formatted_ci.html
 
 + (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError{
-    BibItem *item = [BibItem itemWithDOI:itemString];
+    BibItem *item = [BibItem itemWithDOI:itemString owner:nil];
     
     if (item == nil && outError) *outError = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unable to get bibtex data for DOI", @"Error description")];
     
