@@ -345,8 +345,19 @@ static void removeAliens(NSMutableString *string)
 
 + (id)itemWithPubMedSearchTerm:(NSString *)searchTerm;
 {
-    NSData *data = [BDSKPubMedLookupHelper xmlReferenceDataForSearchTerm:searchTerm];
-    return [data length] ? [[BDSKPubMedXMLParser itemsFromData:data error:NULL] lastObject] : nil;
+    BibItem *item = nil;
+    
+    AGRegex *doiRegex = [AGRegex regexWithPattern:@"^((doi:)|(https?://(dx\\.)?doi\\.org/)?10\\.[0-9]{4,}(\\.[0-9]+)*/\\S+$"];
+    if ([doiRegex findInString:searchTerm] != nil)
+        item = [BibItem itemWithDOI:searchTerm owner:nil];
+    
+    if (item == nil) {
+        NSData *data = [BDSKPubMedLookupHelper xmlReferenceDataForSearchTerm:searchTerm];
+        if ([data length])
+            item = [[BDSKPubMedXMLParser itemsFromData:data error:NULL] lastObject];
+    }
+    
+    return item;
 }
 
 @end
