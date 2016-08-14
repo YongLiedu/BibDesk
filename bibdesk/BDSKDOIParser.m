@@ -41,13 +41,13 @@
 #import "NSURL_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "BibItem.h"
+#import <AGRegex/AGRegex.h>
 
 @implementation BDSKDOIParser
 
 + (BOOL)canParseString:(NSString *)string{
-    string = [string lowercaseString];
-    return ([string hasPrefix:@"doi:10."] || [string hasPrefix:@"http://doi.org/10."] || [string hasPrefix:@"https://doi.org/10."] || [string hasPrefix:@"http://dx.doi.org/10."] || [string hasPrefix:@"https://dx.doi.org/10."] || [string hasPrefix:@"10."]) &&
-    [string rangeOfCharacterFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].location == NSNotFound;
+    AGRegex *doiRegex = [AGRegex regexWithPattern:@"^((doi:)|(https?://(dx\\.)?doi\\.org/)?10\\.[0-9]{4,}(\\.[0-9]+)*/\\S+$"];
+    return [doiRegex findInString:string] != nil;
 }
 
 // See http://www.crossref.org/CrossTech/2011/11/turning_dois_into_formatted_ci.html
