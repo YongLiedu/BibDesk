@@ -347,7 +347,7 @@ static void removeAliens(NSMutableString *string)
 {
     BibItem *item = nil;
     
-    AGRegex *doiRegex = [AGRegex regexWithPattern:@"^(((doi:)|(https?://(dx\\.)?doi\\.org/))?10\\.[0-9]{4,}(\\.[0-9]+)*/\\S+)(\\s+\\[AID\\])?$" options:AGRegexCaseInsensitive];
+    AGRegex *doiRegex = [AGRegex regexWithPattern:@"^((doi:|https?://(dx\\.)?doi\\.org/)?10\\.[0-9]{4,}(\\.[0-9]+)*/\\S+)(\\s+\\[AID\\])?$" options:AGRegexCaseInsensitive];
     AGRegexMatch *match = [doiRegex findInString:searchTerm];
     if (match)
         item = [BibItem itemWithDOI:[match groupAtIndex:1] owner:nil];
