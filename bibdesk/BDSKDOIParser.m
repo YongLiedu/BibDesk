@@ -46,7 +46,7 @@
 @implementation BDSKDOIParser
 
 + (BOOL)canParseString:(NSString *)string{
-    AGRegex *doiRegex = [AGRegex regexWithPattern:@"^((doi:)|(https?://(dx\\.)?doi\\.org/))?10\\.[0-9]{4,}(\\.[0-9]+)*/\\S+$"];
+    AGRegex *doiRegex = [AGRegex regexWithPattern:@"^((doi:)|(https?://(dx\\.)?doi\\.org/))?10\\.[0-9]{4,}(\\.[0-9]+)*/\\S+$" options:AGRegexCaseInsensitive];
     return [doiRegex findInString:string] != nil;
 }
 
