@@ -841,7 +841,7 @@ More details are given in the following sections.
 
 References can also be added to a bibliography by dragging entries
 from a text source (text editor, web browser) into BibDesk's main publicationslist.
-The text can be BibTeX, RIS (Reference Manager), MARC, JSTOR or Web Of Knowledge formatted text.
+The text can be BibTeX, PubMed, RIS (Reference Manager), MARC, JSTOR, Web Of Knowledge, Dublin Core, Refer, MODS, or SciFinder formatted text, or a DOI.
 Here's a fancy picture:
 
 @image{gfx/dragIntoBib}
@@ -870,8 +870,8 @@ to easily copy items between documents.
 @cindex add to bibliography
 
 References can be added to a publications list by copying them from another
-source and pasting them into BibDesk's main window.  The text being pasted must
-be BibTeX, RIS (Reference Manager), MARC, JSTOR or Web Of Knowledge formatted text, or an error will occur.
+source and pasting them into BibDesk's main window.  The text being pasted can
+be BibTeX, PubMed, RIS (Reference Manager), MARC, JSTOR, Web Of Knowledge, Dublin Core, Refer, MODS, or SciFinder formatted text, or a DOI.
 
 Furthermore, everything that can be @ref{Drag and Drop, dragged and dropped} on a BibDesk window can also
 be added using Copy and Paste. 
@@ -917,7 +917,8 @@ to add references from an arbitrary text file, or the
 to add publactions from a website. 
 
 If the clipboard or the file contains formatted text that BibDesk can understand, 
-such as BibTeX, RIS, Medline (PubMed), MARC, JSTOR, and Web of Knowledge formatted text, 
+such as BibTeX, PubMed, RIS (Reference Manager), MARC, JSTOR, Web Of Knowledge,
+Dublin Core, Refer, MODS, or SciFinder formatted text, or a DOI,
 Bibdesk will parse the text and the new references are immediately added to the database 
 instead of openingthe sheet to do it by hand. 
 
