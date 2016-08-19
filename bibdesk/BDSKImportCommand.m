@@ -173,7 +173,7 @@
                 pubs = [document transferredPublications:pubs];
             [search release];
         } else {
-            pubs = [NSArray arrayWithObjects:[BibItem itemWithPubMedSearchTerm:searchTerm], nil];
+            pubs = [BibItem itemsWithPubMedSearchTerm:searchTerm];
         }
     } else if (url) {
         if ([url isKindOfClass:[NSURL class]]) {

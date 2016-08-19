@@ -40,22 +40,9 @@
 #import <Quartz/Quartz.h>
 #import "BibItem.h"
 
-@interface NSString (PubMedLookup)
-
-- (NSString *) stringByExtractingDOIFromString;
-- (NSString *) stringByExtractingPIIFromString;
-- (NSString *) stringByMakingPubmedSearchFromAnyBibliographicIDsInString;
-@end
-
-@interface NSMutableString (PubMedLookup)
-
-- (void)removeAliens;
-@end
-
 @interface BibItem (PubMedLookup)
 
-+ (id)itemWithPubMedSearchTerm:(NSString *)searchTerm;
++ (NSArray *)itemsWithPubMedSearchTerm:(NSString *)searchTerm;
 + (id)itemByParsingPDFAtURL:(NSURL *)pdfURL;
-+ (id)itemByParsingPDFDocument:(PDFDocument *)pdfd;
 
 @end
