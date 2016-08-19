@@ -44,7 +44,6 @@
 
 - (NSString *) stringByExtractingDOIFromString;
 - (NSString *) stringByExtractingPIIFromString;
-- (NSString *) stringByExtractingNormalisedPIIFromString;
 - (NSString *) stringByMakingPubmedSearchFromAnyBibliographicIDsInString;
 @end
 

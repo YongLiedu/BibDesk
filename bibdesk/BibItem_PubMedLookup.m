@@ -131,15 +131,6 @@
 	return pii;
 }
 
-- (NSString *) stringByExtractingNormalisedPIIFromString;
-{
-	NSString *pii=[self stringByExtractingPIIFromString];
-	if(pii!=nil)
-	pii = [pii stringByReplacingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"()-"]
-									 withString:@""];
-	return pii;
-}
-
 - (NSString *) stringByMakingPubmedSearchFromAnyBibliographicIDsInString;
 {
 	NSString *doi=nil,*pii=nil;
@@ -148,7 +139,7 @@
 	pii = [self stringByExtractingPIIFromString];
 	// nb we need to search for both forms and the standard one must be quoted
 	if(pii) return [NSString stringWithFormat:@"\"%@\" [AID] OR %@ [AID]",
-					 pii,[pii stringByExtractingNormalisedPIIFromString]];
+					 pii,[pii stringByDeletingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"()-"]]];
 
 	// next try DOI
 	doi = [self stringByExtractingDOIFromString];
