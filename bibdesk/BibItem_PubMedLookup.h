@@ -42,7 +42,7 @@
 
 @interface BibItem (PubMedLookup)
 
-+ (NSArray *)itemsWithPubMedSearchTerm:(NSString *)searchTerm;
++ (id)itemWithPubMedSearchTerm:(NSString *)searchTerm;
 + (id)itemByParsingPDFAtURL:(NSURL *)pdfURL;
 
 @end

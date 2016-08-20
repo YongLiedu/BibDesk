@@ -67,19 +67,19 @@
     if ((bibID = [string stringByExtractingPIIFromString])) {
         // nb we need to search for both forms and the standard one must be quoted
         pubmedSearch = [NSString stringWithFormat:@"\"%@\" [AID] OR %@ [AID]", bibID, [bibID stringByDeletingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"()-"]]];
-        bi = [[self itemsWithPubMedSearchTerm:pubmedSearch] firstObject];
+        bi = [self itemWithPubMedSearchTerm:pubmedSearch];
     
     } else if ((bibID = [[string extractAllDOIsFromString] firstObject])) {
         // next try DOI
         bi = [self itemWithDOI:bibID owner:nil];
         if (bi == nil) {
             pubmedSearch = [NSString stringWithFormat:@"%@ [AID]", bibID];
-            bi = [[self itemsWithPubMedSearchTerm:pubmedSearch] firstObject];
+            bi = [self itemWithPubMedSearchTerm:pubmedSearch];
         }
     } else if ((bibID = [string stringByExtractingNPGRJFromString])) {
         // next try looking for any nature publishing group form
         pubmedSearch = [NSString stringWithFormat:@"%@ [AID] OR %@ [AID]", bibID, [bibID stringByRemovingString:@"_"]];
-        bi = [[self itemsWithPubMedSearchTerm:pubmedSearch] firstObject];
+        bi = [self itemWithPubMedSearchTerm:pubmedSearch];
     }
     
     return bi;
@@ -120,7 +120,7 @@
                                 [pubmedSearch appendFormat:@"\"%@\" [AID]", doi];
                             }
                             if (bi == nil)
-                                bi = [[self itemsWithPubMedSearchTerm:pubmedSearch] firstObject];
+                                bi = [self itemWithPubMedSearchTerm:pubmedSearch];
                         }
                     }
                 }
@@ -132,10 +132,10 @@
 	return bi;
 }
 
-+ (NSArray *)itemsWithPubMedSearchTerm:(NSString *)searchTerm;
++ (id)itemWithPubMedSearchTerm:(NSString *)searchTerm;
 {
     NSData *data = [BDSKPubMedLookupHelper xmlReferenceDataForSearchTerm:searchTerm];
-    return [data length] ? [BDSKPubMedXMLParser itemsFromData:data error:NULL] : nil;
+    return [data length] ? [[BDSKPubMedXMLParser itemsFromData:data error:NULL] firstObject] : nil;
 }
 
 @end
