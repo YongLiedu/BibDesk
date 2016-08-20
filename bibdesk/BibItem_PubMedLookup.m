@@ -73,7 +73,7 @@
         // next try DOI
         bi = [self itemWithDOI:bibID owner:nil];
         if (bi == nil) {
-            pubmedSearch = [NSString stringWithFormat:@"\"%@\" [AID]", bibID];
+            pubmedSearch = [NSString stringWithFormat:@"%@ [AID]", bibID];
             bi = [[self itemsWithPubMedSearchTerm:pubmedSearch] firstObject];
         }
     } else if ((bibID = [string stringByExtractingNPGRJFromString])) {
