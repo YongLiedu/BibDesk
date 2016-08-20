@@ -209,13 +209,12 @@
 @implementation NSString (PubMedLookup)
 
 // here is another exampled of a doi regex = /(10\.[0-9]+\/[a-z0-9\.\-\+\/\(\)]+)/i;
-// from http://userscripts.org/scripts/review/8939
-#define doiRegexString @"doi[:\\s/]{1,2}(10\\.[0-9]{4,}(?:\\.[0-9]+)*)[\\s/0]{1,3}(\\S+)"
 
 - (NSArray *)extractAllDOIsFromString;
 {
     NSMutableArray *dois = [NSMutableArray array];
-    AGRegex *doiRegex= [AGRegex regexWithPattern:doiRegexString options:AGRegexMultiline|AGRegexCaseInsensitive];
+    AGRegex *doiRegex = [AGRegex regexWithPattern:@"doi[:\\s/]{1,2}(10\\.[0-9]{4,}(?:\\.[0-9]+)*)[\\s/0]{1,3}(\\S+)"
+                                          options:AGRegexMultiline|AGRegexCaseInsensitive];
     AGRegexMatch *match;
     for (match in [doiRegex findEnumeratorInString:self]) {
         NSString *doi;
