@@ -43,6 +43,6 @@
 @interface BibItem (PubMedLookup)
 
 + (id)itemWithPubMedSearchTerm:(NSString *)searchTerm;
-+ (id)itemByParsingPDFAtURL:(NSURL *)pdfURL;
++ (id)itemByParsingPDFAtURL:(NSURL *)pdfURL owner:(id<BDSKOwner>)anOwner;
 
 @end

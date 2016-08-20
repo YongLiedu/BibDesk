@@ -57,7 +57,7 @@
 
 @implementation BibItem (PubMedLookup)
 
-+ (id)itemFromAnyBibliographicIDsInString:(NSString *)string;
++ (id)itemFromAnyBibliographicIDsInString:(NSString *)string owner:(id<BDSKOwner>)anOwner;
 {
     BibItem *bi = nil;
     NSString *bibID;
@@ -71,7 +71,7 @@
     
     } else if ((bibID = [[string extractAllDOIsFromString] firstObject])) {
         // next try DOI
-        bi = [self itemWithDOI:bibID owner:nil];
+        bi = [self itemWithDOI:bibID owner:anOwner];
         if (bi == nil) {
             pubmedSearch = [NSString stringWithFormat:@"%@ [AID]", bibID];
             bi = [self itemWithPubMedSearchTerm:pubmedSearch];
@@ -85,20 +85,20 @@
     return bi;
 }
 
-+ (id)itemByParsingPDFAtURL:(NSURL *)pdfURL;
++ (id)itemByParsingPDFAtURL:(NSURL *)pdfURL owner:(id<BDSKOwner>)anOwner;
 {
 	BibItem *bi=nil;
     NSString *name = [[pdfURL lastPathComponent] stringByDeletingPathExtension];
 	
 	// see if we can find any bibliographic info in the filename
-    bi = [self itemFromAnyBibliographicIDsInString:name];
+    bi = [self itemFromAnyBibliographicIDsInString:name owner:anOwner];
 	
     if (bi == nil) {
         PDFDocument *pdfDoc = [[PDFDocument alloc] initWithURL:pdfURL];
         if (pdfDoc) {
             // See if we can find any bibliographic info in the pdf title attribute
             if ((name = [[pdfDoc documentAttributes] valueForKey:PDFDocumentTitleAttribute]))
-                bi = [self itemFromAnyBibliographicIDsInString:name];
+                bi = [self itemFromAnyBibliographicIDsInString:name owner:anOwner];
             
             if (bi == nil) {
                 // ... else directly parse text of first two pages for doi
@@ -113,7 +113,7 @@
                         if ([dois count]) {
                             NSMutableString *pubmedSearch = [NSMutableString string];
                             for (NSString *doi in dois) {
-                                bi = [self itemWithDOI:doi owner:nil];
+                                bi = [self itemWithDOI:doi owner:anOwner];
                                 if (bi) break;
                                 if ([pubmedSearch length])
                                     [pubmedSearch appendString:@" OR "];

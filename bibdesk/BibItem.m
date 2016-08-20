@@ -3340,7 +3340,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     // GJ try parsing pdf to extract info that is then used to get a PubMed record
     if(newBI == nil && [[[NSWorkspace sharedWorkspace] typeOfFile:[[[fileURL URLByStandardizingPath] URLByResolvingSymlinksInPath] path] error:NULL] isEqualToUTI:(NSString *)kUTTypePDF]){
         if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTermKey])
-            newBI = [self itemByParsingPDFAtURL:fileURL];			
+            newBI = [self itemByParsingPDFAtURL:fileURL owner:anOwner];			
         // fall back on the least reliable metadata source (hidden pref)
         if(newBI == nil && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldUsePDFMetadataKey])
             newBI = [self itemWithPDFMetadataFromURL:fileURL];
