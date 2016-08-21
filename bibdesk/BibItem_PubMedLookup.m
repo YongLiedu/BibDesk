@@ -167,7 +167,7 @@
     searchTerm = [searchTerm stringByAddingPercentEscapesIncludingReserved];
     
     // get the initial XML document with our search parameters in it; we ask for 2 results at most
-    NSString *esearch = [[[self class] baseURLString] stringByAppendingFormat:@"/esearch.fcgi?db=pubmed&retmax=2&usehistory=y&term=%@&tool=bibdesk", searchTerm];
+    NSString *esearch = [[self baseURLString] stringByAppendingFormat:@"/esearch.fcgi?db=pubmed&retmax=2&usehistory=y&term=%@&tool=bibdesk", searchTerm];
 	NSURL *theURL = [NSURL URLWithStringByNormalizingPercentEscapes:esearch];
     BDSKPRECONDITION(theURL);
     
@@ -191,7 +191,7 @@
         if ([count integerValue] == 1) {  
             
             // get the first result (zero-based indexing)
-            NSString *efetch = [[[self class] baseURLString] stringByAppendingFormat:@"/efetch.fcgi?rettype=abstract&retmode=xml&retstart=0&retmax=1&db=pubmed&query_key=%@&WebEnv=%@&tool=bibdesk", queryKey, webEnv];
+            NSString *efetch = [[self baseURLString] stringByAppendingFormat:@"/efetch.fcgi?rettype=abstract&retmode=xml&retstart=0&retmax=1&db=pubmed&query_key=%@&WebEnv=%@&tool=bibdesk", queryKey, webEnv];
             theURL = [NSURL URLWithString:efetch];
             BDSKPOSTCONDITION(theURL);
             
