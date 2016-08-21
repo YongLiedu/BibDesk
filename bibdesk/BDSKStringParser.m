@@ -110,6 +110,8 @@ static Class classForType(BDSKStringType stringType)
         newPubs = [BDSKBibTeXParser itemsFromString:string owner:owner error:&parseError];
     }else if(type == BDSKNoKeyBibTeXStringType){
         newPubs = [BDSKBibTeXParser itemsFromString:[string stringWithPhoneyCiteKeys:@"FixMe"] owner:owner error:&parseError];
+    }else if(type == BDSKDOIStringType){
+        newPubs = [BDSKDOIParser itemsFromString:string owner:owner error:&parseError];
 	}else{
         // this will create the NSError if the type is unrecognized
         newPubs = [self itemsFromString:string ofType:type error:&parseError];

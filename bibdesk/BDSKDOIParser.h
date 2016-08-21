@@ -40,4 +40,5 @@
 #import "BDSKStringParser.h"
 
 @interface BDSKDOIParser : NSObject <BDSKStringParser>
++ (NSArray *)itemsFromString:(NSString *)itemString owner:(id<BDSKOwner>)owner error:(NSError **)outError;
 @end
