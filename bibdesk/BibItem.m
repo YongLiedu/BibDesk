@@ -3313,8 +3313,12 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     
     if (btData) {
         bibtexString = [[[[NSString alloc] initWithData:btData encoding:NSUTF8StringEncoding] autorelease] stringByRemovingSurroundingWhitespace];
-        if (bibtexString)
+        if (bibtexString) {
             item = [[BDSKBibTeXParser itemsFromString:bibtexString owner:anOwner error:&error] firstObject];
+            if ([error isLocalErrorWithCode:kBDSKBibTeXParserFailed])
+                item = nil;
+
+        }
     }
 
     return item;
