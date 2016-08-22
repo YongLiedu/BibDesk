@@ -105,7 +105,6 @@
 #import "BDSKCustomCiteDrawerController.h"
 #import "BDSKDocumentController.h"
 #import "BDSKFiler.h"
-#import "BibItem_PubMedLookup.h"
 #import "BDSKItemSearchIndexes.h"
 #import "BDSKNotesSearchIndex.h"
 #import "PDFDocument_BDSKExtensions.h"
