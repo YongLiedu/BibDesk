@@ -58,18 +58,19 @@
     NSInteger downloadState;
     NSString *errorMessage;
 }
-+ (NSString *)baseURLString;
-- (void)setServerInfo:(BDSKServerInfo *)info;
-- (BDSKServerInfo *)serverInfo;
+
 - (void)setSearchTerm:(NSString *)string;
 - (NSString *)searchTerm;
 - (void)setWebEnv:(NSString *)env;
 - (NSString *)webEnv;
 - (void)setQueryKey:(NSString *)aKey;
 - (NSString *)queryKey;
+
 - (void)resetSearch;
 - (void)fetch;
 - (void)startDownloadFromURL:(NSURL *)theURL;
 - (void)setErrorMessage:(NSString *)newErrorMessage;
+
++ (NSArray *)itemsForSearchTerm:(NSString *)searchTerm usingDatabase:(NSString *)database allowMultiple:(BOOL)allowMultiple;
 
 @end

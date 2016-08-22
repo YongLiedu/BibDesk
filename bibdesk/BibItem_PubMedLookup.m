@@ -37,16 +37,10 @@
  */
 
 #import "BibItem_PubMedLookup.h"
-#import <WebKit/WebKit.h>
-#import "BDSKStringParser.h"
+#import "BDSKEntrezGroupServer.h"
 #import "BDSKPubMedXMLParser.h"
 #import <AGRegex/AGRegex.h>
-#import "NSURL_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
-
-@interface BDSKPubMedLookupHelper : NSObject
-+ (NSData *)xmlReferenceDataForSearchTerm:(NSString *)searchTerm;
-@end
 
 @interface NSString (PubMedLookup)
 - (NSArray *)extractAllDOIsFromString;
@@ -134,74 +128,7 @@
 
 + (id)itemWithPubMedSearchTerm:(NSString *)searchTerm;
 {
-    NSData *data = [BDSKPubMedLookupHelper xmlReferenceDataForSearchTerm:searchTerm];
-    return [data length] ? [[BDSKPubMedXMLParser itemsFromData:data error:NULL] firstObject] : nil;
-}
-
-@end
-
-@implementation BDSKPubMedLookupHelper
-
-/* Based on public domain sample code written by Oleg Khovayko, available at
- http://www.ncbi.nlm.nih.gov/entrez/query/static/eutils_example.pl
- 
- - We pass tool=bibdesk for their tracking purposes.  
- - We use lower case characters in the URL /except/ for WebEnv
- - See http://www.ncbi.nlm.nih.gov/entrez/query/static/eutils_help.html for details.
- 
- */
-
-+ (NSString *)baseURLString { return @"http://eutils.ncbi.nlm.nih.gov/entrez/eutils"; }
-
-+ (NSData *)xmlReferenceDataForSearchTerm:(NSString *)searchTerm;
-{
-    NSParameterAssert(searchTerm != nil);
-    
-    NSData *toReturn = nil;
-        
-    if ([[NSURL URLWithString:[self baseURLString]] canConnect] == NO)
-        return toReturn;
-        
-    NSXMLDocument *document = nil;
-    
-    searchTerm = [searchTerm stringByAddingPercentEscapesIncludingReserved];
-    
-    // get the initial XML document with our search parameters in it; we ask for 2 results at most
-    NSString *esearch = [[self baseURLString] stringByAppendingFormat:@"/esearch.fcgi?db=pubmed&retmax=2&usehistory=y&term=%@&tool=bibdesk", searchTerm];
-	NSURL *theURL = [NSURL URLWithStringByNormalizingPercentEscapes:esearch];
-    BDSKPRECONDITION(theURL);
-    
-    NSURLRequest *request = [NSURLRequest requestWithURL:theURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:1.0];
-    NSURLResponse *response;
-    NSError *error;
-    NSData *esearchResult = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-    
-    if ([esearchResult length])
-        document = [[NSXMLDocument alloc] initWithData:esearchResult options:NSXMLNodeOptionsNone error:&error];
-    
-    if (nil != document) {
-        NSXMLElement *root = [document rootElement];
-
-        // we need to extract WebEnv, Count, and QueryKey to construct our final URL
-        NSString *webEnv = [[[root nodesForXPath:@"/eSearchResult[1]/WebEnv[1]" error:NULL] lastObject] stringValue];
-        NSString *queryKey = [[[root nodesForXPath:@"/eSearchResult[1]/QueryKey[1]" error:NULL] lastObject] stringValue];
-        id count = [[[root nodesForXPath:@"/eSearchResult[1]/Count[1]" error:NULL] lastObject] objectValue];
-
-        // ensure that we only have a single result; if it's ambiguous, just return nil
-        if ([count integerValue] == 1) {  
-            
-            // get the first result (zero-based indexing)
-            NSString *efetch = [[self baseURLString] stringByAppendingFormat:@"/efetch.fcgi?rettype=abstract&retmode=xml&retstart=0&retmax=1&db=pubmed&query_key=%@&WebEnv=%@&tool=bibdesk", queryKey, webEnv];
-            theURL = [NSURL URLWithString:efetch];
-            BDSKPOSTCONDITION(theURL);
-            
-            request = [NSURLRequest requestWithURL:theURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:1.0];
-            toReturn = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-        }
-        [document release];
-    }
-    
-    return toReturn;
+    return [[BDSKEntrezGroupServer itemsForSearchTerm:searchTerm usingDatabase:@"pubmed" allowMultiple:NO] firstObject];
 }
 
 @end

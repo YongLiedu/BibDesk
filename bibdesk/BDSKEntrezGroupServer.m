@@ -67,6 +67,16 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
 
 + (NSString *)baseURLString { return @"http://eutils.ncbi.nlm.nih.gov/entrez/eutils"; }
 
++ (NSURL *)esearchURLWithDatabase:(NSString *)database searchTerm:(NSString *)searchTerm {
+    NSString *esearch = [[self baseURLString] stringByAppendingFormat:@"/esearch.fcgi?db=%@&retmax=1&usehistory=y&term=%@&tool=bibdesk", database, [searchTerm stringByAddingPercentEscapesIncludingReserved]];
+    return [NSURL URLWithString:esearch];
+}
+
++ (NSURL *)efetchURLWithDatabase:(NSString *)database webEnv:(NSString *)webEnv queryKey:(NSString *)queryKey range:(NSRange)range {
+    NSString *efetch = [[[self class] baseURLString] stringByAppendingFormat:@"/efetch.fcgi?rettype=abstract&retmode=xml&retstart=%lu&retmax=%lu&db=%@&query_key=%@&WebEnv=%@&tool=bibdesk", (unsigned long)range.location, (unsigned long)range.length, database, [queryKey stringByAddingPercentEscapesIncludingReserved], webEnv];
+    return [NSURL URLWithString:efetch];
+}
+
 - (id)initWithGroup:(id<BDSKSearchGroup>)aGroup serverInfo:(BDSKServerInfo *)info;
 {
     self = [super init];
@@ -208,8 +218,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     
     if(NO == [NSString isEmptyString:[self searchTerm]]){
         // get the initial XML document with our search parameters in it
-        NSString *esearch = [[[self class] baseURLString] stringByAppendingFormat:@"/esearch.fcgi?db=%@&retmax=1&usehistory=y&term=%@&tool=bibdesk", [[self serverInfo] database], [[self searchTerm] stringByAddingPercentEscapesIncludingReserved]];
-        NSURL *initialURL = [NSURL URLWithString:esearch]; 
+        NSURL *initialURL = [[self class] esearchURLWithDatabase:[[self serverInfo] database] searchTerm:[self searchTerm]];
         BDSKPRECONDITION(initialURL);
         
         downloadState = BDSKEsearchState;
@@ -226,14 +235,13 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     }
     
     BDSKPRECONDITION(downloadState == BDSKIdleState);
-    NSInteger numResults = MIN([self numberOfAvailableResults] - [self numberOfFetchedResults], MAX_RESULTS);
+    NSRange returnRange = NSMakeRange([self numberOfFetchedResults], MIN([self numberOfAvailableResults] - [self numberOfFetchedResults], MAX_RESULTS));
     
     // need to escape queryKey, but the rest should be valid for a URL
-    NSString *efetch = [[[self class] baseURLString] stringByAppendingFormat:@"/efetch.fcgi?rettype=abstract&retmode=xml&retstart=%ld&retmax=%ld&db=%@&query_key=%@&WebEnv=%@&tool=bibdesk", (long)[self numberOfFetchedResults], (long)numResults, [[self serverInfo] database], [[self queryKey] stringByAddingPercentEscapesIncludingReserved], [self webEnv]];
-    NSURL *theURL = [NSURL URLWithString:efetch];
+    NSURL *theURL = [[self class] efetchURLWithDatabase:[[self serverInfo] database] webEnv:[self webEnv] queryKey:[self queryKey] range:returnRange];
     BDSKPOSTCONDITION(theURL);
     
-    fetchedResults += numResults;
+    fetchedResults += returnRange.length;
     
     downloadState = BDSKEfetchState;
     [self startDownloadFromURL:theURL];
@@ -351,6 +359,54 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     
     // redraw 
     [group addPublications:nil];
+}
+
++ (NSArray *)itemsForSearchTerm:(NSString *)searchTerm usingDatabase:(NSString *)database allowMultiple:(BOOL)allowMultiple
+{
+    NSParameterAssert(searchTerm != nil);
+    
+    NSArray *items = nil;
+    
+    if ([[NSURL URLWithString:[self baseURLString]] canConnect] == NO)
+        return items;
+    
+    NSURL *theURL = [self esearchURLWithDatabase:database searchTerm:searchTerm];
+    BDSKPRECONDITION(theURL);
+    
+    NSURLRequest *request = [NSURLRequest requestWithURL:theURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:1.0];
+    NSURLResponse *response;
+    NSError *error;
+    NSData *returnData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+    
+    if ([returnData length]) {
+        NSXMLDocument *document = [[NSXMLDocument alloc] initWithData:returnData options:NSXMLNodeOptionsNone error:&error];
+        
+        if (nil != document) {
+            NSXMLElement *root = [document rootElement];
+            
+            // we need to extract WebEnv, Count, and QueryKey to construct our final URL
+            NSString *webEnv = [[[root nodesForXPath:@"/eSearchResult[1]/WebEnv[1]" error:NULL] lastObject] stringValue];
+            NSString *queryKey = [[[root nodesForXPath:@"/eSearchResult[1]/QueryKey[1]" error:NULL] lastObject] stringValue];
+            NSInteger count = [[[[root nodesForXPath:@"/eSearchResult[1]/Count[1]" error:NULL] lastObject] objectValue] integerValue];
+            
+            // if we don't allow multiple items, ensure that we only have a single result; if it's ambiguous, just return nil
+            if (count > 0 && (allowMultiple || count == 1)) {
+                
+                theURL = [self efetchURLWithDatabase:database webEnv:webEnv queryKey:queryKey range:NSMakeRange(0, MIN(count, MAX_RESULTS))];
+                BDSKPOSTCONDITION(theURL);
+                
+                request = [NSURLRequest requestWithURL:theURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:1.0];
+                
+                returnData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+                
+                if ([returnData length])
+                    items = [BDSKPubMedXMLParser itemsFromData:returnData error:&error];
+            }
+            [document release];
+        }
+    }
+    
+    return items;
 }
 
 @end

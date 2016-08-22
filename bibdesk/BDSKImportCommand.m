@@ -72,7 +72,7 @@
 #import "BDSKImportCommand.h"
 #import "BibDocument.h"
 #import "BibItem.h"
-#import "BibItem_PubMedLookup.h"
+#import "BDSKEntrezGroupServer.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKStringParser.h"
 #import "BDSKSearchGroup.h"
@@ -173,7 +173,7 @@
                 pubs = [document transferredPublications:pubs];
             [search release];
         } else {
-            pubs = [NSArray arrayWithObjects:[BibItem itemWithPubMedSearchTerm:searchTerm], nil];
+            pubs = [BDSKEntrezGroupServer itemsForSearchTerm:searchTerm usingDatabase:@"pubmed" allowMultiple:YES];
         }
     } else if (url) {
         if ([url isKindOfClass:[NSURL class]]) {
