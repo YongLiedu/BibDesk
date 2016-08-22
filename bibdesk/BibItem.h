@@ -824,6 +824,7 @@ enum {
 + (BibItem *)itemWithFileURL:(NSURL *)fileURL owner:(id<BDSKOwner>)anOwner;
 + (BibItem *)itemWithURL:(NSURL *)aURL title:(NSString *)aTitle owner:(id<BDSKOwner>)anOwner;
 + (BibItem *)itemWithDOI:(NSString *)doi owner:(id<BDSKOwner>)anOwner;
++ (BibItem *)itemByParsingPDFAtURL:(NSURL *)pdfURL owner:(id<BDSKOwner>)anOwner;
 @end
 
 
