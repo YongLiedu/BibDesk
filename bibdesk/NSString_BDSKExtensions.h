@@ -466,6 +466,8 @@ An inline buffer is used for speed in accessing each character.
 
 - (NSString *)fullyEncodeAsIURI;
 
+- (NSString *)stringByRemovingAliens;
+
 + (NSString *)pathSeparator;
 - (NSString *)commonRootPathOfFile:(NSString *)filename;
 - (NSString *)relativePathFromPath:(NSString *)basePath;

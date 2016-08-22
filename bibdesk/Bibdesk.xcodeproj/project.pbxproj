@@ -470,7 +470,6 @@
 		F99BC25F095A5C7000E018C3 /* NSArray_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F99BC25D095A5C7000E018C3 /* NSArray_BDSKExtensions.m */; };
 		F9A2245D0AE02C8E0046CA3D /* BDSKFileSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A2245B0AE02C8E0046CA3D /* BDSKFileSearch.m */; };
 		F9A411FC0A0B2066008493C0 /* BDSKPreferenceController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9DAC7A10A0A95BC0099117E /* BDSKPreferenceController.m */; };
-		F9B3405E0BBC16720072C2B0 /* BibItem_PubMedLookup.m in Sources */ = {isa = PBXBuildFile; fileRef = F9B3405C0BBC16720072C2B0 /* BibItem_PubMedLookup.m */; };
 		F9B800950B41DFAF00A5A615 /* BDSKSearchGroupSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9B800930B41DFAF00A5A615 /* BDSKSearchGroupSheetController.m */; };
 		F9B8019F0B41E91F00A5A615 /* BDSKZoomGroupServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F9B8019D0B41E91F00A5A615 /* BDSKZoomGroupServer.m */; };
 		F9B88D990B7D14B700D5D42C /* BDSKFileMatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = F9B88D970B7D14B700D5D42C /* BDSKFileMatcher.m */; };
@@ -1620,8 +1619,6 @@
 		F9A411F00A0B1FEF008493C0 /* BDSKSpotlightView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSpotlightView.m; sourceTree = "<group>"; };
 		F9ABEC9E086E11B500741FC5 /* BTParse.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = BTParse.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9ABECF2086E142100741FC5 /* BTParse.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BTParse.xcodeproj; path = vendorsrc/gward/btparse/objc/BTParse.xcodeproj; sourceTree = "<group>"; };
-		F9B3405B0BBC16720072C2B0 /* BibItem_PubMedLookup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BibItem_PubMedLookup.h; sourceTree = "<group>"; };
-		F9B3405C0BBC16720072C2B0 /* BibItem_PubMedLookup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BibItem_PubMedLookup.m; sourceTree = "<group>"; };
 		F9B800920B41DFAF00A5A615 /* BDSKSearchGroupSheetController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchGroupSheetController.h; sourceTree = "<group>"; };
 		F9B800930B41DFAF00A5A615 /* BDSKSearchGroupSheetController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchGroupSheetController.m; sourceTree = "<group>"; };
 		F9B801830B41E89500A5A615 /* yaz.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = yaz.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2185,7 +2182,6 @@
 				CE38FEFD0D4E7EC700D0A886 /* BDSKVersionNumber.m */,
 				F9022C60075802E300C3F701 /* BibAuthor.m */,
 				F9022C6E075802E300C3F701 /* BibItem.m */,
-				F9B3405C0BBC16720072C2B0 /* BibItem_PubMedLookup.m */,
 				F97C9DBB0C44866F0002EE01 /* WSGeneratedObj.m */,
 				3B91DD46162225850088206D /* WOKMWSAuthenticateService.m */,
 				CEBF7AE618F2EB6300012ECD /* WokSearchLiteService.m */,
@@ -2713,7 +2709,6 @@
 				F9022C67075802E300C3F701 /* BDSKEditor.h */,
 				F920DAFE075C2B69000C5FCA /* BibItem+Scripting.h */,
 				F9022C6D075802E300C3F701 /* BibItem.h */,
-				F9B3405B0BBC16720072C2B0 /* BibItem_PubMedLookup.h */,
 				F9E0BCB10895ACC9005E5FAA /* BibPref_Display.h */,
 				F963E4350A1D7B3600695DDC /* BibPref_Export.h */,
 				F92F4E4C0788DEFC001B8F82 /* BibPref_Files.h */,
@@ -3535,7 +3530,6 @@
 				F9BE68380B80F94000B2597C /* BDSKFileMatchConfigController.m in Sources */,
 				CEF71ADB0B91BBCB003A2771 /* BDSKNotesWindowController.m in Sources */,
 				CE4385E90BB81D0500A56987 /* BDSKSearchBookmarkController.m in Sources */,
-				F9B3405E0BBC16720072C2B0 /* BibItem_PubMedLookup.m in Sources */,
 				F92405030BC5856900672839 /* BDSKLevelIndicatorCell.m in Sources */,
 				F9936CC60BC746C300A32DC4 /* BDSKItemSearchIndexes.m in Sources */,
 				CE6C04450BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.m in Sources */,

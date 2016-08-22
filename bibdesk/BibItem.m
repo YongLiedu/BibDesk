@@ -35,7 +35,6 @@
 
 
 #import "BibItem.h"
-#import "BibItem_PubMedLookup.h"
 #import "BDSKOwnerProtocol.h"
 #import "NSDate_BDSKExtensions.h"
 #import "BDSKGroup.h"
@@ -79,6 +78,8 @@
 #import "NSWorkSpace_BDSKExtensions.h"
 #import <SkimNotesBase/SkimNotesBase.h>
 #import <Quartz/Quartz.h>
+#import <AGRegex/AGRegex.h>
+#import "BDSKEntrezGroupServer.h"
 
 NSString *BDSKBibItemKeyKey = @"key";
 NSString *BDSKBibItemOldValueKey = @"oldValue";
@@ -3283,6 +3284,144 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         }
     }
     return item;
+}
+
+static inline NSArray *extractAllDOIsFromString(NSString *string) {
+    NSMutableArray *dois = [NSMutableArray array];
+    // here is another exampled of a doi regex = 10\.[0-9]+\/[a-z0-9\.\-\+\/\(\)]+;
+    AGRegex *doiRegex = [AGRegex regexWithPattern:@"doi[:\\s/]{1,2}(10\\.[0-9]{4,}(?:\\.[0-9]+)*)[\\s/0]{1,3}(\\S+)"
+                                          options:AGRegexMultiline|AGRegexCaseInsensitive];
+    AGRegexMatch *match;
+    for (match in [doiRegex findEnumeratorInString:string]) {
+        NSString *doi;
+        if ([match groupAtIndex:1] != nil && [match groupAtIndex:2] != nil)
+            [dois addObject:[NSString stringWithFormat:@"%@/%@", [match groupAtIndex:1], [match groupAtIndex:2]]];
+    }
+    return dois;
+}
+
+static inline NSString *stringByExtractingPIIFromString(NSString *string) {
+    // nb this method will NOT attempt to 'denormalise' normalised PIIs
+    
+    NSString *pii=nil;
+    // next Elsevier PII
+    // Some useful info at: http://www.weizmann.ac.il/home/comartin/doi.html
+    // It has the form Sxxxx-xxxx(yy)zzzzz-c,
+    // where xxxx-xxxx is the 8-digit ISSN (International Systematic Serial Number) of the journal,
+    // yy are the last two digits of the year,
+    // zzzzz is an article number within that year of the journal,
+    // and c is a checksum digit
+    // sometimes it is also normalised by removing all non alpha characters
+    // (and this is how it is stored in PubMed)
+    
+    //S0092867402007006 or S0092-8674(02)00700-6
+    // NB occasionally the checksum is X and once I have seen: 0092-8674(93)90422-M
+    // ie terminal M and missing S
+    // Unfortunately Elsevier switched from submitting the standard form to PubMed
+    // to the normalised form.
+    
+    // I have relaxed the regex to allow a missing S in the full form BUT not the normalised form
+    
+    AGRegex *PIIRegex = [AGRegex regexWithPattern:@"S{0,1}[0-9]{4}-[0-9]{3}[0-9X][(][0-9]{2}[)][0-9]{5}-[0-9MX]"
+                                          options:AGRegexMultiline|AGRegexCaseInsensitive];
+    AGRegexMatch *match = [PIIRegex findInString:string];
+    if([match groupAtIndex:0]!=nil)
+        pii = [NSString stringWithString:[match groupAtIndex:0]];
+    if(pii==nil){
+        // try normalised form
+        AGRegex *PIIRegex2 = [AGRegex regexWithPattern:@"S[0-9]{7}[0-9X][0-9]{7}[0-9MX]"
+                                               options:AGRegexCaseInsensitive];
+        match = [PIIRegex2 findInString:string];
+        if([match groupAtIndex:0]!=nil)
+            pii = [NSString stringWithString:[match groupAtIndex:0]];
+    }
+    return pii;
+}
+
+static inline NSString *stringByExtractingNPGRJFromString(NSString *string) {
+    // kMDItemTitle = "npgrj_nmeth_1241 821..827"
+    // kMDItemTitle = "NPGRJ_NMETH_989 73..79"
+    if ([string length] <= 6 || [string hasCaseInsensitivePrefix:@"npgrj_"] == NO)
+        return nil;
+    NSUInteger end = [string rangeOfString:@" "].location;
+    if (end == NSNotFound)
+        end = [string length];
+    return [string substringWithRange:NSMakeRange(6, end - 6)];
+}
+
++ (id)itemFromAnyBibliographicIDsInString:(NSString *)string owner:(id<BDSKOwner>)anOwner;
+{
+    BibItem *bi = nil;
+    NSString *bibID;
+    NSString *pubmedSearch;
+    
+    // first try Elsevier PII
+    if ((bibID = stringByExtractingPIIFromString(string))) {
+        // nb we need to search for both forms and the standard one must be quoted
+        pubmedSearch = [NSString stringWithFormat:@"\"%@\" [AID] OR %@ [AID]", bibID, [bibID stringByDeletingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"()-"]]];
+        bi = [[BDSKEntrezGroupServer itemsForSearchTerm:pubmedSearch usingDatabase:@"pubmed" allowMultiple:NO] firstObject];
+        
+    } else if ((bibID = [extractAllDOIsFromString(string) firstObject])) {
+        // next try DOI
+        bi = [self itemWithDOI:bibID owner:anOwner];
+        if (bi == nil) {
+            pubmedSearch = [NSString stringWithFormat:@"%@ [AID]", bibID];
+            bi = [[BDSKEntrezGroupServer itemsForSearchTerm:pubmedSearch usingDatabase:@"pubmed" allowMultiple:NO] firstObject];
+        }
+    } else if ((bibID = stringByExtractingNPGRJFromString(string))) {
+        // next try looking for any nature publishing group form
+        pubmedSearch = [NSString stringWithFormat:@"%@ [AID] OR %@ [AID]", bibID, [bibID stringByRemovingString:@"_"]];
+        bi = [[BDSKEntrezGroupServer itemsForSearchTerm:pubmedSearch usingDatabase:@"pubmed" allowMultiple:NO] firstObject];
+    }
+    
+    return bi;
+}
+
++ (id)itemByParsingPDFAtURL:(NSURL *)pdfURL owner:(id<BDSKOwner>)anOwner;
+{
+    BibItem *bi=nil;
+    NSString *name = [[pdfURL lastPathComponent] stringByDeletingPathExtension];
+    
+    // see if we can find any bibliographic info in the filename
+    bi = [self itemFromAnyBibliographicIDsInString:name owner:anOwner];
+    
+    if (bi == nil) {
+        PDFDocument *pdfDoc = [[PDFDocument alloc] initWithURL:pdfURL];
+        if (pdfDoc) {
+            // See if we can find any bibliographic info in the pdf title attribute
+            if ((name = [[pdfDoc documentAttributes] valueForKey:PDFDocumentTitleAttribute]))
+                bi = [self itemFromAnyBibliographicIDsInString:name owner:anOwner];
+            
+            if (bi == nil) {
+                // ... else directly parse text of first two pages for doi
+                NSUInteger i = 0;
+                for (; bi == nil && i < 2 && i < [pdfDoc pageCount]; i++) {
+                    
+                    NSString *pageText = [[pdfDoc pageAtIndex:i] string];
+                    // If we've got nothing to parse, try the next page
+                    if ([pageText length]>4) {
+                        // Clean up any high unicode characters which can flummox the regex
+                        NSArray *dois = extractAllDOIsFromString([pageText stringByRemovingAliens]);
+                        if ([dois count]) {
+                            NSMutableString *pubmedSearch = [NSMutableString string];
+                            for (NSString *doi in dois) {
+                                bi = [self itemWithDOI:doi owner:anOwner];
+                                if (bi) break;
+                                if ([pubmedSearch length])
+                                    [pubmedSearch appendString:@" OR "];
+                                [pubmedSearch appendFormat:@"\"%@\" [AID]", doi];
+                            }
+                            if (bi == nil)
+                                bi = [[BDSKEntrezGroupServer itemsForSearchTerm:pubmedSearch usingDatabase:@"pubmed" allowMultiple:NO] firstObject];
+                        }
+                    }
+                }
+            }
+            [pdfDoc release];
+        }
+    }
+    
+    return bi;
 }
 
 + (BibItem *)itemWithDOI:(NSString *)doi owner:(id<BDSKOwner>)anOwner {

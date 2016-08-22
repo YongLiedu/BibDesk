@@ -1387,6 +1387,87 @@ http://home.planet.nl/~faase009/GNU.txt
     return [resultString autorelease];
 }
 
+// NS and CF character sets won't find these, due to the way CFString handles surrogate pairs.  The surrogate pair inlines were borrowed from CFCharacterSetPriv.h in CF-lite-476.13.
+static inline bool __SKIsSurrogateHighCharacter(const UniChar character) {
+    return ((character >= 0xD800UL) && (character <= 0xDBFFUL) ? true : false);
+}
+
+static inline bool __SKIsSurrogateLowCharacter(const UniChar character) {
+    return ((character >= 0xDC00UL) && (character <= 0xDFFFUL) ? true : false);
+}
+
+static inline bool __SKIsSurrogateCharacter(const UniChar character) {
+    return ((character >= 0xD800UL) && (character <= 0xDFFFUL) ? true : false);
+}
+
+static inline UTF32Char __SKGetLongCharacterForSurrogatePair(const UniChar surrogateHigh, const UniChar surrogateLow) {
+    return ((surrogateHigh - 0xD800UL) << 10) + (surrogateLow - 0xDC00UL) + 0x0010000UL;
+}
+
+static inline bool __SKIsPrivateUseCharacter(const UTF32Char ch)
+{
+    return ((ch >= 0xE000UL && ch <= 0xF8FFUL) ||    /* private use area */
+            (ch >= 0xF0000UL && ch <= 0xFFFFFUL) ||  /* supplementary private use A */
+            (ch >= 0x100000UL && ch <= 0x10FFFFUL)); /* supplementary private use B */
+}
+
+// Remove anything in the private use planes, and/or malformed surrogate pair sequences rdar://problem/6273932
+- (NSString *)stringByRemovingAliens {
+    
+    // make a mutable copy only if needed
+    CFMutableStringRef theString = (void *)self;
+    
+    CFStringInlineBuffer inlineBuffer;
+    CFIndex length = CFStringGetLength(theString);
+    
+    // use the current mutable string with the inline buffer, but make a new mutable copy if needed
+    CFStringInitInlineBuffer(theString, &inlineBuffer, CFRangeMake(0, length));
+    UniChar ch;
+    
+#define DELETE_CHARACTERS(n) do{if((void*)self==theString){theString=(void*)[[self mutableCopyWithZone:[self zone]] autorelease];};CFStringDelete(theString, CFRangeMake(delIdx, n));} while(0)
+    
+    // idx is current index into the inline buffer, and delIdx is current index in the mutable string
+    CFIndex idx = 0, delIdx = 0;
+    while(idx < length){
+        ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, idx);
+        if (__SKIsPrivateUseCharacter(ch)) {
+            DELETE_CHARACTERS(1);
+        } else if (__SKIsSurrogateCharacter(ch)) {
+            
+            if ((idx + 1) < length) {
+                
+                UniChar highChar = ch;
+                UniChar lowChar = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, idx + 1);
+                // if we only have half of a surrogate pair, delete the offending character
+                if (__SKIsSurrogateLowCharacter(lowChar) == false || __SKIsSurrogateHighCharacter(highChar) == false) {
+                    DELETE_CHARACTERS(1);
+                    // only deleted a single char, so don't need to adjust idx
+                } else if (__SKIsPrivateUseCharacter(__SKGetLongCharacterForSurrogatePair(highChar, lowChar))) {
+                    // remove the pair; can't display private use characters
+                    DELETE_CHARACTERS(2);
+                    // adjust since we removed two characters...
+                    idx++;
+                } else {
+                    // valid surrogate pair, so we'll leave it alone
+                    delIdx += 2;
+                    idx++;
+                }
+                
+            } else {
+                // insufficient length for this to be a valid sequence, so it's only half of a surrogate pair
+                DELETE_CHARACTERS(1);
+            }
+            
+        } else {
+            // keep track of our index in the copy and the original
+            delIdx++;
+        }
+        idx++;
+    }
+    
+    return (id)theString;
+}
+
 #pragma mark Paths
 
 // These methods are copied and modified from NSString-OFStringExtensions.m
