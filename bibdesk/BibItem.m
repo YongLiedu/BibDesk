@@ -3353,26 +3353,24 @@ static inline NSString *stringByExtractingNPGRJFromString(NSString *string) {
 {
     BibItem *bi = nil;
     NSString *bibID;
-    NSString *pubmedSearch;
+    NSString *pubmedSearch = nil;
     
     // first try Elsevier PII
     if ((bibID = stringByExtractingPIIFromString(string))) {
         // nb we need to search for both forms and the standard one must be quoted
         pubmedSearch = [NSString stringWithFormat:@"\"%@\" [AID] OR %@ [AID]", bibID, [bibID stringByDeletingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"()-"]]];
-        bi = [[BDSKEntrezGroupServer itemsForSearchTerm:pubmedSearch usingDatabase:@"pubmed" allowMultiple:NO] firstObject];
         
     } else if ((bibID = [extractAllDOIsFromString(string) firstObject])) {
         // next try DOI
         bi = [self itemWithDOI:bibID owner:anOwner];
-        if (bi == nil) {
+        if (bi == nil)
             pubmedSearch = [NSString stringWithFormat:@"%@ [AID]", bibID];
-            bi = [[BDSKEntrezGroupServer itemsForSearchTerm:pubmedSearch usingDatabase:@"pubmed" allowMultiple:NO] firstObject];
-        }
     } else if ((bibID = stringByExtractingNPGRJFromString(string))) {
         // next try looking for any nature publishing group form
         pubmedSearch = [NSString stringWithFormat:@"%@ [AID] OR %@ [AID]", bibID, [bibID stringByRemovingString:@"_"]];
-        bi = [[BDSKEntrezGroupServer itemsForSearchTerm:pubmedSearch usingDatabase:@"pubmed" allowMultiple:NO] firstObject];
     }
+    if (pubmedSearch)
+        bi = [[BDSKEntrezGroupServer itemsForSearchTerm:pubmedSearch usingDatabase:@"pubmed" allowMultiple:NO] firstObject];
     
     return bi;
 }
