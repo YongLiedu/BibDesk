@@ -3349,7 +3349,7 @@ static inline NSString *stringByExtractingNPGRJFromString(NSString *string) {
     return [string substringWithRange:NSMakeRange(6, end - 6)];
 }
 
-+ (id)itemFromAnyBibliographicIDsInString:(NSString *)string owner:(id<BDSKOwner>)anOwner;
++ (BibItem *)itemFromAnyBibliographicIDsInString:(NSString *)string owner:(id<BDSKOwner>)anOwner;
 {
     BibItem *bi = nil;
     NSString *bibID;
@@ -3375,7 +3375,7 @@ static inline NSString *stringByExtractingNPGRJFromString(NSString *string) {
     return bi;
 }
 
-+ (id)itemByParsingPDFAtURL:(NSURL *)pdfURL owner:(id<BDSKOwner>)anOwner;
++ (BibItem *)itemByParsingPDFAtURL:(NSURL *)pdfURL owner:(id<BDSKOwner>)anOwner;
 {
     BibItem *bi=nil;
     NSString *name = [[pdfURL lastPathComponent] stringByDeletingPathExtension];
