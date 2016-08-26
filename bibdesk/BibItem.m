@@ -2597,8 +2597,8 @@ static void addFilesToArray(const void *value, void *context)
             baseURL = [NSURL URLWithString:@"http://doi.org/"];
             // remove any text prefix, which is not required for a valid DOI, but may be present; DOI starts with "10"
             // http://www.doi.org/handbook_2000/enumeration.html#2.2
-            NSRange range = [value rangeOfCharacterFromSet:[NSCharacterSet decimalDigitCharacterSet]];
-            if(range.length && range.location > 0)
+            NSRange range = [value rangeOfString:@"10."];
+            if(range.location != NSNotFound)
                 value = [value substringFromIndex:range.location];
         }
         // DOIs can contain % and # characters, which should be escaped in a valid URL
@@ -3424,23 +3424,20 @@ static inline NSString *stringByExtractingNPGRJFromString(NSString *string) {
 
 + (BibItem *)itemWithDOI:(NSString *)doi owner:(id<BDSKOwner>)anOwner {
     BibItem *item = nil;
-    NSURL *doiURL = nil;
+    NSURL *baseURL = nil;
     
-    if ([doi hasCaseInsensitivePrefix:@"http://"] || [doi hasCaseInsensitivePrefix:@"https://"]) {
-        // it's already a DOI URL string
-        doiURL = [NSURL URLWithString:doi];
-    } else {
+    if ([doi rangeOfString:@"://"].location == NSNotFound) {
         // DOI manual says this is a safe URL to resolve with for the foreseeable future
-        NSURL *baseURL = [NSURL URLWithString:@"http://doi.org/"];
+        baseURL = [NSURL URLWithString:@"http://doi.org/"];
         // remove any text prefix, which is not required for a valid DOI, but may be present; DOI starts with "10"
         // http://www.doi.org/handbook_2000/enumeration.html#2.2
-        NSRange range = [doi rangeOfCharacterFromSet:[NSCharacterSet decimalDigitCharacterSet]];
-        if(range.length && range.location > 0)
+        NSRange range = [doi rangeOfString:@"10."];
+        if (range.location != NSNotFound)
             doi = [doi substringFromIndex:range.location];
         doi = [doi stringByAddingPercentEscapes];
-        doiURL = [[NSURL URLWithStringByNormalizingPercentEscapes:doi baseURL:baseURL] absoluteURL];
     }
     
+    NSURL *doiURL = [[NSURL URLWithStringByNormalizingPercentEscapes:doi baseURL:baseURL] absoluteURL];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:doiURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:1.0];
     [request setValue:@"text/bibliography; style=bibtex" forHTTPHeaderField:@"Accept"];
     NSURLResponse *response = nil;
