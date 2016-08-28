@@ -496,8 +496,6 @@
 
 - (BOOL)isDocument { return NO; }
 
-- (BDSKItemSearchIndexes *)searchIndexes { return nil; }
-
 #pragma mark Private
 
 // workaround for webview bug, which looses its selection when the focus changes to another view

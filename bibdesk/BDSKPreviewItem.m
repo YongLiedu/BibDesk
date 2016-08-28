@@ -182,8 +182,6 @@
 
 - (NSString *)documentInfoForKey:(NSString *)key { return key; }
 
-- (BDSKItemSearchIndexes *)searchIndexes { return nil; }
-
 @end
 
 

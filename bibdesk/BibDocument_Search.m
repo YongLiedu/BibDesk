@@ -128,13 +128,13 @@
             
             SKIndexRef skIndex = NULL;
             
-            if ([field isEqualToString:BDSKSkimNotesString]) {
+            // we need the correct search index
+            if ([field isEqualToString:BDSKSkimNotesString])
                 skIndex = [notesSearchIndex index];
-            } else {
-                // we need the correct BDSKPublicationsArray for access to the identifierURLs
-                id<BDSKOwner> owner = [self hasGroupTypeSelected:BDSKExternalGroupType] ? [[self selectedGroups] firstObject] : self;
-                skIndex = [[owner searchIndexes] indexForField:field];
-            }
+            else if ([self hasGroupTypeSelected:BDSKExternalGroupType])
+                skIndex = [[[[self selectedGroups] firstObject] searchIndexes] indexForField:field];
+            else
+                skIndex = [[self searchIndexes] indexForField:field];
             [documentSearch searchForString:BDSKSearchKitExpressionWithString(searchString) index:skIndex selectedPublications:[self selectedPublications] scrollPositionAsPercentage:[tableView scrollPositionAsPercentage]];
             
         }

@@ -49,6 +49,5 @@
 - (NSUndoManager *)undoManager;
 - (NSURL *)fileURL;
 - (NSString *)documentInfoForKey:(NSString *)key;
-- (BDSKItemSearchIndexes *)searchIndexes;
 
 @end

@@ -57,6 +57,8 @@ extern NSString *BDSKExternalGroupSucceededKey;
 - (void)setPublications:(NSArray *)newPublications;
 - (void)addPublications:(NSArray *)newPublications;
 
+- (BDSKItemSearchIndexes *)searchIndexes;
+
 - (BOOL)shouldRetrievePublications;
 - (void)retrievePublications;
 

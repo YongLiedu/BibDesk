@@ -366,6 +366,8 @@ extern NSString *BDSKDocumentPublicationsKey;
 - (id)valueForUndefinedKey:(NSString *)key;
 - (NSString *)documentInfoString;
 
+- (BDSKItemSearchIndexes *)searchIndexes;
+
 #pragma mark bibtex macro support
 
 - (BDSKMacroResolver *)macroResolver;
