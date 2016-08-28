@@ -38,7 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes;
+@class BDSKPublicationsArray, BDSKMacroResolver;
 
 // this protocol describes the methods for a stand-in for the document, documents of BibItem and BDSKMacroResolver should conform to this
 @protocol BDSKOwner <NSObject>
