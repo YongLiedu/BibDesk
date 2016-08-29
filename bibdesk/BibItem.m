@@ -3443,10 +3443,16 @@ static inline NSString *stringByExtractingNPGRJFromString(NSString *string) {
     NSURLResponse *response = nil;
     NSError *error = nil;
     NSData *btData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-    NSString *bibtexString = nil;
     
     if (btData) {
-        bibtexString = [[[[NSString alloc] initWithData:btData encoding:NSUTF8StringEncoding] autorelease] stringByRemovingSurroundingWhitespace];
+        NSString *bibtexString = nil;
+        NSString *encodingName = [response textEncodingName];
+        NSStringEncoding encoding = kCFStringEncodingInvalidId;
+        if (encodingName)
+            encoding = CFStringConvertEncodingToNSStringEncoding(CFStringConvertIANACharSetNameToEncoding((CFStringRef)encodingName));
+        if (encoding == kCFStringEncodingInvalidId)
+            encoding = NSUTF8StringEncoding;
+        bibtexString = [[[[NSString alloc] initWithData:btData encoding:encoding] autorelease] stringByRemovingSurroundingWhitespace];
         if (bibtexString) {
             item = [[BDSKBibTeXParser itemsFromString:bibtexString owner:anOwner error:&error] firstObject];
             if ([error isLocalErrorWithCode:kBDSKBibTeXParserFailed])

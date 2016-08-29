@@ -138,15 +138,22 @@
 		queryString = [queryString stringByAddingPercentEscapes];
 		[request setHTTPBody:[queryString dataUsingEncoding:NSUTF8StringEncoding]];
 		
-		NSURLResponse * response;
+		NSURLResponse * response = nil;
 		NSData * result = [NSURLConnection sendSynchronousRequest:request returningResponse: &response error: &error];
 		
 		if (result == nil) {
-			if (outError != NULL) { *outError = error; } 
+			if (outError != NULL) *outError = error;
 			return nil; 
 		}
 		
-		NSString * bibTeXString = [[[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding] autorelease];
+        NSString *encodingName = [response textEncodingName];
+        NSStringEncoding encoding = kCFStringEncodingInvalidId;
+        if (encodingName)
+            encoding = CFStringConvertEncodingToNSStringEncoding(CFStringConvertIANACharSetNameToEncoding((CFStringRef)encodingName));
+        if (encoding == kCFStringEncodingInvalidId)
+            encoding = NSUTF8StringEncoding;
+        
+		NSString * bibTeXString = [[[NSString alloc] initWithData:result encoding:encoding] autorelease];
 		bibTeXString = [bibTeXString stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 		bibTeXString = [umlautFixer replaceWithString:@"{$1}" inString:bibTeXString];
 		NSError * ignoreError;
