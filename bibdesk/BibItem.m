@@ -2594,7 +2594,7 @@ static void addFilesToArray(const void *value, void *context)
     if([field isEqualToString:BDSKDoiString]) {
         if ([value rangeOfString:@"://"].length == 0){
             // DOI manual says this is a safe URL to resolve with for the foreseeable future
-            baseURL = [NSURL URLWithString:@"http://doi.org/"];
+            baseURL = [NSURL URLWithString:@"http://dx.doi.org/"];
             // remove any text prefix, which is not required for a valid DOI, but may be present; DOI starts with "10"
             // http://www.doi.org/handbook_2000/enumeration.html#2.2
             NSRange range = [value rangeOfString:@"10."];
@@ -3428,7 +3428,7 @@ static inline NSString *stringByExtractingNPGRJFromString(NSString *string) {
     
     if ([doi rangeOfString:@"://"].location == NSNotFound) {
         // DOI manual says this is a safe URL to resolve with for the foreseeable future
-        baseURL = [NSURL URLWithString:@"http://doi.org/"];
+        baseURL = [NSURL URLWithString:@"http://dx.doi.org/"];
         // remove any text prefix, which is not required for a valid DOI, but may be present; DOI starts with "10"
         // http://www.doi.org/handbook_2000/enumeration.html#2.2
         NSRange range = [doi rangeOfString:@"10."];

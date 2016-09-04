@@ -168,7 +168,7 @@
 	[filesArray addObject:[BDSKLinkedFile linkedFileWithURL:[NSURL URLWithString:@"fulltext.pdf" relativeToURL:url] delegate:nil]];
 	// URL to DOI
 	if (doi != nil) {
-		[filesArray addObject:[BDSKLinkedFile linkedFileWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://doi.org/%@", doi]] delegate:nil]];
+		[filesArray addObject:[BDSKLinkedFile linkedFileWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://dx.doi.org/%@", doi]] delegate:nil]];
 	}
     
 	return [[BibItem alloc] initWithType:pubType citeKey:nil pubFields:pubFields files:filesArray isNew:YES];
