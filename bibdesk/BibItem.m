@@ -3438,7 +3438,7 @@ static inline NSString *stringByExtractingNPGRJFromString(NSString *string) {
     }
     
     NSURL *doiURL = [[NSURL URLWithStringByNormalizingPercentEscapes:doi baseURL:baseURL] absoluteURL];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:doiURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:1.0];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:doiURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:10.0];
     [request setValue:@"text/bibliography; style=bibtex" forHTTPHeaderField:@"Accept"];
     NSURLResponse *response = nil;
     NSError *error = nil;

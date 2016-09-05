@@ -373,7 +373,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
     NSURL *theURL = [self esearchURLWithDatabase:database searchTerm:searchTerm];
     BDSKPRECONDITION(theURL);
     
-    NSURLRequest *request = [NSURLRequest requestWithURL:theURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:1.0];
+    NSURLRequest *request = [NSURLRequest requestWithURL:theURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:10.0];
     NSURLResponse *response;
     NSError *error;
     NSData *returnData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
@@ -395,7 +395,7 @@ enum { BDSKIdleState, BDSKEsearchState, BDSKEfetchState };
                 theURL = [self efetchURLWithDatabase:database webEnv:webEnv queryKey:queryKey range:NSMakeRange(0, MIN(count, MAX_RESULTS))];
                 BDSKPOSTCONDITION(theURL);
                 
-                request = [NSURLRequest requestWithURL:theURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:1.0];
+                request = [NSURLRequest requestWithURL:theURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:10.0];
                 
                 returnData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
                 
