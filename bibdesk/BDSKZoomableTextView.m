@@ -83,6 +83,11 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.1, 0.2, 0.25, 0.35, 0.5, 0.6, 
     return self;
 }
 
+- (void)dealloc {
+    BDSKDESTROY(scalePopUpButton);
+    [super dealloc];
+}
+
 - (void)viewDidMoveToSuperview {
     [super viewDidMoveToSuperview];
     [self makeScalePopUpButton];
@@ -158,7 +163,6 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
         
         // put it in the scrollview
         [[self enclosingScrollView] setPlacards:[NSArray arrayWithObject:scalePopUpButton]];
-        [scalePopUpButton release];
     }
 }
 
