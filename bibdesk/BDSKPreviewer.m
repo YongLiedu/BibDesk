@@ -187,6 +187,12 @@ static BDSKPreviewer *sharedPreviewer = nil;
     return pdfView;
 }
 
+- (NSView *)pdfContentView;
+{
+    [self window];
+    return [[[[tabView tabViewItemAtIndex:BDSKPreviewerTabIndexPDF] view] subviews] firstObject];
+}
+
 - (BDSKOverlayPanel *)progressOverlay;
 {
     [self window];

@@ -41,6 +41,8 @@
 #import "NSView_BDSKExtensions.h"
 #import "BDSKHighlightingPopUpButton.h"
 #import "NSPrintOperation_BDSKExtensions.h"
+#import "BDSKCollapsibleView.h"
+#import "BDSKColoredView.h"
 
 
 @interface BDSKZoomableTextView (BDSKPrivate)
@@ -59,7 +61,9 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.1, 0.2, 0.25, 0.35, 0.5, 0.6, 
 #define BDSKMinDefaultScaleMenuFactor (BDSKDefaultScaleMenuFactors[1])
 #define BDSKDefaultScaleMenuFactorsCount (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(CGFloat))
 
-#define BDSKScaleMenuFontSize ((CGFloat)11.0)
+#define BDSKScaleMenuFontSize 10.0
+#define BDSKScaleMenuHeight 15.0
+#define BDSKScaleMenuWidthOffset 20.0
 
 #pragma mark Instance methods
 
@@ -68,7 +72,6 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.1, 0.2, 0.25, 0.35, 0.5, 0.6, 
     if (self) {
 		scaleFactor = 1.0;
         pinchZoomFactor = 1.0;
-        [self makeScalePopUpButton];
     }
     return self;
 }
@@ -78,19 +81,14 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.1, 0.2, 0.25, 0.35, 0.5, 0.6, 
     if (self) {
 		scaleFactor = 1.0;
         pinchZoomFactor = 1.0;
-        [self makeScalePopUpButton];
     }
     return self;
 }
 
 - (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     BDSKDESTROY(scalePopUpButton);
     [super dealloc];
-}
-
-- (void)viewDidMoveToSuperview {
-    [super viewDidMoveToSuperview];
-    [self makeScalePopUpButton];
 }
 
 - (IBAction)printSelection:(id)sender {
@@ -101,32 +99,35 @@ static CGFloat BDSKDefaultScaleMenuFactors[] = {0.1, 0.2, 0.25, 0.35, 0.5, 0.6, 
     [printOp runOperationModalForWindow:[self window] delegate:nil didRunSelector:NULL contextInfo:NULL];
 }
 
+- (void)awakeFromNib {
+    [self makeScalePopUpButton];
+}
+
 #pragma mark Instance methods - scaling related
 
-static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anIndex) {
-    NSUInteger i = [popUpButton indexOfSelectedItem];
-    [popUpButton selectItemAtIndex:anIndex];
-    [popUpButton sizeToFit];
-    NSSize frameSize = [popUpButton frame].size;
-    frameSize.width -= 22.0 + 2 * [[popUpButton cell] controlSize];
-    [popUpButton setFrameSize:frameSize];
-    [popUpButton selectItemAtIndex:i];
+- (void)handleScrollerStyleDidChange:(NSNotification *)notification {
+    NSView *view = [[self enclosingScrollView] superview];
+    if ([view respondsToSelector:@selector(setBackgroundColor:)]) {
+        CGFloat white = [NSScroller preferredScrollerStyle] == NSScrollerStyleLegacy ? 0.97 : 1.0;
+        [(BDSKColoredView *)view setBackgroundColor:[NSColor colorWithCalibratedWhite:white alpha:1.0]];
+        [view setNeedsDisplay:YES];
+    }
 }
 
 - (void)makeScalePopUpButton {
-    if (scalePopUpButton == nil && [self enclosingScrollView]) {
-        [[self enclosingScrollView] setHasHorizontalScroller:YES];
+    if (scalePopUpButton == nil) {
+        NSScrollView *scrollView = [self enclosingScrollView];
         
         // create it
         scalePopUpButton = [[BDSKHighlightingPopUpButton allocWithZone:[self zone]] initWithFrame:NSMakeRect(0.0, 0.0, 1.0, 1.0) pullsDown:NO];
-        [[scalePopUpButton cell] setControlSize:[[[self enclosingScrollView] horizontalScroller] controlSize]];
+        [[scalePopUpButton cell] setControlSize:NSSmallControlSize];
 		[scalePopUpButton setBordered:NO];
 		[scalePopUpButton setEnabled:YES];
 		[scalePopUpButton setRefusesFirstResponder:YES];
 		[[scalePopUpButton cell] setUsesItemFromMenu:YES];
         
         // set a suitable font, the control size is 0, 1 or 2
-        [scalePopUpButton setFont:[NSFont toolTipsFontOfSize: BDSKScaleMenuFontSize - [[scalePopUpButton cell] controlSize]]];
+        [scalePopUpButton setFont:[NSFont toolTipsFontOfSize:BDSKScaleMenuFontSize]];
 		
         NSUInteger cnt, numberOfDefaultItems = BDSKDefaultScaleMenuFactorsCount;
         id curItem;
@@ -148,6 +149,12 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
             curItem = [scalePopUpButton itemAtIndex:cnt];
             [curItem setRepresentedObject:(BDSKDefaultScaleMenuFactors[cnt] > 0.0 ? [NSNumber numberWithDouble:BDSKDefaultScaleMenuFactors[cnt]] : nil)];
         }
+        
+        // Make sure the popup is big enough to fit the largest cell
+        [scalePopUpButton selectItemAtIndex:maxIndex];
+        [scalePopUpButton sizeToFit];
+        [scalePopUpButton setFrameSize:NSMakeSize(NSWidth([scalePopUpButton frame]) - BDSKScaleMenuWidthOffset, BDSKScaleMenuHeight)];
+        
         // select the appropriate item, adjusting the scaleFactor if necessary
 		[self setScaleFactor:scaleFactor adjustPopup:YES];
         
@@ -155,14 +162,41 @@ static void sizePopUpToItemAtIndex(NSPopUpButton *popUpButton, NSUInteger anInde
         [scalePopUpButton setTarget:self];
         [scalePopUpButton setAction:@selector(scalePopUpAction:)];
         
-        // Make sure the popup is big enough to fit the largest cell
-        sizePopUpToItemAtIndex(scalePopUpButton, maxIndex);
-        
 		// don't let it become first responder
 		[scalePopUpButton setRefusesFirstResponder:YES];
         
-        // put it in the scrollview
-        [[self enclosingScrollView] setPlacards:[NSArray arrayWithObject:scalePopUpButton]];
+        if ([NSScroller respondsToSelector:@selector(preferredScrollerStyle)]) {
+            
+            // on 10.7+, put it in an enclosing collapsible view
+            NSRect popUpRect, scrollViewRect = [scrollView frame];
+            BDSKCollapsibleView *containerView = [[[BDSKCollapsibleView alloc] initWithFrame:scrollViewRect] autorelease];
+            
+            scrollViewRect.origin = NSZeroPoint;
+            NSDivideRect(scrollViewRect, &popUpRect, &scrollViewRect, NSHeight([scalePopUpButton frame]), NSMinYEdge);
+            popUpRect.size.width = NSWidth([scalePopUpButton frame]);
+            
+            [containerView setContentView:[[[BDSKColoredView alloc] init] autorelease]];
+            [containerView setMinSize:popUpRect.size];
+            [containerView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+            [[scrollView superview] addSubview:containerView];
+            
+            [scalePopUpButton setAutoresizingMask:NSViewMaxXMargin | NSViewMaxYMargin];
+            [scalePopUpButton setFrame:popUpRect];
+            [containerView addSubview:scalePopUpButton];
+            
+            [scrollView setFrame:scrollViewRect];
+            [containerView addSubview:scrollView];
+            
+            [self handleScrollerStyleDidChange:nil];
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleScrollerStyleDidChange:) name:@"NSPreferredScrollerStyleDidChangeNotification" object:nil];
+            
+        } else {
+            
+            // on 10.6, put it in the scroll view
+            [scrollView setHasHorizontalScroller:YES];
+            [scrollView setPlacards:[NSArray arrayWithObject:scalePopUpButton]];
+            
+        }
     }
 }
 

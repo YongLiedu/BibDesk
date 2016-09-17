@@ -66,10 +66,12 @@
 }
 
 - (void)drawRect:(NSRect)rect {
-	[NSGraphicsContext saveGraphicsState];
-    [backgroundColor set];
-    NSRectFill(rect);
-	[NSGraphicsContext restoreGraphicsState];
+    if (backgroundColor) {
+        [NSGraphicsContext saveGraphicsState];
+        [backgroundColor setFill];
+        [NSBezierPath fillRect:rect];
+        [NSGraphicsContext restoreGraphicsState];
+    }
     [super drawRect:rect];
 }
 

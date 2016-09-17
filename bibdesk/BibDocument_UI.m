@@ -204,7 +204,7 @@ enum {
         previewer = [[BDSKPreviewer alloc] init];
         NSDictionary *xatrrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
         [previewer setPDFScaleFactor:[xatrrDefaults doubleForKey:BDSKPreviewPDFScaleFactorKey defaultValue:0.0]];
-        [[bottomPreviewTabView tabViewItemAtIndex:BDSKPreviewDisplayTeX] setView:[previewer pdfView]];
+        [[bottomPreviewTabView tabViewItemAtIndex:BDSKPreviewDisplayTeX] setView:[previewer pdfContentView]];
     }
     
     [[previewer progressOverlay] overlayView:bottomPreviewTabView];

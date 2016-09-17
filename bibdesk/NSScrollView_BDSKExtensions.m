@@ -40,21 +40,6 @@
 #import "BDSKRuntime.h"
 #import "NSView_BDSKExtensions.h"
 
-#if !defined(MAC_OS_X_VERSION_10_7) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_7
-
-enum {
-   NSScrollerStyleLegacy,
-   NSScrollerStyleOverlay
-};
-typedef NSInteger NSScrollerStyle;
-
-@interface NSScroller (BDSKLionDeclarations)
-+ (NSScrollerStyle)preferredScrollerStyle;
-- (NSScrollerStyle)scrollerStyle;
-- (void)setScrollerStyle:(NSScrollerStyle)newScrollerStyle;
-@end
-
-#endif
 
 @interface BDSKPlacardView : NSView
 - (void)tile;

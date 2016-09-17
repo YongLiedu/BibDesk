@@ -77,6 +77,7 @@ typedef NSInteger BDSKPreviewState;
 + (BDSKPreviewer *)sharedPreviewer;
 
 - (PDFView *)pdfView;
+- (NSView *)pdfContentView;
 - (BDSKOverlayPanel *)progressOverlay;
 
 - (CGFloat)PDFScaleFactor;
