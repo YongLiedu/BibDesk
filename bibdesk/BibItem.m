@@ -3293,7 +3293,6 @@ static inline NSArray *extractAllDOIsFromString(NSString *string) {
                                           options:AGRegexMultiline|AGRegexCaseInsensitive];
     AGRegexMatch *match;
     for (match in [doiRegex findEnumeratorInString:string]) {
-        NSString *doi;
         if ([match groupAtIndex:1] != nil && [match groupAtIndex:2] != nil)
             [dois addObject:[NSString stringWithFormat:@"%@/%@", [match groupAtIndex:1], [match groupAtIndex:2]]];
     }
