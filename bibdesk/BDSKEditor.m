@@ -1264,40 +1264,20 @@ static inline BOOL validRanges(NSArray *ranges, NSUInteger max) {
 }
 
 - (NSArray *)safariDownloadHistory{
-    static CFURLRef downloadPlistURL = NULL;
-    CFAllocatorRef alloc = CFAllocatorGetDefault();
+    static NSURL *downloadPlistURL = NULL;
     if(NULL == downloadPlistURL){
         NSString *downloadPlistFileName = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) lastObject];
         downloadPlistFileName = [downloadPlistFileName stringByAppendingPathComponent:@"Safari"];
         downloadPlistFileName = [downloadPlistFileName stringByAppendingPathComponent:@"Downloads.plist"];
-        downloadPlistURL = CFURLCreateWithFileSystemPath(alloc, (CFStringRef)downloadPlistFileName, kCFURLPOSIXPathStyle, FALSE);
-    }
-    Boolean success;
-    CFReadStreamRef readStream = CFReadStreamCreateWithFile(alloc, downloadPlistURL);
-    success = readStream != NULL;
-        
-    if(success)
-        success = CFReadStreamOpen(readStream);
-    
-    NSDictionary *theDictionary = nil;
-    CFPropertyListFormat format;
-    CFStringRef errorString = nil;
-    if(success)
-        theDictionary = (NSDictionary *)CFPropertyListCreateFromStream(alloc, readStream, 0, kCFPropertyListImmutable, &format, &errorString);
-    
-    if(nil == theDictionary){
-        NSLog(@"failed to read Safari download property list %@ (%@)", downloadPlistURL, errorString);
-        if(errorString) CFRelease(errorString);
+        downloadPlistURL = [[NSURL alloc] initFileURLWithPath:downloadPlistFileName];
     }
     
-    if(readStream){
-        CFReadStreamClose(readStream);
-        CFRelease(readStream);
-    }
+    NSDictionary *theDictionary = [NSDictionary dictionaryWithContentsOfURL:downloadPlistURL];
     
-    NSArray *historyArray = [[theDictionary objectForKey:@"DownloadHistory"] retain];
-    [theDictionary release];
-	return [historyArray autorelease];
+    if(nil == theDictionary)
+        NSLog(@"failed to read Safari download property list %@ ", downloadPlistURL);
+    
+    return [theDictionary objectForKey:@"DownloadHistory"];
 }
 
 - (void)updateSafariRecentDownloadsMenu:(NSMenu *)menu{
