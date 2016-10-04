@@ -156,7 +156,7 @@ static double runLoopTimeout = 30;
 		NSString *filePath = [dirPath stringByAppendingPathComponent:fileName];
         texPath = [[BDSKTeXPath alloc] initWithBasePath:filePath];
         
-		binDirPath = nil; // set from where we run the tasks, since some programs (e.g. XeLaTeX) need a real path setting     
+		binDirPaths = nil; // set from where we run the tasks, since some programs (e.g. XeLaTeX) need a real path setting
         
         environment = [[[NSProcessInfo processInfo] environment] mutableCopy];
         
@@ -187,7 +187,7 @@ static double runLoopTimeout = 30;
 
 - (NSString *)description{
     NSMutableString *temporaryDescription = [[NSMutableString alloc] initWithString:[super description]];
-    [temporaryDescription appendFormat:@" {\nivars:\n\tdelegate = \"%@\"\n\tfile name = \"%@\"\n\ttemplate = \"%@\"\n\tTeX file = \"%@\"\n\tBibTeX file = \"%@\"\n\tTeX binary path = \"%@\"\n\tEncoding = \"%@\"\n\tBibTeX style = \"%@\"\n\tHelper files = %@\n\nenvironment:\n\tSHELL = \"%@\"\n\tBIBINPUTS = \"%@\"\n\tBSTINPUTS = \"%@\"\n\tTEXINPUTS = \"%@\"\n\tTEXCONFIG = \"%@\"\n\tTEXMFCONFIG = \"%@\"\n\tPATH = \"%@\" }", delegate, [texPath baseNameWithoutExtension], texTemplatePath, [texPath texFilePath], [texPath bibFilePath], binDirPath, [NSString localizedNameOfStringEncoding:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey]], [[NSUserDefaults standardUserDefaults] objectForKey:BDSKBTStyleKey], [[self helperFileURLs] description], [environment objectForKey:@"SHELL"], [environment objectForKey:@"BIBINPUTS"], [environment objectForKey:@"BSTINPUTS"], [environment objectForKey:@"TEXINPUTS"], [environment objectForKey:@"TEXCONFIG"], [environment objectForKey:@"TEXMFCONFIG"], [environment objectForKey:@"PATH"]];
+    [temporaryDescription appendFormat:@" {\nivars:\n\tdelegate = \"%@\"\n\tfile name = \"%@\"\n\ttemplate = \"%@\"\n\tTeX file = \"%@\"\n\tBibTeX file = \"%@\"\n\tTeX binary path = \"%@\"\n\tEncoding = \"%@\"\n\tBibTeX style = \"%@\"\n\tHelper files = %@\n\nenvironment:\n\tSHELL = \"%@\"\n\tBIBINPUTS = \"%@\"\n\tBSTINPUTS = \"%@\"\n\tTEXINPUTS = \"%@\"\n\tTEXCONFIG = \"%@\"\n\tTEXMFCONFIG = \"%@\"\n\tPATH = \"%@\" }", delegate, [texPath baseNameWithoutExtension], texTemplatePath, [texPath texFilePath], [texPath bibFilePath], binDirPaths, [NSString localizedNameOfStringEncoding:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey]], [[NSUserDefaults standardUserDefaults] objectForKey:BDSKBTStyleKey], [[self helperFileURLs] description], [environment objectForKey:@"SHELL"], [environment objectForKey:@"BIBINPUTS"], [environment objectForKey:@"BSTINPUTS"], [environment objectForKey:@"TEXINPUTS"], [environment objectForKey:@"TEXCONFIG"], [environment objectForKey:@"TEXMFCONFIG"], [environment objectForKey:@"PATH"]];
     NSString *description = [temporaryDescription copy];
     [temporaryDescription release];
     return [description autorelease];
@@ -230,12 +230,20 @@ static double runLoopTimeout = 30;
     // make sure the PATH environment variable is set correctly
     NSString *texCommand = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKTeXBinPathKey];
     NSString *texCommandDir = [[BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:texCommand] stringByDeletingLastPathComponent];
+    NSString *bibtexCommand = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKBibTeXBinPathKey];
+    NSString *bibtexCommandDir = [[BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:texCommand] stringByDeletingLastPathComponent];
+    NSSet *commandDirs = [NSSet setWithObjects:texCommandDir, bibtexCommandDir, nil];
 
-    if (NO == [texCommandDir isEqualToString:binDirPath]) {
-        [binDirPath release];
-        binDirPath = [texCommandDir retain];
+    if (NO == [commandDirs isEqualToSet:binDirPaths]) {
+        [binDirPaths release];
+        binDirPaths = [commandDirs retain];
         NSString *path = [[[NSProcessInfo processInfo] environment] objectForKey:@"PATH"];
-        [environment setObject:[NSString stringWithFormat:@"%@:%@", path, binDirPath] forKey:@"PATH"];
+        NSArray *paths = [path componentsSeparatedByString:@":"];
+        for (NSString *commandDir in commandDirs) {
+            if ([paths containsObject:commandDir] == NO)
+                path = [path stringByAppendingFormat:@":%@", commandDir];
+        }
+        [environment setObject:path forKey:@"PATH"];
     }
     
     BOOL isLTB = (flag == BDSKGenerateLTB);
