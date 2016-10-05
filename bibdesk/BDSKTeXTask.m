@@ -100,6 +100,8 @@ enum {
 
 - (void)checkTeXPaths;
 
+- (void)checkPATHEnvironment;
+
 @end
 
 // modify the TeX template in application support
@@ -221,30 +223,14 @@ static double runLoopTimeout = 30;
     
     static BOOL didCheckTeXPaths = NO;
     if (didCheckTeXPaths == NO) {
-        didCheckTeXPaths  =YES;
+        didCheckTeXPaths = YES;
         [self checkTeXPaths];
     }
     
-    generatedDataMask = BDSKGeneratedNoneMask;
-    
     // make sure the PATH environment variable is set correctly
-    NSString *texCommand = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKTeXBinPathKey];
-    NSString *texCommandDir = [[BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:texCommand] stringByDeletingLastPathComponent];
-    NSString *bibtexCommand = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKBibTeXBinPathKey];
-    NSString *bibtexCommandDir = [[BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:bibtexCommand] stringByDeletingLastPathComponent];
-    NSSet *commandDirs = [NSSet setWithObjects:texCommandDir, bibtexCommandDir, nil];
-
-    if (NO == [commandDirs isEqualToSet:binDirPaths]) {
-        [binDirPaths release];
-        binDirPaths = [commandDirs retain];
-        NSString *path = [[[NSProcessInfo processInfo] environment] objectForKey:@"PATH"];
-        NSArray *paths = [path componentsSeparatedByString:@":"];
-        for (NSString *commandDir in commandDirs) {
-            if ([paths containsObject:commandDir] == NO)
-                path = [path stringByAppendingFormat:@":%@", commandDir];
-        }
-        [environment setObject:path forKey:@"PATH"];
-    }
+    [self checkPATHEnvironment];
+    
+    generatedDataMask = BDSKGeneratedNoneMask;
     
     BOOL isLTB = (flag == BDSKGenerateLTB);
     BOOL success = [self writeTeXFileForCiteKeys:citeKeys isLTB:isLTB] && [self writeBibTeXFile:bibStr];
@@ -591,6 +577,26 @@ static double runLoopTimeout = 30;
                 }
             }
         }
+    }
+}
+
+- (void)checkPATHEnvironment {
+    NSString *texCommand = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKTeXBinPathKey];
+    NSString *texCommandDir = [[BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:texCommand] stringByDeletingLastPathComponent];
+    NSString *bibtexCommand = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKBibTeXBinPathKey];
+    NSString *bibtexCommandDir = [[BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:bibtexCommand] stringByDeletingLastPathComponent];
+    NSSet *commandDirs = [NSSet setWithObjects:texCommandDir, bibtexCommandDir, nil];
+    
+    if (NO == [commandDirs isEqualToSet:binDirPaths]) {
+        [binDirPaths release];
+        binDirPaths = [commandDirs retain];
+        NSString *path = [[[NSProcessInfo processInfo] environment] objectForKey:@"PATH"];
+        NSArray *paths = [path componentsSeparatedByString:@":"];
+        for (NSString *commandDir in commandDirs) {
+            if ([paths containsObject:commandDir] == NO)
+                path = [path stringByAppendingFormat:@":%@", commandDir];
+        }
+        [environment setObject:path forKey:@"PATH"];
     }
 }
 
