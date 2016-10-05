@@ -231,7 +231,7 @@ static double runLoopTimeout = 30;
     NSString *texCommand = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKTeXBinPathKey];
     NSString *texCommandDir = [[BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:texCommand] stringByDeletingLastPathComponent];
     NSString *bibtexCommand = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKBibTeXBinPathKey];
-    NSString *bibtexCommandDir = [[BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:texCommand] stringByDeletingLastPathComponent];
+    NSString *bibtexCommandDir = [[BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:bibtexCommand] stringByDeletingLastPathComponent];
     NSSet *commandDirs = [NSSet setWithObjects:texCommandDir, bibtexCommandDir, nil];
 
     if (NO == [commandDirs isEqualToSet:binDirPaths]) {
