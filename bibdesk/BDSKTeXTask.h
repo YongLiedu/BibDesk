@@ -58,8 +58,7 @@ enum {
 @interface BDSKTeXTask : NSObject {	
     NSString *texTemplatePath;
     BDSKTeXPath *texPath;
-    NSSet *binDirPaths;
-    NSMutableDictionary *environment;
+    NSDictionary *environment;
 	
 	id<BDSKTeXTaskDelegate> delegate;
     
