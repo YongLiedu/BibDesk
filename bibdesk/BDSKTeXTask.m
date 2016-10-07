@@ -94,7 +94,7 @@ enum {
 
 - (void)removeFilesFromPreviousRun;
 
-- (BDSKTaskAndGeneratedType *)taskForGeneratedType:(NSUInteger)type;
+- (void)addTaskForGeneratedType:(NSUInteger)type;
 
 - (BOOL)invokePendingTasks;
 
@@ -242,14 +242,14 @@ static double runLoopTimeout = 30;
         // tasks are launched from the end of pendingTasks, so we add them in opposite order
         if (flag >= BDSKGeneratePDF) {
             // pdflatex
-            [pendingTasks addObject:[self taskForGeneratedType:BDSKGeneratedPDFMask]];
+            [self addTaskForGeneratedType:BDSKGeneratedPDFMask];
             // pdflatex
-            [pendingTasks addObject:[self taskForGeneratedType:BDSKGeneratedNoneMask]];
+            [self addTaskForGeneratedType:BDSKGeneratedNoneMask];
         }
         // bibtex
-        [pendingTasks addObject:[self taskForGeneratedType:isLTB ? BDSKGeneratedLTBMask : BDSKGeneratedLaTeXMask]];
+        [self addTaskForGeneratedType:isLTB ? BDSKGeneratedLTBMask : BDSKGeneratedLaTeXMask];
         // pdflatex
-        [pendingTasks addObject:[self taskForGeneratedType:BDSKGeneratedNoneMask]];
+        [self addTaskForGeneratedType:BDSKGeneratedNoneMask];
         
         success = [self invokePendingTasks];
     }
@@ -457,7 +457,7 @@ static double runLoopTimeout = 30;
         [fm removeItemAtPath:path error:NULL];
 }
 
-- (BDSKTaskAndGeneratedType *)taskForGeneratedType:(NSUInteger)type {
+- (void)addTaskForGeneratedType:(NSUInteger)type {
     NSString *binPath = nil;
     NSArray *arguments = nil;
     
@@ -496,7 +496,9 @@ static double runLoopTimeout = 30;
     [task setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
     [task setStandardError:[NSFileHandle fileHandleWithNullDevice]];
     
-    return [[[BDSKTaskAndGeneratedType alloc] initWithTask:task generatedType:type] autorelease];
+    BDSKTaskAndGeneratedType *taskAndType = [[BDSKTaskAndGeneratedType alloc] initWithTask:task generatedType:type];
+    [pendingTasks addObject:taskAndType];
+    [taskAndType release];
 }
 
 - (void)taskFinished:(NSNotification *)notification{
