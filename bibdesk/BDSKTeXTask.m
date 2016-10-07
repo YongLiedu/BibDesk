@@ -473,8 +473,10 @@ static double runLoopTimeout = 30;
         // This task runs latex on our tex file 
         NSString *command = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKTeXBinPathKey];
         binPath = [BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:command];
-        NSMutableArray *args = [NSMutableArray arrayWithObject:@"-interaction=batchmode"];
+        NSMutableArray *args = [NSMutableArray array];
         [args addObjectsFromArray:[BDSKShellCommandFormatter argumentsFromCommand:command]];
+        if ([args containsObject:@"-interaction=batchmode"] == NO)
+            [args insertObject:@"-interaction=batchmode" atIndex:0];
         [args addObject:[texPath baseNameWithoutExtension]];
         arguments = args;
     }
