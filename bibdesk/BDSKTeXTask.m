@@ -458,28 +458,25 @@ static double runLoopTimeout = 30;
 }
 
 - (void)addTaskForGeneratedType:(NSUInteger)type {
-    NSString *binPath = nil;
-    NSArray *arguments = nil;
+    NSString *commandKey = nil;
+    NSString *extraArg = nil;
     
-    if (type & (BDSKGeneratedLaTeXMask | BDSKGeneratedLTBMask)) {
+    if ((type & (BDSKGeneratedLaTeXMask | BDSKGeneratedLTBMask))) {
         // This task runs bibtex on our bib file 
-        NSString *command = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKBibTeXBinPathKey];
-        binPath = [BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:command];
-        NSMutableArray *args = [NSMutableArray array];
-        [args addObjectsFromArray:[BDSKShellCommandFormatter argumentsFromCommand:command]];
-        [args addObject:[texPath baseNameWithoutExtension]];
-        arguments = args;
+        commandKey = BDSKBibTeXBinPathKey;
     } else {
         // This task runs latex on our tex file 
-        NSString *command = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKTeXBinPathKey];
-        binPath = [BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:command];
-        NSMutableArray *args = [NSMutableArray array];
-        [args addObjectsFromArray:[BDSKShellCommandFormatter argumentsFromCommand:command]];
-        if ([args containsObject:@"-interaction=batchmode"] == NO)
-            [args insertObject:@"-interaction=batchmode" atIndex:0];
-        [args addObject:[texPath baseNameWithoutExtension]];
-        arguments = args;
+        commandKey = BDSKTeXBinPathKey;
+        extraArg = @"-interaction=batchmode";
     }
+    
+    NSString *command = [[NSUserDefaults standardUserDefaults] stringForKey:commandKey];
+    NSString *binPath = [BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:command];
+    NSMutableArray *arguments = [NSMutableArray array];
+    [arguments addObjectsFromArray:[BDSKShellCommandFormatter argumentsFromCommand:command]];
+    if ([arguments containsObject:extraArg] == NO)
+        [arguments insertObject:extraArg atIndex:0];
+    [arguments addObject:[texPath baseNameWithoutExtension]];
     
     // make sure the PATH environment variable is set correctly, including the path for the TeX installation
     NSMutableDictionary *env = [[environment mutableCopy] autorelease];
