@@ -61,11 +61,3 @@
 #ifndef NS_DESIGNATED_INITIALIZER
 #define NS_DESIGNATED_INITIALIZER
 #endif
-
-
-#if !defined(MAC_OS_X_VERSION_10_10) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_10
-typedef NSUInteger NSCellHitResult;
-enum {
-    NSFullSizeContentViewWindowMask = 1 << 15;
-};
-#endif

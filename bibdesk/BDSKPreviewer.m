@@ -114,9 +114,6 @@ static BDSKPreviewer *sharedPreviewer = nil;
     [collapsibleView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
     
     if([self isSharedPreviewer]){
-        // this is needed for the PDFView to use layers efficiently, especially on Sierra, otherwise scrolling is sluggish
-        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_9)
-            [[self window] setStyleMask:[[self window] styleMask] | NSFullSizeContentViewWindowMask];
         
         [self setWindowFrameAutosaveName:BDSKPreviewPanelFrameAutosaveName];
         

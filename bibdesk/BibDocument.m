@@ -566,10 +566,6 @@ static NSOperationQueue *metadataCacheQueue = nil;
     [self updateSmartGroupsCount];
     [self updateCategoryGroups:nil];
     
-    // this is needed for the PDFView to use layers efficiently, especially on Sierra, otherwise scrolling is sluggish
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_9)
-        [documentWindow setStyleMask:[documentWindow styleMask] | NSFullSizeContentViewWindowMask];
-    
     // this shouldn't be necessary
     [documentWindow recalculateKeyViewLoop];
     [documentWindow makeFirstResponder:tableView];
