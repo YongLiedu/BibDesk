@@ -474,7 +474,7 @@ static double runLoopTimeout = 30;
     NSString *binPath = [BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:command];
     NSMutableArray *arguments = [NSMutableArray array];
     [arguments addObjectsFromArray:[BDSKShellCommandFormatter argumentsFromCommand:command]];
-    if ([arguments containsObject:extraArg] == NO)
+    if (extraArg && [arguments containsObject:extraArg] == NO)
         [arguments insertObject:extraArg atIndex:0];
     [arguments addObject:[texPath baseNameWithoutExtension]];
     
