@@ -51,6 +51,7 @@
 #import "NSImage_BDSKExtensions.h"
 #import "NSPrintOperation_BDSKExtensions.h"
 #import "BDSKPreferenceController.h"
+#import "NSGeometry_BDSKExtensions.h"
 
 #define BDSKPreviewPanelFrameAutosaveName @"BDSKPreviewPanel"
 
@@ -60,6 +61,18 @@ enum {
 };
 
 static NSData *defaultPDFDataForState(BDSKPreviewState state);
+
+#if !defined(MAC_OS_X_VERSION_10_10) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_10
+
+enum {
+    NSWindowStyleMaskFullSizeContentView = 1 << 15;
+};
+
+@interface NSWindow (SKYosemiteDeclarations)
+- (NSRect)contentLayoutRect;
+@end
+
+#endif
 
 @implementation BDSKPreviewer
 
@@ -115,6 +128,17 @@ static BDSKPreviewer *sharedPreviewer = nil;
     
     if([self isSharedPreviewer]){
         
+        NSView *contentView = [[self window] contentView];
+        
+        if ([[self window] respondsToSelector:@selector(contentLayoutRect)]) {
+            contentView = [[[NSView alloc] initWithFrame:[contentView bounds]] autorelease];
+            [contentView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+            [[[self window] contentView] addSubview:contentView];
+            [contentView addSubview:tabView];
+            [[self window] setStyleMask:[[self window] styleMask] | NSFullSizeContentViewWindowMask];
+            [contentView setFrame:[[self window] contentLayoutRect]];
+        }
+        
         [self setWindowFrameAutosaveName:BDSKPreviewPanelFrameAutosaveName];
         
         rect = [warningView frame];
@@ -122,7 +146,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
         [warningView setFrame:rect];
         
         // overlay the progressIndicator over the contentView
-        [progressOverlay overlayView:[[self window] contentView]];
+        [progressOverlay overlayView:contentView];
         
         pdfScaleFactor = [[NSUserDefaults standardUserDefaults] doubleForKey:BDSKPreviewPDFScaleFactorKey];
         
