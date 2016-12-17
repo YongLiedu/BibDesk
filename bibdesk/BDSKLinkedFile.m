@@ -601,11 +601,16 @@ static BOOL saveRelativePathOnly = NO;
         }
     }
     if (aPath && [[self path] isEqualToString:aPath] == NO) {
-        FSRef baseRef;
-        if (BDSKPathToFSRef((CFStringRef)basePath, &baseRef))
-            [self updateWithPath:aPath basePath:basePath baseRef:&baseRef];
+        FSRef aRef;
+        if (BDSKPathToFSRef((CFStringRef)basePath, &aRef))
+            [self updateWithPath:aPath basePath:basePath baseRef:&aRef];
         else
             [self updateAliasWithPath:aPath basePath:basePath];
+        if (BDSKPathToFSRef((CFStringRef)aPath, &aRef)) {
+            [self setFileRef:&aRef];
+            [fileURL release];
+            fileURL = [[NSURL alloc] initFileURLWithPath:aPath];
+        }
     }
 }
 
