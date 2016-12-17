@@ -63,7 +63,7 @@ static AliasHandle BDSKPathToAliasHandle(CFStringRef inPath, CFStringRef inBaseP
     AliasHandle alias;
     const FSRef *fileRef;
     NSString *relativePath;
-    NSURL *lastURL;
+    NSURL *fileURL;
     BOOL isInitial;
     id delegate;
 }
@@ -269,7 +269,7 @@ static BOOL saveRelativePathOnly = NO;
         alias = anAlias;
         relativePath = [relPath copy];
         delegate = aDelegate;
-        lastURL = nil;
+        fileURL = nil;
         isInitial = YES;
     }
     return self;    
@@ -380,7 +380,7 @@ static BOOL saveRelativePathOnly = NO;
     BDSKZONEDESTROY(fileRef);
     BDSKDisposeAliasHandle(alias); alias = NULL;
     BDSKDESTROY(relativePath);
-    BDSKDESTROY(lastURL);
+    BDSKDESTROY(fileURL);
     [super dealloc];
 }
 
@@ -414,6 +414,17 @@ static BOOL saveRelativePathOnly = NO;
     return relativePath;
 }
 
+- (void)setFileRef:(FSRef *)aRef {
+    BDSKZONEDESTROY(fileRef);
+    if (aRef != NULL) {
+        FSRef *newRef = (FSRef *)NSZoneMalloc([self zone], sizeof(FSRef));
+        if (newRef) {
+            bcopy(aRef, newRef, sizeof(FSRef));
+            fileRef = newRef;
+        }
+    }
+}
+
 - (void)updateFileRef;
 {
     NSString *basePath = [delegate basePathForLinkedFile:self];
@@ -425,7 +436,12 @@ static BOOL saveRelativePathOnly = NO;
         FSRef aRef;
         Boolean hasRef = false;
         
-        if (hasBaseRef && relativePath) {
+        if (fileURL) {
+            hasRef = BDSKPathToFSRef((CFStringRef)[fileURL path], &aRef);
+            shouldUpdate = hasBaseRef && hasRef;
+        }
+        
+        if (hasRef == false && hasBaseRef && relativePath) {
             NSString *path = [basePath stringByAppendingPathComponent:relativePath];
             shouldUpdate = hasRef = BDSKPathToFSRef((CFStringRef)path, &aRef);
         }
@@ -435,22 +451,20 @@ static BOOL saveRelativePathOnly = NO;
             shouldUpdate = (shouldUpdate || relativePath == nil) && hasBaseRef && hasRef;
         }
         
-        if (hasRef) {
-            FSRef *newRef = (FSRef *)NSZoneMalloc([self zone], sizeof(FSRef));
-            if (newRef) {
-                bcopy(&aRef, newRef, sizeof(FSRef));
-                fileRef = newRef;
-            }
-        }
+        if (hasRef)
+            [self setFileRef:&aRef];
     } else if (relativePath == nil) {
         shouldUpdate = hasBaseRef;
     }
     
-    if (shouldUpdate) {
-        CFURLRef aURL = CFURLCreateFromFSRef(NULL, fileRef);
-        if (aURL != NULL) {
-            [self updateWithPath:[(NSURL *)aURL path] basePath:basePath baseRef:&baseRef];
-            CFRelease(aURL);
+    if ((shouldUpdate || fileURL == nil) && fileRef != NULL) {
+        NSURL *aURL = (NSURL *)CFURLCreateFromFSRef(NULL, fileRef);
+        if (aURL != nil) {
+            if (fileURL == nil)
+                fileURL = [aURL retain];
+            if (shouldUpdate)
+                [self updateWithPath:[aURL path] basePath:basePath baseRef:&baseRef];
+            [aURL release];
         }
     }
 }
@@ -458,6 +472,7 @@ static BOOL saveRelativePathOnly = NO;
 - (NSURL *)URL;
 {
     BOOL hadFileRef = fileRef != NULL;
+    BOOL hadFileURL = fileURL != nil;
     
     if (hadFileRef == NO)
         [self updateFileRef];
@@ -466,15 +481,28 @@ static BOOL saveRelativePathOnly = NO;
     
     if (aURL == NULL && hadFileRef) {
         // fileRef was invalid, try to update it
-        BDSKZONEDESTROY(fileRef);
+        [self setFileRef:NULL];
         [self updateFileRef];
         if (fileRef != NULL)
             aURL = CFURLCreateFromFSRef(NULL, fileRef);
     }
-    BOOL changed = [(NSURL *)aURL isEqual:lastURL] == NO && (aURL != NULL || lastURL != nil);
+    
+    BOOL changed = [(NSURL *)aURL isEqual:fileURL] == NO && (aURL != NULL || hadFileURL);
     if (changed) {
-        [lastURL release];
-        lastURL = [(NSURL *)aURL retain];
+        FSRef aRef;
+        if (BDSKPathToFSRef((CFStringRef)[fileURL path], &aRef)) {
+            // the file was replaced, reference the replacement rather than the moved file
+            // this is what Dropbox does with file updates
+            [self setFileRef:&aRef];
+            BDSKCFDESTROY(aURL);
+            aURL = (CFURLRef)[fileURL retain];
+            NSString *basePath = [delegate basePathForLinkedFile:self];
+            if (BDSKPathToFSRef((CFStringRef)basePath, &aRef))
+                [self updateWithPath:[fileURL path] basePath:basePath baseRef:&aRef];
+        } else {
+            [fileURL release];
+            fileURL = [(NSURL *)aURL retain];
+        }
         if (isInitial == NO)
             [delegate performSelector:@selector(linkedFileURLChanged:) withObject:self afterDelay:0.0];
     }
@@ -565,7 +593,7 @@ static BOOL saveRelativePathOnly = NO;
             CFRelease(aURL);
         } else {
             // the fileRef was invalid, reset it and update
-            BDSKZONEDESTROY(fileRef);
+            [self setFileRef:NULL];
             [self updateFileRef];
             if (fileRef == NULL && aPath)
                 // this can happen after an auto file to a volume, as the file is actually not moved but copied
